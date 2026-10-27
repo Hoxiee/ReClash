@@ -286,8 +286,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         prepared.summary,
         sourceScope: subscriptionImportScope(profile.url, profile.ageSecretKey),
       )) {
-        approval = await approveSubscriptionImportAt(
-          route,
+        final page = SubscriptionImportReviewPage(
           format: prepared.payload.format,
           summary: prepared.summary,
           sourceScope: subscriptionImportScope(
@@ -295,6 +294,14 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             profile.ageSecretKey,
           ),
         );
+        approval = isSheetPage(context)
+            ? await Navigator.of(context).push<SubscriptionImportApproval>(
+                PagedSheetRoute(builder: (_) => page),
+              )
+            : await BaseNavigator.push<SubscriptionImportApproval>(
+                context,
+                page,
+              );
       }
       if (approval == null || !mounted) return;
       if (ref.read(profilesProvider).getProfile(profile.id) != current ||

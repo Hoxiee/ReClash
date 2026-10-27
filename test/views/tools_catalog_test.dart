@@ -1,3 +1,4 @@
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/common/tools_search.dart';
 import 'package:reclash/views/tools/navigation.dart';
@@ -16,7 +17,13 @@ ToolEnvironment _environment({
   bool authentication = false,
   bool controller = false,
   Set<String> dnsKeys = const {},
+  NavigationLayout layout = NavigationLayout.auto,
+  ThemeMode themeMode = ThemeMode.system,
+  bool sidebarBlur = false,
 }) => ToolEnvironment(
+  navigationLayout: layout,
+  themeMode: themeMode,
+  sidebarBlur: sidebarBlur,
   desktop: !android,
   android: android,
   windows: false,
@@ -31,6 +38,51 @@ ToolEnvironment _environment({
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'appearance search follows layout, theme and platform support',
+    () async {
+      final l = await AppLocalizations.load(const Locale('en'));
+      for (final layout in NavigationLayout.values) {
+        for (final themeMode in ThemeMode.values) {
+          for (final blurSupported in [false, true]) {
+            final ids = buildToolCatalog(
+              l,
+              _environment(
+                layout: layout,
+                themeMode: themeMode,
+                sidebarBlur: blurSupported,
+              ),
+            ).map((entry) => entry.id).toSet();
+            expect(
+              ids.contains('theme.sidebarWidth'),
+              layout != NavigationLayout.bar,
+            );
+            expect(
+              ids.contains('theme.sidebarBlur'),
+              blurSupported && layout != NavigationLayout.bar,
+            );
+            expect(
+              ids.contains('theme.pureBlackMode'),
+              themeMode != ThemeMode.light,
+            );
+            expect(
+              ids.contains('theme.navigationBarStyle'),
+              layout != NavigationLayout.sidebar,
+            );
+            expect(
+              ids.contains('theme.navigationLabels'),
+              layout != NavigationLayout.sidebar,
+            );
+            expect(
+              ids,
+              containsAll(['theme.liquidGlass', 'theme.tabAnimation']),
+            );
+          }
+        }
+      }
+    },
+  );
 
   test('catalogue groups follow the Alpha section order', () async {
     expect(ToolCategory.values, [

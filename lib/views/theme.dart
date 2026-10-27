@@ -311,44 +311,66 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     );
   }
 
-  Widget _page(int index) => switch (index) {
-    0 => const _ThemeSettingsPage(
-      id: 'theme',
-      items: [
-        _ThemeModeItem(),
-        SizedBox(height: 16),
-        _PureBlackItem(),
-        SizedBox(height: 16),
-        _PrimaryColorItem(),
-        SizedBox(height: 16),
-        _ContrastItem(),
-        _AppIconItem(),
-      ],
-    ),
-    1 => const WallpaperView(),
-    _ => const _ThemeSettingsPage(
-      id: 'interface',
-      items: [
-        _DashboardStyleItem(),
-        SizedBox(height: 16),
-        _NavigationLayoutItem(),
-        SizedBox(height: 16),
-        _NavigationBarItem(),
-        SizedBox(height: 16),
-        _NavigationLabelsItem(),
-        SizedBox(height: 16),
-        _TabAnimationItem(),
-        SizedBox(height: 16),
-        _LiquidGlassItem(),
-        SizedBox(height: 16),
-        _SidebarBlurItem(),
-        _FontFamilyItem(),
-        SizedBox(height: 16),
-        _TextScaleFactorItem(),
-        _TrayIconItem(),
-      ],
-    ),
-  };
+  Widget _page(int index) {
+    final layout = ref.watch(
+      appSettingProvider.select((state) => state.navigationLayout),
+    );
+    final themeMode = ref.watch(
+      themeSettingProvider.select((state) => state.themeMode),
+    );
+    bool visible(SettingCondition condition) => isAppearanceSettingVisible(
+      condition,
+      layout: layout,
+      themeMode: themeMode,
+    );
+    return switch (index) {
+      0 => _ThemeSettingsPage(
+        id: 'theme',
+        items: [
+          const _ThemeModeItem(),
+          if (visible(SettingCondition.darkTheme)) ...const [
+            SizedBox(height: 16),
+            _PureBlackItem(),
+          ],
+          const SizedBox(height: 16),
+          const _PrimaryColorItem(),
+          const SizedBox(height: 16),
+          const _ContrastItem(),
+          const _AppIconItem(),
+        ],
+      ),
+      1 => const WallpaperView(),
+      _ => _ThemeSettingsPage(
+        id: 'interface',
+        items: [
+          const _DashboardStyleItem(),
+          const SizedBox(height: 16),
+          const _NavigationLayoutItem(),
+          if (visible(SettingCondition.navigationSidebar))
+            const _SidebarWidthItem(),
+          if (visible(SettingCondition.navigationBar)) ...const [
+            SizedBox(height: 16),
+            _NavigationBarItem(),
+            SizedBox(height: 16),
+            _NavigationLabelsItem(),
+          ],
+          const SizedBox(height: 16),
+          const _TabAnimationItem(),
+          const SizedBox(height: 16),
+          const _LiquidGlassItem(),
+          if (visible(SettingCondition.sidebarBlur) &&
+              (system.isMacOS || system.isWindows)) ...const [
+            SizedBox(height: 16),
+            _SidebarBlurItem(),
+          ],
+          const _FontFamilyItem(),
+          const SizedBox(height: 16),
+          const _TextScaleFactorItem(),
+          const _TrayIconItem(),
+        ],
+      ),
+    };
+  }
 }
 
 class _AppearanceSwipeRecognizer extends HorizontalDragGestureRecognizer {
@@ -697,20 +719,18 @@ class _PrimaryColorItem extends ConsumerWidget {
                   onDelete: (color) => _handleDelete(context, ref, color),
                   onAdd: () => _handleAdd(context, ref),
                 ),
-                generateSection(
-                  items: [
-                    ListItem<ColorStyle>.options(
-                      title: Text(appLocalizations.colorStyle),
-                      options: ColorStyle.values,
-                      value: themeColors.colorStyle,
-                      textBuilder: (style) => style.label,
-                      onChanged: (style) => _update(
-                        ref,
-                        (state) => state.copyWith(colorStyle: style),
-                      ),
+                generateGroup([
+                  ListItem<ColorStyle>.options(
+                    title: Text(appLocalizations.colorStyle),
+                    options: ColorStyle.values,
+                    value: themeColors.colorStyle,
+                    textBuilder: (style) => style.label,
+                    onChanged: (style) => _update(
+                      ref,
+                      (state) => state.copyWith(colorStyle: style),
                     ),
-                  ],
-                ),
+                  ),
+                ]),
               ],
             ),
           ),
@@ -1652,6 +1672,40 @@ class _DashboardStyleItem extends ConsumerWidget {
   }
 }
 
+class _SidebarWidthItem extends ConsumerWidget {
+  const _SidebarWidthItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final narrow = ref.watch(
+      appSettingProvider.select(
+        (state) => resolveSidebarNarrow(state.sidebarNarrow, isTV: system.isTV),
+      ),
+    );
+    return SettingTarget(
+      spec: themeToolSettings.firstWhere(
+        (spec) => spec.id == 'theme.sidebarWidth',
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: generateGroup([
+          ListItem<bool>.options(
+            title: Text(l.sidebarWidth),
+            options: const [false, true],
+            value: narrow,
+            textBuilder: (value) =>
+                value ? l.sidebarWidthNarrow : l.sidebarWidthWide,
+            onChanged: (value) => ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(sidebarNarrow: value)),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
 class _NavigationLayoutItem extends ConsumerWidget {
   const _NavigationLayoutItem();
 
@@ -2370,12 +2424,14 @@ final themeToolSettings = <SettingSpec>[
     page: ToolPage.theme,
     title: (l) => l.pureBlackMode,
     keywords: ['pureBlackMode'],
+    condition: SettingCondition.darkTheme,
   ),
   SettingSpec(
     id: 'theme.navigationBarStyle',
     page: ToolPage.theme,
     title: (l) => l.navigationBarStyle,
     keywords: ['navigationBarStyle'],
+    condition: SettingCondition.navigationBar,
   ),
   SettingSpec(
     id: 'theme.tabAnimation',
@@ -2432,6 +2488,7 @@ final themeToolSettings = <SettingSpec>[
     page: ToolPage.theme,
     title: (l) => l.navigationLabels,
     keywords: ['navigationLabels'],
+    condition: SettingCondition.navigationBar,
   ),
   SettingSpec(
     id: 'theme.trayIcon',
@@ -2445,6 +2502,13 @@ final themeToolSettings = <SettingSpec>[
     page: ToolPage.theme,
     title: (l) => l.dashboardStyle,
     keywords: ['dashboardStyle', 'dashboardStyleSimple'],
+  ),
+  SettingSpec(
+    id: 'theme.sidebarWidth',
+    page: ToolPage.theme,
+    title: (l) => l.sidebarWidth,
+    keywords: ['sidebarWidth', 'sidebarWidthNarrow', 'sidebarWidthWide'],
+    condition: SettingCondition.navigationSidebar,
   ),
   ...wallpaperToolSettings,
 ];

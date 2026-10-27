@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
@@ -10,6 +11,11 @@ import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/subscriptions/compatibility/client_picker.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/compatibility/editor_section.dart';
+import 'package:reclash/subscriptions/compatibility/import_policy.dart';
+import 'package:reclash/subscriptions/compatibility/import_review.dart';
+import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
@@ -21,6 +27,67 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
+
+class _CompatibilityProfilesAction extends ProfilesAction {
+  int updates = 0;
+  SubscriptionImportPolicy? acceptedPolicy;
+
+  @override
+  Future<SubscriptionClientPreset?> lastSuccessfulProfileClient(
+    Profile candidate,
+  ) async => null;
+
+  @override
+  Future<PreparedSubscriptionUpdate> prepareProfileCompatibility(
+    Profile candidate, {
+    SubscriptionCancellation? cancellation,
+  }) async => PreparedSubscriptionUpdate(
+    profileId: candidate.id,
+    sourceUrl: candidate.url,
+    sourceAgeSecretKey: candidate.ageSecretKey,
+    sourcePreferences: candidate.subscriptionPreferences,
+    payload: SubscriptionImportResult(
+      bytes: Uint8List(0),
+      format: SubscriptionFormat.singbox,
+      summary: const SubscriptionImportSummary(
+        nodes: 2,
+        ignoredSections: ['route'],
+        hasLosses: true,
+      ),
+    ),
+    metadata: const SubscriptionMetadataResult(
+      metadata: SubscriptionMetadata(),
+      source: SubscriptionDataSource.http,
+    ),
+    subscriptionInfo: null,
+    snapshot: SubscriptionSnapshot(
+      metadata: const SubscriptionMetadata(),
+      receivedAt: DateTime.utc(2026),
+    ),
+    label: candidate.label,
+    client: SubscriptionClientPreset.clashMeta,
+  );
+
+  @override
+  Future<Profile?> updateProfile(
+    Profile profile, {
+    bool showLoading = false,
+    bool allowLossReview = false,
+    bool persistProfileSettings = false,
+    PreparedSubscriptionUpdate? preparedUpdate,
+    SubscriptionImportPolicy? importPolicy,
+    bool acceptLosses = false,
+    BuildContext? reviewContext,
+  }) async {
+    expect(preparedUpdate, isNotNull);
+    expect(acceptLosses, isTrue);
+    expect(persistProfileSettings, isTrue);
+    updates++;
+    acceptedPolicy = importPolicy;
+    return profile;
+  }
+}
 
 class _NoopSetupAction extends SetupAction {
   @override
@@ -105,14 +172,20 @@ void main() {
     WidgetTester tester,
     Profile profile, {
     bool details = false,
+    Size size = const Size(1000, 1000),
+    ProfilesAction? profilesAction,
+    Widget? child,
   }) async {
-    const size = Size(1000, 1000);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final container = ProviderContainer(
       overrides: [
         setupActionProvider.overrideWith(() => _NoopSetupAction()),
+        if (profilesAction != null) ...[
+          profilesProvider.overrideWith(() => TestProfiles([profile])),
+          profilesActionProvider.overrideWith(() => profilesAction),
+        ],
         currentProfileProvider.overrideWithValue(profile),
         groupsProvider.overrideWithValue([]),
         providersProvider.overrideWithValue([]),
@@ -126,9 +199,11 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          child: details
-              ? const ProfileDetailSheet()
-              : Scaffold(body: EditProfileView(profile: profile)),
+          child:
+              child ??
+              (details
+                  ? const ProfileDetailSheet()
+                  : Scaffold(body: EditProfileView(profile: profile))),
         ),
       ),
     );
@@ -240,6 +315,117 @@ void main() {
     expect(find.byType(SubscriptionCompatibilityPage), findsNothing);
     expect(find.byType(EditProfileView), findsOneWidget);
   });
+
+  for (final size in [const Size(412, 915), const Size(1200, 1000)]) {
+    testWidgets(
+      'compatibility loss review stays in the sheet at width ${size.width}',
+      (tester) async {
+        final profile = _profile();
+        final actions = _CompatibilityProfilesAction();
+        await pumpProfile(
+          tester,
+          profile,
+          size: size,
+          profilesAction: actions,
+          child: const SizedBox(),
+        );
+        final destination = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: globalState.container,
+            child: TestApp(
+              child: Navigator(
+                key: destination,
+                onGenerateInitialRoutes: (_, _) => [
+                  MaterialPageRoute<void>(
+                    builder: (context) => TextButton(
+                      onPressed: () => showSheet<void>(
+                        context: context,
+                        props: nestedPagedSheetProps,
+                        builder: (_) => NestedPagedSheet(
+                          builder: (_) => EditProfileView(profile: profile),
+                        ),
+                      ),
+                      child: const Text('open'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.runAsync(() async {
+          await tester.tap(find.text('open'));
+          await tester.pumpAndSettle();
+          final store = await DeviceIdentityStore.create();
+          await store.globalSendEnabled();
+          await store.profileSendOverride(profile.id);
+        });
+        await tester.pumpAndSettle();
+        final l10n = currentAppLocalizations;
+        final compatibility = find.text(l10n.subscriptionCompatibilityTitle);
+        await tester.ensureVisible(compatibility);
+        await tester.pumpAndSettle();
+        await tester.tap(compatibility);
+        await tester.pumpAndSettle();
+        final pageContext = tester.element(
+          find.byType(SubscriptionCompatibilityPage),
+        );
+        final navigator = Navigator.of(pageContext);
+        final back = UiLocalizations.of(pageContext).back;
+        final check = find.text(l10n.subscriptionCompatibilityCheck);
+        await tester.ensureVisible(check);
+        await tester.pumpAndSettle();
+        await tester.tap(check);
+        await tester.pumpAndSettle();
+
+        Future<void> openReview() async {
+          final apply = find.text(l10n.subscriptionCompatibilityApplyPrepared);
+          await tester.ensureVisible(apply);
+          await tester.pumpAndSettle();
+          await tester.tap(apply);
+          await tester.pumpAndSettle();
+          final review = tester.element(
+            find.byType(SubscriptionImportReviewPage),
+          );
+          expect(Navigator.of(review), same(navigator));
+          expect(sheetNavigatorOf(review), same(destination.currentState));
+          expect(find.byTooltip(back).hitTestable(), findsOneWidget);
+        }
+
+        await openReview();
+        await tester.tap(find.byTooltip(back).hitTestable());
+        await tester.pumpAndSettle();
+        expect(find.byType(SubscriptionImportReviewPage), findsNothing);
+        expect(find.byType(SubscriptionCompatibilityPage), findsOneWidget);
+        expect(actions.updates, 0);
+        expect(globalState.container.read(profilesProvider), [profile]);
+
+        await openReview();
+        await tester.tap(find.text(l10n.cancel));
+        await tester.pumpAndSettle();
+        expect(find.byType(SubscriptionCompatibilityPage), findsOneWidget);
+        expect(actions.updates, 0);
+
+        await openReview();
+        final remember = find.text(l10n.subscriptionImportRememberConsent);
+        await tester.ensureVisible(remember);
+        await tester.pumpAndSettle();
+        await tester.tap(remember);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.subscriptionImportAdd(2)));
+        await tester.pumpAndSettle();
+        expect(actions.updates, 1);
+        expect(
+          actions.acceptedPolicy?.scope,
+          subscriptionImportScope(profile.url, ''),
+        );
+        expect(find.byType(SubscriptionImportReviewPage), findsNothing);
+        expect(find.byType(NestedPagedSheet), findsNothing);
+        expect(find.text('open').hitTestable(), findsOneWidget);
+      },
+    );
+  }
 
   testWidgets('request-as uses the standard options row', (tester) async {
     await tester.pumpWidget(

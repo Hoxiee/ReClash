@@ -8,15 +8,42 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
+import 'package:reclash/subscriptions/page_preview.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
 class _RecordingProfilesAction extends ProfilesAction {
+  final previews = <ProfileLinkSource>[];
+  final confirmed = <ProfileLinkSource>[];
+
+  @override
+  Future<SubscriptionPagePreview> previewProfileLinkSource(
+    ProfileLinkSource source, {
+    SubscriptionCancellation? cancellation,
+  }) async {
+    previews.add(source);
+    return const SubscriptionPagePreview(label: 'Clipboard subscription');
+  }
+
+  @override
+  Future<Profile> addConfirmedLinkSource(
+    ProfileLinkSource source, {
+    String? label,
+    SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    confirmed.add(source);
+    return Profile.normal(url: source.url!, label: label ?? '');
+  }
+
   final batches = <List<ProfileLinkInput>>[];
   final singles = <String>[];
   final ageSecretKeys = <String>[];
@@ -98,7 +125,7 @@ Future<void> _openMenu(WidgetTester tester, ProviderContainer container) async {
 }
 
 void main() {
-  testWidgets('offers the QR code, file, link, and custom entries', (
+  testWidgets('offers the QR code, file, link, clipboard, and custom entries', (
     tester,
   ) async {
     final container = _containerFor(tester);
@@ -110,7 +137,110 @@ void main() {
     expect(find.text(l10n.file), findsOne);
     expect(find.text(l10n.link), findsOne);
     expect(find.text(l10n.customProfile), findsOne);
+    expect(find.text(l10n.profilePasteFromClipboard), findsOne);
     expect(tester.takeException(), null);
+  });
+
+  for (final input in [
+    '  https://example.com/sub  ',
+    'reclash://add?url=https%3A%2F%2Fexample.com%2Fsub',
+  ]) {
+    testWidgets('clipboard opens a preview before consent: $input', (
+      tester,
+    ) async {
+      final action = _RecordingProfilesAction();
+      final container = _containerFor(tester, profilesAction: action);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async =>
+            call.method == 'Clipboard.getData' ? {'text': input} : null,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+      await _openMenu(tester, container);
+      await tester.tap(
+        find.text(currentAppLocalizations.profilePasteFromClipboard),
+      );
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      });
+      await tester.pumpAndSettle();
+
+      expect(action.previews.single.url, 'https://example.com/sub');
+      expect(action.confirmed, isEmpty);
+      expect(action.singles, isEmpty);
+      expect(find.text('Clipboard subscription'), findsWidgets);
+
+      await tester.tap(find.text(currentAppLocalizations.add));
+      await tester.pumpAndSettle();
+      expect(action.confirmed.single.url, 'https://example.com/sub');
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final input in <String?>[null, '   ', 'not a link']) {
+    testWidgets('invalid clipboard does not import: $input', (tester) async {
+      final action = _RecordingProfilesAction();
+      final container = _containerFor(tester, profilesAction: action);
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async => call.method == 'Clipboard.getData'
+            ? (input == null ? null : {'text': input})
+            : null,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+      await _openMenu(tester, container);
+      await tester.tap(
+        find.text(currentAppLocalizations.profilePasteFromClipboard),
+      );
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      });
+      await tester.pumpAndSettle();
+      expect(action.previews, isEmpty);
+      expect(action.confirmed, isEmpty);
+      expect(action.singles, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('clipboard read failure is handled', (tester) async {
+    final action = _RecordingProfilesAction();
+    final container = _containerFor(tester, profilesAction: action);
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.getData') {
+          throw PlatformException(code: 'clipboard-denied');
+        }
+        return null;
+      },
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+    await _openMenu(tester, container);
+    await tester.tap(
+      find.text(currentAppLocalizations.profilePasteFromClipboard),
+    );
+    await tester.pumpAndSettle();
+    expect(action.previews, isEmpty);
+    expect(action.confirmed, isEmpty);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a batch link import skips existing profiles and adds the rest', (

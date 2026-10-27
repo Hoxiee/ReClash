@@ -140,6 +140,25 @@ chip-sized `sm` and the near-pill `md` on a 40 tall row. Reach for this only onc
   `tool/preview/examples/about_preview.dart`; the Flutter Development section of `.agents/commands.md` lists the
   options and what the preview cannot show.
 
+## Delivering Previews
+
+- Include every generated preview in the user-facing response as a clickable Markdown link to its PNG, not just a
+  path in tool output. Do not wait for a separate screenshot request.
+- Group links under “Preview”, with clear labels for themes, screens, states, and sizes when there are multiple
+  variants. Link only to existing files, using paths relative to the project root.
+- Use unique scenario names for different changes: `tool/preview.dart` names PNGs after the scenario, so reusing
+  `scenario.dart` overwrites images already linked in earlier responses.
+- Generating a PNG and visually checking it are separate outcomes. If the image could not be viewed, say so while
+  still sharing links to successfully generated files; do not claim the visual check passed.
+
+Example response format (replace these paths with the actual output paths):
+
+```markdown
+Preview:
+- [Light theme](.dart_tool/preview/out/url_paste_412x915_light_en.png)
+- [Dark theme](.dart_tool/preview/out/url_paste_412x915_dark_en.png)
+```
+
 ## Pitfalls
 
 - Do not mutate provider/domain state merely to smooth a transition. Keep presentation holds local and let real errors

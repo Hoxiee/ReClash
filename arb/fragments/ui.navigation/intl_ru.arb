@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Нажмите ещё раз, чтобы выйти",
-  "selected": "Выбрано"
+  "selected": "Выбрано",
+  "sidebarWidth": "Ширина боковой панели",
+  "sidebarWidthNarrow": "Узкая",
+  "sidebarWidthWide": "Широкая"
 }

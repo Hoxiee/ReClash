@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Press back again to exit",
-  "selected": "Selected"
+  "selected": "Selected",
+  "sidebarWidth": "Sidebar width",
+  "sidebarWidthNarrow": "Narrow",
+  "sidebarWidthWide": "Wide"
 }

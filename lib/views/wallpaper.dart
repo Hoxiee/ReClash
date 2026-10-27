@@ -71,28 +71,35 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
               spacing: 12,
               children: [
                 const _WallpaperGallery(),
-                generateSection(
-                  items: [
-                    _WallpaperControl(
-                      enabled: editable,
-                      child: ConfigToggleItem(
-                        setting: wallpaperToolSettings[0],
-                        selector: themeSettingProvider.select(
-                          (theme) => theme.wallpaper.enabled,
-                        ),
-                        title: (l) => l.wallpaperEnabled,
-                        leading: const GlyphIcon(AppGlyphs.photos),
-                        onChanged: (ref, value) => _updateWallpaper(
-                          ref,
-                          (wallpaper) => wallpaper.copyWith(enabled: value),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    generateGroup([
+                      _WallpaperControl(
+                        enabled: editable,
+                        child: ConfigToggleItem(
+                          setting: wallpaperToolSettings[0],
+                          selector: themeSettingProvider.select(
+                            (theme) => theme.wallpaper.enabled,
+                          ),
+                          title: (l) => l.wallpaperEnabled,
+                          leading: const GlyphIcon(AppGlyphs.photos),
+                          onChanged: (ref, value) => _updateWallpaper(
+                            ref,
+                            (wallpaper) => wallpaper.copyWith(enabled: value),
+                          ),
                         ),
                       ),
+                    ]),
+                    ListFooter(
+                      text:
+                          selected != null &&
+                              image == null &&
+                              !imageState.isLoading
+                          ? l.wallpaperUnavailable
+                          : l.wallpaperSelectHint,
                     ),
                   ],
-                  footer:
-                      selected != null && image == null && !imageState.isLoading
-                      ? l.wallpaperUnavailable
-                      : l.wallpaperSelectHint,
                 ),
               ],
             ),
@@ -113,59 +120,56 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
                         ),
                 ),
             ],
-            child: generateSection(
-              items: [
-                _WallpaperControl(
-                  enabled: editable,
-                  child: ConfigOptionsItem<WallpaperFit>(
-                    setting: wallpaperToolSettings[1],
-                    selector: themeSettingProvider.select(
-                      (theme) => theme.wallpaper.fit,
-                    ),
-                    title: (l) => l.wallpaperFit,
-                    options: WallpaperFit.values,
-                    textBuilder: (fit) => fit.label,
-                    onChanged: (ref, value) => _updateWallpaper(
-                      ref,
-                      (wallpaper) => wallpaper.copyWith(fit: value),
-                    ),
+            child: generateGroup([
+              _WallpaperControl(
+                enabled: editable,
+                child: ConfigOptionsItem<WallpaperFit>(
+                  setting: wallpaperToolSettings[1],
+                  selector: themeSettingProvider.select(
+                    (theme) => theme.wallpaper.fit,
+                  ),
+                  title: (l) => l.wallpaperFit,
+                  options: WallpaperFit.values,
+                  textBuilder: (fit) => fit.label,
+                  onChanged: (ref, value) => _updateWallpaper(
+                    ref,
+                    (wallpaper) => wallpaper.copyWith(fit: value),
                   ),
                 ),
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[2],
-                  selector: (wallpaper) => wallpaper.scale,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(scale: value),
-                  min: 1,
-                  max: 3,
-                  divisions: 40,
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[3],
-                  selector: (wallpaper) => wallpaper.positionX,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(positionX: value),
-                  min: -1,
-                  max: 1,
-                  divisions: 40,
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[4],
-                  selector: (wallpaper) => wallpaper.positionY,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(positionY: value),
-                  min: -1,
-                  max: 1,
-                  divisions: 40,
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-              ],
-            ),
+              ),
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[2],
+                selector: (wallpaper) => wallpaper.scale,
+                update: (wallpaper, value) => wallpaper.copyWith(scale: value),
+                min: 1,
+                max: 3,
+                divisions: 40,
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[3],
+                selector: (wallpaper) => wallpaper.positionX,
+                update: (wallpaper, value) =>
+                    wallpaper.copyWith(positionX: value),
+                min: -1,
+                max: 1,
+                divisions: 40,
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[4],
+                selector: (wallpaper) => wallpaper.positionY,
+                update: (wallpaper, value) =>
+                    wallpaper.copyWith(positionY: value),
+                min: -1,
+                max: 1,
+                divisions: 40,
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+            ]),
           ),
           const SizedBox(height: 16),
           _WallpaperSection(
@@ -183,51 +187,47 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
                         ),
                 ),
             ],
-            child: generateSection(
-              items: [
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[5],
-                  selector: (wallpaper) => wallpaper.opacity,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(opacity: value),
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[6],
-                  selector: (wallpaper) => wallpaper.dimming,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(dimming: value),
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[7],
-                  selector: (wallpaper) => wallpaper.blur,
-                  update: (wallpaper, value) => wallpaper.copyWith(blur: value),
-                  max: 30,
-                  divisions: 30,
-                  valueLabel: (value) => value.round().toString(),
-                  enabled: editable,
-                ),
-              ],
-            ),
+            child: generateGroup([
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[5],
+                selector: (wallpaper) => wallpaper.opacity,
+                update: (wallpaper, value) =>
+                    wallpaper.copyWith(opacity: value),
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[6],
+                selector: (wallpaper) => wallpaper.dimming,
+                update: (wallpaper, value) =>
+                    wallpaper.copyWith(dimming: value),
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[7],
+                selector: (wallpaper) => wallpaper.blur,
+                update: (wallpaper, value) => wallpaper.copyWith(blur: value),
+                max: 30,
+                divisions: 30,
+                valueLabel: (value) => value.round().toString(),
+                enabled: editable,
+              ),
+            ]),
           ),
           const SizedBox(height: 16),
           _WallpaperSection(
             info: Info(label: l.wallpaperReadability, glyph: AppGlyphs.eye),
-            child: generateSection(
-              items: [
-                _WallpaperSlider(
-                  setting: wallpaperToolSettings[8],
-                  selector: (wallpaper) => wallpaper.cardOpacity,
-                  update: (wallpaper, value) =>
-                      wallpaper.copyWith(cardOpacity: value),
-                  valueLabel: (value) => '${(value * 100).round()}%',
-                  enabled: editable,
-                ),
-              ],
-            ),
+            child: generateGroup([
+              _WallpaperSlider(
+                setting: wallpaperToolSettings[8],
+                selector: (wallpaper) => wallpaper.cardOpacity,
+                update: (wallpaper, value) =>
+                    wallpaper.copyWith(cardOpacity: value),
+                valueLabel: (value) => '${(value * 100).round()}%',
+                enabled: editable,
+              ),
+            ]),
           ),
           SizedBox(height: context.bottomInset + 32),
         ],

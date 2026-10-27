@@ -113,5 +113,6 @@
   "profileImportFromProvider": "Du fournisseur",
   "profileImportSingleServer": "Un seul serveur",
   "profileImportDownloading": "Téléchargement de l’abonnement…",
-  "profileImportTryOtherFormat": "Rien n’a été ajouté. Vous pouvez choisir un autre format et réessayer."
+  "profileImportTryOtherFormat": "Rien n’a été ajouté. Vous pouvez choisir un autre format et réessayer.",
+  "profilePasteFromClipboard": "Coller depuis le presse-papiers"
 }

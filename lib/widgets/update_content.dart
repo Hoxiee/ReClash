@@ -116,27 +116,25 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
               title: l.changelogBreaking,
               description: entry.text,
             ),
-          generateSection(
-            items: [
-              DecorationListItem(
-                leading: GlyphIcon(
-                  _glyphOf(summary.spotlight.kind),
-                  color: context.colorScheme.primary,
-                ),
-                title: Text(
-                  summary.spotlight.title,
-                  style: AppTextStyle.headline.of(context),
-                ),
-                subtitle: Text(summary.spotlight.description),
+          generateGroup([
+            DecorationListItem(
+              leading: GlyphIcon(
+                _glyphOf(summary.spotlight.kind),
+                color: context.colorScheme.primary,
               ),
-              for (final highlight in summary.highlights)
-                DecorationListItem(
-                  leading: GlyphIcon(_glyphOf(highlight.kind)),
-                  title: Text(highlight.title),
-                  subtitle: Text(highlight.description),
-                ),
-            ],
-          ),
+              title: Text(
+                summary.spotlight.title,
+                style: AppTextStyle.headline.of(context),
+              ),
+              subtitle: Text(summary.spotlight.description),
+            ),
+            for (final highlight in summary.highlights)
+              DecorationListItem(
+                leading: GlyphIcon(_glyphOf(highlight.kind)),
+                title: Text(highlight.title),
+                subtitle: Text(highlight.description),
+              ),
+          ]),
           if (changelog?.tag != release.tag)
             ReleaseNotes(
               body: release.body,
@@ -152,23 +150,21 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
             fullReleaseUrl: release.source.releasePage(release.tag).toString(),
           ),
         if (summary != null || widget.asset != null)
-          generateSection(
-            items: [
-              Semantics(
-                button: true,
-                expanded: _details,
-                child: ListItem(
-                  key: const ValueKey('update-release-details'),
-                  title: Text(l.updateReleaseDetails),
-                  trailing: GlyphIcon(
-                    _details ? AppGlyphs.chevronUp : AppGlyphs.chevronDown,
-                    size: 18,
-                  ),
-                  onTap: () => setState(() => _details = !_details),
+          generateGroup([
+            Semantics(
+              button: true,
+              expanded: _details,
+              child: ListItem(
+                key: const ValueKey('update-release-details'),
+                title: Text(l.updateReleaseDetails),
+                trailing: GlyphIcon(
+                  _details ? AppGlyphs.chevronUp : AppGlyphs.chevronDown,
+                  size: 18,
                 ),
+                onTap: () => setState(() => _details = !_details),
               ),
-            ],
-          ),
+            ),
+          ]),
         if (_details) ...[
           if (summary != null)
             ReleaseNotes(
@@ -179,27 +175,25 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
                   .toString(),
             ),
           if (widget.asset case final asset?)
-            generateSection(
-              items: [
+            generateGroup([
+              FormRow(
+                title: l.updatePackageDevice,
+                trailing: Text(_abiOf(asset.name)),
+              ),
+              if (asset.size case final size?)
                 FormRow(
-                  title: l.updatePackageDevice,
-                  trailing: Text(_abiOf(asset.name)),
+                  title: l.updatePackageSize,
+                  trailing: Text(size.traffic.show),
                 ),
-                if (asset.size case final size?)
-                  FormRow(
-                    title: l.updatePackageSize,
-                    trailing: Text(size.traffic.show),
-                  ),
-                FormRow(
-                  title: l.updatePackageVerification,
-                  trailing: Text(
-                    widget.verified
-                        ? l.updatePackageVerified
-                        : l.updatePackageVerificationPending,
-                  ),
+              FormRow(
+                title: l.updatePackageVerification,
+                trailing: Text(
+                  widget.verified
+                      ? l.updatePackageVerified
+                      : l.updatePackageVerificationPending,
                 ),
-              ],
-            ),
+              ),
+            ]),
         ],
       ],
     );

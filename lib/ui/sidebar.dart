@@ -17,6 +17,7 @@ import 'package:material_ui/material_ui.dart';
 
 const _compactWidth = 48.0;
 const _expandedWidth = 220.0;
+const _narrowWidth = 88.0;
 const _itemSize = 36.0;
 const _pillWidth = 36.0;
 const _pillInsetY = 4.0;
@@ -87,6 +88,18 @@ class SidebarDestination {
   Object get identity => id ?? glyph;
 }
 
+class SidebarAction {
+  const SidebarAction({
+    required this.glyph,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final Glyph glyph;
+  final String tooltip;
+  final VoidCallback onPressed;
+}
+
 /// Where the sidebar cannot widen in place, [onToggle] is null and the toggle
 /// opens the expanded pane over the content instead.
 ///
@@ -99,7 +112,9 @@ class NavigationSidebar extends StatefulWidget {
     required this.selectedIndex,
     required this.expanded,
     required this.onSelected,
+    this.actions = const [],
     this.onToggle,
+    this.narrow = false,
     this.windowControls = Size.zero,
   });
 
@@ -115,7 +130,9 @@ class NavigationSidebar extends StatefulWidget {
   final List<SidebarDestination> destinations;
   final int selectedIndex;
   final bool expanded;
+  final bool narrow;
   final ValueChanged<int> onSelected;
+  final List<SidebarAction> actions;
   final VoidCallback? onToggle;
   final Size windowControls;
 
@@ -144,6 +161,15 @@ class _NavigationSidebarState extends State<NavigationSidebar>
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations && _overlayController.isShowing) {
+      _overlayExpansion.value = _overlayExpansion.isForwardOrCompleted ? 1 : 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _hideIfDismissed());
+    }
+  }
+
   void _handleToggle() {
     final onToggle = widget.onToggle;
     if (onToggle != null) {
@@ -152,12 +178,26 @@ class _NavigationSidebarState extends State<NavigationSidebar>
       _closeOverlay();
     } else {
       _overlayController.show();
-      _overlayExpansion.forward();
+      if (context.disableAnimations) {
+        _overlayExpansion.value = 1;
+      } else {
+        _overlayExpansion.forward();
+      }
     }
   }
 
   void _closeOverlay() {
-    _overlayExpansion.reverse().whenCompleteOrCancel(_hideIfDismissed);
+    if (context.disableAnimations) {
+      _overlayExpansion.value = 0;
+      _hideIfDismissed();
+    } else {
+      _overlayExpansion.reverse().whenCompleteOrCancel(_hideIfDismissed);
+    }
+  }
+
+  void _handleAction(SidebarAction action) {
+    if (_overlayController.isShowing) _closeOverlay();
+    action.onPressed();
   }
 
   void _hideIfDismissed() {
@@ -193,12 +233,15 @@ class _NavigationSidebarState extends State<NavigationSidebar>
               progress: progress,
               windowControls: widget.windowControls,
               expanded: true,
+              narrow: widget.narrow,
               destinations: widget.destinations,
               selectedIndex: widget.selectedIndex,
               onSelected: (index) {
                 widget.onSelected(index);
                 _closeOverlay();
               },
+              actions: widget.actions,
+              onAction: _handleAction,
               onToggle: _closeOverlay,
             ),
           ),
@@ -207,15 +250,18 @@ class _NavigationSidebarState extends State<NavigationSidebar>
       child: SafeArea(
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: widget.expanded ? 1.0 : 0.0),
-          duration: _expandDuration,
+          duration: context.disableAnimations ? Duration.zero : _expandDuration,
           curve: Easing.standard,
           builder: (context, progress, _) => _SidebarPane(
             progress: progress,
             windowControls: widget.windowControls,
             expanded: widget.expanded,
+            narrow: widget.narrow,
             destinations: widget.destinations,
             selectedIndex: widget.selectedIndex,
             onSelected: widget.onSelected,
+            actions: widget.actions,
+            onAction: _handleAction,
             onToggle: _handleToggle,
           ),
         ),
@@ -317,20 +363,26 @@ class _SidebarColors {
 class _SidebarPane extends StatefulWidget {
   const _SidebarPane({
     required this.progress,
+    required this.narrow,
     required this.windowControls,
     required this.expanded,
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    required this.actions,
+    required this.onAction,
     required this.onToggle,
   });
 
   final double progress;
+  final bool narrow;
   final Size windowControls;
   final bool expanded;
   final List<SidebarDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final List<SidebarAction> actions;
+  final ValueChanged<SidebarAction> onAction;
   final VoidCallback onToggle;
 
   @override
@@ -350,7 +402,9 @@ class _SidebarPaneState extends State<_SidebarPane>
   final Map<_DestinationKey, SidebarDestination> _destinationsById = {};
   final Map<_DestinationKey, NavSpring> _groupSprings = {};
   final Map<_DestinationKey, bool> _groupTargets = {};
+  final Map<_DestinationKey, int> _boundaryGroups = {};
   _DestinationKey? _hoveredIdentity;
+  bool _syncingSlots = false;
 
   @override
   void initState() {
@@ -365,8 +419,10 @@ class _SidebarPaneState extends State<_SidebarPane>
   @override
   void didUpdateWidget(covariant _SidebarPane oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncingSlots = true;
     _slots.sync(_destinationKeys(widget.destinations));
     _cacheDestinations();
+    _syncingSlots = false;
     _syncGroupSprings();
     final hoveredIdentity = _hoveredIdentity;
     if (hoveredIdentity != null) {
@@ -377,6 +433,7 @@ class _SidebarPaneState extends State<_SidebarPane>
       final index = liveKeys.indexOf(hoveredIdentity);
       if (index < 0) {
         _hoveredIdentity = null;
+        _spring(_hoverShow, 0, _hoverFadeSpring);
       } else {
         _spring(_hover, index.toDouble(), _hoverSpring);
       }
@@ -489,28 +546,58 @@ class _SidebarPaneState extends State<_SidebarPane>
     if (index >= 0) widget.onSelected(index);
   }
 
-  void _handleSlotsChanged() => _syncGroupSprings();
+  void _handleSlotsChanged() {
+    if (!_syncingSlots) _syncGroupSprings();
+  }
 
   void _syncGroupSprings({bool seed = false}) {
-    final retained = <Object>{};
+    final boundaries = <_DestinationKey, int>{};
     int? previousGroup;
     for (final slot in _slots.slots) {
       final destination = _destinationsById[slot.key];
       if (destination == null) continue;
-      retained.add(slot.key);
-      final separates =
-          previousGroup != null && destination.group != previousGroup;
-      final spring = _groupSprings.putIfAbsent(
-        slot.key,
-        () => NavSpring(this, seed && separates ? 1 : 0),
-      );
-      final oldTarget = _groupTargets[slot.key];
-      _groupTargets[slot.key] = separates;
-      if (!seed && oldTarget != separates) {
-        _spring(spring, separates ? 1 : 0, _slotSpring);
+      if (previousGroup != null && destination.group != previousGroup) {
+        boundaries[slot.key] = destination.group;
       }
       previousGroup = destination.group;
     }
+    for (final entry in boundaries.entries) {
+      if (_groupTargets[entry.key] == true) continue;
+      final donors = _boundaryGroups.keys
+          .where(
+            (key) =>
+                key != entry.key &&
+                _boundaryGroups[key] == entry.value &&
+                !boundaries.containsKey(key) &&
+                _groupTargets[key] == true,
+          )
+          .toList();
+      if (donors.isNotEmpty) {
+        final donor = donors.first;
+        final value = _groupSprings[donor]!.value;
+        _groupSprings
+            .putIfAbsent(entry.key, () => NavSpring(this, 0))
+            .jumpTo(value);
+        _groupSprings[donor]!.jumpTo(0);
+        _groupTargets[donor] = false;
+      }
+    }
+    final retained = _slots.slots.map((slot) => slot.key).toSet();
+    for (final key in retained) {
+      final separates = boundaries.containsKey(key);
+      final spring = _groupSprings.putIfAbsent(
+        key,
+        () => NavSpring(this, seed && separates ? 1 : 0),
+      );
+      final oldTarget = _groupTargets[key];
+      _groupTargets[key] = separates;
+      if (!seed && oldTarget != separates) {
+        _spring(spring, separates ? 1 : 0, _slotSpring);
+      }
+    }
+    _boundaryGroups
+      ..clear()
+      ..addAll(boundaries);
     for (final key in _groupSprings.keys.toList()) {
       if (retained.contains(key)) continue;
       _groupSprings.remove(key)!.dispose();
@@ -518,20 +605,49 @@ class _SidebarPaneState extends State<_SidebarPane>
     }
   }
 
+  Map<_DestinationKey, double> _groupReveals() {
+    final runs = <List<NavSlot<_DestinationKey>>>[];
+    int? previousGroup;
+    for (final slot in _slots.slots) {
+      final destination = _destinationsById[slot.key];
+      if (destination == null) continue;
+      if (runs.isEmpty || previousGroup != destination.group) runs.add([]);
+      runs.last.add(slot);
+      previousGroup = destination.group;
+    }
+    final reveals = <_DestinationKey, double>{};
+    for (final run in runs) {
+      final reveal = run
+          .fold<double>(
+            0,
+            (sum, member) => sum + member.weight.value.clamp(0.0, 1.0),
+          )
+          .clamp(0.0, 1.0);
+      for (final slot in run) {
+        reveals[slot.key] = reveal;
+      }
+    }
+    return reveals;
+  }
+
   double _slotExtent(double stride) {
     var extent = 0.0;
     var previousReveal = 0.0;
     var hasPrevious = false;
+    final groupReveals = _groupReveals();
     for (final slot in _slots.slots) {
       final destination = _destinationsById[slot.key];
       if (destination == null) continue;
       final reveal = slot.weight.value.clamp(0.0, 1.0);
       final divider = _groupSprings[slot.key]?.value.clamp(0.0, 1.0) ?? 0.0;
       if (hasPrevious) {
-        extent += _dividerExtent * divider * math.min(previousReveal, reveal);
+        extent +=
+            _dividerExtent *
+            divider *
+            math.min(previousReveal, groupReveals[slot.key]!);
       }
       extent += stride * reveal;
-      previousReveal = reveal;
+      previousReveal = groupReveals[slot.key]!;
       hasPrevious = true;
     }
     return extent;
@@ -540,17 +656,36 @@ class _SidebarPaneState extends State<_SidebarPane>
   @override
   Widget build(BuildContext context) {
     final colors = _SidebarColors(context.colorScheme);
-    final fontSize = AppTextStyle.subheadline.size;
+    final fontSize = widget.narrow
+        ? AppTextStyle.caption1.size
+        : AppTextStyle.subheadline.size;
     final labelOpacity = ((widget.progress - 0.4) / 0.6).clamp(0.0, 1.0);
     final compactWidth = math.max(_compactWidth, widget.windowControls.width);
     final sideInset = math.min(_maxSideInset, (compactWidth - _pillWidth) / 2);
     final itemWidth = compactWidth - sideInset * 2;
     final iconInset = (itemWidth - _iconSize) / 2;
     final itemHeight =
-        _itemSize + MediaQuery.textScalerOf(context).scale(fontSize) - fontSize;
-    final rowWidth = _expandedWidth - sideInset * 2;
-    final labelStyle = AppTextStyle.subheadline.of(context);
-    final labelWidth = rowWidth - iconInset - _iconSize - _labelGap * 2;
+        _itemSize +
+        MediaQuery.textScalerOf(context).scale(fontSize) -
+        fontSize +
+        (widget.narrow
+            ? (24 +
+                      MediaQuery.textScalerOf(context).scale(fontSize) -
+                      fontSize) *
+                  widget.progress
+            : 0);
+    final openWidth = math.max(
+      compactWidth,
+      widget.narrow ? _narrowWidth : _expandedWidth,
+    );
+    final paneWidth = lerpDouble(compactWidth, openWidth, widget.progress)!;
+    final rowWidth = openWidth - sideInset * 2;
+    final labelStyle = widget.narrow
+        ? AppTextStyle.caption1.of(context)
+        : AppTextStyle.subheadline.of(context);
+    final labelWidth = widget.narrow
+        ? rowWidth
+        : rowWidth - iconInset - _iconSize - _labelGap * 2;
     String? rowTooltip(String label) =>
         widget.expanded &&
             widget.progress == 1 &&
@@ -560,7 +695,7 @@ class _SidebarPaneState extends State<_SidebarPane>
     final stride = itemHeight + _pillInsetY * 2;
 
     return SizedBox(
-      width: lerpDouble(compactWidth, _expandedWidth, widget.progress),
+      width: paneWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -591,6 +726,7 @@ class _SidebarPaneState extends State<_SidebarPane>
                               final centers = <double>[];
                               final liveIdentities = <_DestinationKey>[];
                               final liveIndex = <_DestinationKey, int>{};
+                              final groupReveals = _groupReveals();
                               var y = 0.0;
                               var previousReveal = 0.0;
                               var hasPrevious = false;
@@ -610,7 +746,10 @@ class _SidebarPaneState extends State<_SidebarPane>
                                 final gap = hasPrevious
                                     ? _dividerExtent *
                                           divider *
-                                          math.min(previousReveal, reveal)
+                                          math.min(
+                                            previousReveal,
+                                            groupReveals[slot.key]!,
+                                          )
                                     : 0.0;
                                 y += gap;
                                 final top = y;
@@ -632,7 +771,7 @@ class _SidebarPaneState extends State<_SidebarPane>
                                   ),
                                 );
                                 y += height;
-                                previousReveal = reveal;
+                                previousReveal = groupReveals[slot.key]!;
                                 hasPrevious = true;
                               }
                               final extent = y;
@@ -701,6 +840,7 @@ class _SidebarPaneState extends State<_SidebarPane>
                                             fill: layout.slot.key == selectedKey
                                                 ? 1.0
                                                 : hoverOf(layout) * 0.7,
+                                            narrow: widget.narrow,
                                             rowWidth: rowWidth,
                                             iconInset: iconInset,
                                             style: labelStyle,
@@ -739,25 +879,84 @@ class _SidebarPaneState extends State<_SidebarPane>
                     ),
                     _FootSeparator(
                       key: NavigationSidebar.footSeparatorKey,
-                      visible: _slotExtent(stride) > constraints.maxHeight,
+                      visible:
+                          _slotExtent(stride) >
+                          math.max(
+                            0,
+                            constraints.maxHeight -
+                                stride -
+                                _verticalInset -
+                                _toggleGap,
+                          ),
                       sideInset: sideInset,
                     ),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: _SidebarButton(
-                        colors: colors,
-                        height: itemHeight,
-                        sideInset: sideInset,
-                        tooltip: widget.expanded
-                            ? UiLocalizations.of(context).showLess
-                            : UiLocalizations.of(context).showMore,
-                        onTap: widget.onToggle,
-                        child: SizedBox(
-                          width: itemWidth,
-                          child: Center(
-                            child: GlyphIcon(
-                              AppGlyphs.sidebar(widget.progress),
-                            ),
+                    SizedBox(
+                      height: stride,
+                      child: ClipRect(
+                        child: OverflowBox(
+                          alignment: AlignmentDirectional.centerStart,
+                          minWidth: openWidth,
+                          maxWidth: openWidth,
+                          child: Row(
+                            children: [
+                              _SidebarButton(
+                                colors: colors,
+                                height: itemHeight,
+                                sideInset: sideInset,
+                                tooltip: widget.expanded
+                                    ? UiLocalizations.of(context).showLess
+                                    : UiLocalizations.of(context).showMore,
+                                onTap: widget.onToggle,
+                                child: SizedBox(
+                                  width: widget.narrow
+                                      ? paneWidth - sideInset * 2
+                                      : itemWidth,
+                                  child: Center(
+                                    child: GlyphIcon(
+                                      AppGlyphs.sidebar(widget.progress),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (!widget.narrow && labelOpacity > 0)
+                                ExcludeFocus(
+                                  excluding:
+                                      !widget.expanded || labelOpacity < 1,
+                                  child: ExcludeSemantics(
+                                    excluding:
+                                        !widget.expanded || labelOpacity < 1,
+                                    child: IgnorePointer(
+                                      ignoring:
+                                          !widget.expanded || labelOpacity < 1,
+                                      child: Opacity(
+                                        opacity: labelOpacity,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final action in widget.actions)
+                                              _SidebarButton(
+                                                colors: colors,
+                                                height: itemHeight,
+                                                sideInset: _pillInsetY,
+                                                tooltip: action.tooltip,
+                                                onTap: () =>
+                                                    widget.onAction(action),
+                                                child: SizedBox(
+                                                  width: _pillWidth,
+                                                  child: Center(
+                                                    child: GlyphIcon(
+                                                      action.glyph,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -816,6 +1015,7 @@ class _SidebarSlot extends StatelessWidget {
   const _SidebarSlot({
     super.key,
     required this.layout,
+    required this.narrow,
     required this.colors,
     required this.itemHeight,
     required this.stride,
@@ -832,6 +1032,7 @@ class _SidebarSlot extends StatelessWidget {
   });
 
   final _SidebarSlotLayout layout;
+  final bool narrow;
   final _SidebarColors colors;
   final double itemHeight;
   final double stride;
@@ -856,28 +1057,32 @@ class _SidebarSlot extends StatelessWidget {
         heightFactor: reveal,
         child: Opacity(
           opacity: reveal,
-          child: IgnorePointer(
-            ignoring: leaving,
-            child: ExcludeSemantics(
-              excluding: leaving,
-              child: SizedBox(
-                height: stride,
-                child: _SidebarButton(
-                  colors: colors,
-                  height: itemHeight,
-                  sideInset: sideInset,
-                  selected: selected,
-                  tooltip: tooltip,
-                  hoverDelayScale: 2,
-                  onTap: onTap,
-                  child: _DestinationRow(
-                    destination: layout.destination,
-                    color: color,
-                    fill: fill,
-                    width: rowWidth,
-                    iconInset: iconInset,
-                    style: style,
-                    labelOpacity: labelOpacity,
+          child: ExcludeFocus(
+            excluding: leaving || reveal < 0.001,
+            child: IgnorePointer(
+              ignoring: leaving,
+              child: ExcludeSemantics(
+                excluding: leaving,
+                child: SizedBox(
+                  height: stride,
+                  child: _SidebarButton(
+                    colors: colors,
+                    height: itemHeight,
+                    sideInset: sideInset,
+                    selected: selected,
+                    tooltip: tooltip,
+                    hoverDelayScale: 2,
+                    onTap: onTap,
+                    child: _DestinationRow(
+                      narrow: narrow,
+                      destination: layout.destination,
+                      color: color,
+                      fill: fill,
+                      width: rowWidth,
+                      iconInset: iconInset,
+                      style: style,
+                      labelOpacity: labelOpacity,
+                    ),
                   ),
                 ),
               ),
@@ -1160,6 +1365,7 @@ bool _fitsOneLine(
 class _DestinationRow extends StatelessWidget {
   const _DestinationRow({
     required this.destination,
+    required this.narrow,
     required this.color,
     required this.fill,
     required this.width,
@@ -1169,6 +1375,7 @@ class _DestinationRow extends StatelessWidget {
   });
 
   final SidebarDestination destination;
+  final bool narrow;
   final Color color;
   final double fill;
   final double width;
@@ -1178,6 +1385,37 @@ class _DestinationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (narrow) {
+      return ClipRect(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GlyphIcon(
+              destination.glyph,
+              size: _iconSize,
+              color: color,
+              fill: fill,
+            ),
+            Align(
+              heightFactor: labelOpacity,
+              child: Opacity(
+                opacity: labelOpacity,
+                alwaysIncludeSemantics: true,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    destination.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: style?.copyWith(color: color),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return ClipRect(
       child: OverflowBox(
         alignment: AlignmentDirectional.centerStart,

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -124,6 +125,8 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
   final _batchController = TextEditingController();
   bool _isBatch = false;
   bool _attempted = false;
+  bool _pasting = false;
+  String? _pasteError;
   ParsedInput<String>? _parsed;
 
   String get _urlLabel => widget.urlLabel ?? context.appLocalizations.url;
@@ -219,9 +222,43 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
     });
   }
 
+  Future<void> _pasteUrl() async {
+    if (_pasting) return;
+    setState(() {
+      _pasting = true;
+      _pasteError = null;
+    });
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (!mounted || _isBatch) return;
+      final text = data?.text?.trim();
+      if (text == null || text.isEmpty) return;
+      if (text.characters.length > widget.urlMaxLength) {
+        setState(() {
+          _pasteError = context.appLocalizations.maxLengthTip(
+            _urlLabel,
+            widget.urlMaxLength,
+          );
+        });
+        return;
+      }
+      _urlController.text = text;
+      _handleChanged(text);
+      _urlFocusNode.requestFocus();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _pasteError = context.appLocalizations.urlSchemePasteFailed;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _pasting = false);
+    }
+  }
+
   void _handleChanged(String _) {
-    if (_attempted) {
-      setState(() {});
+    if (_attempted || _pasteError != null) {
+      setState(() => _pasteError = null);
     }
   }
 
@@ -283,6 +320,7 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
       saveLabel: appLocalizations.submit,
       onSave: _handleSubmit,
       error:
+          _pasteError ??
           additionalError ??
           (_isBatch
               ? _batchInput.errorOf(
@@ -354,25 +392,39 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
         FormRow(
           title: _urlLabel,
           invalid: invalid == _NamedUrlField.url,
-          trailing: FormRowTextField(
-            controller: _urlController,
-            focusNode: _urlFocusNode,
-            autofocus: true,
-            hintText: appLocalizations.required,
-            keyboardType: TextInputType.url,
-            textInputAction: widget.withAgeSecretKey
-                ? TextInputAction.next
-                : TextInputAction.done,
-            autocorrect: false,
-            inputFormatters: TextInputLimits.limit(widget.urlMaxLength),
-            onChanged: _handleChanged,
-            onFieldSubmitted: (_) {
-              if (widget.withAgeSecretKey) {
-                _ageSecretKeyFocusNode.requestFocus();
-              } else {
-                _handleSubmit();
-              }
-            },
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: FormRowTextField(
+                  controller: _urlController,
+                  focusNode: _urlFocusNode,
+                  autofocus: true,
+                  hintText: appLocalizations.required,
+                  keyboardType: TextInputType.url,
+                  textInputAction: widget.withAgeSecretKey
+                      ? TextInputAction.next
+                      : TextInputAction.done,
+                  autocorrect: false,
+                  inputFormatters: TextInputLimits.limit(widget.urlMaxLength),
+                  onChanged: _handleChanged,
+                  onFieldSubmitted: (_) {
+                    if (widget.withAgeSecretKey) {
+                      _ageSecretKeyFocusNode.requestFocus();
+                    } else {
+                      _handleSubmit();
+                    }
+                  },
+                ),
+              ),
+              CommonMinIconButtonTheme(
+                child: IconButton(
+                  tooltip: appLocalizations.paste,
+                  icon: const GlyphIcon(AppGlyphs.paste),
+                  onPressed: _pasting ? null : _pasteUrl,
+                ),
+              ),
+            ],
           ),
         ),
         if (widget.withAgeSecretKey)

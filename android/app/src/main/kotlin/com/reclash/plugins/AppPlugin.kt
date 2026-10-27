@@ -15,6 +15,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -175,6 +177,30 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                             .distinct()
                             .joinToString(" "),
                     ),
+                )
+            }
+
+            "getNetworkCost" -> reply(result) {
+                val manager = GlobalState.application.getSystemService(ConnectivityManager::class.java)
+                val active = manager.activeNetwork
+                var network = active
+                var capabilities = active?.let(manager::getNetworkCapabilities)
+                if (capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true) {
+                    network = manager.allNetworks.filter { candidate ->
+                        manager.getNetworkCapabilities(candidate)?.let {
+                            !it.hasTransport(NetworkCapabilities.TRANSPORT_VPN) &&
+                                it.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                                it.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                        } == true
+                    }.singleOrNull()
+                    capabilities = network?.let(manager::getNetworkCapabilities)
+                }
+                mapOf(
+                    "connected" to (active != null),
+                    "identity" to "${active?.networkHandle}:${network?.networkHandle}",
+                    "metered" to capabilities?.let {
+                        !it.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                    },
                 )
             }
 

@@ -34,6 +34,8 @@ Widget _sidebar({
   List<SidebarDestination> destinations = _destinations,
   int selectedIndex = 0,
   bool expanded = true,
+  bool narrow = false,
+  List<SidebarAction> actions = const [],
   ValueChanged<int>? onSelected,
   VoidCallback? onToggle,
   Size windowControls = Size.zero,
@@ -55,6 +57,8 @@ Widget _sidebar({
                     destinations: destinations,
                     selectedIndex: selectedIndex,
                     expanded: expanded,
+                    narrow: narrow,
+                    actions: actions,
                     onSelected: onSelected ?? (_) {},
                     onToggle: onToggle,
                     windowControls: windowControls,
@@ -119,7 +123,285 @@ Iterable<double> _membershipOpacities(WidgetTester tester, String label) =>
         .where((opacity) => !opacity.alwaysIncludeSemantics)
         .map((opacity) => opacity.opacity);
 
+List<SidebarAction> _actions(ValueChanged<String> onPressed) => [
+  SidebarAction(
+    glyph: AppGlyphs.info,
+    tooltip: 'About',
+    onPressed: () => onPressed('about'),
+  ),
+  SidebarAction(
+    glyph: AppGlyphs.paintbrush,
+    tooltip: 'Theme',
+    onPressed: () => onPressed('theme'),
+  ),
+];
+
 void main() {
+  testWidgets('wide footer actions are icon-only beside the toggle', (
+    tester,
+  ) async {
+    final pressed = <String>[];
+    var toggled = 0;
+    await tester.pumpWidget(
+      _sidebar(
+        actions: _actions(pressed.add),
+        onToggle: () => toggled++,
+        windowControls: const Size(88, 28),
+      ),
+    );
+    expect(find.text('About'), findsNothing);
+    expect(find.text('Theme'), findsNothing);
+    final toggle = tester.getCenter(_tip('Collapse'));
+    final about = tester.getCenter(_tip('About'));
+    final theme = tester.getCenter(_tip('Theme'));
+    expect(about.dy, toggle.dy);
+    expect(theme.dy, toggle.dy);
+    expect(about.dx, greaterThan(toggle.dx));
+    expect(theme.dx, greaterThan(about.dx));
+    await tester.tap(_tip('About'));
+    await tester.tap(_tip('Theme'));
+    expect(pressed, ['about', 'theme']);
+    expect(toggled, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('footer actions stay reachable while destinations scroll', (
+    tester,
+  ) async {
+    final pressed = <String>[];
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: [
+          for (var i = 0; i < 20; i++)
+            SidebarDestination(glyph: AppGlyphs.dashboard, label: 'Row $i'),
+        ],
+        actions: _actions(pressed.add),
+        onToggle: () {},
+      ),
+    );
+    await tester.drag(find.byType(Scrollable), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    await tester.tap(_tip('Theme'));
+    expect(pressed, ['theme']);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('compact and narrow sidebars hide footer actions', (
+    tester,
+  ) async {
+    final actions = _actions((_) {});
+    await tester.pumpWidget(
+      _sidebar(expanded: false, actions: actions, onToggle: () {}),
+    );
+    expect(_tip('About'), findsNothing);
+    expect(_tip('Theme'), findsNothing);
+    await tester.pumpWidget(_sidebar(actions: actions, onToggle: () {}));
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    expect(_tip('About').hitTestable(), findsOneWidget);
+    expect(_tip('Theme').hitTestable(), findsOneWidget);
+    await tester.pumpWidget(
+      _sidebar(expanded: false, actions: actions, onToggle: () {}),
+    );
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(_tip('About').hitTestable(), findsNothing);
+    expect(_tip('Theme').hitTestable(), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    expect(_tip('About'), findsNothing);
+    await tester.pumpWidget(
+      _sidebar(narrow: true, actions: actions, onToggle: () {}),
+    );
+    await tester.pumpAndSettle();
+    expect(_tip('About'), findsNothing);
+    expect(_tip('Theme'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final disableAnimations in [false, true]) {
+    testWidgets('footer actions close the overlay '
+        'with reduced motion=$disableAnimations', (tester) async {
+      final pressed = <String>[];
+      await tester.pumpWidget(
+        _sidebar(
+          expanded: false,
+          actions: _actions(pressed.add),
+          disableAnimations: disableAnimations,
+        ),
+      );
+      await tester.tap(_tip('Expand'));
+      await tester.pumpAndSettle();
+      await tester.tap(_tip('About'));
+      await tester.pumpAndSettle();
+      expect(pressed, ['about']);
+      expect(_tip('About'), findsNothing);
+      expect(_tip('Expand'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets(
+    'persistent group boundary survives adjacent removals and insertions',
+    (tester) async {
+      const a = SidebarDestination(
+        glyph: AppGlyphs.dashboard,
+        label: 'A',
+        id: 'a',
+      );
+      const b = SidebarDestination(
+        glyph: AppGlyphs.proxies,
+        label: 'B',
+        id: 'b',
+        group: 1,
+      );
+      const c = SidebarDestination(
+        glyph: AppGlyphs.profiles,
+        label: 'C',
+        id: 'c',
+        group: 1,
+      );
+      final divider = find.byWidgetPredicate(NavigationSidebar.isGroupDivider);
+      await tester.pumpWidget(_sidebar(destinations: [a, b, c]));
+      final height = tester
+          .getSize(
+            find.ancestor(of: divider, matching: find.byType(ClipRect)).first,
+          )
+          .height;
+      await tester.pumpWidget(_sidebar(destinations: [a, c]));
+      for (var i = 0; i < 15; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        expect(divider, findsOneWidget);
+        expect(
+          tester
+              .getSize(
+                find
+                    .ancestor(of: divider, matching: find.byType(ClipRect))
+                    .first,
+              )
+              .height,
+          closeTo(height, 0.01),
+        );
+      }
+      await tester.pumpWidget(_sidebar(destinations: [a, b, c]));
+      for (var i = 0; i < 15; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        expect(divider, findsOneWidget);
+        expect(
+          tester
+              .getSize(
+                find
+                    .ancestor(of: divider, matching: find.byType(ClipRect))
+                    .first,
+              )
+              .height,
+          closeTo(height, 0.01),
+        );
+      }
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('leaving destinations cannot retain keyboard focus', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_sidebar());
+    final node = Focus.of(tester.element(find.text('Proxies')));
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    await tester.pumpWidget(
+      _sidebar(destinations: [_destinations[0], _destinations[2]]),
+    );
+    await tester.pump();
+    expect(node.hasFocus, isFalse);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'narrow opening stacks labels and keeps destinations interactive',
+    (tester) async {
+      int? selected;
+      await tester.pumpWidget(
+        _sidebar(narrow: true, expanded: false, onToggle: () {}),
+      );
+      await tester.pumpWidget(
+        _sidebar(
+          narrow: true,
+          onToggle: () {},
+          onSelected: (index) => selected = index,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSize(_sidebarFinder).width, lessThan(100));
+      expect(
+        tester.getTopLeft(find.text('Proxies')).dy,
+        greaterThan(tester.getBottomLeft(_glyph(AppGlyphs.proxies)).dy),
+      );
+      await tester.tap(find.text('Proxies'));
+      expect(selected, 1);
+      await tester.pumpWidget(
+        _sidebar(narrow: true, expanded: false, onToggle: () {}),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSize(_sidebarFinder).width, 48);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('foot separator notices overflow smaller than the toggle', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: [
+          for (var i = 0; i < 8; i++)
+            SidebarDestination(glyph: AppGlyphs.dashboard, label: 'Row $i'),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(NavigationSidebar.footSeparatorKey)).height,
+      greaterThan(0),
+    );
+  });
+
+  testWidgets('reduced motion opens and closes the overlay immediately', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _sidebar(expanded: false, narrow: true, disableAnimations: true),
+    );
+    await tester.tap(_tip('Expand'));
+    await tester.pump();
+    expect(_labelOpacities(tester, 'Proxies'), unorderedEquals([0, 1]));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.text('Proxies'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('removing the hovered destination fades the hover ghost', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_sidebar());
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: tester.getCenter(find.text('Proxies')));
+    await mouse.moveTo(tester.getCenter(find.text('Proxies')));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _sidebar(destinations: [_destinations[0], _destinations[2]]),
+    );
+    await tester.pumpAndSettle();
+    final ghost = find.descendant(
+      of: find.byKey(NavigationSidebar.hoverGhostKey),
+      matching: find.byType(DecoratedBox),
+    );
+    expect(ghost, findsNothing);
+  });
+
   testWidgets('destination slots animate insertion and removal', (
     tester,
   ) async {

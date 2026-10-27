@@ -53,7 +53,7 @@ checks:
   tools:
     argv: [flutter, test, test/providers/tools_test.dart, test/views/tools_catalog_test.dart, test/widgets/tools_workspace_test.dart]
   simple-dashboard:
-    argv: [flutter, test, test/views/dashboard/simple_dashboard_test.dart, test/providers/speed_test_test.dart, test/models/config_test.dart]
+    argv: [flutter, test, test/views/dashboard/simple_dashboard_test.dart, test/providers/speed_test_test.dart, test/features/speed_test_engine_test.dart, test/views/speed_test_sheet_test.dart, test/models/config_test.dart]
   web-dashboard-storage:
     argv: [flutter, test, test/common/web_dashboard_test.dart, test/common/app_data_test.dart]
   web-dashboard-access:

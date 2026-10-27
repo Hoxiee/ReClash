@@ -380,7 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'Выбор из ${count} сервера этой группы.', few: 'Выбор из ${count} серверов этой группы.', many: 'Выбор из ${count} серверов этой группы.', other: 'Выбор из ${count} сервера этой группы.')}";
 
   static String m147(region, bypassed, proxied) =>
-      "${region}: в список обхода VPN попадут ${bypassed} приложений, в список VPN — ${proxied}. Оба списка будут заменены; режим и остальные параметры не изменятся. Совпадения пакетов и SDK — лишь подсказки: проверьте результат после применения.";
+      "Распознанные приложения региона «${region}» — в обход VPN (${bypassed}), остальные установленные — через VPN (${proxied}).\n\nРучной выбор в обоих списках будет заменён, режим не изменится. Проверьте подбор перед сохранением.";
 
   static String m148(seconds) => "Подтверждение через ${seconds} с";
 
@@ -440,65 +440,72 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m173(label) => "«${label}» — только одно значение";
 
-  static String m174(client, format, count) =>
+  static String m174(used, limit) => "${used} из ${limit}";
+
+  static String m175(value) => "${value} мс";
+
+  static String m176(size) =>
+      "Тест передаст до ${size} тестовых данных. Это расходует лимиты интернета и VPN. Служебный трафик сети может увеличить расход.";
+
+  static String m177(client, format, count) =>
       "Получено как ${client}: ${format}, узлов: ${count}.";
 
-  static String m175(count) =>
+  static String m178(count) =>
       "${Intl.plural(count, one: 'Подписка истекает через ${count} день', few: 'Подписка истекает через ${count} дня', many: 'Подписка истекает через ${count} дней', other: 'Подписка истекает через ${count} дней')}";
 
-  static String m176(count) =>
+  static String m179(count) =>
       "${Intl.plural(count, one: 'Добавить ${count} сервер', few: 'Добавить ${count} сервера', many: 'Добавить ${count} серверов', other: 'Добавить ${count} сервера')}";
 
-  static String m177(count) =>
+  static String m180(count) =>
       "${Intl.plural(count, one: 'Сервер будет добавлен', other: 'Все серверы будут добавлены: ${count}')}";
 
-  static String m178(count, total) =>
+  static String m181(count, total) =>
       "Будет добавлено ${count} из ${Intl.plural(total, one: '${total} сервера', other: '${total} серверов')}";
 
-  static String m179(count) => "Показать все (${count})";
+  static String m182(count) => "Показать все (${count})";
 
-  static String m180(format) => "Формат: ${format}";
+  static String m183(format) => "Формат: ${format}";
 
-  static String m181(percent) => "Израсходовано ${percent}% трафика";
+  static String m184(percent) => "Израсходовано ${percent}% трафика";
 
-  static String m182(count) => "Результатов: ${count}";
+  static String m185(count) => "Результатов: ${count}";
 
-  static String m183(value) => "Пик ${value}";
+  static String m186(value) => "Пик ${value}";
 
-  static String m184(value) => "Всего ${value}";
+  static String m187(value) => "Всего ${value}";
 
-  static String m185(transport) => "Заголовки ${transport}";
+  static String m188(transport) => "Заголовки ${transport}";
 
-  static String m186(version) => "Установлена версия ${version}";
+  static String m189(version) => "Установлена версия ${version}";
 
-  static String m187(count) => "${count} мин";
+  static String m190(count) => "${count} мин";
 
-  static String m188(time) => "Осталось ${time}";
+  static String m191(time) => "Осталось ${time}";
 
-  static String m189(count) => "${count} с";
+  static String m192(count) => "${count} с";
 
-  static String m190(speed) => "${speed}/с";
+  static String m193(speed) => "${speed}/с";
 
-  static String m191(nodes, groups, providers) =>
+  static String m194(nodes, groups, providers) =>
       "Прокси: ${nodes}, группы: ${groups}, удалённые провайдеры: ${providers}";
 
-  static String m192(action) =>
+  static String m195(action) =>
       "Ссылка запрашивает действие «${action}». Разрешить ReClash выполнить его?";
 
-  static String m193(name, source) =>
+  static String m196(name, source) =>
       "Импортировать «${name}» из ${source}? После согласия выполнятся проверка профиля и рассмотрение преобразований.";
 
-  static String m194(label) => "Значение «${label}» должно быть URL";
+  static String m197(label) => "Значение «${label}» должно быть URL";
 
-  static String m195(index) => "Фон ${index}";
+  static String m198(index) => "Фон ${index}";
 
-  static String m196(count) =>
+  static String m199(count) =>
       "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
 
-  static String m197(count) =>
+  static String m200(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m198(count) =>
+  static String m201(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2095,6 +2102,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Введите название профиля",
     ),
+    "profilePasteFromClipboard": MessageLookupByLibrary.simpleMessage(
+      "Вставить из буфера обмена",
+    ),
     "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "Действует только для этого профиля; не добавленные параметры используют значения по умолчанию.",
     ),
@@ -2142,6 +2152,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxiesProfileLabel": m74,
     "proxiesRemovedTip": m75,
     "proxiesReplacedTip": m76,
+    "proxyCardOneLine": MessageLookupByLibrary.simpleMessage("Однострочный"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Цепочка прокси"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Группа прокси"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage(
@@ -2784,9 +2795,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Приложения для этого региона не найдены. Ваши списки не изменены.",
     ),
     "regionAppsPreview": m147,
-    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
-      "Предпросмотр подбора",
-    ),
     "regionChangeDns": MessageLookupByLibrary.simpleMessage("DNS-серверы"),
     "regionChangeMtu": MessageLookupByLibrary.simpleMessage("MTU для TUN"),
     "regionChangeServices": MessageLookupByLibrary.simpleMessage(
@@ -2814,9 +2822,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Рекомендуется для этого устройства",
     ),
     "regionRussia": MessageLookupByLibrary.simpleMessage("Россия"),
-    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
-      "Подбор приложений по региону",
-    ),
     "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
       "Сначала выберите поддерживаемый регион, чтобы использовать региональный подбор приложений.",
     ),
@@ -3426,6 +3431,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Размытие фона показывает рабочий стол за окном сквозь боковую панель.",
     ),
+    "sidebarWidth": MessageLookupByLibrary.simpleMessage(
+      "Ширина боковой панели",
+    ),
+    "sidebarWidthNarrow": MessageLookupByLibrary.simpleMessage("Узкая"),
+    "sidebarWidthWide": MessageLookupByLibrary.simpleMessage("Широкая"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Тихий запуск"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Тихий запуск не показывает окно.",
@@ -3639,6 +3649,96 @@ class MessageLookup extends MessageLookupByLibrary {
     "speedStatistics": MessageLookupByLibrary.simpleMessage(
       "Статистика скорости",
     ),
+    "speedTestAgain": MessageLookupByLibrary.simpleMessage("Повторить тест"),
+    "speedTestAlwaysConfirm": MessageLookupByLibrary.simpleMessage(
+      "Подтверждать в любой сети",
+    ),
+    "speedTestBudget": MessageLookupByLibrary.simpleMessage(
+      "Общий лимит трафика",
+    ),
+    "speedTestBudgetHint": MessageLookupByLibrary.simpleMessage(
+      "Общий для download, upload и прогрева. Служебный трафик сети учитывается отдельно.",
+    ),
+    "speedTestCancelled": MessageLookupByLibrary.simpleMessage(
+      "Тест остановлен",
+    ),
+    "speedTestComplete": MessageLookupByLibrary.simpleMessage("Полный тест"),
+    "speedTestConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Начать тест соединения?",
+    ),
+    "speedTestDataUsed": m174,
+    "speedTestDone": MessageLookupByLibrary.simpleMessage("Тест завершён"),
+    "speedTestDownload": MessageLookupByLibrary.simpleMessage("Загрузка"),
+    "speedTestIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Загрузка, отправка, задержка и jitter с лимитом трафика.",
+    ),
+    "speedTestJitter": MessageLookupByLibrary.simpleMessage("Jitter"),
+    "speedTestLatency": MessageLookupByLibrary.simpleMessage("HTTP-задержка"),
+    "speedTestLatencyOnly": MessageLookupByLibrary.simpleMessage(
+      "Только задержка и jitter",
+    ),
+    "speedTestLatencyWarning": MessageLookupByLibrary.simpleMessage(
+      "Отправляются только небольшие запросы задержки. Они тоже тратят трафик; скорость загрузки и отправки не измеряется.",
+    ),
+    "speedTestLimited": MessageLookupByLibrary.simpleMessage(
+      "Лимит трафика закончился до стабилизации скорости. Результат приблизительный.",
+    ),
+    "speedTestMeteredTitle": MessageLookupByLibrary.simpleMessage(
+      "Потратить трафик в лимитной сети?",
+    ),
+    "speedTestMode": MessageLookupByLibrary.simpleMessage("Измерения"),
+    "speedTestMs": m175,
+    "speedTestMsUnit": MessageLookupByLibrary.simpleMessage("мс"),
+    "speedTestNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "Сеть или маршрут изменились. Запустите тест заново.",
+    ),
+    "speedTestOffline": MessageLookupByLibrary.simpleMessage(
+      "Нет подключения к сети",
+    ),
+    "speedTestOpen": MessageLookupByLibrary.simpleMessage("Открыть тест"),
+    "speedTestPartial": MessageLookupByLibrary.simpleMessage(
+      "Часть измерений не удалась. Полученные результаты сохранены.",
+    ),
+    "speedTestPing": MessageLookupByLibrary.simpleMessage("Задержка"),
+    "speedTestPlatform": MessageLookupByLibrary.simpleMessage(
+      "Платформа тестирования",
+    ),
+    "speedTestPlatformHint": MessageLookupByLibrary.simpleMessage(
+      "Доступность и ограничения определяет владелец сервиса.",
+    ),
+    "speedTestPlatformUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Эта платформа недоступна. Выберите другую в настройках.",
+    ),
+    "speedTestPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Платформа видит публичный IP тестового соединения. Тестовые данные создаются локально; личные файлы не отправляются.",
+    ),
+    "speedTestReady": MessageLookupByLibrary.simpleMessage("Готов к измерению"),
+    "speedTestRouteCore": MessageLookupByLibrary.simpleMessage(
+      "По правилам Core",
+    ),
+    "speedTestRouteHint": MessageLookupByLibrary.simpleMessage(
+      "Проверяется текущий маршрут до платформы, не обязательно выбранный VPN-узел. Автоматического перехода на DIRECT нет.",
+    ),
+    "speedTestRouteSystem": MessageLookupByLibrary.simpleMessage(
+      "Системный маршрут",
+    ),
+    "speedTestSafetyHint": MessageLookupByLibrary.simpleMessage(
+      "В лимитных сетях и при неизвестном лимите подтверждение обязательно. Wi-Fi не считается безлимитным автоматически.",
+    ),
+    "speedTestSettings": MessageLookupByLibrary.simpleMessage(
+      "Настройки теста",
+    ),
+    "speedTestStart": MessageLookupByLibrary.simpleMessage("Начать тест"),
+    "speedTestStop": MessageLookupByLibrary.simpleMessage("Остановить тест"),
+    "speedTestTitle": MessageLookupByLibrary.simpleMessage("Тест соединения"),
+    "speedTestTrafficWarning": m176,
+    "speedTestUnknownTitle": MessageLookupByLibrary.simpleMessage(
+      "Лимит этой сети неизвестен",
+    ),
+    "speedTestUpload": MessageLookupByLibrary.simpleMessage("Отправка"),
+    "speedTestWarmup": MessageLookupByLibrary.simpleMessage(
+      "Прогрев соединения",
+    ),
     "splitStrategy": MessageLookupByLibrary.simpleMessage(
       "Стратегия распределения",
     ),
@@ -3744,7 +3844,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Использовать этот клиент"),
-    "subscriptionCompatibilityPrepared": m174,
+    "subscriptionCompatibilityPrepared": m177,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core разобрал результат. Он ещё не сохранён и не применён.",
@@ -3777,7 +3877,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Подписка истекла",
     ),
-    "subscriptionExpiresInDays": m175,
+    "subscriptionExpiresInDays": m178,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Подписка истекает сегодня",
     ),
@@ -3803,8 +3903,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Как в настройках",
     ),
-    "subscriptionImportAdd": m176,
-    "subscriptionImportAllAdded": m177,
+    "subscriptionImportAdd": m179,
+    "subscriptionImportAllAdded": m180,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "конфигурация Clash",
     ),
@@ -3832,7 +3932,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
       "Часть параметров серверов не поддерживается и будет опущена",
     ),
-    "subscriptionImportPartial": m178,
+    "subscriptionImportPartial": m181,
     "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
       "Не указаны скорости загрузки и отдачи",
     ),
@@ -3852,11 +3952,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Перенесётся не всё",
     ),
-    "subscriptionImportShowAll": m179,
+    "subscriptionImportShowAll": m182,
     "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
       "Не будут добавлены",
     ),
-    "subscriptionImportSourceFormat": m180,
+    "subscriptionImportSourceFormat": m183,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),
@@ -3883,7 +3983,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Поддержка",
     ),
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("Сайт"),
-    "subscriptionTrafficLow": m181,
+    "subscriptionTrafficLow": m184,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Использовать интервал провайдера",
     ),
@@ -3985,7 +4085,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро",
     ),
-    "toolsResults": m182,
+    "toolsResults": m185,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
@@ -4004,14 +4104,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m183,
-    "trafficTotal": m184,
+    "trafficPeak": m186,
+    "trafficTotal": m187,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Предложить правку перевода",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Транспорт"),
-    "transportHeaders": m185,
+    "transportHeaders": m188,
     "trayIcon": MessageLookupByLibrary.simpleMessage("Иконка в трее"),
     "trayIconColor": MessageLookupByLibrary.simpleMessage("Цветная"),
     "trayIconDark": MessageLookupByLibrary.simpleMessage("Чёрная"),
@@ -4188,14 +4288,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Обновление установлено",
     ),
-    "updateInstalledVersion": m186,
+    "updateInstalledVersion": m189,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android завершает установку. На этом этапе ReClash может закрыться.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Устанавливаем обновление",
     ),
-    "updateMinutes": m187,
+    "updateMinutes": m190,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Не сейчас"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Описание изменений не опубликовано.",
@@ -4247,7 +4347,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Подробности релиза",
     ),
-    "updateRemainingTime": m188,
+    "updateRemainingTime": m191,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Продолжить загрузку",
     ),
@@ -4258,7 +4358,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Повторить установку",
     ),
-    "updateSeconds": m189,
+    "updateSeconds": m192,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Все примечания к релизу",
     ),
@@ -4266,7 +4366,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Показать все изменения",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Обновления"),
-    "updateTransferSpeed": m190,
+    "updateTransferSpeed": m193,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось проверить целостность загруженного обновления.",
     ),
@@ -4304,14 +4404,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Закрыть приложение согласно настройке закрытия.",
     ),
-    "urlSchemeConfigCounts": m191,
+    "urlSchemeConfigCounts": m194,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Вставьте конфигурацию YAML или JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Состав конфигурации",
     ),
-    "urlSchemeConfirmMessage": m192,
+    "urlSchemeConfirmMessage": m195,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Внешняя команда приложения",
     ),
@@ -4355,7 +4455,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Импортировать конфигурацию",
     ),
-    "urlSchemeImportConfirm": m193,
+    "urlSchemeImportConfirm": m196,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Встроить конфигурацию YAML или JSON в ссылку.",
     ),
@@ -4449,7 +4549,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Подставить пример",
     ),
-    "urlTip": m194,
+    "urlTip": m197,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -4494,9 +4594,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Выберите корректное изображение PNG, JPEG, WebP или SVG.",
     ),
-    "wallpaperImageLabel": m195,
+    "wallpaperImageLabel": m198,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m196,
+    "wallpaperLibraryFull": m199,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -4610,6 +4710,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "Открыть в браузере",
     ),
+    "webDashboardReinstall": MessageLookupByLibrary.simpleMessage(
+      "Переустановить панель",
+    ),
     "webDashboardReload": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
     "webDashboardRestricted": MessageLookupByLibrary.simpleMessage(
       "Доступ к панели отключён вашим провайдером.",
@@ -4639,8 +4742,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m197,
-    "yearsAgoShort": m198,
+    "yearsAgo": m200,
+    "yearsAgoShort": m201,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

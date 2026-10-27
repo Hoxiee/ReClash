@@ -10,7 +10,7 @@ must:
   safe-import: Unknown and encrypted bytes pass through; conversions report every unsupported section and skipped node.
   staged-update: Invalid, empty, stale or superseded downloads never replace the saved profile file.
   portable-secrets: Device identity and consent stay outside portable profile backups.
-  provider-settings: A subscription's app settings apply by default and carry a provider tag; a user change takes the setting from the provider until it is handed back, and withdrawing a header restores the user's value. Backgrounds reuse cached PNG or original SVG files; SVGs are never rasterized for storage or display.
+  provider-settings: A subscription's app settings apply by default and carry a provider tag; a user change takes the setting from the provider until it is handed back, and withdrawing a header restores the user's value. Application settings offer a confirmed bulk return of provider-managed app settings, app-wide DNS/TUN/general overrides and released provider apps, including changes made before the next sync; local values and manual app lists remain stored. Backgrounds reuse cached PNG or original SVG files; SVGs are never rasterized for storage or display.
   provider-apps: Provider app lists add to the user's list in the same access-control mode; modes are never mixed and an app the user unticks stays released.
   provider-hosts: Fallback hosts never replace the stored URL; a new domain is adopted only after it serves a valid profile; both require an https subscription.
   provider-messages: Announce is a persistent, reorderable and non-removable subscription description; desktop previews morph into a centered reader; notice and noticeurl supply a separate dismissible message whose changed content shows again.

@@ -14,11 +14,7 @@
   "regionChina": "China",
   "regionEgypt": "Egipto",
   "regionNoServices": "Comprobaciones de servicios desactivadas",
-  "regionSelectApps": "Seleccionar aplicaciones por región",
-  "regionAppsPreviewTitle": "Vista previa de aplicaciones",
-  "regionAppsPreview": "{region}: {bypassed} aplicaciones en la lista de exclusión de VPN y {proxied} en la lista de VPN. Se sustituirán ambas listas; el modo y los demás ajustes no cambian. Las coincidencias de paquetes y SDK son sugerencias: revisa el resultado al aplicarlo.",
-  "regionAppsEmpty": "Ninguna aplicación coincide con esta región. Tus listas no cambian.",
-  "regionAppsChanged": "La región o las listas cambiaron. Repite la selección con los ajustes actuales.",
+  "regionAppsPreview": "{region}: las apps identificadas como locales no usarán la VPN ({bypassed}); las demás apps instaladas sí la usarán ({proxied}).\n\nSe reemplazará tu selección manual en ambas listas sin cambiar el modo. Revisa el resultado antes de guardar.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "Ninguna aplicación coincide con esta región. Tus listas no cambian.",
+  "regionAppsChanged": "La región o las listas cambiaron. Repite la selección con los ajustes actuales.",
   "regionRecommended": "Recomendado para este dispositivo",
   "regionChangesTitle": "Qué cambia",
   "regionChangeDns": "Servidores DNS",

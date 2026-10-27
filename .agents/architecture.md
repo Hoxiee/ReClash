@@ -167,6 +167,12 @@ managed storage. Valid installations live in `web-dashboard/<flavor>/`, with a b
 and a nonempty `index.html`. The profile task serves only this managed root through `external-ui` and clears
 `external-ui-name` and `external-ui-url`; a profile cannot redirect dashboard storage or initiate an automatic download.
 Both dashboards use `/ui/<flavor>/`, so changing flavor neither downloads the other panel nor reapplies the profile.
+Before opening even an existing installation, the store stages a network-only compatibility worker at `/ui/sw.js`.
+A legacy worker scoped to `/ui/` can otherwise serve its cached HTML inside either new panel, whose old hashed assets
+are absent. The compatibility worker replaces that interceptor without clearing browser storage or changing panel
+files. It reloads only the two managed entry documents after activation, toggling the directory/index path because
+Firefox treats a same-URL navigation with a fragment as a same-document move. It never awaits navigation from the
+activation event; the Core redirects `index.html` back to the canonical directory and preserves the setup fragment.
 
 Downloads and isolate-based verification/extraction use a fresh `.web-dashboard-work/<operation>/` directory outside
 the served tree. Size, entry count, path, link, duplicate and checksum checks precede publication. Directory replacement
@@ -185,9 +191,13 @@ An embedded Android/macOS page releases its own owner on disposal or load failur
 browser; a successful browser launch or handoff retains the same owner until explicit end or application exit.
 Cancellation, failed apply/probe/launch and stale callbacks cannot retain a failed opening or close another session.
 Removing one panel ends only its owners. Controller-setting changes, Core disconnect, profile removal and Safe Mode
-revoke existing access. The Core API probe is authenticated and bounded by a shared deadline, while credentials stay
-in the dashboard URL fragment and never enter request paths or error messages. Embedded navigation stays within the
-selected panel; external main-frame links use the system browser and Core API or external subframe navigation is blocked.
+revoke existing access. The Core API probe is authenticated and shares its deadline and byte budget with the entry
+HTML and required scripts/styles. Assets must remain inside the panel and return nonempty bodies with usable MIME
+types; optional classic scripts with an explicit error fallback do not block readiness. Asset requests carry no
+credentials and follow no redirects. Credentials stay in the dashboard URL fragment and never enter request paths
+or error messages. Embedded navigation stays within the selected panel; external main-frame links use the system
+browser and Core API or external subframe navigation is blocked. The install action remains available as reinstall
+for a current version, preserving the existing staging and rollback guarantees.
 
 ### Local Trust Boundary
 

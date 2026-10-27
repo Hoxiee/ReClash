@@ -833,6 +833,63 @@ void main() {
   }
 
   for (final floating in [true, false]) {
+    testWidgets('compact Tools pages leave only the system bottom inset '
+        'with floating=$floating', (tester) async {
+      globalState.packageInfo = PackageInfo(
+        appName: 'ReClash',
+        packageName: 'com.reclash',
+        version: '1.0.0',
+        buildNumber: '1',
+      );
+      final container = await pumpTools(
+        tester,
+        size: const Size(390, 844),
+        home: true,
+        safeArea: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(floatingNavigationBar: floating));
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pumpAndSettle();
+      final catalog = find.byType(ToolsCatalogPanel);
+      final catalogInset = BottomInsetScope.of(tester.element(catalog));
+      expect(catalogInset, floating ? greaterThan(0) : 0);
+      final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+      for (final page in [
+        ToolPage.general,
+        ToolPage.network,
+        ToolPage.routing,
+        ToolPage.coreDetails,
+        ToolPage.about,
+        ToolPage.filters,
+      ]) {
+        await host.openEntry(
+          ToolEntry(
+            id: 'page.${page.name}',
+            title: page.name,
+            category: ToolCategory.configuration,
+            glyph: AppGlyphs.settings,
+            route: ToolRoute(page),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final scaffold = find.byType(CommonScaffold).last;
+        final pageContext = tester.element(scaffold);
+        expect(BottomInsetScope.of(pageContext), 0, reason: page.name);
+        expect(pageContext.bottomInset, 24, reason: page.name);
+        expect(tester.takeException(), isNull, reason: page.name);
+      }
+      while (container.read(toolsSessionProvider).path.isNotEmpty) {
+        await host.handleBack();
+        await tester.pumpAndSettle();
+      }
+      expect(BottomInsetScope.of(tester.element(catalog)), catalogInset);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final floating in [true, false]) {
     testWidgets(
       'mobile navigation follows Tools depth with floating=$floating',
       (tester) async {
@@ -857,10 +914,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(shown(), isFalse);
         final detail = find.byType(SettingsPageScroll);
-        expect(
-          BottomInsetScope.of(tester.element(detail)),
-          floating ? NavigationDock.insetOf(tester.element(detail)) : 0,
-        );
+        expect(BottomInsetScope.of(tester.element(detail)), 0);
         final host = tester.state<ToolsViewState>(find.byType(ToolsView));
         await host.openEntry(
           const ToolEntry(

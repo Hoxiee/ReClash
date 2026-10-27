@@ -347,10 +347,11 @@ Config returnProviderSettings(
   ProviderSettingsInput input, {
   Iterable<String>? ids,
 }) {
-  final state = config.providerSettings;
+  final reconciled = applyProviderSettings(config, input);
+  final state = reconciled.providerSettings;
   final returned = ids?.toSet();
-  return applyProviderSettings(
-    config.copyWith(
+  final restored = applyProviderSettings(
+    reconciled.copyWith(
       providerSettings: state.copyWith(
         userOwned: returned == null
             ? const {}
@@ -358,6 +359,20 @@ Config returnProviderSettings(
       ),
     ),
     input,
+  );
+  if (returned != null) return restored;
+  return restored.copyWith(
+    patchClashConfig: restored.patchClashConfig.copyWith(
+      generalOverrideKeys: const {},
+      dnsOverrideKeys: const {},
+      tunOverrideKeys: const {},
+    ),
+    vpnProps: restored.vpnProps.copyWith(
+      accessControlProps: restored.vpnProps.accessControlProps.copyWith(
+        acceptReleased: const [],
+        rejectReleased: const [],
+      ),
+    ),
   );
 }
 

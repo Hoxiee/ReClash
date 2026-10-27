@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Pulsa Atrás otra vez para salir",
-  "selected": "Seleccionado"
+  "selected": "Seleccionado",
+  "sidebarWidth": "Anchura de la barra lateral",
+  "sidebarWidthNarrow": "Estrecha",
+  "sidebarWidthWide": "Ancha"
 }

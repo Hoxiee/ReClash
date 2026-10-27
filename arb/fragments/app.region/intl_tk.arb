@@ -14,11 +14,7 @@
   "regionChina": "Hytaý",
   "regionEgypt": "Müsür",
   "regionNoServices": "Hyzmat barlaglary öçürilen",
-  "regionSelectApps": "Programmalary sebit boýunça saýlamak",
-  "regionAppsPreviewTitle": "Programma saýlawynyň deslapky syny",
-  "regionAppsPreview": "{region}: VPN-den aýlanyp geçiş sanawyna {bypassed} programma, VPN sanawyna {proxied} programma girer. Iki sanaw hem çalşylar; iş tertibi we beýleki sazlamalar üýtgemez. Paket we SDK gabat gelmeleri diňe teklipdir: ulananyňyzdan soň netijäni barlaň.",
-  "regionAppsEmpty": "Bu sebite gabat gelýän programma tapylmady. Sanawlaryňyz üýtgemedi.",
-  "regionAppsChanged": "Sebit ýa-da programma sanawlary üýtgedi. Häzirki sazlamalar bilen saýlawy gaýtalaň.",
+  "regionAppsPreview": "«{region}» sebitine degişli diýlip kesgitlenen programmalar VPN-den daşarda işlär ({bypassed}), beýleki gurnalan programmalar bolsa VPN-i ulanar ({proxied}).\n\nIki sanawdaky el bilen edilen saýlaw çalşyrylar, režim üýtgemez. Ýatda saklamazdan öň netijäni barlaň.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "Bu sebite gabat gelýän programma tapylmady. Sanawlaryňyz üýtgemedi.",
+  "regionAppsChanged": "Sebit ýa-da programma sanawlary üýtgedi. Häzirki sazlamalar bilen saýlawy gaýtalaň.",
   "regionRecommended": "Bu enjam üçin maslahat berilýär",
   "regionChangesTitle": "Näme üýtgeýär",
   "regionChangeDns": "DNS serwerleri",

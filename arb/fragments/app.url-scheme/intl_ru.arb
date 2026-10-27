@@ -113,5 +113,6 @@
   "profileImportFromProvider": "От провайдера",
   "profileImportSingleServer": "Один сервер",
   "profileImportDownloading": "Загружаем подписку…",
-  "profileImportTryOtherFormat": "Ничего не добавлено. Можно выбрать другой формат и попробовать снова."
+  "profileImportTryOtherFormat": "Ничего не добавлено. Можно выбрать другой формат и попробовать снова.",
+  "profilePasteFromClipboard": "Вставить из буфера обмена"
 }

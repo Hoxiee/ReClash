@@ -8257,30 +8257,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Select apps by region`
-  String get regionSelectApps {
-    return Intl.message(
-      'Select apps by region',
-      name: 'regionSelectApps',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App selection preview`
-  String get regionAppsPreviewTitle {
-    return Intl.message(
-      'App selection preview',
-      name: 'regionAppsPreviewTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{region}: {bypassed} apps in the VPN bypass list, {proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.`
+  /// `{region}: apps recognized as local will bypass the VPN ({bypassed}); all other installed apps will use it ({proxied}).\n\nThis replaces your manual selection in both lists without changing the mode. Review the suggestions before saving.`
   String regionAppsPreview(String region, int bypassed, int proxied) {
     return Intl.message(
-      '$region: $bypassed apps in the VPN bypass list, $proxied in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.',
+      '$region: apps recognized as local will bypass the VPN ($bypassed); all other installed apps will use it ($proxied).\n\nThis replaces your manual selection in both lists without changing the mode. Review the suggestions before saving.',
       name: 'regionAppsPreview',
       desc: '',
       args: [region, bypassed, proxied],
@@ -10913,6 +10893,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Paste from clipboard`
+  String get profilePasteFromClipboard {
+    return Intl.message(
+      'Paste from clipboard',
+      name: 'profilePasteFromClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Theme`
   String get appearanceTheme {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
@@ -12205,6 +12195,396 @@ class AppLocalizations {
     return Intl.message(
       'Manual',
       name: 'simpleServicesManual',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection test`
+  String get speedTestTitle {
+    return Intl.message(
+      'Connection test',
+      name: 'speedTestTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test settings`
+  String get speedTestSettings {
+    return Intl.message(
+      'Test settings',
+      name: 'speedTestSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test platform`
+  String get speedTestPlatform {
+    return Intl.message(
+      'Test platform',
+      name: 'speedTestPlatform',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The service operator sets its availability and limits.`
+  String get speedTestPlatformHint {
+    return Intl.message(
+      'The service operator sets its availability and limits.',
+      name: 'speedTestPlatformHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This platform is unavailable. Choose another in settings.`
+  String get speedTestPlatformUnavailable {
+    return Intl.message(
+      'This platform is unavailable. Choose another in settings.',
+      name: 'speedTestPlatformUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Measurements`
+  String get speedTestMode {
+    return Intl.message(
+      'Measurements',
+      name: 'speedTestMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full test`
+  String get speedTestComplete {
+    return Intl.message(
+      'Full test',
+      name: 'speedTestComplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency and jitter only`
+  String get speedTestLatencyOnly {
+    return Intl.message(
+      'Latency and jitter only',
+      name: 'speedTestLatencyOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total data budget`
+  String get speedTestBudget {
+    return Intl.message(
+      'Total data budget',
+      name: 'speedTestBudget',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by download, upload and warm-up. Network overhead is additional.`
+  String get speedTestBudgetHint {
+    return Intl.message(
+      'Shared by download, upload and warm-up. Network overhead is additional.',
+      name: 'speedTestBudgetHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm on every network`
+  String get speedTestAlwaysConfirm {
+    return Intl.message(
+      'Confirm on every network',
+      name: 'speedTestAlwaysConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Metered and unknown networks always require confirmation. Wi-Fi is not assumed to be unlimited.`
+  String get speedTestSafetyHint {
+    return Intl.message(
+      'Metered and unknown networks always require confirmation. Wi-Fi is not assumed to be unlimited.',
+      name: 'speedTestSafetyHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ready to measure`
+  String get speedTestReady {
+    return Intl.message(
+      'Ready to measure',
+      name: 'speedTestReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Warming up`
+  String get speedTestWarmup {
+    return Intl.message(
+      'Warming up',
+      name: 'speedTestWarmup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HTTP latency`
+  String get speedTestLatency {
+    return Intl.message(
+      'HTTP latency',
+      name: 'speedTestLatency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get speedTestDownload {
+    return Intl.message(
+      'Download',
+      name: 'speedTestDownload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload`
+  String get speedTestUpload {
+    return Intl.message('Upload', name: 'speedTestUpload', desc: '', args: []);
+  }
+
+  /// `Test complete`
+  String get speedTestDone {
+    return Intl.message(
+      'Test complete',
+      name: 'speedTestDone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test stopped`
+  String get speedTestCancelled {
+    return Intl.message(
+      'Test stopped',
+      name: 'speedTestCancelled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start test`
+  String get speedTestStart {
+    return Intl.message(
+      'Start test',
+      name: 'speedTestStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop test`
+  String get speedTestStop {
+    return Intl.message('Stop test', name: 'speedTestStop', desc: '', args: []);
+  }
+
+  /// `Latency`
+  String get speedTestPing {
+    return Intl.message('Latency', name: 'speedTestPing', desc: '', args: []);
+  }
+
+  /// `Jitter`
+  String get speedTestJitter {
+    return Intl.message('Jitter', name: 'speedTestJitter', desc: '', args: []);
+  }
+
+  /// `ms`
+  String get speedTestMsUnit {
+    return Intl.message('ms', name: 'speedTestMsUnit', desc: '', args: []);
+  }
+
+  /// `{value} ms`
+  String speedTestMs(String value) {
+    return Intl.message(
+      '$value ms',
+      name: 'speedTestMs',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `{used} of {limit}`
+  String speedTestDataUsed(String used, String limit) {
+    return Intl.message(
+      '$used of $limit',
+      name: 'speedTestDataUsed',
+      desc: '',
+      args: [used, limit],
+    );
+  }
+
+  /// `Through Core rules`
+  String get speedTestRouteCore {
+    return Intl.message(
+      'Through Core rules',
+      name: 'speedTestRouteCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System route`
+  String get speedTestRouteSystem {
+    return Intl.message(
+      'System route',
+      name: 'speedTestRouteSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tests the current route to the platform, not necessarily the selected VPN node. No automatic direct fallback.`
+  String get speedTestRouteHint {
+    return Intl.message(
+      'Tests the current route to the platform, not necessarily the selected VPN node. No automatic direct fallback.',
+      name: 'speedTestRouteHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The data budget ended before the speed stabilized. This is an estimate.`
+  String get speedTestLimited {
+    return Intl.message(
+      'The data budget ended before the speed stabilized. This is an estimate.',
+      name: 'speedTestLimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some measurements failed. Available results are kept.`
+  String get speedTestPartial {
+    return Intl.message(
+      'Some measurements failed. Available results are kept.',
+      name: 'speedTestPartial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network or route changed. Start a new test.`
+  String get speedTestNetworkChanged {
+    return Intl.message(
+      'The network or route changed. Start a new test.',
+      name: 'speedTestNetworkChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No network connection`
+  String get speedTestOffline {
+    return Intl.message(
+      'No network connection',
+      name: 'speedTestOffline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use data on this metered network?`
+  String get speedTestMeteredTitle {
+    return Intl.message(
+      'Use data on this metered network?',
+      name: 'speedTestMeteredTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network’s data limit is unknown`
+  String get speedTestUnknownTitle {
+    return Intl.message(
+      'The network’s data limit is unknown',
+      name: 'speedTestUnknownTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the connection test?`
+  String get speedTestConfirmTitle {
+    return Intl.message(
+      'Start the connection test?',
+      name: 'speedTestConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The test transfers up to {size} of test data. This uses your internet and VPN allowances. Network overhead may increase usage.`
+  String speedTestTrafficWarning(String size) {
+    return Intl.message(
+      'The test transfers up to $size of test data. This uses your internet and VPN allowances. Network overhead may increase usage.',
+      name: 'speedTestTrafficWarning',
+      desc: '',
+      args: [size],
+    );
+  }
+
+  /// `Only small latency probes are sent. They also use data; download and upload speed are not measured.`
+  String get speedTestLatencyWarning {
+    return Intl.message(
+      'Only small latency probes are sent. They also use data; download and upload speed are not measured.',
+      name: 'speedTestLatencyWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download, upload, latency and jitter, with a data budget.`
+  String get speedTestIdleDesc {
+    return Intl.message(
+      'Download, upload, latency and jitter, with a data budget.',
+      name: 'speedTestIdleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open test`
+  String get speedTestOpen {
+    return Intl.message('Open test', name: 'speedTestOpen', desc: '', args: []);
+  }
+
+  /// `The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.`
+  String get speedTestPrivacy {
+    return Intl.message(
+      'The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.',
+      name: 'speedTestPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test again`
+  String get speedTestAgain {
+    return Intl.message(
+      'Test again',
+      name: 'speedTestAgain',
       desc: '',
       args: [],
     );
@@ -13734,6 +14114,16 @@ class AppLocalizations {
     return Intl.message(
       'A profile with this subscription URL already exists',
       name: 'profileImportDuplicate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `One line`
+  String get proxyCardOneLine {
+    return Intl.message(
+      'One line',
+      name: 'proxyCardOneLine',
       desc: '',
       args: [],
     );
@@ -18117,6 +18507,31 @@ class AppLocalizations {
     return Intl.message('Selected', name: 'selected', desc: '', args: []);
   }
 
+  /// `Sidebar width`
+  String get sidebarWidth {
+    return Intl.message(
+      'Sidebar width',
+      name: 'sidebarWidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Narrow`
+  String get sidebarWidthNarrow {
+    return Intl.message(
+      'Narrow',
+      name: 'sidebarWidthNarrow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wide`
+  String get sidebarWidthWide {
+    return Intl.message('Wide', name: 'sidebarWidthWide', desc: '', args: []);
+  }
+
   /// `Web dashboard`
   String get webDashboard {
     return Intl.message(
@@ -18482,6 +18897,16 @@ class AppLocalizations {
     return Intl.message(
       'In the browser',
       name: 'webDashboardAccessInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reinstall dashboard`
+  String get webDashboardReinstall {
+    return Intl.message(
+      'Reinstall dashboard',
+      name: 'webDashboardReinstall',
       desc: '',
       args: [],
     );

@@ -113,5 +113,6 @@
   "profileImportFromProvider": "Провайдерден",
   "profileImportSingleServer": "Бір сервер",
   "profileImportDownloading": "Жазылым жүктелуде…",
-  "profileImportTryOtherFormat": "Ештеңе қосылмады. Басқа пішімді таңдап, қайталап көріңіз."
+  "profileImportTryOtherFormat": "Ештеңе қосылмады. Басқа пішімді таңдап, қайталап көріңіз.",
+  "profilePasteFromClipboard": "Алмасу буферінен қою"
 }

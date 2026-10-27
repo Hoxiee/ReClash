@@ -680,33 +680,30 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           title: l.setupLanguageTitle,
           description: l.setupLanguageDescription,
         ),
-        generateSection(
-          items: [
-            for (final option in <Locale?>[
-              null,
-              ...AppLocalizations.delegate.supportedLocales,
-            ])
-              DecorationListItem(
-                isSelected: locale == option,
-                leading: option == null
-                    ? const GlyphIcon(AppGlyphs.language)
-                    : Text(
-                        option.flagEmoji,
-                        style: AppTextStyle.title3
-                            .of(context)
-                            .copyWith(fontFamily: FontFamily.twEmoji.value),
-                      ),
-                title: Text(option?.nativeLabel ?? l.defaultText),
-                subtitle: Text(option?.englishLabel ?? l.followSystem),
-                trailing: locale == option ? const SelectionCheck() : null,
-                onPressed: locked
-                    ? null
-                    : () => unawaited(
-                        _session.selectLanguage(option?.toString()),
-                      ),
-              ),
-          ],
-        ),
+        generateGroup([
+          for (final option in <Locale?>[
+            null,
+            ...AppLocalizations.delegate.supportedLocales,
+          ])
+            DecorationListItem(
+              isSelected: locale == option,
+              leading: option == null
+                  ? const GlyphIcon(AppGlyphs.language)
+                  : Text(
+                      option.flagEmoji,
+                      style: AppTextStyle.title3
+                          .of(context)
+                          .copyWith(fontFamily: FontFamily.twEmoji.value),
+                    ),
+              title: Text(option?.nativeLabel ?? l.defaultText),
+              subtitle: Text(option?.englishLabel ?? l.followSystem),
+              trailing: locale == option ? const SelectionCheck() : null,
+              onPressed: locked
+                  ? null
+                  : () =>
+                        unawaited(_session.selectLanguage(option?.toString())),
+            ),
+        ]),
       ],
     );
   }
@@ -858,37 +855,40 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           title: l.setupCoverageTitle,
           description: l.setupCoverageDescription,
         ),
-        generateSection(
-          items: [
-            for (final coverage in options)
-              DecorationListItem(
-                leading: GlyphIcon(switch (coverage) {
-                  SetupCoverage.tun => AppGlyphs.vpn,
-                  SetupCoverage.system => AppGlyphs.devices,
-                  SetupCoverage.local => AppGlyphs.link,
-                }),
-                title: _optionTitle(
-                  _coverageLabel(l, coverage),
-                  recommended: coverage == SetupCoverage.tun,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            generateGroup([
+              for (final coverage in options)
+                DecorationListItem(
+                  leading: GlyphIcon(switch (coverage) {
+                    SetupCoverage.tun => AppGlyphs.vpn,
+                    SetupCoverage.system => AppGlyphs.devices,
+                    SetupCoverage.local => AppGlyphs.link,
+                  }),
+                  title: _optionTitle(
+                    _coverageLabel(l, coverage),
+                    recommended: coverage == SetupCoverage.tun,
+                  ),
+                  subtitle: Text(switch (coverage) {
+                    SetupCoverage.tun =>
+                      _isAndroid
+                          ? l.setupCoverageAndroidDescription
+                          : l.setupCoverageAllDescription,
+                    SetupCoverage.system => l.setupCoverageSystemDescription,
+                    SetupCoverage.local => l.setupCoverageLocalDescription,
+                  }),
+                  isSelected: coverage == draft.coverage,
+                  trailing: coverage == draft.coverage
+                      ? const SelectionCheck()
+                      : null,
+                  onPressed: locked
+                      ? null
+                      : () => _session.selectCoverage(coverage),
                 ),
-                subtitle: Text(switch (coverage) {
-                  SetupCoverage.tun =>
-                    _isAndroid
-                        ? l.setupCoverageAndroidDescription
-                        : l.setupCoverageAllDescription,
-                  SetupCoverage.system => l.setupCoverageSystemDescription,
-                  SetupCoverage.local => l.setupCoverageLocalDescription,
-                }),
-                isSelected: coverage == draft.coverage,
-                trailing: coverage == draft.coverage
-                    ? const SelectionCheck()
-                    : null,
-                onPressed: locked
-                    ? null
-                    : () => _session.selectCoverage(coverage),
-              ),
+            ]),
+            ListFooter(text: l.setupCoverageNote),
           ],
-          footer: l.setupCoverageNote,
         ),
       ],
     );
@@ -931,81 +931,82 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           title: l.setupRegionTitle,
           description: l.setupRegionStepDescription,
         ),
-        generateSection(
-          items: [
-            for (final code in _regionOptions)
-              option(
-                leading: Text(
-                  regionFlag(code),
-                  style: AppTextStyle.title3
-                      .of(context)
-                      .copyWith(fontFamily: FontFamily.twEmoji.value),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            generateGroup([
+              for (final code in _regionOptions)
+                option(
+                  leading: Text(
+                    regionFlag(code),
+                    style: AppTextStyle.title3
+                        .of(context)
+                        .copyWith(fontFamily: FontFamily.twEmoji.value),
+                  ),
+                  title: regionLabel(l, code),
+                  isSelected: draft.regionChosen && code == draft.regionCode,
+                  code: code,
                 ),
-                title: regionLabel(l, code),
-                isSelected: draft.regionChosen && code == draft.regionCode,
-                code: code,
+              option(
+                leading: const GlyphIcon(AppGlyphs.block),
+                title: l.setupRegionNeutral,
+                subtitle: l.setupRegionNeutralDescription,
+                isSelected: draft.regionChosen && draft.regionCode == null,
+                code: null,
               ),
-            option(
-              leading: const GlyphIcon(AppGlyphs.block),
-              title: l.setupRegionNeutral,
-              subtitle: l.setupRegionNeutralDescription,
-              isSelected: draft.regionChosen && draft.regionCode == null,
-              code: null,
+            ]),
+            ListFooter(
+              text: draft.regionChosen
+                  ? l.regionCustomPreserved
+                  : l.setupRegionUnchosen,
             ),
           ],
-          footer: draft.regionChosen
-              ? l.regionCustomPreserved
-              : l.setupRegionUnchosen,
         ),
         if (directRules.isNotEmpty)
-          generateSection(
-            items: [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.split),
-                title: _optionTitle(l.setupDirectTitle, recommended: true),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
-                  children: [
-                    Text(l.setupDirectDescription),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        for (final rule in directRules) CodeLabel(rule),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: Switch(
-                  value: draft.directRoutes,
-                  onChanged: locked ? null : _session.selectDirectRoutes,
-                ),
-                onPressed: locked
-                    ? null
-                    : () => _session.selectDirectRoutes(!draft.directRoutes),
-              ),
-              if (directApps)
-                DecorationListItem(
-                  leading: const GlyphIcon(AppGlyphs.appsList),
-                  title: Text(
-                    state.scanningApps || draft.directApps == null
-                        ? l.setupDirectAppsScanning
-                        : l.setupDirectApps(draft.directApps!.length),
+          generateGroup([
+            DecorationListItem(
+              leading: const GlyphIcon(AppGlyphs.split),
+              title: _optionTitle(l.setupDirectTitle, recommended: true),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  Text(l.setupDirectDescription),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [for (final rule in directRules) CodeLabel(rule)],
                   ),
-                  subtitle: state.scanningApps || draft.directApps == null
-                      ? null
-                      : Text(
-                          draft.directApps!.isEmpty
-                              ? l.setupDirectAppsNone
-                              : l.setupDirectAppsReview,
-                        ),
-                  trailing: state.scanningApps
-                      ? const CommonCircleLoading(size: 20)
-                      : null,
+                ],
+              ),
+              trailing: Switch(
+                value: draft.directRoutes,
+                onChanged: locked ? null : _session.selectDirectRoutes,
+              ),
+              onPressed: locked
+                  ? null
+                  : () => _session.selectDirectRoutes(!draft.directRoutes),
+            ),
+            if (directApps)
+              DecorationListItem(
+                leading: const GlyphIcon(AppGlyphs.appsList),
+                title: Text(
+                  state.scanningApps || draft.directApps == null
+                      ? l.setupDirectAppsScanning
+                      : l.setupDirectApps(draft.directApps!.length),
                 ),
-            ],
-          ),
+                subtitle: state.scanningApps || draft.directApps == null
+                    ? null
+                    : Text(
+                        draft.directApps!.isEmpty
+                            ? l.setupDirectAppsNone
+                            : l.setupDirectAppsReview,
+                      ),
+                trailing: state.scanningApps
+                    ? const CommonCircleLoading(size: 20)
+                    : null,
+              ),
+          ]),
         if (changes.isNotEmpty)
           generateSection(
             title: l.regionChangesTitle,
@@ -1134,23 +1135,21 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           ),
         if (verdict == SetupVerdict.local) _localProxy(l),
         if (report.confirmed)
-          generateSection(
-            items: [
-              DecorationListItem(
-                title: Text(l.setupAutoConnect),
-                subtitle: Text(l.setupAutoConnectDescription),
-                trailing: Switch(
-                  value: _autoRun,
-                  onChanged: locked
-                      ? null
-                      : (value) => setState(() => _autoRun = value),
-                ),
-                onPressed: locked
+          generateGroup([
+            DecorationListItem(
+              title: Text(l.setupAutoConnect),
+              subtitle: Text(l.setupAutoConnectDescription),
+              trailing: Switch(
+                value: _autoRun,
+                onChanged: locked
                     ? null
-                    : () => setState(() => _autoRun = !_autoRun),
+                    : (value) => setState(() => _autoRun = value),
               ),
-            ],
-          ),
+              onPressed: locked
+                  ? null
+                  : () => setState(() => _autoRun = !_autoRun),
+            ),
+          ]),
         if (report.phases.isNotEmpty) _SetupPhases(phases: report.phases),
         if (report.error != null)
           CommonCard(
@@ -1500,57 +1499,54 @@ class _SetupPhases extends StatelessWidget {
             value: completed / phases.length,
             minHeight: 4,
           ),
-        generateSection(
-          items: [
-            for (final phase in phases)
-              DecorationListItem(
-                leading: CommonCard(
-                  shape: AppShape.full,
-                  padding: const EdgeInsets.all(8),
-                  child: phase.status == SetupPhaseStatus.running
-                      ? const CommonCircleLoading(size: 20)
-                      : GlyphIcon(
-                          switch (phase.status) {
-                            SetupPhaseStatus.confirmed => AppGlyphs.check,
-                            SetupPhaseStatus.failed => AppGlyphs.error,
-                            SetupPhaseStatus.unconfirmed => AppGlyphs.info,
-                            SetupPhaseStatus.waiting ||
-                            SetupPhaseStatus.skipped ||
-                            SetupPhaseStatus.running => AppGlyphs.clock,
-                          },
-                          size: 20,
-                          color: switch (phase.status) {
-                            SetupPhaseStatus.confirmed =>
-                              context.colorScheme.success,
-                            SetupPhaseStatus.failed =>
-                              context.colorScheme.error,
-                            SetupPhaseStatus.unconfirmed =>
-                              context.colorScheme.warning,
-                            _ => context.colorScheme.onSurfaceVariant,
-                          },
-                        ),
-                ),
-                title: Text(_phaseLabel(l, phase.phase)),
-                subtitle: Text(
-                  switch (phase.status) {
-                    SetupPhaseStatus.confirmed => l.setupConfirmed,
-                    SetupPhaseStatus.failed ||
-                    SetupPhaseStatus.unconfirmed => l.setupUnavailable,
-                    SetupPhaseStatus.running => l.connecting,
-                    SetupPhaseStatus.waiting ||
-                    SetupPhaseStatus.skipped => l.setupNotChecked,
-                  },
-                  style: AppTextStyle.footnote
-                      .of(context)
-                      .copyWith(
-                        color: phase.status == SetupPhaseStatus.running
-                            ? context.colorScheme.primary
-                            : context.colorScheme.onSurfaceVariant,
+        generateGroup([
+          for (final phase in phases)
+            DecorationListItem(
+              leading: CommonCard(
+                shape: AppShape.full,
+                padding: const EdgeInsets.all(8),
+                child: phase.status == SetupPhaseStatus.running
+                    ? const CommonCircleLoading(size: 20)
+                    : GlyphIcon(
+                        switch (phase.status) {
+                          SetupPhaseStatus.confirmed => AppGlyphs.check,
+                          SetupPhaseStatus.failed => AppGlyphs.error,
+                          SetupPhaseStatus.unconfirmed => AppGlyphs.info,
+                          SetupPhaseStatus.waiting ||
+                          SetupPhaseStatus.skipped ||
+                          SetupPhaseStatus.running => AppGlyphs.clock,
+                        },
+                        size: 20,
+                        color: switch (phase.status) {
+                          SetupPhaseStatus.confirmed =>
+                            context.colorScheme.success,
+                          SetupPhaseStatus.failed => context.colorScheme.error,
+                          SetupPhaseStatus.unconfirmed =>
+                            context.colorScheme.warning,
+                          _ => context.colorScheme.onSurfaceVariant,
+                        },
                       ),
-                ),
               ),
-          ],
-        ),
+              title: Text(_phaseLabel(l, phase.phase)),
+              subtitle: Text(
+                switch (phase.status) {
+                  SetupPhaseStatus.confirmed => l.setupConfirmed,
+                  SetupPhaseStatus.failed ||
+                  SetupPhaseStatus.unconfirmed => l.setupUnavailable,
+                  SetupPhaseStatus.running => l.connecting,
+                  SetupPhaseStatus.waiting ||
+                  SetupPhaseStatus.skipped => l.setupNotChecked,
+                },
+                style: AppTextStyle.footnote
+                    .of(context)
+                    .copyWith(
+                      color: phase.status == SetupPhaseStatus.running
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
+        ]),
       ],
     );
   }

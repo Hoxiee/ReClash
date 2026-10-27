@@ -14,11 +14,7 @@
   "regionChina": "China",
   "regionEgypt": "Egypt",
   "regionNoServices": "Service checks are off",
-  "regionSelectApps": "Select apps by region",
-  "regionAppsPreviewTitle": "App selection preview",
-  "regionAppsPreview": "{region}: {bypassed} apps in the VPN bypass list, {proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.",
-  "regionAppsEmpty": "No apps matched this region. Your lists are unchanged.",
-  "regionAppsChanged": "The region or app lists changed. Run selection again for the current settings.",
+  "regionAppsPreview": "{region}: apps recognized as local will bypass the VPN ({bypassed}); all other installed apps will use it ({proxied}).\n\nThis replaces your manual selection in both lists without changing the mode. Review the suggestions before saving.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "No apps matched this region. Your lists are unchanged.",
+  "regionAppsChanged": "The region or app lists changed. Run selection again for the current settings.",
   "regionRecommended": "Recommended for this device",
   "regionChangesTitle": "What changes",
   "regionChangeDns": "DNS servers",

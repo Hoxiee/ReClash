@@ -59,6 +59,10 @@ class App {
     return _instance!;
   }
 
+  Future<Map<String, dynamic>?> getNetworkCost() => methodChannel
+      .invokeMapMethod<String, dynamic>('getNetworkCost')
+      .timeout(_platformProbeTimeout);
+
   Future<bool?> moveTaskToBack() async {
     return methodChannel.invokeMethod<bool>('moveTaskToBack');
   }

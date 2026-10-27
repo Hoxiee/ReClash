@@ -47,7 +47,7 @@ final class RcxStatusStateProvider
   }
 }
 
-String _$rcxStatusStateHash() => r'c424862b77dddcaecadb675b6c8aebbd47794eba';
+String _$rcxStatusStateHash() => r'2c6ef317a7fd394930e1e37edb70eb7204e6a7b8';
 
 /// The routing engine's last reported state. The Core pushes it on change;
 /// the host only asks when it has nothing yet.

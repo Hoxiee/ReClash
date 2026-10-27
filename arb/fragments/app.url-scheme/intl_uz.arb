@@ -113,5 +113,6 @@
   "profileImportFromProvider": "Provayderdan",
   "profileImportSingleServer": "Bitta server",
   "profileImportDownloading": "Obuna yuklanmoqda…",
-  "profileImportTryOtherFormat": "Hech narsa qo‘shilmadi. Boshqa formatni tanlab, qayta urinib ko‘rishingiz mumkin."
+  "profileImportTryOtherFormat": "Hech narsa qo‘shilmadi. Boshqa formatni tanlab, qayta urinib ko‘rishingiz mumkin.",
+  "profilePasteFromClipboard": "Almashish buferidan joylash"
 }

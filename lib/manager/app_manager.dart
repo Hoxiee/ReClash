@@ -7,11 +7,15 @@ import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/widgets/icon.dart';
 import 'package:reclash/widgets/tun_privilege_setup_dialog.dart';
 import 'package:flutter/foundation.dart';
@@ -203,13 +207,46 @@ class _Sidebar extends ConsumerWidget {
   final ViewMode viewMode;
   final void Function(int index) onSelected;
 
+  void _openTool(BuildContext context, WidgetRef ref, ToolEntry entry) {
+    ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      final host = const GlobalObjectKey(PageLabel.tools).currentState;
+      if (host is ToolsViewState) {
+        unawaited(host.openEntry(entry));
+      } else {
+        ref.read(toolsSessionProvider.notifier).open(entry.route!);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canExpand = canExpandSidebar(viewMode);
     final sidebarExpanded = ref.watch(
       appSettingProvider.select((state) => state.sidebarExpanded),
     );
+    final sidebarNarrow = ref.watch(
+      appSettingProvider.select((state) => state.sidebarNarrow),
+    );
     final version = ref.watch(versionProvider);
+    final l = context.appLocalizations;
+    final actions = [
+      ToolEntry(
+        id: 'page.about',
+        title: l.about,
+        category: ToolCategory.information,
+        glyph: AppGlyphs.info,
+        route: const ToolRoute(ToolPage.about),
+      ),
+      ToolEntry(
+        id: 'page.theme',
+        title: l.theme,
+        category: ToolCategory.application,
+        glyph: AppGlyphs.paintbrush,
+        route: const ToolRoute(ToolPage.theme),
+      ),
+    ];
     return NavigationSidebar(
       destinations: [
         for (final item in items)
@@ -222,7 +259,16 @@ class _Sidebar extends ConsumerWidget {
       ],
       selectedIndex: currentIndex,
       expanded: canExpand && sidebarExpanded,
+      narrow: resolveSidebarNarrow(sidebarNarrow, isTV: system.isTV),
       onSelected: onSelected,
+      actions: [
+        for (final entry in actions)
+          SidebarAction(
+            glyph: entry.glyph,
+            tooltip: entry.title,
+            onPressed: () => _openTool(context, ref, entry),
+          ),
+      ],
       onToggle: canExpand
           ? () {
               ref

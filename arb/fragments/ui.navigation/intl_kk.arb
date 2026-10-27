@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Шығу үшін артқа тағы бір рет басыңыз",
-  "selected": "Таңдалған"
+  "selected": "Таңдалған",
+  "sidebarWidth": "Бүйірлік тақтаның ені",
+  "sidebarWidthNarrow": "Тар",
+  "sidebarWidthWide": "Кең"
 }

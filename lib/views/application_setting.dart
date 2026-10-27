@@ -285,6 +285,7 @@ class ApplicationSettingView extends ConsumerWidget {
                 items: diagnostics,
                 footer: [l.logcatDesc].join('\n'),
               ),
+              const ProviderSettingsReturnSection(),
             ],
           ),
         ),

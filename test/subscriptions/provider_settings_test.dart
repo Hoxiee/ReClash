@@ -263,6 +263,147 @@ void main() {
       expect(returned.providerSettings.userOwned, isEmpty);
     });
 
+    test('returning all also returns changes before the next sync', () {
+      final input = _input(view);
+      final applied = applyProviderSettings(_base, input);
+      final changed = applied.copyWith(
+        proxiesStyleProps: applied.proxiesStyleProps.copyWith(
+          type: ProxiesType.tab,
+        ),
+        themeProps: applied.themeProps.copyWith(pureBlack: false),
+      );
+
+      final returned = returnProviderSettings(changed, input);
+
+      expect(returned.proxiesStyleProps.type, ProxiesType.list);
+      expect(returned.themeProps.pureBlack, isTrue);
+      expect(returned.providerSettings.userOwned, isEmpty);
+      expect(isProviderManaged(returned, 'proxies.type'), isTrue);
+      expect(isProviderManaged(returned, 'app.black'), isTrue);
+    });
+
+    test('returning one fresh change keeps other settings released', () {
+      final input = _input(view);
+      final applied = applyProviderSettings(_base, input);
+      final changed = applied.copyWith(
+        proxiesStyleProps: applied.proxiesStyleProps.copyWith(
+          type: ProxiesType.tab,
+        ),
+        themeProps: applied.themeProps.copyWith(pureBlack: false),
+      );
+
+      final returned = returnProviderSettings(
+        changed,
+        input,
+        ids: ['proxies.type'],
+      );
+
+      expect(returned.proxiesStyleProps.type, ProxiesType.list);
+      expect(returned.themeProps.pureBlack, isFalse);
+      expect(returned.providerSettings.userOwned, {'app.black'});
+      expect(isProviderManaged(returned, 'proxies.type'), isTrue);
+    });
+
+    test('withdrawing after returning restores the latest user value', () {
+      final input = _input(view);
+      final applied = applyProviderSettings(_base, input);
+      final changed = applied.copyWith(
+        proxiesStyleProps: applied.proxiesStyleProps.copyWith(
+          type: ProxiesType.tab,
+        ),
+      );
+      final returned = returnProviderSettings(changed, input);
+
+      final withdrawn = applyProviderSettings(returned, _input(const {}));
+
+      expect(returned.proxiesStyleProps.type, ProxiesType.list);
+      expect(withdrawn.proxiesStyleProps.type, ProxiesType.tab);
+      expect(withdrawn.providerSettings.applied, isEmpty);
+    });
+
+    test('returning all clears core overrides without resetting values', () {
+      final patch = _base.patchClashConfig.copyWith(
+        generalOverrideKeys: {GeneralOverrideKey.ipv6},
+        dnsOverrideKeys: {DnsOverrideKey.nameserver},
+        tunOverrideKeys: {TunOverrideKey.mtu},
+        ipv6: false,
+        dns: _base.patchClashConfig.dns.copyWith(nameserver: ['1.1.1.1']),
+        tunOverride: _base.patchClashConfig.tunOverride.copyWith(mtu: 1400),
+        secret: 'local-controller-secret',
+        mixedPort: 8888,
+      );
+      final config = _base.copyWith(patchClashConfig: patch);
+
+      final returned = returnProviderSettings(config, _input(const {}));
+
+      expect(returned.patchClashConfig.generalOverrideKeys, isEmpty);
+      expect(returned.patchClashConfig.dnsOverrideKeys, isEmpty);
+      expect(returned.patchClashConfig.tunOverrideKeys, isEmpty);
+      expect(returned.patchClashConfig.ipv6, isFalse);
+      expect(returned.patchClashConfig.dns, patch.dns);
+      expect(returned.patchClashConfig.tunOverride, patch.tunOverride);
+      expect(returned.patchClashConfig.secret, patch.secret);
+      expect(returned.patchClashConfig.mixedPort, patch.mixedPort);
+      expect(returned.patchClashConfig.tun, patch.tun);
+    });
+
+    test('returning all restores provider apps in both access modes', () {
+      final access = _base.vpnProps.accessControlProps.copyWith(
+        enable: true,
+        mode: AccessControlMode.acceptSelected,
+        acceptList: ['com.user.included'],
+        rejectList: ['com.user.excluded'],
+        acceptReleased: ['com.provider.included'],
+        rejectReleased: ['com.provider.excluded'],
+      );
+      final config = _base.copyWith(
+        vpnProps: _base.vpnProps.copyWith(accessControlProps: access),
+      );
+
+      final returned = returnProviderSettings(config, _input(const {}));
+      final restoredAccess = returned.vpnProps.accessControlProps;
+
+      expect(restoredAccess.acceptReleased, isEmpty);
+      expect(restoredAccess.rejectReleased, isEmpty);
+      expect(restoredAccess.acceptList, access.acceptList);
+      expect(restoredAccess.rejectList, access.rejectList);
+      expect(restoredAccess.mode, access.mode);
+      expect(restoredAccess.enable, access.enable);
+    });
+
+    test('returning one setting leaves core and app-list overrides alone', () {
+      final input = _input(view);
+      final applied = applyProviderSettings(_base, input);
+      final patch = applied.patchClashConfig.copyWith(
+        generalOverrideKeys: {GeneralOverrideKey.ipv6},
+        dnsOverrideKeys: {DnsOverrideKey.nameserver},
+        tunOverrideKeys: {TunOverrideKey.mtu},
+      );
+      final vpn = applied.vpnProps.copyWith(
+        accessControlProps: applied.vpnProps.accessControlProps.copyWith(
+          acceptReleased: ['com.provider.included'],
+          rejectReleased: ['com.provider.excluded'],
+        ),
+      );
+      final changed = applied.copyWith(
+        patchClashConfig: patch,
+        vpnProps: vpn,
+        proxiesStyleProps: applied.proxiesStyleProps.copyWith(
+          type: ProxiesType.tab,
+        ),
+      );
+
+      final returned = returnProviderSettings(
+        changed,
+        input,
+        ids: ['proxies.type'],
+      );
+
+      expect(returned.proxiesStyleProps.type, ProxiesType.list);
+      expect(returned.patchClashConfig, patch);
+      expect(returned.vpnProps, vpn);
+    });
+
     test('withdrawing a header restores what the user had', () {
       final applied = applyProviderSettings(_base, _input(view));
       final withdrawn = applyProviderSettings(applied, _input(const {}));

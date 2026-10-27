@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/ui/ui.dart';
@@ -84,6 +85,53 @@ void main() {
       (label: 'Home', url: 'https://example.com/sub', ageSecretKey: ''),
     ]);
   });
+
+  for (final mode in ['text', 'empty', 'error', 'long']) {
+    testWidgets('URL paste handles $mode without submitting', (tester) async {
+      List<NamedUrl>? result;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method != 'Clipboard.getData') return null;
+          if (mode == 'error') throw PlatformException(code: 'denied');
+          return {
+            'text': switch (mode) {
+              'empty' => '   ',
+              'long' => 'x' * 3000,
+              _ => '  https://example.com/sub  ',
+            },
+          };
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+      await _open(
+        tester,
+        const NamedUrlForm(title: 'Import', url: 'https://example.com/old'),
+        (value) => result = value,
+      );
+      await tester.tap(find.byTooltip('Paste'));
+      await tester.pumpAndSettle();
+      final field = tester.widget<TextFormField>(_field('URL'));
+      expect(
+        field.controller!.text,
+        mode == 'text' ? 'https://example.com/sub' : 'https://example.com/old',
+      );
+      expect(result, isNull);
+      expect(find.byType(NamedUrlForm), findsOneWidget);
+      if (mode == 'error') {
+        expect(
+          find.text('Could not read the clipboard. Paste the link manually.'),
+          findsOneWidget,
+        );
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('a batch previews, refuses invalid lines and returns every url', (
     tester,

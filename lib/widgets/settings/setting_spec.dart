@@ -1,3 +1,5 @@
+import 'package:material_ui/material_ui.dart' show ThemeMode;
+import 'package:reclash/enum/enum.dart' show NavigationLayout;
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/tool_route.dart';
 
@@ -16,6 +18,9 @@ enum SettingCondition {
   customInterface,
   mipsStack,
   sidebarBlur,
+  navigationBar,
+  navigationSidebar,
+  darkTheme,
   contextual,
   remoteBackup,
   locationPermission,
@@ -38,3 +43,15 @@ class SettingSpec {
 
   ToolRoute get route => ToolRoute(page, settingId: id);
 }
+
+bool isAppearanceSettingVisible(
+  SettingCondition condition, {
+  required NavigationLayout layout,
+  required ThemeMode themeMode,
+}) => switch (condition) {
+  SettingCondition.navigationBar => layout != NavigationLayout.sidebar,
+  SettingCondition.navigationSidebar ||
+  SettingCondition.sidebarBlur => layout != NavigationLayout.bar,
+  SettingCondition.darkTheme => themeMode != ThemeMode.light,
+  _ => true,
+};

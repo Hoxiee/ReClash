@@ -394,7 +394,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'Il choisit parmi ${count} serveur de ce groupe.', other: 'Il choisit parmi les ${count} serveurs de ce groupe.')}";
 
   static String m147(region, bypassed, proxied) =>
-      "${region} : ${bypassed} applications dans la liste d’exclusion du VPN, ${proxied} dans la liste VPN. Les deux listes seront remplacées ; le mode et les autres réglages restent inchangés. Les correspondances de paquets et SDK sont des suggestions : vérifiez le résultat après application.";
+      "${region} : les apps reconnues comme locales contourneront le VPN (${bypassed}) ; les autres apps installées l’utiliseront (${proxied}).\n\nVotre sélection manuelle sera remplacée dans les deux listes, sans changer de mode. Vérifiez le résultat avant d’enregistrer.";
 
   static String m148(seconds) => "Confirmation possible dans ${seconds} s";
 
@@ -456,66 +456,73 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m173(label) => "${label} doit être un seul élément";
 
-  static String m174(client, format, count) =>
+  static String m174(used, limit) => "${used} sur ${limit}";
+
+  static String m175(value) => "${value} ms";
+
+  static String m176(size) =>
+      "Le test transfère jusqu’à ${size} de données, décomptées de vos forfaits internet et VPN. Le trafic de protocole peut augmenter la consommation.";
+
+  static String m177(client, format, count) =>
       "Reçu comme ${client} : ${format}, ${count} nœuds proxy.";
 
-  static String m175(count) =>
+  static String m178(count) =>
       "${Intl.plural(count, one: 'Votre abonnement expire demain', other: 'Votre abonnement expire dans ${count} jours')}";
 
-  static String m176(count) =>
+  static String m179(count) =>
       "${Intl.plural(count, one: 'Ajouter 1 serveur', other: 'Ajouter ${count} serveurs')}";
 
-  static String m177(count) =>
+  static String m180(count) =>
       "${Intl.plural(count, one: 'Le serveur sera ajouté', other: 'Les ${count} serveurs seront ajoutés')}";
 
-  static String m178(count, total) =>
+  static String m181(count, total) =>
       "${count} ${Intl.plural(total, one: 'serveur sur 1', other: 'serveurs sur ${total}')} seront ajoutés";
 
-  static String m179(count) => "Tout afficher (${count})";
+  static String m182(count) => "Tout afficher (${count})";
 
-  static String m180(format) => "Format : ${format}";
+  static String m183(format) => "Format : ${format}";
 
-  static String m181(percent) =>
+  static String m184(percent) =>
       "Vous avez utilisé ${percent}% de votre trafic";
 
-  static String m182(count) => "${count} résultats";
+  static String m185(count) => "${count} résultats";
 
-  static String m183(value) => "Pic ${value}";
+  static String m186(value) => "Pic ${value}";
 
-  static String m184(value) => "Total ${value}";
+  static String m187(value) => "Total ${value}";
 
-  static String m185(transport) => "En-têtes ${transport}";
+  static String m188(transport) => "En-têtes ${transport}";
 
-  static String m186(version) => "Version installée : ${version}";
+  static String m189(version) => "Version installée : ${version}";
 
-  static String m187(count) => "${count} min";
+  static String m190(count) => "${count} min";
 
-  static String m188(time) => "Encore ${time}";
+  static String m191(time) => "Encore ${time}";
 
-  static String m189(count) => "${count} s";
+  static String m192(count) => "${count} s";
 
-  static String m190(speed) => "${speed}/s";
+  static String m193(speed) => "${speed}/s";
 
-  static String m191(nodes, groups, providers) =>
+  static String m194(nodes, groups, providers) =>
       "${nodes} proxys, ${groups} groupes, ${providers} fournisseurs distants";
 
-  static String m192(action) =>
+  static String m195(action) =>
       "Ce lien demande « ${action} ». Autoriser ReClash à effectuer cette action ?";
 
-  static String m193(name, source) =>
+  static String m196(name, source) =>
       "Importer « ${name} » depuis ${source} ? La validation du profil et la vérification des conversions suivront votre confirmation.";
 
-  static String m194(label) => "${label} doit être une URL";
+  static String m197(label) => "${label} doit être une URL";
 
-  static String m195(index) => "Fond ${index}";
+  static String m198(index) => "Fond ${index}";
 
-  static String m196(count) =>
+  static String m199(count) =>
       "Vous pouvez conserver jusqu’à ${count} fonds. Supprimez-en un pour en ajouter un autre.";
 
-  static String m197(count) =>
+  static String m200(count) =>
       "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
 
-  static String m198(count) =>
+  static String m201(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2152,6 +2159,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Veuillez saisir le nom du profil",
     ),
+    "profilePasteFromClipboard": MessageLookupByLibrary.simpleMessage(
+      "Coller depuis le presse-papiers",
+    ),
     "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "S’applique uniquement à ce profil ; tout ce qui n’est pas ajouté utilise la valeur par défaut.",
     ),
@@ -2203,6 +2213,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxiesProfileLabel": m74,
     "proxiesRemovedTip": m75,
     "proxiesReplacedTip": m76,
+    "proxyCardOneLine": MessageLookupByLibrary.simpleMessage("Une ligne"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Chaîne de proxys"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Groupe de proxys"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage(
@@ -2893,9 +2904,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Aucune application ne correspond à cette région. Vos listes restent inchangées.",
     ),
     "regionAppsPreview": m147,
-    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
-      "Aperçu de la sélection",
-    ),
     "regionChangeDns": MessageLookupByLibrary.simpleMessage("Serveurs DNS"),
     "regionChangeMtu": MessageLookupByLibrary.simpleMessage("MTU TUN"),
     "regionChangeServices": MessageLookupByLibrary.simpleMessage(
@@ -2923,9 +2931,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Recommandée pour cet appareil",
     ),
     "regionRussia": MessageLookupByLibrary.simpleMessage("Russie"),
-    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
-      "Sélectionner les applications par région",
-    ),
     "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
       "Choisissez une région prise en charge avant d’utiliser les suggestions d’applications régionales.",
     ),
@@ -3557,6 +3562,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Le flou d’arrière-plan laisse voir le bureau derrière la fenêtre à travers la barre latérale.",
     ),
+    "sidebarWidth": MessageLookupByLibrary.simpleMessage(
+      "Largeur de la barre latérale",
+    ),
+    "sidebarWidthNarrow": MessageLookupByLibrary.simpleMessage("Étroite"),
+    "sidebarWidthWide": MessageLookupByLibrary.simpleMessage("Large"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage(
       "Lancement silencieux",
     ),
@@ -3778,6 +3788,94 @@ class MessageLookup extends MessageLookupByLibrary {
     "speedStatistics": MessageLookupByLibrary.simpleMessage(
       "Statistiques de débit",
     ),
+    "speedTestAgain": MessageLookupByLibrary.simpleMessage("Relancer le test"),
+    "speedTestAlwaysConfirm": MessageLookupByLibrary.simpleMessage(
+      "Confirmer sur chaque réseau",
+    ),
+    "speedTestBudget": MessageLookupByLibrary.simpleMessage(
+      "Budget total de données",
+    ),
+    "speedTestBudgetHint": MessageLookupByLibrary.simpleMessage(
+      "Commun au téléchargement, à l’envoi et à la préparation. Le trafic de protocole s’ajoute.",
+    ),
+    "speedTestCancelled": MessageLookupByLibrary.simpleMessage("Test arrêté"),
+    "speedTestComplete": MessageLookupByLibrary.simpleMessage("Test complet"),
+    "speedTestConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Démarrer le test de connexion ?",
+    ),
+    "speedTestDataUsed": m174,
+    "speedTestDone": MessageLookupByLibrary.simpleMessage("Test terminé"),
+    "speedTestDownload": MessageLookupByLibrary.simpleMessage("Téléchargement"),
+    "speedTestIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Téléchargement, envoi, latence et gigue, avec un budget de données.",
+    ),
+    "speedTestJitter": MessageLookupByLibrary.simpleMessage("Gigue"),
+    "speedTestLatency": MessageLookupByLibrary.simpleMessage("Latence HTTP"),
+    "speedTestLatencyOnly": MessageLookupByLibrary.simpleMessage(
+      "Latence et gigue uniquement",
+    ),
+    "speedTestLatencyWarning": MessageLookupByLibrary.simpleMessage(
+      "Seules de petites requêtes de latence sont envoyées. Elles consomment aussi des données ; les débits ne sont pas mesurés.",
+    ),
+    "speedTestLimited": MessageLookupByLibrary.simpleMessage(
+      "Le budget de données a été atteint avant la stabilisation du débit. Résultat estimatif.",
+    ),
+    "speedTestMeteredTitle": MessageLookupByLibrary.simpleMessage(
+      "Utiliser des données sur ce réseau limité ?",
+    ),
+    "speedTestMode": MessageLookupByLibrary.simpleMessage("Mesures"),
+    "speedTestMs": m175,
+    "speedTestMsUnit": MessageLookupByLibrary.simpleMessage("ms"),
+    "speedTestNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "Le réseau ou la route a changé. Relancez le test.",
+    ),
+    "speedTestOffline": MessageLookupByLibrary.simpleMessage(
+      "Aucune connexion réseau",
+    ),
+    "speedTestOpen": MessageLookupByLibrary.simpleMessage("Ouvrir le test"),
+    "speedTestPartial": MessageLookupByLibrary.simpleMessage(
+      "Certaines mesures ont échoué. Les résultats obtenus sont conservés.",
+    ),
+    "speedTestPing": MessageLookupByLibrary.simpleMessage("Latence"),
+    "speedTestPlatform": MessageLookupByLibrary.simpleMessage(
+      "Plateforme de test",
+    ),
+    "speedTestPlatformHint": MessageLookupByLibrary.simpleMessage(
+      "La disponibilité et les limites dépendent du fournisseur du service.",
+    ),
+    "speedTestPlatformUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Cette plateforme est indisponible. Choisissez-en une autre dans les réglages.",
+    ),
+    "speedTestPrivacy": MessageLookupByLibrary.simpleMessage(
+      "La plateforme voit l’IP publique de la connexion. Les données de test sont générées localement ; aucun fichier personnel n’est envoyé.",
+    ),
+    "speedTestReady": MessageLookupByLibrary.simpleMessage("Prêt à mesurer"),
+    "speedTestRouteCore": MessageLookupByLibrary.simpleMessage(
+      "Selon les règles de Core",
+    ),
+    "speedTestRouteHint": MessageLookupByLibrary.simpleMessage(
+      "Teste la route actuelle vers la plateforme, pas forcément le nœud VPN sélectionné. Aucun repli automatique sur DIRECT.",
+    ),
+    "speedTestRouteSystem": MessageLookupByLibrary.simpleMessage(
+      "Route système",
+    ),
+    "speedTestSafetyHint": MessageLookupByLibrary.simpleMessage(
+      "Une confirmation est toujours requise sur les réseaux limités ou inconnus. Le Wi-Fi n’est pas supposé illimité.",
+    ),
+    "speedTestSettings": MessageLookupByLibrary.simpleMessage(
+      "Réglages du test",
+    ),
+    "speedTestStart": MessageLookupByLibrary.simpleMessage("Démarrer le test"),
+    "speedTestStop": MessageLookupByLibrary.simpleMessage("Arrêter le test"),
+    "speedTestTitle": MessageLookupByLibrary.simpleMessage("Test de connexion"),
+    "speedTestTrafficWarning": m176,
+    "speedTestUnknownTitle": MessageLookupByLibrary.simpleMessage(
+      "La limite de données du réseau est inconnue",
+    ),
+    "speedTestUpload": MessageLookupByLibrary.simpleMessage("Envoi"),
+    "speedTestWarmup": MessageLookupByLibrary.simpleMessage(
+      "Préparation de la connexion",
+    ),
     "splitStrategy": MessageLookupByLibrary.simpleMessage(
       "Stratégie de répartition",
     ),
@@ -3881,7 +3979,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Utiliser ce client"),
-    "subscriptionCompatibilityPrepared": m174,
+    "subscriptionCompatibilityPrepared": m177,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core a analysé ce résultat. Il n’est pas encore enregistré ni appliqué.",
@@ -3914,7 +4012,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Votre abonnement a expiré",
     ),
-    "subscriptionExpiresInDays": m175,
+    "subscriptionExpiresInDays": m178,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Votre abonnement expire aujourd’hui",
     ),
@@ -3940,8 +4038,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Utiliser le réglage global",
     ),
-    "subscriptionImportAdd": m176,
-    "subscriptionImportAllAdded": m177,
+    "subscriptionImportAdd": m179,
+    "subscriptionImportAllAdded": m180,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "configuration Clash",
     ),
@@ -3969,7 +4067,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
       "Certaines options des serveurs ne sont pas prises en charge et sont ignorées",
     ),
-    "subscriptionImportPartial": m178,
+    "subscriptionImportPartial": m181,
     "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
       "Débits montant et descendant manquants",
     ),
@@ -3989,11 +4087,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Tout ne sera pas transféré",
     ),
-    "subscriptionImportShowAll": m179,
+    "subscriptionImportShowAll": m182,
     "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
       "Ne seront pas ajoutés",
     ),
-    "subscriptionImportSourceFormat": m180,
+    "subscriptionImportSourceFormat": m183,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Infos d’abonnement",
     ),
@@ -4022,7 +4120,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Site web",
     ),
-    "subscriptionTrafficLow": m181,
+    "subscriptionTrafficLow": m184,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Utiliser l’intervalle du fournisseur",
     ),
@@ -4120,7 +4218,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Redémarrer le noyau",
     ),
-    "toolsResults": m182,
+    "toolsResults": m185,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Exécuter"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Réglage"),
@@ -4139,14 +4237,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Envoyé"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Port TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafic"),
-    "trafficPeak": m183,
-    "trafficTotal": m184,
+    "trafficPeak": m186,
+    "trafficTotal": m187,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafic utilisé"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Proposer une correction de traduction",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
-    "transportHeaders": m185,
+    "transportHeaders": m188,
     "trayIcon": MessageLookupByLibrary.simpleMessage("Icône de notification"),
     "trayIconColor": MessageLookupByLibrary.simpleMessage("Couleur"),
     "trayIconDark": MessageLookupByLibrary.simpleMessage("Noir"),
@@ -4331,14 +4429,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Mise à jour installée",
     ),
-    "updateInstalledVersion": m186,
+    "updateInstalledVersion": m189,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android termine l’installation. ReClash peut se fermer pendant cette étape.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Installation de la mise à jour",
     ),
-    "updateMinutes": m187,
+    "updateMinutes": m190,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Pas maintenant"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Aucune note de version disponible.",
@@ -4394,7 +4492,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Détails de la version",
     ),
-    "updateRemainingTime": m188,
+    "updateRemainingTime": m191,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Reprendre le téléchargement",
     ),
@@ -4405,7 +4503,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Réessayer l’installation",
     ),
-    "updateSeconds": m189,
+    "updateSeconds": m192,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Voir toutes les notes de version",
     ),
@@ -4413,7 +4511,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Afficher toutes les modifications",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Mises à jour"),
-    "updateTransferSpeed": m190,
+    "updateTransferSpeed": m193,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "L’intégrité de la mise à jour téléchargée n’a pas pu être vérifiée.",
     ),
@@ -4455,14 +4553,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Utiliser le comportement de fermeture configuré.",
     ),
-    "urlSchemeConfigCounts": m191,
+    "urlSchemeConfigCounts": m194,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Collez une configuration YAML ou JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Contenu de la configuration",
     ),
-    "urlSchemeConfirmMessage": m192,
+    "urlSchemeConfirmMessage": m195,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Commande externe de l’application",
     ),
@@ -4504,7 +4602,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Importer une configuration",
     ),
-    "urlSchemeImportConfirm": m193,
+    "urlSchemeImportConfirm": m196,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Intégrer une configuration YAML ou JSON au lien.",
     ),
@@ -4596,7 +4694,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Utiliser l’exemple",
     ),
-    "urlTip": m194,
+    "urlTip": m197,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -4639,9 +4737,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Choisissez une image PNG, JPEG, WebP ou SVG valide.",
     ),
-    "wallpaperImageLabel": m195,
+    "wallpaperImageLabel": m198,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Cadrage"),
-    "wallpaperLibraryFull": m196,
+    "wallpaperLibraryFull": m199,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Opacité de l’image",
     ),
@@ -4757,6 +4855,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "Ouvrir dans le navigateur",
     ),
+    "webDashboardReinstall": MessageLookupByLibrary.simpleMessage(
+      "Réinstaller le tableau de bord",
+    ),
     "webDashboardReload": MessageLookupByLibrary.simpleMessage("Recharger"),
     "webDashboardRestricted": MessageLookupByLibrary.simpleMessage(
       "L\'accès au tableau de bord est désactivé par votre fournisseur.",
@@ -4784,8 +4885,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m197,
-    "yearsAgoShort": m198,
+    "yearsAgo": m200,
+    "yearsAgoShort": m201,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

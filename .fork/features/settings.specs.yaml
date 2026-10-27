@@ -5,7 +5,7 @@ risk: routine
 must:
   reset-data: Backup options offer a destructive reset after a three-second confirmation delay; reset clears local data without restoring saved state, preserves backup archives, and closes the application.
   tabs: The default tab transition remains fade unless the user selects otherwise.
-  specs: Settings retain their declared state and apply semantics across the specification-based views.
+  specs: Settings retain their declared state and apply semantics across the specification-based views; appearance controls and search results share layout and theme visibility rules without clearing hidden preferences.
   routes: Real setting specification lists have unique IDs and routes retain their page and setting ID.
   log-capture: Log capture and the Core log level share the application settings diagnostics section and search destination without duplicate controls in General settings.
   dashboard-selection: The selected web dashboard is a Flutter-only preference; changing it does not modify controller settings or trigger a profile apply.

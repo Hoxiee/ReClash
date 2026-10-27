@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "再按一次返回键退出",
-  "selected": "已选择"
+  "selected": "已选择",
+  "sidebarWidth": "侧边栏宽度",
+  "sidebarWidthNarrow": "窄",
+  "sidebarWidthWide": "宽"
 }

@@ -1,3 +1,5 @@
+import 'package:material_ui/material_ui.dart' show ThemeMode;
+import 'package:reclash/enum/enum.dart' show NavigationLayout;
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/common/tools_search.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -69,6 +71,8 @@ class ToolEnvironment {
     this.sidebarBlur = false,
     this.dnsKeys = const {},
     this.webdav = false,
+    this.navigationLayout = NavigationLayout.auto,
+    this.themeMode = ThemeMode.system,
   });
 
   final bool desktop;
@@ -87,6 +91,8 @@ class ToolEnvironment {
   final bool sidebarBlur;
   final Set<String> dnsKeys;
   final bool webdav;
+  final NavigationLayout navigationLayout;
+  final ThemeMode themeMode;
 }
 
 String toolCategoryLabel(ToolCategory category, AppLocalizations l) =>
@@ -404,7 +410,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
       SettingCondition.mipsStack => true,
       _ => true,
     };
-    if (!supported) continue;
+    if (!supported ||
+        !isAppearanceSettingVisible(
+          spec.condition,
+          layout: env.navigationLayout,
+          themeMode: env.themeMode,
+        )) {
+      continue;
+    }
     final reason = switch (spec.condition) {
       SettingCondition.remoteBackup when !env.webdav => l.toolsNeedsWebdav,
       SettingCondition.mipsStack when !env.mipsStack => l.toolsNeedsMipsStack,

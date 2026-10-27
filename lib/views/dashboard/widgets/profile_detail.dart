@@ -225,7 +225,7 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
                         case final metadata?)
                       ..._providerMetadataSections(context, metadata),
                     if (ref.watch(currentProfileIdProvider) == profile.id)
-                      const _ReturnSettingsSection(),
+                      const ProviderSettingsReturnSection(),
                     generateSection(
                       title: appLocalizations.profile,
                       items: [
@@ -253,30 +253,6 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ReturnSettingsSection extends ConsumerWidget {
-  const _ReturnSettingsSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(providerReleasedSettingsProvider).isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final l10n = context.appLocalizations;
-    return generateSection(
-      title: l10n.subscriptionProvider,
-      items: [
-        ListItem(
-          title: Text(l10n.providerSettingsReturnAll),
-          subtitle: Text(l10n.providerSettingsReturnAllDesc),
-          trailing: const GlyphIcon(AppGlyphs.undo),
-          onTap: () =>
-              ref.read(providerSettingsActionProvider).returnToProvider(),
-        ),
-      ],
     );
   }
 }

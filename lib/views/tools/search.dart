@@ -30,6 +30,12 @@ ToolEnvironment watchToolEnvironment(WidgetRef ref) {
     macos: system.isMacOS,
     webdav: ref.watch(davSettingProvider.select((dav) => dav != null)),
     sidebarBlur: system.isMacOS || system.isWindows,
+    navigationLayout: ref.watch(
+      appSettingProvider.select((state) => state.navigationLayout),
+    ),
+    themeMode: ref.watch(
+      themeSettingProvider.select((state) => state.themeMode),
+    ),
     customInterface: ref.watch(
       patchClashConfigProvider.select(
         (s) => s.interfaceNameMode == InterfaceNameMode.custom,

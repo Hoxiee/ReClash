@@ -358,6 +358,32 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('appearance groups do not nest a second section gap', (
+      tester,
+    ) async {
+      await pumpThemeView(tester);
+      final colors = find.byWidgetPredicate(
+        (widget) =>
+            widget is SettingTarget && widget.spec.id == 'theme.themeColor',
+      );
+      expect(colors, findsOneWidget);
+      expect(
+        find.descendant(of: colors, matching: find.byType(ListSectionGap)),
+        findsNothing,
+      );
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(WallpaperView),
+          matching: find.byType(ListSectionGap),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(ListFooter), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('background header resets affect only their own settings', (
       tester,
     ) async {
@@ -1197,6 +1223,27 @@ void main() {
   });
 
   group('pure black', () {
+    testWidgets(
+      'hides only in explicit light mode and preserves the saved choice',
+      (tester) async {
+        container
+            .read(themeSettingProvider.notifier)
+            .update((state) => state.copyWith(pureBlack: true));
+        await pumpThemeView(tester);
+        await tester.tap(find.text('Light'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pure black'), findsNothing);
+        expect(readTheme().pureBlack, isTrue);
+        await tester.tap(find.text('Dark'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pure black'), findsOneWidget);
+        expect(readTheme().pureBlack, isTrue);
+        await tester.tap(find.text('Auto'));
+        await tester.pumpAndSettle();
+        expect(find.text('Pure black'), findsOneWidget);
+      },
+    );
+
     testWidgets('switches both ways', (tester) async {
       await pumpThemeView(tester);
 
@@ -1213,6 +1260,66 @@ void main() {
   });
 
   group('home navigation', () {
+    testWidgets(
+      'navigation controls follow the selected layout without resetting preferences',
+      (tester) async {
+        container
+            .read(appSettingProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                sidebarNarrow: true,
+                floatingNavigationBar: false,
+                navigationLabels: NavigationLabels.never,
+              ),
+            );
+        await pumpThemeView(tester, interface: true);
+        Finder setting(String id) => find.byWidgetPredicate(
+          (widget) => widget is SettingTarget && widget.spec.id == id,
+        );
+        for (final layout in [
+          NavigationLayout.sidebar,
+          NavigationLayout.bar,
+          NavigationLayout.auto,
+        ]) {
+          await tester.ensureVisible(find.text('Auto').first);
+          await tester.tap(
+            find.text(switch (layout) {
+              NavigationLayout.sidebar => 'Sidebar',
+              NavigationLayout.bar => 'Tab bar',
+              NavigationLayout.auto => 'Auto',
+            }).first,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            setting('theme.sidebarWidth'),
+            layout == NavigationLayout.bar ? findsNothing : findsOneWidget,
+          );
+          for (final id in [
+            'theme.navigationBarStyle',
+            'theme.navigationLabels',
+          ]) {
+            expect(
+              setting(id),
+              layout == NavigationLayout.sidebar
+                  ? findsNothing
+                  : findsOneWidget,
+            );
+          }
+          expect(setting('theme.tabAnimation'), findsOneWidget);
+          expect(setting('theme.liquidGlass'), findsOneWidget);
+          expect(container.read(appSettingProvider).sidebarNarrow, isTrue);
+          expect(
+            container.read(appSettingProvider).floatingNavigationBar,
+            isFalse,
+          );
+          expect(
+            container.read(appSettingProvider).navigationLabels,
+            NavigationLabels.never,
+          );
+        }
+      },
+    );
+
     AppSettingProps readSetting() => container.read(appSettingProvider);
 
     testWidgets('picks a floating or docked bottom bar', (tester) async {
@@ -1227,6 +1334,29 @@ void main() {
       await tester.tap(find.text('Floating'));
       await tester.pumpAndSettle();
       expect(readSetting().floatingNavigationBar, isTrue);
+    });
+
+    testWidgets('persists narrow and wide sidebar choices independently', (
+      tester,
+    ) async {
+      await pumpThemeView(tester, interface: true);
+      expect(readSetting().sidebarNarrow, isNull);
+      final width = find.text('Sidebar width');
+      await tester.ensureVisible(width);
+      await tester.tap(width);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Narrow').last);
+      await tester.pumpAndSettle();
+      expect(readSetting().sidebarNarrow, isTrue);
+      expect(readSetting().sidebarExpanded, isFalse);
+      expect(readSetting().navigationLayout, NavigationLayout.auto);
+
+      await tester.tap(width);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Wide').last);
+      await tester.pumpAndSettle();
+      expect(readSetting().sidebarNarrow, isFalse);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('overrides the automatic navigation layout', (tester) async {

@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Çykmak üçin yza ýene bir gezek basyň",
-  "selected": "Saýlanan"
+  "selected": "Saýlanan",
+  "sidebarWidth": "Gapdal paneliň ini",
+  "sidebarWidthNarrow": "Dar",
+  "sidebarWidthWide": "Giň"
 }

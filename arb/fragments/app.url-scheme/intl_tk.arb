@@ -113,5 +113,6 @@
   "profileImportFromProvider": "Üpjün edijiden",
   "profileImportSingleServer": "Bir serwer",
   "profileImportDownloading": "Abuna ýüklenýär…",
-  "profileImportTryOtherFormat": "Hiç zat goşulmady. Başga format saýlap, täzeden synanyşyp bilersiňiz."
+  "profileImportTryOtherFormat": "Hiç zat goşulmady. Başga format saýlap, täzeden synanyşyp bilersiňiz.",
+  "profilePasteFromClipboard": "Alyş-çalyş buferinden goý"
 }

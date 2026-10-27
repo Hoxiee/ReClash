@@ -113,5 +113,6 @@
   "profileImportFromProvider": "来自服务商",
   "profileImportSingleServer": "单个服务器",
   "profileImportDownloading": "正在下载订阅…",
-  "profileImportTryOtherFormat": "未添加任何内容。可以选择其他格式后重试。"
+  "profileImportTryOtherFormat": "未添加任何内容。可以选择其他格式后重试。",
+  "profilePasteFromClipboard": "从剪贴板粘贴"
 }

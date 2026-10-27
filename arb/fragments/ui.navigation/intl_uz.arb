@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Chiqish uchun orqaga tugmasini yana bir marta bosing",
-  "selected": "Tanlangan"
+  "selected": "Tanlangan",
+  "sidebarWidth": "Yon panel kengligi",
+  "sidebarWidthNarrow": "Tor",
+  "sidebarWidthWide": "Keng"
 }

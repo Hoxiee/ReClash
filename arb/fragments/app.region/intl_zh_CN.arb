@@ -14,11 +14,7 @@
   "regionChina": "中国",
   "regionEgypt": "埃及",
   "regionNoServices": "服务检查已关闭",
-  "regionSelectApps": "按地区选择应用",
-  "regionAppsPreviewTitle": "应用选择预览",
-  "regionAppsPreview": "{region}：VPN 绕过列表将有 {bypassed} 个应用，VPN 列表将有 {proxied} 个应用。两个列表都会被替换，模式及其他设置保持不变。软件包和 SDK 匹配仅为建议，请在应用后检查结果。",
-  "regionAppsEmpty": "没有应用匹配此地区。列表保持不变。",
-  "regionAppsChanged": "地区或应用列表已更改。请根据当前设置重新选择。",
+  "regionAppsPreview": "{region}：识别为该地区的应用将绕过 VPN（{bypassed} 个），其他已安装的应用将使用 VPN（{proxied} 个）。\n\n这将替换两个列表中的手动选择，但不会更改模式。保存前请检查筛选结果。",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "没有应用匹配此地区。列表保持不变。",
+  "regionAppsChanged": "地区或应用列表已更改。请根据当前设置重新选择。",
   "regionRecommended": "推荐用于此设备",
   "regionChangesTitle": "将要更改",
   "regionChangeDns": "DNS 服务器",

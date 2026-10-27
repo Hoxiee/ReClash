@@ -307,7 +307,6 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                     _field(l10n.coreExecutable, info.executablePath),
                 ],
               ),
-            const SizedBox(height: 16),
             generateSection(
               items: [
                 ListItem.open(

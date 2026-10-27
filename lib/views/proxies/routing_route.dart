@@ -555,7 +555,7 @@ class _BehaviourPage extends ConsumerWidget {
         padding:
             const EdgeInsets.symmetric(
               horizontal: 16,
-            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            ).copyWith(top: context.sectionsTopPadding, bottom: 20) +
             context.bodyInsets,
         children: [
           if (own)

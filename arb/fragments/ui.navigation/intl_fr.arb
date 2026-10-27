@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "Appuyez à nouveau sur Retour pour quitter",
-  "selected": "Sélectionné"
+  "selected": "Sélectionné",
+  "sidebarWidth": "Largeur de la barre latérale",
+  "sidebarWidthNarrow": "Étroite",
+  "sidebarWidthWide": "Large"
 }

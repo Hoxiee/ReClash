@@ -3,6 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/proxies/card.dart';
+import 'package:reclash/views/proxies/common.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,12 @@ const _testUrl = 'https://example.com/generate_204';
 
 class _RecordingProxiesAction extends ProxiesAction {
   static final List<String> tested = [];
+  static final List<(String, String)> selected = [];
+
+  @override
+  void changeProxyDebounce(String groupName, String proxyName) {
+    selected.add((groupName, proxyName));
+  }
 
   @override
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
@@ -30,6 +37,7 @@ void main() {
 
   setUp(() {
     _RecordingProxiesAction.tested.clear();
+    _RecordingProxiesAction.selected.clear();
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
@@ -58,21 +66,24 @@ void main() {
         container: container,
         child: TestApp(
           homeBuilder: (child) => Scaffold(body: child),
-          child: Column(
-            children: [
-              for (var index = 0; index < 2; index++)
-                SizedBox(
-                  height: 120,
-                  child: ProxyCard(
-                    key: ValueKey('proxy $index'),
-                    groupName: 'group',
-                    testUrl: _testUrl,
-                    proxy: Proxy(name: 'proxy $index', type: 'Shadowsocks'),
-                    groupType: GroupType.Selector,
-                    type: type,
+          child: Builder(
+            builder: (context) => Column(
+              children: [
+                for (var index = 0; index < 2; index++)
+                  SizedBox(
+                    width: 200,
+                    height: getItemHeight(type),
+                    child: ProxyCard(
+                      key: ValueKey('proxy $index'),
+                      groupName: 'group',
+                      testUrl: _testUrl,
+                      proxy: Proxy(name: 'proxy $index', type: 'Shadowsocks'),
+                      groupType: GroupType.Selector,
+                      type: type,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -116,6 +127,38 @@ void main() {
       }
     });
   }
+
+  testWidgets('oneline shows the name and delay without protocol details', (
+    tester,
+  ) async {
+    await pumpCards(tester, ProxyCardType.oneline);
+
+    expect(find.text('Shadowsocks'), findsNothing);
+    for (var index = 0; index < 2; index++) {
+      final name = find.text('proxy $index');
+      final delay = find.text(index == 0 ? '123 ms' : '456 ms');
+      expect(name, findsOneWidget);
+      expect(delay, findsOneWidget);
+      expect(tester.getCenter(name).dy, closeTo(tester.getCenter(delay).dy, 1));
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('oneline separates proxy selection from delay testing', (
+    tester,
+  ) async {
+    await pumpCards(tester, ProxyCardType.oneline);
+
+    await tester.tap(find.text('proxy 0'));
+    await tester.pump();
+    expect(_RecordingProxiesAction.selected, [('group', 'proxy 0')]);
+    expect(_RecordingProxiesAction.tested, isEmpty);
+
+    await tester.tap(find.text('123 ms'));
+    await tester.pump();
+    expect(_RecordingProxiesAction.tested, ['proxy 0']);
+    expect(_RecordingProxiesAction.selected, [('group', 'proxy 0')]);
+  });
 
   testWidgets('tab walks card to card without stopping on the delay control', (
     tester,

@@ -177,5 +177,71 @@
     }
   },
   "simpleSpeedDirectTag": "without VPN",
-  "simpleServicesManual": "Manual"
+  "simpleServicesManual": "Manual",
+  "speedTestTitle": "Connection test",
+  "speedTestSettings": "Test settings",
+  "speedTestPlatform": "Test platform",
+  "speedTestPlatformHint": "The service operator sets its availability and limits.",
+  "speedTestPlatformUnavailable": "This platform is unavailable. Choose another in settings.",
+  "speedTestMode": "Measurements",
+  "speedTestComplete": "Full test",
+  "speedTestLatencyOnly": "Latency and jitter only",
+  "speedTestBudget": "Total data budget",
+  "speedTestBudgetHint": "Shared by download, upload and warm-up. Network overhead is additional.",
+  "speedTestAlwaysConfirm": "Confirm on every network",
+  "speedTestSafetyHint": "Metered and unknown networks always require confirmation. Wi-Fi is not assumed to be unlimited.",
+  "speedTestReady": "Ready to measure",
+  "speedTestWarmup": "Warming up",
+  "speedTestLatency": "HTTP latency",
+  "speedTestDownload": "Download",
+  "speedTestUpload": "Upload",
+  "speedTestDone": "Test complete",
+  "speedTestCancelled": "Test stopped",
+  "speedTestStart": "Start test",
+  "speedTestStop": "Stop test",
+  "speedTestPing": "Latency",
+  "speedTestJitter": "Jitter",
+  "speedTestMsUnit": "ms",
+  "speedTestMs": "{value} ms",
+  "@speedTestMs": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "speedTestDataUsed": "{used} of {limit}",
+  "@speedTestDataUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "speedTestRouteCore": "Through Core rules",
+  "speedTestRouteSystem": "System route",
+  "speedTestRouteHint": "Tests the current route to the platform, not necessarily the selected VPN node. No automatic direct fallback.",
+  "speedTestLimited": "The data budget ended before the speed stabilized. This is an estimate.",
+  "speedTestPartial": "Some measurements failed. Available results are kept.",
+  "speedTestNetworkChanged": "The network or route changed. Start a new test.",
+  "speedTestOffline": "No network connection",
+  "speedTestMeteredTitle": "Use data on this metered network?",
+  "speedTestUnknownTitle": "The network’s data limit is unknown",
+  "speedTestConfirmTitle": "Start the connection test?",
+  "speedTestTrafficWarning": "The test transfers up to {size} of test data. This uses your internet and VPN allowances. Network overhead may increase usage.",
+  "@speedTestTrafficWarning": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "speedTestLatencyWarning": "Only small latency probes are sent. They also use data; download and upload speed are not measured.",
+  "speedTestIdleDesc": "Download, upload, latency and jitter, with a data budget.",
+  "speedTestOpen": "Open test",
+  "speedTestPrivacy": "The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.",
+  "speedTestAgain": "Test again"
 }

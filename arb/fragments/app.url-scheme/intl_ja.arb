@@ -113,5 +113,6 @@
   "profileImportFromProvider": "プロバイダーから",
   "profileImportSingleServer": "単一サーバー",
   "profileImportDownloading": "サブスクリプションをダウンロード中…",
-  "profileImportTryOtherFormat": "何も追加されていません。別の形式を選んで再試行できます。"
+  "profileImportTryOtherFormat": "何も追加されていません。別の形式を選んで再試行できます。",
+  "profilePasteFromClipboard": "クリップボードから貼り付け"
 }

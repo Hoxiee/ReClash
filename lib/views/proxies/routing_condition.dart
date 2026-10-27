@@ -186,7 +186,6 @@ class _ConditionEditorState extends ConsumerState<ConditionEditor> {
                 ),
             ],
           ),
-          if (form.clauses.isNotEmpty) const SizedBox(height: 16),
           generateSection(
             footer: form.clauses.isEmpty
                 ? (widget.network ? l.rcxCondAlways : l.rcxCondAnyServer)

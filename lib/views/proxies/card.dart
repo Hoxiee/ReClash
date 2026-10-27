@@ -8,6 +8,8 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'common.dart';
+
 void selectGroupProxy(
   WidgetRef ref, {
   required String groupName,
@@ -59,7 +61,7 @@ class ProxyCard extends ConsumerWidget {
   Measure get measure => globalState.measure;
 
   Widget _buildProxyNameText(BuildContext context) {
-    if (type == ProxyCardType.compact) {
+    if (type == ProxyCardType.compact || type == ProxyCardType.oneline) {
       return SizedBox(
         height: measure.textHeight(AppTextStyle.subheadline) * 1,
         child: EmojiText(
@@ -132,6 +134,7 @@ class ProxyCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final measure = globalState.measure;
     final isLoose = type == ProxyCardType.loose;
+    final isOneline = type == ProxyCardType.oneline;
     final delayText = _DelayText(
       proxy: proxy,
       testUrl: testUrl,
@@ -196,7 +199,9 @@ class ProxyCard extends ConsumerWidget {
             addable: _isAddableToLocal(proxy, isCustomProfile: isCustomProfile),
           ),
           child: CommonCard(
-            radius: AppCorner.lg,
+            radius: isOneline
+                ? AppCorner.fit(getItemHeight(type))
+                : AppCorner.lg,
             enterActionsOnRight: true,
             key: key,
             onPressed: () => _handleSelect(ref),
@@ -209,18 +214,20 @@ class ProxyCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
+                    crossAxisAlignment: isOneline
+                        ? CrossAxisAlignment.center
+                        : CrossAxisAlignment.start,
+                    spacing: isOneline ? 8 : 4,
                     children: [
                       Expanded(child: proxyNameText),
+                      if (isOneline) delayText,
                       if (pinned)
                         SelectionBadge.preferred(inUse: inUse)
                       else if (inUse)
                         const SelectionBadge(),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  details,
+                  if (!isOneline) ...[const SizedBox(height: 8), details],
                 ],
               ),
             ),

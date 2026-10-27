@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/models/tools.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/common/desktop/hotkeys.dart';
@@ -84,6 +85,7 @@ Future<_Harness> _mount(
         (ref) => NavigationItemsState(value: ref.watch(_itemsProvider)),
       ),
       currentPageLabelProvider.overrideWith(() => _SelectedPage(selected)),
+      toolsSessionProvider.overrideWith(_ToolsSession.new),
     ],
   );
   addTearDown(container.dispose);
@@ -107,6 +109,11 @@ Future<_Harness> _mount(
   );
   await tester.pump();
   return _Harness(tester, container, itemNotifier);
+}
+
+class _ToolsSession extends ToolsSession {
+  @override
+  ToolsState build() => const ToolsState();
 }
 
 class _SelectedPage extends CurrentPageLabel {
@@ -162,6 +169,49 @@ void main() {
   final tools = _item(PageLabel.tools);
   final profiles = _item(PageLabel.profiles);
   final proxies = _item(PageLabel.proxies);
+
+  testWidgets('sidebar shortcuts select the existing Tools routes', (
+    tester,
+  ) async {
+    final harness = await _mount(
+      tester,
+      items: [dashboard, profiles, tools],
+      size: const Size(1200, 800),
+    );
+    harness.container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) =>
+              state.copyWith(sidebarExpanded: true, sidebarNarrow: false),
+        );
+    await harness.settle();
+
+    for (final (glyph, page) in [
+      (AppGlyphs.info, ToolPage.about),
+      (AppGlyphs.paintbrush, ToolPage.theme),
+    ]) {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationSidebar),
+          matching: find.byGlyph(AppGlyphs.dashboard),
+        ),
+      );
+      await harness.settle();
+      await tester.tap(find.byGlyph(glyph));
+      await harness.settle();
+      expect(harness.container.read(currentPageLabelProvider), PageLabel.tools);
+      expect(harness.container.read(toolsSessionProvider).path, [
+        ToolRoute(page),
+      ]);
+      expect(find.byType(NavigationSidebar), findsOneWidget);
+      expect(find.text('page:tools'), findsOneWidget);
+      expect(
+        Navigator.of(tester.element(find.byType(HomePage))).canPop(),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+    }
+  });
 
   for (final floating in [true, false]) {
     testWidgets('wide bar matches sidebar destinations and groups '

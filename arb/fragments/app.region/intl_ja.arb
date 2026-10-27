@@ -14,11 +14,7 @@
   "regionChina": "中国",
   "regionEgypt": "エジプト",
   "regionNoServices": "サービス確認はオフです",
-  "regionSelectApps": "地域別にアプリを選択",
-  "regionAppsPreviewTitle": "アプリ選択のプレビュー",
-  "regionAppsPreview": "{region}: VPN バイパス一覧に {bypassed} 個、VPN 一覧に {proxied} 個のアプリを追加します。両方の一覧が置き換わり、モードや他の設定は変更されません。パッケージと SDK の一致は候補にすぎません。適用後に結果を確認してください。",
-  "regionAppsEmpty": "この地域に一致するアプリはありません。一覧は変更されません。",
-  "regionAppsChanged": "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
+  "regionAppsPreview": "{region}のアプリと判定されたものはVPNを迂回し（{bypassed}件）、それ以外のインストール済みアプリはVPNを使用します（{proxied}件）。\n\n両方のリストで手動の選択が置き換えられます。モードは変わりません。保存する前に結果を確認してください。",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "この地域に一致するアプリはありません。一覧は変更されません。",
+  "regionAppsChanged": "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
   "regionRecommended": "このデバイスにおすすめ",
   "regionChangesTitle": "変更される項目",
   "regionChangeDns": "DNS サーバー",

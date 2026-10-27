@@ -15,7 +15,6 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -366,21 +365,19 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          generateSection(
-                            items: [
-                              FormRow(
-                                title: l10n.name,
-                                trailing: FormRowTextField(
-                                  controller: _nameController,
-                                  hintText: host ?? l10n.unnamed,
-                                  inputFormatters: TextInputLimits.limit(
-                                    TextInputLimits.name,
-                                  ),
-                                  onChanged: (_) => _nameEdited = true,
+                          generateGroup([
+                            FormRow(
+                              title: l10n.name,
+                              trailing: FormRowTextField(
+                                controller: _nameController,
+                                hintText: host ?? l10n.unnamed,
+                                inputFormatters: TextInputLimits.limit(
+                                  TextInputLimits.name,
                                 ),
+                                onChanged: (_) => _nameEdited = true,
                               ),
-                            ],
-                          ),
+                            ),
+                          ]),
                           if (source.preset case final native?)
                             generateSection(
                               title: l10n.profileImportFormat,

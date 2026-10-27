@@ -4,13 +4,17 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/pages/scan.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/profiles/custom/custom.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/compatibility/settings_form.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The ways to add a profile, in a menu out of the control [builder] makes.
@@ -38,6 +42,40 @@ class AddProfileMenu extends ConsumerWidget {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(profilesAction.addProfileFromLink(url));
+    });
+  }
+
+  Future<void> _pasteLink(BuildContext context, WidgetRef ref) async {
+    final l10n = context.appLocalizations;
+    await globalState.safeRun(() async {
+      final String? text;
+      try {
+        text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+      } catch (_) {
+        throw MessageException(l10n.urlSchemePasteFailed);
+      }
+      if (!context.mounted) return;
+      if (text == null || text.trim().isEmpty) {
+        throw MessageException(l10n.emptyTip(l10n.link));
+      }
+      final source = await resolveProfileLink(text);
+      if (!context.mounted) return;
+      final profiles = ref.read(profilesActionProvider.notifier);
+      await showProfileImportDialog(
+        source,
+        preview: profiles.previewProfileLinkSource,
+        duplicateOf: profiles.duplicateProfileLabel(source),
+        commit: (choice, {reviewContext, cancellation}) async {
+          if (!context.mounted) return;
+          await profiles.addConfirmedLinkSource(
+            source,
+            label: choice.label,
+            clientSettings: choice.clientSettings,
+            reviewContext: reviewContext,
+            cancellation: cancellation,
+          );
+        },
+      );
     });
   }
 
@@ -183,6 +221,11 @@ class AddProfileMenu extends ConsumerWidget {
             glyph: AppGlyphs.cloudDownload,
             label: appLocalizations.link,
             onPressed: () => _toAdd(context, ref),
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.paste,
+            label: appLocalizations.profilePasteFromClipboard,
+            onPressed: () => unawaited(_pasteLink(context, ref)),
           ),
           if (system.isTV)
             CommonPopupMenuItem(

@@ -14,11 +14,7 @@
   "regionChina": "Xitoy",
   "regionEgypt": "Misr",
   "regionNoServices": "Xizmat tekshiruvlari o‘chirilgan",
-  "regionSelectApps": "Ilovalarni hudud bo‘yicha tanlash",
-  "regionAppsPreviewTitle": "Ilova tanlovini oldindan ko‘rish",
-  "regionAppsPreview": "{region}: VPNni chetlab o‘tish ro‘yxatiga {bypassed} ta, VPN ro‘yxatiga {proxied} ta ilova kiradi. Ikkala ro‘yxat almashtiriladi; rejim va boshqa sozlamalar o‘zgarmaydi. Paket va SDK mosligi faqat tavsiya: qo‘llagandan keyin natijani tekshiring.",
-  "regionAppsEmpty": "Bu hududga mos ilovalar topilmadi. Ro‘yxatlaringiz o‘zgarmadi.",
-  "regionAppsChanged": "Hudud yoki ilova ro‘yxatlari o‘zgardi. Joriy sozlamalar bilan tanlovni takrorlang.",
+  "regionAppsPreview": "«{region}» hududiga tegishli deb aniqlangan ilovalar VPN tashqarisida ishlaydi ({bypassed}), qolgan o‘rnatilgan ilovalar esa VPN orqali ishlaydi ({proxied}).\n\nHar ikkala ro‘yxatdagi qo‘lda tanlov almashtiriladi, rejim o‘zgarmaydi. Saqlashdan oldin natijani tekshiring.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -32,6 +28,8 @@
       }
     }
   },
+  "regionAppsEmpty": "Bu hududga mos ilovalar topilmadi. Ro‘yxatlaringiz o‘zgarmadi.",
+  "regionAppsChanged": "Hudud yoki ilova ro‘yxatlari o‘zgardi. Joriy sozlamalar bilan tanlovni takrorlang.",
   "regionRecommended": "Ushbu qurilma uchun tavsiya etiladi",
   "regionChangesTitle": "Nima o‘zgaradi",
   "regionChangeDns": "DNS serverlari",

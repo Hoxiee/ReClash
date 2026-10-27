@@ -1,3 +1,5 @@
+import 'package:reclash/features/speed_test/types.dart';
+import 'package:reclash/models/speed_test.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
@@ -5,6 +7,32 @@ import 'package:reclash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
+
+extension SpeedTestModeL10n on SpeedTestMode {
+  String get label => switch (this) {
+    SpeedTestMode.complete => currentAppLocalizations.speedTestComplete,
+    SpeedTestMode.latencyOnly => currentAppLocalizations.speedTestLatencyOnly,
+  };
+}
+
+extension SpeedTestStageL10n on SpeedTestStage {
+  String get label => switch (this) {
+    SpeedTestStage.warmup => currentAppLocalizations.speedTestWarmup,
+    SpeedTestStage.latency => currentAppLocalizations.speedTestLatency,
+    SpeedTestStage.download => currentAppLocalizations.speedTestDownload,
+    SpeedTestStage.upload => currentAppLocalizations.speedTestUpload,
+  };
+}
+
+extension SpeedTestPhaseL10n on SpeedTestPhase {
+  String get label => switch (this) {
+    SpeedTestPhase.idle => currentAppLocalizations.speedTestReady,
+    SpeedTestPhase.running => currentAppLocalizations.simpleSpeedMeasuring,
+    SpeedTestPhase.done => currentAppLocalizations.speedTestDone,
+    SpeedTestPhase.cancelled => currentAppLocalizations.speedTestCancelled,
+    SpeedTestPhase.failed => currentAppLocalizations.simpleSpeedFailed,
+  };
+}
 
 extension PageLabelL10n on PageLabel {
   String get label {
@@ -64,6 +92,7 @@ extension ProxyCardTypeL10n on ProxyCardType {
       ProxyCardType.loose => appLocalizations.loose,
       ProxyCardType.standard => appLocalizations.standard,
       ProxyCardType.compact => appLocalizations.compact,
+      ProxyCardType.oneline => appLocalizations.proxyCardOneLine,
     };
   }
 }

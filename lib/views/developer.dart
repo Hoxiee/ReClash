@@ -129,7 +129,7 @@ class DeveloperView extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
-          ).copyWith(top: context.contentTopPadding, bottom: 16),
+          ).copyWith(top: context.sectionsTopPadding, bottom: 16),
           child: Column(
             children: [
               generateSection(

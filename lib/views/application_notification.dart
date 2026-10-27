@@ -153,7 +153,7 @@ class _NotificationSettingsViewState
         builder: (context) => SettingsPageScroll(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-              top: context.contentTopPadding,
+              top: context.sectionsTopPadding,
               bottom: 24 + context.bottomInset,
             ),
             child: Column(

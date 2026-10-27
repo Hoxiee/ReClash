@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "終了するには、もう一度戻るを押してください",
-  "selected": "選択済み"
+  "selected": "選択済み",
+  "sidebarWidth": "サイドバーの幅",
+  "sidebarWidthNarrow": "狭い",
+  "sidebarWidthWide": "広い"
 }

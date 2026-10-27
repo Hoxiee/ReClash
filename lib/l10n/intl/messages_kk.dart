@@ -382,7 +382,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, other: 'Осы топтың ${count} серверінің ішінен таңдайды.')}";
 
   static String m147(region, bypassed, proxied) =>
-      "${region}: VPN айналып өту тізіміне ${bypassed} қолданба, VPN тізіміне ${proxied} қолданба кіреді. Екі тізім де ауыстырылады; режим мен басқа параметрлер өзгермейді. Пакет пен SDK сәйкестігі — тек ұсыныс: қолданғаннан кейін нәтижені тексеріңіз.";
+      "«${region}» аймағына тиесілі деп танылған қолданбалар VPN-ді айналып өтеді (${bypassed}), қалған орнатылған қолданбалар VPN арқылы өтеді (${proxied}).\n\nЕкі тізімдегі қолмен жасалған таңдау ауыстырылады, режим өзгермейді. Сақтау алдында нәтижені тексеріңіз.";
 
   static String m148(seconds) => "${seconds} секундтан кейін растауға болады";
 
@@ -441,63 +441,70 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m173(label) => "${label} жалғыз жазба болуы керек";
 
-  static String m174(client, format, count) =>
+  static String m174(used, limit) => "${used} / ${limit}";
+
+  static String m175(value) => "${value} мс";
+
+  static String m176(size) =>
+      "Сынақ ${size} дейін дерек жібереді. Бұл интернет пен VPN лимиттерін жұмсайды. Желінің қызметтік трафигі шығынды арттыруы мүмкін.";
+
+  static String m177(client, format, count) =>
       "${client} ретінде алынды: ${format}, прокси түйіндер саны: ${count}.";
 
-  static String m175(count) =>
+  static String m178(count) =>
       "${Intl.plural(count, one: 'Жазылыс мерзімі ертең аяқталады', other: 'Жазылыс мерзімі ${count} күннен кейін аяқталады')}";
 
-  static String m176(count) => "${count} серверді қосу";
+  static String m179(count) => "${count} серверді қосу";
 
-  static String m177(count) => "Барлық ${count} сервер қосылады";
+  static String m180(count) => "Барлық ${count} сервер қосылады";
 
-  static String m178(count, total) =>
+  static String m181(count, total) =>
       "${total} серверден ${count} сервер қосылады";
 
-  static String m179(count) => "Барлығын көрсету (${count})";
+  static String m182(count) => "Барлығын көрсету (${count})";
 
-  static String m180(format) => "Пішім: ${format}";
+  static String m183(format) => "Пішім: ${format}";
 
-  static String m181(percent) => "Трафиктің ${percent}% жұмсалды";
+  static String m184(percent) => "Трафиктің ${percent}% жұмсалды";
 
-  static String m182(count) => "${count} нәтиже";
+  static String m185(count) => "${count} нәтиже";
 
-  static String m183(value) => "Шың: ${value}";
+  static String m186(value) => "Шың: ${value}";
 
-  static String m184(value) => "Барлығы: ${value}";
+  static String m187(value) => "Барлығы: ${value}";
 
-  static String m185(transport) => "${transport} тақырыптары";
+  static String m188(transport) => "${transport} тақырыптары";
 
-  static String m186(version) => "Орнатылған нұсқа: ${version}";
+  static String m189(version) => "Орнатылған нұсқа: ${version}";
 
-  static String m187(count) => "${count} мин";
+  static String m190(count) => "${count} мин";
 
-  static String m188(time) => "${time} қалды";
+  static String m191(time) => "${time} қалды";
 
-  static String m189(count) => "${count} с";
+  static String m192(count) => "${count} с";
 
-  static String m190(speed) => "${speed}/с";
+  static String m193(speed) => "${speed}/с";
 
-  static String m191(nodes, groups, providers) =>
+  static String m194(nodes, groups, providers) =>
       "Прокси: ${nodes}, топтар: ${groups}, қашықтағы провайдерлер: ${providers}";
 
-  static String m192(action) =>
+  static String m195(action) =>
       "Сілтеме «${action}» әрекетін сұрайды. ReClash қолданбасына орындауға рұқсат бересіз бе?";
 
-  static String m193(name, source) =>
+  static String m196(name, source) =>
       "${source} көзінен «${name}» импортталсын ба? Растаудан кейін профиль мен түрлендіру тексеріледі.";
 
-  static String m194(label) => "${label} URL болуы керек";
+  static String m197(label) => "${label} URL болуы керек";
 
-  static String m195(index) => "Фон ${index}";
+  static String m198(index) => "Фон ${index}";
 
-  static String m196(count) =>
+  static String m199(count) =>
       "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
 
-  static String m197(count) =>
+  static String m200(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
-  static String m198(count) =>
+  static String m201(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2092,6 +2099,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Профиль атауын енгізіңіз.",
     ),
+    "profilePasteFromClipboard": MessageLookupByLibrary.simpleMessage(
+      "Алмасу буферінен қою",
+    ),
     "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "Тек осы профильге қолданылады; қосылмағаны әдепкісін қолданады.",
     ),
@@ -2143,6 +2153,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxiesProfileLabel": m74,
     "proxiesRemovedTip": m75,
     "proxiesReplacedTip": m76,
+    "proxyCardOneLine": MessageLookupByLibrary.simpleMessage("Бір жолды"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси тізбегі"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Прокси тобы"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage("Прокси тобы бос"),
@@ -2771,9 +2782,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Бұл аймаққа сәйкес қолданбалар табылмады. Тізімдеріңіз өзгермеді.",
     ),
     "regionAppsPreview": m147,
-    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
-      "Қолданба таңдауының алдын ала қарауы",
-    ),
     "regionChangeDns": MessageLookupByLibrary.simpleMessage("DNS серверлері"),
     "regionChangeMtu": MessageLookupByLibrary.simpleMessage("TUN MTU"),
     "regionChangeServices": MessageLookupByLibrary.simpleMessage(
@@ -2801,9 +2809,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Осы құрылғы үшін ұсынылады",
     ),
     "regionRussia": MessageLookupByLibrary.simpleMessage("Ресей"),
-    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
-      "Қолданбаларды аймақ бойынша таңдау",
-    ),
     "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
       "Аймақтық қолданба ұсыныстарын пайдалану үшін алдымен қолдау көрсетілетін аймақты таңдаңыз.",
     ),
@@ -3415,6 +3420,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Терезе артындағы бұлыңғыр жұмыс үстелін бүйірлік панель арқылы көрсету",
     ),
+    "sidebarWidth": MessageLookupByLibrary.simpleMessage(
+      "Бүйірлік тақтаның ені",
+    ),
+    "sidebarWidthNarrow": MessageLookupByLibrary.simpleMessage("Тар"),
+    "sidebarWidthWide": MessageLookupByLibrary.simpleMessage("Кең"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Жасырын іске қосу"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Жасырын іске қосу терезені көрсетпей іске қосады.",
@@ -3628,6 +3638,96 @@ class MessageLookup extends MessageLookupByLibrary {
     "speedStatistics": MessageLookupByLibrary.simpleMessage(
       "Жылдамдық статистикасы",
     ),
+    "speedTestAgain": MessageLookupByLibrary.simpleMessage("Қайта тексеру"),
+    "speedTestAlwaysConfirm": MessageLookupByLibrary.simpleMessage(
+      "Әр желіде растау",
+    ),
+    "speedTestBudget": MessageLookupByLibrary.simpleMessage(
+      "Трафиктің жалпы шегі",
+    ),
+    "speedTestBudgetHint": MessageLookupByLibrary.simpleMessage(
+      "Жүктеу, жіберу және дайындық үшін ортақ. Желінің қызметтік трафигі қосымша жұмсалады.",
+    ),
+    "speedTestCancelled": MessageLookupByLibrary.simpleMessage(
+      "Сынақ тоқтатылды",
+    ),
+    "speedTestComplete": MessageLookupByLibrary.simpleMessage("Толық сынақ"),
+    "speedTestConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Қосылым сынағы басталсын ба?",
+    ),
+    "speedTestDataUsed": m174,
+    "speedTestDone": MessageLookupByLibrary.simpleMessage("Сынақ аяқталды"),
+    "speedTestDownload": MessageLookupByLibrary.simpleMessage("Жүктеу"),
+    "speedTestIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Трафик шегімен жүктеу, жіберу, кідіріс және jitter.",
+    ),
+    "speedTestJitter": MessageLookupByLibrary.simpleMessage("Jitter"),
+    "speedTestLatency": MessageLookupByLibrary.simpleMessage("HTTP кідірісі"),
+    "speedTestLatencyOnly": MessageLookupByLibrary.simpleMessage(
+      "Тек кідіріс пен jitter",
+    ),
+    "speedTestLatencyWarning": MessageLookupByLibrary.simpleMessage(
+      "Кідірісті өлшейтін шағын сұраулар ғана жіберіледі. Олар да трафик жұмсайды; жүктеу және жіберу жылдамдығы өлшенбейді.",
+    ),
+    "speedTestLimited": MessageLookupByLibrary.simpleMessage(
+      "Жылдамдық тұрақтанғанға дейін трафик шегі бітті. Нәтиже шамамен берілген.",
+    ),
+    "speedTestMeteredTitle": MessageLookupByLibrary.simpleMessage(
+      "Лимиті бар желіде трафик жұмсалсын ба?",
+    ),
+    "speedTestMode": MessageLookupByLibrary.simpleMessage("Өлшемдер"),
+    "speedTestMs": m175,
+    "speedTestMsUnit": MessageLookupByLibrary.simpleMessage("мс"),
+    "speedTestNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "Желі немесе маршрут өзгерді. Сынақты қайта бастаңыз.",
+    ),
+    "speedTestOffline": MessageLookupByLibrary.simpleMessage(
+      "Желіге қосылым жоқ",
+    ),
+    "speedTestOpen": MessageLookupByLibrary.simpleMessage("Сынақты ашу"),
+    "speedTestPartial": MessageLookupByLibrary.simpleMessage(
+      "Кейбір өлшемдер сәтсіз болды. Алынған нәтижелер сақталды.",
+    ),
+    "speedTestPing": MessageLookupByLibrary.simpleMessage("Кідіріс"),
+    "speedTestPlatform": MessageLookupByLibrary.simpleMessage(
+      "Сынақ платформасы",
+    ),
+    "speedTestPlatformHint": MessageLookupByLibrary.simpleMessage(
+      "Қолжетімділік пен шектеулерді қызмет иесі белгілейді.",
+    ),
+    "speedTestPlatformUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Бұл платформа қолжетімсіз. Баптаулардан басқасын таңдаңыз.",
+    ),
+    "speedTestPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Платформа сынақ қосылымының жалпыға ашық IP мекенжайын көреді. Сынақ деректері жергілікті жасалады; жеке файлдар жіберілмейді.",
+    ),
+    "speedTestReady": MessageLookupByLibrary.simpleMessage("Өлшеуге дайын"),
+    "speedTestRouteCore": MessageLookupByLibrary.simpleMessage(
+      "Core ережелері бойынша",
+    ),
+    "speedTestRouteHint": MessageLookupByLibrary.simpleMessage(
+      "Платформаға дейінгі ағымдағы маршрут тексеріледі, ол таңдалған VPN түйіні болмауы мүмкін. DIRECT режиміне автоматты ауысу жоқ.",
+    ),
+    "speedTestRouteSystem": MessageLookupByLibrary.simpleMessage(
+      "Жүйелік маршрут",
+    ),
+    "speedTestSafetyHint": MessageLookupByLibrary.simpleMessage(
+      "Лимиті бар және лимиті белгісіз желілерде растау міндетті. Wi-Fi автоматты түрде шексіз саналмайды.",
+    ),
+    "speedTestSettings": MessageLookupByLibrary.simpleMessage(
+      "Сынақ баптаулары",
+    ),
+    "speedTestStart": MessageLookupByLibrary.simpleMessage("Сынақты бастау"),
+    "speedTestStop": MessageLookupByLibrary.simpleMessage("Сынақты тоқтату"),
+    "speedTestTitle": MessageLookupByLibrary.simpleMessage("Қосылым сынағы"),
+    "speedTestTrafficWarning": m176,
+    "speedTestUnknownTitle": MessageLookupByLibrary.simpleMessage(
+      "Желінің трафик шегі белгісіз",
+    ),
+    "speedTestUpload": MessageLookupByLibrary.simpleMessage("Жіберу"),
+    "speedTestWarmup": MessageLookupByLibrary.simpleMessage(
+      "Қосылымды дайындау",
+    ),
     "splitStrategy": MessageLookupByLibrary.simpleMessage("Бөлу стратегиясы"),
     "splitStrategyNotEmpty": MessageLookupByLibrary.simpleMessage(
       "Бөлу стратегиясы бос болмауы тиіс",
@@ -3727,7 +3827,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Осы клиентті пайдалану"),
-    "subscriptionCompatibilityPrepared": m174,
+    "subscriptionCompatibilityPrepared": m177,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core бұл нәтижені талдады. Ол әлі сақталған да, қолданылған да жоқ.",
@@ -3760,7 +3860,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі аяқталды",
     ),
-    "subscriptionExpiresInDays": m175,
+    "subscriptionExpiresInDays": m178,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі бүгін аяқталады",
     ),
@@ -3786,8 +3886,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Жалпы параметрді қолдану",
     ),
-    "subscriptionImportAdd": m176,
-    "subscriptionImportAllAdded": m177,
+    "subscriptionImportAdd": m179,
+    "subscriptionImportAllAdded": m180,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "Clash конфигурациясы",
     ),
@@ -3815,7 +3915,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
       "Сервердің кейбір параметрлеріне қолдау жоқ, олар алынып тасталады",
     ),
-    "subscriptionImportPartial": m178,
+    "subscriptionImportPartial": m181,
     "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
       "Жүктеу және жіберу жылдамдығы көрсетілмеген",
     ),
@@ -3835,11 +3935,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Барлығы көшірілмейді",
     ),
-    "subscriptionImportShowAll": m179,
+    "subscriptionImportShowAll": m182,
     "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
       "Қосылмайды",
     ),
-    "subscriptionImportSourceFormat": m180,
+    "subscriptionImportSourceFormat": m183,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Жазылыс туралы ақпарат",
     ),
@@ -3868,7 +3968,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Веб-сайт",
     ),
-    "subscriptionTrafficLow": m181,
+    "subscriptionTrafficLow": m184,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Провайдердің жаңарту аралығын пайдалану",
     ),
@@ -3968,7 +4068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Ядроны қайта іске қосу",
     ),
-    "toolsResults": m182,
+    "toolsResults": m185,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Іске қосу"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Бөлім"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Баптау"),
@@ -3987,14 +4087,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Жүктеп салынған"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m183,
-    "trafficTotal": m184,
+    "trafficPeak": m186,
+    "trafficTotal": m187,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Аударма түзетуін ұсыну",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Тасымал"),
-    "transportHeaders": m185,
+    "transportHeaders": m188,
     "trayIcon": MessageLookupByLibrary.simpleMessage("Трей таңбашасы"),
     "trayIconColor": MessageLookupByLibrary.simpleMessage("Түрлі"),
     "trayIconDark": MessageLookupByLibrary.simpleMessage("Қара"),
@@ -4171,14 +4271,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Жаңарту орнатылды",
     ),
-    "updateInstalledVersion": m186,
+    "updateInstalledVersion": m189,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android орнатуды аяқтауда. Осы кезде ReClash жабылуы мүмкін.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Жаңарту орнатылуда",
     ),
-    "updateMinutes": m187,
+    "updateMinutes": m190,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Қазір емес"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Релиз ескертпелері қолжетімсіз.",
@@ -4228,7 +4328,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Шығарылым туралы мәлімет",
     ),
-    "updateRemainingTime": m188,
+    "updateRemainingTime": m191,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Жүктеуді жалғастыру",
     ),
@@ -4237,7 +4337,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Орнатуды қайталау",
     ),
-    "updateSeconds": m189,
+    "updateSeconds": m192,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Толық релиз ескертпелерін көру",
     ),
@@ -4245,7 +4345,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Барлық өзгерістерді көрсету",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Жаңартулар"),
-    "updateTransferSpeed": m190,
+    "updateTransferSpeed": m193,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Жүктелген жаңартудың тұтастығын тексеру мүмкін болмады.",
     ),
@@ -4281,14 +4381,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Бапталған жабу әрекетін қолдану.",
     ),
-    "urlSchemeConfigCounts": m191,
+    "urlSchemeConfigCounts": m194,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML немесе JSON конфигурациясын қойыңыз",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Конфигурация құрамы",
     ),
-    "urlSchemeConfirmMessage": m192,
+    "urlSchemeConfirmMessage": m195,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Қолданбаның сыртқы пәрмені",
     ),
@@ -4332,7 +4432,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Конфигурацияны импорттау",
     ),
-    "urlSchemeImportConfirm": m193,
+    "urlSchemeImportConfirm": m196,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Сілтемеге YAML не JSON конфигурациясын ендіру.",
     ),
@@ -4424,7 +4524,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Мысалды қолдану",
     ),
-    "urlTip": m194,
+    "urlTip": m197,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -4463,9 +4563,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG, WebP немесе SVG пішіміндегі жарамды суретті таңдаңыз.",
     ),
-    "wallpaperImageLabel": m195,
+    "wallpaperImageLabel": m198,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
-    "wallpaperLibraryFull": m196,
+    "wallpaperLibraryFull": m199,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Суреттің мөлдір еместігі",
     ),
@@ -4579,6 +4679,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "Браузерде ашу",
     ),
+    "webDashboardReinstall": MessageLookupByLibrary.simpleMessage(
+      "Басқару тақтасын қайта орнату",
+    ),
     "webDashboardReload": MessageLookupByLibrary.simpleMessage("Қайта жүктеу"),
     "webDashboardRestricted": MessageLookupByLibrary.simpleMessage(
       "Панельге қолжетімділікті провайдер өшірген.",
@@ -4604,8 +4707,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m197,
-    "yearsAgoShort": m198,
+    "yearsAgo": m200,
+    "yearsAgoShort": m201,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

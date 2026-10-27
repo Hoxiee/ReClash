@@ -4,11 +4,13 @@ state: active
 risk: routine
 must:
   replay: Empty-state feedback retains its tested replay behavior.
-  rail: Sidebar selection and navigation retain their tested interactions.
+  rail: Sidebar selection and navigation retain their tested interactions; group boundaries stay continuous during membership changes, and narrow opening stacks labels below icons.
+  rail-actions: Expanded wide sidebars show icon-only About and Theme shortcuts beside the toggle, opening their existing Tools pages without covering the sidebar.
   tooltip: Hover hints wait for the shared delay and pending hints cannot appear after their control is disposed.
   text-input: Only secret fields request password-style keyboards; non-secret fields retain suggestions and clipboard input.
 watch: ['lib/ui/**', 'lib/widgets/**', 'lib/features/form/**', 'test/widgets/**', lib/manager/app_manager.dart, lib/manager/theme_manager.dart, lib/pages/error.dart, lib/views/access.dart, lib/views/profiles/edit.dart, test/common/dialog_test.dart, test/lint/text_field_suggestions_test.dart, test/views/access_test.dart]
 checks:
-  interactions: [replay, rail]
+  interactions: [replay, rail, rail-actions]
+  navigation: [rail-actions]
   tooltip: [tooltip]
   tests: [text-input]

@@ -322,7 +322,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                     padding:
                         EdgeInsets.only(
                           left: 16,
-                          top: context.contentTopPadding,
+                          top: context.sectionsTopPadding,
                           right: 16,
                           bottom: 20 + context.bottomInset,
                         ) +
@@ -684,24 +684,42 @@ abstract class _ToolsRoute<T> extends PageRoute<T>
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) => Semantics(
-    scopesRoute: true,
-    explicitChildNodes: true,
-    child: KeyboardInsetHold(
-      child: PageViewport.inherit(
-        context,
-        child: coversBelow
-            ? Stack(
-                fit: StackFit.expand,
-                children: [
-                  const _ToolsBackdrop(),
-                  buildContent(context, animation),
-                ],
-              )
-            : buildContent(context, animation),
+  ) {
+    final content = Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      child: KeyboardInsetHold(
+        child: PageViewport.inherit(
+          context,
+          child: coversBelow
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    const _ToolsBackdrop(),
+                    buildContent(context, animation),
+                  ],
+                )
+              : buildContent(context, animation),
+        ),
       ),
-    ),
-  );
+    );
+    if (!coversBelow || !ViewScope.isMobileOf(context)) return content;
+    final padding = MediaQuery.paddingOf(context);
+    final navigation = NavigationDockScope.maybeOf(context);
+    return BottomInsetScope(
+      inset: 0,
+      child: Builder(
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            padding: padding.copyWith(
+              bottom: navigation?.bottomPadding ?? padding.bottom,
+            ),
+          ),
+          child: content,
+        ),
+      ),
+    );
+  }
 }
 
 class _ToolsPageRoute extends _ToolsRoute<void> {

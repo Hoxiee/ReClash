@@ -1,4 +1,7 @@
 {
   "pressBackAgainToExit": "종료하려면 뒤로 버튼을 한 번 더 누르세요",
-  "selected": "선택됨"
+  "selected": "선택됨",
+  "sidebarWidth": "사이드바 너비",
+  "sidebarWidthNarrow": "좁게",
+  "sidebarWidthWide": "넓게"
 }

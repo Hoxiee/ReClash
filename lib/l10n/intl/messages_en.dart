@@ -377,7 +377,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'It chooses from the ${count} server of this group.', other: 'It chooses among the ${count} servers of this group.')}";
 
   static String m147(region, bypassed, proxied) =>
-      "${region}: ${bypassed} apps in the VPN bypass list, ${proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.";
+      "${region}: apps recognized as local will bypass the VPN (${bypassed}); all other installed apps will use it (${proxied}).\n\nThis replaces your manual selection in both lists without changing the mode. Review the suggestions before saving.";
 
   static String m148(seconds) => "You can confirm in ${seconds} s";
 
@@ -438,67 +438,74 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m173(label) => "${label} must be a single item";
 
-  static String m174(client, format, count) =>
+  static String m174(used, limit) => "${used} of ${limit}";
+
+  static String m175(value) => "${value} ms";
+
+  static String m176(size) =>
+      "The test transfers up to ${size} of test data. This uses your internet and VPN allowances. Network overhead may increase usage.";
+
+  static String m177(client, format, count) =>
       "Received as ${client}: ${format}, ${count} proxy nodes.";
 
-  static String m175(count) =>
+  static String m178(count) =>
       "Your subscription expires in ${Intl.plural(count, one: '1 day', other: '${count} days')}";
 
-  static String m176(count) =>
+  static String m179(count) =>
       "${Intl.plural(count, one: 'Add 1 server', other: 'Add ${count} servers')}";
 
-  static String m177(count) =>
+  static String m180(count) =>
       "${Intl.plural(count, one: 'The server will be added', other: 'All ${count} servers will be added')}";
 
-  static String m178(count, total) =>
+  static String m181(count, total) =>
       "${count} of ${Intl.plural(total, one: '1 server', other: '${total} servers')} will be added";
 
-  static String m179(count) => "Show all (${count})";
+  static String m182(count) => "Show all (${count})";
 
-  static String m180(format) => "Format: ${format}";
+  static String m183(format) => "Format: ${format}";
 
-  static String m181(percent) => "You have used ${percent}% of your traffic";
+  static String m184(percent) => "You have used ${percent}% of your traffic";
 
-  static String m182(count) => "${count} results";
+  static String m185(count) => "${count} results";
 
-  static String m183(value) => "Peak ${value}";
+  static String m186(value) => "Peak ${value}";
 
-  static String m184(value) => "Total ${value}";
+  static String m187(value) => "Total ${value}";
 
-  static String m185(transport) => "${transport} Headers";
+  static String m188(transport) => "${transport} Headers";
 
-  static String m186(version) => "Installed: ${version}";
+  static String m189(version) => "Installed: ${version}";
 
-  static String m187(count) =>
+  static String m190(count) =>
       "${Intl.plural(count, one: '1 min', other: '${count} min')}";
 
-  static String m188(time) => "${time} remaining";
+  static String m191(time) => "${time} remaining";
 
-  static String m189(count) =>
+  static String m192(count) =>
       "${Intl.plural(count, one: '1 sec', other: '${count} sec')}";
 
-  static String m190(speed) => "${speed}/s";
+  static String m193(speed) => "${speed}/s";
 
-  static String m191(nodes, groups, providers) =>
+  static String m194(nodes, groups, providers) =>
       "${nodes} proxies, ${groups} groups, ${providers} remote providers";
 
-  static String m192(action) =>
+  static String m195(action) =>
       "This link requests “${action}”. Allow ReClash to perform this action?";
 
-  static String m193(name, source) =>
+  static String m196(name, source) =>
       "Import “${name}” from ${source}? Profile validation and any conversion review follow your confirmation.";
 
-  static String m194(label) => "${label} must be a URL";
+  static String m197(label) => "${label} must be a URL";
 
-  static String m195(index) => "Background ${index}";
+  static String m198(index) => "Background ${index}";
 
-  static String m196(count) =>
+  static String m199(count) =>
       "You can keep up to ${count} backgrounds. Remove one to add another.";
 
-  static String m197(count) =>
+  static String m200(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m198(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m201(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2018,6 +2025,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please enter the profile name",
     ),
+    "profilePasteFromClipboard": MessageLookupByLibrary.simpleMessage(
+      "Paste from clipboard",
+    ),
     "profileSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "Applies to this profile only; anything not added uses its default.",
     ),
@@ -2067,6 +2077,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxiesProfileLabel": m74,
     "proxiesRemovedTip": m75,
     "proxiesReplacedTip": m76,
+    "proxyCardOneLine": MessageLookupByLibrary.simpleMessage("One line"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chain"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Proxy group"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage(
@@ -2693,9 +2704,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "No apps matched this region. Your lists are unchanged.",
     ),
     "regionAppsPreview": m147,
-    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
-      "App selection preview",
-    ),
     "regionChangeDns": MessageLookupByLibrary.simpleMessage("DNS servers"),
     "regionChangeMtu": MessageLookupByLibrary.simpleMessage("TUN MTU"),
     "regionChangeServices": MessageLookupByLibrary.simpleMessage(
@@ -2723,9 +2731,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Recommended for this device",
     ),
     "regionRussia": MessageLookupByLibrary.simpleMessage("Russia"),
-    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
-      "Select apps by region",
-    ),
     "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
       "Choose a supported region before using regional app suggestions.",
     ),
@@ -3303,6 +3308,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
       "Background blur lets the desktop behind the window show through the sidebar.",
     ),
+    "sidebarWidth": MessageLookupByLibrary.simpleMessage("Sidebar width"),
+    "sidebarWidthNarrow": MessageLookupByLibrary.simpleMessage("Narrow"),
+    "sidebarWidthWide": MessageLookupByLibrary.simpleMessage("Wide"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Silent launch"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Silent launch starts without showing the window.",
@@ -3512,6 +3520,88 @@ class MessageLookup extends MessageLookupByLibrary {
     "specialRules": MessageLookupByLibrary.simpleMessage("Special rules"),
     "spectrum": MessageLookupByLibrary.simpleMessage("Spectrum"),
     "speedStatistics": MessageLookupByLibrary.simpleMessage("Speed statistics"),
+    "speedTestAgain": MessageLookupByLibrary.simpleMessage("Test again"),
+    "speedTestAlwaysConfirm": MessageLookupByLibrary.simpleMessage(
+      "Confirm on every network",
+    ),
+    "speedTestBudget": MessageLookupByLibrary.simpleMessage(
+      "Total data budget",
+    ),
+    "speedTestBudgetHint": MessageLookupByLibrary.simpleMessage(
+      "Shared by download, upload and warm-up. Network overhead is additional.",
+    ),
+    "speedTestCancelled": MessageLookupByLibrary.simpleMessage("Test stopped"),
+    "speedTestComplete": MessageLookupByLibrary.simpleMessage("Full test"),
+    "speedTestConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Start the connection test?",
+    ),
+    "speedTestDataUsed": m174,
+    "speedTestDone": MessageLookupByLibrary.simpleMessage("Test complete"),
+    "speedTestDownload": MessageLookupByLibrary.simpleMessage("Download"),
+    "speedTestIdleDesc": MessageLookupByLibrary.simpleMessage(
+      "Download, upload, latency and jitter, with a data budget.",
+    ),
+    "speedTestJitter": MessageLookupByLibrary.simpleMessage("Jitter"),
+    "speedTestLatency": MessageLookupByLibrary.simpleMessage("HTTP latency"),
+    "speedTestLatencyOnly": MessageLookupByLibrary.simpleMessage(
+      "Latency and jitter only",
+    ),
+    "speedTestLatencyWarning": MessageLookupByLibrary.simpleMessage(
+      "Only small latency probes are sent. They also use data; download and upload speed are not measured.",
+    ),
+    "speedTestLimited": MessageLookupByLibrary.simpleMessage(
+      "The data budget ended before the speed stabilized. This is an estimate.",
+    ),
+    "speedTestMeteredTitle": MessageLookupByLibrary.simpleMessage(
+      "Use data on this metered network?",
+    ),
+    "speedTestMode": MessageLookupByLibrary.simpleMessage("Measurements"),
+    "speedTestMs": m175,
+    "speedTestMsUnit": MessageLookupByLibrary.simpleMessage("ms"),
+    "speedTestNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "The network or route changed. Start a new test.",
+    ),
+    "speedTestOffline": MessageLookupByLibrary.simpleMessage(
+      "No network connection",
+    ),
+    "speedTestOpen": MessageLookupByLibrary.simpleMessage("Open test"),
+    "speedTestPartial": MessageLookupByLibrary.simpleMessage(
+      "Some measurements failed. Available results are kept.",
+    ),
+    "speedTestPing": MessageLookupByLibrary.simpleMessage("Latency"),
+    "speedTestPlatform": MessageLookupByLibrary.simpleMessage("Test platform"),
+    "speedTestPlatformHint": MessageLookupByLibrary.simpleMessage(
+      "The service operator sets its availability and limits.",
+    ),
+    "speedTestPlatformUnavailable": MessageLookupByLibrary.simpleMessage(
+      "This platform is unavailable. Choose another in settings.",
+    ),
+    "speedTestPrivacy": MessageLookupByLibrary.simpleMessage(
+      "The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.",
+    ),
+    "speedTestReady": MessageLookupByLibrary.simpleMessage("Ready to measure"),
+    "speedTestRouteCore": MessageLookupByLibrary.simpleMessage(
+      "Through Core rules",
+    ),
+    "speedTestRouteHint": MessageLookupByLibrary.simpleMessage(
+      "Tests the current route to the platform, not necessarily the selected VPN node. No automatic direct fallback.",
+    ),
+    "speedTestRouteSystem": MessageLookupByLibrary.simpleMessage(
+      "System route",
+    ),
+    "speedTestSafetyHint": MessageLookupByLibrary.simpleMessage(
+      "Metered and unknown networks always require confirmation. Wi-Fi is not assumed to be unlimited.",
+    ),
+    "speedTestSettings": MessageLookupByLibrary.simpleMessage("Test settings"),
+    "speedTestStart": MessageLookupByLibrary.simpleMessage("Start test"),
+    "speedTestStop": MessageLookupByLibrary.simpleMessage("Stop test"),
+    "speedTestTitle": MessageLookupByLibrary.simpleMessage("Connection test"),
+    "speedTestTrafficWarning": m176,
+    "speedTestUnknownTitle": MessageLookupByLibrary.simpleMessage(
+      "The network’s data limit is unknown",
+    ),
+    "speedTestUpload": MessageLookupByLibrary.simpleMessage("Upload"),
+    "speedTestWarmup": MessageLookupByLibrary.simpleMessage("Warming up"),
     "splitStrategy": MessageLookupByLibrary.simpleMessage("Split strategy"),
     "splitStrategyNotEmpty": MessageLookupByLibrary.simpleMessage(
       "Split strategy cannot be empty",
@@ -3613,7 +3703,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Use this client"),
-    "subscriptionCompatibilityPrepared": m174,
+    "subscriptionCompatibilityPrepared": m177,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core parsed this result. It has not been saved or applied.",
@@ -3646,7 +3736,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m175,
+    "subscriptionExpiresInDays": m178,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Your subscription expires today",
     ),
@@ -3672,8 +3762,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Use global",
     ),
-    "subscriptionImportAdd": m176,
-    "subscriptionImportAllAdded": m177,
+    "subscriptionImportAdd": m179,
+    "subscriptionImportAllAdded": m180,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "Clash configuration",
     ),
@@ -3701,7 +3791,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
       "Some server options aren’t supported and are dropped",
     ),
-    "subscriptionImportPartial": m178,
+    "subscriptionImportPartial": m181,
     "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
       "Upload and download speeds are missing",
     ),
@@ -3721,11 +3811,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Not everything carries over",
     ),
-    "subscriptionImportShowAll": m179,
+    "subscriptionImportShowAll": m182,
     "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
       "Won’t be added",
     ),
-    "subscriptionImportSourceFormat": m180,
+    "subscriptionImportSourceFormat": m183,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
@@ -3756,7 +3846,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Website",
     ),
-    "subscriptionTrafficLow": m181,
+    "subscriptionTrafficLow": m184,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Use provider update interval",
     ),
@@ -3846,7 +3936,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("Pin"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
-    "toolsResults": m182,
+    "toolsResults": m185,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Run"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Setting"),
@@ -3865,14 +3955,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m183,
-    "trafficTotal": m184,
+    "trafficPeak": m186,
+    "trafficTotal": m187,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Suggest a translation fix",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
-    "transportHeaders": m185,
+    "transportHeaders": m188,
     "trayIcon": MessageLookupByLibrary.simpleMessage("Tray icon"),
     "trayIconColor": MessageLookupByLibrary.simpleMessage("Color"),
     "trayIconDark": MessageLookupByLibrary.simpleMessage("Black"),
@@ -4043,14 +4133,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Update installed",
     ),
-    "updateInstalledVersion": m186,
+    "updateInstalledVersion": m189,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android is completing the installation. ReClash may close during this step.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Installing the update",
     ),
-    "updateMinutes": m187,
+    "updateMinutes": m190,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Not now"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No release notes are available.",
@@ -4098,7 +4188,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Release details",
     ),
-    "updateRemainingTime": m188,
+    "updateRemainingTime": m191,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Resume download",
     ),
@@ -4107,7 +4197,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Try installation again",
     ),
-    "updateSeconds": m189,
+    "updateSeconds": m192,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "See full release notes",
     ),
@@ -4115,7 +4205,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Show all changes",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Updates"),
-    "updateTransferSpeed": m190,
+    "updateTransferSpeed": m193,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "The downloaded update failed integrity verification.",
     ),
@@ -4151,14 +4241,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Use your configured close behavior.",
     ),
-    "urlSchemeConfigCounts": m191,
+    "urlSchemeConfigCounts": m194,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Paste a YAML or JSON configuration",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Configuration contents",
     ),
-    "urlSchemeConfirmMessage": m192,
+    "urlSchemeConfirmMessage": m195,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "External application command",
     ),
@@ -4200,7 +4290,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Import configuration",
     ),
-    "urlSchemeImportConfirm": m193,
+    "urlSchemeImportConfirm": m196,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Embed a YAML or JSON configuration in the link.",
     ),
@@ -4288,7 +4378,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This encryption version is not supported. Request a plain subscription link.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Use example"),
-    "urlTip": m194,
+    "urlTip": m197,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -4327,9 +4417,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Choose a valid PNG, JPEG, WebP or SVG image.",
     ),
-    "wallpaperImageLabel": m195,
+    "wallpaperImageLabel": m198,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperLibraryFull": m196,
+    "wallpaperLibraryFull": m199,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
@@ -4437,6 +4527,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
       "Open in browser",
     ),
+    "webDashboardReinstall": MessageLookupByLibrary.simpleMessage(
+      "Reinstall dashboard",
+    ),
     "webDashboardReload": MessageLookupByLibrary.simpleMessage("Reload"),
     "webDashboardRestricted": MessageLookupByLibrary.simpleMessage(
       "Dashboard access is disabled by your provider.",
@@ -4462,8 +4555,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m197,
-    "yearsAgoShort": m198,
+    "yearsAgo": m200,
+    "yearsAgoShort": m201,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

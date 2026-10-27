@@ -131,6 +131,50 @@ void main() {
     });
   });
 
+  group('sidebar width', () {
+    test('legacy settings use the platform default without persisting it', () {
+      for (final json in <Map<String, Object?>>[
+        {},
+        {'sidebarNarrow': null},
+      ]) {
+        final settings = AppSettingProps.fromJson(json);
+        expect(settings.sidebarNarrow, isNull);
+        expect(
+          resolveSidebarNarrow(settings.sidebarNarrow, isTV: true),
+          isTrue,
+        );
+        expect(
+          resolveSidebarNarrow(settings.sidebarNarrow, isTV: false),
+          isFalse,
+        );
+        expect(
+          roundTrip(settings.toJson, AppSettingProps.fromJson).sidebarNarrow,
+          isNull,
+        );
+      }
+    });
+
+    test(
+      'explicit choices survive JSON and override every platform default',
+      () {
+        for (final narrow in [false, true]) {
+          final settings = const AppSettingProps().copyWith(
+            sidebarNarrow: narrow,
+          );
+          final restored = roundTrip(settings.toJson, AppSettingProps.fromJson);
+          expect(restored.sidebarNarrow, narrow);
+          for (final isTV in [false, true]) {
+            expect(
+              resolveSidebarNarrow(restored.sidebarNarrow, isTV: isTV),
+              narrow,
+            );
+          }
+          expect(settings.copyWith(sidebarNarrow: null).sidebarNarrow, isNull);
+        }
+      },
+    );
+  });
+
   group('AppSettingProps JSON round-trip', () {
     test('service automation defaults and choices survive JSON', () {
       final defaults = AppSettingProps.fromJson({});
