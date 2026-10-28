@@ -41,6 +41,28 @@ void main() {
       );
     });
 
+    test('rejects a lone APK for an unsupported ABI', () {
+      for (final abi in ['x86', 'x86_64', 'armeabi-v7a', 'riscv64']) {
+        expect(
+          selectAndroidUpdateAsset(
+            [asset('ReClash-android-$abi.apk')],
+            supportedAbis: const ['arm64-v8a'],
+          ),
+          isNull,
+          reason: abi,
+        );
+      }
+    });
+
+    test('does not guess an architecture when supported ABIs are unknown', () {
+      expect(
+        selectAndroidUpdateAsset([
+          asset('ReClash-android-arm64-v8a.apk'),
+        ], supportedAbis: const []),
+        isNull,
+      );
+    });
+
     test('rejects ambiguous assets for unsupported ABIs', () {
       expect(
         selectAndroidUpdateAsset(

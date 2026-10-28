@@ -93,9 +93,10 @@ class GitHubUpdateSource implements AppUpdateSource {
   }
 
   @override
-  Uri releasePage(String tag) => Uri.https(
-    'github.com',
-    '/$repository/releases/tag/${Uri.encodeComponent(tag)}',
+  Uri releasePage(String tag) => Uri(
+    scheme: 'https',
+    host: 'github.com',
+    pathSegments: [...repository.split('/'), 'releases', 'tag', tag],
   );
 
   @override

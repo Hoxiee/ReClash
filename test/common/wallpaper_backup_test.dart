@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:reclash/common/backup.dart';
@@ -75,6 +76,49 @@ void main() {
     expect(await WallpaperStore.readStoredImage(restored), svg);
     expect(restored.readAsBytesSync(), svg);
   });
+
+  for (final declaredSize in [1, 2048]) {
+    test('rejects a false wallpaper ZIP size of $declaredSize', () async {
+      const name = '0123456789abcdef0123456789abcdef.png';
+      final payload = Uint8List(1024);
+      final archive = Archive()
+        ..addFile(ArchiveFile.bytes('wallpapers/$name', payload))
+        ..addFile(ArchiveFile.string('config.json', '{"version":1}'));
+      final bytes = ZipEncoder().encodeBytes(archive);
+      final directory = ZipDirectory()..read(InputMemoryStream(bytes));
+      final header = directory.fileHeaders.first;
+      final data = ByteData.sublistView(bytes);
+      data.setUint32(
+        directory.centralDirectoryOffset + 24,
+        declaredSize,
+        Endian.little,
+      );
+      data.setUint32(
+        header.localHeaderOffset + 22,
+        declaredSize,
+        Endian.little,
+      );
+      final archivePath = join(root.path, 'invalid-size.zip');
+      File(archivePath).writeAsBytesSync(bytes);
+      final staging = join(root.path, 'stage');
+
+      await expectLater(
+        readBackupArchive(archivePath: archivePath, stagingDirPath: staging),
+        throwsA(
+          isA<BackupException>().having(
+            (error) => error.failure,
+            'failure',
+            BackupFailure.invalid,
+          ),
+        ),
+      );
+
+      final output = File(join(staging, 'wallpapers', name));
+      if (output.existsSync()) {
+        expect(output.lengthSync(), lessThanOrEqualTo(declaredSize));
+      }
+    });
+  }
 
   test(
     'skips unsafe and unsupported wallpaper entries during restore staging',

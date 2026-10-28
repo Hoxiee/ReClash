@@ -787,6 +787,52 @@ void main() {
     );
   });
 
+  group('GitHub release links', () {
+    for (final tag in [
+      'v1.2.3',
+      'v1.2.3+build.7',
+      'release/v1.2.3',
+      'v1%test',
+    ]) {
+      test('encodes the release tag exactly once: $tag', () {
+        final uri = GitHubUpdateSource(Dio()).releasePage(tag);
+
+        expect(uri.scheme, 'https');
+        expect(uri.host, 'github.com');
+        expect(uri.pathSegments, [
+          ...repository.split('/'),
+          'releases',
+          'tag',
+          tag,
+        ]);
+      });
+    }
+  });
+
+  group('GitHubUpdateSource.releasePage', () {
+    for (final tag in [
+      'v1.2.3',
+      'v1.2.3+build.7',
+      'release/v1.2.3',
+      'v1.2.3%patched',
+    ]) {
+      test('encodes $tag once as one path segment', () {
+        final uri = GitHubUpdateSource(Dio()).releasePage(tag);
+
+        expect(uri.scheme, 'https');
+        expect(uri.host, 'github.com');
+        expect(uri.pathSegments, [
+          ...repository.split('/'),
+          'releases',
+          'tag',
+          tag,
+        ]);
+        expect(uri.hasQuery, isFalse);
+        expect(uri.hasFragment, isFalse);
+      });
+    }
+  });
+
   group('latestRelease', () {
     Request requestAnswering(Map<String, ResponseBody Function()> byHost) {
       return Request()..dio.httpClientAdapter = _HostAdapter(byHost);
@@ -845,6 +891,20 @@ void main() {
 
       expect(target.uri.toString(), 'https://example.com/a.yaml?x=1');
       expect(target.headers, isEmpty);
+    });
+
+    test('encodes an omitted password as an empty Basic password', () {
+      for (final userInfo in ['alice', 'alice:']) {
+        final target = downloadTarget(
+          'https://$userInfo@dav.example.com/dav/a.yaml',
+        );
+
+        expect(target.uri.toString(), 'https://dav.example.com/dav/a.yaml');
+        expect(
+          target.headers[HttpHeaders.authorizationHeader],
+          'Basic ${base64.encode(utf8.encode('alice:'))}',
+        );
+      }
     });
 
     test('moves decoded credentials into the Authorization header', () {

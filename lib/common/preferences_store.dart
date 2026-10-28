@@ -36,7 +36,10 @@ class AtomicFilePreferencesStore extends SharedPreferencesStorePlatform {
       return {};
     }
     final data = json.decode(content);
-    return data is Map ? Map<String, Object>.from(data) : {};
+    if (data is! Map) {
+      throw const FormatException('Preferences must contain a JSON object');
+    }
+    return Map<String, Object>.from(data);
   }
 
   Future<bool> _update(void Function(Map<String, Object> values) change) async {

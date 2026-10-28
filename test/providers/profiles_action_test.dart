@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
@@ -33,6 +35,55 @@ import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+final class _PickedProfileFile extends PlatformFile {
+  _PickedProfileFile(this.file);
+
+  final File file;
+
+  @override
+  String get name => file.uri.pathSegments.last;
+
+  @override
+  Uri get uri => file.uri;
+
+  @override
+  XFile get xFile => XFile(file.path);
+
+  @override
+  int lengthSync() => file.lengthSync();
+
+  @override
+  Future<int> length() => file.length();
+
+  @override
+  Future<Uint8List> readAsBytes() => file.readAsBytes();
+
+  @override
+  Stream<Uint8List> readAsByteStream() =>
+      file.openRead().map(Uint8List.fromList);
+}
+
+class _ProfileFilePicker extends FilePickerPlatform {
+  _ProfileFilePicker(this.file);
+
+  final PlatformFile file;
+
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => file;
+}
 
 class _ImportReviewObserver extends NavigatorObserver {
   final opened = Completer<void>();
@@ -363,6 +414,51 @@ void main() {
       verify(() => core.decodeShareLinks(links)).called(1);
     });
 
+    test(
+      'repeating the first share link still imports one grouped profile',
+      () async {
+        final repeated = [links.first, links[1], links.first];
+        when(() => core.decodeShareLinks(repeated)).thenAnswer(
+          (_) async => [
+            for (final link in repeated)
+              [
+                {
+                  'name': 'HK',
+                  'type': link.startsWith('vless:') ? 'vless' : 'trojan',
+                  'server': 'example.test',
+                },
+              ],
+          ],
+        );
+        final settings = container.listen(appSettingProvider, (_, _) {});
+        addTearDown(settings.close);
+        container
+            .read(appSettingProvider.notifier)
+            .update((value) => value.copyWith(preventDuplicateProfiles: false));
+
+        await container
+            .read(profilesActionProvider.notifier)
+            .addProfilesFromLinks([
+              for (final link in repeated)
+                (label: '', url: link, ageSecretKey: ''),
+            ]);
+
+        expect(container.read(profilesProvider), hasLength(1));
+        final proxies = await savedProxies(
+          container.read(profilesProvider).single,
+        );
+        expect(
+          [for (final proxy in proxies) proxy['type']],
+          ['vless', 'trojan', 'vless'],
+        );
+        expect(
+          [for (final proxy in proxies) proxy['name']],
+          ['HK', 'HK-01', 'HK-02'],
+        );
+        verify(() => core.decodeShareLinks(repeated)).called(1);
+      },
+    );
+
     testWidgets('names the link no proxy can be read from and adds nothing', (
       tester,
     ) async {
@@ -678,6 +774,105 @@ void main() {
       expect(container.read(profilesProvider), isEmpty);
       verifyNever(() => core.decodeShareLinks(any()));
       verifyNever(() => core.validateConfig(any()));
+    });
+  });
+
+  group('addProfileFormFile durable storage', () {
+    late db.Database testDatabase;
+
+    setUp(() async {
+      final previousDatabase = db.database;
+      final previousPicker = FilePickerPlatform.instance;
+      final previousContainer = container;
+      testDatabase = db.Database(NativeDatabase.memory());
+      db.database = testDatabase;
+      final file = File('${home.path}/picked-profile.yaml');
+      await file.writeAsString('proxies: []');
+      FilePickerPlatform.instance = _ProfileFilePicker(
+        _PickedProfileFile(file),
+      );
+      container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        ],
+      );
+      final actionContainer = container;
+      globalState.container = actionContainer;
+      addTearDown(() async {
+        actionContainer.dispose();
+        globalState.container = previousContainer;
+        db.database = previousDatabase;
+        FilePickerPlatform.instance = previousPicker;
+        await testDatabase.close();
+      });
+      container.listen(profilesProvider, (_, _) {});
+      container.listen(currentProfileIdProvider, (_, _) {});
+      await container.read(profilesStreamProvider.future);
+    });
+
+    testWidgets('waits for the profile row before selecting or completing', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await tester.runAsync(() async {
+        final entered = Completer<void>();
+        final release = Completer<void>();
+        final transaction = testDatabase.transaction(() async {
+          entered.complete();
+          await release.future;
+        });
+        await entered.future;
+        final validated = Completer<void>();
+        when(() => core.validateConfig(any())).thenAnswer((_) async {
+          validated.complete();
+          return '';
+        });
+        var completed = false;
+        final operation = container
+            .read(profilesActionProvider.notifier)
+            .addProfileFormFile()
+            .then((_) => completed = true);
+        try {
+          await validated.future;
+          await pumpEventQueue();
+          expect(completed, isFalse);
+          expect(container.read(currentProfileIdProvider), isNull);
+        } finally {
+          release.complete();
+          await transaction;
+          await operation;
+        }
+        final profile = (await testDatabase.profilesDao.query().get()).single;
+        expect(container.read(profilesProvider), [profile]);
+        expect(container.read(currentProfileIdProvider), profile.id);
+        expect(await (await profile.file).readAsString(), 'proxies: []');
+      });
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('SQL failure removes the file and does not select a profile', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await tester.runAsync(() async {
+        await testDatabase.customStatement(
+          'CREATE TRIGGER reject_profile_insert BEFORE INSERT ON profiles '
+          "BEGIN SELECT RAISE(FAIL, 'profile table write rejected'); END",
+        );
+        final filesBefore = storedFiles();
+
+        await container
+            .read(profilesActionProvider.notifier)
+            .addProfileFormFile();
+        await pumpEventQueue();
+
+        expect(storedFiles(), filesBefore);
+        expect(container.read(profilesProvider), isEmpty);
+        expect(await testDatabase.profilesDao.query().get(), isEmpty);
+        expect(container.read(currentProfileIdProvider), isNull);
+      });
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
     });
   });
 

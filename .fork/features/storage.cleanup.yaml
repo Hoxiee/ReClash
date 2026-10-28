@@ -1,0 +1,15 @@
+v: 1
+kind: fix
+state: active
+risk: routine
+why: Concurrent cache cleanup can remove a file after its existence check.
+must:
+  missing: Cleanup accepts paths that are already absent or disappear before deletion.
+  failures: Deletion failures other than a missing path remain visible to the caller.
+watch:
+  - lib/common/file.dart
+  - test/common/file_test.dart
+  - test/providers/clash_providers_action_test.dart
+checks:
+  file-cleanup: [missing, failures]
+drop: Upstream cleanup tolerates concurrent removal without suppressing other filesystem errors.

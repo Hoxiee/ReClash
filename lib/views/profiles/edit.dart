@@ -511,12 +511,15 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           profile,
           _fileData!,
           reviewContext: reviewContext,
+          onCommitted: ref.read(profilesProvider.notifier).putAndWait,
         ),
       );
-      if (savedProfile == null) {
+      if (savedProfile == null || !mounted) {
         return;
       }
-      profilesAction.putProfile(savedProfile);
+      if (ref.read(currentProfileIdProvider) == null) {
+        ref.read(currentProfileIdProvider.notifier).value = savedProfile.id;
+      }
     } else if (!hasUpdate) {
       profilesAction.putProfile(profile);
     } else {

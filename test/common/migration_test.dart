@@ -10,6 +10,43 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Migration', () {
+    for (final marker in ['version', 'upgradeVersion']) {
+      test(
+        'keeps recovery free of writes when $marker is unreadable',
+        () async {
+          final store = _FakeMigrationStore(
+            configMap: _createConfigMap(),
+            version: 0,
+            upgradeVersion: 0,
+            unreadableMarker: marker,
+            available: false,
+          );
+
+          final config = await Migration(store: store).run();
+
+          expect(config, Config.realFromJson(null));
+          expect(store.restoredData, isNull);
+          expect(store.savedConfig, isNull);
+          expect(store.version, 0);
+          expect(store.upgradeVersion, 0);
+          expect(store.didClearClashConfig, isFalse);
+        },
+      );
+    }
+
+    test('still rejects a readable newer storage version', () async {
+      final store = _FakeMigrationStore(
+        configMap: _createConfigMap(),
+        version: Migration.currentVersion + 1,
+      );
+
+      await expectLater(Migration(store: store).run(), throwsStateError);
+
+      expect(store.savedConfig, isNull);
+      expect(store.restoredData, isNull);
+      expect(store.version, Migration.currentVersion + 1);
+    });
+
     test('returns current config without rewriting storage', () async {
       final configMap = _createConfigMap(
         davProps: const DAVProps(
@@ -401,6 +438,7 @@ class _FakeMigrationStore implements MigrationStore {
   final Map<String, Object?>? clashConfigMap;
   final bool configSaveResult;
   final bool available;
+  final String? unreadableMarker;
   final List<String> events = [];
 
   int version;
@@ -416,6 +454,7 @@ class _FakeMigrationStore implements MigrationStore {
     this.clashConfigMap,
     this.configSaveResult = true,
     this.available = true,
+    this.unreadableMarker,
   });
 
   @override
@@ -445,6 +484,9 @@ class _FakeMigrationStore implements MigrationStore {
   @override
   Future<int> getVersion() async {
     events.add('getVersion');
+    if (unreadableMarker == 'version') {
+      throw const FormatException('Unreadable version marker');
+    }
     return version;
   }
 
@@ -468,7 +510,12 @@ class _FakeMigrationStore implements MigrationStore {
   }
 
   @override
-  Future<int> getUpgradeVersion() async => upgradeVersion;
+  Future<int> getUpgradeVersion() async {
+    if (unreadableMarker == 'upgradeVersion') {
+      throw const FormatException('Unreadable upgrade version marker');
+    }
+    return upgradeVersion;
+  }
 
   @override
   Future<void> setUpgradeVersion(int version) async {

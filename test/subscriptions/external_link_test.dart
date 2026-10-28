@@ -263,6 +263,10 @@ void main() {
     for (final input in [
       '',
       'not a link',
+      '%',
+      '%2',
+      '%ZZ',
+      'happ%3A%2F%2Fadd%2Fhttps%3A%2F%2Fexample.com%2Fsub%',
       'other://add/data',
       'reclash://connect',
       'happ://add',

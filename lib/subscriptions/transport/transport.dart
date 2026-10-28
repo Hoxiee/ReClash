@@ -111,19 +111,30 @@ class SubscriptionTransport {
     final stopwatch = Stopwatch()..start();
     Future<SubscriptionResponse> direct() async {
       try {
-        return await _fetch(
+        final pending = _fetch(
           client,
           source,
           headers,
           localCancellation,
           onResponse: () => receivedResponse = true,
-        ).timeout(
+        );
+        return await pending.timeout(
           primaryTimeout,
-          onTimeout: () => throw SubscriptionException(
-            useProtectedFallback && !receivedResponse
-                ? SubscriptionFailure.transport
-                : SubscriptionFailure.timeout,
-          ),
+          onTimeout: () {
+            if (useProtectedFallback && !receivedResponse) {
+              throw const SubscriptionException(SubscriptionFailure.transport);
+            }
+            final remaining = timeout - stopwatch.elapsed;
+            if (remaining <= Duration.zero) {
+              throw const SubscriptionException(SubscriptionFailure.timeout);
+            }
+            return pending.timeout(
+              remaining,
+              onTimeout: () => throw const SubscriptionException(
+                SubscriptionFailure.timeout,
+              ),
+            );
+          },
         );
       } on SubscriptionException {
         rethrow;
@@ -230,12 +241,11 @@ class SubscriptionTransport {
       validateSubscriptionHeaders(fields, allowManaged: true),
     );
     if (uri.userInfo.isNotEmpty) {
-      final credentials = uri.userInfo
-          .split(':')
-          .map(Uri.decodeComponent)
-          .join(':');
+      final userInfo = uri.userInfo.split(':');
+      if (userInfo.length == 1) userInfo.add('');
+      final credentials = userInfo.map(Uri.decodeComponent).join(':');
       headers.putIfAbsent(
-        'Authorization',
+        HttpHeaders.authorizationHeader,
         () => 'Basic ${base64.encode(utf8.encode(credentials))}',
       );
       uri = uri.replace(userInfo: '');

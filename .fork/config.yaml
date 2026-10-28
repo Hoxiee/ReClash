@@ -12,6 +12,10 @@ checks:
     argv: [flutter, test, test/database/migration_v1_to_v2_test.dart, test/common/backup_task_test.dart, test/providers/backup_action_test.dart]
   code-generation:
     argv: [flutter, test, test/tool/prepare_test.dart, test/tool/github_workflows_test.dart]
+  preferences-storage:
+    argv: [flutter, test, test/common/preferences_test.dart, test/common/preferences_store_test.dart, test/common/migration_test.dart]
+  file-cleanup:
+    argv: [flutter, test, test/common/file_test.dart, test/providers/clash_providers_action_test.dart]
   generated-contracts:
     argv: [dart, run, tool/check_generated_contracts.dart]
   on-demand:

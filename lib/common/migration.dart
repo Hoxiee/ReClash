@@ -102,12 +102,24 @@ class Migration {
 
   Future<Config> run() async {
     final configMap = await _store.getConfigMap();
-    final config = await _migrate(configMap);
-    return _upgrade(config, installed: configMap != null);
+    final int version;
+    final int upgrade;
+    try {
+      version = await _store.getVersion();
+      upgrade = await _store.getUpgradeVersion();
+    } catch (_) {
+      if (await _store.isAvailable) rethrow;
+      return Config.realFromJson(null);
+    }
+    final config = await _migrate(configMap, version);
+    return _upgrade(config, installed: configMap != null, from: upgrade);
   }
 
-  Future<Config> _upgrade(Config config, {required bool installed}) async {
-    final from = await _store.getUpgradeVersion();
+  Future<Config> _upgrade(
+    Config config, {
+    required bool installed,
+    required int from,
+  }) async {
     if (from >= upgradeVersion) {
       return config;
     }
@@ -124,8 +136,11 @@ class Migration {
     return upgraded;
   }
 
-  Future<Config> _migrate(Map<String, Object?>? configMap) async {
-    var oldVersion = await _store.getVersion();
+  Future<Config> _migrate(
+    Map<String, Object?>? configMap,
+    int storedVersion,
+  ) async {
+    var oldVersion = storedVersion;
     Config? config;
     if (oldVersion > currentVersion) {
       throw StateError(

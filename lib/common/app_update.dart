@@ -62,7 +62,10 @@ AndroidUpdateAsset? selectAndroidUpdateAsset(
   for (final asset in candidates) {
     if (matchesAndroidTarget(asset.name, 'universal')) return asset;
   }
-  return candidates.length == 1 ? candidates.single : null;
+  return candidates.length == 1 &&
+          !candidates.single.name.toLowerCase().contains('-android-')
+      ? candidates.single
+      : null;
 }
 
 String? parseAssetSha256(Object? digest) {

@@ -1,0 +1,21 @@
+v: 1
+kind: fix
+state: active
+risk: critical
+why: Preferences must remain recoverable after unreadable data or a failed write.
+must:
+  unreadable-store: An existing malformed or non-object preferences file rejects reads and writes without replacing its bytes, and can be read again after repair.
+  unreadable-config: Automatic initialization and saves never overwrite an existing unreadable config value with defaults; an explicit reset restores normal writes.
+  atomic-writes: Desktop preference writes replace a flushed sibling atomically, preserve the previous file on failure, and serialize overlapping saves.
+  diagnostics: Errors decoding stored config JSON never log the raw JSON source.
+  version-markers: Unreadable or negative version markers enter recovery before migration writes, without guessing their values.
+watch:
+  - lib/common/preferences.dart
+  - lib/common/preferences_store.dart
+  - lib/common/migration.dart
+  - test/common/migration_test.dart
+  - test/common/preferences_test.dart
+  - test/common/preferences_store_test.dart
+checks:
+  preferences-storage: [unreadable-store, unreadable-config, atomic-writes, diagnostics, version-markers]
+drop: Upstream preserves unreadable preference data and provides equivalent atomic ordered writes.

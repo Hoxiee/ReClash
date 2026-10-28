@@ -8,16 +8,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:shared_preferences_platform_interface/types.dart';
 
+import '../helpers/preferences.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late Directory dir;
   late String path;
 
   setUp(() async {
+    await mockPreferences();
     dir = await Directory.systemTemp.createTemp('preferences_store');
     path = join(dir.path, 'shared_preferences.json');
   });
 
-  tearDown(() => dir.delete(recursive: true));
+  tearDown(() async {
+    await mockPreferences();
+    await dir.delete(recursive: true);
+  });
 
   AtomicFilePreferencesStore openStore() {
     return AtomicFilePreferencesStore(Future.value(path));
@@ -68,6 +76,25 @@ void main() {
 
     expect(await store.getAll(), {'flutter.config': '{}'});
   });
+
+  for (final content in ['[]', 'null', '42', '"not an object"']) {
+    test('rejects non-object preferences without replacing $content', () async {
+      final file = File(path)..writeAsStringSync(content);
+      final store = openStore();
+
+      await expectLater(store.getAll(), throwsFormatException);
+      await expectLater(
+        store.setValue('String', 'flutter.config', '{}'),
+        throwsFormatException,
+      );
+      expect(file.readAsStringSync(), content);
+      expect(dirEntries(), ['shared_preferences.json']);
+
+      file.writeAsStringSync(json.encode({'flutter.config': '{}'}));
+
+      expect(await store.getAll(), {'flutter.config': '{}'});
+    });
+  }
 
   test('writes keep keys outside the prefix', () async {
     File(path).writeAsStringSync(json.encode({'other': 'kept'}));
@@ -139,23 +166,28 @@ void main() {
     expect(dirEntries(), ['shared_preferences.json']);
   });
 
-  test('backs SharedPreferences', () async {
-    addTearDown(SharedPreferences.resetStatic);
-    SharedPreferencesStorePlatform.instance = openStore();
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString('config', '{}');
-    await preferences.setStringList('list', ['a']);
-
-    expect(readFile(), {
-      'flutter.config': '{}',
-      'flutter.list': ['a'],
+  group('SharedPreferences integration', () {
+    setUp(() {
+      SharedPreferences.resetStatic();
+      SharedPreferencesStorePlatform.instance = openStore();
     });
 
-    SharedPreferences.resetStatic();
-    SharedPreferencesStorePlatform.instance = openStore();
-    final reopened = await SharedPreferences.getInstance();
+    test('backs SharedPreferences', () async {
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString('config', '{}');
+      await preferences.setStringList('list', ['a']);
 
-    expect(reopened.getString('config'), '{}');
-    expect(reopened.getStringList('list'), ['a']);
+      expect(readFile(), {
+        'flutter.config': '{}',
+        'flutter.list': ['a'],
+      });
+
+      SharedPreferences.resetStatic();
+      SharedPreferencesStorePlatform.instance = openStore();
+      final reopened = await SharedPreferences.getInstance();
+
+      expect(reopened.getString('config'), '{}');
+      expect(reopened.getStringList('list'), ['a']);
+    });
   });
 }

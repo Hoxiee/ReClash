@@ -378,6 +378,29 @@ void main() {
     });
   });
 
+  group('isProfileLinkInput', () {
+    for (final input in [
+      '%',
+      '%2',
+      'text%ZZ',
+      'reclash%3A%2F%2Fadd%2Fhttps%3A%2F%2Fexample.com%2Fsub%',
+      '%FF',
+    ]) {
+      test('rejects malformed percent encoding $input', () {
+        expect(isProfileLinkInput(input), isFalse);
+      });
+    }
+
+    test('still accepts a percent-encoded profile link', () {
+      expect(
+        isProfileLinkInput(
+          Uri.encodeComponent('reclash://add/https://example.com/sub'),
+        ),
+        isTrue,
+      );
+    });
+  });
+
   test(
     'profile source display redacts credentials, paths and query tokens',
     () {

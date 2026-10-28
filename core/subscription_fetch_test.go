@@ -305,6 +305,36 @@ func TestSubscriptionHeadersRejectCaseInsensitiveDuplicates(t *testing.T) {
 	}
 }
 
+func TestSubscriptionExplicitAuthorizationOverridesURLCredentials(t *testing.T) {
+	for _, test := range []struct {
+		name, header, value string
+	}{
+		{"canonical", "Authorization", "Bearer explicit-token"},
+		{"lowercase", "authorization", "Bearer explicit-token"},
+		{"uppercase", "AUTHORIZATION", "Bearer explicit-token"},
+		{"empty", "Authorization", ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if got := r.Header.Get("Authorization"); got != test.value {
+					t.Errorf("authorization = %q, want %q", got, test.value)
+				}
+				_, _ = io.WriteString(w, "ok")
+			}))
+			defer server.Close()
+			params := fetchTestParams(strings.Replace(server.URL, "http://", "http://user:password@", 1))
+			params.Headers = map[string]string{test.header: test.value}
+			result, err := fetchSubscription(params, &net.Dialer{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(result.FinalURL, "@") {
+				t.Fatalf("credentials leaked into final URL: %q", result.FinalURL)
+			}
+		})
+	}
+}
+
 func TestSubscriptionURLCredentialsBecomeInitialBasicAuth(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, password, ok := r.BasicAuth()

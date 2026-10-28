@@ -1,7 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cross_file/cross_file.dart';
+import 'package:drift/native.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -28,6 +36,57 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+
+class _MockCoreHandler extends Mock implements CoreHandlerInterface {}
+
+final class _ReplacementFile extends PlatformFile {
+  _ReplacementFile(this.file);
+
+  final File file;
+
+  @override
+  String get name => file.uri.pathSegments.last;
+
+  @override
+  Uri get uri => file.uri;
+
+  @override
+  XFile get xFile => XFile(file.path);
+
+  @override
+  int lengthSync() => file.lengthSync();
+
+  @override
+  Future<int> length() => file.length();
+
+  @override
+  Future<Uint8List> readAsBytes() => file.readAsBytes();
+
+  @override
+  Stream<Uint8List> readAsByteStream() =>
+      file.openRead().map(Uint8List.fromList);
+}
+
+class _ReplacementPicker extends FilePickerPlatform {
+  _ReplacementPicker(this.file);
+
+  final PlatformFile file;
+
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => file;
+}
 
 class _CompatibilityProfilesAction extends ProfilesAction {
   int updates = 0;
@@ -209,6 +268,230 @@ void main() {
     );
     await tester.pump();
   }
+
+  group('editor file replacement', () {
+    const previousConfig = 'proxies: []\nmode: rule\n';
+    const replacementConfig = 'proxies: []\nmode: direct\n';
+    late db.Database testDatabase;
+    late ProviderContainer container;
+    late _MockCoreHandler core;
+    late Profile profile;
+    late File profileFile;
+    late Completer<void> editorClosed;
+
+    setUp(() async {
+      final previousDatabase = db.database;
+      final previousPicker = FilePickerPlatform.instance;
+      testDatabase = db.Database(NativeDatabase.memory());
+      db.database = testDatabase;
+      profile = _profile(url: '', snapshot: _snapshot()).copyWith(
+        lastUpdateDate: DateTime(2025),
+        subscriptionInfo: const SubscriptionInfo(download: 10, total: 100),
+      );
+      await testDatabase.profilesDao.putAll([profile.toCompanion()]);
+      profileFile = await profile.file;
+      await profileFile.writeAsString(previousConfig);
+      final replacement = File('${tempDir.path}/replacement.yaml');
+      await replacement.writeAsString(replacementConfig);
+      FilePickerPlatform.instance = _ReplacementPicker(
+        _ReplacementFile(replacement),
+      );
+      core = _MockCoreHandler();
+      when(() => core.validateConfig(any())).thenAnswer((_) async => '');
+      container = ProviderContainer(
+        overrides: [
+          setupActionProvider.overrideWith(_NoopSetupAction.new),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        ],
+      );
+      globalState.container = container;
+      editorClosed = Completer<void>();
+      addTearDown(() async {
+        container.dispose();
+        db.database = previousDatabase;
+        FilePickerPlatform.instance = previousPicker;
+        await testDatabase.close();
+      });
+      container.listen(profilesProvider, (_, _) {});
+      container.listen(currentProfileIdProvider, (_, _) {});
+      await container.read(profilesStreamProvider.future);
+      container.read(currentProfileIdProvider.notifier).value = profile.id;
+    });
+
+    Future<void> uploadReplacement(WidgetTester tester) async {
+      const size = Size(1000, 1000);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      addTearDown(() => tester.pumpWidget(const SizedBox()));
+      container.read(viewSizeProvider.notifier).value = size;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            withStatusManager: true,
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  await showFormSheet<void>(
+                    context: context,
+                    builder: (_) => EditProfileView(profile: profile),
+                  );
+                  editorClosed.complete();
+                },
+                child: const Text('open file editor'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open file editor'));
+      await tester.pumpAndSettle();
+      final l10n = currentAppLocalizations;
+      final fileRow = find.text(l10n.profile);
+      for (
+        var attempt = 0;
+        attempt < 100 && fileRow.evaluate().isEmpty;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      await tester.longPress(fileRow);
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await tester.tap(find.text(l10n.upload));
+        await pumpEventQueue();
+      });
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is TextField && widget.controller?.text == profile.label,
+        ),
+        'Edited profile',
+      );
+      await tester.pump();
+    }
+
+    testWidgets('SQL failure preserves the previous file and profile row', (
+      tester,
+    ) async {
+      await tester.runAsync(
+        () => testDatabase.customStatement(
+          'CREATE TRIGGER reject_profile_update BEFORE UPDATE ON profiles '
+          "BEGIN SELECT RAISE(FAIL, 'editor profile write rejected'); END",
+        ),
+      );
+      await uploadReplacement(tester);
+      var failed = false;
+      final previousPrint = debugPrint;
+      debugPrint = (message, {wrapWidth}) {
+        previousPrint(message, wrapWidth: wrapWidth);
+        failed |= message?.contains('editor profile write rejected') == true;
+      };
+      try {
+        await tester.runAsync(() async {
+          await tester.tap(
+            find.text(currentAppLocalizations.save).hitTestable(),
+          );
+          await pumpEventQueue();
+        });
+        for (var attempt = 0; attempt < 100 && !failed; attempt++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump();
+        }
+        expect(failed, isTrue);
+      } finally {
+        debugPrint = previousPrint;
+      }
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        expect(await profileFile.readAsString(), previousConfig);
+        expect(await testDatabase.profilesDao.get(profile.id), profile);
+        expect(container.read(profilesProvider), [profile]);
+        expect(container.read(currentProfileIdProvider), profile.id);
+        expect(await File('${profileFile.path}.previous').exists(), isFalse);
+        expect(await File('${profileFile.path}.staged').exists(), isFalse);
+      });
+      expect(editorClosed.isCompleted, isFalse);
+      expect(find.byType(EditProfileView), findsOneWidget);
+      verify(() => core.validateConfig(any())).called(1);
+    });
+
+    testWidgets('keeps the editor open until replacement metadata is durable', (
+      tester,
+    ) async {
+      container.read(currentProfileIdProvider.notifier).value = null;
+      await uploadReplacement(tester);
+      late Completer<void> release;
+      late Future<void> blocked;
+      await tester.runAsync(() async {
+        final entered = Completer<void>();
+        release = Completer<void>();
+        blocked = testDatabase.transaction(() async {
+          entered.complete();
+          await release.future;
+        });
+        await entered.future;
+        final published = Completer<void>();
+        final subscription = container.listen(profilesProvider, (_, next) {
+          if (next.any((item) => item.label == 'Edited profile') &&
+              !published.isCompleted) {
+            published.complete();
+          }
+        });
+        try {
+          await tester.tap(
+            find.text(currentAppLocalizations.save).hitTestable(),
+          );
+          await published.future.timeout(const Duration(seconds: 5));
+          await pumpEventQueue();
+        } finally {
+          subscription.close();
+        }
+      });
+      try {
+        await tester.pump();
+        expect(editorClosed.isCompleted, isFalse);
+        expect(container.read(currentProfileIdProvider), isNull);
+      } finally {
+        await tester.runAsync(() async {
+          release.complete();
+          await blocked;
+          await pumpEventQueue();
+        });
+      }
+      for (
+        var attempt = 0;
+        attempt < 100 && !editorClosed.isCompleted;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      expect(editorClosed.isCompleted, isTrue);
+      await tester.runAsync(() async {
+        final saved = await testDatabase.profilesDao.get(profile.id);
+        expect(saved?.label, 'Edited profile');
+        expect(saved?.lastUpdateDate, isNot(profile.lastUpdateDate));
+        expect(saved?.subscriptionSnapshot, profile.subscriptionSnapshot);
+        expect(await profileFile.readAsString(), replacementConfig);
+        expect(container.read(currentProfileIdProvider), profile.id);
+        expect(await File('${profileFile.path}.previous').exists(), isFalse);
+        expect(await File('${profileFile.path}.staged').exists(), isFalse);
+      });
+      await tester.pumpAndSettle();
+      expect(find.byType(EditProfileView), findsNothing);
+      verify(() => core.validateConfig(any())).called(1);
+    });
+  });
 
   testWidgets('stale metadata still shows provider, account, and links', (
     tester,

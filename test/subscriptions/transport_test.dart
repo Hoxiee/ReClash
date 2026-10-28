@@ -76,6 +76,52 @@ void main() {
     }
   });
 
+  for (final (userInfo, credentials) in [
+    ('alice', 'alice:'),
+    ('alice:', 'alice:'),
+    ('alice%40example.test:p%3Aa:ss', 'alice@example.test:p:a:ss'),
+  ]) {
+    test('uses valid Basic credentials for $userInfo', () async {
+      final expected = 'Basic ${base64.encode(utf8.encode(credentials))}';
+      final uri = await serve((request) {
+        if (request.headers.value(HttpHeaders.authorizationHeader) !=
+            expected) {
+          request.response.statusCode = HttpStatus.unauthorized;
+        }
+        return respond(request, utf8.encode('proxies: []'));
+      });
+
+      final response = await SubscriptionTransport().fetch(
+        uri.replace(userInfo: userInfo),
+      );
+
+      expect(response.status, HttpStatus.ok);
+      expect(utf8.decode(response.bytes), 'proxies: []');
+      expect(response.uri.userInfo, isEmpty);
+    });
+  }
+
+  for (final name in ['Authorization', 'authorization', 'AUTHORIZATION']) {
+    test('preserves an explicit $name header over URI credentials', () async {
+      const explicit = 'Bearer explicit-token';
+      final uri = await serve((request) {
+        if (request.headers.value(HttpHeaders.authorizationHeader) !=
+            explicit) {
+          request.response.statusCode = HttpStatus.unauthorized;
+        }
+        return respond(request, utf8.encode('proxies: []'));
+      });
+
+      final response = await SubscriptionTransport().fetch(
+        uri.replace(userInfo: 'alice:password'),
+        headers: {name: explicit},
+      );
+
+      expect(response.status, HttpStatus.ok);
+      expect(utf8.decode(response.bytes), 'proxies: []');
+    });
+  }
+
   test('rejects unsupported and malformed content encoding', () async {
     for (final encoding in ['br', 'gzip, deflate', 'gzip']) {
       final uri = await serve(
@@ -295,6 +341,74 @@ void main() {
     );
     expect(result.protected, isTrue);
     expect(retries, 1);
+  });
+
+  test('allows response bodies to use the original deadline', () async {
+    final payload = utf8.encode('proxies: []');
+    final headersSent = Completer<void>();
+    final releaseBody = Completer<void>();
+    var retries = 0;
+    final uri = await serve((request) async {
+      request.response.contentLength = payload.length;
+      request.response.add(payload.sublist(0, 1));
+      await request.response.flush();
+      headersSent.complete();
+      await releaseBody.future;
+      try {
+        request.response.add(payload.sublist(1));
+        await request.response.close();
+      } on HttpException {
+        return;
+      } on SocketException {
+        return;
+      }
+    });
+    final transport = SubscriptionTransport(
+      protectedFetcher: (_, _, _, _) async {
+        retries++;
+        throw StateError('unexpected fallback');
+      },
+    );
+    final result = transport
+        .fetch(uri, timeout: const Duration(seconds: 6))
+        .then<Object>((response) => response, onError: (Object error) => error);
+
+    await headersSent.future;
+    await Future<void>.delayed(const Duration(milliseconds: 4500));
+    releaseBody.complete();
+
+    final response = await result;
+    expect(response, isA<SubscriptionResponse>());
+    expect((response as SubscriptionResponse).bytes, payload);
+    expect(retries, 0);
+  });
+
+  test('enforces the original deadline after response headers', () async {
+    var retries = 0;
+    final uri = await serve((request) async {
+      request.response.contentLength = 2;
+      request.response.add([1]);
+      await request.response.flush();
+    });
+    final transport = SubscriptionTransport(
+      protectedFetcher: (_, _, _, _) async {
+        retries++;
+        throw StateError('unexpected fallback');
+      },
+    );
+    final stopwatch = Stopwatch()..start();
+
+    await expectLater(
+      transport.fetch(uri, timeout: const Duration(seconds: 3)),
+      throwsA(_failure(SubscriptionFailure.timeout)),
+    );
+
+    expect(
+      stopwatch.elapsed,
+      greaterThanOrEqualTo(const Duration(milliseconds: 2900)),
+    );
+    expect(stopwatch.elapsed, lessThan(const Duration(milliseconds: 4300)));
+    expect(retries, 0);
   });
 
   test('rechecks fallback permission before switching routes', () async {

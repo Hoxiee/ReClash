@@ -450,6 +450,61 @@ void main() {
       );
     });
 
+    test('reads an encoded filename with a language tag', () {
+      expect(
+        getFileNameForDisposition(
+          "attachment; filename*=UTF-8'ru'%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8C.yaml",
+        ),
+        'профиль.yaml',
+      );
+    });
+
+    test('keeps literal plus signs in encoded filenames', () {
+      expect(
+        getFileNameForDisposition("attachment; filename*=UTF-8''a+b%2Bc.yaml"),
+        'a+b+c.yaml',
+      );
+    });
+
+    test('reads ISO-8859-1 encoded filenames', () {
+      expect(
+        getFileNameForDisposition(
+          "attachment; filename*=ISO-8859-1''caf%E9.yaml",
+        ),
+        'café.yaml',
+      );
+    });
+
+    for (final encoded in [
+      "UTF-8''broken%",
+      "UTF-8''%FF.yaml",
+      "UTF-16''profile.yaml",
+      "UTF-8''",
+    ]) {
+      test('falls back to filename for invalid encoding $encoded', () {
+        expect(
+          getFileNameForDisposition(
+            'attachment; filename="fallback.yaml"; filename*=$encoded',
+          ),
+          'fallback.yaml',
+        );
+      });
+    }
+
+    test('ignores a malformed disposition header', () {
+      expect(
+        getFileNameForDisposition('attachment; filename="unterminated'),
+        isNull,
+      );
+    });
+
+    test('ignores invalid encoding without a fallback filename', () {
+      expect(
+        getFileNameForDisposition("attachment; filename*=UTF-8''broken%"),
+        isNull,
+      );
+    });
+
     test('returns null when no filename parameter is present', () {
       expect(getFileNameForDisposition('attachment'), isNull);
     });

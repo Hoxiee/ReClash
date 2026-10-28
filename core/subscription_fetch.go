@@ -171,8 +171,10 @@ func fetchSubscription(params SubscriptionFetchParams, connector subscriptionCon
 		headers.Set(k, v)
 	}
 	if target.User != nil {
-		password, _ := target.User.Password()
-		headers.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(target.User.Username()+":"+password)))
+		if _, exists := headers["Authorization"]; !exists {
+			password, _ := target.User.Password()
+			headers.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(target.User.Username()+":"+password)))
+		}
 		target.User = nil
 	}
 	wire := &atomic.Int64{}

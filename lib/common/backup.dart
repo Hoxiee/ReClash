@@ -69,7 +69,11 @@ abstract final class BackupEntries {
   }
 
   static String resolve(String root, String entry) {
-    return joinAll([root, ...posix.split(entry)]);
+    final path = _stagedEntryPath(root, entry);
+    if (path == null) {
+      throw const BackupException(BackupFailure.invalid);
+    }
+    return path;
   }
 }
 
@@ -226,41 +230,91 @@ Future<void> _extract(String archivePath, String stagingDirPath) async {
   await Directory(stagingDirPath).create(recursive: true);
   final input = InputFileStream(archivePath);
   try {
-    final Archive archive;
+    final directory = ZipDirectory();
     try {
-      archive = ZipDecoder().decodeStream(input);
+      directory.read(input);
     } on Exception {
       throw const BackupException(BackupFailure.invalid);
     }
     var wallpaperEntries = 0;
-    for (final file in archive.files) {
-      if (!file.isFile || file.isSymbolicLink) {
+    for (final header in directory.fileHeaders) {
+      final file = header.file;
+      if (file == null) {
+        throw const BackupException(BackupFailure.invalid);
+      }
+      if (file.filename.endsWith('/') ||
+          file.filename.endsWith('\\') ||
+          (header.externalFileAttributes >> 16) & 0xf000 == 0xa000) {
         continue;
       }
-      final name = posix.normalize(file.name.replaceAll('\\', '/'));
+      if (file.crc32 != header.crc32) {
+        throw const BackupException(BackupFailure.invalid);
+      }
+      final name = posix.normalize(file.filename.replaceAll('\\', '/'));
       final isWallpaper = name.startsWith('wallpapers/');
       if (isWallpaper &&
           (posix.dirname(name) != 'wallpapers' ||
               !isWallpaperFileName(posix.basename(name)) ||
-              file.size > 32 * 1024 * 1024 ||
+              file.uncompressedSize > 32 * 1024 * 1024 ||
               wallpaperEntries >= maxWallpaperLibrary)) {
         continue;
       }
       if (isWallpaper) wallpaperEntries++;
-      final outPath = _stagedEntryPath(stagingDirPath, file.name);
+      final outPath = _stagedEntryPath(stagingDirPath, file.filename);
       if (outPath == null) {
         continue;
       }
+      if (file.uncompressedSize < 0) {
+        throw const BackupException(BackupFailure.invalid);
+      }
       await Directory(dirname(outPath)).create(recursive: true);
-      final output = OutputFileStream(outPath);
+      final output = _VerifiedBackupOutput(outPath, file.uncompressedSize);
       try {
-        file.writeContent(output);
+        file.decompress(output);
+        if (output.length != file.uncompressedSize ||
+            output.crc != file.crc32) {
+          throw const BackupException(BackupFailure.invalid);
+        }
+      } on FormatException {
+        throw const BackupException(BackupFailure.invalid);
       } finally {
         await output.close();
       }
     }
   } finally {
     await input.close();
+  }
+}
+
+class _VerifiedBackupOutput extends OutputFileStream {
+  _VerifiedBackupOutput(String path, this.limit)
+    : super.withFileHandle(FileHandle(path, mode: FileAccess.write));
+
+  final int limit;
+  int crc = 0;
+
+  void _check(int count) {
+    if (length + count > limit) {
+      throw const BackupException(BackupFailure.invalid);
+    }
+  }
+
+  @override
+  void writeByte(int value) {
+    _check(1);
+    crc = getCrc32Byte(crc ^ 0xffffffff, value) ^ 0xffffffff;
+    super.writeByte(value);
+  }
+
+  @override
+  void writeBytes(List<int> bytes, {int? length}) {
+    final count = length ?? bytes.length;
+    _check(count);
+    crc = getCrc32(
+      count == bytes.length ? bytes : bytes.sublist(0, count),
+      crc,
+    );
+    super.writeBytes(bytes, length: count);
   }
 }
 
@@ -275,7 +329,9 @@ String? _stagedEntryPath(String stagingDirPath, String name) {
       normalized.startsWith('../')) {
     return null;
   }
-  final outPath = normalize(BackupEntries.resolve(stagingDirPath, normalized));
+  final outPath = normalize(
+    joinAll([stagingDirPath, ...posix.split(normalized)]),
+  );
   if (!isWithin(stagingDirPath, outPath)) {
     return null;
   }

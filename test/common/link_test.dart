@@ -314,6 +314,13 @@ void main() {
       );
     });
 
+    test('skips malformed percent encoding before a valid code', () {
+      expect(
+        profileUrlFromQrCodes(['%', '%ZZ', 'https://example.com/sub']),
+        'https://example.com/sub',
+      );
+    });
+
     test('returns the first code that carries a profile source', () {
       expect(
         profileUrlFromQrCodes([

@@ -682,11 +682,12 @@ class ProfilesAction extends _$ProfilesAction {
       () => saveImportedProfileFile(
         Profile.normal(label: platformFile.name),
         bytes,
+        onCommitted: _saveImportedProfile,
       ),
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
-      putProfile(profile);
+      _importedProfile(profile, select: true);
     }
   }
 
@@ -973,12 +974,13 @@ class ProfilesAction extends _$ProfilesAction {
       for (final input in links)
         if (input.url.isShareLink) input.url,
     ];
+    final firstShareLink = links.indexWhere((input) => input.url.isShareLink);
     await globalState.batchRun(
       [
-        for (final input in links)
+        for (final (index, input) in links.indexed)
           if (!input.url.isShareLink)
             (input: input, shareLinks: const <String>[])
-          else if (input.url == shareLinks.first)
+          else if (index == firstShareLink)
             (input: input, shareLinks: shareLinks),
       ],
       (item) async {

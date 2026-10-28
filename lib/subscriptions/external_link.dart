@@ -67,6 +67,8 @@ String _decodeEncodedProtocolLink(String input) {
     return protocolSchemes.contains(scheme) ? decoded : input;
   } on FormatException {
     return input;
+  } on ArgumentError {
+    return input;
   }
 }
 

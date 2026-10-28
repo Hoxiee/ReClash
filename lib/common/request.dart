@@ -668,7 +668,9 @@ Uint8List decompressUnlabeled(Uint8List bytes) {
   if (uri.userInfo.isEmpty) {
     return (uri: uri, headers: const {});
   }
-  final credentials = uri.userInfo.split(':').map(_decodeUserInfo).join(':');
+  final parts = uri.userInfo.split(':');
+  if (parts.length == 1) parts.add('');
+  final credentials = parts.map(_decodeUserInfo).join(':');
   return (
     uri: uri.replace(userInfo: ''),
     headers: {
@@ -688,22 +690,33 @@ String _decodeUserInfo(String value) {
 
 String? getFileNameForDisposition(String? disposition) {
   if (disposition == null) return null;
-  final parseValue = HeaderValue.parse(disposition);
-  final parameters = parseValue.parameters;
-  final fileNamePointKey = parameters.keys.firstWhere(
-    (key) => key == 'filename*',
-    orElse: () => '',
-  );
-  if (fileNamePointKey.isNotEmpty) {
-    final res = parameters[fileNamePointKey]?.split("''") ?? [];
-    if (res.length >= 2) {
-      return Uri.decodeComponent(res[1]);
-    }
+  try {
+    final parameters = HeaderValue.parse(disposition).parameters;
+    return _decodeDispositionFileName(parameters['filename*']) ??
+        parameters['filename'];
+  } on HttpException {
+    return null;
   }
-  final fileNameKey = parameters.keys.firstWhere(
-    (key) => key == 'filename',
-    orElse: () => '',
-  );
-  if (fileNameKey.isEmpty) return null;
-  return parameters[fileNameKey];
+}
+
+String? _decodeDispositionFileName(String? value) {
+  if (value == null) return null;
+  final parts = value.split("'");
+  if (parts.length != 3 || parts.last.isEmpty) return null;
+  final encoding = switch (parts.first.toLowerCase()) {
+    'utf-8' => utf8,
+    'iso-8859-1' => latin1,
+    _ => null,
+  };
+  if (encoding == null) return null;
+  try {
+    return Uri.decodeQueryComponent(
+      parts.last.replaceAll('+', '%2B'),
+      encoding: encoding,
+    );
+  } on FormatException {
+    return null;
+  } on ArgumentError {
+    return null;
+  }
 }

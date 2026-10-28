@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:drift/native.dart';
@@ -773,6 +774,166 @@ void main() {
         ).readAsStringSync(),
         'proxies: []',
       );
+    });
+
+    for (final prefix in ['../../', '..\\..\\', '../..\\']) {
+      for (final existing in [true, false]) {
+        test(
+          'rejects legacy traversal $prefix with existing target $existing',
+          () async {
+            final name = 'sensitive-$uniqueId';
+            final outside = File(join(staging.parent.path, '$name.yaml'));
+            if (existing) outside.writeAsStringSync('outside-secret');
+            final archivePath = await zipOf({
+              configJsonName: utf8.encode(
+                jsonEncode({
+                  'version': 0,
+                  'profiles': [
+                    {
+                      'id': '$prefix$name',
+                      'label': 'Untrusted',
+                      'autoUpdateDuration': 0,
+                    },
+                  ],
+                }),
+              ),
+              'profiles/placeholder.yaml': utf8.encode('proxies: []'),
+            });
+
+            await expectLater(
+              restore(archivePath),
+              failsWith(BackupFailure.invalid),
+            );
+
+            expect(outside.existsSync(), existing);
+            if (existing) {
+              expect(outside.readAsStringSync(), 'outside-secret');
+            }
+            expect(
+              Directory(join(staging.path, 'profiles'))
+                  .listSync()
+                  .whereType<File>()
+                  .map((file) => file.readAsStringSync()),
+              ['proxies: []'],
+            );
+          },
+        );
+      }
+    }
+
+    test('ignores ZIP symlinks without decoding their payload', () async {
+      final archive = Archive()
+        ..addFile(
+          ArchiveFile.string('profiles/link.yaml', '../../outside')
+            ..mode = 0xa1ff,
+        )
+        ..addFile(ArchiveFile.string(configJsonName, '{"version":1}'))
+        ..addFile(ArchiveFile.string('profiles/1.yaml', 'proxies: []'));
+      final bytes = ZipEncoder().encodeBytes(archive);
+      final directory = ZipDirectory()..read(InputMemoryStream(bytes));
+      final data = ByteData.sublistView(bytes);
+      data.setUint16(
+        directory.centralDirectoryOffset + 4,
+        (3 << 8) | 20,
+        Endian.little,
+      );
+      final offset = directory.fileHeaders.first.localHeaderOffset;
+      final contentOffset =
+          offset +
+          30 +
+          data.getUint16(offset + 26, Endian.little) +
+          data.getUint16(offset + 28, Endian.little);
+      bytes[contentOffset] = 0x07;
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      File(archivePath).writeAsBytesSync(bytes);
+
+      final restored = await restore(archivePath);
+
+      expect(restored.configMap?['version'], 1);
+      expect(
+        File(join(staging.path, 'profiles', '1.yaml')).readAsStringSync(),
+        'proxies: []',
+      );
+      expect(
+        FileSystemEntity.typeSync(
+          join(staging.path, 'profiles', 'link.yaml'),
+          followLinks: false,
+        ),
+        FileSystemEntityType.notFound,
+      );
+    });
+
+    test('rejects corrupted stored ZIP data', () async {
+      final payload = utf8.encode('proxies: []');
+      final archive = Archive()
+        ..addFile(ArchiveFile.string(configJsonName, '{"version":1}'))
+        ..addFile(
+          ArchiveFile.noCompress('profiles/1.yaml', payload.length, payload),
+        );
+      final bytes = ZipEncoder().encodeBytes(archive);
+      final directory = ZipDirectory()..read(InputMemoryStream(bytes));
+      final offset = directory.fileHeaders.last.localHeaderOffset;
+      final data = ByteData.sublistView(bytes);
+      final contentOffset =
+          offset +
+          30 +
+          data.getUint16(offset + 26, Endian.little) +
+          data.getUint16(offset + 28, Endian.little);
+      bytes[contentOffset] ^= 1;
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      File(archivePath).writeAsBytesSync(bytes);
+
+      await expectLater(restore(archivePath), failsWith(BackupFailure.invalid));
+
+      expect(File(archivePath).readAsBytesSync(), bytes);
+    });
+
+    for (final header in ['local', 'central']) {
+      test('rejects a corrupt ZIP $header CRC', () async {
+        final archive = Archive()
+          ..addFile(ArchiveFile.string(configJsonName, '{"version":1}'));
+        final bytes = ZipEncoder().encodeBytes(archive);
+        final directory = ZipDirectory()..read(InputMemoryStream(bytes));
+        final crcOffset = header == 'local'
+            ? directory.fileHeaders.single.localHeaderOffset + 14
+            : directory.centralDirectoryOffset + 16;
+        final data = ByteData.sublistView(bytes);
+        data.setUint32(
+          crcOffset,
+          data.getUint32(crcOffset, Endian.little) ^ 1,
+          Endian.little,
+        );
+        final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+        File(archivePath).writeAsBytesSync(bytes);
+
+        await expectLater(
+          restore(archivePath),
+          failsWith(BackupFailure.invalid),
+        );
+      });
+    }
+
+    test('validates stored and compressed CRC across output chunks', () async {
+      final payload = Uint8List.fromList(
+        List.generate(2 * 1024 * 1024 + 31, (index) => index % 251),
+      );
+      final archive = Archive()
+        ..addFile(ArchiveFile.string(configJsonName, '{"version":1}'))
+        ..addFile(ArchiveFile.bytes('profiles/1.yaml', payload))
+        ..addFile(
+          ArchiveFile.noCompress('profiles/2.yaml', payload.length, payload),
+        );
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      File(archivePath).writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+      await restore(archivePath);
+
+      for (final id in [1, 2]) {
+        expect(
+          File(join(staging.path, 'profiles', '$id.yaml')).readAsBytesSync(),
+          payload,
+        );
+      }
     });
 
     test(

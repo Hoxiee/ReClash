@@ -221,6 +221,8 @@ bool isProfileLinkInput(String input) {
       }
     } on FormatException {
       return false;
+    } on ArgumentError {
+      return false;
     }
   }
   try {

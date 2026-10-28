@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
+
+class _MockFile extends Mock implements File {}
 
 void main() {
   late Directory root;
@@ -15,6 +18,34 @@ void main() {
     if (root.existsSync()) {
       root.deleteSync(recursive: true);
     }
+  });
+
+  group('safeDelete', () {
+    test('tolerates a file removed after the existence check', () async {
+      final original = File(join(root.path, 'cache'))
+        ..writeAsStringSync('data');
+      final file = _MockFile();
+      when(file.exists).thenAnswer((_) async {
+        await original.delete();
+        return true;
+      });
+      when(
+        () => file.delete(recursive: false),
+      ).thenAnswer((_) => original.delete());
+
+      await expectLater(file.safeDelete(), completes);
+
+      expect(original.existsSync(), isFalse);
+    });
+
+    test('preserves errors other than a missing file', () async {
+      final failure = FileSystemException('Permission denied', root.path);
+      final file = _MockFile();
+      when(file.exists).thenAnswer((_) async => true);
+      when(() => file.delete(recursive: false)).thenThrow(failure);
+
+      await expectLater(file.safeDelete(), throwsA(same(failure)));
+    });
   });
 
   group('safeDeletePath', () {

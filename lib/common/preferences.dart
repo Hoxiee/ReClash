@@ -14,8 +14,10 @@ class Preferences {
   static Preferences? _instance;
   var _store = ResolveOnce(_open);
   bool _preventWrites = false;
+  bool _unreadableData = false;
 
-  Future<bool> get isInit async => await _store.value != null;
+  Future<bool> get isInit async =>
+      await _store.value != null && !_unreadableData;
 
   Preferences._internal();
 
@@ -30,6 +32,7 @@ class Preferences {
   @visibleForTesting
   Future<void> rebind() async {
     _preventWrites = false;
+    _unreadableData = false;
     _store = ResolveOnce(_open);
     await _store.value;
   }
@@ -69,10 +72,7 @@ class Preferences {
     await store?.setStringList('provider.notices', dismissed);
   }
 
-  Future<int> getVersion() async {
-    final preferences = await _store.value;
-    return preferences?.getInt('version') ?? 0;
-  }
+  Future<int> getVersion() => _readVersionMarker('version');
 
   Future<void> setVersion(int version) async {
     final preferences = await _store.value;
@@ -80,9 +80,16 @@ class Preferences {
     await preferences?.setInt('version', version);
   }
 
-  Future<int> getUpgradeVersion() async {
+  Future<int> getUpgradeVersion() => _readVersionMarker('upgradeVersion');
+
+  Future<int> _readVersionMarker(String key) async {
     final preferences = await _store.value;
-    return preferences?.getInt('upgradeVersion') ?? 0;
+    final value = preferences?.get(key);
+    if (value == null) return 0;
+    if (value is int && value >= 0) return value;
+    _unreadableData = true;
+    _preventWrites = true;
+    throw FormatException('Invalid preferences marker: $key');
   }
 
   Future<void> setUpgradeVersion(int version) async {
@@ -118,13 +125,13 @@ class Preferences {
       final preferences = await _store.value;
       final configString = preferences?.getString(configKey);
       if (configString == null) return null;
-      final Map<String, Object?>? configMap = json.decode(configString);
+      final Map<String, Object?> configMap = json.decode(configString);
       return configMap;
     } catch (e) {
-      commonPrint.log(
-        'getConfigMap error ${e.toString()}',
-        logLevel: LogLevel.warning,
-      );
+      _unreadableData = true;
+      _preventWrites = true;
+      final reason = e is FormatException ? e.message : e.runtimeType;
+      commonPrint.log('getConfigMap error $reason', logLevel: LogLevel.warning);
       return null;
     }
   }
@@ -136,8 +143,9 @@ class Preferences {
       if (clashConfigString == null) return null;
       return json.decode(clashConfigString);
     } catch (e) {
+      final reason = e is FormatException ? e.message : e.runtimeType;
       commonPrint.log(
-        'getClashConfigMap error ${e.toString()}',
+        'getClashConfigMap error $reason',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -251,11 +259,13 @@ class Preferences {
   }
 
   Future<void> clearPreferences({bool preventWrites = false}) async {
-    _preventWrites = preventWrites;
+    _preventWrites = _preventWrites || preventWrites;
     final sharedPreferencesIns = await _store.value;
     if (sharedPreferencesIns == null || !await sharedPreferencesIns.clear()) {
       throw StateError('Unable to clear preferences');
     }
+    _unreadableData = false;
+    _preventWrites = preventWrites;
   }
 }
 
