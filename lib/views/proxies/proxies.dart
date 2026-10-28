@@ -180,6 +180,34 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     );
   }
 
+  IconButtonData _buildFoldAction() {
+    final groups = ref.watch(
+      proxiesListStateProvider.select((state) => state.groups),
+    );
+    final groupNames = {for (final group in groups) group.name};
+    final unfoldSet = ref.watch(unfoldSetProvider);
+    final hasExpanded = groupNames.any(unfoldSet.contains);
+    return IconButtonData(
+      glyph: hasExpanded ? AppGlyphs.collapseAll : AppGlyphs.expandAll,
+      tooltip: hasExpanded
+          ? context.appLocalizations.collapseAllGroups
+          : context.appLocalizations.expandAllGroups,
+      onPressed: groupNames.isEmpty
+          ? null
+          : () {
+              final next = Set<String>.of(ref.read(unfoldSetProvider));
+              if (hasExpanded) {
+                next.removeAll(groupNames);
+              } else {
+                next.addAll(groupNames);
+              }
+              ref
+                  .read(proxiesActionProvider.notifier)
+                  .updateCurrentUnfoldSet(next);
+            },
+    );
+  }
+
   void _onSearch(String value) {
     ref.read(queryProvider(QueryTag.proxies).notifier).value = value;
   }
@@ -213,8 +241,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       resizeToAvoidBottomInset: false,
       primaryAction: primaryAction,
       searchActions: [?primaryAction],
+      actionGroupSize: _isTab && !picker ? 3 : 2,
       iconActions: [
-        if (_isTab && !picker) ?_buildRoutingAction(),
         if (_isTab && !picker)
           IconButtonData(
             glyph: AppGlyphs.locate,
@@ -223,6 +251,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
             },
             tooltip: context.appLocalizations.scrollToSelected,
           ),
+        if (_isTab && !picker) ?_buildRoutingAction(),
+        if (!_isTab && !picker) _buildFoldAction(),
       ],
       menuItems: picker ? const [] : _buildMenuItems(context, style),
       title: context.appLocalizations.proxies,

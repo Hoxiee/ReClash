@@ -1,3 +1,5 @@
 {
-  "proxyCardOneLine": "1行"
+  "proxyCardOneLine": "1行",
+  "expandAllGroups": "すべてのグループを展開",
+  "collapseAllGroups": "すべてのグループを折りたたむ"
 }

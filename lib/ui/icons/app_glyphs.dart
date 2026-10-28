@@ -170,6 +170,32 @@ abstract final class AppGlyphs {
     ], role: GlyphRole.line),
   ]);
 
+  static const expandAll = Glyph([
+    GlyphPolyline([
+      GlyphVertex(7, 8),
+      GlyphVertex(12, 3, 0.4),
+      GlyphVertex(17, 8),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(7, 16),
+      GlyphVertex(12, 21, 0.4),
+      GlyphVertex(17, 16),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const collapseAll = Glyph([
+    GlyphPolyline([
+      GlyphVertex(7, 5),
+      GlyphVertex(12, 10, 0.4),
+      GlyphVertex(17, 5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(7, 19),
+      GlyphVertex(12, 14, 0.4),
+      GlyphVertex(17, 19),
+    ], role: GlyphRole.line),
+  ]);
+
   static const picker = Glyph([
     GlyphPolyline([
       GlyphVertex(7.5, 9.5),

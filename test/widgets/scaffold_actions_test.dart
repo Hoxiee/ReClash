@@ -14,6 +14,7 @@ Future<List<String>> _pumpBar(
   List<String> icons = const [],
   List<String> menuItems = const [],
   List<String> selection = const [],
+  int actionGroupSize = 2,
 }) async {
   final taps = <String>[];
   IconButtonData action(String label) {
@@ -32,6 +33,7 @@ Future<List<String>> _pumpBar(
         title: 'Page',
         searchState: hasSearch ? AppBarSearchState(onSearch: (_) {}) : null,
         primaryAction: primary == null ? null : action(primary),
+        actionGroupSize: actionGroupSize,
         iconActions: [for (final label in icons) action(label)],
         selectionActions: [for (final label in selection) action(label)],
         menuItems: [
@@ -154,6 +156,33 @@ void main() {
     await _openMenu(tester);
     expect(_menuLabels(tester, ['Delay test', 'Locate', 'Settings']), [
       'Locate',
+      'Settings',
+    ]);
+  });
+
+  testWidgets('an enlarged action group keeps its third action outside more', (
+    tester,
+  ) async {
+    final taps = await _pumpBar(
+      tester,
+      hasSearch: true,
+      primary: 'Delay test',
+      icons: ['Locate', 'Routing'],
+      menuItems: ['Settings'],
+      actionGroupSize: 3,
+    );
+
+    expect(_barButtons(tester), ['Search', 'Delay test', 'Locate', 'More']);
+    expect(_inGroup('Search'), findsOneWidget);
+    expect(_inGroup('Delay test'), findsOneWidget);
+    expect(_inGroup('Locate'), findsOneWidget);
+    expect(_inGroup('More'), findsNothing);
+    await tester.tap(_inBar(find.byTooltip('Locate')));
+    expect(taps, ['Locate']);
+
+    await _openMenu(tester);
+    expect(_menuLabels(tester, ['Locate', 'Routing', 'Settings']), [
+      'Routing',
       'Settings',
     ]);
   });

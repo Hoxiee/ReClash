@@ -606,13 +606,15 @@ pixel-aligned stroke of Windows' 10-pixel caption glyphs on every platform.
 
 ## App Bar Actions
 
-`CommonScaffold` keeps at most three buttons in sight in its bar, the overflow menu button included. A page hands it
+By default, `CommonScaffold` keeps at most three buttons in sight in its bar, the overflow menu button included. A page hands it
 what may fold as data: `primaryAction`, `iconActions`, `menuItems`, and `searchActions` while searching; custom widgets
 passed through `actions` never fold. Past three, two buttons stay beside the overflow menu: the search button when
 there is one, then foldable actions, primary action first;
 everything else goes into one overflow menu, primary action first, and a folded action that is loading shows as a
 disabled item. The bar reads as one button group of two beside a single button: the overflow menu button when
-something folds, otherwise the last action, so the proxies list shows a search and delay test group beside the menu.
+something folds, otherwise the last action. A page can enlarge that leading group with `actionGroupSize`: the proxies
+tab view uses three for search, delay test and scroll to selected, with the menu still separate. Search-mode and
+selection action groups keep their default limits.
 The bar holds `primaryAction` everywhere, a phone's home page above the fixed navigation bar included, and nothing in
 the app floats an action button: a secondary action such as selecting every app goes into `menuItems`. Saving or
 confirming, in a page, a side sheet or a form, is a check in `confirmationAction`, never among `iconActions`: it ends

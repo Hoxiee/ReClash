@@ -183,13 +183,13 @@ void main() {
 
     await openProxiesMenu(tester);
     expect(inMenu(find.text(l10n.iconStyle)), findsNothing);
+    expect(inMenu(find.text(l10n.scrollToSelected)), findsNothing);
     expect(
-      tester.getTopLeft(inMenu(find.text(l10n.scrollToSelected))).dy,
-      lessThan(tester.getTopLeft(inMenu(find.byType(Divider)).first).dy),
-    );
-    expect(
-      tester.getTopLeft(inMenu(find.byType(Divider)).first).dy,
-      lessThan(tester.getTopLeft(inMenu(find.text(l10n.style))).dy),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byTooltip(l10n.scrollToSelected),
+      ),
+      findsOneWidget,
     );
     expect(tester.takeException(), null);
   });

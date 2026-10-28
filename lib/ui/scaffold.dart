@@ -61,10 +61,11 @@ class CommonScaffold extends StatefulWidget {
 
   final IconButtonData? primaryAction;
 
-  /// Folded into the overflow menu once the bar would hold more than three
-  /// buttons, as [primaryAction] and [menuItems] are; [actions] never fold.
+  /// Folded into the overflow menu past [actionGroupSize] plus one separate
+  /// button, as [primaryAction] and [menuItems] are; [actions] never fold.
   final List<IconButtonData> iconActions;
   final List<CommonPopupMenuItem> menuItems;
+  final int actionGroupSize;
 
   /// Answers a form: last in the bar, and in a form sheet the filled default
   /// at its foot beside cancel, where SwiftUI sets one on macOS.
@@ -105,11 +106,12 @@ class CommonScaffold extends StatefulWidget {
     this.primaryAction,
     this.iconActions = const [],
     this.menuItems = const [],
+    this.actionGroupSize = _maxGroupedActions,
     this.confirmationAction,
     this.onKeywordsUpdate,
     this.resizeToAvoidBottomInset,
     this.canSort = false,
-  });
+  }) : assert(actionGroupSize > 0);
 
   @override
   State<CommonScaffold> createState() => CommonScaffoldState();
@@ -636,9 +638,12 @@ class CommonScaffoldState extends State<CommonScaffold>
       widgetCount:
           widgets.length + selection.slots + (widget.trailing == null ? 0 : 1),
       menuItems: widget.menuItems,
+      maxButtons: widget.actionGroupSize + 1,
     );
     final shown = [?lead, ...fold.shown];
-    final grouped = shown.length > 1 ? shown.take(_maxGroupedActions) : null;
+    final grouped = shown.length > 1
+        ? shown.take(widget.actionGroupSize)
+        : null;
     final actions = [
       if (grouped != null)
         TonalButtonGroup(
@@ -2191,14 +2196,15 @@ _foldBarActions({
   IconButtonData? confirmation,
   int widgetCount = 0,
   List<CommonPopupMenuItem> menuItems = const [],
+  int maxButtons = _maxBarButtons,
 }) {
   final foldable = [?primary, ...icons];
   final fixed =
       (hasLead ? 1 : 0) + widgetCount + (confirmation == null ? 0 : 1);
-  if (fixed + foldable.length + (menuItems.isEmpty ? 0 : 1) <= _maxBarButtons) {
+  if (fixed + foldable.length + (menuItems.isEmpty ? 0 : 1) <= maxButtons) {
     return (shown: [...foldable, ?confirmation], overflow: menuItems);
   }
-  final slots = _maxBarButtons - 1 - fixed;
+  final slots = maxButtons - 1 - fixed;
   final kept = foldable.take(slots < 0 ? 0 : slots).toList();
   bool isKept(IconButtonData data) => kept.any((it) => identical(it, data));
   return (

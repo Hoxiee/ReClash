@@ -6,7 +6,9 @@ must:
   oneline: The proxy Size menu includes an oneline mode with the name and delay on one row in both list and tab layouts, without protocol details.
   persistence: The oneline card size round-trips as oneline without changing existing size names or legacy aliases.
   controls: Oneline cards retain independent proxy selection and delay-test controls, including keyboard access.
-watch: [lib/enum/enum.dart, lib/models/config.dart, lib/common/l10n_labels.dart, 'lib/views/proxies/card.dart', 'lib/views/proxies/common.dart', 'lib/views/proxies/proxies.dart', test/models/config_test.dart, test/widgets/proxy_card_focus_test.dart, 'arb/fragments/proxies.presentation/**']
+  toolbar: The tab view keeps search, delay test and scroll to selected together outside the overflow menu; the picker retains its minimal bar.
+  groups: The list view can collapse or expand all displayed groups, preserving hidden groups and disabling the action for an empty result.
+watch: [lib/enum/enum.dart, lib/models/config.dart, lib/common/l10n_labels.dart, 'lib/views/proxies/card.dart', 'lib/views/proxies/common.dart', 'lib/views/proxies/proxies.dart', test/models/config_test.dart, test/widgets/proxy_card_focus_test.dart, test/widgets/proxies_actions_test.dart, 'arb/fragments/proxies.presentation/**']
 checks:
   config: [persistence]
-  tests: [oneline, controls]
+  tests: [oneline, controls, toolbar, groups]

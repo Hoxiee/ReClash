@@ -25,6 +25,8 @@ final _glyphs = {
   'chevronForward': AppGlyphs.chevronForward,
   'chevronDown': AppGlyphs.chevronDown,
   'chevronUp': AppGlyphs.chevronUp,
+  'expandAll': AppGlyphs.expandAll,
+  'collapseAll': AppGlyphs.collapseAll,
   'picker': AppGlyphs.picker,
   'caretDown': AppGlyphs.caretDown,
   'arrowUp': AppGlyphs.arrowUp,

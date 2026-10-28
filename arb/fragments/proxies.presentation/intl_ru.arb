@@ -1,3 +1,5 @@
 {
-  "proxyCardOneLine": "Однострочный"
+  "proxyCardOneLine": "Однострочный",
+  "expandAllGroups": "Развернуть все группы",
+  "collapseAllGroups": "Свернуть все группы"
 }

@@ -1,3 +1,5 @@
 {
-  "proxyCardOneLine": "한 줄"
+  "proxyCardOneLine": "한 줄",
+  "expandAllGroups": "모든 그룹 펼치기",
+  "collapseAllGroups": "모든 그룹 접기"
 }

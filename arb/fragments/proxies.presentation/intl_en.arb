@@ -1,3 +1,5 @@
 {
-  "proxyCardOneLine": "One line"
+  "proxyCardOneLine": "One line",
+  "expandAllGroups": "Expand all groups",
+  "collapseAllGroups": "Collapse all groups"
 }

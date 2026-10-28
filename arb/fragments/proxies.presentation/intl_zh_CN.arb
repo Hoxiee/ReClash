@@ -1,3 +1,5 @@
 {
-  "proxyCardOneLine": "单行"
+  "proxyCardOneLine": "单行",
+  "expandAllGroups": "展开所有组",
+  "collapseAllGroups": "折叠所有组"
 }
