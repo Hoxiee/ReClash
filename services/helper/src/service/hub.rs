@@ -126,23 +126,42 @@ struct ErrorResponse {
     details: Option<ErrorDetails>,
 }
 
+#[derive(Debug)]
 struct ManagedCore {
     session_id: String,
     child: Child,
     #[cfg(windows)]
-    _job: CoreJob,
+    _job: Option<CoreJob>,
 }
 
 impl ManagedCore {
-    fn adopt(session_id: String, child: Child) -> Result<Self, Error> {
-        #[cfg(windows)]
-        let job = CoreJob::bind(&child)?;
-        Ok(Self {
+    fn adopt(session_id: String, child: Child) -> Result<Self, (Self, Error)> {
+        Self::adopt_with(session_id, child, Self::bind_job)
+    }
+
+    fn adopt_with(
+        session_id: String,
+        child: Child,
+        bind: impl FnOnce(&mut Self) -> Result<(), Error>,
+    ) -> Result<Self, (Self, Error)> {
+        let mut core = Self {
             session_id,
             child,
             #[cfg(windows)]
-            _job: job,
-        })
+            _job: None,
+        };
+        if let Err(error) = bind(&mut core) {
+            return Err((core, error));
+        }
+        Ok(core)
+    }
+
+    fn bind_job(&mut self) -> Result<(), Error> {
+        #[cfg(windows)]
+        {
+            self._job = Some(CoreJob::bind(&self.child)?);
+        }
+        Ok(())
     }
 
     fn terminate(&mut self) -> Result<(), Error> {
@@ -186,6 +205,7 @@ impl ManagedCore {
 /// Windows has no cgroup to take the Core down with a crashed Helper, so the
 /// Core lives in a job that the kernel kills when the Helper's handle closes.
 #[cfg(windows)]
+#[derive(Debug)]
 struct CoreJob(HANDLE);
 
 #[cfg(windows)]
@@ -424,6 +444,37 @@ fn release_managed_core(managed: &mut Option<ManagedCore>) -> Result<(), Error> 
     Ok(())
 }
 
+fn complete_core_adoption(
+    managed: &mut Option<ManagedCore>,
+    adoption: Result<ManagedCore, (ManagedCore, Error)>,
+    release: impl FnOnce(&mut Option<ManagedCore>) -> Result<(), Error>,
+) -> Result<(), warp::reply::Response> {
+    let (core, error) = match adoption {
+        Ok(core) => (core, None),
+        Err((core, error)) => (core, Some(error)),
+    };
+    *managed = Some(core);
+    let Some(error) = error else {
+        return Ok(());
+    };
+    log_message(format!("Helper could not confine the Core: {error}"));
+    if let Err(stop_error) = release(managed) {
+        log_message(format!(
+            "Helper could not stop the unconfined Core: {stop_error}"
+        ));
+        return Err(error_response(
+            "coreStopFailed",
+            format!("Core confinement failed: {error}; Core cleanup failed: {stop_error}"),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ));
+    }
+    Err(error_response(
+        "internalError",
+        format!("Core confinement failed: {error}"),
+        StatusCode::INTERNAL_SERVER_ERROR,
+    ))
+}
+
 fn json_response<T: Serialize>(value: &T, status: StatusCode) -> warp::reply::Response {
     warp::reply::with_status(warp::reply::json(value), status).into_response()
 }
@@ -600,17 +651,13 @@ fn launch(session_id: String, arguments: Vec<OsString>) -> warp::reply::Response
                     reap_core_exit(&session_id, Some(process_id));
                 });
             }
-            *managed = match ManagedCore::adopt(session_id.clone(), child) {
-                Ok(core) => Some(core),
-                Err(error) => {
-                    log_message(format!("Helper could not confine the Core: {error}"));
-                    return error_response(
-                        "internalError",
-                        format!("Core confinement failed: {error}"),
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                    );
-                }
-            };
+            if let Err(response) = complete_core_adoption(
+                &mut managed,
+                ManagedCore::adopt(session_id.clone(), child),
+                release_managed_core,
+            ) {
+                return response;
+            }
             json_response(
                 &StartResponse {
                     session_id,
@@ -1483,6 +1530,97 @@ mod tests {
             assert!(Instant::now() < deadline, "Core outlived its job");
             thread::sleep(CORE_EXIT_POLL_INTERVAL);
         }
+    }
+
+    #[tokio::test]
+    async fn confinement_failure_owns_the_child_until_cleanup_confirms_exit() {
+        let child = spawn_running_core();
+        let pid = child.id();
+        let adoption = ManagedCore::adopt_with(
+            "0123456789abcdef0123456789abcdef".to_string(),
+            child,
+            |_| Err(Error::other("injected job binding failure")),
+        );
+        let mut managed = None;
+        let mut owned_before_cleanup = None;
+        let response = complete_core_adoption(&mut managed, adoption, |managed| {
+            owned_before_cleanup = managed.as_ref().map(|core| core.child.id());
+            release_managed_core(managed)
+        });
+        let exit_confirmed = managed.is_none();
+        release_managed_core(&mut managed).unwrap();
+
+        assert_eq!(owned_before_cleanup, Some(pid));
+        assert!(exit_confirmed, "the unconfined child was not reaped");
+        let response = response.unwrap_err();
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+        let body: serde_json::Value = serde_json::from_slice(
+            &warp::hyper::body::to_bytes(response.into_body())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(body["code"], "internalError");
+        assert!(body["message"]
+            .as_str()
+            .unwrap()
+            .contains("injected job binding failure"));
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    #[allow(clippy::await_holding_lock)]
+    async fn confinement_failure_keeps_an_unconfirmed_child_owned_and_blocks_replacement() {
+        let _state = lock_process_state();
+        let session_id = "0123456789abcdef0123456789abcdef";
+        let child = spawn_running_core();
+        let pid = child.id();
+        let adoption = ManagedCore::adopt_with(session_id.to_string(), child, |_| {
+            Err(Error::other("injected job binding failure"))
+        });
+        let response =
+            complete_core_adoption(&mut lock_surviving_poison(&MANAGED_CORE), adoption, |_| {
+                Err(Error::other("injected unconfirmed exit"))
+            });
+        let (owned_pid, alive) = {
+            let mut managed = lock_surviving_poison(&MANAGED_CORE);
+            match managed.as_mut() {
+                Some(core) => (
+                    Some(core.child.id()),
+                    core.child.try_wait().unwrap().is_none(),
+                ),
+                None => (None, false),
+            }
+        };
+        let replacement = launch(
+            "fedcba9876543210fedcba9876543210".to_string(),
+            vec![OsString::from(ALLOWED_CORE_ADDRESS)],
+        );
+        let cleanup = stop_core(StopParams {
+            session_id: session_id.to_string(),
+        });
+
+        assert_eq!(owned_pid, Some(pid));
+        assert!(alive);
+        assert_eq!(cleanup.status(), StatusCode::OK);
+        assert!(lock_surviving_poison(&MANAGED_CORE).is_none());
+        let response = response.unwrap_err();
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+        let body: serde_json::Value = serde_json::from_slice(
+            &warp::hyper::body::to_bytes(response.into_body())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(body["code"], "coreStopFailed");
+        assert_eq!(replacement.status(), StatusCode::CONFLICT);
+        let body: serde_json::Value = serde_json::from_slice(
+            &warp::hyper::body::to_bytes(replacement.into_body())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(body["code"], "coreStopFailed");
     }
 
     #[test]

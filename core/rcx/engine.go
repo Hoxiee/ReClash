@@ -57,6 +57,8 @@ type counter struct {
 	fails   atomic.Int32
 }
 
+type nodeCounters map[string]*counter
+
 // Engine serialises every change to the machine under one lock. Hot paths
 // (dials, first bytes) only bump counters and arm one coalesced drain, so a
 // burst of traffic costs a few atomic adds.
@@ -77,11 +79,14 @@ type Engine struct {
 	lastPublish time.Time
 	lastSave    time.Time
 
-	counters      sync.Map
-	failDrainSet  atomic.Bool
-	trafficDrain  atomic.Bool
+	counters      atomic.Pointer[nodeCounters]
+	drainPending  atomic.Uint32
+	drainMu       sync.Mutex
+	drainTimer    *time.Timer
+	drainAt       time.Time
+	drainRevision uint64
+	drainClosed   bool
 	urlTests      chan urlTest
-	urlTestsArmed atomic.Bool
 	userSlots     chan struct{}
 	split         atomic.Pointer[string]
 }
@@ -226,8 +231,11 @@ func (e *Engine) arm(due, now time.Time) {
 func (e *Engine) onTimer() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	if e.closed {
+		return
+	}
 	e.dueAt = time.Time{}
-	e.drainLocked()
+	e.drainLocked(0)
 	e.stepLocked()
 }
 
@@ -301,6 +309,9 @@ func (e *Engine) diagnose(targets []Target) probeResult {
 func (e *Engine) with(run func(now time.Time)) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	if e.closed {
+		return
+	}
 	run(e.now())
 	e.stepLocked()
 }
@@ -314,6 +325,7 @@ func (e *Engine) SetTopology(topology Topology) {
 			topology.User = nil
 		}
 		e.m.topology = topology
+		e.refreshCounters(topology)
 		e.m.rebuild(now)
 	})
 }
@@ -384,12 +396,20 @@ func (e *Engine) Flush() {
 func (e *Engine) Close() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	e.saveLocked(e.now())
+	if e.closed {
+		return
+	}
 	e.closed = true
+	e.counters.Store(nil)
+	e.drainMu.Lock()
+	e.drainClosed = true
+	e.cancelDrainLocked()
+	e.drainMu.Unlock()
 	e.cancel()
 	if e.timer != nil {
 		e.timer.Stop()
 	}
+	e.saveLocked(e.now())
 }
 
 // SplitTarget is the group DIRECT rules should go through now, or empty. It
@@ -401,12 +421,40 @@ func (e *Engine) SplitTarget() string {
 	return ""
 }
 
-func (e *Engine) counter(node string) *counter {
-	if c, ok := e.counters.Load(node); ok {
-		return c.(*counter)
+func (e *Engine) refreshCounters(topology Topology) {
+	previous := e.counters.Load()
+	next := make(nodeCounters, len(topology.Leaves))
+	add := func(node string) {
+		if _, exists := next[node]; exists {
+			return
+		}
+		var c *counter
+		if previous != nil {
+			c = (*previous)[node]
+		}
+		if c == nil {
+			c = &counter{}
+		}
+		next[node] = c
 	}
-	c, _ := e.counters.LoadOrStore(node, &counter{})
-	return c.(*counter)
+	for _, group := range topology.Groups {
+		add(group.Name)
+		for _, member := range group.Members {
+			add(member.Name)
+		}
+	}
+	for _, node := range topology.Leaves {
+		add(node)
+	}
+	// In-flight callbacks keep reaching retained nodes through the same atomics.
+	e.counters.Store(&next)
+}
+
+func (e *Engine) counter(node string) *counter {
+	if counters := e.counters.Load(); counters != nil {
+		return (*counters)[node]
+	}
+	return nil
 }
 
 // NoteDial counts a dial through a node. Only failures matter here; a dial
@@ -415,59 +463,117 @@ func (e *Engine) NoteDial(node string, failed bool) {
 	if !failed {
 		return
 	}
-	e.counter(node).fails.Add(1)
-	if e.failDrainSet.CompareAndSwap(false, true) {
-		time.AfterFunc(failureDrainDelay, e.drain)
+	if c := e.counter(node); c != nil {
+		c.fails.Add(1)
+		e.scheduleDrain(true)
 	}
 }
 
 // NoteTraffic records that a connection through the node received data.
 func (e *Engine) NoteTraffic(node string) {
-	e.counter(node).traffic.Add(1)
-	if e.trafficDrain.CompareAndSwap(false, true) {
-		time.AfterFunc(trafficDrainDelay, e.drain)
+	if c := e.counter(node); c != nil {
+		c.traffic.Add(1)
+		e.scheduleDrain(false)
 	}
 }
 
 // NoteURLTest takes any URL test of the configured test URL, including the
 // user's own delay tests, as a measurement.
 func (e *Engine) NoteURLTest(node string, ms int) {
+	if e.counter(node) == nil {
+		return
+	}
 	select {
 	case e.urlTests <- urlTest{node: node, ms: ms}:
+		e.scheduleDrain(false)
 	default:
 	}
-	if e.urlTestsArmed.CompareAndSwap(false, true) {
-		time.AfterFunc(trafficDrainDelay, e.drain)
+}
+
+func (e *Engine) scheduleDrain(urgent bool) {
+	priority := uint32(1)
+	if urgent {
+		priority = 2
 	}
+	for {
+		pending := e.drainPending.Load()
+		if pending >= priority {
+			return
+		}
+		if e.drainPending.CompareAndSwap(pending, priority) {
+			break
+		}
+	}
+	e.drainMu.Lock()
+	defer e.drainMu.Unlock()
+	if e.drainClosed {
+		e.drainPending.Store(0)
+		return
+	}
+	pending := e.drainPending.Load()
+	if pending == 0 {
+		return
+	}
+	delay := trafficDrainDelay
+	if pending == 2 {
+		delay = failureDrainDelay
+	}
+	due := time.Now().Add(delay)
+	if !e.drainAt.IsZero() && !due.Before(e.drainAt) {
+		return
+	}
+	if e.drainTimer != nil {
+		e.drainTimer.Stop()
+	}
+	e.drainRevision++
+	revision := e.drainRevision
+	e.drainAt = due
+	e.drainTimer = time.AfterFunc(delay, func() { e.drain(revision) })
+}
+
+func (e *Engine) cancelDrainLocked() {
+	if e.drainTimer != nil {
+		e.drainTimer.Stop()
+		e.drainTimer = nil
+	}
+	e.drainAt = time.Time{}
+	e.drainRevision++
+	e.drainPending.Store(0)
 }
 
 func (e *Engine) NoteManualPick(group, node string) {
 	e.with(func(now time.Time) { e.m.onManualPick(group, node, now) })
 }
 
-func (e *Engine) drain() {
+func (e *Engine) drain(revision uint64) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	e.drainLocked()
-	e.stepLocked()
+	if e.drainLocked(revision) {
+		e.stepLocked()
+	}
 }
 
-func (e *Engine) drainLocked() {
-	e.failDrainSet.Store(false)
-	e.trafficDrain.Store(false)
-	e.urlTestsArmed.Store(false)
+func (e *Engine) drainLocked(revision uint64) bool {
+	e.drainMu.Lock()
+	if e.drainClosed || revision != 0 && revision != e.drainRevision {
+		e.drainMu.Unlock()
+		return false
+	}
+	// Reset before swapping counters: later events must be able to arm their own drain.
+	e.cancelDrainLocked()
+	e.drainMu.Unlock()
 	now := e.now()
 	traffic, fails := map[string]int{}, map[string]int{}
-	e.counters.Range(func(key, value any) bool {
-		c := value.(*counter)
-		if n := c.traffic.Swap(0); n > 0 {
-			traffic[key.(string)] = int(n)
+	if counters := e.counters.Load(); counters != nil {
+		for node, c := range *counters {
+			if n := c.traffic.Swap(0); n > 0 {
+				traffic[node] = int(n)
+			}
+			if n := c.fails.Swap(0); n > 0 {
+				fails[node] = int(n)
+			}
 		}
-		if n := c.fails.Swap(0); n > 0 {
-			fails[key.(string)] = int(n)
-		}
-		return true
-	})
+	}
 	if len(traffic) > 0 {
 		e.m.onTraffic(traffic, now)
 	}
@@ -479,7 +585,7 @@ func (e *Engine) drainLocked() {
 		case t := <-e.urlTests:
 			e.m.onURLTest(t.node, t.ms, now)
 		default:
-			return
+			return true
 		}
 	}
 }

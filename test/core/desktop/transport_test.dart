@@ -138,6 +138,29 @@ void main() {
       expect(transport.state, DesktopTransportState.connected);
     });
 
+    test('connection timeouts release their event subscriptions', () async {
+      await transport.open();
+      for (var attempt = 0; attempt < 3; attempt++) {
+        await expectLater(
+          transport.waitUntilConnected(Duration.zero),
+          throwsA(isA<TimeoutException>()),
+        );
+        await pumpEventQueue();
+        expect(transport.hasEventListeners, isFalse);
+      }
+    });
+
+    test('closing releases a pending connection wait', () async {
+      await transport.open();
+      final waiting = expectLater(
+        transport.waitUntilConnected(const Duration(seconds: 1)),
+        throwsStateError,
+      );
+      await transport.close();
+      await waiting;
+      expect(transport.hasEventListeners, isFalse);
+    });
+
     test('hands outgoing frames to the server', () async {
       await transport.open();
 

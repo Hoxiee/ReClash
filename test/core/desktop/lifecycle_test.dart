@@ -10,6 +10,42 @@ import 'fakes.dart';
 const _sessionId = '0123456789abcdef0123456789abcdef';
 
 void main() {
+  test('running timeouts release their state subscriptions', () async {
+    final transport = FakeDesktopCoreTransport();
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: MutableLauncherResolver(
+        FakeLauncher(owner: CoreProcessOwner.direct, pid: 42),
+      ),
+    );
+    addTearDown(lifecycle.close);
+    for (var attempt = 0; attempt < 3; attempt++) {
+      await expectLater(
+        lifecycle.waitUntilRunning(Duration.zero),
+        throwsA(isA<TimeoutException>()),
+      );
+      await pumpEventQueue();
+      expect(lifecycle.hasStateListeners, isFalse);
+    }
+  });
+
+  test('closing releases a pending running wait', () async {
+    final transport = FakeDesktopCoreTransport();
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: MutableLauncherResolver(
+        FakeLauncher(owner: CoreProcessOwner.direct, pid: 42),
+      ),
+    );
+    final waiting = expectLater(
+      lifecycle.waitUntilRunning(const Duration(seconds: 1)),
+      throwsStateError,
+    );
+    await lifecycle.close();
+    await waiting;
+    expect(lifecycle.hasStateListeners, isFalse);
+  });
+
   test(
     'publishes running only after ready, launch, connection, and PID match',
     () async {

@@ -336,13 +336,12 @@ Android deliberately keeps Flutter requests optimistic and the native layer auth
   established `VpnService` alive through its own connection, so a binding dropped on exit left a tunnel that was
   reported as running but that neither a stop nor a revoke could reach.
 - The Core listens exactly while `runtime` is set: a successful start ends in `Core.startListener()` and every path
-  that clears `runtime` calls `Core.stopListener()`. Both return at once when the Core is already there, which is the
-  usual case, since `startTun`/`stopTun` and Flutter's own `startListener`/`stopListener` got there first. They matter
-  when nothing else does: a proxy-only run stopped from the tile used to keep the mixed port open with nothing
-  reported as running. A start closes after itself the same way: Flutter's `startListener` and the native `quickSetup`
-  both open the ports before any service exists, so a start that ends without a `runtime`, refused or cancelled, stops
-  the empty service once more, without passing through `STOPPING`. Flutter may be gone by then and never see the
-  `stopped` report.
+  that clears `runtime` calls `Core.stopListener()`. Both return at once when `startTun`/`stopTun` already did the work.
+  `CoreLib.startListener()` and `stopListener()` send only optimistic service commands: a separate Core RPC could
+  arrive after a newer native transition and reverse it. The native calls also cover proxy-only runs, where stopping
+  from the tile used to leave the mixed port open with nothing reported as running. Native `quickSetup` can open ports
+  before any service exists, so a start that ends without a `runtime`, refused or cancelled, stops the empty service
+  once more, without passing through `STOPPING`. Flutter may be gone by then and never see the `stopped` report.
 - A start that does not bring the service up gives its intent back and takes down whatever it left running, unless a
   newer request has claimed the service. A failed start therefore always ends in `STOPPED`, whichever step refused it.
   The one start that mints no request is a repeat on a settled run of the same kind, which Flutter sends every time it

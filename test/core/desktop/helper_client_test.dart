@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/lifecycle.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -366,6 +367,79 @@ void main() {
       expect(requests.last.data, {'sessionId': _sessionId});
     },
   );
+
+  test(
+    'uncertain Helper cleanup blocks replacement until stop succeeds',
+    () async {
+      var canStop = false;
+      final stoppedSessions = <String>[];
+      final client = _client(
+        _ResponseAdapter((options) {
+          if (options.path.endsWith('/stop')) {
+            stoppedSessions.add((options.data as Map)['sessionId'] as String);
+            if (canStop) {
+              return _jsonResponse({
+                'sessionId': _sessionId,
+                'stopped': false,
+                'reason': 'notRunning',
+              });
+            }
+          }
+          throw DioException(
+            requestOptions: options,
+            type: DioExceptionType.connectionError,
+          );
+        }),
+      );
+      final transport = FakeDesktopCoreTransport();
+      final resolver = MutableLauncherResolver(HelperLauncher(client));
+      final lifecycle = DesktopCoreLifecycle(
+        transportFactory: () => transport,
+        launcherResolver: resolver,
+        sessionIdFactory: () => _sessionId,
+        timeouts: const DesktopCoreTimeouts(
+          connection: Duration(milliseconds: 10),
+          disconnection: Duration(milliseconds: 10),
+        ),
+      );
+      addTearDown(lifecycle.close);
+      final start = lifecycle.start();
+      transport.ready();
+      await expectLater(start, throwsA(isA<DesktopCoreFailure>()));
+
+      final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+      resolver.launcher = direct;
+      await expectLater(lifecycle.start(), throwsA(isA<DesktopCoreFailure>()));
+      expect(direct.startCount, 0);
+      expect(stoppedSessions, [_sessionId, _sessionId]);
+
+      canStop = true;
+      final retry = lifecycle.start();
+      await direct.started;
+      transport.connect(pid: 42, generation: 1);
+      expect((await retry).session?.pid, 42);
+      expect(stoppedSessions, [_sessionId, _sessionId, _sessionId]);
+      final closing = lifecycle.close();
+      await direct.lease.stopStarted;
+      transport.disconnect(1);
+      await closing;
+    },
+  );
+
+  test('home lookup failure never attempts a Helper request', () async {
+    final adapter = _ResponseAdapter(
+      (_) => throw StateError('unexpected request'),
+    );
+    final launcher = HelperLauncher(
+      _client(adapter),
+      homeDirectory: () async => throw StateError('home unavailable'),
+    );
+    await expectLater(
+      launcher.start(sessionId: _sessionId, address: 'test-address'),
+      throwsStateError,
+    );
+    expect(adapter.requestCount, 0);
+  });
 
   test(
     'ping requires the current protocol and the expected Helper path',

@@ -17,6 +17,22 @@ abstract interface class CoreProcessLauncher {
   });
 }
 
+final class CoreLaunchCleanupFailure implements Exception {
+  final String sessionId;
+  final Object cause;
+  final Future<void> Function() retryCleanup;
+
+  const CoreLaunchCleanupFailure({
+    required this.sessionId,
+    required this.cause,
+    required this.retryCleanup,
+  });
+
+  @override
+  String toString() =>
+      'Core launch cleanup for $sessionId is unconfirmed: $cause';
+}
+
 abstract interface class CoreLaunchAttempt {
   String get sessionId;
   Future<void> get spawned;

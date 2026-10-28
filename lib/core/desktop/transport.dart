@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:rust_api/rust_api.dart';
 
 typedef IpcServerBinder = Future<IpcServer> Function(String address);
@@ -179,6 +180,9 @@ final class IpcCoreTransport implements DesktopCoreTransport {
   @override
   DesktopTransportState get state => _state;
 
+  @visibleForTesting
+  bool get hasEventListeners => _eventController.hasListener;
+
   @override
   Stream<DesktopTransportEvent> get events => _eventController.stream;
 
@@ -297,17 +301,18 @@ final class IpcCoreTransport implements DesktopCoreTransport {
       return Future.error(failure.error, failure.stackTrace);
     }
     return events
-        .firstWhere(
+        .where(
           (event) => event is TransportConnected || event is TransportFailed,
         )
+        .timeout(timeout)
+        .first
         .then<TransportConnected>((event) {
           if (event case TransportConnected()) {
             return event;
           }
           final failure = event as TransportFailed;
           Error.throwWithStackTrace(failure.error, failure.stackTrace);
-        })
-        .timeout(timeout);
+        });
   }
 
   @override

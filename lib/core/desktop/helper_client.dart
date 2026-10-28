@@ -488,11 +488,12 @@ final class HelperLauncher implements CoreProcessLauncher {
     required String sessionId,
     required String address,
   }) async {
+    final home = await homeDirectory?.call();
     try {
       final response = await client.start(
         address: address,
         sessionId: sessionId,
-        home: await homeDirectory?.call(),
+        home: home,
       );
       return HelperCoreLease(
         sessionId: response.sessionId,
@@ -509,6 +510,19 @@ final class HelperLauncher implements CoreProcessLauncher {
           '${compactError(releaseError)}',
           logLevel: LogLevel.warning,
         );
+        if (error is! HelperException ||
+            !_preSpawnHelperErrors.contains(error.code)) {
+          Error.throwWithStackTrace(
+            CoreLaunchCleanupFailure(
+              sessionId: sessionId,
+              cause: error,
+              retryCleanup: () async {
+                await client.stop(sessionId);
+              },
+            ),
+            stackTrace,
+          );
+        }
       }
       Error.throwWithStackTrace(error, stackTrace);
     }

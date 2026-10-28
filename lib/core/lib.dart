@@ -15,11 +15,14 @@ class CoreLib extends CoreHandlerInterface {
   static CoreLib? _instance;
 
   final Service? _service;
+  final _lifecycleScheduler = SerialTaskScheduler();
 
   Completer<bool> _connectedCompleter = Completer<bool>();
   Future<CoreLifecycleResult>? _closeOperation;
   int _lifecycleRevision = 0;
+  int _connectionGeneration = 0;
   int _methodCallId = 0;
+  bool _initialized = false;
   bool _closed = false;
 
   CoreLib._internal() : _service = service;
@@ -43,38 +46,64 @@ class CoreLib extends CoreHandlerInterface {
       throw StateError('Core lifecycle is closed');
     }
     final revision = ++_lifecycleRevision;
+    final generation = _connectionGeneration;
+    return _lifecycleScheduler.run(() => _start(revision, generation));
+  }
+
+  bool _isCurrent(int generation) =>
+      !_closed && generation == _connectionGeneration;
+
+  CoreLifecycleResult _superseded(int revision) => CoreLifecycleResult(
+    revision: revision,
+    outcome: CoreLifecycleOutcome.superseded,
+  );
+
+  Future<CoreLifecycleResult> _start(int revision, int generation) async {
+    if (!_isCurrent(generation)) return _superseded(revision);
     if (_connectedCompleter.isCompleted) {
       return CoreLifecycleResult(
         revision: revision,
         outcome: CoreLifecycleOutcome.coalesced,
       );
     }
+    await _shutdown();
+    if (!_isCurrent(generation)) return _superseded(revision);
     final initializationError = await _service?.init() ?? '';
     if (initializationError.isNotEmpty) {
+      if (_isCurrent(generation)) _resetConnection();
       throw StateError(initializationError);
     }
-    await globalState.container.read(vpnOptionsProvider.future);
-    _connectedCompleter.complete(true);
-    final syncError =
-        await _service?.syncState(
-          globalState.container.read(sharedStateProvider),
-        ) ??
-        '';
-    if (syncError.isNotEmpty) {
-      _connectedCompleter = Completer<bool>();
-      await _service?.shutdown();
-      throw StateError(syncError);
+    _initialized = true;
+    try {
+      if (!_isCurrent(generation)) return _superseded(revision);
+      await globalState.container.read(vpnOptionsProvider.future);
+      if (!_isCurrent(generation)) return _superseded(revision);
+      final syncError =
+          await _service?.syncState(
+            globalState.container.read(sharedStateProvider),
+          ) ??
+          '';
+      if (syncError.isNotEmpty) throw StateError(syncError);
+      if (!_isCurrent(generation)) return _superseded(revision);
+      _connectedCompleter.complete(true);
+      return CoreLifecycleResult(
+        revision: revision,
+        outcome: CoreLifecycleOutcome.applied,
+      );
+    } catch (_) {
+      if (_isCurrent(generation)) _resetConnection();
+      await _shutdown();
+      rethrow;
     }
-    return CoreLifecycleResult(
-      revision: revision,
-      outcome: CoreLifecycleOutcome.applied,
-    );
   }
 
   @override
   Future<CoreLifecycleResult> restart() async {
-    await stop();
-    return start();
+    if (_closed) throw StateError('Core lifecycle is closed');
+    final revision = ++_lifecycleRevision;
+    final generation = ++_connectionGeneration;
+    _resetConnection();
+    return _lifecycleScheduler.run(() => _start(revision, generation));
   }
 
   @override
@@ -85,21 +114,34 @@ class CoreLib extends CoreHandlerInterface {
       throw StateError('Core lifecycle is closed');
     }
     final revision = ++_lifecycleRevision;
-    if (!_connectedCompleter.isCompleted) {
+    _connectionGeneration++;
+    _resetConnection();
+    return _lifecycleScheduler.run(() async {
+      final initialized = _initialized;
+      await _shutdown();
       return CoreLifecycleResult(
         revision: revision,
-        outcome: CoreLifecycleOutcome.coalesced,
+        outcome: revision != _lifecycleRevision
+            ? CoreLifecycleOutcome.superseded
+            : initialized
+            ? CoreLifecycleOutcome.applied
+            : CoreLifecycleOutcome.coalesced,
       );
-    }
+    });
+  }
+
+  void _resetConnection() {
+    if (!_connectedCompleter.isCompleted) _connectedCompleter.complete(false);
     _connectedCompleter = Completer<bool>();
+  }
+
+  Future<void> _shutdown() async {
+    if (!_initialized) return;
     final stopped = await _service?.shutdown() ?? true;
     if (!stopped) {
       throw StateError('Android Core service shutdown failed');
     }
-    return CoreLifecycleResult(
-      revision: revision,
-      outcome: CoreLifecycleOutcome.applied,
-    );
+    _initialized = false;
   }
 
   @override
@@ -112,19 +154,18 @@ class CoreLib extends CoreHandlerInterface {
     return _stop(allowClosed: true);
   }
 
-  // The service opens and closes the Core's listeners itself and reports a run
-  // that ends, so once it takes the command the Core's own answer is moot.
+  // Native service transitions own the Core listeners. Separate RPCs here
+  // could arrive after a newer service command and reverse its intent.
   @override
   Future<bool> startListener() async {
-    await super.startListener();
+    if (_closed) return false;
     return await _service?.start() ?? false;
   }
 
   @override
   Future<bool> stopListener() async {
-    final serviceStopped = await _service?.stop() ?? false;
-    await super.stopListener();
-    return serviceStopped;
+    if (_closed) return false;
+    return await _service?.stop() ?? false;
   }
 
   @override
@@ -147,8 +188,17 @@ class CoreLib extends CoreHandlerInterface {
     required CoreMethod method,
     Object? arguments,
   }) async {
+    if (_closed) return null;
+    final connection = _connectedCompleter;
     try {
-      await _connectedCompleter.future.timeout(coreConnectionWaitDuration);
+      final connected = await connection.future.timeout(
+        coreConnectionWaitDuration,
+      );
+      if (!connected ||
+          _closed ||
+          !identical(connection, _connectedCompleter)) {
+        return null;
+      }
     } catch (error) {
       commonPrint.log(
         'Invoke method ${method.name} before connection timed out: $error',

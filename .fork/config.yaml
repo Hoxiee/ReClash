@@ -67,7 +67,7 @@ checks:
   native-privileges:
     argv: [flutter, test, test/core/desktop, test/core/service_test.dart, test/providers/action_test.dart, test/providers/setup_action_test.dart, test/providers/common_action_test.dart, test/providers/state_derived_test.dart, test/common/launch_test.dart, test/common/system_test.dart]
   core-contracts:
-    argv: [flutter, test, test/core/controller_test.dart, test/core/desktop/lifecycle_test.dart, test/core/protocol_contract_test.dart]
+    argv: [flutter, test, test/core/controller_test.dart, test/core/lib_test.dart, test/core/desktop/lifecycle_test.dart, test/core/desktop/transport_test.dart, test/core/desktop/helper_client_test.dart, test/core/protocol_contract_test.dart]
   desktop-window:
     argv: [flutter, test, test/manager/window_manager_test.dart, test/manager/window_header_test.dart, test/common/window_test.dart, test/common/window_visibility_test.dart]
   proxies-groups:

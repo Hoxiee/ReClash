@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import 'launcher.dart';
 import 'model.dart';
 import 'transport.dart';
@@ -152,6 +154,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   Future<void>? _unexpectedDisconnectOperation;
   CoreProcessLease? _unconfirmedLease;
   CoreLaunchAttempt? _unconfirmedAttempt;
+  CoreLaunchCleanupFailure? _unconfirmedLaunch;
   Future<CoreLifecycleResult>? _closeResult;
   int _revision = 0;
   _LifecycleIntent _desired = const _LifecycleIntent(
@@ -196,6 +199,9 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
 
   @override
   Stream<DesktopCoreState> get states => _stateController.stream;
+
+  @visibleForTesting
+  bool get hasStateListeners => _stateController.hasListener;
 
   @override
   Stream<DesktopCoreFailure> get crashEvents => _crashController.stream;
@@ -300,6 +306,16 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   }
 
   Future<_LifecycleAchievement> _reconcile(_LifecycleIntent intent) async {
+    final unconfirmedLaunch = _unconfirmedLaunch;
+    if (unconfirmedLaunch != null) {
+      try {
+        await unconfirmedLaunch.retryCleanup();
+        _unconfirmedLaunch = null;
+      } catch (_) {
+        if (intent.target != _LifecycleTarget.closed) rethrow;
+        _unconfirmedLaunch = null;
+      }
+    }
     final pendingAttempt = _unconfirmedAttempt;
     if (pendingAttempt != null) {
       try {
@@ -514,6 +530,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       _publish(DesktopCoreRunning(session));
       return true;
     } catch (error, stackTrace) {
+      if (error is CoreLaunchCleanupFailure) _unconfirmedLaunch = error;
       try {
         await releaseLease();
       } on DesktopCoreFailure catch (cleanupFailure) {
@@ -935,12 +952,14 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       return Future.error(StateError('Desktop Core lifecycle is closed'));
     }
     return states
-        .firstWhere(
+        .where(
           (state) =>
               state is DesktopCoreRunning ||
               state is DesktopCoreFailed ||
               state is DesktopCoreClosed,
         )
+        .timeout(timeout)
+        .first
         .then<DesktopCoreSession>((state) {
           if (state case DesktopCoreRunning(:final session)) {
             return session;
@@ -952,7 +971,6 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
             );
           }
           throw StateError('Desktop Core lifecycle is closed');
-        })
-        .timeout(timeout);
+        });
   }
 }

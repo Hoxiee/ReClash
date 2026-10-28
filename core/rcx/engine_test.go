@@ -2,8 +2,12 @@ package rcx
 
 import (
 	"context"
+	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"testing/synctest"
+	"time"
 )
 
 type memStore struct {
@@ -137,4 +141,153 @@ func TestChipsMergeLayersAndDropBrokenPools(t *testing.T) {
 		t.Fatalf("chips: %v", labels)
 	}
 	e.Close()
+}
+
+func TestEngineCoalescesMixedDrainTimers(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		defer e.Close()
+		e.SetTopology(engineTopology())
+		var clockReads atomic.Int32
+		e.now = func() time.Time {
+			clockReads.Add(1)
+			return time.Now()
+		}
+
+		e.NoteTraffic("a")
+		e.NoteURLTest("b", 80)
+		e.NoteDial("a", true)
+		time.Sleep(time.Second)
+		synctest.Wait()
+		if e.counter("a").traffic.Load() != 0 || e.counter("a").fails.Load() != 0 || len(e.urlTests) != 0 {
+			t.Fatal("the early failure drain did not consume the whole batch")
+		}
+		reads := clockReads.Load()
+		time.Sleep(2 * trafficDrainDelay)
+		synctest.Wait()
+		if got := clockReads.Load(); got != reads {
+			t.Fatalf("an already consumed batch woke the engine again: %d clock reads", got-reads)
+		}
+	})
+}
+
+func TestEngineCloseCancelsEventDrains(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		e.SetTopology(engineTopology())
+		var clockReads atomic.Int32
+		e.now = func() time.Time {
+			clockReads.Add(1)
+			return time.Now()
+		}
+		e.NoteTraffic("a")
+		e.NoteURLTest("b", 80)
+		e.NoteDial("a", true)
+		e.Close()
+		reads := clockReads.Load()
+
+		time.Sleep(2 * trafficDrainDelay)
+		synctest.Wait()
+		if got := clockReads.Load(); got != reads {
+			t.Fatalf("pending event drains ran after Close: %d clock reads", got-reads)
+		}
+	})
+}
+
+func TestEngineCloseRejectsLateEventsAndTimer(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		e.SetTopology(engineTopology())
+		e.Close()
+		var clockReads atomic.Int32
+		e.now = func() time.Time {
+			clockReads.Add(1)
+			return time.Now()
+		}
+
+		e.NoteTraffic("a")
+		e.NoteURLTest("b", 80)
+		e.NoteDial("a", true)
+		e.onTimer()
+		time.Sleep(2 * trafficDrainDelay)
+		synctest.Wait()
+		if got := clockReads.Load(); got != 0 {
+			t.Fatalf("late callbacks woke a closed engine: %d clock reads", got)
+		}
+	})
+}
+
+func TestEngineCountersFollowTopology(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		defer e.Close()
+		e.SetTopology(engineTopology())
+		e.NoteTraffic("a")
+		e.NoteTraffic("b")
+		kept := e.counter("a")
+		topology := engineTopology()
+		topology.Groups[0].Members = topology.Groups[0].Members[:1]
+		topology.Leaves = []string{"leaf"}
+		e.SetTopology(topology)
+
+		e.NoteTraffic("b")
+		e.NoteDial("unknown", true)
+		if e.counter("b") != nil || e.counter("unknown") != nil {
+			t.Fatal("retired or unknown nodes still retain counters")
+		}
+		if got := e.counter("a"); got != kept || got.traffic.Load() != 1 {
+			t.Fatal("the retained node lost its pending traffic")
+		}
+		e.NoteTraffic("leaf")
+		e.NoteTraffic("G")
+		if e.counter("leaf").traffic.Load() != 1 || e.counter("G").traffic.Load() != 1 {
+			t.Fatal("active leaves and groups must still contribute traffic")
+		}
+	})
+}
+
+func TestEngineCountersSurviveConcurrentTopologyUpdates(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		defer e.Close()
+		e.SetTopology(engineTopology())
+		kept := e.counter("a")
+		const workers, events = 8, 1000
+		var producers sync.WaitGroup
+		for range workers {
+			producers.Go(func() {
+				for range events {
+					e.NoteTraffic("a")
+					e.NoteDial("a", true)
+				}
+			})
+		}
+		for i := range 50 {
+			topology := engineTopology()
+			topology.Groups[0].Members[1] = Node{Name: fmt.Sprintf("node-%d", i), Type: "Vless", Strong: fmt.Sprintf("node-%d", i)}
+			e.SetTopology(topology)
+		}
+		producers.Wait()
+		if got := e.counter("a"); got != kept || got.traffic.Load() != workers*events || got.fails.Load() != workers*events {
+			t.Fatalf("topology refresh lost concurrent events: %+v", got)
+		}
+	})
+}
+
+func TestEngineHotEventsDoNotWaitForMachineLock(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+		defer e.Close()
+		e.SetTopology(engineTopology())
+		e.mu.Lock()
+		done := make(chan struct{})
+		go func() {
+			e.NoteTraffic("a")
+			e.NoteDial("a", true)
+			e.NoteURLTest("b", 80)
+			close(done)
+		}()
+		<-done
+		e.mu.Unlock()
+	})
 }
