@@ -202,9 +202,12 @@ class _TrafficPickerState extends State<_TrafficPicker> {
   }
 }
 
+/// Services shown before the rest are asked for; picked ones always show.
+const _foldedServices = 8;
+
 /// The traffic of one route: services as chips, then the user's own entries.
 /// [errors] maps an index into [match] to the problem the lint found there.
-class RouteTrafficSection extends StatelessWidget {
+class RouteTrafficSection extends StatefulWidget {
   const RouteTrafficSection({
     super.key,
     required this.match,
@@ -217,6 +220,17 @@ class RouteTrafficSection extends StatelessWidget {
   final ValueChanged<List<String>> onChanged;
   final Map<int, String> errors;
   final String? footer;
+
+  @override
+  State<RouteTrafficSection> createState() => _RouteTrafficSectionState();
+}
+
+class _RouteTrafficSectionState extends State<RouteTrafficSection> {
+  bool _all = false;
+
+  List<String> get match => widget.match;
+
+  ValueChanged<List<String>> get onChanged => widget.onChanged;
 
   void _toggle(RcxTrafficPreset preset) {
     if (_covers(match, preset)) {
@@ -251,6 +265,10 @@ class RouteTrafficSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final custom = _customOf(match);
+    final presets = [
+      for (final (index, preset) in rcxTrafficPresets.indexed)
+        if (_all || index < _foldedServices || _covers(match, preset)) preset,
+    ];
     return Column(
       children: [
         generateSection(
@@ -260,11 +278,18 @@ class RouteTrafficSection extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final preset in rcxTrafficPresets)
+                for (final preset in presets)
                   _ServiceChip(
-                    label: preset.label,
+                    label: '${preset.emoji} ${preset.label}',
                     selected: _covers(match, preset),
                     onPressed: () => _toggle(preset),
+                  ),
+                if (presets.length < rcxTrafficPresets.length)
+                  _ServiceChip(
+                    label: l.rcxMatchAllServices,
+                    selected: false,
+                    glyph: AppGlyphs.chevronDown,
+                    onPressed: () => setState(() => _all = true),
                   ),
               ],
             ),
@@ -272,7 +297,7 @@ class RouteTrafficSection extends StatelessWidget {
         ),
         generateAnimatedSection(
           title: l.rcxMatchCustom,
-          footer: footer ?? l.rcxMatchHint,
+          footer: widget.footer ?? l.rcxMatchHint,
           items: [
             for (final head in custom)
               _entryRow(context, l, head, match.indexOf(head)),
@@ -295,7 +320,7 @@ class RouteTrafficSection extends StatelessWidget {
     int index,
   ) {
     final entry = rcxMatchEntry(head);
-    final error = errors[index];
+    final error = widget.errors[index];
     return ContextMenuRegion(
       key: ValueKey(head),
       menuItems: [
@@ -322,33 +347,44 @@ class _ServiceChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onPressed,
+    this.glyph,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onPressed;
+  final Glyph? glyph;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final foreground = selected
+        ? colorScheme.onPrimary
+        : colorScheme.onSurfaceVariant;
     return SizedBox(
       height: 36,
       child: CommonCard(
         isSelected: selected,
         fillsSelection: true,
         shape: AppShape.full,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         onPressed: onPressed,
-        child: Text(
-          label,
-          maxLines: 1,
-          style: AppTextStyle.subheadline
-              .of(context, emphasized: true)
-              .copyWith(
-                color: selected
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurfaceVariant,
-              ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            if (selected)
+              GlyphIcon(AppGlyphs.check, size: 16, color: foreground),
+            EmojiText(
+              label,
+              maxLines: 1,
+              style: AppTextStyle.subheadline
+                  .of(context, emphasized: true)
+                  .copyWith(color: foreground),
+            ),
+            if (glyph case final glyph?)
+              GlyphIcon(glyph, size: 16, color: foreground),
+          ],
         ),
       ),
     );

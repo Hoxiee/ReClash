@@ -63,6 +63,7 @@ extension on List<RcxIssue> {
             : '': rcxIssueText(
           l,
           issue,
+          line: false,
         ),
   };
 
@@ -330,7 +331,9 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
             context.bodyInsets,
         children: [
           ErrorBanner(
-            message: placed.isEmpty ? null : rcxIssueText(l, placed.first),
+            message: placed.isEmpty
+                ? null
+                : rcxIssueText(l, placed.first, line: false),
           ),
           if (lint?.scenario != null) ...[
             generateSection(
@@ -362,6 +365,7 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
             ScenarioSections(
               scenario: scenario,
               errors: errors,
+              warnings: lint?.warnings ?? const [],
               onEdit: edit,
               validate: validate,
             ),
@@ -374,12 +378,15 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
 }
 
 List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
-  if (lint.warnings.isNotEmpty)
+  if (ScenarioSections.placed(lint.warnings) case final warnings
+      when warnings.isNotEmpty)
     generateSection(
       title: l.rcxWarnings,
       items: [
-        for (final warning in lint.warnings)
-          DecorationListItem(title: Text(rcxIssueText(l, warning))),
+        for (final warning in warnings)
+          DecorationListItem(
+            title: Text(rcxIssueText(l, warning, line: false)),
+          ),
       ],
     ),
   if (lint.endpoints.isNotEmpty)
@@ -571,12 +578,15 @@ class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
           context.bodyInsets,
       children: [
         ErrorBanner(
-          message: placed.isEmpty ? null : rcxIssueText(l, placed.first),
+          message: placed.isEmpty
+              ? null
+              : rcxIssueText(l, placed.first, line: false),
         ),
         if (lint?.scenario != null)
           ScenarioSections(
             scenario: scenario,
             errors: errors,
+            warnings: lint?.warnings ?? const [],
             onEdit: _edit,
             validate: (prefix, update) async =>
                 await _ensureOwn() ? validate(prefix, update) : const {},
@@ -611,6 +621,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
     required this.errors,
     required this.onEdit,
     required this.validate,
+    this.warnings = const [],
     this.routes = const [],
     this.tunnelMode = '',
     this.openRoute,
@@ -619,6 +630,9 @@ class ScenarioSections extends ConsumerStatefulWidget {
 
   final Map<String, Object?> scenario;
   final List<RcxIssue> errors;
+
+  /// Problems that do not block saving; a row shows the ones under it.
+  final List<RcxIssue> warnings;
   final ScenarioEdit onEdit;
   final ScenarioValidate validate;
 
@@ -632,7 +646,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
 
   static const _placedRoots = ['routes', 'groups', 'title'];
 
-  /// The errors no row of these sections shows.
+  /// The issues no row of these sections shows.
   static List<RcxIssue> placed(List<RcxIssue> errors) => [
     for (final issue in errors)
       if (!_placedRoots.contains(issue.path.split('.').first)) issue,
@@ -644,7 +658,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
 
 class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   bool _sorting = false;
-  bool _networks = false;
+  final _revision = ValueNotifier(0);
 
   Map<String, Object?> get _s => widget.scenario;
 
@@ -658,7 +672,29 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   void didUpdateWidget(ScenarioSections oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.openRoute != oldWidget.openRoute) _scheduleOpen();
+    // An open page is another route's subtree, which a build may not dirty.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _revision.value++;
+    });
   }
+
+  @override
+  void dispose() {
+    _revision.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openPage(
+    String title,
+    List<Widget> Function(AppLocalizations l) page,
+  ) => BaseNavigator.push<void>(
+    context,
+    RoutingLivePage(
+      title: title,
+      revision: _revision,
+      builder: (l) => mounted ? page(l) : const [],
+    ),
+  );
 
   void _scheduleOpen() {
     final name = widget.openRoute;
@@ -720,8 +756,14 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
       scenario: _s,
       taken: _takenBy(index),
       validate: (value) => widget.validate('routes.$at', (s) => put(s, value)),
+      deletable: index != null,
     );
-    if (result != null) await widget.onEdit((s) => put(s, result));
+    if (result == null) return;
+    if (result.isEmpty && index != null) {
+      _removeRoute(index);
+    } else {
+      await widget.onEdit((s) => put(s, result));
+    }
   }
 
   Future<void> _openProgram(String target) async {
@@ -763,27 +805,83 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
     final l = context.appLocalizations;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _routesSection(l),
-        _mainSection(l),
-        _ProgramsSection(
-          title: l.rcxHubOtherGroups,
-          footer: l.rcxHubOtherGroupsHint,
-          programs: rcxMap(_s['groups'])..remove(r'$main'),
-          offerMain: false,
-          errors: widget.errors,
-          profileTitle: _profileTitle,
-          onOpen: _openProgram,
-          onRemove: (target) => unawaited(
-            widget.onEdit(
-              (s) => s['groups'] = {...rcxMap(s['groups'])}..remove(target),
-            ),
+      children: [_routesSection(l), _moreSection(l)],
+    );
+  }
+
+  Widget _moreSection(AppLocalizations l) {
+    final programs = rcxMap(_s['groups'])..remove(r'$main');
+    final kinds = [
+      for (final kind in rcxList(rcxMap(_s['network'])['kinds']))
+        rcxKindLabel(l, rcxMap(kind)['kind'] as String? ?? ''),
+    ];
+    final tags = rcxMap(_s['tags']);
+    Widget link(
+      String title,
+      String summary,
+      List<Widget> Function(AppLocalizations l) page, {
+      bool invalid = false,
+    }) => DecorationListItem(
+      key: ValueKey(title),
+      invalid: invalid,
+      title: Text(title),
+      subtitle: EmojiText(
+        summary,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onPressed: () => unawaited(_openPage(title, page)),
+      trailing: const DisclosureIndicator(),
+    );
+
+    return generateSection(
+      title: l.more,
+      items: [
+        _modeRow(
+          l,
+          _s['mode'] as String? ?? '',
+          (mode) => widget.onEdit((s) => s['mode'] = mode),
+        ),
+        link(
+          l.rcxHubOtherGroups,
+          programs.isEmpty
+              ? l.rcxHubOtherGroupsHint
+              : programs.keys.map((key) => rcxProgramLabel(l, key)).join(', '),
+          (l) => [_programsSection(l)],
+          invalid: programs.keys.any(
+            (key) =>
+                widget.errors.hits('groups.$key') ||
+                widget.warnings.hits('groups.$key'),
           ),
         ),
-        ..._networkSections(l),
+        link(
+          l.rcxHubNetworks,
+          kinds.isEmpty ? l.rcxScenarioKindsHint : kinds.join(', '),
+          _networkSections,
+        ),
+        link(
+          l.rcxTags,
+          tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
+          (l) => [_tagsSection(l, rcxMap(_s['tags']))],
+        ),
       ],
     );
   }
+
+  Widget _programsSection(AppLocalizations l) => _ProgramsSection(
+    footer: l.rcxHubOtherGroupsHint,
+    programs: rcxMap(_s['groups'])..remove(r'$main'),
+    offerMain: false,
+    errors: widget.errors,
+    warnings: widget.warnings,
+    profileTitle: _profileTitle,
+    onOpen: _openProgram,
+    onRemove: (target) => unawaited(
+      widget.onEdit(
+        (s) => s['groups'] = {...rcxMap(s['groups'])}..remove(target),
+      ),
+    ),
+  );
 
   Widget _routesSection(AppLocalizations l) {
     final routes = _routes;
@@ -793,7 +891,11 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
       final route = routes[index];
       final name = '${route['name'] ?? ''}';
       final problem = applied[name]?.problem;
-      final invalid = widget.errors.hits('routes.$index');
+      final warning = widget.warnings
+          .under(l, 'routes.$index')
+          .values
+          .firstOrNull;
+      final invalid = widget.errors.hits('routes.$index') || warning != null;
       final traffic = rcxTrafficSummary(l, [
         for (final head in rcxList(route['match'])) '$head',
       ]);
@@ -825,9 +927,11 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
                   overflow: TextOverflow.ellipsis,
                 ),
               EmojiText(
-                problem != null
-                    ? rcxReasonText(l, problem)
-                    : rcxProgramSummary(l, route, profileTitle: _profileTitle),
+                switch ((problem, warning)) {
+                  (final problem?, _) => rcxReasonText(l, problem),
+                  (_, final warning?) => warning,
+                  _ => rcxProgramSummary(l, route, profileTitle: _profileTitle),
+                },
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -891,7 +995,11 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
         else
           AnimatedEntries(
             grouped: true,
-            children: [for (var i = 0; i < routes.length; i++) row(i), add],
+            children: [
+              for (var i = 0; i < routes.length; i++) row(i),
+              add,
+              _fallbackRow(l),
+            ],
           ),
         ListFooter(
           text: ruleOnly
@@ -902,27 +1010,32 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
     );
   }
 
-  Widget _mainSection(AppLocalizations l) {
+  /// The last way out, for traffic no route above took.
+  Widget _fallbackRow(AppLocalizations l) {
     final program = rcxMap(rcxMap(_s['groups'])[r'$main']);
     final group = rcxTargetGroup(ref, r'$main');
-    return generateSection(
-      title: l.rcxHubEverythingElse,
-      footer: l.rcxHubEverythingElseHint,
-      items: [
-        DecorationListItem(
-          invalid: widget.errors.hits(r'groups.$main'),
-          title: EmojiText(group ?? l.rcxMainGroup),
-          subtitle: EmojiText(
-            program.isEmpty
-                ? l.rcxOwnProfile
-                : rcxProgramSummary(l, program, profileTitle: _profileTitle),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          onPressed: () => unawaited(_openProgram(r'$main')),
-          trailing: const DisclosureIndicator(),
-        ),
-      ],
+    final warning = widget.warnings
+        .under(l, r'groups.$main')
+        .values
+        .firstOrNull;
+    return DecorationListItem(
+      key: const ValueKey('fallback'),
+      invalid: widget.errors.hits(r'groups.$main') || warning != null,
+      title: Text(l.rcxHubEverythingElse),
+      subtitle: EmojiText(
+        warning ??
+            [
+              group ?? l.rcxMainGroup,
+              if (program.isEmpty)
+                l.rcxOwnProfile
+              else
+                rcxProgramSummary(l, program, profileTitle: _profileTitle),
+            ].join(' · '),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onPressed: () => unawaited(_openProgram(r'$main')),
+      trailing: const DisclosureIndicator(),
     );
   }
 
@@ -930,71 +1043,28 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
     final network = rcxMap(_s['network']);
     final kinds = [for (final kind in rcxList(network['kinds'])) rcxMap(kind)];
     final overrides = rcxMap(_s['on']);
-    final tags = rcxMap(_s['tags']);
-    final mode = _s['mode'] as String? ?? '';
-    final summary = [
-      mode.isEmpty ? l.rcxModeKeep : l.rcxModeIs(rcxModeLabel(mode)),
-      for (final kind in kinds) rcxKindLabel(l, kind['kind'] as String? ?? ''),
-    ].join(' · ');
     return [
-      generateAnimatedSection(
-        title: l.rcxHubNetworks,
-        footer: _networks ? l.rcxScenarioKindsHint : null,
+      generateSection(
+        footer: l.rcxScenarioKindsHint,
         items: [
-          DecorationListItem(
-            key: const ValueKey('networks'),
-            title: Text(l.rcxHubNetworksTitle),
-            subtitle: _networks ? null : Text(summary, maxLines: 2),
-            onPressed: () => setState(() => _networks = !_networks),
-            trailing: SizedBox.square(
-              dimension: kMinInteractiveDimension,
-              child: Center(
-                child: GlyphIcon(
-                  _networks ? AppGlyphs.chevronUp : AppGlyphs.chevronDown,
-                ),
-              ),
-            ),
+          for (final (index, kind) in kinds.indexed)
+            _kindRow(l, index, kind, rcxMap(overrides[kind['kind']])),
+          FormRow(
+            key: const ValueKey('add-kind'),
+            title: l.rcxAddKind,
+            leading: EntryButton.add(onPressed: _addKind),
+            onPressed: _addKind,
           ),
-          if (_networks) ...[
-            _modeRow(
-              l,
-              mode,
-              (mode) => widget.onEdit((s) => s['mode'] = mode),
-              key: const ValueKey('mode'),
-            ),
-            for (final (index, kind) in kinds.indexed)
-              _kindRow(l, index, kind, rcxMap(overrides[kind['kind']])),
-            FormRow(
-              key: const ValueKey('add-kind'),
-              title: l.rcxAddKind,
-              leading: EntryButton.add(onPressed: _addKind),
-              onPressed: _addKind,
-            ),
-          ],
         ],
       ),
-      AnimatedEntries(
-        children: [
-          if (_networks)
-            KeyedSubtree(
-              key: const ValueKey('tags'),
-              child: _tagsSection(l, tags),
-            ),
-          if (_networks &&
-              (rcxMap(network['diagnose']).isNotEmpty ||
-                  rcxMap(_s['l10n']).isNotEmpty))
-            KeyedSubtree(
-              key: const ValueKey('advanced'),
-              child: _advancedSection(l, network),
-            ),
-        ],
-      ),
+      if (rcxMap(network['diagnose']).isNotEmpty ||
+          rcxMap(_s['l10n']).isNotEmpty)
+        _advancedSection(l, network),
     ];
   }
 
   Widget _tagsSection(AppLocalizations l, Map<String, Object?> tags) {
     return generateSection(
-      title: l.rcxTags,
       footer: l.rcxTagsHint,
       items: [
         for (final MapEntry(:key, :value) in tags.entries)
@@ -1327,21 +1397,23 @@ class _KindEditorState extends State<_KindEditor> {
 /// added from the config's select groups, as every other group, or GLOBAL.
 class _ProgramsSection extends ConsumerWidget {
   const _ProgramsSection({
-    required this.title,
+    this.title,
     required this.programs,
     required this.offerMain,
     required this.profileTitle,
     required this.onOpen,
     required this.onRemove,
     this.errors = const [],
+    this.warnings = const [],
     this.footer,
   });
 
-  final String title;
+  final String? title;
   final String? footer;
   final Map<String, Object?> programs;
   final bool offerMain;
   final List<RcxIssue> errors;
+  final List<RcxIssue> warnings;
   final String Function(String id) profileTitle;
   final ValueChanged<String> onOpen;
   final ValueChanged<String> onRemove;
@@ -1377,16 +1449,19 @@ class _ProgramsSection extends ConsumerWidget {
               ),
             ],
             child: DecorationListItem(
-              invalid: errors.hits('groups.$key'),
+              invalid:
+                  errors.hits('groups.$key') || warnings.hits('groups.$key'),
               title: EmojiText(rcxProgramLabel(l, key)),
               subtitle: EmojiText(
-                rcxMap(value).isEmpty
-                    ? l.rcxOwnProfile
-                    : rcxProgramSummary(
-                        l,
-                        rcxMap(value),
-                        profileTitle: profileTitle,
-                      ),
+                switch (warnings.under(l, 'groups.$key').values.firstOrNull) {
+                  final warning? => warning,
+                  _ when rcxMap(value).isEmpty => l.rcxOwnProfile,
+                  _ => rcxProgramSummary(
+                    l,
+                    rcxMap(value),
+                    profileTitle: profileTitle,
+                  ),
+                },
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

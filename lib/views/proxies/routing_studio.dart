@@ -16,11 +16,11 @@ import 'routing.dart';
 import 'routing_condition.dart';
 import 'routing_import.dart';
 import 'routing_ladder.dart';
+import 'routing_route.dart';
 
 const rcxFeels = ['calm', 'balanced', 'eager'];
 const rcxEnergies = ['eco', 'balanced', 'precise'];
 const _strandings = ['hold', 'direct'];
-const _checkRows = 6;
 const _titleDelay = Duration(milliseconds: 500);
 
 /// A new profile starts from the simple built-in's behaviour with one tier,
@@ -81,6 +81,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
   int _request = 0;
   // The smart group the draft is checked against.
   late String? _group = widget.groupName;
+  final _revision = ValueNotifier(0);
 
   RcxRoutingAction get _action => ref.read(rcxRoutingActionProvider.notifier);
 
@@ -109,6 +110,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     _titleDebounce?.cancel();
     _title.dispose();
     _description.dispose();
+    _revision.dispose();
     super.dispose();
   }
 
@@ -143,7 +145,20 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
         }
       }
     });
+    _revision.value++;
   }
+
+  Future<void> _openPage(
+    String title,
+    List<Widget> Function(AppLocalizations l) page,
+  ) => BaseNavigator.push<void>(
+    context,
+    RoutingLivePage(
+      title: title,
+      revision: _revision,
+      builder: (l) => mounted ? page(l) : const [],
+    ),
+  );
 
   void _setText(String text) {
     setState(() => _text = text);
@@ -350,8 +365,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
                 ),
               ],
             ),
-          if (lint?.profile != null) ..._sections(context),
-          if (lint?.profile != null) _checkSection(lint!),
+          if (lint?.profile != null) ..._sections(context, lint!),
           if (lint != null && lint.warnings.isNotEmpty)
             generateSection(
               title: l.rcxWarnings,
@@ -367,16 +381,14 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     );
   }
 
-  List<Widget> _sections(BuildContext context) {
+  List<Widget> _sections(BuildContext context, RcxStudioResult lint) {
     final l = context.appLocalizations;
     final p = _profile;
     final pool = rcxMap(p['pool']);
-    final tags = rcxMap(p['tags']);
     final steps = rcxList(p['prefer']);
     final switching = rcxMap(p['switch']);
     return [
       generateSection(
-        title: l.rcxGeneral,
         items: [
           FormRow(
             title: l.rcxProfileName,
@@ -399,18 +411,19 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
               ),
             ),
           ),
-          _options(
-            title: l.rcxLevel,
-            options: const ['simple', 'advanced'],
-            value: p['level'] as String? ?? 'simple',
-            label: (v) => rcxLevelLabel(l, v),
-            onChanged: (v) => _edit((p) => p['level'] = v),
-          ),
-          _baseRow(l),
         ],
+      ),
+      _previewSection(lint),
+      RoutingLadderSection(
+        steps: [for (final step in steps) rcxMap(step)],
+        onChanged: (steps) => _edit((p) => p['prefer'] = steps),
+        scope: p,
+        groupName: _group,
+        stranded: _strandedLabel(l, p['stranded'] as String? ?? 'hold'),
       ),
       generateSection(
         title: l.rcxServers,
+        footer: l.rcxStudioServersHint,
         items: [
           _conditionRow(
             title: l.rcxPoolInclude,
@@ -430,15 +443,83 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ),
         ],
       ),
-      RoutingLadderSection(
-        steps: [for (final step in steps) rcxMap(step)],
-        onChanged: (steps) => _edit((p) => p['prefer'] = steps),
-        scope: p,
-        groupName: _group,
-        stranded: _strandedLabel(l, p['stranded'] as String? ?? 'hold'),
-      ),
       generateSection(
-        title: l.rcxTags,
+        title: l.rcxStudioCharacter,
+        footer: l.rcxStudioCharacterHint,
+        items: [
+          _options(
+            title: l.rcxSwitching,
+            options: rcxFeels,
+            value: switching['feel'] as String? ?? 'balanced',
+            label: (v) => rcxFeelLabel(l, v),
+            onChanged: (v) =>
+                _edit((p) => p['switch'] = {...rcxMap(p['switch']), 'feel': v}),
+          ),
+          _options(
+            title: l.rcxChecks,
+            options: rcxEnergies,
+            value: p['energy'] as String? ?? 'balanced',
+            label: (v) => rcxEnergyLabel(l, v),
+            onChanged: (v) => _edit((p) => p['energy'] = v),
+          ),
+          _options(
+            title: l.rcxStranded,
+            options: _strandings,
+            value: p['stranded'] as String? ?? 'hold',
+            label: (v) => _strandedLabel(l, v),
+            onChanged: (v) => _edit((p) => p['stranded'] = v),
+          ),
+        ],
+      ),
+      _moreSection(l),
+    ];
+  }
+
+  Widget _moreSection(AppLocalizations l) {
+    final p = _profile;
+    final tags = rcxMap(p['tags']);
+    final advanced = _advancedRows(l);
+    Widget link(String title, String summary, VoidCallback onPressed) =>
+        DecorationListItem(
+          title: Text(title),
+          subtitle: EmojiText(
+            summary,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          onPressed: onPressed,
+          trailing: const DisclosureIndicator(),
+        );
+    return generateSection(
+      title: l.more,
+      items: [
+        _baseRow(l),
+        _options(
+          title: l.rcxLevel,
+          options: const ['simple', 'advanced'],
+          value: p['level'] as String? ?? 'simple',
+          label: (v) => rcxLevelLabel(l, v),
+          onChanged: (v) => _edit((p) => p['level'] = v),
+        ),
+        link(
+          l.rcxTags,
+          tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
+          () => _openPage(l.rcxTags, _tagsSections),
+        ),
+        if (advanced.isNotEmpty)
+          link(
+            l.rcxAdvanced,
+            advanced.map((row) => row.$1).join(', '),
+            () => _openPage(l.rcxAdvanced, (l) => [_advancedSection(l)]),
+          ),
+      ],
+    );
+  }
+
+  List<Widget> _tagsSections(AppLocalizations l) {
+    final tags = rcxMap(_profile['tags']);
+    return [
+      generateSection(
         footer: l.rcxTagsHint,
         items: [
           for (final MapEntry(:key, :value) in tags.entries)
@@ -468,43 +549,23 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ),
         ],
       ),
-      generateSection(
-        title: l.rcxBehaviour,
-        items: [
-          _options(
-            title: l.rcxSwitching,
-            options: rcxFeels,
-            value: switching['feel'] as String? ?? 'balanced',
-            label: (v) => rcxFeelLabel(l, v),
-            onChanged: (v) =>
-                _edit((p) => p['switch'] = {...rcxMap(p['switch']), 'feel': v}),
-          ),
-          _options(
-            title: l.rcxChecks,
-            options: rcxEnergies,
-            value: p['energy'] as String? ?? 'balanced',
-            label: (v) => rcxEnergyLabel(l, v),
-            onChanged: (v) => _edit((p) => p['energy'] = v),
-          ),
-          _options(
-            title: l.rcxStranded,
-            options: _strandings,
-            value: p['stranded'] as String? ?? 'hold',
-            label: (v) => _strandedLabel(l, v),
-            onChanged: (v) => _edit((p) => p['stranded'] = v),
-          ),
-        ],
-      ),
-      if (_advancedRows(l) case final rows when rows.isNotEmpty)
-        generateSection(
-          title: l.rcxAdvanced,
-          footer: l.rcxAdvancedHint,
-          items: rows,
-        ),
     ];
   }
 
-  List<Widget> _advancedRows(AppLocalizations l) {
+  Widget _advancedSection(AppLocalizations l) => generateSection(
+    footer: l.rcxAdvancedHint,
+    items: [
+      for (final (title, value) in _advancedRows(l))
+        DecorationListItem(
+          title: Text(title),
+          subtitle: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis),
+          onPressed: _editYaml,
+          trailing: const GlyphIcon(AppGlyphs.code),
+        ),
+    ],
+  );
+
+  List<(String, String)> _advancedRows(AppLocalizations l) {
     final p = _profile;
     final checks = rcxMap(p['checks']);
     final network = rcxMap(p['network']);
@@ -514,7 +575,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     ];
     final overrides = rcxMap(p['on']);
     final languages = rcxMap(p['l10n']);
-    final rows = <(String, String)>[
+    return [
       if (checks.isNotEmpty) (l.rcxChecksDeclared, checks.keys.join(', ')),
       if (kinds.isNotEmpty)
         (l.rcxNetworkKinds, kinds.map((k) => rcxKindLabel(l, k)).join(', ')),
@@ -531,15 +592,6 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           rcxList(rcxMap(p['egress-verify'])['echo']).join(', '),
         ),
       if (languages.isNotEmpty) (l.rcxTranslations, languages.keys.join(', ')),
-    ];
-    return [
-      for (final (title, value) in rows)
-        DecorationListItem(
-          title: Text(title),
-          subtitle: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis),
-          onPressed: _editYaml,
-          trailing: const GlyphIcon(AppGlyphs.code),
-        ),
     ];
   }
 
@@ -644,10 +696,8 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
 
   /// What the draft would pick in a smart group now, against what the group
   /// runs; the group is chosen here.
-  Widget _checkSection(RcxStudioResult lint) {
+  Widget _previewSection(RcxStudioResult lint) {
     final l = context.appLocalizations;
-    final locale = Localizations.localeOf(context).toString();
-    final info = lint.info;
     final groups = ref.watch(
       rcxStatusStateProvider.select(
         (status) => [for (final g in status?.groups ?? const []) g.name],
@@ -655,10 +705,15 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     );
     if (groups.isEmpty) return const SizedBox.shrink();
     final candidate = lint.candidate;
-    final pick = candidate == null ? null : rcxBestOf(candidate);
-    String tier(String label) => info?.localize(label, locale) ?? label;
+    final leaders = [
+      for (final row in candidate?.ranking ?? const <RcxRanked>[])
+        if (row.excluded == null)
+          row.latencyMs > 0 ? '${row.name} ${row.latencyMs} ms' : row.name,
+    ];
+    final ranked = candidate != null && candidate.ranking.isNotEmpty;
     return generateSection(
-      title: l.rcxCheck,
+      title: l.rcxStudioPreview,
+      footer: candidate == null ? l.rcxStudioPreviewHint : null,
       items: [
         ListItem<String>.options(
           title: Text(l.rcxCheckGroup),
@@ -670,9 +725,37 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
             unawaited(_check());
           },
         ),
-        if (candidate != null) ...[
-          DecorationListItem(title: EmojiText(rcxCheckHeadline(l, lint))),
-          for (final row in candidate.ranking.take(_checkRows))
+        if (candidate != null)
+          DecorationListItem(
+            title: EmojiText(rcxCheckHeadline(l, lint)),
+            subtitle: leaders.isEmpty
+                ? null
+                : EmojiText(
+                    leaders.take(3).join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+            onPressed: ranked
+                ? () => _openPage(l.rcxStudioRanking, _rankingSections)
+                : null,
+            trailing: ranked ? const DisclosureIndicator() : null,
+          ),
+      ],
+    );
+  }
+
+  List<Widget> _rankingSections(AppLocalizations l) {
+    final lint = _lint;
+    final candidate = lint?.candidate;
+    if (lint == null || candidate == null) return const [];
+    final locale = Localizations.localeOf(context).toString();
+    final pick = rcxBestOf(candidate);
+    String tier(String label) => lint.info?.localize(label, locale) ?? label;
+    return [
+      generateSection(
+        title: rcxCheckHeadline(l, lint),
+        items: [
+          for (final row in candidate.ranking)
             DecorationListItem(
               isSelected: row.name == pick,
               title: EmojiText(row.name, maxLines: 1),
@@ -688,8 +771,8 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
               trailing: row.latencyMs > 0 ? Text('${row.latencyMs} ms') : null,
             ),
         ],
-      ],
-    );
+      ),
+    ];
   }
 
   Widget _endpointsSection(AppLocalizations l, List<RcxEndpoint> endpoints) {
@@ -846,7 +929,8 @@ String rcxEndpointUse(AppLocalizations l, String use) {
 
 /// A lint finding in the user's language when the Core gave it a code, with
 /// the line it is on.
-String rcxIssueText(AppLocalizations l, RcxIssue issue) {
+/// The issue in words; [line] prefixes its line where the text is shown.
+String rcxIssueText(AppLocalizations l, RcxIssue issue, {bool line = true}) {
   String arg(String key) => '${issue.args[key] ?? ''}';
   final text = switch (issue.code) {
     'tag.unused' => l.rcxLintTagUnused(arg('tag')),
@@ -860,7 +944,7 @@ String rcxIssueText(AppLocalizations l, RcxIssue issue) {
     ),
     _ => issue.message,
   };
-  return issue.line > 0 ? l.rcxLine(issue.line, text) : text;
+  return line && issue.line > 0 ? l.rcxLine(issue.line, text) : text;
 }
 
 Map<String, Object?> rcxMap(Object? value) =>

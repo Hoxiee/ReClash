@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +32,7 @@ enum _Send { auto, direct, fixed }
 
 /// Edits one route of [scenario], or with [target] the program the scenario
 /// gives that group ($main, `*`, GLOBAL or a group by name). Null when the
-/// user backs out.
+/// user backs out; an empty map when [deletable] and the user deletes it.
 Future<Map<String, Object?>?> editRoute(
   BuildContext context, {
   required Map<String, Object?> value,
@@ -38,6 +40,7 @@ Future<Map<String, Object?>?> editRoute(
   String? target,
   Set<String> taken = const {},
   RouteValidator? validate,
+  bool deletable = false,
 }) {
   return BaseNavigator.push<Map<String, Object?>>(
     context,
@@ -47,6 +50,7 @@ Future<Map<String, Object?>?> editRoute(
       target: target,
       taken: taken,
       validate: validate,
+      deletable: deletable,
     ),
   );
 }
@@ -77,18 +81,50 @@ String rcxProgramSummary(
   final profile = value['profile'] as String? ?? '';
   final exclude = rcxMap(value['pool'])['exclude'] as String? ?? '';
   return [
-    if (steps.isEmpty)
-      l.rcxCondAnyServer
-    else
-      [
-        for (final (index, step) in steps.indexed)
-          steps.length == 1
-              ? rcxStepSummary(l, step)
-              : '${index + 1} ${rcxStepSummary(l, step)}',
-      ].join(' → '),
+    if (steps.isEmpty) l.rcxCondAnyServer else _stepsSummary(l, steps),
     if (profile.isNotEmpty && profileTitle != null) profileTitle(profile),
     if (exclude.isNotEmpty) l.rcxExcept(rcxConditionSummary(l, exclude)),
   ].join(' · ');
+}
+
+String _stepsSummary(AppLocalizations l, List<Map<String, Object?>> steps) => [
+  for (final (index, step) in steps.indexed)
+    steps.length == 1
+        ? rcxStepSummary(l, step)
+        : '${index + 1} ${rcxStepSummary(l, step)}',
+].join(' → ');
+
+/// A page that rebuilds from its opener's state on each [revision], for a
+/// part of an editor the opener still owns.
+class RoutingLivePage extends StatelessWidget {
+  const RoutingLivePage({
+    super.key,
+    required this.title,
+    required this.revision,
+    required this.builder,
+  });
+
+  final String title;
+  final ValueListenable<int> revision;
+  final List<Widget> Function(AppLocalizations l) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonScaffold(
+      title: title,
+      body: ValueListenableBuilder<int>(
+        valueListenable: revision,
+        builder: (context, _, _) => ListView(
+          padding:
+              const EdgeInsets.symmetric(
+                horizontal: 16,
+              ).copyWith(top: context.sectionsTopPadding, bottom: 20) +
+              context.bodyInsets,
+          children: builder(context.appLocalizations),
+        ),
+      ),
+    );
+  }
 }
 
 class RouteEditor extends ConsumerStatefulWidget {
@@ -99,6 +135,7 @@ class RouteEditor extends ConsumerStatefulWidget {
     this.target,
     this.taken = const {},
     this.validate,
+    this.deletable = false,
   });
 
   final Map<String, Object?> value;
@@ -106,6 +143,7 @@ class RouteEditor extends ConsumerStatefulWidget {
   final String? target;
   final Set<String> taken;
   final RouteValidator? validate;
+  final bool deletable;
 
   @override
   ConsumerState<RouteEditor> createState() => _RouteEditorState();
@@ -126,6 +164,7 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
   String? _inheritedOf;
   bool _saving = false;
   int _request = 0;
+  final _revision = ValueNotifier(0);
 
   bool get _isRoute => widget.target == null;
 
@@ -140,7 +179,13 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
   @override
   void dispose() {
     _name.dispose();
+    _revision.dispose();
     super.dispose();
+  }
+
+  void _changed(VoidCallback fn) {
+    setState(fn);
+    _revision.value++;
   }
 
   List<String> get _match => [
@@ -171,7 +216,7 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
     _inheritedOf = id;
     final request = ++_request;
     if (id == null) {
-      setState(() => _inherited = const []);
+      _changed(() => _inherited = const []);
       return;
     }
     final source = await _action.studio({'op': 'source', 'id': id});
@@ -180,7 +225,7 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
         ? null
         : await _action.studio({'op': 'lint', 'text': text, 'id': id});
     if (!mounted || request != _request) return;
-    setState(() {
+    _changed(() {
       _inherited = [
         for (final step in rcxList(lint?.profile?['prefer'])) rcxMap(step),
       ];
@@ -188,7 +233,7 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
   }
 
   void _set(String key, Object? value) {
-    setState(() {
+    _changed(() {
       _value = {..._value, key: value};
       _errors = const {};
     });
@@ -355,37 +400,151 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
     _set('pool', {..._pool, key: text});
   }
 
+  String get _to => _value['to'] as String? ?? '';
+
+  Future<void> _choose(_Send send) async {
+    final previous = _send;
+    _changed(() {
+      _send = send;
+      _errors = const {};
+      if (send == _Send.auto || send == _Send.fixed && _to == 'DIRECT') {
+        _value = {..._value}..remove('to');
+      }
+    });
+    if (send != _Send.fixed) return;
+    await _pickTarget();
+    if (mounted && _to.isEmpty) setState(() => _send = previous);
+  }
+
+  String? _groupName() => _isRoute
+      ? ref.read(groupsProvider).getGroup(_name.text.trim())?.name
+      : rcxTargetGroup(ref, widget.target!);
+
+  ({String title, String? description}) _behaviour(AppLocalizations l) {
+    final library = ref.read(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
+    if (_profile.isEmpty && !_isRoute) {
+      return (title: l.rcxOwnProfile, description: null);
+    }
+    final info = library
+        .where((p) => p.id == (_profile.isEmpty ? _routeProfile : _profile))
+        .firstOrNull;
+    return (
+      title: info?.displayTitle(locale) ?? _profile,
+      description: info?.localize(info.description, locale),
+    );
+  }
+
+  String? get _choiceError =>
+      _errorAt('profile') ?? _errorAt('prefer') ?? _errorAt('pool');
+
+  String _choiceSummary(AppLocalizations l) {
+    final steps = _steps.isEmpty ? _inherited : _steps;
+    final include = _pool['include'] as String? ?? '';
+    final exclude = _pool['exclude'] as String? ?? '';
+    return [
+      _behaviour(l).title,
+      if (steps.isNotEmpty) _stepsSummary(l, steps),
+      if (include.isNotEmpty) l.rcxOnly(rcxConditionSummary(l, include)),
+      if (exclude.isNotEmpty) l.rcxExcept(rcxConditionSummary(l, exclude)),
+    ].join(' · ');
+  }
+
+  Future<void> _openChoice() => BaseNavigator.push<void>(
+    context,
+    RoutingLivePage(
+      title: context.appLocalizations.rcxHowToChoose,
+      revision: _revision,
+      builder: (l) => mounted ? _choiceSections(l) : const [],
+    ),
+  );
+
+  List<Widget> _choiceSections(AppLocalizations l) {
+    final behaviour = _behaviour(l);
+    return [
+      generateSection(
+        footer: _errorAt('profile') ?? behaviour.description,
+        items: [
+          DecorationListItem(
+            invalid: _errorAt('profile') != null,
+            title: Text(l.rcxBehaviour),
+            subtitle: EmojiText(behaviour.title),
+            onPressed: _pickProfile,
+            trailing: const DisclosureIndicator(),
+          ),
+        ],
+      ),
+      RoutingLadderSection(
+        steps: _steps,
+        onChanged: (steps) => _set('prefer', steps),
+        scope: widget.scenario,
+        scenario: true,
+        groupName: _groupName(),
+        inherited: _inherited,
+        footer: _errorAt('prefer'),
+      ),
+      generateSection(
+        footer: _errorAt('pool'),
+        items: [
+          if (!_isRoute)
+            _poolRow(l, 'include', l.rcxPoolInclude, l.rcxCondAnyServer),
+          _poolRow(l, 'exclude', l.rcxPoolExclude, l.none),
+        ],
+      ),
+    ];
+  }
+
+  Widget _sendSection(AppLocalizations l) {
+    final to = _to;
+    Widget option(_Send send, String title, String subtitle) {
+      final selected = _send == send;
+      return DecorationListItem(
+        key: ValueKey(send),
+        isSelected: selected,
+        invalid: selected && send == _Send.fixed && _errorAt('to') != null,
+        title: Text(title),
+        subtitle: EmojiText(
+          subtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        onPressed: () => unawaited(_choose(send)),
+        trailing: selected ? const SelectionCheck() : null,
+      );
+    }
+
+    return generateSection(
+      title: l.rcxRouteWhere,
+      footer:
+          _errorAt('to') ??
+          (_send == _Send.fixed && !_isRoute ? l.rcxFixedHint : null),
+      items: [
+        option(_Send.auto, l.rcxSendBest, l.rcxRouteSendAutoHint),
+        if (widget.target != '*')
+          option(
+            _Send.fixed,
+            l.rcxRouteSendFixed,
+            _send == _Send.fixed && to.isNotEmpty
+                ? to
+                : _isRoute
+                ? l.rcxRouteSendFixedHint
+                : l.rcxRouteChoose,
+          ),
+        if (_isRoute)
+          option(_Send.direct, l.rcxSendDirect, l.rcxRouteSendDirectHint),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final locale = Localizations.localeOf(context).toString();
-    final groupName = _isRoute
-        ? ref.watch(
-            groupsProvider.select(
-              (groups) => groups.getGroup(_name.text.trim())?.name,
-            ),
-          )
-        : rcxTargetGroup(ref, widget.target!);
-    final profileInfo = library
-        .where((p) => p.id == (_profile.isEmpty ? _routeProfile : _profile))
-        .firstOrNull;
-    final profileTitle = _profile.isEmpty && !_isRoute
-        ? l.rcxOwnProfile
-        : profileInfo?.displayTitle(locale) ?? _profile;
-    final description = _profile.isEmpty && !_isRoute
-        ? null
-        : profileInfo?.localize(profileInfo.description, locale);
+    ref.watch(rcxLibraryProvider);
     final nameError = _isRoute && _name.text.trim().isNotEmpty
         ? _nameError(l) ?? _errorAt('name')
         : _errorAt('name');
-    final to = _value['to'] as String? ?? '';
-    final sends = [
-      (_Send.auto, l.rcxModeAuto),
-      if (widget.target != '*') (_Send.fixed, l.rcxRouteSendFixed),
-      if (_isRoute) (_Send.direct, l.direct),
-    ];
     final name = _name.text.trim();
+    final choiceError = _choiceError;
     return FormPage(
       title: _isRoute
           ? (name.isEmpty ? l.rcxRouteNew : name)
@@ -393,6 +552,15 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
       saving: _saving,
       error: _bannerError(),
       onSave: _canSave(l) ? _save : null,
+      actions: [
+        if (widget.deletable)
+          IconButtonData(
+            glyph: AppGlyphs.delete,
+            tooltip: l.delete,
+            onPressed: () =>
+                Navigator.of(context).pop(const <String, Object?>{}),
+          ),
+      ],
       children: [
         if (_isRoute) ...[
           generateSection(
@@ -416,89 +584,28 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
             onChanged: (match) => _set('match', match),
           ),
         ],
-        if (sends.length > 1)
-          generateSection(
-            title: l.rcxRouteSend,
-            footer: switch (_send) {
-              _Send.auto => l.rcxRouteSendAutoHint,
-              _Send.direct => l.rcxRouteSendDirectHint,
-              _Send.fixed =>
-                _isRoute ? l.rcxRouteSendFixedHint : l.rcxFixedHint,
-            },
-            items: [
-              SegmentedControl<_Send>(
-                segments: sends,
-                value: _send,
-                onChanged: (send) => setState(() {
-                  _send = send;
-                  _errors = const {};
-                  if (send == _Send.auto ||
-                      send == _Send.fixed && to == 'DIRECT') {
-                    _value = {..._value}..remove('to');
-                  }
-                }),
-              ),
-            ],
-          ),
+        _sendSection(l),
         AnimatedEntries(
           children: [
-            if (_send == _Send.fixed)
+            if (_send == _Send.auto)
               KeyedSubtree(
-                key: const ValueKey('target'),
+                key: const ValueKey('choice'),
                 child: generateSection(
-                  footer: _errorAt('to'),
                   items: [
                     DecorationListItem(
-                      invalid: _errorAt('to') != null,
-                      title: Text(
-                        _isRoute ? l.rcxRouteTarget : l.rcxProgramMember,
+                      invalid: choiceError != null,
+                      title: Text(l.rcxHowToChoose),
+                      subtitle: EmojiText(
+                        choiceError ?? _choiceSummary(l),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: EmojiText(to.isEmpty ? l.rcxRouteChoose : to),
-                      onPressed: _pickTarget,
+                      onPressed: () => unawaited(_openChoice()),
                       trailing: const DisclosureIndicator(),
                     ),
                   ],
                 ),
               ),
-            if (_send == _Send.auto) ...[
-              KeyedSubtree(
-                key: const ValueKey('ladder'),
-                child: RoutingLadderSection(
-                  steps: _steps,
-                  onChanged: (steps) => _set('prefer', steps),
-                  scope: widget.scenario,
-                  scenario: true,
-                  groupName: groupName,
-                  inherited: _inherited,
-                  footer: _errorAt('prefer'),
-                ),
-              ),
-              KeyedSubtree(
-                key: const ValueKey('behaviour'),
-                child: generateSection(
-                  title: l.rcxBehaviour,
-                  footer:
-                      _errorAt('profile') ?? _errorAt('pool') ?? description,
-                  items: [
-                    DecorationListItem(
-                      invalid: _errorAt('profile') != null,
-                      title: Text(l.rcxBehaviour),
-                      subtitle: EmojiText(profileTitle),
-                      onPressed: _pickProfile,
-                      trailing: const DisclosureIndicator(),
-                    ),
-                    if (!_isRoute)
-                      _poolRow(
-                        l,
-                        'include',
-                        l.rcxPoolInclude,
-                        l.rcxCondAnyServer,
-                      ),
-                    _poolRow(l, 'exclude', l.rcxPoolExclude, l.none),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
       ],

@@ -19,7 +19,7 @@
     }
   },
   "rcxPinnedLabel": "Pinned",
-  "rcxProfile": "Profile",
+  "rcxProfile": "Behaviour",
   "rcxSourceBuiltin": "Built-in",
   "rcxSourceProvider": "From provider",
   "rcxSourceUser": "Mine",
@@ -175,11 +175,11 @@
     }
   },
   "rcxExcludedNoMatch": "Not in the pool",
-  "rcxExcludedByProfile": "Excluded by the profile",
+  "rcxExcludedByProfile": "Excluded by the behaviour",
   "rcxExcludedUnroutable": "Not a server",
   "rcxExcludedCooldown": "Skipped after “Change server”",
   "rcxExcludedNoTier": "Matches no preference",
-  "rcxProblemProfileMissing": "Profile {profile} was not found; the default is used",
+  "rcxProblemProfileMissing": "Behaviour {profile} was not found; the default is used",
   "@rcxProblemProfileMissing": {
     "placeholders": {
       "profile": {
@@ -187,7 +187,7 @@
       }
     }
   },
-  "rcxProblemProfileInvalid": "Profile error: {error}",
+  "rcxProblemProfileInvalid": "Behaviour error: {error}",
   "@rcxProblemProfileInvalid": {
     "placeholders": {
       "error": {
@@ -215,7 +215,7 @@
       }
     }
   },
-  "rcxChangeTo": "Change to",
+  "rcxChangeTo": "Choose from",
   "rcxAnyServer": "Any",
   "rcxAddPool": "Add a pattern",
   "rcxNetwork": "Network: {kind}",
@@ -405,7 +405,7 @@
       }
     }
   },
-  "rcxConsentHint": "Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network.",
+  "rcxConsentHint": "Until you allow it, the group runs the Simple behaviour. The sites are contacted only through your servers or to test the network.",
   "@rcxConsentHint": {
     "description": "Footer of consent section"
   },
@@ -413,11 +413,11 @@
   "@rcxConsentTitle": {
     "description": "Section title"
   },
-  "rcxContacts": "Sites it contacts",
+  "rcxContacts": "Sites contacted",
   "@rcxContacts": {
     "description": "Section title: hosts the profile makes the app contact"
   },
-  "rcxContactsHint": "Third-party sites belong neither to your provider nor to the built-in profiles.",
+  "rcxContactsHint": "Third-party sites belong neither to your provider nor to the built-in behaviours.",
   "@rcxContactsHint": {
     "description": "Footer"
   },
@@ -522,23 +522,19 @@
   "@rcxFieldUdp": {
     "description": "Condition field"
   },
-  "rcxGeneral": "General",
-  "@rcxGeneral": {
-    "description": "Section title"
-  },
   "rcxHistoryVersions": "Earlier versions",
   "@rcxHistoryVersions": {
     "description": "Menu item / sheet title"
   },
-  "rcxImportAdd": "Add to my profiles",
+  "rcxImportAdd": "Add to my library",
   "@rcxImportAdd": {
     "description": "Confirm button"
   },
-  "rcxImportNeedsCore": "Start the app's core to check this profile.",
+  "rcxImportNeedsCore": "Start the app's core to check this file.",
   "@rcxImportNeedsCore": {
     "description": "Error"
   },
-  "rcxImportTitle": "Import routing profile",
+  "rcxImportTitle": "Import auto routing",
   "@rcxImportTitle": {
     "description": "Page title"
   },
@@ -656,7 +652,7 @@
   "@rcxNetworkKinds": {
     "description": "Row title"
   },
-  "rcxNewProfile": "New profile",
+  "rcxNewProfile": "New behaviour",
   "@rcxNewProfile": {
     "description": "Row / default title"
   },
@@ -688,11 +684,11 @@
   "@rcxOverrides": {
     "description": "Row title: overrides by network kind"
   },
-  "rcxPoolExclude": "Leave out",
+  "rcxPoolExclude": "Leave out servers",
   "@rcxPoolExclude": {
     "description": "Row: servers excluded from the pool"
   },
-  "rcxPoolInclude": "Use",
+  "rcxPoolInclude": "Use only servers",
   "@rcxPoolInclude": {
     "description": "Row: servers included in the pool"
   },
@@ -700,7 +696,7 @@
   "@rcxProfileName": {
     "description": "Row: profile title"
   },
-  "rcxSourceChanged": "The original profile changed",
+  "rcxSourceChanged": "The original changed",
   "@rcxSourceChanged": {
     "description": "Section title"
   },
@@ -716,7 +712,7 @@
   "@rcxStrandedDirect": {
     "description": "Choice"
   },
-  "rcxStrandedHold": "Keep the current server",
+  "rcxStrandedHold": "Keep current",
   "@rcxStrandedHold": {
     "description": "Choice"
   },
@@ -783,8 +779,7 @@
   "rcxAllGroups": "Every group",
   "rcxMainGroup": "Main group",
   "rcxAutoControl": "Auto control",
-  "rcxAutoControlHint": "A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own profile.",
-  "rcxCheck": "Check",
+  "rcxAutoControlHint": "A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own behaviour.",
   "rcxCheckGroup": "Against group",
   "rcxCondClause": "Condition {number}",
   "@rcxCondClause": {
@@ -812,8 +807,8 @@
       }
     }
   },
-  "rcxGroupProfiles": "Group profiles",
-  "rcxGroupProfilesHint": "How a smart group picks its server. Tap one of yours to edit it, any other to edit a copy.",
+  "rcxGroupProfiles": "Behaviours",
+  "rcxGroupProfilesHint": "How a group picks its server. Tap one of yours to edit it, any other to edit a copy.",
   "rcxJournalMode": "Mode {from} → {to}",
   "@rcxJournalMode": {
     "placeholders": {
@@ -838,7 +833,7 @@
       }
     }
   },
-  "rcxManageHint": "Profiles and scenarios are made and edited in Advanced configuration → Auto routing.",
+  "rcxManageHint": "Behaviours and scenarios are made and edited in Advanced configuration → Auto routing.",
   "rcxModeBackToAuto": "Give the mode back to the scenario",
   "rcxModeByScenario": "The scenario sets the mode on this network",
   "rcxModeIs": "Mode: {mode}",
@@ -854,8 +849,8 @@
   "rcxModeYours": "The mode is yours on this network",
   "rcxNewScenario": "New scenario",
   "rcxOnThisNetwork": "On this network",
-  "rcxOwnProfile": "Group's own profile",
-  "rcxProfileProgramHint": "The group picks a server with this profile among the servers the pool keeps.",
+  "rcxOwnProfile": "As set on the group",
+  "rcxProfileProgramHint": "The group picks a server with this behaviour among the servers the pool keeps.",
   "rcxProgramAction": "Action",
   "rcxProgramFixed": "Hand to one member",
   "rcxProgramMember": "Member",
@@ -907,8 +902,8 @@
   "rcxScenarioMode": "Connection mode",
   "rcxScenarioOff": "Off",
   "rcxScenarios": "Scenarios",
-  "rcxScenariosHint": "A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.",
-  "rcxSmartGroups": "Smart groups",
+  "rcxScenariosHint": "A scenario drives the whole connection. Tap one to run it; the pencil edits yours, or a copy of any other.",
+  "rcxSmartGroups": "Groups",
   "rcxHubOverview": "Overview",
   "rcxHubRoutes": "Routes",
   "rcxHubLibrary": "Library",
@@ -932,9 +927,9 @@
   "rcxHubRoutesOff": "No scenario is running",
   "rcxHubRoutesOffHint": "Routes send chosen traffic, such as one service, through its own servers.",
   "rcxHubStartScenario": "Start a scenario",
-  "rcxHubOtherGroups": "Other groups",
+  "rcxHubOtherGroups": "Subscription groups",
   "rcxHubOtherGroupsHint": "Groups of the subscription this scenario also drives.",
-  "rcxHubRoutesHint": "Traffic takes the first route it matches, top to bottom.",
+  "rcxHubRoutesHint": "Traffic takes the first route it matches, top to bottom; the rest goes through Everything else.",
   "rcxHubRoutesRuleOnly": "Routes apply in rule mode; the connection is in {mode} mode now.",
   "@rcxHubRoutesRuleOnly": {
     "placeholders": {
@@ -944,9 +939,7 @@
     }
   },
   "rcxHubEverythingElse": "Everything else",
-  "rcxHubEverythingElseHint": "Traffic no route matched goes through the subscription’s main group.",
-  "rcxHubNetworks": "Networks",
-  "rcxHubNetworksTitle": "Mode and networks",
+  "rcxHubNetworks": "Special networks",
   "rcxHubDescriptionHint": "What this scenario does",
   "rcxHubBundle": "In this file",
   "rcxRouteNew": "New route",
@@ -954,9 +947,8 @@
   "rcxRouteName": "Name",
   "rcxRouteNameLong": "The name is too long",
   "rcxRouteNameReserved": "This name is reserved",
-  "rcxRouteSend": "Send through",
   "rcxRouteSendFixed": "One server",
-  "rcxRouteSendAutoHint": "The route’s own group picks the best server in the order below.",
+  "rcxRouteSendAutoHint": "Picks the best working server by itself.",
   "rcxRouteSendDirectHint": "This traffic bypasses the proxy.",
   "rcxRouteSendFixedHint": "This traffic always goes through the chosen server or group.",
   "rcxRouteTarget": "Server",
@@ -1110,7 +1102,7 @@
   },
   "rcxGroupSettings": "Group settings",
   "rcxSettingsLink": "Auto routing settings",
-  "rcxSettingsLinkHint": "Profiles, scenarios and routes",
+  "rcxSettingsLinkHint": "Scenarios, routes and behaviours",
   "rcxRouteGroup": "Made by a route",
   "rcxRouteGroupHint": "A route in the scenario «{scenario}» created this group. Edit or remove it there.",
   "@rcxRouteGroupHint": {
@@ -1159,7 +1151,60 @@
       }
     }
   },
-  "rcxLadderGroupHint": "This order is for this group only. Leave it empty to follow the profile’s order.",
+  "rcxLadderGroupHint": "This order is for this group only. Leave it empty to follow the behaviour’s order.",
   "rcxLadderScenarioFirst": "A scenario drives this group now: a server order the scenario gives it comes before this one.",
-  "rcxProfileDescriptionHint": "What this profile does"
+  "rcxProfileDescriptionHint": "What this behaviour does",
+  "rcxMatchAllServices": "All services",
+  "@rcxMatchAllServices": {
+    "description": "Route editor chip: expands the service list to show every service"
+  },
+  "rcxRouteWhere": "Where it goes",
+  "@rcxRouteWhere": {
+    "description": "Route editor section title above the three destination options (best server, one server, direct)"
+  },
+  "rcxSendBest": "Best server",
+  "@rcxSendBest": {
+    "description": "Destination option: the app picks the best working server automatically"
+  },
+  "rcxHowToChoose": "How to pick the server",
+  "@rcxHowToChoose": {
+    "description": "Row and page title: behaviour, server order and server filters used to pick the best server"
+  },
+  "rcxOnly": "only {condition}",
+  "@rcxOnly": {
+    "description": "Summary fragment: only servers matching the condition are used. Lowercase, joined with ' · '",
+    "placeholders": {
+      "condition": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxSendDirect": "Direct",
+  "@rcxSendDirect": {
+    "description": "Destination option in the route editor: this traffic bypasses the proxy. An adverb in Russian, next to «Лучший сервер» and «Один сервер»"
+  },
+  "rcxStudioPreview": "What it would pick now",
+  "@rcxStudioPreview": {
+    "description": "Section title: live simulation of which server the behaviour picks"
+  },
+  "rcxStudioPreviewHint": "Choose a group to see which server this behaviour would pick in it.",
+  "@rcxStudioPreviewHint": {
+    "description": "Footer when no group is chosen for the simulation"
+  },
+  "rcxStudioRanking": "All candidates",
+  "@rcxStudioRanking": {
+    "description": "Page title: every server of the simulation in rank order"
+  },
+  "rcxStudioCharacter": "Character",
+  "@rcxStudioCharacter": {
+    "description": "Section title: switching, checks and no-server behaviour"
+  },
+  "rcxStudioCharacterHint": "Switching is how readily it moves to a faster server; checks trade accuracy for battery.",
+  "@rcxStudioCharacterHint": {
+    "description": "Footer under the character section"
+  },
+  "rcxStudioServersHint": "Servers outside these conditions are never picked.",
+  "@rcxStudioServersHint": {
+    "description": "Footer under the server filter rows"
+  }
 }

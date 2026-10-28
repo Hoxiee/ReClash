@@ -81,6 +81,9 @@ void main() {
       Map<String, Object?> value, {
       Set<String> taken = const {},
     }) async {
+      tester.view.physicalSize = const Size(412, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         TestApp(
           overrides: [rcxRoutingActionProvider.overrideWith(_FakeAction.new)],
@@ -131,9 +134,9 @@ void main() {
       await tester.tap(find.text('open'));
       await _pumpFrames(tester);
 
-      await tester.ensureVisible(find.text(l.direct).first);
+      await tester.ensureVisible(find.text(l.rcxSendDirect).first);
       await _pumpFrames(tester);
-      await tester.tap(find.text(l.direct).first);
+      await tester.tap(find.text(l.rcxSendDirect).first);
       await _pumpFrames(tester);
       await tester.tap(find.byTooltip(l.save));
       await _pumpFrames(tester);
@@ -143,6 +146,72 @@ void main() {
         'match': ['GEOSITE,youtube'],
         'to': 'DIRECT',
       });
+    });
+
+    testWidgets('deletes a route it was opened on', (tester) async {
+      Map<String, Object?>? result;
+      await tester.pumpWidget(
+        TestApp(
+          overrides: [rcxRoutingActionProvider.overrideWith(_FakeAction.new)],
+          homeBuilder: (_) => Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await editRoute(
+                  context,
+                  value: const {
+                    'name': 'Video',
+                    'match': ['GEOSITE,youtube'],
+                  },
+                  scenario: const {'rcx': 1},
+                  deletable: true,
+                );
+              },
+              child: const Text('open'),
+            ),
+          ),
+          child: const SizedBox.shrink(),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await _pumpFrames(tester);
+
+      await tester.tap(find.byTooltip(l.delete));
+      await _pumpFrames(tester);
+
+      expect(result, isEmpty);
+    });
+
+    testWidgets('keeps the best server when picking one server is dismissed', (
+      tester,
+    ) async {
+      await open(tester, const {
+        'name': 'Video',
+        'match': ['GEOSITE,youtube'],
+      });
+
+      await tester.tap(find.text(l.rcxRouteSendFixed));
+      await _pumpFrames(tester);
+      expect(find.text(l.rcxRouteTarget), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await _pumpFrames(tester);
+      await _pumpFrames(tester);
+
+      expect(find.text(l.rcxRouteTarget), findsNothing);
+      expect(find.text(l.rcxHowToChoose), findsOneWidget);
+    });
+
+    testWidgets('picks the server on its own page', (tester) async {
+      await open(tester, const {
+        'name': 'Video',
+        'match': ['GEOSITE,youtube'],
+      });
+
+      await tester.tap(find.text(l.rcxHowToChoose));
+      await _pumpFrames(tester);
+
+      expect(find.text(l.rcxBehaviour), findsOneWidget);
+      expect(find.text(l.rcxPoolExclude), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('refuses a name another route or group holds', (tester) async {

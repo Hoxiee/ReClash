@@ -251,6 +251,29 @@ void main() {
       expect(find.byType(RoutingStudio), findsNothing);
     });
 
+    testWidgets('keeps tags on their own page', (tester) async {
+      tester.view.physicalSize = const Size(412, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final action = _FakeAction(
+        const RcxStudioResult(
+          profile: {
+            ..._profileMap,
+            'tags': {'premium': 'name ~ /pro/i'},
+          },
+        ),
+      );
+      await _openPage(tester, action, const RoutingStudio(text: 'rcx: 1\n'));
+
+      expect(find.text(l.rcxAddTag), findsNothing);
+      await tester.tap(find.text(l.rcxTags));
+      await _pumpFrames(tester);
+
+      expect(find.text(l.rcxAddTag), findsOneWidget);
+      expect(find.text('name ~ /pro/i'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('edits the description under the title', (tester) async {
       final action = _FakeAction(const RcxStudioResult(profile: _profileMap));
       await _openPage(
@@ -394,7 +417,7 @@ void main() {
         const ScenarioEditor(text: 'rcx: 1\ntitle: Home\n'),
       );
 
-      expect(find.text(l.rcxMainGroup), findsWidgets);
+      expect(find.textContaining(l.rcxMainGroup), findsWidgets);
       expect(find.text(l.rcxAllGroups), findsWidgets);
       final lints = action.requests.where((r) => r['op'] == 'lint');
       expect(lints, isNotEmpty);

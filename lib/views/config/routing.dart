@@ -408,6 +408,10 @@ String _profileTitle(List<RcxProfileInfo> library, String id, String locale) =>
 String _description(RcxProfileInfo? info, String locale) =>
     info == null ? '' : info.localize(info.description, locale);
 
+/// A waiting consent is a question for the user, not a fault to flag red.
+bool _isFault(RcxReason? problem) =>
+    problem != null && problem.code != 'profile.consent';
+
 /// What auto routing does right now: the scenario, the network and mode it
 /// holds, and where each route and smart group sends traffic.
 class _OverviewTab extends ConsumerWidget {
@@ -540,19 +544,17 @@ class _OverviewTab extends ConsumerWidget {
             if (scenario != null && scenario.problem == null)
               DecorationListItem(
                 key: const ValueKey('live'),
-                title: Text(
+                title: Text(l.rcxModeIs(rcxModeLabel(status.tunnelMode))),
+                subtitle: Text(
                   [
                     if (kind != null)
                       l.rcxNetwork(rcxKindLabel(l, kind, own: own)),
-                    l.rcxModeIs(rcxModeLabel(status.tunnelMode)),
-                  ].join(' · '),
-                ),
-                subtitle: Text(
-                  scenario.manual
-                      ? l.rcxModeManualNow
-                      : scenario.mode.isEmpty
-                      ? l.rcxModeYours
-                      : l.rcxModeByScenario,
+                    scenario.manual
+                        ? l.rcxModeManualNow
+                        : scenario.mode.isEmpty
+                        ? l.rcxModeYours
+                        : l.rcxModeByScenario,
+                  ].join('\n'),
                 ),
               ),
             if (scenario != null && scenario.manual && scenario.holdsMode)
@@ -587,7 +589,7 @@ class _OverviewTab extends ConsumerWidget {
             items: [
               for (final group in groups)
                 DecorationListItem(
-                  invalid: group.problem != null,
+                  invalid: _isFault(group.problem),
                   title: EmojiText(group.name),
                   subtitle: EmojiText(
                     _groupLine(l, group, status.tunnelMode),
@@ -611,8 +613,11 @@ class _OverviewTab extends ConsumerWidget {
     RcxGroupStatus? group,
   ) {
     final fixed = route.to.isNotEmpty;
+    final open = fixed || group == null
+        ? () => RoutingSettingsView.showRoute(context, route.name)
+        : () => unawaited(showRoutingSheet(context, route.name));
     return DecorationListItem(
-      invalid: route.problem != null,
+      invalid: _isFault(route.problem),
       title: EmojiText(route.name),
       subtitle: EmojiText(
         switch ((route.problem, group)) {
@@ -624,10 +629,8 @@ class _OverviewTab extends ConsumerWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      onPressed: fixed || group == null
-          ? null
-          : () => unawaited(showRoutingSheet(context, route.name)),
-      trailing: fixed || group == null ? null : const DisclosureIndicator(),
+      onPressed: open,
+      trailing: const DisclosureIndicator(),
     );
   }
 
@@ -687,6 +690,12 @@ class _LibraryTabState extends ConsumerState<_LibraryTab> {
     return info.isScenario
         ? openScenarioEditor(context, text: text, from: from)
         : openRoutingStudio(context, text: text, from: from);
+  }
+
+  Future<void> _run(RcxProfileInfo info) async {
+    final running = ref.read(rcxStatusStateProvider)?.scenario?.id;
+    if (info.id == running) return;
+    await _action.setScenario(info.id);
   }
 
   Future<void> _export(RcxProfileInfo info) async {
@@ -792,7 +801,12 @@ class _LibraryTabState extends ConsumerState<_LibraryTab> {
                   info: info,
                   locale: locale,
                   active: info.isScenario && info.id == active,
-                  onPressed: () => unawaited(_open(info, copy: false)),
+                  onPressed: info.isScenario && info.error.isEmpty
+                      ? () => unawaited(_run(info))
+                      : () => unawaited(_open(info, copy: false)),
+                  onEdit: info.isScenario
+                      ? () => unawaited(_open(info, copy: false))
+                      : null,
                 ),
               ),
           ],
@@ -808,12 +822,17 @@ class _LibraryCard extends StatelessWidget {
     required this.locale,
     required this.active,
     required this.onPressed,
+    this.onEdit,
   });
 
   final RcxProfileInfo info;
   final String locale;
   final bool active;
   final VoidCallback onPressed;
+
+  /// Opens the entry to edit when a tap does something else, as running a
+  /// scenario does.
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -848,7 +867,21 @@ class _LibraryCard extends StatelessWidget {
         ],
       ),
       onPressed: onPressed,
-      trailing: active ? const SelectionCheck() : null,
+      trailing: switch (onEdit) {
+        final onEdit? => Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            if (active) const SelectionCheck(),
+            IconButton(
+              tooltip: info.source == 'user' ? l.edit : l.rcxDuplicate,
+              onPressed: onEdit,
+              icon: const GlyphIcon(AppGlyphs.edit),
+            ).withAppTooltip(),
+          ],
+        ),
+        null => active ? const SelectionCheck() : null,
+      },
     );
   }
 }

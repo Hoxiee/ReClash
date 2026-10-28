@@ -336,11 +336,14 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
         key: const ValueKey('control'),
         child: generateSection(
           title: l.rcxControl,
-          footer: switch (control.mode) {
-            'pinned' => l.rcxModePinnedHint(control.pinName),
-            'manual' => l.rcxModeManualHint,
-            _ => l.rcxModeAutoHint,
-          },
+          footer: [
+            if (group.program.isNotEmpty) l.rcxScenarioDrives(_scenarioTitle()),
+            switch (control.mode) {
+              'pinned' => l.rcxModePinnedHint(control.pinName),
+              'manual' => l.rcxModeManualHint,
+              _ => l.rcxModeAutoHint,
+            },
+          ].join(' '),
           items: [
             SegmentedControl<String>(
               segments: [
@@ -468,18 +471,16 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
         'balanced';
     final energy =
         binding.energy ?? _profileDoc['energy'] as String? ?? 'balanced';
-    final footer = [
-      if (byScenario) l.rcxScenarioDrives(_scenarioTitle()),
-      if (group.problem case final problem?
-          when problem.code != 'profile.consent')
-        rcxReasonText(l, problem),
-    ];
+    final fault = switch (group.problem) {
+      final problem? when problem.code != 'profile.consent' => problem,
+      _ => null,
+    };
     return generateSection(
       title: l.rcxBehaviour,
-      footer: footer.isEmpty ? null : footer.join('\n'),
+      footer: fault == null ? null : rcxReasonText(l, fault),
       items: [
         DecorationListItem(
-          invalid: group.problem != null,
+          invalid: fault != null,
           title: EmojiText(
             group.fixed.isNotEmpty
                 ? l.rcxFixedOn(group.fixed)
@@ -947,12 +948,17 @@ class _RoutingConsentSectionState extends ConsumerState<RoutingConsentSection> {
       items: [
         DecorationListItem(
           title: EmojiText(l.rcxConsentAsk(widget.title)),
-          subtitle: Text(widget.hosts.join('\n')),
-        ),
-        FormRow(
-          title: l.rcxConsentAllow,
-          onPressed: _busy ? null : _allow,
-          trailing: const GlyphIcon(AppGlyphs.check),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12,
+            children: [
+              Text(widget.hosts.join('\n')),
+              FilledButton(
+                onPressed: _busy ? null : _allow,
+                child: Text(l.rcxConsentAllow),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1038,7 +1044,9 @@ class _StatusSection extends StatelessWidget {
     };
     final details = [
       if (country != null) rcxCountryName(context, country),
-      if (decision.tier.isNotEmpty) own(decision.tier),
+      if (decision.tier.isNotEmpty &&
+          decision.reason.args['tier'] != decision.tier)
+        own(decision.tier),
       if (kind != null) l.rcxNetwork(rcxKindLabel(l, kind, own: own)),
     ].join(' · ');
     return Column(

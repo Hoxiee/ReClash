@@ -250,6 +250,54 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a library tap runs a scenario and the pencil edits it', (
+    tester,
+  ) async {
+    final action = await pumpHub(
+      tester,
+      library: [
+        ..._library,
+        const RcxProfileInfo(
+          id: 'builtin/whitelist',
+          kind: 'scenario',
+          title: 'Whitelists',
+          source: 'builtin',
+        ),
+      ],
+    );
+    await tester.tap(destination(l.rcxHubLibrary));
+    await _pumpFrames(tester);
+
+    await tester.tap(_text('Whitelists'));
+    await _pumpFrames(tester);
+    expect(action.scenarios, ['builtin/whitelist']);
+    expect(find.byType(ScenarioEditor), findsNothing);
+
+    await tester.tap(_text('Every group'));
+    await _pumpFrames(tester);
+    expect(action.scenarios, ['builtin/whitelist']);
+
+    await tester.tap(find.byTooltip(l.rcxDuplicate).first);
+    await _pumpFrames(tester);
+    expect(find.byType(ScenarioEditor), findsOneWidget);
+  });
+
+  testWidgets('rarer scenario settings open on their own pages', (
+    tester,
+  ) async {
+    await pumpHub(tester);
+    await tester.tap(destination(l.rcxHubRoutes));
+    await _pumpFrames(tester);
+
+    expect(find.text(l.rcxAddGroup), findsNothing);
+    await tester.ensureVisible(_text(l.rcxHubOtherGroups));
+    await tester.tap(_text(l.rcxHubOtherGroups));
+    await _pumpFrames(tester);
+
+    expect(find.text(l.rcxAddGroup), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the master switch turns the scenario off', (tester) async {
     final action = await pumpHub(tester);
 
@@ -272,7 +320,7 @@ void main() {
       _scenarioId,
     );
 
-    await tester.tap(_text(l.rcxMainGroup));
+    await tester.tap(_text(l.rcxHubEverythingElse));
     await _pumpFrames(tester);
     await tester.tap(find.byTooltip(l.save));
     await _pumpFrames(tester);
