@@ -44,7 +44,7 @@ jobs:
           cache: true
       - run: git config --global user.name 'Fork maintenance tests'
       - run: git config --global user.email 'maintenance@localhost'
-      - run: flutter pub get
+      - run: dart tool/prepare.dart
       - run: dart run tool/fork.dart check
       - run: dart tool/check_format.dart
       - run: flutter test test/tool/fork_registry_test.dart test/tool/fork_context_test.dart test/tool/fork_normalize_test.dart test/tool/fork_sync_test.dart test/tool/fork_identity_test.dart test/tool/check_format_test.dart test/widgets/fork_tooltip_contract_test.dart test/widgets/fork_setting_spec_contract_test.dart

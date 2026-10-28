@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
 
+import 'prepare.dart';
 import 'src/test_select/graph.dart';
 import 'src/fork/git.dart';
 import 'src/fork/registry.dart';
@@ -134,6 +135,15 @@ Future<void> main(List<String> arguments) async {
   if (options.help) {
     stdout.writeln(_usage);
     return;
+  }
+
+  if (!options.list) {
+    final prepared = await prepareProject(
+      Directory.current.path,
+      pubGet: false,
+      quiet: options.summaryOnly,
+    );
+    if (prepared != 0) exit(prepared);
   }
 
   final files = options.selects

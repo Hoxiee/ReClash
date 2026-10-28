@@ -1,0 +1,12 @@
+v: 1
+kind: integration
+state: active
+risk: routine
+must:
+  sources: Assembled ARBs and application-generated Dart are ignored build outputs; authored sources, vendor localization provenance and FRB bindings remain versioned.
+  prepare: Preparation resolves dependencies, assembles ARBs, generates localization and runs build_runner in order, stopping on the first failure.
+  entrypoints: Application checks and builds prepare generated sources from a clean checkout before consuming them.
+watch: [.gitignore, Makefile, flake.nix, .pre-commit-config.yaml, tool/prepare.dart, tool/test.dart, tool/preview.dart, setup.dart, build.yaml, .github/workflows/build.yaml, .github/workflows/fork-maintenance.yaml, test/tool/prepare_test.dart, test/tool/github_workflows_test.dart]
+checks:
+  code-generation: [sources, prepare, entrypoints]
+drop: The application no longer requires source generation.

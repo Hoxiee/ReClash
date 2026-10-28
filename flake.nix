@@ -54,7 +54,7 @@
           prepare = pkgs.writeShellApplication {
             name = "reclash-prepare";
             text = ''
-              if [[ ! -f plugins/rust_api/rust/rust-toolchain.toml || ! -f tool/assemble_l10n.dart ]]; then
+              if [[ ! -f plugins/rust_api/rust/rust-toolchain.toml || ! -f tool/prepare.dart ]]; then
                 echo 'Run reclash-prepare from the ReClash repository root.' >&2
                 exit 1
               fi
@@ -64,8 +64,7 @@
               fi
               rustup toolchain install ${lib.escapeShellArg rustToolchain} --profile minimal
               rustup target add --toolchain ${lib.escapeShellArg rustToolchain} ${lib.escapeShellArg pkgs.stdenv.hostPlatform.rust.rustcTarget}
-              flutter pub get
-              dart run tool/assemble_l10n.dart
+              dart tool/prepare.dart
             '';
           };
         in

@@ -36,6 +36,11 @@ migrate_working_dir/
 /build/
 /dist/
 /arb/intl_*.arb
+/lib/l10n/
+/lib/models/generated/
+/lib/providers/generated/
+/lib/database/generated/
+/lib/ui/generated/
 
 # Symbolication related
 app.*.symbols

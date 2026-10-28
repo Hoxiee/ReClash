@@ -27,12 +27,13 @@ flutter run -d linux --dart-define=SAFE_MODE=true
 
 The shell does not download dependencies, initialize submodules, edit manifests,
 or start the application on entry. `reclash-prepare` explicitly downloads the
-pinned Rust toolchain for the native host, resolves Pub dependencies, and runs
-`tool/assemble_l10n.dart` to create the ignored flat ARBs. That Dart invocation
-also runs the normal Go/Helper and Rust hooks; it may compile native artifacts
-and fetch Go modules and Cargo crates. Leave both `build_assets` defines enabled.
-Tracked localization Dart output is already present; after changing messages,
-follow the normal localization generation commands in `.agents/commands.md`.
+pinned Rust toolchain for the native host and calls `dart tool/prepare.dart` to
+resolve Pub dependencies and generate the ignored ARBs, localization Dart,
+models, providers and database code. The Dart generators also run the normal
+Go/Helper and Rust hooks; they may compile native artifacts and fetch Go modules
+and Cargo crates. Leave both `build_assets` defines enabled. Run preparation
+after switching branches or changing generator inputs; application-generated
+Dart is not stored in Git.
 
 ## Toolchains And Host Integration
 

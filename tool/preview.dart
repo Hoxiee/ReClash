@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'prepare.dart';
 import 'preview/preview_cli.dart';
 
 Future<void> main(List<String> args) async {
@@ -31,6 +32,9 @@ Future<void> main(List<String> args) async {
   } on FormatException catch (error) {
     _fail(error.message);
   }
+
+  final prepared = await prepareProject(root, pubGet: false, quiet: true);
+  if (prepared != 0) exit(prepared);
 
   final work = Directory(p.join(root, '.dart_tool', 'preview'));
   final outDir = Directory(

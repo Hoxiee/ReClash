@@ -58,18 +58,53 @@ void main() {
     expect(steps('dart'), contains('changelog_telegram_test.py'));
   });
 
-  test('localization is assembled before generation and before tests', () {
-    final commands = steps('dart');
+  test('checks and app builds prepare all generated sources first', () {
+    for (final (job, consumer) in [
+      ('dart', 'flutter analyze'),
+      ('dart', 'tool/test.dart'),
+      ('desktop', 'flutter build'),
+      ('build', 'dart setup.dart'),
+    ]) {
+      final commands = steps(job);
+      final prepare = commands.indexOf('dart tool/prepare.dart');
+      expect(prepare, greaterThanOrEqualTo(0), reason: job);
+      expect(prepare, lessThan(commands.indexOf(consumer)), reason: job);
+      expect(commands, isNot(contains('intl_utils:generate')), reason: job);
+    }
+    expect(steps('dart'), contains("git ls-files -- 'arb/intl_*.arb'"));
+    expect(steps('dart'), isNot(contains('git diff --exit-code -- lib/l10n')));
+    final fork =
+        loadYaml(
+              File(
+                '.github/workflows/fork-maintenance.yaml',
+              ).readAsStringSync(),
+            )
+            as YamlMap;
+    final commands = (fork['jobs']['contracts']['steps'] as YamlList)
+        .map((step) => step['run'] ?? '')
+        .join('\n');
+    final prepare = commands.indexOf('dart tool/prepare.dart');
+    expect(prepare, greaterThanOrEqualTo(0));
+    expect(prepare, lessThan(commands.indexOf('flutter test')));
+  });
+
+  test('local analysis and Nix preparation share the app generator', () {
+    final config =
+        loadYaml(File('.pre-commit-config.yaml').readAsStringSync()) as YamlMap;
+    final hooks = config['repos'][0]['hooks'] as YamlList;
+    final analyze = hooks.firstWhere((hook) => hook['id'] == 'flutter-analyze');
     expect(
-      commands.indexOf('tool/assemble_l10n.dart'),
-      lessThan(commands.indexOf('intl_utils:generate')),
+      analyze['entry'],
+      'dart tool/prepare.dart -- analyze --no-fatal-infos',
     );
     expect(
-      commands.indexOf('intl_utils:generate'),
-      lessThan(commands.indexOf('tool/test.dart')),
+      File('flake.nix').readAsStringSync(),
+      contains('dart tool/prepare.dart'),
     );
-    expect(commands, isNot(contains('assemble_l10n.dart --check')));
-    expect(steps('build'), contains('tool/assemble_l10n.dart'));
+    expect(
+      File('Makefile').readAsStringSync(),
+      contains('dart tool/prepare.dart'),
+    );
   });
 
   test('manifest and package validation gate publishing', () {

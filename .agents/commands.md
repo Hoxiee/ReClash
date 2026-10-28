@@ -8,9 +8,11 @@ Update submodules first. The ClashMeta Go core lives in `core/mihomo/`.
 git submodule update --init --recursive
 ```
 
-Full package build, including Go core, Flutter, and packaging, runs through `setup.dart`:
+Full package build, including Go core, Flutter, and packaging, runs through `setup.dart`. Prepare a fresh checkout first;
+`setup.dart` also refreshes generated sources before packaging:
 
 ```bash
+dart tool/prepare.dart
 dart setup.dart macos
 dart setup.dart linux
 dart setup.dart windows
@@ -76,12 +78,12 @@ holds a `rust_api` library built from the same sources.
 
 ## Flutter Development
 
-Use the default Flutter SDK directly:
+Use the default Flutter SDK through the preparation entrypoint, or prepare once before direct Flutter commands:
 
 ```bash
-flutter pub get
-flutter run
-flutter test
+dart tool/prepare.dart -- analyze --no-fatal-infos
+dart tool/prepare.dart -- run --dart-define=SAFE_MODE=true
+dart run tool/test.dart
 ```
 
 Use `flutter test`, not `dart test`, because models pull in Flutter types.
@@ -118,10 +120,21 @@ same checkout.
 
 ## Code Generation
 
-Run code generation after modifying models, providers, or database schema:
+Run from a fresh checkout and after changing localization, models, providers, or database schema:
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+dart tool/prepare.dart
+```
+
+This dependency-free entrypoint runs `flutter pub get`, ARB assembly, `intl_utils`, and `build_runner`, stopping at the
+first failure. `--no-pub` skips dependency resolution, not generation. `build_runner` retains its incremental cache;
+output existence alone never establishes freshness. `setup.dart`, `tool/test.dart` (except `--list`), `tool/preview.dart`,
+Nix preparation, and application CI jobs use the same pipeline. `make prepare`, `make analyze`, `make test`, and
+`make run` expose the local entrypoints; `make run` uses safe mode.
+
+For a model/provider editing loop, the generator also supports watch mode:
+
+```bash
 dart run build_runner watch
 ```
 
@@ -168,9 +181,12 @@ dart run tool/l10n.dart audit [--fragment <f>]     # locale gaps, placeholders, 
 
 Metadata (`@key`) lives in the English fragment only; `intl_utils` reads it from the main ARB alone.
 
-`arb/intl_<locale>.arb` is ignored generated output, assembled automatically in CI before localization checks.
-After a fresh checkout, run the assembly command above before running localization tests locally.
-`lib/l10n/` remains tracked, and CI verifies that regenerating it produces no changes. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
+`arb/intl_<locale>.arb`, `lib/l10n/`, and the application-generated Dart directories listed above are ignored outputs.
+CI regenerates them from a clean checkout before analysis, tests and app builds, and rejects tracked app-generated files.
+After checkout or a branch switch, run `dart tool/prepare.dart` before direct Flutter commands; IDE and ignored local
+build scripts need the same preparation. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new
+downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages. Keep `upstream_l10n/` and FRB
+bindings tracked: they are vendor provenance and a separately generated cross-language contract, not these app outputs.
 
 Application and tray icons are generated from `assets_source/images/icon/`; the
 script requires `rsvg-convert` (librsvg) and ImageMagick 7 (`magick`) on `PATH`:
@@ -427,9 +443,7 @@ The `dart` job performs these root-package checks in order:
 
 ```bash
 bash tool/hooks/test.sh
-flutter pub get
-dart run tool/assemble_l10n.dart
-dart run intl_utils:generate
+dart tool/prepare.dart
 dart run tool/check_release_version.dart
 dart tool/check_format.dart
 flutter analyze --no-fatal-infos

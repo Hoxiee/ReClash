@@ -10,6 +10,8 @@ owned: [CHANGELOG.md, changelog.json]
 checks:
   database-compatibility:
     argv: [flutter, test, test/database/migration_v1_to_v2_test.dart, test/common/backup_task_test.dart, test/providers/backup_action_test.dart]
+  code-generation:
+    argv: [flutter, test, test/tool/prepare_test.dart, test/tool/github_workflows_test.dart]
   generated-contracts:
     argv: [dart, run, tool/check_generated_contracts.dart]
   on-demand:
@@ -79,7 +81,7 @@ checks:
   fork-tests:
     argv: [flutter, test, test/tool/fork_registry_test.dart, test/tool/fork_context_test.dart, test/tool/fork_normalize_test.dart, test/tool/fork_sync_test.dart, test/tool/fork_chain_test.dart, test/tool/fork_report_test.dart, test/tool/generated_contracts_test.dart, test/tool/database_schema_tool_test.dart, test/tool/check_format_test.dart]
   pub:
-    argv: [flutter, pub, get]
+    argv: [dart, tool/prepare.dart]
   analyze:
     argv: [flutter, analyze, --no-fatal-infos]
   tests:

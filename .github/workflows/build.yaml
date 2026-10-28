@@ -78,15 +78,12 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: ${{ env.BRANCH_CACHE }}
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Prepare application sources
+        run: dart tool/prepare.dart
 
-      - name: Assemble localization sources and check generated Dart
+      - name: Check generated application sources stay untracked
         run: |
-          dart run tool/assemble_l10n.dart
-          dart run intl_utils:generate
-          git diff --exit-code -- lib/l10n
-          test -z "$(git ls-files --others --exclude-standard -- lib/l10n)"
+          test -z "$(git ls-files -- 'arb/intl_*.arb' lib/l10n lib/models/generated lib/providers/generated lib/database/generated lib/ui/generated)"
 
       - name: Validate release version
         shell: bash
@@ -199,8 +196,8 @@ jobs:
         if: matrix.platform == 'windows'
         run: git config --global core.longpaths true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Prepare application sources
+        run: dart tool/prepare.dart
 
       # Compiles the desktop runners and the native plugin code that only the
       # tagged release matrix built before; the bundle itself is discarded.
@@ -513,15 +510,10 @@ jobs:
           add-to-path: true
           link-to-sdk: true
 
-      - name: Get Flutter Dependency
+      - name: Prepare application sources
         run: |
           flutter --version
-          flutter pub get
-
-      - name: Assemble localization
-        run: |
-          dart run tool/assemble_l10n.dart
-          dart run intl_utils:generate
+          dart tool/prepare.dart
 
       - name: Validate package version
         shell: bash

@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import 'tool/prepare.dart';
 import 'tool/src/release_version.dart';
 import 'tool/src/windows_bundle.dart';
 
@@ -84,6 +85,9 @@ Future<void> main(List<String> args) async {
   );
   final androidArch = results['arch'] as String?;
   final verbose = results['verbose'] as bool;
+
+  final prepared = await prepareProject(rootDir);
+  if (prepared != 0) exit(prepared);
 
   final exitCode = await _package(
     platform,

@@ -35,8 +35,9 @@ Do not use this for README translation sync or manual edits to generated localiz
    dart run intl_utils:generate
    ```
 
-7. Run `dart run tool/assemble_l10n.dart --check`, `flutter analyze --no-fatal-infos`, and `flutter test test/tool/l10n_assembler_test.dart test/l10n test/lint/dynamic_message_key_test.dart`. The lint test checks locale key parity and rejects runtime-derived `Intl.message` keys; enum labels go through `lib/common/l10n_labels.dart`.
-8. Re-run the Han-text scan for targeted strings.
+7. On a fresh checkout, run `dart tool/prepare.dart` first: assembled ARBs, `lib/l10n/`, and generated application models/providers/database code are ignored, not versioned. Never add them to Git; `upstream_l10n/` remains tracked vendor provenance.
+8. Run `dart run tool/assemble_l10n.dart --check`, `flutter analyze --no-fatal-infos`, and `flutter test test/tool/l10n_assembler_test.dart test/l10n test/lint/dynamic_message_key_test.dart`. The lint test checks locale key parity and rejects runtime-derived `Intl.message` keys; enum labels go through `lib/common/l10n_labels.dart`.
+9. Re-run the Han-text scan for targeted strings.
 
 ## Pitfalls
 

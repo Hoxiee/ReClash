@@ -577,8 +577,8 @@ agents never share a worktree or mutable feature branch. Check status first and 
 feature branches and worktrees after integration.
 
 Keep a feature as one Conventional Commit in the final `dev` history. The feature commit contains its implementation,
-tests, affected contracts, owned ARB fragments, and generated localization output; never collect feature strings into a
-global `feat(l10n)` follow-up. Keep iteration changes uncommitted in the feature worktree until the feature is ready.
+tests, affected contracts, and owned ARB fragments; generated application outputs remain ignored. Never collect feature
+strings into a global `feat(l10n)` follow-up. Keep iteration changes uncommitted in the feature worktree until the feature is ready.
 Prefer landing a feature's foundation before dependent work; if work must be stacked, keep the dependent branch private
 until its base is integrated.
 
@@ -686,7 +686,11 @@ Do not manually edit generated files under:
 - `lib/ui/generated/`
 - `lib/l10n/intl/`
 
-After schema, model, or provider changes, run build generation and include focused tests when behavior changes.
+After schema, model, or provider changes, run `dart tool/prepare.dart` and include focused tests when behavior changes.
+These application-generated directories and assembled `arb/intl_*.arb` files are ignored, never committed. Keep authored
+sources, generator configuration and lockfiles in Git. Vendor provenance in `upstream_l10n/`, FRB bindings and generated
+assets outside these paths remain tracked. Before direct Flutter commands after checkout or source changes, prepare
+again; ignored output left by another branch is not proof of freshness.
 
 `lib/l10n/l10n.dart` is the one file that still imports `package:flutter/material.dart`.
 `intl_utils` hardcodes that import in its own template, so regenerating rewrites it and

@@ -47,7 +47,8 @@ Read these only when the task touches their area:
   kill a ReClash instance by name; the user's own instance is not yours to close. See
   [.agents/rules.md](.agents/rules.md).
 - Use `flutter test`, not `dart test`, because models pull in Flutter types.
-- Run code generation after modifying models, providers, or database schema.
+- Run `dart tool/prepare.dart` after checkout or source changes, before direct Flutter commands. It resolves dependencies
+  and generates ignored ARB, localization Dart, models, providers, and database code; never add those outputs to Git.
 - Do not manually edit generated files.
 - Preserve lifecycle ownership: desktop Core process convergence belongs to `lib/core/desktop/`; Android service intent
   arbitration belongs to `ServiceState`. UI/provider code may request a transition but must not become a second source of
