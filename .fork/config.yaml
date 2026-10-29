@@ -58,6 +58,11 @@ checks:
     argv: [flutter, test, test/models/config_test.dart, test/providers/config_test.dart]
   tools:
     argv: [flutter, test, test/providers/tools_test.dart, test/views/tools_catalog_test.dart, test/widgets/tools_workspace_test.dart]
+  diagnostics-kernel:
+    argv: [flutter, test, test/features/doctor]
+  go-doctor:
+    argv: [go, test, -run, 'Classify|ClockSkew|Reach', .]
+    cwd: core
   simple-dashboard:
     argv: [flutter, test, test/views/dashboard/simple_dashboard_test.dart, test/providers/speed_test_test.dart, test/features/speed_test_engine_test.dart, test/views/speed_test_sheet_test.dart, test/models/config_test.dart]
   web-dashboard-storage:

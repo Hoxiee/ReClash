@@ -475,6 +475,11 @@ class CoreController {
     ServiceCheckParams params,
   ) async => sandbox?.serviceCheck(params) ?? _interface.serviceCheck(params);
 
+  Future<ClockSkewResult?> clockSkew(ClockSkewParams params) =>
+      _interface.clockSkew(params);
+
+  Future<ReachResult?> reach(ReachParams params) => _interface.reach(params);
+
   Future<Map<String, dynamic>> getConfig(int id) async {
     return _readConfig(await appPath.getProfilePath(id.toString()));
   }

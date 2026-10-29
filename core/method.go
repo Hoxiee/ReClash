@@ -209,6 +209,8 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	watchRouteMethod:               watchRouteHandler,
 	checkRoutesMethod:              withArguments(handleCheckRoutes),
 	probeMethod:                    withArguments(handleProbe),
+	doctorClockSkewMethod:          withArguments(handleClockSkew),
+	doctorReachMethod:              withArguments(handleReach),
 	outboundIpMethod:               withArguments(handleOutboundIp),
 	serviceCheckMethod:             withArguments(handleServiceCheck),
 	getTrafficMethod:               withArguments(handleGetTraffic),

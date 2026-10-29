@@ -530,6 +530,7 @@ enum SimpleDashboardWidget {
   services,
   ipQuality,
   trustedNetworks,
+  path,
 }
 
 enum DnsQueryInitiator { app, rule, direct, proxy, other }

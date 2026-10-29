@@ -38,6 +38,8 @@ const (
 	resetTrafficMethod             CoreMethod = "resetTraffic"
 	asyncTestDelayMethod           CoreMethod = "asyncTestDelay"
 	probeMethod                    CoreMethod = "probe"
+	doctorClockSkewMethod          CoreMethod = "doctorClockSkew"
+	doctorReachMethod              CoreMethod = "doctorReach"
 	outboundIpMethod               CoreMethod = "outboundIp"
 	serviceCheckMethod             CoreMethod = "serviceCheck"
 	getConnectionsMethod           CoreMethod = "getConnections"
@@ -233,6 +235,7 @@ type ProbeResult struct {
 	RulePayload string   `json:"rule-payload"`
 	Error       string   `json:"error,omitempty"`
 	Message     string   `json:"message,omitempty"`
+	Cause       string   `json:"cause,omitempty"`
 
 	CoreEpoch    uint64     `json:"core-epoch"`
 	RouteVersion uint64     `json:"route-version"`
@@ -242,6 +245,44 @@ type ProbeResult struct {
 	// response headers, and ProbeResult is the shape the Dart side decodes.
 	header    http.Header
 	lowerBody string
+}
+
+type ClockSkewParams struct {
+	Url       string `json:"url"`
+	ProxyName string `json:"proxy-name"`
+	Timeout   int64  `json:"timeout"`
+}
+
+type ClockSkewResult struct {
+	SkewMs     int64  `json:"skew-ms"`
+	ServerTime int64  `json:"server-time"`
+	Delay      int64  `json:"delay"`
+	Url        string `json:"url"`
+	Cause      string `json:"cause,omitempty"`
+	Message    string `json:"message,omitempty"`
+}
+
+type ReachParams struct {
+	Url       string `json:"url"`
+	ProxyName string `json:"proxy-name"`
+	Timeout   int64  `json:"timeout"`
+}
+
+type ReachResult struct {
+	Stage       string `json:"stage"`
+	Direct      bool   `json:"direct"`
+	Proxy       string `json:"proxy"`
+	Server      string `json:"server"`
+	DnsMs       int64  `json:"dns-ms"`
+	ResolveMs   int64  `json:"resolve-ms"`
+	TcpMs       int64  `json:"tcp-ms"`
+	HandshakeMs int64  `json:"handshake-ms"`
+	Cause       string `json:"cause,omitempty"`
+	Message     string `json:"message,omitempty"`
+
+	CoreEpoch    uint64     `json:"core-epoch"`
+	RouteVersion uint64     `json:"route-version"`
+	Hits         []RouteHit `json:"hits"`
 }
 
 type Traffic struct {

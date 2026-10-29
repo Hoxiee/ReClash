@@ -5,6 +5,7 @@ import 'package:reclash/ui/icons/icons.dart';
 
 import 'address_card.dart';
 import 'mode_card.dart';
+import 'path_card.dart';
 import 'services_card.dart';
 import 'speed_card.dart';
 import 'trusted_networks_card.dart';
@@ -16,6 +17,7 @@ extension SimpleDashboardWidgetView on SimpleDashboardWidget {
     SimpleDashboardWidget.services => const SimpleServicesCard(),
     SimpleDashboardWidget.ipQuality => const SimpleAddressCard(),
     SimpleDashboardWidget.trustedNetworks => const SimpleTrustedNetworksCard(),
+    SimpleDashboardWidget.path => const SimplePathCard(),
   };
 
   Glyph get glyph => switch (this) {
@@ -24,6 +26,7 @@ extension SimpleDashboardWidgetView on SimpleDashboardWidget {
     SimpleDashboardWidget.services => AppGlyphs.verified,
     SimpleDashboardWidget.ipQuality => AppGlyphs.eye,
     SimpleDashboardWidget.trustedNetworks => AppGlyphs.wifi,
+    SimpleDashboardWidget.path => AppGlyphs.status,
   };
 
   String label(BuildContext context) {
@@ -35,6 +38,7 @@ extension SimpleDashboardWidgetView on SimpleDashboardWidget {
       SimpleDashboardWidget.ipQuality => appLocalizations.simpleIpTitle,
       SimpleDashboardWidget.trustedNetworks =>
         appLocalizations.simpleTrustedTitle,
+      SimpleDashboardWidget.path => appLocalizations.doctorPathTitle,
     };
   }
 }

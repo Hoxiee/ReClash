@@ -270,6 +270,7 @@ func runProbe(parent context.Context, req probeRequest) *ProbeResult {
 	fail := func(err error) *ProbeResult {
 		result.Error = probeErrorKind(err)
 		result.Message = err.Error()
+		result.Cause = string(classifyFailure(err))
 		return result
 	}
 

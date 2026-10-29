@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/common/setup_check.dart';
+import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -20,6 +21,7 @@ import 'package:reclash/ui/code_label.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/disclaimer.dart';
+import 'package:reclash/views/doctor/path.dart';
 import 'package:reclash/views/region.dart';
 
 const _regionOptions = ['RU', 'IR', 'CN', 'EG', otherRegionCode];
@@ -53,13 +55,6 @@ String _coverageLabel(AppLocalizations l, SetupCoverage coverage) =>
       SetupCoverage.system => l.setupCoverageSystem,
       SetupCoverage.local => l.setupCoverageLocal,
     };
-
-String _phaseLabel(AppLocalizations l, SetupPhase phase) => switch (phase) {
-  SetupPhase.core => l.setupPhaseCore,
-  SetupPhase.profile => l.setupPhaseProfile,
-  SetupPhase.connection => l.setupPhaseConnection,
-  SetupPhase.route => l.setupPhaseRoute,
-};
 
 String _regionChoiceLabel(AppLocalizations l, SetupDraft draft) =>
     !draft.regionChosen
@@ -1075,16 +1070,18 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           title: l.setupCheckingTitle,
           description: l.setupCheckingDescription,
         ),
-        _SetupPhases(phases: state.phases),
+        if (state.path case final path?) _SetupPath(path: path),
         _note(l.setupCheckLimit),
       ],
     );
   }
 
   Widget _result(SetupSessionState state, AppLocalizations l, bool locked) {
-    final report =
-        state.report ?? const SetupReport(verdict: SetupVerdict.unconfirmed);
-    final verdict = report.verdict;
+    final outcome =
+        state.outcome ?? const SetupOutcome(verdict: SetupVerdict.unconfirmed);
+    final verdict = outcome.verdict;
+    final node = outcome.path?.stepOf(PathStep.server)?.detail;
+    final delay = outcome.path?.stepOf(PathStep.internet)?.duration;
     final title = switch (verdict) {
       SetupVerdict.connected => l.setupConnectedTitle,
       SetupVerdict.partial => l.setupPartialTitle,
@@ -1118,7 +1115,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
       spacing: 24,
       children: [
         _hero(
-          glyph: report.confirmed
+          glyph: outcome.confirmed
               ? AppGlyphs.checkCircle
               : switch (verdict) {
                   SetupVerdict.saved ||
@@ -1128,7 +1125,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                   SetupVerdict.failed => AppGlyphs.error,
                   _ => AppGlyphs.warning,
                 },
-          color: report.confirmed
+          color: outcome.confirmed
               ? context.colorScheme.success
               : switch (verdict) {
                   SetupVerdict.failed => context.colorScheme.error,
@@ -1140,9 +1137,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           title: title,
           description: description,
         ),
-        if (report.confirmed &&
-            (report.chains.isNotEmpty ||
-                (report.delay != null && report.delay! > 0)))
+        if (outcome.confirmed && (node != null || delay != null))
           CommonCard(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -1159,14 +1154,11 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 8,
                     children: [
-                      if (report.chains.isNotEmpty)
+                      if (node != null)
+                        Text(node, style: AppTextStyle.headline.of(context)),
+                      if (delay != null)
                         Text(
-                          report.chains.reversed.join(' › '),
-                          style: AppTextStyle.headline.of(context),
-                        ),
-                      if (report.delay != null && report.delay! > 0)
-                        Text(
-                          '${report.delay} ms',
+                          '${delay.inMilliseconds} ms',
                           style: AppTextStyle.title2.of(context),
                         ),
                       _note(l.setupCheckLimit),
@@ -1177,7 +1169,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
             ),
           ),
         if (verdict == SetupVerdict.local) _localProxy(l),
-        if (report.confirmed)
+        if (outcome.confirmed)
           generateGroup([
             DecorationListItem(
               title: Text(l.setupAutoConnect),
@@ -1193,8 +1185,8 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                   : () => setState(() => _autoRun = !_autoRun),
             ),
           ]),
-        if (report.phases.isNotEmpty) _SetupPhases(phases: report.phases),
-        if (report.error != null)
+        if (outcome.path case final path?) _SetupPath(path: path),
+        if (outcome.error != null)
           CommonCard(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -1206,7 +1198,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                   style: AppTextStyle.headline.of(context),
                 ),
                 SelectableText(
-                  report.error!,
+                  outcome.error!,
                   style: AppTextStyle.footnote.of(context),
                 ),
               ],
@@ -1263,11 +1255,11 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     bool locked, {
     required double maxWidth,
   }) {
-    final report = state.report;
-    final verdict = report?.verdict;
+    final outcome = state.outcome;
+    final verdict = outcome?.verdict;
     final finishes =
         state.step == SetupStep.result &&
-        (report?.confirmed == true || verdict == SetupVerdict.saved);
+        (outcome?.confirmed == true || verdict == SetupVerdict.saved);
     final saveInstead =
         state.step == SetupStep.result && verdict == SetupVerdict.safeMode;
     void saveWithoutConnection() =>
@@ -1329,7 +1321,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
           onPressed: locked ? null : () => _goTo(_previous(state)!),
           child: Text(l.setupChangeSettings),
         ),
-      if (state.step == SetupStep.result && report?.confirmed == true)
+      if (state.step == SetupStep.result && outcome?.confirmed == true)
         TextButton(
           onPressed: locked ? null : () => unawaited(_check()),
           child: Text(l.setupRepeat),
@@ -1501,21 +1493,15 @@ class _StepTap extends StatelessWidget {
   }
 }
 
-class _SetupPhases extends StatelessWidget {
-  const _SetupPhases({required this.phases});
+class _SetupPath extends StatelessWidget {
+  const _SetupPath({required this.path});
 
-  final List<SetupPhaseResult> phases;
+  final PathResult path;
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final completed = phases
-        .where(
-          (phase) =>
-              phase.status != SetupPhaseStatus.waiting &&
-              phase.status != SetupPhaseStatus.running,
-        )
-        .length;
+    final completed = path.steps.where((step) => step.settled).length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
@@ -1530,66 +1516,18 @@ class _SetupPhases extends StatelessWidget {
               ),
             ),
             Text(
-              l.setupStepStatus(completed, phases.length),
+              l.setupStepStatus(completed, path.steps.length),
               style: AppTextStyle.caption1
                   .of(context)
                   .copyWith(color: context.colorScheme.onSurfaceVariant),
             ),
           ],
         ),
-        if (phases.isNotEmpty)
-          LinearProgressIndicator(
-            value: completed / phases.length,
-            minHeight: 4,
-          ),
-        generateGroup([
-          for (final phase in phases)
-            DecorationListItem(
-              leading: CommonCard(
-                shape: AppShape.full,
-                padding: const EdgeInsets.all(8),
-                child: phase.status == SetupPhaseStatus.running
-                    ? const CommonCircleLoading(size: 20)
-                    : GlyphIcon(
-                        switch (phase.status) {
-                          SetupPhaseStatus.confirmed => AppGlyphs.check,
-                          SetupPhaseStatus.failed => AppGlyphs.error,
-                          SetupPhaseStatus.unconfirmed => AppGlyphs.info,
-                          SetupPhaseStatus.waiting ||
-                          SetupPhaseStatus.skipped ||
-                          SetupPhaseStatus.running => AppGlyphs.clock,
-                        },
-                        size: 20,
-                        color: switch (phase.status) {
-                          SetupPhaseStatus.confirmed =>
-                            context.colorScheme.success,
-                          SetupPhaseStatus.failed => context.colorScheme.error,
-                          SetupPhaseStatus.unconfirmed =>
-                            context.colorScheme.warning,
-                          _ => context.colorScheme.onSurfaceVariant,
-                        },
-                      ),
-              ),
-              title: Text(_phaseLabel(l, phase.phase)),
-              subtitle: Text(
-                switch (phase.status) {
-                  SetupPhaseStatus.confirmed => l.setupConfirmed,
-                  SetupPhaseStatus.failed ||
-                  SetupPhaseStatus.unconfirmed => l.setupUnavailable,
-                  SetupPhaseStatus.running => l.connecting,
-                  SetupPhaseStatus.waiting ||
-                  SetupPhaseStatus.skipped => l.setupNotChecked,
-                },
-                style: AppTextStyle.footnote
-                    .of(context)
-                    .copyWith(
-                      color: phase.status == SetupPhaseStatus.running
-                          ? context.colorScheme.primary
-                          : context.colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ),
-        ]),
+        LinearProgressIndicator(
+          value: completed / path.steps.length,
+          minHeight: 4,
+        ),
+        PathStepList(path: path),
       ],
     );
   }
@@ -1608,11 +1546,12 @@ class _SetupReceipt extends ConsumerWidget {
     final profile = ref
         .watch(profilesProvider)
         .getProfile(draft.profileId ?? -1);
-    final report = state.report;
+    final outcome = state.outcome;
+    final node = outcome?.path?.stepOf(PathStep.server)?.detail;
     final current = _journeyIndex(state.step) ?? 0;
     final checkValue = state.checking
         ? l.connecting
-        : switch (report?.verdict) {
+        : switch (outcome?.verdict) {
             SetupVerdict.connected || SetupVerdict.partial => l.setupConfirmed,
             SetupVerdict.local => l.setupLocalTitle,
             SetupVerdict.saved || SetupVerdict.safeMode => l.setupSavedTitle,
@@ -1623,9 +1562,9 @@ class _SetupReceipt extends ConsumerWidget {
             SetupVerdict.unconfirmed => l.setupUnconfirmedTitle,
             null => l.setupNotChecked,
           };
-    final checkColor = report?.confirmed == true
+    final checkColor = outcome?.confirmed == true
         ? context.colorScheme.success
-        : switch (report?.verdict) {
+        : switch (outcome?.verdict) {
             SetupVerdict.failed => context.colorScheme.error,
             SetupVerdict.permission ||
             SetupVerdict.unconfirmed ||
@@ -1679,7 +1618,7 @@ class _SetupReceipt extends ConsumerWidget {
                   value: values[index],
                   current: index == current,
                   done: index == _journey.length - 1
-                      ? report?.confirmed == true
+                      ? outcome?.confirmed == true
                       : index < current ||
                             (index == 0 && profile != null) ||
                             (step == SetupStep.region && draft.regionChosen),
@@ -1689,17 +1628,12 @@ class _SetupReceipt extends ConsumerWidget {
                       ? () => onStep!(step)
                       : null,
                 ),
-              if (report?.confirmed == true && report!.chains.isNotEmpty) ...[
+              if (outcome?.confirmed == true && node != null) ...[
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Divider(height: 1),
                 ),
-                _fact(
-                  context,
-                  AppGlyphs.target,
-                  l.server,
-                  report.chains.reversed.join(' › '),
-                ),
+                _fact(context, AppGlyphs.target, l.server, node),
               ],
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 14, 12, 4),

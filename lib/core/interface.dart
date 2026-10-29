@@ -104,6 +104,10 @@ mixin CoreInterface {
 
   Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params);
 
+  Future<ClockSkewResult?> clockSkew(ClockSkewParams params);
+
+  Future<ReachResult?> reach(ReachParams params);
+
   Future<String> updateConfig(UpdateParams updateParams);
 
   Future<String> setupConfig(SetupParams setupParams);
@@ -867,6 +871,26 @@ abstract class CoreHandlerInterface with CoreInterface {
       timeout: coreGuardFor(params.timeout),
     );
     return data == null ? null : OutboundIpResult.fromJson(data);
+  }
+
+  @override
+  Future<ClockSkewResult?> clockSkew(ClockSkewParams params) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.doctorClockSkew,
+      arguments: params.toJson(),
+      timeout: coreGuardFor(params.timeout),
+    );
+    return data == null ? null : ClockSkewResult.fromJson(data);
+  }
+
+  @override
+  Future<ReachResult?> reach(ReachParams params) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.doctorReach,
+      arguments: params.toJson(),
+      timeout: coreGuardFor(params.timeout),
+    );
+    return data == null ? null : ReachResult.fromJson(data);
   }
 
   @override

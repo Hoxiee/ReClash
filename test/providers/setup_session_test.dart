@@ -8,6 +8,8 @@ import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/cause.dart';
+import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/action.dart';
@@ -85,28 +87,55 @@ class _TestSetupAction extends SetupAction {
   void resetCoreTraffic() {}
 }
 
+PathResult _connectedPath() {
+  final at = DateTime.now();
+  return PathResult.start(PathScope.setup, at)
+      .withStep(
+        const PathStepResult(
+          PathStep.internet,
+          status: PathStepStatus.pass,
+          duration: Duration(milliseconds: 84),
+        ),
+      )
+      .finish(at);
+}
+
+PathResult _failedPath(FailureCause cause, String detail) {
+  final at = DateTime.now();
+  return PathResult.start(PathScope.setup, at)
+      .withStep(
+        PathStepResult(
+          PathStep.internet,
+          status: PathStepStatus.fail,
+          cause: cause,
+          detail: detail,
+        ),
+      )
+      .finish(at);
+}
+
 class _TestSetupSession extends SetupSession {
-  _TestSetupSession({this.saveResult = true, this.probeGate, this.probeGates});
+  _TestSetupSession({this.saveResult = true, this.pathGate, this.pathGates});
 
   bool saveResult;
-  final Completer<ProbeResult?>? probeGate;
-  final List<Completer<ProbeResult?>>? probeGates;
-  final Completer<void> probeStarted = Completer<void>();
-  final Completer<void> retryProbeStarted = Completer<void>();
+  final Completer<PathResult>? pathGate;
+  final List<Completer<PathResult>>? pathGates;
+  final Completer<void> pathStarted = Completer<void>();
+  final Completer<void> retryPathStarted = Completer<void>();
+  final _pathUpdates = StreamController<PathResult>.broadcast(sync: true);
   bool android = false;
   bool connectThroughAction = false;
   DateTime? nativeAcknowledgement;
-  RouteSnapshot snapshot = const RouteSnapshot(coreEpoch: 2, routeVersion: 5);
   int saveCalls = 0;
   Completer<bool>? saveGate;
   final Completer<void> saveStarted = Completer<void>();
   int prepareCalls = 0;
   int startCalls = 0;
   int applyCalls = 0;
+  int pathCalls = 0;
   int snapshotCalls = 0;
-  int probeCalls = 0;
+  RouteSnapshot? snapshot = const RouteSnapshot(coreEpoch: 2, routeVersion: 5);
   int nativeRuntimeCalls = 0;
-  final List<String> probedUrls = [];
   final List<List<String>> directRules = [];
   List<String> domesticApps = const [];
   final List<String> scannedRegions = [];
@@ -114,9 +143,13 @@ class _TestSetupSession extends SetupSession {
   void setFinishReady() {
     state = state.copyWith(
       step: SetupStep.result,
-      report: const SetupReport(verdict: SetupVerdict.saved),
+      outcome: const SetupOutcome(verdict: SetupVerdict.saved),
     );
   }
+
+  void pushPath(PathResult path) => _pathUpdates.add(path);
+
+  Future<void> closePathUpdates() => _pathUpdates.close();
 
   @override
   bool get isAndroid => android;
@@ -176,21 +209,18 @@ class _TestSetupSession extends SetupSession {
   }
 
   @override
-  Future<ProbeResult?> probeRoute(String url) {
-    probeCalls++;
-    probedUrls.add(url);
-    if (probeCalls == 1 && !probeStarted.isCompleted) {
-      probeStarted.complete();
+  Stream<PathResult> get pathUpdates => _pathUpdates.stream;
+
+  @override
+  Future<PathResult> runPath() {
+    pathCalls++;
+    if (pathCalls == 1 && !pathStarted.isCompleted) pathStarted.complete();
+    if (pathCalls == 2 && !retryPathStarted.isCompleted) {
+      retryPathStarted.complete();
     }
-    if (probeCalls == 2 && !retryProbeStarted.isCompleted) {
-      retryProbeStarted.complete();
-    }
-    final gates = probeGates;
-    if (gates != null) return gates[probeCalls - 1].future;
-    return probeGate?.future ??
-        Future.value(
-          const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-        );
+    final gates = pathGates;
+    if (gates != null) return gates[pathCalls - 1].future;
+    return pathGate?.future ?? Future.value(_connectedPath());
   }
 }
 
@@ -230,6 +260,7 @@ void main() {
   }) {
     final profile = Profile.normal(label: 'Wizard profile');
     final setupSession = session ?? _TestSetupSession();
+    addTearDown(setupSession.closePathUpdates);
     final setupAction = _TestSetupAction(startResult: startResult);
     final core = _MockCoreHandlerInterface();
     when(() => core.watchRoute(true)).thenAnswer(
@@ -320,7 +351,7 @@ void main() {
       await harness.container.read(setupSessionProvider.notifier).check();
       expect(harness.session.prepareCalls, 0);
       expect(harness.session.startCalls, 0);
-      expect(harness.session.probeCalls, 0);
+      expect(harness.session.pathCalls, 0);
     },
   );
 
@@ -342,7 +373,7 @@ void main() {
 
     expect(harness.session.prepareCalls, 0);
     expect(harness.session.startCalls, 0);
-    expect(harness.session.probeCalls, 0);
+    expect(harness.session.pathCalls, 0);
   });
 
   test('check remains available on the result step', () async {
@@ -362,7 +393,7 @@ void main() {
     expect(fake.prepareCalls, 1);
     expect(fake.startCalls, 1);
     expect(fake.applyCalls, 0);
-    expect(fake.probeCalls, 1);
+    expect(fake.pathCalls, 1);
   });
 
   test('completed setup cannot be checked again', () async {
@@ -379,7 +410,7 @@ void main() {
 
     expect(harness.session.prepareCalls, 0);
     expect(harness.session.startCalls, 0);
-    expect(harness.session.probeCalls, 0);
+    expect(harness.session.pathCalls, 0);
   });
 
   test(
@@ -471,11 +502,11 @@ void main() {
 
     await harness.container.read(setupSessionProvider.notifier).check();
 
-    expect(harness.container.read(setupSessionProvider).report, isNull);
+    expect(harness.container.read(setupSessionProvider).outcome, isNull);
     expect(harness.container.read(setupSessionProvider).step, SetupStep.region);
     expect(fake.prepareCalls, 0);
     expect(fake.startCalls, 0);
-    expect(fake.probeCalls, 0);
+    expect(fake.pathCalls, 0);
   });
 
   test('waits for Android native runtime acknowledgment after start', () async {
@@ -487,13 +518,11 @@ void main() {
 
     await harness.container.read(setupSessionProvider.notifier).check();
 
-    final report = harness.container.read(setupSessionProvider).report!;
     expect(fake.nativeRuntimeCalls, 2);
+    expect(fake.pathCalls, 1);
     expect(
-      report.phases
-          .singleWhere((phase) => phase.phase == SetupPhase.connection)
-          .status,
-      SetupPhaseStatus.confirmed,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
+      SetupVerdict.connected,
     );
     await harness.container
         .read(setupSessionProvider.notifier)
@@ -537,7 +566,7 @@ void main() {
     expect(await saving, isFalse);
   });
 
-  test('safe mode reports without starting or probing', () async {
+  test('safe mode reports without starting or running the path', () async {
     final fake = _TestSetupSession();
     final harness = makeHarness(safeMode: true, session: fake);
     addTearDown(harness.container.dispose);
@@ -545,20 +574,20 @@ void main() {
     await harness.container.read(setupSessionProvider.notifier).check();
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       SetupVerdict.safeMode,
     );
     expect(fake.prepareCalls, 0);
     expect(fake.startCalls, 0);
     expect(fake.applyCalls, 0);
-    expect(fake.probeCalls, 0);
+    expect(fake.pathCalls, 0);
     await harness.container
         .read(setupSessionProvider.notifier)
         .finish(autoRun: false);
   });
 
   test(
-    'checks one route probe without stopping an existing connection',
+    'checks the setup path without stopping an existing connection',
     () async {
       final fake = _TestSetupSession();
       final harness = makeHarness(running: true, session: fake);
@@ -567,28 +596,24 @@ void main() {
       await harness.container.read(setupSessionProvider.notifier).check();
 
       final session = harness.container.read(setupSessionProvider.notifier);
-      final report = harness.container.read(setupSessionProvider).report!;
+      final outcome = harness.container.read(setupSessionProvider).outcome!;
       expect(fake.applyCalls, 1);
       expect(fake.startCalls, 0);
       expect(harness.action.stops, 0);
-      expect(fake.probeCalls, 1);
-      expect(fake.probedUrls, [
-        harness.container.read(patchClashConfigProvider).testUrl,
-      ]);
-      expect(fake.snapshotCalls, 2);
-      expect(report.verdict, SetupVerdict.connected);
+      expect(fake.pathCalls, 1);
+      expect(outcome.verdict, SetupVerdict.connected);
       expect(
-        report.phases.map((phase) => phase.phase).toList(),
-        SetupPhase.values,
+        outcome.path?.steps.map((step) => step.step).toList(),
+        PathScope.setup.steps,
       );
       expect(
-        harness.container.read(routeTrackerProvider).isFresh(report.stamp!),
+        harness.container.read(routeTrackerProvider).isFresh(outcome.stamp!),
         isTrue,
       );
 
       expect(await session.finish(autoRun: false), isTrue);
       expect(
-        harness.container.read(routeTrackerProvider).isFresh(report.stamp!),
+        harness.container.read(routeTrackerProvider).isFresh(outcome.stamp!),
         isTrue,
       );
     },
@@ -728,31 +753,52 @@ void main() {
   );
 
   test(
-    'cancelling a pending probe clears busy and skips unfinished phases',
+    'cancelling a pending path clears busy and skips unfinished steps',
     () async {
-      final gate = Completer<ProbeResult?>();
-      final fake = _TestSetupSession(probeGate: gate);
+      final gate = Completer<PathResult>();
+      final fake = _TestSetupSession(pathGate: gate);
       final harness = makeHarness(running: true, session: fake);
       addTearDown(harness.container.dispose);
       final session = harness.container.read(setupSessionProvider.notifier);
 
       final operation = session.check();
-      await fake.probeStarted.future;
+      await fake.pathStarted.future;
+      fake.pushPath(
+        PathResult.start(PathScope.setup, DateTime.now())
+            .withStep(
+              const PathStepResult(
+                PathStep.network,
+                status: PathStepStatus.pass,
+              ),
+            )
+            .withStep(
+              const PathStepResult(
+                PathStep.core,
+                status: PathStepStatus.running,
+              ),
+            ),
+      );
       session.cancelCheck();
 
       final cancelled = harness.container.read(setupSessionProvider);
       expect(cancelled.busy, isFalse);
       expect(
-        cancelled.report!.phases.map((phase) => phase.status),
-        isNot(contains(SetupPhaseStatus.running)),
+        cancelled.path?.steps.map((step) => step.status),
+        isNot(contains(PathStepStatus.running)),
       );
-      gate.complete(
-        const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
+      expect(
+        cancelled.path?.stepOf(PathStep.network)?.status,
+        PathStepStatus.pass,
       );
+      expect(
+        cancelled.path?.stepOf(PathStep.core)?.status,
+        PathStepStatus.skipped,
+      );
+      gate.complete(_connectedPath());
       await operation;
 
       expect(
-        harness.container.read(setupSessionProvider).report?.verdict,
+        harness.container.read(setupSessionProvider).outcome?.verdict,
         SetupVerdict.stopped,
       );
       expect(harness.container.read(setupSessionProvider).busy, isFalse);
@@ -760,134 +806,157 @@ void main() {
   );
 
   test(
-    'a cancelled probe cannot answer a retry with a different result',
+    'setup path updates reach the wizard only for the running check',
     () async {
-      final oldGate = Completer<ProbeResult?>();
-      final currentGate = Completer<ProbeResult?>();
-      final fake = _TestSetupSession(probeGates: [oldGate, currentGate]);
+      final gate = Completer<PathResult>();
+      final fake = _TestSetupSession(pathGate: gate);
+      final harness = makeHarness(running: true, session: fake);
+      addTearDown(harness.container.dispose);
+      final session = harness.container.read(setupSessionProvider.notifier);
+
+      final operation = session.check();
+      await fake.pathStarted.future;
+      final now = DateTime.now();
+      fake.pushPath(
+        PathResult.start(PathScope.full, now).withStep(
+          const PathStepResult(
+            PathStep.network,
+            status: PathStepStatus.fail,
+            cause: FailureCause.noNetwork,
+          ),
+        ),
+      );
+      fake.pushPath(
+        PathResult.start(PathScope.setup, now).withStep(
+          const PathStepResult(PathStep.network, status: PathStepStatus.pass),
+        ),
+      );
+
+      final mirrored = harness.container.read(setupSessionProvider).path;
+      expect(mirrored?.scope, PathScope.setup);
+      expect(mirrored?.failed, isNull);
+      expect(mirrored?.stepOf(PathStep.network)?.status, PathStepStatus.pass);
+      gate.complete(_connectedPath());
+      await operation;
+    },
+  );
+
+  test(
+    'a cancelled path cannot answer a retry with a different result',
+    () async {
+      final oldGate = Completer<PathResult>();
+      final currentGate = Completer<PathResult>();
+      final fake = _TestSetupSession(pathGates: [oldGate, currentGate]);
       final harness = makeHarness(running: true, session: fake);
       addTearDown(harness.container.dispose);
       final session = harness.container.read(setupSessionProvider.notifier);
 
       final first = session.check();
-      await fake.probeStarted.future;
+      await fake.pathStarted.future;
       session.cancelCheck();
       await first;
 
       final retry = session.check();
-      await fake.retryProbeStarted.future;
-      oldGate.complete(
-        const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-      );
+      await fake.retryPathStarted.future;
+      oldGate.complete(_connectedPath());
       await Future<void>.delayed(Duration.zero);
       expect(harness.container.read(setupSessionProvider).checking, isTrue);
 
       currentGate.complete(
-        const ProbeResult(
-          statusCode: 503,
-          error: 'current probe failed',
-          coreEpoch: 2,
-          routeVersion: 5,
-        ),
+        _failedPath(FailureCause.timeout, 'current probe failed'),
       );
       await retry;
 
-      final report = harness.container.read(setupSessionProvider).report!;
-      expect(report.verdict, SetupVerdict.unconfirmed);
-      expect(report.error, 'current probe failed');
+      final outcome = harness.container.read(setupSessionProvider).outcome!;
+      expect(outcome.verdict, SetupVerdict.failed);
+      expect(outcome.error, 'current probe failed');
     },
   );
 
-  test('coverage changes invalidate a pending route probe', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('coverage changes invalidate a pending path', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final session = harness.container.read(setupSessionProvider.notifier);
 
     final operation = session.check();
-    await fake.probeStarted.future;
+    await fake.pathStarted.future;
     session.selectCoverage(SetupCoverage.tun);
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
   });
 
-  test('region changes invalidate a pending route probe', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('region changes invalidate a pending path', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final session = harness.container.read(setupSessionProvider.notifier);
 
     final operation = session.check();
-    await fake.probeStarted.future;
+    await fake.pathStarted.future;
     session.selectRegion('RU');
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
   });
 
-  test('selected profile changes invalidate a pending route probe', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('selected profile changes invalidate a pending path', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final operation = harness.container
         .read(setupSessionProvider.notifier)
         .check();
-    await fake.probeStarted.future;
+    await fake.pathStarted.future;
 
     harness.container
         .read(profilesProvider.notifier)
         .put(harness.profile.copyWith(label: 'Changed profile'));
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
   });
 
-  test('a Core epoch change invalidates a pending route probe', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('a Core epoch change invalidates a pending path', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final session = harness.container.read(setupSessionProvider.notifier);
 
     final operation = session.check();
-    await fake.probeStarted.future;
-    fake.snapshot = const RouteSnapshot(coreEpoch: 3, routeVersion: 5);
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    await fake.pathStarted.future;
+    harness.container
+        .read(routeTrackerProvider.notifier)
+        .applySnapshot(const RouteSnapshot(coreEpoch: 3, routeVersion: 5));
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
   });
 
-  test('changing the test URL invalidates a pending route probe', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('changing the test URL invalidates a pending path', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final subscription = harness.container.listen<SetupSessionState>(
@@ -899,38 +968,44 @@ void main() {
     final session = harness.container.read(setupSessionProvider.notifier);
 
     final operation = session.check();
-    await fake.probeStarted.future;
+    await fake.pathStarted.future;
     final settings = harness.container.read(patchClashConfigProvider);
     harness.container.read(patchClashConfigProvider.notifier).value = settings
         .copyWith(testUrl: 'https://example.org/');
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
   });
 
   test('stopping the Core invalidates a connected result in flight', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
     addTearDown(harness.container.dispose);
     final session = harness.container.read(setupSessionProvider.notifier);
 
-    final operation = session.check();
-    await fake.probeStarted.future;
-    harness.container.read(runTimeProvider.notifier).value = null;
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
+    final stopped = Completer<void>();
+    harness.container.listen(
+      routeTrackerProvider.select((route) => route.proxied),
+      (_, proxied) {
+        if (!proxied) stopped.complete();
+      },
     );
+
+    final operation = session.check();
+    await fake.pathStarted.future;
+    harness.container.read(runTimeProvider.notifier).value = null;
+    // The answer must land after the tracker has seen the stop.
+    await stopped.future;
+    gate.complete(_connectedPath());
     await operation;
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
     expect(await session.finish(autoRun: true), isTrue);
@@ -945,26 +1020,24 @@ void main() {
     await harness.container.read(setupSessionProvider.notifier).check();
 
     expect(
-      harness.container.read(setupSessionProvider).report?.verdict,
+      harness.container.read(setupSessionProvider).outcome?.verdict,
       isNot(SetupVerdict.connected),
     );
     expect(harness.container.read(initProvider), isFalse);
-    expect(fake.probeCalls, 0);
+    expect(fake.pathCalls, 0);
   });
 
-  test('disposing during a pending probe tolerates its late result', () async {
-    final gate = Completer<ProbeResult?>();
-    final fake = _TestSetupSession(probeGate: gate);
+  test('disposing during a pending path tolerates its late result', () async {
+    final gate = Completer<PathResult>();
+    final fake = _TestSetupSession(pathGate: gate);
     final harness = makeHarness(running: true, session: fake);
 
     final operation = harness.container
         .read(setupSessionProvider.notifier)
         .check();
-    await fake.probeStarted.future;
+    await fake.pathStarted.future;
     harness.container.dispose();
-    gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
-    );
+    gate.complete(_connectedPath());
     await operation;
   });
 

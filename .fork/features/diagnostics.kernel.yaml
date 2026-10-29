@@ -1,0 +1,17 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  taxonomy: FailureCause is the one closed failure set; core/doctor.go classifies mihomo errors into the same wire ids and lib/common/network_error.dart folds its kinds into it.
+  snapshot: Rules are pure functions of an immutable snapshot of typed facts, run off the UI isolate once the snapshot grows, and a missing or stale fact never raises a finding.
+  probes: Probes are deduplicated per key, cached by TTL and bounded by cost class; a newer intent supersedes the run in flight and the Core leaving connected cancels every run.
+  remedies: Remedies are the only kernel code that changes state, verify through the rules, snapshot Config when undoable and refuse an undo once the config moved on; restarts are requested through ServiceState or the desktop lifecycle, never owned.
+  journal: Every diagnostic event is published live and persisted, keeping the last 100 incidents.
+  path: Every consumer runs the one connection path through runPath; steps run in order through the probe scheduler, the first failure stops the chain and the rest show as skipped, routed steps are RoutedProbe answers judged against routeTrackerProvider, and the Core leaving ends a run as cancelled.
+watch: ['lib/features/doctor/**', 'lib/views/doctor/**', core/doctor.go, core/doctor_test.go, lib/common/network_error.dart, 'test/features/doctor/**', 'arb/fragments/diagnostics.kernel/**']
+checks:
+  diagnostics-kernel: [snapshot, probes, remedies, journal, path]
+  go-doctor: [taxonomy, path]
+deps: [core.integration]
+drop: Upstream ships an equivalent diagnostic kernel.

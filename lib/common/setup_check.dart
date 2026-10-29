@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/route_state.dart';
 
@@ -13,17 +14,6 @@ enum SetupStep {
 }
 
 enum SetupCoverage { tun, system, local }
-
-enum SetupPhase { core, profile, connection, route }
-
-enum SetupPhaseStatus {
-  waiting,
-  running,
-  confirmed,
-  unconfirmed,
-  failed,
-  skipped,
-}
 
 enum SetupVerdict {
   connected,
@@ -109,39 +99,46 @@ class SetupDraft {
       _copy(directApps: () => packages);
 }
 
-@immutable
-class SetupPhaseResult {
-  const SetupPhaseResult(
-    this.phase, {
-    this.status = SetupPhaseStatus.waiting,
-    this.detail,
-  });
-
-  final SetupPhase phase;
-  final SetupPhaseStatus status;
-  final String? detail;
+/// The wizard's reading of its connection path: only a passing internet step
+/// confirms a connection, and a step that is merely not up is unconfirmed
+/// rather than failed.
+SetupVerdict setupVerdictOf(
+  PathResult path, {
+  required SetupCoverage coverage,
+}) {
+  if (path.cancelled || !path.complete) return SetupVerdict.stale;
+  final failed = path.failed;
+  if (failed != null) {
+    return failed.cause == null
+        ? SetupVerdict.unconfirmed
+        : SetupVerdict.failed;
+  }
+  if (path.stepOf(PathStep.internet)?.status != PathStepStatus.pass) {
+    return SetupVerdict.unconfirmed;
+  }
+  return coverage == SetupCoverage.local
+      ? SetupVerdict.local
+      : SetupVerdict.connected;
 }
 
 @immutable
-class SetupReport {
-  const SetupReport({
+class SetupOutcome {
+  const SetupOutcome({
     required this.verdict,
-    this.phases = const [],
-    this.delay,
-    this.chains = const [],
+    this.path,
     this.error,
     this.stamp,
-    this.checkedAt,
     this.connectionActive = false,
   });
 
   final SetupVerdict verdict;
-  final List<SetupPhaseResult> phases;
-  final int? delay;
-  final List<String> chains;
+
+  /// Null when the check ended before the path ran.
+  final PathResult? path;
   final String? error;
+
+  /// The route the path confirmed; a move past it makes the outcome stale.
   final RouteStamp? stamp;
-  final DateTime? checkedAt;
   final bool connectionActive;
 
   bool get confirmed => switch (verdict) {
@@ -151,9 +148,9 @@ class SetupReport {
     _ => false,
   };
 
-  SetupReport asStale() => SetupReport(
+  SetupOutcome asStale() => SetupOutcome(
     verdict: SetupVerdict.stale,
-    phases: phases,
+    path: path,
     error: error,
     connectionActive: connectionActive,
   );

@@ -7,11 +7,12 @@ import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/path.dart';
+import 'package:reclash/features/doctor/providers.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/service.dart';
 
 import 'providers.dart';
-import 'routed_probe.dart';
 
 final setupSessionProvider = NotifierProvider<SetupSession, SetupSessionState>(
   SetupSession.new,
@@ -26,8 +27,8 @@ class SetupSessionState {
     this.busy = false,
     this.checking = false,
     this.scanningApps = false,
-    this.phases = const [],
-    this.report,
+    this.path,
+    this.outcome,
     this.error,
     this.saveError = false,
     this.needsVpnRestart = false,
@@ -40,8 +41,10 @@ class SetupSessionState {
   final bool busy;
   final bool checking;
   final bool scanningApps;
-  final List<SetupPhaseResult> phases;
-  final SetupReport? report;
+
+  /// The wizard's connection path, step by step while the check runs.
+  final PathResult? path;
+  final SetupOutcome? outcome;
   final String? error;
   final bool saveError;
   final bool needsVpnRestart;
@@ -54,13 +57,13 @@ class SetupSessionState {
     bool? busy,
     bool? checking,
     bool? scanningApps,
-    List<SetupPhaseResult>? phases,
-    SetupReport? report,
+    PathResult? path,
+    SetupOutcome? outcome,
     String? error,
     bool? saveError,
     bool? needsVpnRestart,
     String? pendingLink,
-    bool clearReport = false,
+    bool clearOutcome = false,
     bool clearError = false,
     bool clearLink = false,
   }) => SetupSessionState(
@@ -70,72 +73,13 @@ class SetupSessionState {
     busy: busy ?? this.busy,
     checking: checking ?? this.checking,
     scanningApps: scanningApps ?? this.scanningApps,
-    phases: phases ?? this.phases,
-    report: clearReport ? null : report ?? this.report,
+    path: path ?? this.path,
+    outcome: clearOutcome ? null : outcome ?? this.outcome,
     error: clearError ? null : error ?? this.error,
     saveError: saveError ?? this.saveError,
     needsVpnRestart: needsVpnRestart ?? this.needsVpnRestart,
     pendingLink: clearLink ? null : pendingLink ?? this.pendingLink,
   );
-}
-
-// The session rides in the family key so the probe never reads the session
-// provider from inside its own run, which Riverpod reports as a cycle.
-final _setupRouteProbeProvider = NotifierProvider.autoDispose
-    .family<
-      _SetupRouteProbe,
-      RoutedProbeState<String, ProbeResult>,
-      (int, SetupSession)
-    >(_SetupRouteProbe.new);
-
-class _SetupRouteProbe extends Notifier<RoutedProbeState<String, ProbeResult>>
-    with RoutedProbe<String, ProbeResult> {
-  _SetupRouteProbe((int, SetupSession) key)
-    : generation = key.$1,
-      _session = key.$2;
-
-  final int generation;
-  final SetupSession _session;
-
-  @override
-  RoutedProbeState<String, ProbeResult> build() => buildProbe();
-
-  @override
-  bool isFailure(ProbeResult result) =>
-      result.error != null ||
-      result.statusCode < 200 ||
-      result.statusCode >= 400;
-
-  @override
-  Future<Map<String, ProbeAnswer<ProbeResult>>> probe(
-    String target,
-    RouteState route,
-  ) async {
-    final session = _session;
-    final result = await session.probeRoute(target);
-    if (!ref.mounted ||
-        !session.ref.mounted ||
-        session._generation != generation) {
-      return const {};
-    }
-    final snapshot = await session.routeSnapshot();
-    if (!ref.mounted ||
-        !session.ref.mounted ||
-        session._generation != generation) {
-      return const {};
-    }
-    if (snapshot != null) {
-      ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
-    }
-    return {
-      target: ProbeAnswer(
-        value: result,
-        coreEpoch: result?.coreEpoch,
-        routeVersion: result?.routeVersion,
-        hits: result?.hits ?? const [],
-      ),
-    };
-  }
 }
 
 class _SetupCancelled implements Exception {}
@@ -210,7 +154,7 @@ class SetupSession extends Notifier<SetupSessionState> {
     ref.listen(profilesProvider, (previous, next) {
       if (previous == null ||
           !state.active ||
-          (!_probing && state.report == null)) {
+          (!_probing && state.outcome == null)) {
         return;
       }
       final profileId = state.draft.profileId;
@@ -221,7 +165,7 @@ class SetupSession extends Notifier<SetupSessionState> {
     });
     ref.listen(routeTrackerProvider, (previous, next) {
       if (previous == null || !state.active) return;
-      final stamp = state.report?.stamp;
+      final stamp = state.outcome?.stamp;
       if (stamp != null && !next.isFresh(stamp)) _invalidate();
       if (_probing &&
           (previous.coreEpoch != next.coreEpoch ||
@@ -303,7 +247,7 @@ class SetupSession extends Notifier<SetupSessionState> {
 
   Future<bool> next(SetupStep step) async {
     if (state.busy) return false;
-    if (step != state.step && state.report != null) _invalidate();
+    if (step != state.step && state.outcome != null) _invalidate();
     if (step.index > SetupStep.agreement.index &&
         ref.read(appSettingProvider).acceptedDisclaimerVersion <
             disclaimerVersion) {
@@ -466,28 +410,27 @@ class SetupSession extends Notifier<SetupSessionState> {
     }
   }
 
-  List<SetupPhaseResult> _settledPhases() => List.unmodifiable([
-    for (final phase in state.phases)
-      if (phase.status == SetupPhaseStatus.running ||
-          phase.status == SetupPhaseStatus.waiting)
-        SetupPhaseResult(phase.phase, status: SetupPhaseStatus.skipped)
-      else
-        phase,
-  ]);
+  PathResult? _settledPath() => switch (state.path) {
+    final path? when !path.complete => path.finish(
+      DateTime.now(),
+      cancelled: true,
+    ),
+    final path => path,
+  };
 
   void _invalidate() {
     _cancelOperation();
-    if (state.checking || state.report != null) {
-      final phases = _settledPhases();
+    if (state.checking || state.outcome != null) {
+      final path = _settledPath();
       state = state.copyWith(
         busy: state.checking ? false : state.busy,
         checking: false,
-        phases: phases,
-        report:
-            state.report?.asStale() ??
-            SetupReport(
+        path: path,
+        outcome:
+            state.outcome?.asStale() ??
+            SetupOutcome(
               verdict: SetupVerdict.stale,
-              phases: phases,
+              path: path,
               connectionActive: ref.read(isStartProvider),
             ),
         step: state.checking ? SetupStep.result : state.step,
@@ -499,15 +442,15 @@ class SetupSession extends Notifier<SetupSessionState> {
   void cancelCheck() {
     if (!state.checking) return;
     _cancelOperation();
-    final phases = _settledPhases();
+    final path = _settledPath();
     state = state.copyWith(
       busy: false,
       checking: false,
-      phases: phases,
+      path: path,
       step: SetupStep.result,
-      report: SetupReport(
+      outcome: SetupOutcome(
         verdict: SetupVerdict.stopped,
-        phases: phases,
+        path: path,
         connectionActive: ref.read(isStartProvider),
       ),
     );
@@ -600,17 +543,6 @@ class SetupSession extends Notifier<SetupSessionState> {
     return persist();
   }
 
-  void _phase(SetupPhase phase, SetupPhaseStatus status, {String? detail}) {
-    state = state.copyWith(
-      phases: [
-        for (final item in state.phases)
-          item.phase == phase
-              ? SetupPhaseResult(phase, status: status, detail: detail)
-              : item,
-      ],
-    );
-  }
-
   @protected
   Future<bool> startConnection() => ref
       .read(setupActionProvider.notifier)
@@ -644,57 +576,58 @@ class SetupSession extends Notifier<SetupSessionState> {
   Future<RouteSnapshot?> routeSnapshot() =>
       ref.read(coreHandlerProvider).watchRoute(true);
 
-  Future<RouteState> _syncRoute(int generation) async {
-    final tracker = ref.read(routeTrackerProvider.notifier);
+  Future<void> _syncRoute(int generation) async {
     final snapshot = await routeSnapshot();
     _guard(generation);
     if (snapshot == null) {
       throw MessageException(currentAppLocalizations.setupRouteChanged);
     }
-    tracker.applySnapshot(snapshot);
+    ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
     await Future<void>.delayed(Duration.zero);
     _guard(generation);
-    return ref.read(routeTrackerProvider);
   }
 
   @protected
-  Future<ProbeResult?> probeRoute(String url) => ref
-      .read(coreHandlerProvider)
-      .probe(
-        ProbeParams(
-          url: url,
-          timeout: const Duration(seconds: 8).inMilliseconds,
-        ),
-      );
+  Future<PathResult> runPath() => ref
+      .read(diagnosticKernelProvider)
+      .runPath(scope: PathScope.setup, force: true);
 
-  Future<ProbeEntry<ProbeResult>> _probeRoute(
-    String url,
+  @protected
+  Stream<PathResult> get pathUpdates =>
+      ref.read(diagnosticKernelProvider).pathUpdates;
+
+  /// Mirrors the kernel's setup path into the session until it ends or the
+  /// check is cancelled, so a late step never lands in a newer check.
+  Future<PathResult> _walkPath(
     int generation,
     Future<void> cancellation,
   ) async {
-    final provider = _setupRouteProbeProvider((generation, this));
-    final answer = Completer<ProbeEntry<ProbeResult>>();
-    var launched = false;
-    final subscription = ref.listen(
-      provider.select((probe) => probe.entryOf(url)),
-      (_, entry) {
-        launched |= entry.isLoading;
-        if (launched && !entry.isLoading && !answer.isCompleted) {
-          answer.complete(entry);
-        }
-      },
-    );
-    ref.read(provider.notifier).refresh([url]);
+    final updates = pathUpdates.listen((path) {
+      if (path.scope != PathScope.setup ||
+          !ref.mounted ||
+          generation != _generation) {
+        return;
+      }
+      state = state.copyWith(path: path);
+    });
     try {
       return await Future.any([
-        answer.future,
-        cancellation.then<ProbeEntry<ProbeResult>>(
-          (_) => throw _SetupCancelled(),
-        ),
-      ]).timeout(const Duration(seconds: 28));
+        runPath(),
+        cancellation.then<PathResult>((_) => throw _SetupCancelled()),
+      ]);
     } finally {
-      subscription.close();
+      await updates.cancel();
     }
+  }
+
+  RouteStamp _routeStamp() {
+    final route = ref.read(routeTrackerProvider);
+    return RouteStamp(
+      coreEpoch: route.coreEpoch,
+      routeVersion: route.routeVersion,
+      hostEpoch: route.hostEpoch,
+      proxied: route.proxied,
+    );
   }
 
   Future<void> check({bool restartVpn = false}) {
@@ -716,10 +649,10 @@ class SetupSession extends Notifier<SetupSessionState> {
       step: SetupStep.checking,
       busy: true,
       checking: true,
-      clearReport: true,
+      clearOutcome: true,
       clearError: true,
       needsVpnRestart: false,
-      phases: [for (final phase in SetupPhase.values) SetupPhaseResult(phase)],
+      path: PathResult.start(PathScope.setup, DateTime.now()),
     );
     late final Future<void> operation;
     operation =
@@ -745,6 +678,7 @@ class SetupSession extends Notifier<SetupSessionState> {
     required Future<void> cancellation,
     required bool restartVpn,
   }) async {
+    var connecting = false;
     try {
       await previous;
       _guard(generation);
@@ -755,7 +689,7 @@ class SetupSession extends Notifier<SetupSessionState> {
       }
       _guard(generation);
       if (ref.read(safeModeProvider)) {
-        _finishReport(const SetupReport(verdict: SetupVerdict.safeMode));
+        _finish(const SetupOutcome(verdict: SetupVerdict.safeMode));
         return;
       }
       if (state.draft.profileId == null) {
@@ -774,7 +708,6 @@ class SetupSession extends Notifier<SetupSessionState> {
         return;
       }
       _guard(generation);
-      _phase(SetupPhase.core, SetupPhaseStatus.running);
       // Choosing TUN coverage here is the consent the app's TUN setup prompt
       // would otherwise ask for, so the wizard may install its Helper.
       if (!isAndroid && state.draft.coverage == SetupCoverage.tun) {
@@ -784,7 +717,6 @@ class SetupSession extends Notifier<SetupSessionState> {
         throw MessageException(currentAppLocalizations.setupUnknownError);
       }
       _guard(generation);
-      _phase(SetupPhase.core, SetupPhaseStatus.confirmed);
       if (isAndroid && ref.read(isStartProvider)) {
         final running = ref.read(runningVpnOptionsProvider)?.effective;
         final requested = (await ref.read(vpnOptionsProvider.future)).effective;
@@ -792,8 +724,8 @@ class SetupSession extends Notifier<SetupSessionState> {
         if (running != null && running != requested) {
           if (!restartVpn) {
             state = state.copyWith(needsVpnRestart: true);
-            _finishReport(
-              SetupReport(
+            _finish(
+              SetupOutcome(
                 verdict: SetupVerdict.permission,
                 error: currentAppLocalizations.vpnConfigChangeDetected,
                 connectionActive: true,
@@ -807,9 +739,8 @@ class SetupSession extends Notifier<SetupSessionState> {
           _guard(generation);
         }
       }
-      _phase(SetupPhase.profile, SetupPhaseStatus.running);
       final alreadyRunning = ref.read(isStartProvider);
-      _phase(SetupPhase.connection, SetupPhaseStatus.running);
+      connecting = true;
       final applied = alreadyRunning
           ? await applyProfile()
           : await startConnection();
@@ -818,23 +749,21 @@ class SetupSession extends Notifier<SetupSessionState> {
         throw MessageException(currentAppLocalizations.setupUnknownError);
       }
       ref.read(initProvider.notifier).value = true;
-      _phase(SetupPhase.profile, SetupPhaseStatus.confirmed);
       final connectionConfirmed =
           !isAndroid || await _confirmAndroid(generation);
       _guard(generation);
+      connecting = false;
       if (!connectionConfirmed ||
           !ref.read(isStartProvider) ||
           ref.read(suspendProvider)) {
-        _phase(SetupPhase.connection, SetupPhaseStatus.unconfirmed);
-        _finishReport(
-          SetupReport(
+        _finish(
+          SetupOutcome(
             verdict: SetupVerdict.unconfirmed,
             connectionActive: ref.read(isStartProvider),
           ),
         );
         return;
       }
-      _phase(SetupPhase.connection, SetupPhaseStatus.confirmed);
       if (_routeWatcher == null) {
         final tracker = ref.read(routeTrackerProvider.notifier);
         _routeWatcher = tracker;
@@ -842,44 +771,17 @@ class SetupSession extends Notifier<SetupSessionState> {
       }
       await _syncRoute(generation);
       _probing = true;
-      final testUrl = ref.read(patchClashConfigProvider).testUrl;
-      _phase(SetupPhase.route, SetupPhaseStatus.running);
-      ProbeEntry<ProbeResult>? answer;
-      try {
-        answer = await _probeRoute(testUrl, generation, cancellation);
-      } on _SetupCancelled {
-        rethrow;
-      } catch (_) {}
+      final path = await _walkPath(generation, cancellation);
       _guard(generation);
-      final response = answer?.value;
-      final stamp = answer?.stamp;
-      final fresh =
-          stamp != null && ref.read(routeTrackerProvider).isFresh(stamp);
-      final routeConfirmed = answer?.phase == ProbePhase.fresh && fresh;
-      final error = response?.message ?? response?.error;
-      _phase(
-        SetupPhase.route,
-        routeConfirmed
-            ? SetupPhaseStatus.confirmed
-            : SetupPhaseStatus.unconfirmed,
-        detail: error,
-      );
       _probing = false;
-      _finishReport(
-        SetupReport(
-          verdict:
-              answer?.phase == ProbePhase.empty || (stamp != null && !fresh)
-              ? SetupVerdict.stale
-              : !routeConfirmed
-              ? SetupVerdict.unconfirmed
-              : state.draft.coverage == SetupCoverage.local
-              ? SetupVerdict.local
-              : SetupVerdict.connected,
-          delay: response?.delay,
-          chains: response?.chains ?? const [],
-          error: error,
-          stamp: stamp,
-          checkedAt: DateTime.now(),
+      final verdict = setupVerdictOf(path, coverage: state.draft.coverage);
+      final failed = path.failed;
+      _finish(
+        SetupOutcome(
+          verdict: verdict,
+          path: path,
+          error: failed?.cause == null ? null : failed?.detail,
+          stamp: verdict == SetupVerdict.stale ? null : _routeStamp(),
           connectionActive: ref.read(isStartProvider),
         ),
       );
@@ -887,13 +789,9 @@ class SetupSession extends Notifier<SetupSessionState> {
       return;
     } catch (error) {
       if (!ref.mounted || generation != _generation) return;
-      final running = state.phases
-          .where((item) => item.status == SetupPhaseStatus.running)
-          .firstOrNull;
-      if (running != null) _phase(running.phase, SetupPhaseStatus.failed);
-      _finishReport(
-        SetupReport(
-          verdict: running?.phase == SetupPhase.connection && isAndroid
+      _finish(
+        SetupOutcome(
+          verdict: connecting && isAndroid
               ? SetupVerdict.permission
               : SetupVerdict.failed,
           error: compactError(error),
@@ -903,21 +801,18 @@ class SetupSession extends Notifier<SetupSessionState> {
     }
   }
 
-  void _finishReport(SetupReport report) {
-    final phases = _settledPhases();
+  void _finish(SetupOutcome outcome) {
+    final path = outcome.path ?? _settledPath();
     state = state.copyWith(
-      phases: phases,
+      path: path,
       step: SetupStep.result,
       checking: false,
-      report: SetupReport(
-        verdict: report.verdict,
-        phases: phases,
-        delay: report.delay,
-        chains: report.chains,
-        error: report.error,
-        stamp: report.stamp,
-        checkedAt: report.checkedAt,
-        connectionActive: report.connectionActive,
+      outcome: SetupOutcome(
+        verdict: outcome.verdict,
+        path: path,
+        error: outcome.error,
+        stamp: outcome.stamp,
+        connectionActive: outcome.connectionActive,
       ),
     );
     unawaited(persist());
@@ -957,8 +852,8 @@ class SetupSession extends Notifier<SetupSessionState> {
             .update((settings) => settings.copyWith(autoRun: false));
       }
       if (!await persist() || !ref.mounted) return false;
-      _finishReport(
-        SetupReport(
+      _finish(
+        SetupOutcome(
           verdict: SetupVerdict.saved,
           connectionActive: ref.read(isStartProvider),
         ),
@@ -973,7 +868,7 @@ class SetupSession extends Notifier<SetupSessionState> {
   }
 
   Future<bool> finish({required bool autoRun}) async {
-    if (state.busy || state.step != SetupStep.result || state.report == null) {
+    if (state.busy || state.step != SetupStep.result || state.outcome == null) {
       return false;
     }
     state = state.copyWith(busy: true, clearError: true);
@@ -982,8 +877,8 @@ class SetupSession extends Notifier<SetupSessionState> {
       if (!ref.mounted) return false;
       final previous = ref.read(appSettingProvider);
       final canAutoRun =
-          state.report?.confirmed == true &&
-          state.report?.connectionActive == true &&
+          state.outcome?.confirmed == true &&
+          state.outcome?.connectionActive == true &&
           ref.read(isStartProvider);
       ref
           .read(appSettingProvider.notifier)
@@ -992,7 +887,7 @@ class SetupSession extends Notifier<SetupSessionState> {
               setupCompleted: true,
               setupStep: SetupStep.result.index,
               autoRun:
-                  state.report?.verdict == SetupVerdict.saved &&
+                  state.outcome?.verdict == SetupVerdict.saved &&
                       ref.read(isStartProvider)
                   ? previous.autoRun
                   : canAutoRun && autoRun,

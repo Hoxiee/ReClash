@@ -257,6 +257,7 @@ abstract class ProbeResult with _$ProbeResult {
     @JsonKey(name: 'rule-payload') @Default('') String rulePayload,
     String? error,
     String? message,
+    String? cause,
     @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
     @JsonKey(name: 'route-version') @Default(0) int routeVersion,
     @Default([]) List<RouteHit> hits,
@@ -294,6 +295,67 @@ abstract class OutboundIpResult with _$OutboundIpResult {
 
   factory OutboundIpResult.fromJson(Map<String, Object?> json) =>
       _$OutboundIpResultFromJson(json);
+}
+
+@freezed
+abstract class ClockSkewParams with _$ClockSkewParams {
+  const factory ClockSkewParams({
+    required String url,
+    @JsonKey(name: 'proxy-name') @Default('') String proxyName,
+    required int timeout,
+  }) = _ClockSkewParams;
+
+  factory ClockSkewParams.fromJson(Map<String, Object?> json) =>
+      _$ClockSkewParamsFromJson(json);
+}
+
+@freezed
+abstract class ClockSkewResult with _$ClockSkewResult {
+  const factory ClockSkewResult({
+    @JsonKey(name: 'skew-ms') @Default(0) int skewMs,
+    @JsonKey(name: 'server-time') @Default(0) int serverTime,
+    @Default(0) int delay,
+    @Default('') String url,
+    String? cause,
+    String? message,
+  }) = _ClockSkewResult;
+
+  factory ClockSkewResult.fromJson(Map<String, Object?> json) =>
+      _$ClockSkewResultFromJson(json);
+}
+
+@freezed
+abstract class ReachParams with _$ReachParams {
+  const factory ReachParams({
+    required String url,
+    @JsonKey(name: 'proxy-name') @Default('') String proxyName,
+    required int timeout,
+  }) = _ReachParams;
+
+  factory ReachParams.fromJson(Map<String, Object?> json) =>
+      _$ReachParamsFromJson(json);
+}
+
+@freezed
+abstract class ReachResult with _$ReachResult {
+  const factory ReachResult({
+    @Default('') String stage,
+    @Default(false) bool direct,
+    @Default('') String proxy,
+    @Default('') String server,
+    @JsonKey(name: 'dns-ms') @Default(0) int dnsMs,
+    @JsonKey(name: 'resolve-ms') @Default(0) int resolveMs,
+    @JsonKey(name: 'tcp-ms') @Default(0) int tcpMs,
+    @JsonKey(name: 'handshake-ms') @Default(0) int handshakeMs,
+    String? cause,
+    String? message,
+    @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
+    @JsonKey(name: 'route-version') @Default(0) int routeVersion,
+    @Default([]) List<RouteHit> hits,
+  }) = _ReachResult;
+
+  factory ReachResult.fromJson(Map<String, Object?> json) =>
+      _$ReachResultFromJson(json);
 }
 
 @freezed

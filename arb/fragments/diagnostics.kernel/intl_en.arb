@@ -1,0 +1,51 @@
+{
+  "doctorStepClock": "Device time",
+  "doctorStepCore": "Engine",
+  "doctorStepTunnel": "Tunnel",
+  "doctorStepDns": "DNS",
+  "doctorCauseNoNetwork": "No internet on the device itself",
+  "doctorCauseCaptivePortal": "The Wi-Fi network asks you to sign in",
+  "doctorCauseClockSkew": "Device time is off",
+  "doctorCauseCoreDown": "The engine is not running",
+  "doctorCauseProfileInvalid": "No working profile is selected",
+  "doctorCauseSubscriptionExpired": "The subscription has expired",
+  "doctorCauseTrafficExhausted": "The subscription's traffic is used up",
+  "doctorCauseTunnelDenied": "VPN permission was not granted",
+  "doctorCauseTunnelTaken": "Another VPN app holds the tunnel",
+  "doctorCauseDnsFailed": "Names don't resolve through the engine",
+  "doctorCauseServerDns": "The server's address doesn't resolve",
+  "doctorCauseRefused": "The server refused the connection",
+  "doctorCauseTimeout": "The server didn't answer in time",
+  "doctorCauseReset": "The connection was cut on the way",
+  "doctorCauseTlsHandshake": "The secure handshake with the server failed",
+  "doctorCauseAuthRejected": "The server rejected the key: check the device time or the subscription",
+  "doctorCauseUdpBlocked": "UDP is blocked on the way",
+  "doctorCauseNoUpstream": "The server is up but has no internet",
+  "doctorCauseServiceBlocked": "Some services are blocked on this server",
+  "doctorCauseUnknown": "Something went wrong",
+  "doctorPathTitle": "Connection path",
+  "doctorPathDescription": "Each step relies on the one before it, and the first one that fails stops the check",
+  "doctorPathAllPass": "All steps pass · {ms} ms",
+  "@doctorPathAllPass": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorPathFailedAt": "Stopped at: {step}",
+  "@doctorPathFailedAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorPathIdle": "Connect to check the path",
+  "doctorPathChecking": "Checking…",
+  "doctorPathNotStarted": "Not connected",
+  "doctorPathCancelled": "The connection changed during the check",
+  "doctorPathStepPassed": "Passed",
+  "doctorPathStepUnknown": "Couldn't tell",
+  "doctorPathStepWaiting": "Waiting"
+}

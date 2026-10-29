@@ -33,6 +33,8 @@ enum CoreMethod {
   probe,
   outboundIp,
   serviceCheck,
+  doctorClockSkew,
+  doctorReach,
   getConnections,
   getConnectionCount,
   closeConnections,

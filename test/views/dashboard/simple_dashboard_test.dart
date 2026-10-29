@@ -557,7 +557,15 @@ void main() {
   testWidgets('hiding a widget offers it back at the end of the list', (
     tester,
   ) async {
-    chooseSimple();
+    chooseSimple(
+      widgets: const [
+        SimpleDashboardWidget.outboundMode,
+        SimpleDashboardWidget.speed,
+        SimpleDashboardWidget.services,
+        SimpleDashboardWidget.ipQuality,
+        SimpleDashboardWidget.trustedNetworks,
+      ],
+    );
     await openEditor(tester);
 
     await tester.tap(find.byTooltip('Remove Mode'));

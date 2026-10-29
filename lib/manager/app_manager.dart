@@ -6,6 +6,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/providers.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
@@ -50,6 +51,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     });
     ref.listenManual(serviceStatusProvider, (_, _) {});
     ref.listenManual(providerSettingsSyncProvider, (_, _) {});
+    ref.listenManual(diagnosticKernelProvider, (_, _) {});
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
         ref.read(storeActionProvider.notifier).savePreferencesDebounce();

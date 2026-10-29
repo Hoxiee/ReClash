@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:reclash/common/webdav.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/features/doctor/cause.dart';
 import 'package:reclash/l10n/l10n.dart';
 
 enum _Kind {
@@ -31,6 +32,25 @@ final class _Failure {
 String? networkErrorMessage(Object error, AppLocalizations appLocalizations) {
   final failure = _failureOf(error);
   return failure == null ? null : _messageOf(failure, appLocalizations);
+}
+
+/// The kernel's cause for an error this mapper recognises; a cancelled
+/// request is not a failure.
+FailureCause? networkFailureCause(Object error) {
+  final failure = _failureOf(error);
+  if (failure == null) return null;
+  return switch (failure.kind) {
+    _Kind.timeout => FailureCause.timeout,
+    _Kind.hostLookup => FailureCause.dnsFailed,
+    _Kind.connection => FailureCause.noUpstream,
+    _Kind.tls => FailureCause.tlsHandshake,
+    _Kind.cancelled => null,
+    _Kind.httpStatus => switch (failure.statusCode) {
+      401 || 403 || 407 => FailureCause.authRejected,
+      _ => FailureCause.unknown,
+    },
+    _Kind.unknown => FailureCause.unknown,
+  };
 }
 
 /// Bare socket and timeout exceptions are left alone: outside an HTTP request

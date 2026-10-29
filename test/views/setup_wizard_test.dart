@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/common/regional/region_detection.dart';
+import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
@@ -23,10 +24,30 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/card.dart';
 import 'package:reclash/ui/list.dart';
 import 'package:reclash/ui/selection_mark.dart';
+import 'package:reclash/views/doctor/path.dart';
 import 'package:reclash/views/setup.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+
+PathResult _setupPath({String? node}) {
+  final at = DateTime.now();
+  return PathScope.setup.steps
+      .fold(
+        PathResult.start(PathScope.setup, at),
+        (path, step) => path.withStep(
+          PathStepResult(
+            step,
+            status: PathStepStatus.pass,
+            detail: step == PathStep.server ? node : null,
+            duration: step == PathStep.internet
+                ? const Duration(milliseconds: 84)
+                : null,
+          ),
+        ),
+      )
+      .finish(at);
+}
 
 class _TestSetupSession extends SetupSession {
   _TestSetupSession({
@@ -34,7 +55,7 @@ class _TestSetupSession extends SetupSession {
     required this.acceptedDisclaimerVersion,
     required this.profileId,
     this.coverage = SetupCoverage.tun,
-    this.report,
+    this.outcome,
     this.regionCode,
     this.regionChosen = false,
   });
@@ -43,7 +64,7 @@ class _TestSetupSession extends SetupSession {
   final int acceptedDisclaimerVersion;
   final int? profileId;
   final SetupCoverage coverage;
-  final SetupReport? report;
+  final SetupOutcome? outcome;
   final String? regionCode;
   final bool regionChosen;
   var saveResult = true;
@@ -61,7 +82,7 @@ class _TestSetupSession extends SetupSession {
       regionCode: regionCode,
       regionChosen: regionChosen,
     ),
-    report: report,
+    outcome: outcome,
   );
 
   @override
@@ -96,8 +117,10 @@ class _TestSetupSession extends SetupSession {
       const RouteSnapshot(coreEpoch: 1, routeVersion: 1);
 
   @override
-  Future<ProbeResult?> probeRoute(String url) async =>
-      const ProbeResult(statusCode: 204);
+  Stream<PathResult> get pathUpdates => const Stream<PathResult>.empty();
+
+  @override
+  Future<PathResult> runPath() async => _setupPath();
 }
 
 class _AgeRetryProfilesAction extends ProfilesAction {
@@ -250,7 +273,7 @@ _harness({
   SetupStep step = SetupStep.language,
   int acceptedDisclaimerVersion = 0,
   SetupCoverage coverage = SetupCoverage.tun,
-  SetupReport? report,
+  SetupOutcome? outcome,
   String? regionCode,
   bool regionChosen = false,
   bool safeMode = false,
@@ -265,7 +288,7 @@ _harness({
     acceptedDisclaimerVersion: acceptedDisclaimerVersion,
     profileId: profile.id,
     coverage: coverage,
-    report: report,
+    outcome: outcome,
     regionCode: regionCode,
     regionChosen: regionChosen,
   );
@@ -499,7 +522,7 @@ void main() {
     final harness = _harness(
       step: SetupStep.result,
       acceptedDisclaimerVersion: disclaimerVersion,
-      report: const SetupReport(verdict: SetupVerdict.saved),
+      outcome: const SetupOutcome(verdict: SetupVerdict.saved),
     );
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);
@@ -827,27 +850,14 @@ void main() {
   testWidgets(
     'desktop results keep the receipt outside main content scrolling',
     (tester) async {
-      const phases = [
-        SetupPhaseResult(SetupPhase.core, status: SetupPhaseStatus.confirmed),
-        SetupPhaseResult(
-          SetupPhase.profile,
-          status: SetupPhaseStatus.confirmed,
-        ),
-        SetupPhaseResult(
-          SetupPhase.connection,
-          status: SetupPhaseStatus.confirmed,
-        ),
-        SetupPhaseResult(SetupPhase.route, status: SetupPhaseStatus.confirmed),
-      ];
       final harness = _harness(
         step: SetupStep.result,
         acceptedDisclaimerVersion: disclaimerVersion,
         regionCode: 'RU',
         regionChosen: true,
-        report: SetupReport(
+        outcome: SetupOutcome(
           verdict: SetupVerdict.connected,
-          chains: const ['DIRECT', 'Route Alpha'],
-          phases: phases,
+          path: _setupPath(node: 'Route Alpha'),
           error: List.filled(
             40,
             'Diagnostic details keep the result content long.',
@@ -887,7 +897,7 @@ void main() {
         find
             .descendant(
               of: receiptCard.first,
-              matching: find.text('Route Alpha › DIRECT'),
+              matching: find.text('Route Alpha'),
             )
             .hitTestable(),
         findsOneWidget,
@@ -901,30 +911,25 @@ void main() {
         find
             .descendant(
               of: receiptCard.first,
-              matching: find.text('Route Alpha › DIRECT'),
+              matching: find.text('Route Alpha'),
             )
             .hitTestable(),
         findsOneWidget,
       );
-      for (final phase in [
-        currentAppLocalizations.setupPhaseCore,
-        currentAppLocalizations.setupPhaseProfile,
-        currentAppLocalizations.setupPhaseConnection,
-        currentAppLocalizations.setupPhaseRoute,
-      ]) {
-        expect(find.text(phase), findsOneWidget);
+      final l = currentAppLocalizations;
+      const steps = [
+        PathStep.core,
+        PathStep.tunnel,
+        PathStep.dns,
+        PathStep.internet,
+      ];
+      for (final step in steps) {
+        expect(find.text(step.label(l)), findsOneWidget);
       }
-      await tester.ensureVisible(
-        find.text(currentAppLocalizations.setupPhaseCore),
-      );
+      await tester.ensureVisible(find.text(PathStep.core.label(l)));
       await tester.pumpAndSettle();
-      for (final phase in [
-        currentAppLocalizations.setupPhaseCore,
-        currentAppLocalizations.setupPhaseProfile,
-        currentAppLocalizations.setupPhaseConnection,
-        currentAppLocalizations.setupPhaseRoute,
-      ]) {
-        expect(find.text(phase).hitTestable(), findsOneWidget);
+      for (final step in steps) {
+        expect(find.text(step.label(l)).hitTestable(), findsOneWidget);
       }
       expect(
         find.widgetWithText(FilledButton, 'Done').hitTestable(),
@@ -947,9 +952,9 @@ void main() {
         acceptedDisclaimerVersion: disclaimerVersion,
         regionCode: 'RU',
         regionChosen: true,
-        report: SetupReport(
+        outcome: SetupOutcome(
           verdict: SetupVerdict.connected,
-          chains: const ['DIRECT', 'Route Alpha'],
+          path: _setupPath(node: 'Route Alpha'),
           error: List.filled(
             40,
             'Diagnostic details keep the result content long.',
@@ -973,7 +978,7 @@ void main() {
         find.text(currentAppLocalizations.setupReceiptCoverage).hitTestable(),
         findsOneWidget,
       );
-      expect(find.text('Route Alpha › DIRECT').hitTestable(), findsOneWidget);
+      expect(find.text('Route Alpha').hitTestable(), findsOneWidget);
       expect(
         harness.container.read(setupSessionProvider).draft.profileId,
         initialDraft.profileId,
@@ -999,12 +1004,14 @@ void main() {
         initialSettings.setupCompleted,
       );
 
-      expect(find.text(currentAppLocalizations.server), findsOneWidget);
+      expect(
+        find.text(currentAppLocalizations.server).hitTestable(),
+        findsOneWidget,
+      );
 
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(find.text(currentAppLocalizations.server), findsNothing);
       expect(receiptTitle.hitTestable(), findsOneWidget);
       expect(
         harness.container.read(setupSessionProvider).draft.profileId,
@@ -1023,15 +1030,31 @@ void main() {
       final harness = _harness(
         step: SetupStep.result,
         acceptedDisclaimerVersion: disclaimerVersion,
-        report: const SetupReport(
+        outcome: SetupOutcome(
           verdict: SetupVerdict.unconfirmed,
-          chains: ['Route Alpha'],
+          path: _setupPath(node: 'Route Alpha').withStep(
+            const PathStepResult(
+              PathStep.internet,
+              status: PathStepStatus.unknown,
+            ),
+          ),
         ),
       );
       addTearDown(harness.container.dispose);
       await _pumpWizard(tester, harness.container, size: const Size(1280, 820));
 
-      expect(find.text('Route Alpha'), findsNothing);
+      final receiptCard = find.ancestor(
+        of: find.text(currentAppLocalizations.setupReceipt),
+        matching: find.byType(CommonCard),
+      );
+      expect(receiptCard, findsWidgets);
+      expect(
+        find.descendant(
+          of: receiptCard.first,
+          matching: find.text('Route Alpha'),
+        ),
+        findsNothing,
+      );
     },
   );
 
@@ -1042,7 +1065,7 @@ void main() {
       step: SetupStep.result,
       acceptedDisclaimerVersion: disclaimerVersion,
       coverage: SetupCoverage.local,
-      report: const SetupReport(
+      outcome: const SetupOutcome(
         verdict: SetupVerdict.local,
         connectionActive: true,
       ),
@@ -1153,17 +1176,14 @@ void main() {
   testWidgets('confirmed and saved results hide save-without-connection', (
     tester,
   ) async {
-    for (final report in [
-      const SetupReport(
-        verdict: SetupVerdict.connected,
-        connectionActive: true,
-      ),
-      const SetupReport(verdict: SetupVerdict.saved),
+    for (final outcome in const [
+      SetupOutcome(verdict: SetupVerdict.connected, connectionActive: true),
+      SetupOutcome(verdict: SetupVerdict.saved),
     ]) {
       final harness = _harness(
         step: SetupStep.result,
         acceptedDisclaimerVersion: disclaimerVersion,
-        report: report,
+        outcome: outcome,
       );
       await _pumpWizard(tester, harness.container);
       expect(find.text('Save without connecting'), findsNothing);
@@ -1176,7 +1196,7 @@ void main() {
     final harness = _harness(
       step: SetupStep.result,
       acceptedDisclaimerVersion: disclaimerVersion,
-      report: const SetupReport(verdict: SetupVerdict.unconfirmed),
+      outcome: const SetupOutcome(verdict: SetupVerdict.unconfirmed),
     );
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);
@@ -1192,7 +1212,7 @@ void main() {
     final harness = _harness(
       step: SetupStep.result,
       acceptedDisclaimerVersion: disclaimerVersion,
-      report: const SetupReport(verdict: SetupVerdict.failed),
+      outcome: const SetupOutcome(verdict: SetupVerdict.failed),
     );
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);

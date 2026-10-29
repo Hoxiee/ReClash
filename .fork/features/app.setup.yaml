@@ -12,7 +12,7 @@ must:
   imports: Link, file and QR imports reuse client presets, conversion, explicit loss approval, validation and duplicate prevention; age-key retry, cancellation and errors remain inside the wizard, rejected or failed imports leave no profile files, and imports do not change active selection.
   coverage: Desktop offers TUN, system proxy and local proxy; Android offers VPN and local proxy; coverage never promises to proxy all traffic.
   region: Region is its own step independent of UI locale; detection only marks a recommendation, manual choices win, and choosing or going back changes only the draft.
-  foundation: Checks use the existing Core and connection owners with one Core-stamped route probe; success does not certify every app or website.
+  foundation: Checks use the existing Core and connection owners, then run the diagnostic kernel's connection path in its setup scope; only a passing internet step confirms, and success does not certify every app or website.
   cancellation: Cancellation immediately settles progress; late responses cannot overwrite the report, and retry cannot accept a cancelled run's answer.
   freshness: Profile, profile-content, coverage, region, check-setting and route changes invalidate an outdated confirmed result.
   ownership: Cancellation and save-without-connecting preserve pre-existing runs; Android runtime restoration stays in SetupAction without a new start or stop, and newer intents supersede late observations.
@@ -21,7 +21,7 @@ must:
   shortcuts: Active setup permits only window visibility and exit actions; network-changing native events and local shortcuts remain blocked until setup completes.
   direct-routes: A region with a preset recommends its direct rules, added once to the global rules on commit; on Android VPN its matched local apps bypass the VPN through access control, and declining or a neutral region adds neither.
   navigation: Every step after language goes back to its predecessor without losing the draft, completed steps reopen from the step bar or receipt, and going back during a check cancels it.
-  presentation: The wizard uses app components, typography, superellipses and primary selection checks without selected-row fills; a divided action bar stays visible, the receipt stays outside the content scroll and opens as compact details on small layouts, real check phases remain expanded, and phone or long text layouts do not overflow.
+  presentation: The wizard uses app components, typography, superellipses and primary selection checks without selected-row fills; a divided action bar stays visible, the receipt stays outside the content scroll and opens as compact details on small layouts, the path's real steps remain expanded, and phone or long text layouts do not overflow.
   localization: All wizard messages belong to app.setup fragments with matching keys and placeholders across supported locales.
 watch:
   - lib/common/setup_check.dart

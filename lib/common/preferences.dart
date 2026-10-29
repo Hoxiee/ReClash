@@ -72,6 +72,21 @@ class Preferences {
     await store?.setStringList('provider.notices', dismissed);
   }
 
+  Future<List<String>> getDoctorIncidents() async {
+    try {
+      final store = await _store.value;
+      return store?.getStringList('doctor.incidents') ?? const [];
+    } on Object {
+      return const [];
+    }
+  }
+
+  Future<void> saveDoctorIncidents(List<String> incidents) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    await store?.setStringList('doctor.incidents', incidents);
+  }
+
   Future<int> getVersion() => _readVersionMarker('version');
 
   Future<void> setVersion(int version) async {
