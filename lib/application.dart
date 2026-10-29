@@ -117,13 +117,14 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   Future<void> _handleLink(String input) async {
-    if (!mounted) return;
+    final context = globalState.navigatorKey.currentContext;
+    if (!mounted || context == null) return;
     try {
       await ref
           .read(urlSchemeActionProvider.notifier)
           .handleLink(
             input,
-            isCurrent: () => mounted,
+            isCurrent: () => mounted && context.mounted,
             confirmCommand: (action) async =>
                 await dialogs.showMessage(
                   title: currentAppLocalizations.urlSchemeConfirmTitle,
