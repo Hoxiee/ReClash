@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.3",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Connection diagnostics and guided fixes",
+      "spotlight": {
+        "title": "Diagnostics on your dashboard",
+        "description": "The health card on both dashboards shows detected issues and opens diagnostics with available fixes.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Follow the connection path",
+          "description": "Check each connection step in order and see where it stops, with timings and explanations.",
+          "kind": "link"
+        },
+        {
+          "title": "Android system checks",
+          "description": "Check VPN access, competing VPNs, Private DNS, network sign-in and battery restrictions, with shortcuts to system settings.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Fix and verify",
+          "description": "Apply suggested fixes, check whether the issue cleared and undo reversible configuration changes.",
+          "kind": "update"
+        },
+        {
+          "title": "Recent incidents in one place",
+          "description": "Review diagnostic history and hide noncritical recommendations without silencing critical issues.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Диагностика подключения и помощь с исправлением проблем",
+      "spotlight": {
+        "title": "Диагностика на главном экране",
+        "description": "Карточка состояния на обоих дашбордах показывает найденные проблемы и открывает диагностику с доступными способами исправления.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Путь подключения",
+          "description": "Проверяйте этапы соединения по порядку и смотрите, где оно останавливается, с замерами времени и объяснениями.",
+          "kind": "link"
+        },
+        {
+          "title": "Системные проверки Android",
+          "description": "Проверяйте разрешение VPN, другие VPN, Private DNS, вход в сеть и ограничения батареи с быстрым переходом к системным настройкам.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Исправление с проверкой",
+          "description": "Применяйте предложенные исправления, проверяйте результат и отменяйте обратимые изменения конфигурации.",
+          "kind": "update"
+        },
+        {
+          "title": "История проблем в одном месте",
+          "description": "Просматривайте историю диагностики и скрывайте некритичные рекомендации, не отключая важные предупреждения.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
