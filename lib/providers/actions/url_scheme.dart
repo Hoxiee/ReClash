@@ -14,6 +14,7 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     )
     confirmImport,
     required Future<void> Function(String text, String origin) openRouting,
+    Future<void> Function(String? check)? openDoctor,
     bool Function()? isCurrent,
   }) async {
     bool current() => ref.mounted && (isCurrent?.call() ?? true);
@@ -21,7 +22,8 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     if (!current()) return;
     if (link != null &&
         !link.command.isProfile &&
-        link.command != ReClashCommand.routing) {
+        link.command != ReClashCommand.routing &&
+        link.command != ReClashCommand.doctor) {
       await execute(
         link.command,
         confirm: (action) async =>
@@ -31,6 +33,10 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     }
     await windowPort?.show();
     if (!current()) return;
+    if (link?.command == ReClashCommand.doctor) {
+      await openDoctor?.call(link!.payload);
+      return;
+    }
     if (ref.read(setupSessionProvider).active) {
       ref.read(setupSessionProvider.notifier).offerLink(input);
       return;

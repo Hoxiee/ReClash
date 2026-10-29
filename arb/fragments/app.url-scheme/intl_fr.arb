@@ -114,5 +114,6 @@
   "profileImportSingleServer": "Un seul serveur",
   "profileImportDownloading": "Téléchargement de l’abonnement…",
   "profileImportTryOtherFormat": "Rien n’a été ajouté. Vous pouvez choisir un autre format et réessayer.",
-  "profilePasteFromClipboard": "Coller depuis le presse-papiers"
+  "profilePasteFromClipboard": "Coller depuis le presse-papiers",
+  "urlSchemeDoctorDesc": "Ouvre le diagnostic ; avec ?check=, affiche un seul problème."
 }

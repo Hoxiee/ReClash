@@ -12,10 +12,10 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/probe_start_hold.dart';
 import 'package:reclash/views/dashboard/layout.dart';
 import 'package:reclash/views/dashboard/style.dart';
+import 'package:reclash/widgets/service_icon.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
@@ -117,9 +117,12 @@ class _ServiceView {
 }
 
 class ServiceStatusCard extends ConsumerStatefulWidget {
-  const ServiceStatusCard({super.key, this.columns = 2});
+  const ServiceStatusCard({super.key, this.columns = 2, this.random});
 
   final int columns;
+
+  @visibleForTesting
+  final Random? random;
 
   @override
   ConsumerState<ServiceStatusCard> createState() => _ServiceStatusCardState();
@@ -128,6 +131,7 @@ class ServiceStatusCard extends ConsumerStatefulWidget {
 class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
     with ProbeStartHold<ServiceStatusCard> {
   late final ServiceStatus _services;
+  late final bool _variant;
   Set<ServiceTarget> _shown = const {};
   Set<ServiceTarget> _watched = const {};
   var _syncScheduled = false;
@@ -136,6 +140,7 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
   void initState() {
     super.initState();
     _services = ref.read(serviceStatusProvider.notifier);
+    _variant = ServiceIcon.selectVariant(widget.random);
   }
 
   @override
@@ -205,6 +210,7 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
     final scale = DashboardDensityScope.scaleOf(context);
     final grid = _ServiceGrid(
       services: services,
+      variant: _variant,
       columns: widget.columns,
       fill: !mobile,
       cellHeight:
@@ -267,6 +273,7 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
 class _ServiceGrid extends StatelessWidget {
   const _ServiceGrid({
     required this.services,
+    required this.variant,
     required this.columns,
     required this.fill,
     required this.cellHeight,
@@ -274,6 +281,7 @@ class _ServiceGrid extends StatelessWidget {
   });
 
   final List<_ServiceView> services;
+  final bool variant;
   final int columns;
 
   /// Holds two rows on a fixed-height card, a single row growing into tiles.
@@ -294,6 +302,7 @@ class _ServiceGrid extends StatelessWidget {
               Expanded(
                 child: _ServiceCell(
                   service: service,
+                  variant: variant,
                   height: cellHeight,
                   tile: true,
                 ),
@@ -312,7 +321,11 @@ class _ServiceGrid extends StatelessWidget {
             children: [
               for (final service in services.skip(start).take(columns))
                 Expanded(
-                  child: _ServiceCell(service: service, height: cellHeight),
+                  child: _ServiceCell(
+                    service: service,
+                    variant: variant,
+                    height: cellHeight,
+                  ),
                 ),
             ],
           ),
@@ -324,6 +337,7 @@ class _ServiceGrid extends StatelessWidget {
 class _ServiceCell extends StatelessWidget {
   const _ServiceCell({
     required this.service,
+    required this.variant,
     required this.height,
     this.tile = false,
   });
@@ -334,6 +348,7 @@ class _ServiceCell extends StatelessWidget {
   static const _tileText = EdgeInsetsDirectional.fromSTEB(5, 0, 5, 3);
 
   final _ServiceView service;
+  final bool variant;
   final double height;
 
   final bool tile;
@@ -347,6 +362,7 @@ class _ServiceCell extends StatelessWidget {
         .copyWith(color: color);
     final badge = _ServiceBadge(
       target: service.target,
+      variant: variant,
       size: height - _inset * 2,
       radius: DashboardCorner.tab - _inset,
       color: DashboardColors.of(context).card,
@@ -547,6 +563,7 @@ class _ServiceBadge extends StatelessWidget {
     this.enabled = true,
     this.color,
     this.ink,
+    this.variant = false,
   });
 
   static const _glyphShare = 0.56;
@@ -558,6 +575,7 @@ class _ServiceBadge extends StatelessWidget {
   final bool enabled;
   final Color? color;
   final Color? ink;
+  final bool variant;
 
   @override
   Widget build(BuildContext context) {
@@ -574,18 +592,16 @@ class _ServiceBadge extends StatelessWidget {
       child: SizedBox.square(
         dimension: size,
         child: Center(
-          child: SvgPicture.asset(
-            'assets/images/services/${target.icon}.svg',
-            width: size * _glyphShare,
-            height: size * _glyphShare,
+          child: ServiceIcon(
+            target: target,
+            size: size * _glyphShare,
+            color:
+                ink ??
+                (enabled
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.onSurfaceVariant.opacity38),
+            variant: variant,
             excludeFromSemantics: true,
-            theme: SvgTheme(
-              currentColor:
-                  ink ??
-                  (enabled
-                      ? colorScheme.onSurfaceVariant
-                      : colorScheme.onSurfaceVariant.opacity38),
-            ),
           ),
         ),
       ),
@@ -653,11 +669,27 @@ Future<void> showServiceStatusSheet(BuildContext context) {
   );
 }
 
-class ServiceStatusSheet extends ConsumerWidget {
-  const ServiceStatusSheet({super.key});
+class ServiceStatusSheet extends ConsumerStatefulWidget {
+  const ServiceStatusSheet({super.key, this.random});
+
+  @visibleForTesting
+  final Random? random;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ServiceStatusSheet> createState() => _ServiceStatusSheetState();
+}
+
+class _ServiceStatusSheetState extends ConsumerState<ServiceStatusSheet> {
+  late final bool _variant;
+
+  @override
+  void initState() {
+    super.initState();
+    _variant = ServiceIcon.selectVariant(widget.random);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final targets = ref.watch(enabledServiceTargetsProvider);
     final state = ref.watch(serviceStatusProvider);
     final services = ref.read(serviceStatusProvider.notifier);
@@ -703,6 +735,7 @@ class ServiceStatusSheet extends ConsumerWidget {
                   child: _ServiceRow(
                     target: target,
                     entry: state.entryOf(target),
+                    variant: _variant,
                     onCheck: () => services.refresh([target]),
                   ),
                 );
@@ -891,11 +924,13 @@ class _ServiceRow extends ConsumerStatefulWidget {
   const _ServiceRow({
     required this.target,
     required this.entry,
+    required this.variant,
     required this.onCheck,
   });
 
   final ServiceTarget target;
   final ProbeEntry<ServiceCheck> entry;
+  final bool variant;
   final VoidCallback onCheck;
 
   @override
@@ -931,6 +966,7 @@ class _ServiceRowState extends ConsumerState<_ServiceRow>
           target: target,
           size: _rowBadgeSize,
           radius: _rowBadgeRadius,
+          variant: widget.variant,
           dot: loading
               ? context.colorScheme.onSurfaceVariant
               : service.dotOf(context),

@@ -85,6 +85,10 @@ abstract interface class ConfigAccess {
 const _causeRemedies = <FailureCause, List<String>>{
   FailureCause.subscriptionExpired: ['profile.update'],
   FailureCause.trafficExhausted: ['profile.update'],
+  FailureCause.clockSkew: ['device.openDateSettings'],
+  FailureCause.tunnelDenied: ['device.requestVpnPermission'],
+  FailureCause.tunnelTaken: ['device.openVpnSettings'],
+  FailureCause.captivePortal: ['network.openCaptivePortal'],
 };
 
 FailureCause failureCauseOf(Object error) => switch (error) {

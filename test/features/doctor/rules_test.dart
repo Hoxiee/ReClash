@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/constant.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/cause.dart';
 import 'package:reclash/features/doctor/finding.dart';
 import 'package:reclash/features/doctor/rules/rules.dart';
 import 'package:reclash/features/doctor/snapshot.dart';
+import 'package:reclash/plugins/doctor.dart';
 
 final _now = DateTime(2026, 10, 29, 12);
 
@@ -33,6 +35,7 @@ void main() {
       expect(finding.detailKey, 'doctorClockSkewAhead');
       expect(finding.args, {'seconds': 45});
       expect(finding.cause, FailureCause.clockSkew);
+      expect(finding.remedyIds, ['device.openDateSettings']);
     });
 
     test('is critical when the device runs 120 seconds behind', () {
@@ -178,6 +181,143 @@ void main() {
       );
 
       expect(directModeRule(snapshot), isNull);
+    });
+  });
+
+  group('vpnPermissionRule', () {
+    test('is critical once the VPN permission was revoked', () {
+      final snapshot = _snapshot().withFact(
+        Facts.vpnPermission,
+        Fact(VpnPermission.revoked, at: _now),
+      );
+
+      final finding = vpnPermissionRule(snapshot)!;
+
+      expect(finding.id, 'tunnel.vpnPermission');
+      expect(finding.severity, CheckSeverity.critical);
+      expect(finding.cause, FailureCause.tunnelDenied);
+      expect(finding.remedyIds, contains('device.requestVpnPermission'));
+    });
+
+    test('stays silent while granted, never asked or unknown', () {
+      for (final permission in [
+        VpnPermission.granted,
+        VpnPermission.notAsked,
+      ]) {
+        final snapshot = _snapshot().withFact(
+          Facts.vpnPermission,
+          Fact(permission, at: _now),
+        );
+
+        expect(vpnPermissionRule(snapshot), isNull, reason: permission.name);
+      }
+      expect(vpnPermissionRule(_snapshot()), isNull);
+    });
+  });
+
+  group('otherVpnRule', () {
+    test('is critical while another VPN owns the tunnel', () {
+      final snapshot = _snapshot().withFact(
+        Facts.otherVpn,
+        Fact(true, at: _now),
+      );
+
+      final finding = otherVpnRule(snapshot)!;
+
+      expect(finding.id, 'tunnel.otherVpn');
+      expect(finding.severity, CheckSeverity.critical);
+      expect(finding.cause, FailureCause.tunnelTaken);
+      expect(finding.remedyIds, ['device.openVpnSettings']);
+    });
+
+    test('stays silent when no other VPN is up', () {
+      final snapshot = _snapshot().withFact(
+        Facts.otherVpn,
+        Fact(false, at: _now),
+      );
+
+      expect(otherVpnRule(snapshot), isNull);
+      expect(otherVpnRule(_snapshot()), isNull);
+    });
+  });
+
+  group('alwaysOnVpnRule', () {
+    DiagnosticSnapshot withAlwaysOn(String app) =>
+        _snapshot().withFact(Facts.alwaysOnVpnApp, Fact(app, at: _now));
+
+    test('is critical while another app is the always-on VPN', () {
+      final finding = alwaysOnVpnRule(withAlwaysOn('com.example.vpn'))!;
+
+      expect(finding.id, 'tunnel.alwaysOn');
+      expect(finding.severity, CheckSeverity.critical);
+      expect(finding.cause, FailureCause.tunnelTaken);
+      expect(finding.titleKey, 'doctorAlwaysOnOtherTitle');
+    });
+
+    test('is only a tip when no always-on VPN is set', () {
+      final finding = alwaysOnVpnRule(withAlwaysOn(''))!;
+
+      expect(finding.severity, CheckSeverity.tip);
+      expect(finding.cause, isNull);
+      expect(finding.titleKey, 'doctorAlwaysOnOffTitle');
+    });
+
+    test('stays silent when the system hides the setting or ReClash holds '
+        'it', () {
+      expect(alwaysOnVpnRule(_snapshot()), isNull);
+      expect(alwaysOnVpnRule(withAlwaysOn(packageName)), isNull);
+    });
+  });
+
+  group('privateDnsRule', () {
+    test('warns under strict Private DNS and names the resolver host', () {
+      final snapshot = _snapshot()
+          .withFact(Facts.privateDns, Fact(PrivateDnsMode.strict, at: _now))
+          .withFact(Facts.privateDnsHost, Fact('dns.example.net', at: _now));
+
+      final finding = privateDnsRule(snapshot)!;
+
+      expect(finding.id, 'network.privateDns');
+      expect(finding.severity, CheckSeverity.warning);
+      expect(finding.cause, isNull);
+      expect(finding.args, {'host': 'dns.example.net'});
+      expect(finding.remedyIds, ['device.openPrivateDnsSettings']);
+    });
+
+    test('stays silent in off and opportunistic modes', () {
+      for (final mode in [PrivateDnsMode.off, PrivateDnsMode.opportunistic]) {
+        final snapshot = _snapshot().withFact(
+          Facts.privateDns,
+          Fact(mode, at: _now),
+        );
+
+        expect(privateDnsRule(snapshot), isNull, reason: mode.name);
+      }
+    });
+  });
+
+  group('captivePortalRule', () {
+    test('warns behind a captive portal and offers its page', () {
+      final snapshot = _snapshot().withFact(
+        Facts.captivePortal,
+        Fact(true, at: _now),
+      );
+
+      final finding = captivePortalRule(snapshot)!;
+
+      expect(finding.id, 'network.captivePortal');
+      expect(finding.severity, CheckSeverity.warning);
+      expect(finding.cause, FailureCause.captivePortal);
+      expect(finding.remedyIds, ['network.openCaptivePortal']);
+    });
+
+    test('stays silent on an open network', () {
+      final snapshot = _snapshot().withFact(
+        Facts.captivePortal,
+        Fact(false, at: _now),
+      );
+
+      expect(captivePortalRule(snapshot), isNull);
     });
   });
 

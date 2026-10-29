@@ -135,5 +135,6 @@
   "profileImportSingleServer": "Single server",
   "profileImportDownloading": "Downloading the subscription…",
   "profileImportTryOtherFormat": "Nothing was added. You can pick another format and try again.",
-  "profilePasteFromClipboard": "Paste from clipboard"
+  "profilePasteFromClipboard": "Paste from clipboard",
+  "urlSchemeDoctorDesc": "Opens the diagnostics; with ?check= on one issue."
 }

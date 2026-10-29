@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/service_probe.dart';
@@ -16,12 +17,15 @@ import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/layout.dart';
+import 'package:reclash/views/dashboard/simple/services_card.dart';
 import 'package:reclash/views/dashboard/widget_registry.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/service_status.dart';
+import 'package:reclash/widgets/service_icon.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
@@ -30,6 +34,8 @@ import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';
 
 class _MockCore extends Mock implements CoreHandlerInterface {}
+
+class _MockRandom extends Mock implements Random {}
 
 ServiceCheckItem _item(
   String name,
@@ -155,6 +161,183 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
   }
+
+  SvgPicture artworkOf(WidgetTester tester, ServiceTarget target) {
+    final icon = find.byWidgetPredicate(
+      (widget) => widget is ServiceIcon && widget.target == target,
+    );
+    return tester.widget<SvgPicture>(
+      find.descendant(of: icon, matching: find.byType(SvgPicture)),
+    );
+  }
+
+  for (final (name, makeCard) in <(String, Widget Function(Random))>[
+    ('dashboard', (random) => ServiceStatusCard(random: random)),
+    ('simple dashboard', (random) => SimpleServicesCard(random: random)),
+  ]) {
+    testWidgets('$name artwork stays stable while mounted', (tester) async {
+      final random = _MockRandom();
+      var samples = 0;
+      when(
+        () => random.nextInt(100),
+      ).thenAnswer((_) => samples++ == 0 ? 0 : 99);
+      answer(
+        (params) => [
+          for (final name in params.names)
+            _item(name, ServiceProbeStatus.available, delay: 30),
+        ],
+      );
+      Widget host({int opening = 0}) => app(
+        settings: only([ServiceTarget.gosuslugi, ServiceTarget.google]),
+        body: KeyedSubtree(key: ValueKey(opening), child: makeCard(random)),
+      );
+      await tester.pumpWidget(host());
+      await settleChecks(tester);
+      final loader = artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader;
+      expect(loader, isA<SvgStringLoader>());
+      expect(
+        artworkOf(tester, ServiceTarget.google).bytesLoader,
+        isA<SvgAssetLoader>(),
+      );
+      expect(find.byType(ServiceStatusSheet), findsNothing);
+      expect(samples, 1);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ServiceIcon).first),
+      );
+      container.read(serviceStatusProvider.notifier).refresh([
+        ServiceTarget.gosuslugi,
+      ]);
+      await settleChecks(tester);
+      expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+      expect(samples, 1);
+
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (settings) =>
+                settings.copyWith(serviceOrder: ['gosuslugi', 'google']),
+          );
+      await settleChecks(tester);
+      expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+      expect(samples, 1);
+
+      await tester.pumpWidget(host());
+      await settleChecks(tester);
+      expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+      expect(samples, 1);
+
+      await tester.pumpWidget(host(opening: 1));
+      await settleChecks(tester);
+      expect(
+        artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader,
+        isA<SvgAssetLoader>().having(
+          (value) => value.assetName,
+          'asset',
+          'assets/images/services/gosuslugi.svg',
+        ),
+      );
+      expect(samples, 2);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final sample in [0, 1, 2, 3, 99]) {
+    testWidgets('service artwork sample $sample stays local to its row', (
+      tester,
+    ) async {
+      final random = _MockRandom();
+      when(() => random.nextInt(100)).thenReturn(sample);
+      answer((_) => const []);
+      await tester.pumpWidget(
+        app(
+          started: false,
+          settings: only([ServiceTarget.gosuslugi, ServiceTarget.google]),
+          body: ServiceStatusSheet(random: random),
+        ),
+      );
+      await settleChecks(tester);
+
+      final loader = artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader;
+      expect(
+        loader,
+        sample < 3 ? isA<SvgStringLoader>() : isA<SvgAssetLoader>(),
+      );
+      expect(
+        artworkOf(tester, ServiceTarget.google).bytesLoader,
+        isA<SvgAssetLoader>().having(
+          (value) => value.assetName,
+          'asset',
+          'assets/images/services/google.svg',
+        ),
+      );
+      final data = await tester.runAsync(
+        () => loader.loadBytes(tester.element(find.byType(ServiceStatusSheet))),
+      );
+      expect(data?.lengthInBytes, greaterThan(0));
+      verify(() => random.nextInt(100)).called(1);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('service artwork stays stable until the sheet is reopened', (
+    tester,
+  ) async {
+    final random = _MockRandom();
+    var samples = 0;
+    when(() => random.nextInt(100)).thenAnswer((_) => samples++ == 0 ? 0 : 99);
+    answer(
+      (params) => [
+        for (final name in params.names)
+          _item(name, ServiceProbeStatus.available, delay: 30),
+      ],
+    );
+    Widget host({int opening = 0}) => app(
+      settings: only([ServiceTarget.gosuslugi, ServiceTarget.google]),
+      body: ServiceStatusSheet(key: ValueKey(opening), random: random),
+    );
+    await tester.pumpWidget(host());
+    await settleChecks(tester);
+    final loader = artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader;
+    expect(loader, isA<SvgStringLoader>());
+    expect(samples, 1);
+
+    await tester.tap(find.text(ServiceTarget.gosuslugi.label));
+    await settleChecks(tester);
+    expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+    expect(samples, 1);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ServiceStatusSheet)),
+    );
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (settings) =>
+              settings.copyWith(serviceOrder: ['google', 'gosuslugi']),
+        );
+    await settleChecks(tester);
+    expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+    expect(samples, 1);
+
+    await tester.pumpWidget(host());
+    await settleChecks(tester);
+    expect(artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader, loader);
+    expect(samples, 1);
+
+    await tester.pumpWidget(host(opening: 1));
+    await settleChecks(tester);
+    expect(
+      artworkOf(tester, ServiceTarget.gosuslugi).bytesLoader,
+      isA<SvgAssetLoader>().having(
+        (value) => value.assetName,
+        'asset',
+        'assets/images/services/gosuslugi.svg',
+      ),
+    );
+    expect(samples, 2);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('holds the latency with a skeleton until checked', (
     tester,

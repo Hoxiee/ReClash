@@ -86,7 +86,7 @@ class BatteryOptimizationIgnored extends _$BatteryOptimizationIgnored {
   BatteryOptimization? get plugin => batteryOptimization;
 
   @override
-  Stream<bool> build() => plugin?.onChanged ?? Stream.value(true);
+  Stream<bool?> build() => plugin?.onChanged ?? Stream.value(true);
 
   Future<void> request() async {
     final plugin = this.plugin;

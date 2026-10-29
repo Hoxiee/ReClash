@@ -47,5 +47,104 @@
   "doctorPathCancelled": "The connection changed during the check",
   "doctorPathStepPassed": "Passed",
   "doctorPathStepUnknown": "Couldn't tell",
-  "doctorPathStepWaiting": "Waiting"
+  "doctorPathStepWaiting": "Waiting",
+  "doctorClockSkewBehind": "The clock is {seconds} s behind. Servers turn away a device with the wrong time.",
+  "@doctorClockSkewBehind": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorClockSkewAhead": "The clock is {seconds} s ahead. Servers turn away a device with the wrong time.",
+  "@doctorClockSkewAhead": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorBatteryOptimizationTitle": "Battery optimization is on",
+  "doctorBatteryOptimizationDetail": "The system may stop the VPN in the background.",
+  "doctorSubscriptionDetail": "Servers stop letting you in. Renew the subscription, then update the profile.",
+  "doctorDirectModeTitle": "Direct mode is on",
+  "doctorDirectModeDetail": "All traffic bypasses the server.",
+  "doctorVpnRevokedTitle": "VPN permission was taken away",
+  "doctorVpnRevokedDetail": "Android no longer lets the app start the tunnel. Allow it again.",
+  "doctorOtherVpnDetail": "Only one VPN can run at a time. Turn the other app's VPN off.",
+  "doctorAlwaysOnOtherTitle": "Another app is the always-on VPN",
+  "doctorAlwaysOnOtherDetail": "Android starts that app's VPN instead of this one. Choose this app in VPN settings.",
+  "doctorAlwaysOnOffTitle": "Always-on VPN is off",
+  "doctorAlwaysOnOffDetail": "With it on, Android restarts the VPN by itself after a reboot.",
+  "doctorPrivateDnsTitle": "Private DNS bypasses the VPN",
+  "doctorPrivateDnsDetail": "Strict Private DNS ({host}) sends lookups past the routing rules. Set it to Automatic.",
+  "@doctorPrivateDnsDetail": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorCaptivePortalDetail": "Open the network's sign-in page, then connect again.",
+  "doctorAllSet": "All set",
+  "doctorChecksPassed": "{count, plural, one{1 check passed} other{{count} checks passed}}",
+  "@doctorChecksPassed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorIssueCount": "{count, plural, one{1 issue} other{{count} issues}}",
+  "@doctorIssueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorMoreIssues": "{count, plural, one{+1 more issue} other{+{count} more issues}}",
+  "@doctorMoreIssues": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorShowMore": "Show {count} more",
+  "@doctorShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorFix": "Fix",
+  "doctorOpen": "Open",
+  "doctorDidntHelp": "Didn't help",
+  "doctorFixed": "Fixed",
+  "doctorFixAll": "Fix everything",
+  "doctorFixAllResult": "{fixed} fixed, {left} left",
+  "@doctorFixAllResult": {
+    "placeholders": {
+      "fixed": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorSnoozeWeek": "Hide for 7 days",
+  "doctorSnoozeForever": "Hide for good",
+  "doctorIssues": "Issues",
+  "doctorHistoryEmpty": "Nothing has happened yet",
+  "doctorEventFindingRaised": "Issue found",
+  "doctorEventFindingCleared": "Issue cleared",
+  "doctorEventRemedyApplied": "Fix applied",
+  "doctorEventRemedyUndone": "Fix undone",
+  "doctorEventPathFailed": "Connection failed",
+  "doctorEventPathRecovered": "Connection restored",
+  "doctorWhy": "Why?",
+  "doctorExplainTitle": "What went wrong"
 }

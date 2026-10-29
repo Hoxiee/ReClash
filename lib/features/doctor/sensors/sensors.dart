@@ -4,6 +4,9 @@ import 'package:reclash/providers/providers.dart';
 
 import '../kernel.dart';
 import '../snapshot.dart';
+import 'device.dart';
+
+export 'device.dart';
 
 /// A passive source: it subscribes to state that already emits and turns it
 /// into facts. A sensor never polls.
@@ -14,6 +17,7 @@ const List<Sensor> defaultSensors = [
   modeSensor,
   batteryOptimizationSensor,
   subscriptionSensor,
+  deviceSensor,
 ];
 
 void coreStatusSensor(Ref ref, FactSink sink) {

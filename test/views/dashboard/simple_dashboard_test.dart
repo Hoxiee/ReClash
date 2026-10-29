@@ -11,6 +11,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/providers.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -35,6 +36,7 @@ import '../../helpers/preferences.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
 import '../../helpers/test_update_runtime.dart';
+import '../doctor/doctor_fakes.dart';
 
 class _MockCore extends Mock implements CoreHandlerInterface {}
 
@@ -547,7 +549,7 @@ void main() {
     chooseSimple();
     await openEditor(tester);
 
-    expect(find.byTooltip(_removeWidget), findsNWidgets(5));
+    expect(find.byTooltip(_removeWidget), findsNWidgets(6));
     expect(
       centerX(tester, find.text('Mode')),
       inInclusiveRange(0, _phone.width),
@@ -582,6 +584,16 @@ void main() {
     expect(find.byTooltip(_removeWidget), findsNWidgets(4));
     expect(find.text('Available to add'), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.byTooltip('Add Mode'),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(SimpleWidgetList),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.tap(find.byTooltip('Add Mode'));
     await settle(tester);
 
@@ -592,7 +604,7 @@ void main() {
       SimpleDashboardWidget.trustedNetworks,
       SimpleDashboardWidget.outboundMode,
     ]);
-    expect(find.text('Available to add'), findsNothing);
+    expect(find.byTooltip('Add Mode'), findsNothing);
   });
 
   testWidgets('done leaves edit mode', (tester) async {
@@ -954,6 +966,32 @@ void main() {
   });
 
   group('provider messages', () {
+    testWidgets('critical diagnostics stay off the simple home page', (
+      tester,
+    ) async {
+      useContainer(
+        overrides: [
+          ...doctorOverrides(
+            kernel: FakeDoctorKernel(),
+            findings: [clockSkewFinding],
+          ),
+        ],
+      );
+      container.listen(findingsProvider, (_, _) {});
+      chooseSimple();
+      await pumpPage(tester);
+      await settle(tester);
+      expect(container.read(findingsProvider).value, [clockSkewFinding]);
+      expect(
+        find.descendant(
+          of: find.byType(SimpleHome),
+          matching: find.text(currentAppLocalizations.doctorCauseClockSkew),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(SimplePower), findsOneWidget);
+    });
+
     testWidgets('an announcement opens the widgets page and is not on home', (
       tester,
     ) async {

@@ -7,11 +7,12 @@ must:
   snapshot: Rules are pure functions of an immutable snapshot of typed facts, run off the UI isolate once the snapshot grows, and a missing or stale fact never raises a finding.
   probes: Probes are deduplicated per key, cached by TTL and bounded by cost class; a newer intent supersedes the run in flight and the Core leaving connected cancels every run.
   remedies: Remedies are the only kernel code that changes state, verify through the rules, snapshot Config when undoable and refuse an undo once the config moved on; restarts are requested through ServiceState or the desktop lifecycle, never owned.
-  journal: Every diagnostic event is published live and persisted, keeping the last 100 incidents.
+  journal: Every diagnostic event is published live and persisted, keeping the last 100 incidents; the doctor page shows the latest 30 in a history section that starts collapsed and toggles from its header.
   path: Every consumer runs the one connection path through runPath; steps run in order through the probe scheduler, the first failure stops the chain and the rest show as skipped, routed steps are RoutedProbe answers judged against routeTrackerProvider, and the Core leaving ends a run as cancelled.
-watch: ['lib/features/doctor/**', 'lib/views/doctor/**', core/doctor.go, core/doctor_test.go, lib/common/network_error.dart, 'test/features/doctor/**', 'arb/fragments/diagnostics.kernel/**']
+  findings: Findings reach the user through the health card on both dashboards and the doctor page, never a banner on simple home; a button appears only for a remedy the platform registers, critical findings cannot be snoozed, Android device state comes from native plugins as facts, and an unavailable battery policy remains unknown.
+watch: ['lib/features/doctor/**', lib/plugins/doctor.dart, lib/plugins/battery.dart, lib/providers/on_demand.dart, android/app/src/main/kotlin/com/reclash/plugins/DoctorPlugin.kt, android/app/src/main/kotlin/com/reclash/plugins/BatteryPlugin.kt, test/providers/on_demand_test.dart, 'test/views/doctor/**', 'lib/views/doctor/**', core/doctor.go, core/doctor_test.go, lib/common/network_error.dart, 'test/features/doctor/**', 'arb/fragments/diagnostics.kernel/**']
 checks:
-  diagnostics-kernel: [snapshot, probes, remedies, journal, path]
+  diagnostics-kernel: [snapshot, probes, remedies, journal, path, findings]
   go-doctor: [taxonomy, path]
 deps: [core.integration]
 drop: Upstream ships an equivalent diagnostic kernel.

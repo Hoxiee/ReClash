@@ -111,6 +111,7 @@ final List<HotKeyAction> defaultHotKeyActions = system.isWindows
 
 const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.currentOutbound,
+  DashboardWidget.health,
   DashboardWidget.networkSpeed,
   DashboardWidget.outboundMode,
   DashboardWidget.vpnButton,
@@ -127,6 +128,7 @@ const List<DashboardWidget> defaultDashboardWidgets = [
 final List<DashboardWidget> platformDefaultDashboardWidgets = system.isAndroid
     ? const [
         DashboardWidget.currentOutbound,
+        DashboardWidget.health,
         DashboardWidget.networkSpeed,
         DashboardWidget.outboundMode,
         DashboardWidget.profiles,

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/plugins/doctor.dart';
 
 /// Names one fact and the type of its value. Values cross into the rules
 /// isolate, so they must be plain data: no closures, handles or providers.
@@ -66,6 +67,14 @@ abstract final class Facts {
   /// Device clock minus server clock: positive when the device runs ahead.
   static const clockSkew = FactKey<Duration>('device.clockSkew');
   static const subscription = FactKey<SubscriptionFact>('profile.subscription');
+  static const vpnPermission = FactKey<VpnPermission>('device.vpnPermission');
+  static const otherVpn = FactKey<bool>('device.otherVpn');
+
+  /// Empty when no app is the always-on VPN.
+  static const alwaysOnVpnApp = FactKey<String>('device.alwaysOnVpnApp');
+  static const privateDns = FactKey<PrivateDnsMode>('device.privateDns');
+  static const privateDnsHost = FactKey<String>('device.privateDnsHost');
+  static const captivePortal = FactKey<bool>('network.captivePortal');
 }
 
 /// The immutable merge of every current fact. A missing fact means the kernel

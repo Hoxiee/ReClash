@@ -5,6 +5,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/features/doctor/explain.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,7 +165,11 @@ class GlobalState {
                 ),
         );
       } else if (silence) {
-        dialogs.showNotifier(message, level: MessageLevel.error);
+        dialogs.showNotifier(
+          message,
+          level: MessageLevel.error,
+          actionState: explainAction(e),
+        );
       } else {
         unawaited(
           dialogs.showAlert(

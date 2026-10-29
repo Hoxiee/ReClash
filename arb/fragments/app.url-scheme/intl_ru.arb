@@ -114,5 +114,6 @@
   "profileImportSingleServer": "Один сервер",
   "profileImportDownloading": "Загружаем подписку…",
   "profileImportTryOtherFormat": "Ничего не добавлено. Можно выбрать другой формат и попробовать снова.",
-  "profilePasteFromClipboard": "Вставить из буфера обмена"
+  "profilePasteFromClipboard": "Вставить из буфера обмена",
+  "urlSchemeDoctorDesc": "Открывает диагностику; с ?check= открывает одну проблему."
 }

@@ -2,6 +2,7 @@ package com.reclash
 
 import com.reclash.plugins.AppPlugin
 import com.reclash.plugins.BatteryPlugin
+import com.reclash.plugins.DoctorPlugin
 import com.reclash.plugins.ServicePlugin
 import com.reclash.plugins.TilePlugin
 import io.flutter.embedding.android.FlutterActivity
@@ -12,6 +13,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AppPlugin())
         flutterEngine.plugins.add(BatteryPlugin())
+        flutterEngine.plugins.add(DoctorPlugin())
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
         ServiceState.attachFlutterEngine(flutterEngine)

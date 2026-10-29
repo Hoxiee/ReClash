@@ -114,5 +114,6 @@
   "profileImportSingleServer": "Бір сервер",
   "profileImportDownloading": "Жазылым жүктелуде…",
   "profileImportTryOtherFormat": "Ештеңе қосылмады. Басқа пішімді таңдап, қайталап көріңіз.",
-  "profilePasteFromClipboard": "Алмасу буферінен қою"
+  "profilePasteFromClipboard": "Алмасу буферінен қою",
+  "urlSchemeDoctorDesc": "Диагностиканы ашады; ?check= қосылса, бір мәселені ашады."
 }

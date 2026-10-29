@@ -13,7 +13,7 @@ import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/doctor/path.dart';
 
-/// The connection path as a chain of step badges, one line once it passes.
+/// The connection path as a chain of step badges.
 class SimplePathCard extends ConsumerStatefulWidget {
   const SimplePathCard({super.key});
 
@@ -55,6 +55,7 @@ class _SimplePathCardState extends ConsumerState<SimplePathCard> {
             title: l.doctorPathTitle,
             chevron: true,
           ),
+          _PathChain(path: path),
           if (idle)
             Text(l.doctorPathIdle, style: label)
           else if (path == null)
@@ -76,7 +77,6 @@ class _SimplePathCardState extends ConsumerState<SimplePathCard> {
               ],
             )
           else ...[
-            _PathChain(path: path),
             Text(switch (path) {
               PathResult(cancelled: true) => l.doctorPathCancelled,
               PathResult(complete: false) => l.doctorPathChecking,
@@ -101,13 +101,15 @@ class _PathChain extends StatelessWidget {
 
   static const _gap = 2.0;
 
-  final PathResult path;
+  final PathResult? path;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final colors = DashboardColors.of(context);
-    final steps = path.steps;
+    final steps =
+        path?.steps ??
+        [for (final step in PathStep.values) PathStepResult(step)];
     (Color, Color) tones(PathStepResult step) => switch (step.status) {
       PathStepStatus.pass => (colors.okContainer, colors.onOkContainer),
       PathStepStatus.fail when step.cause == null => (

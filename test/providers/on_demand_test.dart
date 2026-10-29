@@ -262,6 +262,23 @@ void main() {
       },
     );
 
+    test('keeps an unreadable battery policy unknown and recovers', () async {
+      await watch();
+      expect(ignored(), isFalse);
+
+      events.success(null);
+      await pumpEventQueue();
+
+      final unknown = container.read(batteryOptimizationIgnoredProvider);
+      expect(unknown.hasValue, isTrue);
+      expect(unknown.hasError, isFalse);
+      expect(ignored(), isNull);
+
+      events.success(true);
+      await pumpEventQueue();
+      expect(ignored(), isTrue);
+    });
+
     test('a second tap while the prompt is up asks once', () async {
       final prompt = Completer<Object?>();
       answer((_) => prompt.future);

@@ -12,10 +12,10 @@ class BatteryOptimization {
   );
 
   /// The current answer on listen, then one per change. On Xiaomi it follows
-  /// the battery saver's "No restrictions" instead of the allowlist.
-  late final Stream<bool> onChanged = _eventChannel
+  /// the battery saver's "No restrictions"; null means the policy is unavailable.
+  late final Stream<bool?> onChanged = _eventChannel
       .receiveBroadcastStream()
-      .map((event) => event as bool);
+      .map((event) => event as bool?);
 
   /// Completes once the user leaves the settings page; the answer itself
   /// arrives through [onChanged].

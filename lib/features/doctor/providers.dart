@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -58,8 +59,27 @@ final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
           .updateProfile(profile);
       return updated != null;
     }),
+    if (doctorPlugin case final plugin?) ...[
+      VpnPermissionRemedy(plugin.requestVpnPermission),
+      for (final (id, target) in const [
+        ('device.openVpnSettings', DoctorSettings.vpn),
+        ('device.openPrivateDnsSettings', DoctorSettings.privateDns),
+        ('device.openDateSettings', DoctorSettings.dateTime),
+        ('network.openCaptivePortal', DoctorSettings.captivePortal),
+      ])
+        SystemScreenRemedy(id, () => plugin.openSettings(target)),
+    ],
   ];
 });
+
+/// The kind of every remedy this platform has; a finding's remedy missing
+/// here has no button.
+final remedyKindsProvider = Provider<Map<String, FixKind>>(
+  (ref) => {
+    for (final remedy in ref.watch(diagnosticRemediesProvider))
+      remedy.id: remedy.kind,
+  },
+);
 
 final diagnosticKernelProvider = Provider<DiagnosticKernel>((ref) {
   late final DoctorKernel kernel;

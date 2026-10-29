@@ -2,12 +2,14 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/widgets/widgets.dart';
+import 'package:reclash/views/doctor/health.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension DashboardWidgetView on DashboardWidget {
   Widget get card => switch (this) {
     DashboardWidget.currentOutbound => const CurrentOutboundCard(),
+    DashboardWidget.health => const HealthCard(),
     DashboardWidget.networkSpeed => const NetworkSpeedCard(),
     DashboardWidget.outboundMode => const OutboundModeCard(),
     DashboardWidget.vpnButton => const VpnCard(),
@@ -23,6 +25,7 @@ extension DashboardWidgetView on DashboardWidget {
 
   Glyph get glyph => switch (this) {
     DashboardWidget.currentOutbound => AppGlyphs.status,
+    DashboardWidget.health => AppGlyphs.verified,
     DashboardWidget.networkSpeed => AppGlyphs.speed,
     DashboardWidget.outboundMode => AppGlyphs.split,
     DashboardWidget.vpnButton => AppGlyphs.vpn,
@@ -40,6 +43,7 @@ extension DashboardWidgetView on DashboardWidget {
     final appLocalizations = context.appLocalizations;
     return switch (this) {
       DashboardWidget.currentOutbound => appLocalizations.status,
+      DashboardWidget.health => appLocalizations.toolsObservation,
       DashboardWidget.networkSpeed => appLocalizations.networkSpeed,
       DashboardWidget.outboundMode => appLocalizations.outboundMode,
       DashboardWidget.vpnButton => 'VPN',

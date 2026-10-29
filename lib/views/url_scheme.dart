@@ -91,6 +91,7 @@ class UrlSchemeView extends StatelessWidget {
               section(l.app, const [
                 ReClashCommand.open,
                 ReClashCommand.close,
+                ReClashCommand.doctor,
               ], footer: l.urlSchemeConfirmationTip),
               section(l.urlSchemeProfiles, const [
                 ReClashCommand.add,

@@ -22,7 +22,8 @@ enum ReClashCommand {
   add('add'),
   importProfile('import'),
   installConfig('install-config'),
-  routing('routing');
+  routing('routing'),
+  doctor('doctor');
 
   const ReClashCommand(this.host);
 
@@ -134,6 +135,7 @@ UrlSchemeLink? parseUrlSchemeLink(String input) {
     throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
   }
   if (command == ReClashCommand.routing) return _parseRoutingLink(uri);
+  if (command == ReClashCommand.doctor) return _parseDoctorLink(uri);
   if (!command.isProfile) {
     if (uri.path.isNotEmpty && uri.path != '/' ||
         uri.hasQuery ||
@@ -208,6 +210,22 @@ UrlSchemeLink _parseRoutingLink(Uri uri) {
     throw const UrlSchemeException(UrlSchemeIssue.tooLarge);
   }
   return UrlSchemeLink(command: ReClashCommand.routing, payload: value);
+}
+
+final _findingId = RegExp(r'^[A-Za-z][A-Za-z0-9.]{0,63}$');
+
+/// `reclash://doctor[?check=<finding id>]`.
+UrlSchemeLink _parseDoctorLink(Uri uri) {
+  final parameters = checkedLinkParameters(uri);
+  final check = parameters['check'];
+  if ((uri.path.isNotEmpty && uri.path != '/') ||
+      uri.hasFragment ||
+      parameters.keys.any((key) => key != 'check') ||
+      check != null &&
+          (check.length != 1 || !_findingId.hasMatch(check.single))) {
+    throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
+  }
+  return UrlSchemeLink(command: ReClashCommand.doctor, payload: check?.single);
 }
 
 bool isProfileLinkInput(String input) {

@@ -505,6 +505,7 @@ enum FunctionTag {
 
 enum DashboardWidget {
   currentOutbound,
+  health,
   networkSpeed,
   outboundMode,
   vpnButton(platforms: [SupportPlatform.Android]),
@@ -525,6 +526,7 @@ enum DashboardWidget {
 enum DashboardStyle { simple, detailed }
 
 enum SimpleDashboardWidget {
+  health,
   outboundMode,
   speed,
   services,

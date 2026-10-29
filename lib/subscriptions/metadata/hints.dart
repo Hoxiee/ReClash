@@ -133,6 +133,7 @@ class ProviderAnnouncement {
 const _simpleCounterparts = {
   DashboardWidget.outboundMode: SimpleDashboardWidget.outboundMode,
   DashboardWidget.serviceStatus: SimpleDashboardWidget.services,
+  DashboardWidget.health: SimpleDashboardWidget.health,
 };
 
 class ProviderHints {

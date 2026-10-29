@@ -4,6 +4,7 @@ import 'package:reclash/common/network_cost.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/outbound_ip.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/routed_probe.dart';
@@ -16,6 +17,7 @@ import '../kernel.dart';
 import '../path.dart';
 import '../rules/device.dart';
 import '../rules/profile.dart';
+import '../snapshot.dart';
 import 'clock.dart';
 import 'scheduler.dart';
 
@@ -170,6 +172,9 @@ bool _connected(Ref ref) =>
     ref.read(isStartProvider) &&
     !ref.read(suspendProvider);
 
+T? _device<T extends Object>(DiagnosticKernel kernel, FactKey<T> key) =>
+    kernel.snapshot.at(DateTime.now()).valueOf(key);
+
 String _signed(Duration skew) =>
     '${skew.isNegative ? '−' : '+'}${skew.inSeconds.abs()} s';
 
@@ -182,8 +187,11 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
       cost: CheckCost.local,
       run: (_) async {
         final network = await createNetworkCostMonitor().read();
-        return network.cost == NetworkCost.offline
-            ? const StepCheck.fail(FailureCause.noNetwork)
+        if (network.cost == NetworkCost.offline) {
+          return const StepCheck.fail(FailureCause.noNetwork);
+        }
+        return _device(kernel, Facts.captivePortal) == true
+            ? const StepCheck.fail(FailureCause.captivePortal)
             : const StepCheck.pass();
       },
     ),
@@ -229,8 +237,15 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
     ),
     PathStep.tunnel => PathCheck(
       cost: CheckCost.local,
-      run: (_) async =>
-          _connected(ref) ? const StepCheck.pass() : const StepCheck.fail(null),
+      run: (_) async {
+        if (_connected(ref)) return const StepCheck.pass();
+        if (_device(kernel, Facts.vpnPermission) == VpnPermission.revoked) {
+          return const StepCheck.fail(FailureCause.tunnelDenied);
+        }
+        return _device(kernel, Facts.otherVpn) == true
+            ? const StepCheck.fail(FailureCause.tunnelTaken)
+            : const StepCheck.fail(null);
+      },
     ),
     PathStep.dns => PathCheck(
       cost: CheckCost.local,
@@ -239,8 +254,14 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
       run: (_) async {
         final reach = await _reach(ref, kernel);
         if (reach == null) return const StepCheck.unknown();
-        return reach.stage == 'dns'
-            ? StepCheck.fail(FailureCause.dnsFailed, detail: reach.message)
+        if (reach.stage == 'dns') {
+          return StepCheck.fail(FailureCause.dnsFailed, detail: reach.message);
+        }
+        return _device(kernel, Facts.privateDns) == PrivateDnsMode.strict
+            ? StepCheck.pass(
+                detail:
+                    'Private DNS · ${_device(kernel, Facts.privateDnsHost)}',
+              )
             : const StepCheck.pass();
       },
     ),

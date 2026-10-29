@@ -1,6 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/service_probe.dart';
@@ -13,6 +14,7 @@ import 'package:reclash/views/dashboard/probe_start_hold.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/service_status.dart';
+import 'package:reclash/widgets/service_icon.dart';
 
 /// Services a split profile keeps off the tunnel, so they read as direct
 /// until a check says where they really went.
@@ -89,7 +91,10 @@ typedef _Service = ({
 /// tunnel, home services straight, so one card shows both that the VPN works
 /// and that it broke nothing. Only exceptions get words.
 class SimpleServicesCard extends ConsumerStatefulWidget {
-  const SimpleServicesCard({super.key});
+  const SimpleServicesCard({super.key, this.random});
+
+  @visibleForTesting
+  final Random? random;
 
   @override
   ConsumerState<SimpleServicesCard> createState() => _SimpleServicesCardState();
@@ -98,6 +103,7 @@ class SimpleServicesCard extends ConsumerStatefulWidget {
 class _SimpleServicesCardState extends ConsumerState<SimpleServicesCard>
     with ProbeStartHold<SimpleServicesCard> {
   late final ServiceStatus _services;
+  late final bool _variant;
   Set<ServiceTarget> _watched = const {};
   Set<ServiceTarget> _shown = const {};
   var _syncScheduled = false;
@@ -106,6 +112,7 @@ class _SimpleServicesCardState extends ConsumerState<SimpleServicesCard>
   void initState() {
     super.initState();
     _services = ref.read(serviceStatusProvider.notifier);
+    _variant = ServiceIcon.selectVariant(widget.random);
   }
 
   @override
@@ -202,6 +209,7 @@ class _SimpleServicesCardState extends ConsumerState<SimpleServicesCard>
             ),
           if (services.isNotEmpty)
             _ServiceRow(
+              variant: _variant,
               groups: [
                 for (final (direct, title) in [
                   (false, appLocalizations.simpleServicesViaVpn),
@@ -262,11 +270,12 @@ class _SimpleServicesCardState extends ConsumerState<SimpleServicesCard>
 
 /// One row of [_maxShown] equal slots, each route's name over its tiles.
 class _ServiceRow extends StatelessWidget {
-  const _ServiceRow({required this.groups});
+  const _ServiceRow({required this.groups, required this.variant});
 
   static const _gap = 8.0;
 
   final List<({String title, List<_Service> services})> groups;
+  final bool variant;
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +307,10 @@ class _ServiceRow extends StatelessWidget {
                         for (final service in services)
                           SizedBox(
                             width: slot,
-                            child: _ServiceTile(service: service),
+                            child: _ServiceTile(
+                              service: service,
+                              variant: variant,
+                            ),
                           ),
                       ],
                     ),
@@ -313,9 +325,10 @@ class _ServiceRow extends StatelessWidget {
 }
 
 class _ServiceTile extends StatelessWidget {
-  const _ServiceTile({required this.service});
+  const _ServiceTile({required this.service, required this.variant});
 
   final _Service service;
+  final bool variant;
 
   @override
   Widget build(BuildContext context) {
@@ -342,10 +355,10 @@ class _ServiceTile extends StatelessWidget {
               child: SizedBox(
                 height: 52,
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/images/services/${service.target.icon}.svg',
-                    width: 24,
-                    height: 24,
+                  child: ServiceIcon(
+                    target: service.target,
+                    size: 24,
+                    variant: variant,
                     colorFilter: ColorFilter.mode(ink, BlendMode.srcIn),
                   ),
                 ),

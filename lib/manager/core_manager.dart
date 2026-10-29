@@ -14,6 +14,7 @@ import 'package:reclash/providers/route_state.dart';
 import 'package:reclash/providers/routing.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/features/doctor/explain.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -129,7 +130,11 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     if (log.logLevel == LogLevel.error && !_setupActive) {
       throttler.call(
         FunctionTag.coreErrorNotifier,
-        () => dialogs.showNotifier(log.payload, level: MessageLevel.error),
+        () => dialogs.showNotifier(
+          log.payload,
+          level: MessageLevel.error,
+          actionState: explainAction(log.payload),
+        ),
         duration: const Duration(seconds: 3),
         fire: true,
       );

@@ -244,6 +244,66 @@ void main() {
     });
   });
 
+  group('doctor links', () {
+    test('open the doctor with or without a finding to show', () {
+      final plain = parseUrlSchemeLink('reclash://doctor')!;
+      expect(plain.command, ReClashCommand.doctor);
+      expect(plain.payload, isNull);
+
+      final check = parseUrlSchemeLink(
+        'reclash://doctor?check=tunnel.otherVpn',
+      )!;
+      expect(check.command, ReClashCommand.doctor);
+      expect(check.payload, 'tunnel.otherVpn');
+    });
+
+    test('accept a finding id up to the length limit', () {
+      final longest = 'a' * 64;
+      expect(
+        parseUrlSchemeLink('reclash://doctor?check=$longest')!.payload,
+        longest,
+      );
+    });
+
+    test('reject a check that is not a finding id', () {
+      for (final link in [
+        'reclash://doctor?check=1bad',
+        'reclash://doctor?check=../x',
+        'reclash://doctor?check=${'a' * 65}',
+        'reclash://doctor?check=',
+        'reclash://doctor?check=tunnel.otherVpn&check=device.clockSkew',
+      ]) {
+        expect(
+          () => parseUrlSchemeLink(link),
+          throwsA(_issue(UrlSchemeIssue.invalidLink)),
+          reason: link,
+        );
+      }
+    });
+
+    test('reject unknown parameters, path segments and fragments', () {
+      for (final link in [
+        'reclash://doctor?check=tunnel.otherVpn&fix=true',
+        'reclash://doctor?fix=true',
+        'reclash://doctor/tunnel',
+        'reclash://doctor#tunnel',
+      ]) {
+        expect(
+          () => parseUrlSchemeLink(link),
+          throwsA(_issue(UrlSchemeIssue.invalidLink)),
+          reason: link,
+        );
+      }
+    });
+
+    test('belong to the ReClash scheme alone', () {
+      expect(
+        () => parseUrlSchemeLink('clash://doctor'),
+        throwsA(_issue(UrlSchemeIssue.unknownCommand)),
+      );
+    });
+  });
+
   group('buildUrlSchemeLink', () {
     test('every command round-trips through the same parser', () async {
       const url = 'https://example.com/a%2Fb?token=a+b&part=%23#anchor';

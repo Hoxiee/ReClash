@@ -75,3 +75,52 @@ class UpdateSubscriptionRemedy implements Remedy {
     }
   }
 }
+
+/// Opens a system screen; the device sensor reports the result when the user
+/// comes back, so verification waits a moment for it.
+class SystemScreenRemedy implements Remedy {
+  const SystemScreenRemedy(this.id, this._open);
+
+  @override
+  final String id;
+
+  /// False when no screen could be opened.
+  final Future<bool> Function() _open;
+
+  @override
+  FixKind get kind => FixKind.system;
+
+  @override
+  bool get undoable => false;
+
+  @override
+  Duration get settle => const Duration(seconds: 3);
+
+  @override
+  Future<void> apply(RemedyRequest request) async {
+    if (!await _open()) throw StateError('$id: no screen to open');
+  }
+}
+
+class VpnPermissionRemedy implements Remedy {
+  const VpnPermissionRemedy(this._request);
+
+  final Future<bool> Function() _request;
+
+  @override
+  String get id => 'device.requestVpnPermission';
+
+  @override
+  FixKind get kind => FixKind.system;
+
+  @override
+  bool get undoable => false;
+
+  @override
+  Duration get settle => const Duration(seconds: 3);
+
+  @override
+  Future<void> apply(RemedyRequest request) async {
+    if (!await _request()) throw StateError('VPN permission refused');
+  }
+}

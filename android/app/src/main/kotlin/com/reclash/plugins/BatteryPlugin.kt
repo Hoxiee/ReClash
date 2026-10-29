@@ -2,6 +2,7 @@ package com.reclash.plugins
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -64,6 +65,22 @@ class BatteryPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
         }
     }
 
+    private val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityResumed(activity: Activity) = publish()
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: android.os.Bundle?) {}
+
+        override fun onActivityStarted(activity: Activity) {}
+
+        override fun onActivityPaused(activity: Activity) {}
+
+        override fun onActivityStopped(activity: Activity) {}
+
+        override fun onActivitySaveInstanceState(activity: Activity, outState: android.os.Bundle) {}
+
+        override fun onActivityDestroyed(activity: Activity) {}
+    }
+
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         context = binding.applicationContext
         methodChannel = MethodChannel(binding.binaryMessenger, "${Components.PACKAGE_NAME}/battery")
@@ -103,6 +120,8 @@ class BatteryPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
         )
         events = sink
         lastPublished = ignoring
+        (context.applicationContext as Application)
+            .registerActivityLifecycleCallbacks(lifecycleCallbacks)
     }
 
     override fun onCancel(arguments: Any?) {
@@ -110,6 +129,8 @@ class BatteryPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
         events = null
         context.unregisterReceiver(allowlistReceiver)
         context.contentResolver.unregisterContentObserver(saverObserver)
+        (context.applicationContext as Application)
+            .unregisterActivityLifecycleCallbacks(lifecycleCallbacks)
     }
 
     private fun publish() {
@@ -129,7 +150,7 @@ class BatteryPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
 
     private fun requestIgnoreOptimizations(callback: (Unit) -> Unit) {
         val activity = activityBinding?.activity
-        if (activity == null || isIgnoringOptimizations()) {
+        if (activity == null || isIgnoringOptimizations() == true) {
             callback(Unit)
             return
         }
@@ -177,25 +198,23 @@ class BatteryPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAw
         false
     }
 
-    // On Xiaomi the battery saver is what counts: "No restrictions" also allowlists the
-    // app, the allowlist alone does not stop PowerKeeper freezing it, and PowerKeeper
-    // drops a running VPN from the allowlist while the list follows the user's policy.
-    private fun isIgnoringOptimizations(): Boolean {
+    // PowerKeeper policy is independent of Android's allowlist and may be unavailable.
+    private fun isIgnoringOptimizations(): Boolean? {
         if (isXiaomi) {
-            return context.packageName in noRestrictionApps()
+            return noRestrictionApps()?.contains(context.packageName)
         }
         return context.getSystemService(PowerManager::class.java)
-            ?.isIgnoringBatteryOptimizations(context.packageName) ?: false
+            ?.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     // PowerKeeper's comma-separated "No restrictions" packages, kept for user 0 only.
-    private fun noRestrictionApps(): List<String> {
+    private fun noRestrictionApps(): List<String>? {
         val packages = try {
             Settings.System.getString(context.contentResolver, MILLET_NO_RESTRICT_APP)
         } catch (_: SecurityException) {
             null
         }
-        return packages?.split(',')?.map { it.trim() }.orEmpty()
+        return packages?.split(',')?.map { it.trim() }
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

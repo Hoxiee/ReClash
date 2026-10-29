@@ -16,6 +16,8 @@ import 'package:reclash/providers/setup.dart';
 import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/views/proxies/routing_import.dart';
 import 'package:reclash/views/setup.dart';
+import 'package:reclash/features/doctor/explain.dart';
+import 'package:reclash/views/doctor/doctor.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -81,6 +83,10 @@ class ApplicationState extends ConsumerState<Application> {
   void initState() {
     super.initState();
     SystemNavigator.setFrameworkHandlesBack(true);
+    openDoctorOnCause = (cause) {
+      final context = globalState.navigatorKey.currentContext;
+      if (context != null) unawaited(showDoctorSheet(context, cause: cause));
+    };
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (globalState.navigatorKey.currentContext != null) {
         await bootstrap.attach();
@@ -144,6 +150,7 @@ class ApplicationState extends ConsumerState<Application> {
             },
             openRouting: (text, origin) =>
                 openRoutingImport(context, text: text, origin: origin),
+            openDoctor: (check) => showDoctorSheet(context, check: check),
           );
     } catch (error) {
       if (!mounted) return;

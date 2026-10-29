@@ -15,11 +15,12 @@ Finding? clockSkewRule(DiagnosticSnapshot snapshot) {
         : CheckSeverity.warning,
     cause: FailureCause.clockSkew,
     evidence: [Facts.clockSkew.id],
-    titleKey: 'doctorClockSkewTitle',
+    titleKey: 'doctorCauseClockSkew',
     detailKey: skew.isNegative
         ? 'doctorClockSkewBehind'
         : 'doctorClockSkewAhead',
     args: {'seconds': skew.inSeconds.abs()},
+    remedyIds: const ['device.openDateSettings'],
   );
 }
 

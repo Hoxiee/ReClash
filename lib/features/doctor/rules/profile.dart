@@ -21,8 +21,8 @@ Finding? subscriptionRule(DiagnosticSnapshot snapshot) {
     cause: cause,
     evidence: [Facts.subscription.id],
     titleKey: cause == FailureCause.subscriptionExpired
-        ? 'doctorSubscriptionExpiredTitle'
-        : 'doctorTrafficExhaustedTitle',
+        ? 'doctorCauseSubscriptionExpired'
+        : 'doctorCauseTrafficExhausted',
     detailKey: 'doctorSubscriptionDetail',
     args: {
       'profileId': subscription.profileId,
