@@ -169,10 +169,14 @@ and a nonempty `index.html`. The profile task serves only this managed root thro
 Both dashboards use `/ui/<flavor>/`, so changing flavor neither downloads the other panel nor reapplies the profile.
 Before opening even an existing installation, the store stages a network-only compatibility worker at `/ui/sw.js`.
 A legacy worker scoped to `/ui/` can otherwise serve its cached HTML inside either new panel, whose old hashed assets
-are absent. The compatibility worker replaces that interceptor without clearing browser storage or changing panel
-files. It reloads only the two managed entry documents after activation, toggling the directory/index path because
-Firefox treats a same-URL navigation with a fragment as a same-document move. It never awaits navigation from the
+are absent. The compatibility worker replaces that interceptor without clearing browser storage or replacing panel
+bundles. Zashboard also stages it at `/ui/zashboard/sw.js`, so its own precache cannot hide the setup bootstrap.
+Each worker reloads only the two managed entry documents within its scope after activation, toggling the directory/index
+path because Firefox treats a same-URL navigation with a fragment as a same-document move. It never awaits navigation from the
 activation event; the Core redirects `index.html` back to the canonical directory and preserves the setup fragment.
+Zashboard also gets an idempotent, staged bootstrap before its entry scripts: an explicit setup fragment clears only
+`setup/active-uuid`, preventing eager requests with a previous session's secret before URL login. Saved backends and
+other preferences remain intact; no credentials are written into the served HTML.
 
 Downloads and isolate-based verification/extraction use a fresh `.web-dashboard-work/<operation>/` directory outside
 the served tree. Size, entry count, path, link, duplicate and checksum checks precede publication. Directory replacement
@@ -196,7 +200,9 @@ HTML and required scripts/styles. Assets must remain inside the panel and return
 types; optional classic scripts with an explicit error fallback do not block readiness. Asset requests carry no
 credentials and follow no redirects. Credentials stay in the dashboard URL fragment and never enter request paths
 or error messages. Embedded navigation stays within the selected panel; external main-frame links use the system
-browser and Core API or external subframe navigation is blocked. The install action remains available as reinstall
+browser and Core API or external subframe navigation is blocked. The embedded page disables route back swipes but keeps
+app-bar and system back actions, which leave the page rather than replaying dashboard history.
+The install action remains available as reinstall
 for a current version, preserving the existing staging and rollback guarantees.
 
 ### Local Trust Boundary

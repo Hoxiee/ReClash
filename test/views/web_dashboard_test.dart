@@ -748,30 +748,52 @@ void main() {
     expect(find.text('The Core is not serving this dashboard.'), findsNothing);
   });
 
-  testWidgets('back leaves the page instead of replaying dashboard history', (
-    tester,
-  ) async {
-    final active = session();
-    await pump(tester, child: const SizedBox.shrink());
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator).last);
-    unawaited(
-      navigator
-          .push(
-            MaterialPageRoute<void>(
-              builder: (_) => WebDashboardPage(session: active),
-            ),
-          )
-          .then((_) => active.close()),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('embedded dashboard'), findsOneWidget);
-    platform.controller.hasBack = true;
-    expect(await navigator.maybePop(), isTrue);
-    await tester.pumpAndSettle();
-    expect(platform.controller.backs, 0);
-    expect(find.text('embedded dashboard'), findsNothing);
-    expect(active.isActive(), isFalse);
-  });
+  for (final desktop in [false, true]) {
+    for (final back in ['app bar', 'system']) {
+      testWidgets(
+        '${desktop ? 'desktop' : 'mobile'} blocks dashboard drag back but keeps $back back',
+        (tester) async {
+          final active = session();
+          final size = desktop ? const Size(1000, 1000) : const Size(390, 844);
+          await pump(tester, child: const SizedBox.shrink(), size: size);
+          final navigator = tester.state<NavigatorState>(
+            find.byType(Navigator).last,
+          );
+          Widget page(BuildContext context) =>
+              WebDashboardPage(session: active);
+          unawaited(
+            navigator
+                .push<void>(
+                  desktop
+                      ? CommonDesktopRoute<void>(builder: page)
+                      : CommonRoute<void>(builder: page),
+                )
+                .then((_) => active.close()),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('embedded dashboard'), findsOneWidget);
+          platform.controller.hasBack = true;
+          await tester.timedDragFrom(
+            Offset(20, size.height / 2),
+            Offset(size.width * 0.75, 0),
+            const Duration(seconds: 1),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('embedded dashboard'), findsOneWidget);
+          expect(active.isActive(), isTrue);
+          if (back == 'app bar') {
+            await tester.tap(find.byTooltip('Back'));
+          } else {
+            expect(await navigator.maybePop(), isTrue);
+          }
+          await tester.pumpAndSettle();
+          expect(platform.controller.backs, 0);
+          expect(find.text('embedded dashboard'), findsNothing);
+          expect(active.isActive(), isFalse);
+        },
+      );
+    }
+  }
 
   testWidgets('WebView load exception closes access and remains retryable', (
     tester,

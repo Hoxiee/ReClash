@@ -149,24 +149,49 @@ class WebDashboardStore {
       if (await _installation(p.join(root, flavor.name), flavor) == null) {
         throw const WebDashboardException(WebDashboardFailure.storage);
       }
-      final target = File(p.join(root, webDashboardRecoveryFileName));
-      final type = await FileSystemEntity.type(target.path, followLinks: false);
-      if (type != FileSystemEntityType.notFound &&
-          type != FileSystemEntityType.file) {
-        throw const WebDashboardException(WebDashboardFailure.storage);
+      final files = {
+        webDashboardRecoveryFileName: utf8.encode(webDashboardRecoveryWorker),
+      };
+      if (flavor == WebDashboardFlavor.zashboard) {
+        final path = p.join(flavor.name, webDashboardEntryName);
+        final entry = File(p.join(root, path));
+        if (await entry.length() > webDashboardMaxFileBytes) {
+          throw const WebDashboardException(WebDashboardFailure.storage);
+        }
+        files[path] = utf8.encode(
+          prepareZashboardHtml(await entry.readAsString()),
+        );
+        files[p.join(flavor.name, webDashboardRecoveryFileName)] =
+            files[webDashboardRecoveryFileName]!;
       }
-      final contents = utf8.encode(webDashboardRecoveryWorker);
-      if (type == FileSystemEntityType.file &&
-          await target.length() == contents.length &&
-          listEquals(await target.readAsBytes(), contents)) {
-        return;
+      for (final file in files.entries) {
+        final target = File(p.join(root, file.key));
+        final type = await FileSystemEntity.type(
+          target.path,
+          followLinks: false,
+        );
+        if (type != FileSystemEntityType.notFound &&
+            type != FileSystemEntityType.file) {
+          throw const WebDashboardException(WebDashboardFailure.storage);
+        }
+        final contents = file.value;
+        if (type == FileSystemEntityType.file &&
+            await target.length() == contents.length &&
+            listEquals(await target.readAsBytes(), contents)) {
+          continue;
+        }
+        if (work == null) {
+          final workRoot = p.join(
+            p.dirname(root),
+            webDashboardWorkDirectoryName,
+          );
+          await _requireDirectory(workRoot, create: true);
+          work = await Directory(workRoot).createTemp('hosting-');
+        }
+        final next = File(p.join(work.path, p.basename(file.key)));
+        await next.writeAsBytes(contents, flush: true);
+        await next.rename(target.path);
       }
-      final workRoot = p.join(p.dirname(root), webDashboardWorkDirectoryName);
-      await _requireDirectory(workRoot, create: true);
-      work = await Directory(workRoot).createTemp('recovery-');
-      final next = File(p.join(work.path, webDashboardRecoveryFileName));
-      await next.writeAsBytes(contents, flush: true);
-      await next.rename(target.path);
     } on WebDashboardException {
       rethrow;
     } catch (_) {

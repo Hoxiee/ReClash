@@ -68,6 +68,30 @@ void main() {
   setUp(() => home = Directory.systemTemp.createTempSync('reclash-dashboard-'));
   tearDown(() => home.deleteSync(recursive: true));
 
+  group('dashboard startup', () {
+    for (final prefix in [
+      '<!doctype html><html><head>',
+      '<!DOCTYPE html><html><HEAD data-panel="zashboard">',
+      '<!doctype html>',
+      '',
+    ]) {
+      test('setup bootstrap precedes dashboard scripts with $prefix', () {
+        final html = '$prefix<script type="module" src="./app.js"></script>';
+        final prepared = prepareZashboardHtml(html);
+        expect(prepared, startsWith(prefix));
+        expect(
+          prepared.indexOf('id="reclash-zashboard-setup"'),
+          lessThan(prepared.indexOf('type="module"')),
+        );
+        expect(
+          prepared,
+          endsWith('<script type="module" src="./app.js"></script>'),
+        );
+        expect(prepareZashboardHtml(prepared), prepared);
+      });
+    }
+  });
+
   group('dashboard addresses', () {
     for (final flavor in WebDashboardFlavor.values) {
       test('${flavor.name} receives escaped credentials in the fragment', () {
@@ -466,7 +490,12 @@ void main() {
         await recovery.writeAsString('old cached dashboard');
         await store.prepareForOpen(flavor);
         expect(await recovery.readAsString(), webDashboardRecoveryWorker);
-        expect(entry(WebDashboardFlavor.zashboard), '<html>old</html>');
+        expect(
+          entry(WebDashboardFlavor.zashboard),
+          flavor == WebDashboardFlavor.zashboard
+              ? prepareZashboardHtml('<html>old</html>')
+              : '<html>old</html>',
+        );
         expect(entry(WebDashboardFlavor.metacubexd), '<html>old</html>');
         expect(phases, isEmpty);
         noWork();
@@ -496,6 +525,46 @@ void main() {
         noWork();
       },
     );
+    test(
+      'opening zashboard prepares login even with a current worker',
+      () async {
+        _seed(home, WebDashboardFlavor.zashboard);
+        final root = p.join(home.path, webDashboardDirectoryName);
+        final page = File(p.join(root, 'zashboard', webDashboardEntryName));
+        const html =
+            '<!doctype html><html><head>'
+            '<script type="module" src="./assets/app.js"></script>'
+            '</head><body>dashboard</body></html>';
+        await page.writeAsString(html);
+        final recovery = File(p.join(root, webDashboardRecoveryFileName));
+        await recovery.writeAsString(webDashboardRecoveryWorker);
+        final panelWorker = File(
+          p.join(root, 'zashboard', webDashboardRecoveryFileName),
+        );
+        await panelWorker.writeAsString('old precached index');
+
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+
+        expect(await panelWorker.readAsString(), webDashboardRecoveryWorker);
+        expect(await page.readAsString(), prepareZashboardHtml(html));
+        expect(
+          (await store.installations())[WebDashboardFlavor.zashboard]?.version,
+          'old',
+        );
+        expect(phases, isEmpty);
+        noWork();
+        final preserved = DateTime.utc(2020);
+        await page.setLastModified(preserved);
+        await recovery.setLastModified(preserved);
+        await panelWorker.setLastModified(preserved);
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+        expect(await page.lastModified(), preserved.toLocal());
+        expect(await recovery.lastModified(), preserved.toLocal());
+        expect(await panelWorker.lastModified(), preserved.toLocal());
+        noWork();
+      },
+    );
+
     test(
       'recovery replaces malformed worker contents of the same size',
       () async {
@@ -527,28 +596,31 @@ void main() {
         noWork();
       },
     );
-    test('recovery refuses symlinks without changing their target', () async {
-      _seed(home, WebDashboardFlavor.zashboard);
-      final outside = File(p.join(home.path, 'untouched'));
-      await outside.writeAsString('keep');
-      final link = Link(
-        p.join(
-          home.path,
-          webDashboardDirectoryName,
-          webDashboardRecoveryFileName,
-        ),
-      );
-      await link.create(outside.path);
-      await expectLater(
-        store.prepareForOpen(WebDashboardFlavor.zashboard),
-        throwsA(_failure(WebDashboardFailure.storage)),
-      );
-      expect(await outside.readAsString(), 'keep');
-      expect(await link.exists(), isTrue);
-      await link.delete();
-      await store.prepareForOpen(WebDashboardFlavor.zashboard);
-      noWork();
-    }, skip: Platform.isWindows);
+    for (final directory in ['', 'zashboard']) {
+      test('recovery refuses symlinks in /ui/$directory', () async {
+        _seed(home, WebDashboardFlavor.zashboard);
+        final outside = File(p.join(home.path, 'untouched'));
+        await outside.writeAsString('keep');
+        final link = Link(
+          p.join(
+            home.path,
+            webDashboardDirectoryName,
+            directory,
+            webDashboardRecoveryFileName,
+          ),
+        );
+        await link.create(outside.path);
+        await expectLater(
+          store.prepareForOpen(WebDashboardFlavor.zashboard),
+          throwsA(_failure(WebDashboardFailure.storage)),
+        );
+        expect(await outside.readAsString(), 'keep');
+        expect(await link.exists(), isTrue);
+        await link.delete();
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+        noWork();
+      }, skip: Platform.isWindows);
+    }
 
     test('publishes verified staging and preserves the other panel', () async {
       _seed(home, WebDashboardFlavor.zashboard);

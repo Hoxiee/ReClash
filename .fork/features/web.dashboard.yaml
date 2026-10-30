@@ -5,12 +5,13 @@ risk: critical
 must:
   storage: Pinned SHA-256 releases are bounded, validated and staged outside the served tree; unsafe archives, cancellation and failed publication preserve the previous installation or retain its recovery copy.
   panels: Each dashboard has independent managed files and metadata; switching flavor neither downloads another panel nor reapplies the profile.
-  browser-recovery: Opening an existing installation stages a network-only parent worker that recovers only managed dashboard documents from legacy /ui/ caches without deleting browser settings or panel files.
+  browser-recovery: Opening an existing installation stages scoped network-only workers that recover managed dashboard documents from legacy /ui/ and Zashboard caches without deleting browser settings or replacing panel bundles.
+  startup-auth: Managed Zashboard setup clears only the active backend selector before dashboard scripts start; saved backends and preferences survive, and credentials remain in URL fragments.
   readiness: Opening verifies the authenticated API, HTML and required same-panel scripts and styles under one deadline; missing, empty or mistyped assets never count as ready.
   access: Dashboard controller access is runtime-only, loopback and authenticated; saved controller settings win and Safe Mode never opens access.
   ownership: Embedded access belongs to its page; browser handoff keeps that owner until explicit end or exit; removal ends only owners of the removed panel.
   failure: Failed apply, probe, launch, cancellation, disposal and stale results cannot retain unsuccessful access or close a newer session; every operation resets progress.
-  navigation: The dashboard remains a searchable child of General beside the external controller, not a root Tools tile; embedded navigation cannot enter Core API or external subframes.
+  navigation: The dashboard remains a searchable child of General beside the external controller, not a root Tools tile; embedded navigation cannot enter Core API or external subframes, and back swipes are disabled without blocking explicit back actions.
   interface: Installation, update, delete, cancel and access actions use the app bar; loading, unavailable Core or profile, retry and deletion confirmation remain usable on phone widths.
   localization: Dashboard messages belong to one web.dashboard ARB fragment in every supported locale.
 watch:
@@ -50,7 +51,7 @@ watch:
   - test/views/web_dashboard_test.dart
   - test/views/tools_catalog_test.dart
 checks:
-  web-dashboard-storage: [storage, panels, browser-recovery, readiness]
+  web-dashboard-storage: [storage, panels, browser-recovery, startup-auth, readiness]
   web-dashboard-access: [panels, access, ownership, failure, browser-recovery]
   web-dashboard-ui: [navigation, interface, failure]
   localization: [localization]

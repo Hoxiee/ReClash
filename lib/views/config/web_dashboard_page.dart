@@ -203,57 +203,66 @@ class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
     final failure = _failure;
     final controller = _controller;
     final retryable = active || failure != null;
-    return CommonScaffold(
-      title: _session.flavor.label,
-      iconActions: [
-        IconButtonData(
-          glyph: AppGlyphs.refresh,
-          tooltip: l.webDashboardReload,
-          onPressed: retryable && !_loading ? () => unawaited(_reload()) : null,
-        ),
-        IconButtonData(
-          glyph: AppGlyphs.openExternal,
-          tooltip: l.webDashboardOpenInBrowser,
-          isLoading: _launching,
-          onPressed: active && !_launching ? () => unawaited(_browser()) : null,
-        ),
-      ],
-      body: AppBarClearance(
-        child: !active || failure != null
-            ? NullStatus(
-                illustration: NullStatusIllustration.error,
-                label: failure != null
-                    ? l.webDashboard
-                    : l.webDashboardAccessEnded,
-                description: failure?.label ?? l.webDashboardNoAccess,
-                action: retryable
-                    ? FilledButton.tonal(
-                        onPressed: () => unawaited(_reload()),
-                        child: Text(l.webDashboardReload),
-                      )
-                    : null,
-              )
-            : SafeArea(
-                top: false,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (controller != null)
-                      WebViewWidget(controller: controller),
-                    AnimatedSwitcher(
-                      duration: context.motionDuration(
-                        const Duration(milliseconds: 200),
+    return CommonPopScope(
+      onPop: (_) => true,
+      child: CommonScaffold(
+        title: _session.flavor.label,
+        iconActions: [
+          IconButtonData(
+            glyph: AppGlyphs.refresh,
+            tooltip: l.webDashboardReload,
+            onPressed: retryable && !_loading
+                ? () => unawaited(_reload())
+                : null,
+          ),
+          IconButtonData(
+            glyph: AppGlyphs.openExternal,
+            tooltip: l.webDashboardOpenInBrowser,
+            isLoading: _launching,
+            onPressed: active && !_launching
+                ? () => unawaited(_browser())
+                : null,
+          ),
+        ],
+        body: AppBarClearance(
+          child: !active || failure != null
+              ? NullStatus(
+                  illustration: NullStatusIllustration.error,
+                  label: failure != null
+                      ? l.webDashboard
+                      : l.webDashboardAccessEnded,
+                  description: failure?.label ?? l.webDashboardNoAccess,
+                  action: retryable
+                      ? FilledButton.tonal(
+                          onPressed: () => unawaited(_reload()),
+                          child: Text(l.webDashboardReload),
+                        )
+                      : null,
+                )
+              : SafeArea(
+                  top: false,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (controller != null)
+                        WebViewWidget(controller: controller),
+                      AnimatedSwitcher(
+                        duration: context.motionDuration(
+                          const Duration(milliseconds: 200),
+                        ),
+                        child: _loading
+                            ? ColoredBox(
+                                color: _background!,
+                                child: const Center(
+                                  child: CommonCircleLoading(),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                      child: _loading
-                          ? ColoredBox(
-                              color: _background!,
-                              child: const Center(child: CommonCircleLoading()),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
