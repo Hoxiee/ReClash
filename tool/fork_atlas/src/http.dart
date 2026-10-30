@@ -97,8 +97,8 @@ class AtlasServer {
             'assets/model.mjs',
             ContentType('text', 'javascript', charset: 'utf-8'),
           ),
-          '/assets/style.css': (
-            '../assets/style.css',
+          '/fork/assets/site.css': (
+            'assets/site.css',
             ContentType('text', 'css', charset: 'utf-8'),
           ),
         };

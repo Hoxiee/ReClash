@@ -408,32 +408,34 @@ while `v<pubspec version>` is still tagged it refuses to collect anything and th
 
 ### Website
 
-`site/` is the GitHub Pages site: a static page that renders `CHANGELOG.md` and the download links in the browser, and
-works as is for local previews. `tool/build_site.sh [dir]` assembles it with the preview images, the app icon,
-`CHANGELOG.md` read at the latest release tag, and a `release.json` of asset names, sizes and digests fetched through
-`gh`. Without `gh` access the page falls back to the newest version in `CHANGELOG.md` and lists the files without sizes.
-It then runs `tool/render_site.mjs` (Node), which writes the English page and a `zh/` copy for search engines: page
-text, the first changelog releases, canonical and `hreflang` links, JSON-LD and `sitemap.xml`, all from the strings,
-changelog parser and release markup in `site/assets/shared.js`, plus the GitHub star count from `release.json` so the
-nav does not grow when the page loads. `SITE_URL` overrides the published URL these point at.
-On the built site each URL keeps its language: the language button links to the other page and carries the section in
-view, the chosen platform and the changelog search. Only the English root sends readers who chose or prefer Chinese on
-to `zh/`, unless its URL carries `?lang=en`: the button on `zh/` links there with it, so getting back to English never
-depends on browser storage. A project site cannot serve the `robots.txt` that would announce the sitemap, so submit
-`sitemap.xml` in Google Search Console and Bing Webmaster Tools once.
+`site/` is the pinned `Hoxiee/reclash-site` submodule. Its Nuxt site is built and deployed by that repository, not by the
+application release jobs. Public behavior changes include the affected website documentation; read
+[site-documentation.md](site-documentation.md) for canonical sources, snapshot synchronization and separate commit/push
+boundaries. Read `site/AGENTS.md` before editing website code.
 
 ```bash
-tool/build_site.sh && python3 -m http.server -d build/site
+git submodule update --init -- site
+npm --prefix site ci
+node tool/site_docs.mjs --sync
+node tool/site_docs.mjs --check
+npm --prefix site run check
+npm --prefix site run test:e2e
 ```
 
-The page's look is deliberate: low-saturation flat colour, no blur, glow, glass or soft shadow, and motion that follows
-the logo's parallel bars, tilted 20° from vertical. `site/assets/field.js` draws the hero's capsules on that lattice
-with the glyph's own proportions. Text that sits
-inside the hero has to be listed in `wireField` in `app.js`, or the capsules run behind it.
+`tool/build_site.sh` delegates to the Nuxt build and produces `site/.output/public` without deleting a caller-supplied
+output path. Preview the generated site with `npm --prefix site run preview`; live development uses
+`npm --prefix site run dev`. Neither command deploys it. A locally committed website revision must be pushed under
+separate authority before another checkout or CI can fetch the application's new gitlink.
 
-`.github/workflows/pages.yaml` deploys it after every successful stable tag build and on pushes to `main` that touch the
-site, in the public repository only; its Pages source has to be set to GitHub Actions once. The file names come from the
-release matrix in `build.yaml`, so a renamed artifact needs the same change in `buildsFor` in `site/assets/app.js`.
+Fork Atlas is a separate, loopback-only maintenance tool, not public website content:
+
+```bash
+dart run tool/fork_atlas/server.dart
+node --test tool/fork_atlas/test/model_test.mjs
+flutter test tool/fork_atlas/test/server_test.dart
+```
+
+Its read boundaries and optional browser smoke check are documented in `tool/fork_atlas/README.md`.
 
 ## Verify
 

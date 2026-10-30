@@ -49,6 +49,8 @@ class Registry {
             'go',
             'cargo',
             'bash',
+            'node',
+            'npm',
           ].contains(argv.first)) {
         reject('Unapproved executable: ${entry.key}');
       }

@@ -1,18 +1,18 @@
 # Fork Atlas
 
-A local, read-only maintenance workspace for ReClash, using the release site's design tokens and the existing Dart fork registry.
+A local, read-only maintenance workspace for ReClash, using its own static assets and the existing Dart fork registry.
 
 ## Run
 
 From the repository root, with the root Flutter dependencies already resolved:
 
 ```bash
-dart run site/fork/server.dart
+dart run tool/fork_atlas/server.dart
 ```
 
 Open `http://127.0.0.1:8788/fork/`. Use `--port 8789` for another port, or `--root /path/to/ReClash` to inspect another checkout. Stop the server with Ctrl+C.
 
-The release landing page is unchanged. Opening the Atlas HTML through a static server cannot read Git: the local Dart server supplies a session token and the read-only API. No repository snapshots or receipts are embedded in browser source or written under `site/`.
+Opening the Atlas HTML through a static server cannot read Git: the local Dart server supplies a session token and the read-only API. No repository snapshots or receipts are embedded in browser source or written into static assets.
 
 ## Workspace
 
@@ -35,16 +35,16 @@ Atlas never fetches upstream, runs mapped checks, prepares or accepts a sync, ed
 ## Verify
 
 ```bash
-node --test site/fork/test/model_test.mjs
-flutter test site/fork/test/server_test.dart
-dart format --output=none --set-exit-if-changed site/fork/server.dart site/fork/src site/fork/test
-dart analyze site/fork
+node --test tool/fork_atlas/test/model_test.mjs
+flutter test tool/fork_atlas/test/server_test.dart
+dart format --output=none --set-exit-if-changed tool/fork_atlas/server.dart tool/fork_atlas/src tool/fork_atlas/test
+dart analyze tool/fork_atlas
 ```
 
 The Dart tests use disposable Git repositories, not the live maintenance baseline. Browser smoke checks require an existing Playwright installation and a running local Atlas server:
 
 ```bash
-node site/fork/test/browser.mjs \
+node tool/fork_atlas/test/browser.mjs \
   --url http://127.0.0.1:8788/fork/ \
   --playwright /path/to/playwright/index.mjs \
   --out /tmp/reclash-atlas-browser

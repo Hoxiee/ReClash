@@ -1,9 +1,12 @@
 SHELL := /bin/bash
 
-.PHONY: help submodules prepare analyze test run
+.PHONY: help submodules prepare analyze test run site-sync site-check site-build
 
 help:
-	@echo 'make submodules  # update git submodules (mihomo core sources)'
+	@echo 'make submodules  # initialize the pinned core and website repositories'
+	@echo 'make site-sync   # synchronize website provider data and JSON schemas'
+	@echo 'make site-check  # verify website data and documentation source parity'
+	@echo 'make site-build  # build the Nuxt website without deploying it'
 	@echo 'make prepare     # resolve dependencies and generate app sources'
 	@echo 'make analyze     # prepare and analyze the application'
 	@echo 'make test        # prepare and run the root test suite'
@@ -26,3 +29,13 @@ test:
 
 run:
 	dart tool/prepare.dart -- run --dart-define=SAFE_MODE=true
+
+site-sync:
+	node tool/site_docs.mjs --sync
+
+site-check:
+	node --test test/tool/site_docs_test.mjs
+	node tool/site_docs.mjs --check
+
+site-build:
+	bash tool/build_site.sh

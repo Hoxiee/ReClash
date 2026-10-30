@@ -149,20 +149,14 @@ void main() {
     );
   });
 
-  test('website branding uses the same current glyph and icon', () {
-    final site = File('tool/build_site.sh').readAsStringSync();
-    expect(site, contains('assets/images/icon.png'));
-    expect(site, contains('assets_source/images/icon/glyph.svg'));
-    final glyph = File(
-      'assets_source/images/icon/glyph.svg',
-    ).readAsStringSync();
-    final paths = RegExp(
-      r'<path\b[^>]*\bd="([^"]+)"',
-    ).allMatches(glyph).map((match) => match[1]!);
-    final html = File('site/index.html').readAsStringSync();
-    for (final path in paths) {
-      expect('d="$path"'.allMatches(html), hasLength(2));
-    }
+  test('the website is owned by the pinned ReClash site repository', () {
+    final modules = File('.gitmodules').readAsStringSync();
+    expect(modules, contains('[submodule "site"]'));
+    expect(modules, contains('path = site'));
+    expect(modules, contains('https://github.com/Hoxiee/reclash-site.git'));
+    final builder = File('tool/build_site.sh').readAsStringSync();
+    expect(builder, contains(r'npm --prefix "$root/site" run build'));
+    expect(builder, isNot(contains('render_site.mjs')));
     final generator = File(
       'tool/generate_status_icons.dart',
     ).readAsStringSync();

@@ -16,7 +16,7 @@ Future<void> main(List<String> arguments) async {
     final options = parser.parse(arguments);
     if (options.flag('help')) {
       stdout.writeln(
-        'Fork Atlas — a local read-only maintenance workspace.\n\nUsage: dart run site/fork/server.dart [options]\n${parser.usage}',
+        'Fork Atlas — a local read-only maintenance workspace.\n\nUsage: dart run tool/fork_atlas/server.dart [options]\n${parser.usage}',
       );
       return;
     }

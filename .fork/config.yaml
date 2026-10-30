@@ -8,6 +8,18 @@ vendor: vendor/flclash
 budget: 6144
 owned: [CHANGELOG.md, changelog.json]
 checks:
+  site-docs:
+    argv: [node, tool/site_docs.mjs, --check]
+  site-docs-tooling:
+    argv: [node, --test, test/tool/site_docs_test.mjs]
+  site-build:
+    argv: [npm, --prefix, site, run, check]
+  site-browser:
+    argv: [npm, --prefix, site, run, 'test:e2e']
+  fork-atlas-model:
+    argv: [node, --test, tool/fork_atlas/test/model_test.mjs]
+  fork-atlas-server:
+    argv: [flutter, test, tool/fork_atlas/test/server_test.dart]
   database-compatibility:
     argv: [flutter, test, test/database/migration_v1_to_v2_test.dart, test/common/backup_task_test.dart, test/providers/backup_action_test.dart]
   code-generation:

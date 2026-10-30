@@ -74,6 +74,30 @@ release:
     path: android/app/build.gradle.kts
     pattern: '^\s*applicationId\s*=.*$'
 paths:
+  'site':
+    kind: platform
+    checks: [site-docs, site-build, site-browser]
+    reason: The pinned Nuxt website requires its own source-parity, static-build and browser checks.
+  'site/**':
+    kind: platform
+    checks: [site-docs, site-build, site-browser]
+    reason: Website code belongs to the separate site repository, not the Flutter test selector.
+  'docs/**':
+    kind: documentation
+    checks: [site-docs, site-build]
+    reason: Public documentation must match its website snapshot and render successfully.
+  'tool/site_docs.mjs':
+    kind: platform
+    checks: [site-docs-tooling, site-docs]
+    reason: Node integration checks verify website exports and application documentation snapshots.
+  'test/tool/site_docs_test.mjs':
+    kind: platform
+    checks: [site-docs-tooling]
+    reason: Source-parity tooling is tested with Node in disposable directories.
+  'tool/fork_atlas/**':
+    kind: platform
+    checks: [fork-atlas-model, fork-atlas-server]
+    reason: The local maintenance viewer has separate Node model and Dart server tests.
   '.agents/**':
     kind: documentation
     checks: [fork-tests]

@@ -324,7 +324,7 @@ void main() {
     setUp(() async {
       server = AtlasServer(
         root: fixture.directory.path,
-        siteRoot: p.join(Directory.current.path, 'site/fork'),
+        siteRoot: p.join(Directory.current.path, 'tool/fork_atlas'),
       );
       await server.start(port: 0);
       client = HttpClient();
@@ -400,6 +400,7 @@ void main() {
         );
         expect((await request('/fork/assets/model.mjs')).$1, 200);
         expect((await request('/fork/assets/glyph.svg')).$1, 200);
+        expect((await request('/fork/assets/site.css')).$1, 200);
       },
     );
   });

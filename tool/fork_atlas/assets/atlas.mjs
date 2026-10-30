@@ -59,7 +59,7 @@ const noticeCopy = {
 };
 
 async function api(endpoint, query = {}) {
-  if (token === '__ATLAS_TOKEN__') throw new Error('Откройте Atlas через локальный сервер: dart run site/fork/server.dart');
+  if (token === '__ATLAS_TOKEN__') throw new Error('Open Atlas through its local server: dart run tool/fork_atlas/server.dart');
   const url = new URL(`/api/${endpoint}`, location.origin);
   for (const [key, value] of Object.entries(query)) if (value !== null && value !== undefined) url.searchParams.set(key, value);
   const response = await fetch(url, { headers: { 'X-Atlas-Token': token }, cache: 'no-store' });

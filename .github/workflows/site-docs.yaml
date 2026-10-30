@@ -1,0 +1,51 @@
+name: Website documentation
+
+on:
+  push:
+    paths:
+      - 'site'
+      - '.gitmodules'
+      - 'docs/**'
+      - 'provider_standard.g.json'
+      - 'provider-policy.schema.json'
+      - 'rcx-profile.schema.json'
+      - 'tool/site_docs.mjs'
+      - 'test/tool/site_docs_test.mjs'
+      - '.github/workflows/site-docs.yaml'
+  pull_request:
+    paths:
+      - 'site'
+      - '.gitmodules'
+      - 'docs/**'
+      - 'provider_standard.g.json'
+      - 'provider-policy.schema.json'
+      - 'rcx-profile.schema.json'
+      - 'tool/site_docs.mjs'
+      - 'test/tool/site_docs_test.mjs'
+      - '.github/workflows/site-docs.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init -- site
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: site/.node-version
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: node --test test/tool/site_docs_test.mjs
+      - run: node tool/site_docs.mjs --check
+      - run: npm ci
+        working-directory: site
+      - run: npm run check
+        working-directory: site
+      - run: npx playwright install --with-deps chromium
+        working-directory: site
+      - run: npm run test:e2e
+        working-directory: site

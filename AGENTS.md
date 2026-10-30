@@ -17,6 +17,8 @@ Read these only when the task touches their area:
   local plugins.
 - [.agents/setting-changes.md](.agents/setting-changes.md): whether a changed setting is patched live, re-applies the
   profile, or asks for an Android VPN restart.
+- [.agents/site-documentation.md](.agents/site-documentation.md): the website submodule, documentation updates alongside
+  public behavior changes, source snapshots, schema synchronization, and website checks.
 - [.agents/surfaces.md](.agents/surfaces.md): fill levels, selection and status colors, and the few borders that
   remain, for any change to how a surface is colored.
 - [.agents/agent-config.md](.agents/agent-config.md): how to choose between `AGENTS.md`, `.agents`, skills, Codex config,
@@ -34,6 +36,10 @@ Read these only when the task touches their area:
 - The request sets the scope. A pre-existing bug, cleanup, or refactor the task did not ask for is a follow-up in the
   summary, not part of the change. Edit a file surgically when a rewrite would give the same result, keep scratch checks
   out of the repository, and commit tests only where the task asks for them or the neighbouring code already keeps them.
+- Public behavior changes include the affected website documentation in the same task. Read `.agents/site-documentation.md`
+  and `site/AGENTS.md`; keep canonical documents, website snapshots and exported schemas aligned. If documentation is
+  unaffected or a source commit is not authorized, report that explicitly rather than silently leaving the site stale.
+  The site is a separate repository: committing or pushing the application never authorizes a website commit or deploy.
 - Comments are allowed and sometimes necessary; excess is the problem. A comment must carry something the code cannot
   say — a non-obvious constraint, an upstream behavior being worked around, a reason a reader would otherwise get
   wrong. Never restate what the code does, narrate the change you just made, record what the code used to be, or

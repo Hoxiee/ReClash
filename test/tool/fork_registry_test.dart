@@ -45,6 +45,23 @@ void main() {
     f.metadata();
     expect(() => f.registry, throwsA(isA<ForkException>()));
   });
+  test(
+    'website checks admit Node tools without allowing arbitrary executables',
+    () {
+      for (final executable in ['node', 'npm']) {
+        (f.config['checks'] as Map)['website'] = {
+          'argv': [executable, '--version'],
+        };
+        f.metadata();
+        expect(f.registry.checks, contains('website'));
+      }
+      (f.config['checks'] as Map)['website'] = {
+        'argv': ['unapproved-command'],
+      };
+      f.metadata();
+      expect(() => f.registry, throwsA(isA<ForkException>()));
+    },
+  );
   test('rejects cycles and unknown check groups', () {
     f.feature['deps'] = ['feature.demo'];
     f.metadata();
