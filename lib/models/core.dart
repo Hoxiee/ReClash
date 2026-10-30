@@ -13,6 +13,11 @@ abstract class SetupParams with _$SetupParams {
     @Default(false) @JsonKey(name: 'skip-cert-verify') bool skipCertVerify,
     @JsonKey(includeIfNull: false) SetupBase? base,
     @JsonKey(includeIfNull: false) RcxUserLayer? rcx,
+    @JsonKey(name: 'policy-path', includeIfNull: false) String? policyPath,
+    @JsonKey(name: 'no-global', includeIfNull: false) bool? noGlobal,
+    @JsonKey(name: 'vpn-enabled', includeIfNull: false) bool? vpnEnabled,
+    @JsonKey(name: 'excluded-apps', includeIfNull: false)
+    List<String>? excludedApps,
   }) = _SetupParams;
 
   factory SetupParams.fromJson(Map<String, dynamic> json) =>
@@ -80,6 +85,7 @@ abstract class VpnOptions with _$VpnOptions {
     required bool ipv6,
     required bool dnsHijacking,
     required AccessControlProps accessControlProps,
+    @Default([]) List<String> requiredExcludedApps,
     required bool allowBypass,
     required bool systemProxy,
     required List<String> bypassDomain,
@@ -99,6 +105,18 @@ abstract class VpnOptions with _$VpnOptions {
 }
 
 extension VpnOptionsExt on VpnOptions {
+  bool excludesRequiredApps(Set<String> packages) {
+    if (packages.isEmpty) return true;
+    if (!enable) return false;
+    final remaining = packages.difference(requiredExcludedApps.toSet());
+    if (remaining.isEmpty) return true;
+    final access = accessControlProps;
+    if (!access.enable) return false;
+    return access.mode == AccessControlMode.acceptSelected
+        ? !access.acceptList.any(remaining.contains)
+        : access.rejectList.toSet().containsAll(remaining);
+  }
+
   /// Settings that require rebuilding the Android VPN, excluding live policy.
   VpnOptions get effective {
     if (!enable) {

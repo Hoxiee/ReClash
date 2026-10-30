@@ -189,10 +189,17 @@ func applyConfig(params *SetupParams) error {
 	configMu.Lock()
 	defer configMu.Unlock()
 
+	policy, err := loadProviderPolicy(params)
+	if err != nil {
+		return blockProviderPolicy(err)
+	}
 	setTestURL(params.TestURL)
 	skipCertVerify.Store(params.SkipCertVerify)
 	load, err := loadSetupConfig(params)
 	cfg := load.cfg
+	if err != nil && (policy.enforced() || activeProviderPolicy.Load().enforced()) {
+		return blockProviderPolicy(err)
+	}
 	if err != nil {
 		// The fallback is what keeps the listeners serving while the host
 		// reports the error, but it applies a config with no proxies in it.
@@ -210,6 +217,9 @@ func applyConfig(params *SetupParams) error {
 		cfg = fallback
 	}
 
+	if policyErr := installProviderPolicy(policy); policyErr != nil {
+		return blockProviderPolicy(policyErr)
+	}
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
 	tunnel.SetMode(rcxSetUserMode(cfg.General.Mode))
@@ -250,6 +260,9 @@ func updateConfig(params *UpdateParams) error {
 	}
 	routeChange := routeUnchanged
 	if params.Mode != nil {
+		if *params.Mode == tunnel.Global && !activeProviderPolicy.Load().allowsGlobal() {
+			return errors.New("provider policy does not allow GLOBAL; select an allowed node or use Rule mode")
+		}
 		if general.Mode != *params.Mode {
 			routeChange = routeMoved
 		}

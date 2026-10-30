@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count} soat qoldi",
   "promoEnded": "Tugadi",
   "promoRenew": "Uzaytirish",
-  "promoConverted": "{name}: obuna faol"
+  "promoConverted": "{name}: obuna faol",
+  "providerPolicyRequired": "Provayder talabi",
+  "providerPolicyAppsNotice": "Bu obuna majburiy chiqarilgan ilovalarni barcha rejimlarda VPN tashqarisida saqlaydi. Ular bevosita ulanishingiz va haqiqiy IP manzilingizdan foydalanishi mumkin.",
+  "providerPolicyVpnRequired": "Bu obuna Android VPN ilovalarini chiqarishni talab qiladi. Android VPN rejimidan foydalaning yoki boshqa obunani tanlang.",
+  "providerPolicyRestartRequired": "Provayder ilovalarning majburiy chiqarish ro‘yxatini o‘zgartirdi. Bu obunadan foydalanishdan oldin VPN’ni qayta ishga tushiring.",
+  "providerPolicyGlobalDenied": "Provayder bu tugunga Global rejimda ruxsat bermaydi. Ruxsat etilgan tugunni yoki qoidalar rejimini tanlang."
 }

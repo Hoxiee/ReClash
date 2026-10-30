@@ -29,6 +29,7 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/profiles/edit.dart';
+import 'package:reclash/widgets/provider_setting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -520,6 +521,39 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'profile details never offer returning settings to the provider',
+    (tester) async {
+      final profile = _profile(snapshot: _snapshot());
+      await pumpProfile(
+        tester,
+        profile,
+        size: const Size(1000, 1800),
+        child: ProviderScope(
+          overrides: [
+            providerSettingsReturnAvailableProvider.overrideWithValue(true),
+          ],
+          child: const ProfileDetailSheet(),
+        ),
+      );
+      final container = globalState.container;
+      container.listen(currentProfileIdProvider, (_, _) {});
+      container.read(currentProfileIdProvider.notifier).value = profile.id;
+      await tester.pump();
+
+      expect(find.text('Example provider'), findsOneWidget);
+      expect(find.text('Premium account'), findsOneWidget);
+      expect(
+        find.text(currentAppLocalizations.providerSettingsReturnAll),
+        findsNothing,
+      );
+      expect(
+        find.text(currentAppLocalizations.providerSettingsReturnAllDesc),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('hideUrl does not prevent editing the subscription URL', (
     tester,

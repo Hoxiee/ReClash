@@ -59,6 +59,79 @@ void main() {
     expect(props.acceptList, isEmpty);
   });
 
+  for (final mode in AccessControlMode.values) {
+    for (final enabled in [false, true]) {
+      test('required exclusions win in $mode with access enabled=$enabled', () {
+        const required = ProviderApps(
+          included: {'com.bank.app', 'com.work.app'},
+          requiredExcluded: {'com.bank.app'},
+        );
+        final original = AccessControlProps(
+          enable: enabled,
+          mode: mode,
+          acceptList: ['com.bank.app', 'com.user.app'],
+          rejectReleased: ['com.bank.app'],
+        );
+        final effective = original.withProviderApps(required);
+        expect(effective.enable, isTrue);
+        if (enabled && mode == AccessControlMode.acceptSelected) {
+          expect(effective.acceptList, ['com.user.app', 'com.work.app']);
+        } else {
+          expect(effective.mode, AccessControlMode.rejectSelected);
+          expect(effective.rejectList, contains('com.bank.app'));
+        }
+        expect(original.acceptList, contains('com.bank.app'));
+        expect(
+          original.withProviderApps(const ProviderApps()).acceptList,
+          contains('com.bank.app'),
+        );
+      });
+    }
+  }
+
+  test('the VPN checks actual exclusions, not a planned provider list', () {
+    const running = VpnOptions(
+      enable: true,
+      port: 0,
+      ipv6: false,
+      dnsHijacking: false,
+      accessControlProps: AccessControlProps(),
+      allowBypass: false,
+      systemProxy: false,
+      bypassDomain: [],
+      stack: 'gvisor',
+    );
+    expect(running.excludesRequiredApps({'com.bank.app'}), isFalse);
+    expect(
+      running
+          .copyWith(requiredExcludedApps: ['com.bank.app'])
+          .excludesRequiredApps({'com.bank.app'}),
+      isTrue,
+    );
+    expect(
+      running
+          .copyWith(
+            accessControlProps: const AccessControlProps(
+              enable: true,
+              mode: AccessControlMode.acceptSelected,
+              acceptList: ['com.other.app'],
+            ),
+          )
+          .excludesRequiredApps({'com.bank.app'}),
+      isTrue,
+    );
+    expect(
+      running
+          .copyWith(enable: false, requiredExcludedApps: ['com.bank.app'])
+          .excludesRequiredApps({'com.bank.app'}),
+      isFalse,
+    );
+    expect(
+      running.copyWith(requiredExcludedApps: ['com.bank.app']).effective,
+      isNot(running.effective),
+    );
+  });
+
   test('released lists survive JSON', () {
     final props = AccessControlProps.fromJson(
       const AccessControlProps(

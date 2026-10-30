@@ -500,7 +500,19 @@ class ProfilesAction extends _$ProfilesAction {
         ensureCurrent();
         if (accepted != true) return null;
       }
-      return candidate.saveFile(
+      final previous = candidate.subscriptionSnapshot;
+      final policy = imported.summary.providerPolicy;
+      final stored = policy != null || previous?.providerPolicy != null
+          ? candidate.copyWith(
+              subscriptionSnapshot: SubscriptionSnapshot(
+                metadata: previous?.metadata ?? const SubscriptionMetadata(),
+                receivedAt: DateTime.now().toUtc(),
+                source: SubscriptionDataSource.body,
+                providerPolicy: policy,
+              ),
+            )
+          : candidate;
+      return stored.saveFile(
         imported.bytes,
         validate: (path, _) => _core.validateConfig(path),
         isCurrent: cancellation == null ? null : () => !cancellation.cancelled,

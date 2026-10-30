@@ -170,3 +170,40 @@ class TunOptionsTest {
         assertEquals("", json["congestion-controller"].asString)
     }
 }
+
+
+class ProviderAppPolicyTest {
+    @Test
+    fun `required apps apply with access control off`() {
+        val options = optionsWithRoutes(emptyList()).copy(requiredExcludedApps = listOf("com.bank.app"))
+        val access = options.effectiveAccessControl()
+        assertTrue(access.enable)
+        assertEquals(AccessControlMode.REJECT_SELECTED, access.mode)
+        assertEquals(listOf("com.bank.app"), access.rejectList)
+    }
+
+    @Test
+    fun `required exclusions beat a whitelist`() {
+        val options = optionsWithRoutes(emptyList()).copy(
+            requiredExcludedApps = listOf("com.bank.app"),
+            accessControlProps = AccessControlProps(
+                enable = true,
+                mode = AccessControlMode.ACCEPT_SELECTED,
+                acceptList = listOf("com.bank.app", "com.browser.app"),
+                rejectList = emptyList(),
+            ),
+        )
+        assertEquals(listOf("com.browser.app"), options.effectiveAccessControl().acceptList)
+    }
+
+    @Test
+    fun `required exclusions add to a blacklist and tolerate old saved state`() {
+        val options = optionsWithRoutes(emptyList()).copy(
+            accessControlProps = AccessControlProps(true, AccessControlMode.REJECT_SELECTED,
+                emptyList(), listOf("com.user.app")),
+        )
+        assertEquals(options.accessControlProps, options.copy(requiredExcludedApps = null).effectiveAccessControl())
+        assertEquals(listOf("com.user.app", "com.bank.app"),
+            options.copy(requiredExcludedApps = listOf("com.bank.app")).effectiveAccessControl().rejectList)
+    }
+}

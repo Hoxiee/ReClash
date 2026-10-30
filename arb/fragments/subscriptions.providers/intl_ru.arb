@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count, plural, =1{Остался 1 час} one{Остался {count} час} few{Осталось {count} часа} other{Осталось {count} часов}}",
   "promoEnded": "Закончилось",
   "promoRenew": "Продлить",
-  "promoConverted": "{name}: подписка активна"
+  "promoConverted": "{name}: подписка активна",
+  "providerPolicyRequired": "Обязательно у провайдера",
+  "providerPolicyAppsNotice": "Эта подписка исключает обязательные приложения из VPN во всех режимах. Они могут использовать прямое соединение и ваш реальный IP.",
+  "providerPolicyVpnRequired": "Этой подписке нужны исключения приложений Android VPN. Используйте режим VPN на Android или выберите другую подписку.",
+  "providerPolicyRestartRequired": "Провайдер изменил обязательные исключения приложений. Перезапустите VPN перед использованием этой подписки.",
+  "providerPolicyGlobalDenied": "Провайдер не разрешает эту ноду в режиме GLOBAL. Выберите разрешённую ноду или режим правил."
 }

@@ -235,8 +235,6 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
                     if (profile.subscriptionSnapshot?.metadata
                         case final metadata?)
                       ..._providerMetadataSections(context, metadata),
-                    if (ref.watch(currentProfileIdProvider) == profile.id)
-                      const ProviderSettingsReturnSection(),
                     generateSection(
                       title: appLocalizations.profile,
                       items: [

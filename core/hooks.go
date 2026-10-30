@@ -17,6 +17,10 @@ import (
 )
 
 func init() {
+	adapter.DialPolicyHook = providerPolicyDial
+	tunnel.MetadataPolicyHook = providerPolicyMetadata
+	tunnel.ModeChangeHook = providerPolicyModeChanged
+	statistic.DefaultConnectionAdmission = providerPolicyAdmit
 	mihomoHttp.TLSConfigHook = relaxCertVerify
 	adapter.UrlTestHook = func(url string, name string, delay uint16, timedOut bool) {
 		sendMessage(DelayMessage, &Delay{Url: url, Name: name, Value: delayValue(delay, timedOut)})

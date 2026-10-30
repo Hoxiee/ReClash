@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';

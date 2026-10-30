@@ -1433,6 +1433,7 @@ class _ProgramsSection extends ConsumerWidget {
       for (final target in [if (offerMain) r'$main', '*', 'GLOBAL', ...groups])
         if (!programs.containsKey(target)) target,
     ];
+    PopupOpen? addGroup;
     return generateAnimatedSection(
       title: title,
       footer: footer,
@@ -1470,21 +1471,25 @@ class _ProgramsSection extends ConsumerWidget {
             ),
           ),
         if (targets.isNotEmpty)
-          CommonPopupBox(
+          FormRow(
             key: const ValueKey('add-group'),
-            targetBuilder: (open) => FormRow(
-              title: l.rcxAddGroup,
-              leading: EntryButton.add(onPressed: open),
-              onPressed: open,
-            ),
-            popupBuilder: (_) => CommonPopupMenu(
-              items: [
-                for (final target in targets)
-                  CommonPopupMenuItem(
-                    label: rcxProgramLabel(l, target),
-                    onPressed: () => onOpen(target),
-                  ),
-              ],
+            title: l.rcxAddGroup,
+            onPressed: () => addGroup?.call(),
+            leading: CommonPopupBox(
+              placement: PopupPlacement.overAnchorStart,
+              targetBuilder: (open) {
+                addGroup = open;
+                return EntryButton.add(onPressed: open);
+              },
+              popupBuilder: (_) => CommonPopupMenu(
+                items: [
+                  for (final target in targets)
+                    CommonPopupMenuItem(
+                      label: rcxProgramLabel(l, target),
+                      onPressed: () => onOpen(target),
+                    ),
+                ],
+              ),
             ),
           ),
       ],

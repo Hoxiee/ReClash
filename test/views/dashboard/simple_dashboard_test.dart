@@ -167,11 +167,17 @@ void main() {
     }
   }
 
-  Future<void> pumpPage(WidgetTester tester, {Size size = _phone}) async {
+  Future<void> pumpPage(
+    WidgetTester tester, {
+    Size size = _phone,
+    double textScale = 1,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     container.read(viewSizeProvider.notifier).value = size;
 
     await tester.pumpWidget(
@@ -660,6 +666,110 @@ void main() {
       expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
     },
   );
+
+  testWidgets('large windows center a bounded desktop layout', (tester) async {
+    chooseSimple();
+    Size? layoutSize;
+    for (final size in const [
+      Size(1920, 1080),
+      Size(2560, 1440),
+      Size(3440, 1440),
+    ]) {
+      await pumpPage(tester, size: size);
+
+      final bounds = tester
+          .getRect(find.byType(SimpleHome))
+          .expandToInclude(tester.getRect(find.byType(SimpleWidgetList)));
+      expect(bounds.width, lessThan(size.width));
+      expect(bounds.height, lessThan(size.height));
+      expect(bounds.center, size.center(Offset.zero));
+      if (layoutSize != null) expect(bounds.size, layoutSize);
+      layoutSize = bounds.size;
+      expect(find.byType(PageView), findsNothing);
+      expect(find.byType(PowerButton).hitTestable(), findsOneWidget);
+      expect(find.byType(SubscriptionCard).hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
+  testWidgets('the bounded desktop layout makes room for larger text', (
+    tester,
+  ) async {
+    chooseSimple(widgets: [SimpleDashboardWidget.outboundMode]);
+    const size = Size(1920, 1440);
+    await pumpPage(tester, size: size);
+    final normalHeight = tester.getSize(find.byType(SimpleHome)).height;
+
+    await pumpPage(tester, size: size, textScale: 1.5);
+
+    final bounds = tester.getRect(find.byType(SimpleHome));
+    expect(bounds.height, greaterThan(normalHeight));
+    expect(bounds.height, lessThan(size.height));
+    expect(bounds.center.dy, size.height / 2);
+    expect(find.byType(PowerButton).hitTestable(), findsOneWidget);
+    expect(find.byType(SubscriptionCard).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'short desktop windows keep both columns independently scrollable',
+    (tester) async {
+      chooseSimple();
+      await pumpPage(tester, size: const Size(900, 400));
+      final homeScroll = find.descendant(
+        of: find.byType(SimpleHome),
+        matching: find.byType(Scrollable),
+      );
+      final widgetsScroll = find.descendant(
+        of: find.byType(SimpleWidgetList),
+        matching: find.byType(Scrollable),
+      );
+      final homePosition = tester.state<ScrollableState>(homeScroll).position;
+      final widgetsPosition = tester
+          .state<ScrollableState>(widgetsScroll)
+          .position;
+      expect(homePosition.maxScrollExtent, greaterThan(0));
+      expect(widgetsPosition.maxScrollExtent, greaterThan(0));
+
+      await tester.scrollUntilVisible(
+        find.byType(SubscriptionCard),
+        120,
+        scrollable: homeScroll,
+      );
+      expect(find.byType(SubscriptionCard).hitTestable(), findsOneWidget);
+      expect(widgetsPosition.pixels, 0);
+      final homeOffset = homePosition.pixels;
+
+      final lastCard = find.byKey(const ValueKey(SimpleDashboardWidget.path));
+      await tester.scrollUntilVisible(lastCard, 240, scrollable: widgetsScroll);
+      await Scrollable.ensureVisible(tester.element(lastCard), alignment: 1);
+      await tester.pump();
+      expect(lastCard.hitTestable(), findsOneWidget);
+      expect(homePosition.pixels, homeOffset);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final (size, textScale) in const [
+    (Size(412, 568), 1.0),
+    (Size(412, 915), 1.0),
+    (Size(960, 800), 2.0),
+  ]) {
+    testWidgets(
+      'compact layout keeps the pager at $size and scale $textScale',
+      (tester) async {
+        chooseSimple(widgets: [SimpleDashboardWidget.outboundMode]);
+        await pumpPage(tester, size: size, textScale: textScale);
+
+        expect(find.byType(PageView), findsOneWidget);
+        expect(find.byType(PowerButton).hitTestable(), findsOneWidget);
+        await openWidgets(tester);
+        expect(find.text('Mode').hitTestable(), findsOneWidget);
+        expect(find.byTooltip('Edit widgets'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('a stopped core still shows the flag in the server name', (
     tester,

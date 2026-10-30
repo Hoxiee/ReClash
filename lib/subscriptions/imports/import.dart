@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:yaml/yaml.dart';
 
 import '../metadata/metadata.dart';
+import '../metadata/provider_policy.dart';
 
 import 'config/amnezia_config.dart';
 import 'config/singbox_config.dart';
@@ -41,6 +42,7 @@ class SubscriptionImportSummary {
     this.rejectCoreFallback = false,
     this.excludedPackages = const [],
     this.includedPackages = const [],
+    this.providerPolicy,
   });
 
   final int nodes;
@@ -57,6 +59,7 @@ class SubscriptionImportSummary {
   /// The Clash config's `tun.exclude-package` and `tun.include-package`.
   final List<String> excludedPackages;
   final List<String> includedPackages;
+  final ProviderPolicy? providerPolicy;
 }
 
 class SubscriptionImportResult {
@@ -69,6 +72,10 @@ class SubscriptionImportResult {
   final Uint8List bytes;
   final SubscriptionFormat format;
   final SubscriptionImportSummary summary;
+}
+
+class SubscriptionPolicyException extends SubscriptionImportException {
+  const SubscriptionPolicyException(super.message);
 }
 
 class SubscriptionImportException implements Exception {
@@ -114,7 +121,15 @@ SubscriptionImportResult _convert(Uint8List input, {required bool encrypted}) {
         : null;
     final value = json ?? yaml;
     if (value != null) _checkValueLimits(value);
+    if (value is Map) ProviderPolicy.parseConfig(value);
     final format = _detectFormat(content, json, yaml);
+    if (value is Map &&
+        value.containsKey('reclash-policy') &&
+        format != SubscriptionFormat.clash) {
+      throw const SubscriptionPolicyException(
+        'Provider policy requires native Clash YAML',
+      );
+    }
     if (format == SubscriptionFormat.unknown) {
       final rejectCoreFallback =
           json is Map &&
@@ -181,6 +196,8 @@ SubscriptionImportResult _convert(Uint8List input, {required bool encrypted}) {
             converted is LossyConversion && converted.hasOtherLosses,
       ),
     );
+  } on ProviderPolicyFormatException catch (error) {
+    throw SubscriptionPolicyException(error.message);
   } on SubscriptionImportException {
     rethrow;
   } on Object {
@@ -342,6 +359,7 @@ SubscriptionImportSummary _clashSummary(Object? value) {
     remoteProviders: providersCount,
     excludedPackages: packages('exclude-package'),
     includedPackages: packages('include-package'),
+    providerPolicy: ProviderPolicy.parseConfig(value),
   );
 }
 

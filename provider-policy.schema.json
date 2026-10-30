@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReClash Provider Policy",
+  "description": "The opt-in reclash-policy mapping in a native Clash subscription. Allowed IDs must also exist uniquely on inline proxies as reclash-id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "version": { "const": 1, "type": "integer" },
+    "global": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allow"],
+      "properties": {
+        "allow": {
+          "description": "Default-deny permission list. An empty list forbids all nodes in GLOBAL. Omitting the entire global section preserves normal mode behavior.",
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/nodeId" }
+        }
+      }
+    },
+    "apps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "android": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["exclude"],
+          "properties": {
+            "exclude": {
+              "description": "Required exclusions, not recommendations. Requires Android VPN mode; these packages bypass the VPN and may expose the real IP.",
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 512,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$"
+    }
+  }
+}

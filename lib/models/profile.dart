@@ -592,6 +592,7 @@ extension ProfileExtension on Profile {
                     decodedMetadata.metadata,
                   );
               final snapshot = SubscriptionSnapshot(
+                providerPolicy: payload.summary.providerPolicy,
                 metadata: mergedMetadata,
                 receivedAt: DateTime.now().toUtc(),
                 stale: staleFields.isNotEmpty,
@@ -653,6 +654,8 @@ extension ProfileExtension on Profile {
               );
             } on SubscriptionException catch (error) {
               return SubscriptionClientRejected(_retryReason(error));
+            } on SubscriptionPolicyException {
+              rethrow;
             } on SubscriptionImportException {
               return const SubscriptionClientRejected(
                 SubscriptionRetryReason.invalidResponse,

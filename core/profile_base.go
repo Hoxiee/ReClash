@@ -18,7 +18,7 @@ import (
 
 // What makes a profile large stays in the Core; the overlay the host sends
 // back replaces every other section.
-var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules", "rcx-profiles", "rcx-scenarios", "rcx-scenario"}
+var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules", "rcx-profiles", "rcx-scenarios", "rcx-scenario", "reclash-policy"}
 
 func handleGetProfileBase(path string) (*ProfileBase, error) {
 	defer scheduleLoadMemoryRelease()

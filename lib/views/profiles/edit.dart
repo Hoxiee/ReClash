@@ -686,7 +686,18 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       }
     });
     final issue = _attempted ? _issue(appLocalizations) : null;
+    final policy = widget.profile.subscriptionSnapshot?.providerPolicy;
     final sections = [
+      if (policy?.requiredExcludedApps.isNotEmpty == true)
+        generateSection(
+          title: appLocalizations.subscriptionProvider,
+          items: [
+            ListItem(
+              title: Text(appLocalizations.providerPolicyRequired),
+              subtitle: Text(appLocalizations.providerPolicyAppsNotice),
+            ),
+          ],
+        ),
       generateSection(
         items: [
           _ProfileNameField(

@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 
 import '../../common/telegram_link.dart';
 import '../protocol/registry.dart';
+import 'provider_policy.dart';
 
 enum SubscriptionDeviceStatus { required, accepted, unsupported, limitReached }
 
@@ -251,6 +252,7 @@ class SubscriptionSnapshot {
     this.source = SubscriptionDataSource.http,
     this.deviceStatus,
     this.warnings = const [],
+    this.providerPolicy,
   });
   final SubscriptionMetadata metadata;
   final DateTime receivedAt;
@@ -259,6 +261,7 @@ class SubscriptionSnapshot {
   final SubscriptionDataSource source;
   final SubscriptionDeviceStatus? deviceStatus;
   final List<String> warnings;
+  final ProviderPolicy? providerPolicy;
 
   bool get usageStale =>
       stale || staleFields.any((f) => f.startsWith('subscription.'));
@@ -272,6 +275,7 @@ class SubscriptionSnapshot {
       const ListEquality<String>().equals(staleFields, other.staleFields) &&
       source == other.source &&
       deviceStatus == other.deviceStatus &&
+      providerPolicy == other.providerPolicy &&
       const ListEquality<String>().equals(warnings, other.warnings);
 
   @override
@@ -282,6 +286,7 @@ class SubscriptionSnapshot {
     const ListEquality<String>().hash(staleFields),
     source,
     deviceStatus,
+    providerPolicy,
     const ListEquality<String>().hash(warnings),
   );
 
@@ -293,6 +298,7 @@ class SubscriptionSnapshot {
     'source': source.name,
     'deviceStatus': deviceStatus?.name,
     'warnings': warnings,
+    if (providerPolicy != null) 'providerPolicy': providerPolicy!.toJson(),
   };
 
   static SubscriptionSnapshot? safeFromJson(Object? value) {
@@ -300,6 +306,11 @@ class SubscriptionSnapshot {
     try {
       final json = Map<String, Object?>.from(value);
       return SubscriptionSnapshot(
+        providerPolicy: json['providerPolicy'] == null
+            ? null
+            : ProviderPolicy.fromJson(
+                Map<String, Object?>.from(json['providerPolicy'] as Map),
+              ),
         metadata: SubscriptionMetadata.fromJson(
           Map<String, Object?>.from(json['metadata'] as Map? ?? const {}),
         ),

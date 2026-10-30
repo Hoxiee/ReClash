@@ -8,6 +8,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -96,12 +97,15 @@ void main() {
 
   late ProviderContainer container;
   late _TestSystemAction systemAction;
+  late Set<String> requiredApps;
 
   setUp(() {
     systemAction = _TestSystemAction();
+    requiredApps = {};
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
+        providerRequiredAppsProvider.overrideWith((_) => requiredApps),
         systemActionProvider.overrideWith(() => systemAction),
       ],
     );
@@ -162,6 +166,44 @@ void main() {
 
   Future<void> teardownView(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
+  }
+
+  for (final mode in AccessControlMode.values) {
+    testWidgets('required apps stay locked in $mode', (tester) async {
+      requiredApps = {'com.example.browser'};
+      seedAccessControl(
+        AccessControlProps(
+          enable: true,
+          mode: mode,
+          acceptList: ['com.example.browser'],
+          rejectReleased: ['com.example.browser'],
+        ),
+      );
+      await pumpAccessView(tester);
+      await tester.pumpAndSettle();
+      final row = tester.widget<PackageListItem>(
+        find.byKey(const Key('com.example.browser')),
+      );
+      expect(row.requiredByProvider, isTrue);
+      expect(row.onChanged, isNull);
+      expect(row.value, mode == AccessControlMode.rejectSelected);
+      expect(
+        find.text(AppLocalizations.current.providerPolicyRequired),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations.current.providerPolicyAppsNotice),
+        findsOneWidget,
+      );
+      await tester.tap(find.byTooltip(AppLocalizations.current.selectAll));
+      await tester.pumpAndSettle();
+      final after = tester.widget<PackageListItem>(
+        find.byKey(const Key('com.example.browser')),
+      );
+      expect(after.value, mode == AccessControlMode.rejectSelected);
+      expect(after.onChanged, isNull);
+      await teardownView(tester);
+    });
   }
 
   testWidgets(

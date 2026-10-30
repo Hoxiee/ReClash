@@ -400,8 +400,12 @@ extension AccessControlPropsExt on AccessControlProps {
   /// A subscription's exclusions apply with access control off too, so its
   /// apps work without the user having to set anything up.
   AccessControlProps withProviderApps(ProviderApps apps) {
+    final required = apps.requiredExcluded;
     if (!enable || mode == AccessControlMode.rejectSelected) {
-      final excluded = apps.excluded.difference(rejectReleased.toSet());
+      final excluded = {
+        ...apps.excluded.difference(rejectReleased.toSet()),
+        ...required,
+      };
       if (!enable) {
         return excluded.isEmpty
             ? this
@@ -417,7 +421,8 @@ extension AccessControlPropsExt on AccessControlProps {
     }
     final included = apps.included.difference(acceptReleased.toSet());
     return copyWith(
-      acceptList: ({...acceptList, ...included}.toList()..sort()),
+      acceptList: ({...acceptList, ...included}.difference(required).toList()
+        ..sort()),
     );
   }
 }
@@ -425,26 +430,36 @@ extension AccessControlPropsExt on AccessControlProps {
 /// The apps the current subscription keeps out of the tunnel or, for the
 /// whitelist mode, routes through it.
 class ProviderApps {
-  const ProviderApps({this.excluded = const {}, this.included = const {}});
+  const ProviderApps({
+    this.excluded = const {},
+    this.included = const {},
+    this.requiredExcluded = const {},
+  });
 
   final Set<String> excluded;
   final Set<String> included;
+  final Set<String> requiredExcluded;
 
   Set<String> of(AccessControlMode mode) => switch (mode) {
-    AccessControlMode.acceptSelected => included,
-    AccessControlMode.rejectSelected => excluded,
+    AccessControlMode.acceptSelected => included.difference(requiredExcluded),
+    AccessControlMode.rejectSelected => {...excluded, ...requiredExcluded},
   };
 
   @override
   bool operator ==(Object other) =>
       other is ProviderApps &&
       const SetEquality<String>().equals(excluded, other.excluded) &&
-      const SetEquality<String>().equals(included, other.included);
+      const SetEquality<String>().equals(included, other.included) &&
+      const SetEquality<String>().equals(
+        requiredExcluded,
+        other.requiredExcluded,
+      );
 
   @override
   int get hashCode => Object.hash(
     const SetEquality<String>().hash(excluded),
     const SetEquality<String>().hash(included),
+    const SetEquality<String>().hash(requiredExcluded),
   );
 }
 

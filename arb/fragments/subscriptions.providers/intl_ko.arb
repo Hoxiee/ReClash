@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count}시간 남음",
   "promoEnded": "종료됨",
   "promoRenew": "연장",
-  "promoConverted": "{name}: 구독이 활성화되었습니다"
+  "promoConverted": "{name}: 구독이 활성화되었습니다",
+  "providerPolicyRequired": "제공자 필수 설정",
+  "providerPolicyAppsNotice": "이 구독은 모든 모드에서 필수 제외 앱을 VPN 밖에 둡니다. 해당 앱은 직접 연결과 실제 IP 주소를 사용할 수 있습니다.",
+  "providerPolicyVpnRequired": "이 구독에는 Android VPN 앱 제외가 필요합니다. Android VPN 모드를 사용하거나 다른 구독을 선택하세요.",
+  "providerPolicyRestartRequired": "제공자의 필수 앱 제외 목록이 변경되었습니다. 이 구독을 사용하기 전에 VPN을 다시 시작하세요.",
+  "providerPolicyGlobalDenied": "제공자가 이 노드의 Global 모드 사용을 허용하지 않습니다. 허용된 노드를 선택하거나 규칙 모드를 사용하세요."
 }

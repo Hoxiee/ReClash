@@ -257,7 +257,9 @@ class ProxiesAction extends _$ProxiesAction {
       profilesAction.updateCurrentSelectedMap(groupName, rollbackName);
       if (!silence) {
         dialogs.showNotifier(
-          currentAppLocalizations.changeProxyFailedTip,
+          error.toString().contains('provider policy:')
+              ? currentAppLocalizations.providerPolicyGlobalDenied
+              : currentAppLocalizations.changeProxyFailedTip,
           level: MessageLevel.error,
         );
         return false;

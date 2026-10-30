@@ -78,11 +78,19 @@ class SetupAction extends _$SetupAction {
   SetupParams get _setupParams {
     final selectedMap = ref.read(selectedMapProvider);
     final appSetting = ref.read(appSettingProvider);
+    final required = ref.read(providerRequiredAppsProvider);
+    final running = ref.read(runningVpnOptionsProvider);
+    final applied = running == null || running.excludesRequiredApps(required);
     return SetupParams(
       selectedMap: selectedMap,
       testUrl: ref.read(patchClashConfigProvider).testUrl,
       skipCertVerify: !appSetting.checkCertificate,
       rcx: ref.read(currentRoutingLayerProvider),
+      noGlobal: ref
+          .read(providerRestrictionsProvider)
+          .contains(ProviderRestriction.noGlobal),
+      vpnEnabled: system.isAndroid && ref.read(vpnSettingProvider).enable,
+      excludedApps: applied ? (required.toList()..sort()) : const [],
     );
   }
 
@@ -351,6 +359,11 @@ class SetupAction extends _$SetupAction {
         return true;
       }
       if (request.resume) {
+        if (ref.read(providerRequiredAppsProvider).isNotEmpty) {
+          throw MessageException(
+            currentAppLocalizations.providerPolicyRestartRequired,
+          );
+        }
         final options = await ref.read(vpnOptionsProvider.future);
         if (ref.mounted && _isCurrent(request)) {
           ref.read(runningVpnOptionsProvider.notifier).value = options;
@@ -363,6 +376,11 @@ class SetupAction extends _$SetupAction {
 
   Future<bool> _setListening(_RunRequest request) async {
     final running = request.running;
+    if (running &&
+        ref.read(providerRequiredAppsProvider).isNotEmpty &&
+        (!system.isAndroid || !ref.read(vpnSettingProvider).enable)) {
+      throw MessageException(currentAppLocalizations.providerPolicyVpnRequired);
+    }
     final vpnOptions = await ref.read(vpnOptionsProvider.future);
     if (!ref.mounted || !_isCurrent(request)) return true;
     final answered = await setCoreRunning(running);
@@ -726,6 +744,14 @@ class SetupAction extends _$SetupAction {
     if (hasScript) {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
+    final policy = ref
+        .read(profilesProvider)
+        .getProfile(profileId)
+        ?.subscriptionSnapshot
+        ?.providerPolicy;
+    if (policy != null) {
+      rawConfig = {...rawConfig, 'reclash-policy': policy.toJson()};
+    }
     if (ref.read(sandboxProvider)) {
       rawConfig = withSandboxNodes(rawConfig);
     }
@@ -872,6 +898,9 @@ class SetupAction extends _$SetupAction {
         (isPrivilegedCoreOwner(_core.processOwner) &&
             ref.read(authorizedTunEnableProvider) ==
                 TunAuthorizationState.authorized);
+    if (ref.read(providerSecureNetworkProvider)) {
+      patchConfig = withoutLocalProxyPorts(patchConfig);
+    }
     return patchConfig.copyWith(
       tun: patchConfig.tun.copyWith(
         enable: patchConfig.tun.enable && authorized,
@@ -1067,7 +1096,13 @@ class SetupAction extends _$SetupAction {
         ? await buildProfile()
         : await globalState.safeRun(buildProfile, title: 'build profile');
     final profileFailed = realProfile == null;
-    final setupParams = _setupParams.copyWith(base: realProfile?.base);
+    final sourcePath = profile == null || profile.type == ProfileType.custom
+        ? ''
+        : await appPath.getProfilePath(profile.id.toString());
+    final setupParams = _setupParams.copyWith(
+      base: realProfile?.base,
+      policyPath: sourcePath,
+    );
     final inputs = switch (setupState) {
       final state? when !profileFailed => (
         state,
@@ -1079,7 +1114,11 @@ class SetupAction extends _$SetupAction {
     };
     final yamlString = realProfile?.yaml ?? '';
     final yamlMd5 = realProfile?.md5 ?? '';
-    if (!profileFailed && yamlMd5 == globalState.lastConfigMd5 && !force) {
+    if (!profileFailed &&
+        yamlMd5 == globalState.lastConfigMd5 &&
+        !force &&
+        _appliedInputs?.$4 == inputs?.$4 &&
+        ref.read(providerPolicyProvider) == null) {
       _appliedInputs = inputs;
       globalState.lastConfigCounts = realProfile.counts;
       await preloadInvoke?.call();
@@ -1127,7 +1166,13 @@ class SetupAction extends _$SetupAction {
           } else {
             await globalState.safeRun(() => onUpdated?.call());
           }
-          throw MessageException(message);
+          throw MessageException(
+            message.contains('provider app exclusions are not applied')
+                ? currentAppLocalizations.providerPolicyRestartRequired
+                : message.contains('requires Android VPN app exclusions')
+                ? currentAppLocalizations.providerPolicyVpnRequired
+                : message,
+          );
         }
       } catch (e, s) {
         setupFailed = true;

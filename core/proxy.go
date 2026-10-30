@@ -176,6 +176,10 @@ func changeProxy(params *ChangeProxyParams) *ChangeProxyResult {
 	if err != nil {
 		return &ChangeProxyResult{Message: err.Error()}
 	}
+	if params.GroupName == globalProxyName && params.ProxyName != "" &&
+		!providerGlobalCandidate(lookupProxy(params.ProxyName)) {
+		return &ChangeProxyResult{Message: "provider policy: this node is not allowed in GLOBAL"}
+	}
 	before := selector.Now()
 	if params.ProxyName == "" {
 		selector.ForceSet(params.ProxyName)

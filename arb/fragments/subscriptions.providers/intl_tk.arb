@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count} sagat galdy",
   "promoEnded": "Tamamlandy",
   "promoRenew": "Uzaltmak",
-  "promoConverted": "{name}: abuna işjeň"
+  "promoConverted": "{name}: abuna işjeň",
+  "providerPolicyRequired": "Üpjün edijiniň talaby",
+  "providerPolicyAppsNotice": "Bu abuna hökmany çykarylan programmalary ähli tertiplerde VPN-den daşarda saklaýar. Olar göni birikmäňizi we hakyky IP salgyňyzy ulanyp bilerler.",
+  "providerPolicyVpnRequired": "Bu abuna Android VPN programmalaryny çykarmagy talap edýär. Android VPN tertibini ulanyň ýa-da başga abunany saýlaň.",
+  "providerPolicyRestartRequired": "Üpjün ediji programmalaryň hökmany çykaryşlaryny üýtgetdi. Bu abunany ulanmazdan öň VPN-i täzeden işlediň.",
+  "providerPolicyGlobalDenied": "Üpjün ediji bu düwne Global tertibinde rugsat bermeýär. Rugsat berlen düwni ýa-da düzgün tertibini saýlaň."
 }

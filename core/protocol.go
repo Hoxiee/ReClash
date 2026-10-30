@@ -116,6 +116,10 @@ type DecryptConfigParams struct {
 }
 
 type SetupParams struct {
+	PolicyPath     *string           `json:"policy-path,omitempty"`
+	NoGlobal       *bool             `json:"no-global,omitempty"`
+	VPNEnabled     *bool             `json:"vpn-enabled,omitempty"`
+	ExcludedApps   []string          `json:"excluded-apps,omitempty"`
 	SelectedMap    map[string]string `json:"selected-map"`
 	TestURL        string            `json:"test-url"`
 	SkipCertVerify bool              `json:"skip-cert-verify"`

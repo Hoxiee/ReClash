@@ -12,13 +12,7 @@ Future<RegionDetectionResult?> detectedRegion(Ref ref) async {
 PatchClashConfig _providerPatchConfig(Ref ref) {
   final config = ref.watch(patchClashConfigProvider);
   if (!ref.watch(providerSecureNetworkProvider)) return config;
-  return config.copyWith(
-    mixedPort: 0,
-    port: 0,
-    socksPort: 0,
-    redirPort: 0,
-    tproxyPort: 0,
-  );
+  return withoutLocalProxyPorts(config);
 }
 
 @riverpod
@@ -241,6 +235,11 @@ SharedState sharedState(Ref ref) {
       selectedMap: selectedMap,
       testUrl: testUrl,
       skipCertVerify: !appSetting.checkCertificate,
+      noGlobal: ref
+          .watch(providerRestrictionsProvider)
+          .contains(ProviderRestriction.noGlobal),
+      vpnEnabled: ref.watch(vpnSettingProvider).enable,
+      excludedApps: ref.watch(providerRequiredAppsProvider).toList()..sort(),
     ),
     vpnOptions: ref.watch(vpnOptionsProvider).value,
   );
@@ -288,6 +287,8 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
     port: clashConfig.mixedPort,
     ipv6: vpnSetting.ipv6,
     dnsHijacking: vpnSetting.dnsHijacking,
+    requiredExcludedApps: ref.watch(providerRequiredAppsProvider).toList()
+      ..sort(),
     accessControlProps: vpnSetting.accessControlProps.withProviderApps(
       await providerApps,
     ),

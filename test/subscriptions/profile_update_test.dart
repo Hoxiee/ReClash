@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
@@ -17,6 +18,7 @@ class _SubscriptionTransport extends SubscriptionTransport {
   final String body;
   final Map<String, List<String>> responseHeaders;
   Map<String, String>? requestHeaders;
+  int requests = 0;
 
   @override
   Future<SubscriptionResponse> fetch(
@@ -25,6 +27,7 @@ class _SubscriptionTransport extends SubscriptionTransport {
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
   }) async {
+    requests++;
     requestHeaders = headers;
     return SubscriptionResponse(
       bytes: Uint8List.fromList(utf8.encode(body)),
@@ -156,6 +159,65 @@ void main() {
         ).exists(),
         isFalse,
       );
+    },
+  );
+
+  test('required policy refresh is atomic and withdrawal is not stale', () async {
+    const policy =
+        'reclash-policy: {version: 1, global: {allow: []}, apps: {android: {exclude: [com.bank.app]}}}\n';
+    final profile = Profile.normal(url: 'https://subs.example.test/policy');
+    final prepared = await profile.prepareUpdate(
+      defaultUserAgent: 'ReClash/test',
+      transport: _SubscriptionTransport('$policy$_nodeBody', const {}),
+    );
+    final saved = await profile.commitPreparedUpdate(
+      prepared,
+      validate: (_, _) async => '',
+    );
+    expect(saved.subscriptionSnapshot?.providerPolicy?.requiredExcludedApps, {
+      'com.bank.app',
+    });
+    final file = File(await appPath.getProfilePath(saved.id.toString()));
+    final before = await file.readAsString();
+    await expectLater(
+      saved.prepareUpdate(
+        defaultUserAgent: 'ReClash/test',
+        transport: _SubscriptionTransport(
+          '${policy.replaceFirst('version: 1', 'version: 2')}$_nodeBody',
+          const {},
+        ),
+      ),
+      throwsA(anything),
+    );
+    expect(await file.readAsString(), before);
+    expect(saved.subscriptionSnapshot?.providerPolicy?.requiredExcludedApps, {
+      'com.bank.app',
+    });
+    final withdrawn = await saved.prepareUpdate(
+      defaultUserAgent: 'ReClash/test',
+      transport: _SubscriptionTransport(_nodeBody, const {}),
+    );
+    expect(withdrawn.snapshot.providerPolicy, isNull);
+  });
+
+  test(
+    'an invalid required policy never retries another client identity',
+    () async {
+      final transport = _SubscriptionTransport(
+        'reclash-policy: {version: 2}\n$_nodeBody',
+        const {},
+      );
+      final profile = Profile.normal(
+        url: 'https://subs.example.test/policy-error',
+      );
+      await expectLater(
+        profile.prepareUpdate(
+          defaultUserAgent: 'ReClash/test',
+          transport: transport,
+        ),
+        throwsA(isA<SubscriptionPolicyException>()),
+      );
+      expect(transport.requests, 1);
     },
   );
 

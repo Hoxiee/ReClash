@@ -20,6 +20,7 @@ import 'location_card.dart';
 import 'widget_list.dart';
 
 const _maxWidth = 1120.0;
+const _maxHeight = 800.0;
 
 const _columnGap = 32.0;
 
@@ -162,7 +163,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
             density: density,
             scale: scale,
             child: density.isDesktop
-                ? _desktop(context, editing, announcement)
+                ? _desktop(context, editing, announcement, scale)
                 : _mobile(context, constraints.maxWidth, editing, announcement),
           );
         },
@@ -210,12 +211,20 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     );
   }
 
-  Widget _desktop(BuildContext context, bool editing, bool announcement) {
+  Widget _desktop(
+    BuildContext context,
+    bool editing,
+    bool announcement,
+    double scale,
+  ) {
     final top = context.contentTopPadding;
     final bottom = 24 + context.bottomInset;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxWidth + 2 * _side),
+        constraints: BoxConstraints(
+          maxWidth: _maxWidth + 2 * _side,
+          maxHeight: _maxHeight * scale,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count, plural, =1{1 heure restante} other{{count} heures restantes}}",
   "promoEnded": "Terminée",
   "promoRenew": "Renouveler",
-  "promoConverted": "{name} : l'abonnement est actif"
+  "promoConverted": "{name} : l'abonnement est actif",
+  "providerPolicyRequired": "Imposé par le fournisseur",
+  "providerPolicyAppsNotice": "Cet abonnement exclut les applications imposées du VPN dans tous les modes. Elles peuvent utiliser votre connexion directe et votre véritable adresse IP.",
+  "providerPolicyVpnRequired": "Cet abonnement exige des exclusions d’applications du VPN Android. Utilisez le mode VPN sur Android ou choisissez un autre abonnement.",
+  "providerPolicyRestartRequired": "Le fournisseur a modifié les exclusions d’applications obligatoires. Redémarrez le VPN avant d’utiliser cet abonnement.",
+  "providerPolicyGlobalDenied": "Le fournisseur n’autorise pas ce nœud en mode Global. Sélectionnez un nœud autorisé ou utilisez le mode Règles."
 }

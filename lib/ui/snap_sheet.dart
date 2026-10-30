@@ -1087,7 +1087,13 @@ class _RenderSheetViewport extends RenderBox
     if (_model.fitsContent) {
       _model.fitContent();
       final fitted = _model.height;
-      if (fitted != height && fitted <= limit) {
+      final fittedLimit = _model.beginLayout(size.height, _keyboard);
+      var relayout = fitted != height && fitted <= fittedLimit;
+      if (content != null && content._limit != fittedLimit) {
+        invokeLayoutCallback<BoxConstraints>((_) => content.markNeedsLayout());
+        relayout = true;
+      }
+      if (relayout) {
         height = fitted;
         _layoutSheet(height);
       }

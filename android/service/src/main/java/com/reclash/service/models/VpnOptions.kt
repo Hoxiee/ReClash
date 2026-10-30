@@ -31,7 +31,29 @@ data class VpnOptions(
     val onDemandCloseConnections: Boolean = false,
     val onDemandStrict: Boolean = false,
     val onDemandNetworks: List<String> = emptyList(),
-)
+    val requiredExcludedApps: List<String>? = emptyList(),
+) {
+    fun effectiveAccessControl(): AccessControlProps {
+        val required = requiredExcludedApps.orEmpty()
+        val access = accessControlProps
+        if (required.isEmpty()) return access
+        if (!access.enable) {
+            return access.copy(
+                enable = true,
+                mode = AccessControlMode.REJECT_SELECTED,
+                rejectList = required.distinct(),
+            )
+        }
+        return when (access.mode) {
+            AccessControlMode.ACCEPT_SELECTED -> access.copy(
+                acceptList = access.acceptList.filterNot(required::contains),
+            )
+            AccessControlMode.REJECT_SELECTED -> access.copy(
+                rejectList = (access.rejectList + required).distinct(),
+            )
+        }
+    }
+}
 
 private const val DEFAULT_TUN_MTU = 9000
 

@@ -1,11 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/config/routing.dart';
+import 'package:reclash/views/proxies/routing_route.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/proxies/routing_studio.dart';
 
@@ -297,6 +299,44 @@ void main() {
     expect(find.text(l.rcxAddGroup), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  for (final fromButton in [false, true]) {
+    testWidgets(
+      'adding a group from the ${fromButton ? 'button' : 'row'} keeps the menu anchored to the button',
+      (tester) async {
+        await pumpHub(tester);
+        await tester.tap(destination(l.rcxHubRoutes));
+        await _pumpFrames(tester);
+        await tester.ensureVisible(_text(l.rcxHubOtherGroups));
+        await tester.tap(_text(l.rcxHubOtherGroups));
+        await _pumpFrames(tester);
+        await tester.pumpAndSettle();
+
+        final row = find.byKey(const ValueKey('add-group'));
+        final button = find.descendant(
+          of: row,
+          matching: find.byType(EntryButton),
+        );
+        final anchor = tester.getRect(button);
+        await tester.tap(fromButton ? button : find.text(l.rcxAddGroup));
+        await _pumpFrames(tester);
+        final menu = find.byType(CommonPopupMenu);
+        final route = ModalRoute.of(tester.element(menu))! as CommonPopupRoute;
+        expect(route.anchorOf(), anchor);
+        await tester.tap(
+          find.descendant(of: menu, matching: find.text('GLOBAL')),
+        );
+        await _pumpFrames(tester);
+        await _pumpFrames(tester);
+        expect(find.byType(CommonPopupMenu), findsNothing);
+        expect(
+          tester.widget<RouteEditor>(find.byType(RouteEditor)).target,
+          'GLOBAL',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('the master switch turns the scenario off', (tester) async {
     final action = await pumpHub(tester);

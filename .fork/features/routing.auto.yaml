@@ -8,7 +8,7 @@ must:
   escrow: Failures seen while no traffic gets through condemn no node.
   layers: Provider and user layers only narrow a profile's pool; an invalid profile or unusable group is a visible problem, never a silent fallback.
   manual-control: A manual pick in a smart group pins it; manual mode never switches.
-  thin-fork: The mihomo fork carries only per-provider health-check suppression, the endpoint fingerprint and the direct-split hook for routing.
+  thin-fork: The mihomo fork carries per-provider health-check suppression, route fingerprints and direct-split hooks, plus minimal metadata, mode-change, connection-admission and leaf-dial hooks for the independently enforced provider safety policy; policy interpretation stays in ReClash Core.
   direct-split: Only the user turns direct-split on; local destinations and the final MATCH rule never leave through the tunnel.
   consent: A provider profile contacts hosts beyond its provider's site and the built-in endpoints only after the user allows them; until then its group runs builtin/simple and says why.
   studio: Lint, simulation, format and merge are read-only; a profile changes what a group runs only once saved.

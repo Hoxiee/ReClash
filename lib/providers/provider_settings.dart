@@ -8,6 +8,7 @@ import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 
 import 'action.dart';
@@ -41,12 +42,25 @@ final providerRestrictionsProvider = Provider<Set<ProviderRestriction>>(
   ),
 );
 
+final providerPolicyProvider = Provider<ProviderPolicy?>(
+  (ref) => ref.watch(
+    currentProfileProvider.select(
+      (profile) => profile?.subscriptionSnapshot?.providerPolicy,
+    ),
+  ),
+);
+
+final providerRequiredAppsProvider = Provider<Set<String>>(
+  (ref) => ref.watch(providerPolicyProvider)?.requiredExcludedApps ?? const {},
+);
+
 /// The tunnel modes the user may pick; a provider can take Global away.
 final availableModesProvider = Provider<List<Mode>>(
   (ref) =>
       ref
-          .watch(providerRestrictionsProvider)
-          .contains(ProviderRestriction.noGlobal)
+              .watch(providerRestrictionsProvider)
+              .contains(ProviderRestriction.noGlobal) ||
+          ref.watch(providerPolicyProvider)?.globalAllow?.isEmpty == true
       ? [
           for (final mode in Mode.values)
             if (mode != Mode.global) mode,
@@ -118,10 +132,14 @@ final providerServerNodeProvider = Provider<String?>((ref) {
 final providerSecureNetworkProvider = Provider<bool>(
   (ref) =>
       system.isAndroid &&
-      ref
-          .watch(providerRestrictionsProvider)
-          .contains(ProviderRestriction.androidSecure),
+      (ref.watch(providerRequiredAppsProvider).isNotEmpty ||
+          ref
+              .watch(providerRestrictionsProvider)
+              .contains(ProviderRestriction.androidSecure)),
 );
+
+PatchClashConfig withoutLocalProxyPorts(PatchClashConfig config) => config
+    .copyWith(mixedPort: 0, port: 0, socksPort: 0, redirPort: 0, tproxyPort: 0);
 
 /// On Android only: elsewhere no app list exists to resolve against.
 final providerAppsProvider = FutureProvider<ProviderApps>((ref) async {
@@ -141,7 +159,11 @@ final providerAppsProvider = FutureProvider<ProviderApps>((ref) async {
       );
     }
   }
-  return ProviderApps(excluded: excluded, included: {...hints.includedApps});
+  return ProviderApps(
+    excluded: excluded,
+    included: {...hints.includedApps},
+    requiredExcluded: ref.watch(providerRequiredAppsProvider),
+  );
 });
 
 final _providerBackgroundProvider = FutureProvider<String?>((ref) async {

@@ -231,7 +231,10 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     private fun Builder.configureAccessControl(options: VpnOptions) {
-        val accessControl = options.accessControlProps
+        require(packageName !in options.requiredExcludedApps.orEmpty()) {
+            "The VPN application cannot be a required provider exclusion"
+        }
+        val accessControl = options.effectiveAccessControl()
         if (!accessControl.enable) return
         when (accessControl.mode) {
             AccessControlMode.ACCEPT_SELECTED -> {

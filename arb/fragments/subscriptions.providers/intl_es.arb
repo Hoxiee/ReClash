@@ -21,5 +21,10 @@
   "promoHoursLeft": "{count, plural, =1{Queda 1 hora} other{Quedan {count} horas}}",
   "promoEnded": "Terminada",
   "promoRenew": "Renovar",
-  "promoConverted": "{name}: la suscripción está activa"
+  "promoConverted": "{name}: la suscripción está activa",
+  "providerPolicyRequired": "Obligatorio por el proveedor",
+  "providerPolicyAppsNotice": "Esta suscripción mantiene las aplicaciones obligatorias fuera de la VPN en todos los modos. Pueden usar tu conexión directa y tu IP real.",
+  "providerPolicyVpnRequired": "Esta suscripción requiere exclusiones de aplicaciones de VPN en Android. Usa el modo VPN en Android o elige otra suscripción.",
+  "providerPolicyRestartRequired": "El proveedor cambió las exclusiones obligatorias de aplicaciones. Reinicia la VPN antes de usar esta suscripción.",
+  "providerPolicyGlobalDenied": "El proveedor no permite este nodo en modo Global. Selecciona un nodo permitido o usa el modo de reglas."
 }

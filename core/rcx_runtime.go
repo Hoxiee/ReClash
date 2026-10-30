@@ -367,6 +367,9 @@ func rcxTopologyOf(proxies map[string]constant.Proxy, names []string, smart map[
 		var walk func(selector *outboundgroup.Selector, via []string)
 		walk = func(selector *outboundgroup.Selector, via []string) {
 			for _, member := range selector.Proxies() {
+				if name == globalProxyName && !providerPolicyCandidate(activeProviderPolicy.Load(), member, func(name string) constant.Proxy { return proxies[name] }) {
+					continue
+				}
 				inner, nested := adapterAs[*outboundgroup.Selector](member)
 				if nested && smart[name] && name != globalProxyName && len(via) < maxFlattenDepth && rcxFlattens(member.Name(), refs, smart, flat) {
 					flat[member.Name()] = name

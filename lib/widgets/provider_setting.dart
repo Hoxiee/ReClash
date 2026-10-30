@@ -129,7 +129,9 @@ class ProviderSettingsReturnSection extends ConsumerWidget {
 }
 
 class ProviderTag extends StatelessWidget {
-  const ProviderTag({super.key});
+  const ProviderTag({super.key, this.requiredByProvider = false});
+
+  final bool requiredByProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +139,9 @@ class ProviderTag extends StatelessWidget {
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: TonalChip(
-        label: context.appLocalizations.providerSettingManaged,
+        label: requiredByProvider
+            ? context.appLocalizations.providerPolicyRequired
+            : context.appLocalizations.providerSettingManaged,
         color: SurfaceLevel.inset.colorOf(colorScheme),
         foregroundColor: colorScheme.onSurfaceVariant,
       ),

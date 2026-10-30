@@ -531,6 +531,45 @@ void main() {
     await shown;
   });
 
+  testWidgets('returning from preferences keeps both footer actions on screen', (
+    tester,
+  ) async {
+    await container
+        .read(appUpdateActionProvider.notifier)
+        .offer(testUpdateRelease());
+    await pump(tester, const SizedBox.shrink());
+    final shown = UpdateSheet.show(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    final actions = [
+      find.byKey(const ValueKey('update-offer-accept'), skipOffstage: false),
+      find.byKey(const ValueKey('update-offer-dismiss'), skipOffstage: false),
+    ];
+    final bottoms = [
+      for (final action in actions) tester.getBottomLeft(action).dy,
+    ];
+    await tester.tap(
+      find.byTooltip(currentAppLocalizations.updatePreferencesTitle),
+    );
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byType(UpdatePreferences))).pop();
+    await tester.pump();
+    for (var frame = 0; frame < 40; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      for (final (index, action) in actions.indexed) {
+        expect(
+          tester.getBottomLeft(action).dy,
+          lessThanOrEqualTo(bottoms[index] + 0.5),
+          reason:
+              'footer action $index moved below its resting position on frame $frame',
+        );
+      }
+    }
+    expect(find.byType(UpdatePreferences), findsNothing);
+    expect(container.read(appUpdateActionProvider).phase, UpdatePhase.offered);
+    await close(tester);
+    await shown;
+  });
+
   testWidgets('closing preferences discards an unsaved installation consent', (
     tester,
   ) async {

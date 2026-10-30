@@ -21,5 +21,10 @@
   "promoHoursLeft": "剩余 {count} 小时",
   "promoEnded": "已结束",
   "promoRenew": "续订",
-  "promoConverted": "{name}：订阅已激活"
+  "promoConverted": "{name}：订阅已激活",
+  "providerPolicyRequired": "服务商强制要求",
+  "providerPolicyAppsNotice": "此订阅要求指定应用在所有模式下绕过 VPN。这些应用可能使用直连网络和您的真实 IP。",
+  "providerPolicyVpnRequired": "此订阅要求使用 Android VPN 应用排除功能。请使用 Android VPN 模式或选择其他订阅。",
+  "providerPolicyRestartRequired": "服务商更改了强制应用排除列表。请重启 VPN 后再使用此订阅。",
+  "providerPolicyGlobalDenied": "服务商不允许此节点用于全局模式。请选择获准的节点或使用规则模式。"
 }

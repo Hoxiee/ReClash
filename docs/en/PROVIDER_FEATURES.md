@@ -84,6 +84,75 @@ A subscription may set app settings. They apply when the profile is current, wit
 - `reclash-includeapps` (or `tun.include-package`) adds to the whitelist in the whitelist mode only. Modes are never mixed.
 - Provider apps carry the tag in Access control. Unticking one records that the user took it back into the tunnel; "Return apps to provider" resets that.
 
+## Required safety policy
+
+A native Clash subscription may opt into a separate, versioned policy. It is not
+an RCX profile, an app-setting hint, or a user-editable routing rule. Existing
+subscriptions without `reclash-policy` keep their previous behavior.
+
+```yaml
+reclash-policy:
+  version: 1
+  global:
+    allow: [de-01]
+  apps:
+    android:
+      exclude: [com.example.bank]
+proxies:
+  - name: Germany
+    reclash-id: de-01
+    type: socks5
+    server: proxy.example.test
+    port: 1080
+  - name: Restricted
+    reclash-id: restricted-01
+    type: socks5
+    server: restricted.example.test
+    port: 1080
+```
+
+- A present `global` section is **default deny**. Only explicitly listed IDs may
+  carry GLOBAL traffic; `allow: []` forbids every node. Omitting `global` adds no
+  mode restriction. The existing `noglobal` restriction remains an absolute veto.
+- `reclash-id` is case-sensitive, unique within the original subscription and
+  matches `[A-Za-z0-9][A-Za-z0-9._:-]{0,63}`. IDs cannot refer to missing nodes.
+  Permissions bind to the original node's complete route definition, including
+  credentials, not its display name or RCX identity history. Renaming a node
+  preserves permission; copying its ID onto a different server does not.
+- Version 1 binds IDs on inline `proxies`. A dynamically loaded provider member
+  is denied unless its route definition matches an explicitly permitted inline
+  node. A group is an eligible RCX GLOBAL candidate only when all its possible
+  members are permitted. Actual leaf TCP and UDP dials remain checked, including
+  fallback, nested selection, health probes and controller changes.
+- The Core reads the original profile separately from user scripts and keeps the
+  applied authority outside `config.yaml`. Controller reloads and config scripts
+  cannot remove it. Switching profiles or a valid provider update may replace it.
+  Mode/policy changes close existing connections and invalidate in-flight routes.
+  A denied route never automatically becomes DIRECT or uses an unapproved node.
+- `apps.android.exclude` is **required**, unlike the existing recommended
+  `reclash-excludeapps`. Required entries override released recommendations,
+  whitelist inclusions and disabled access control, in every routing mode.
+  Local proxy listeners cannot be used to bypass them.
+- Required app exclusions need Android VPN mode. Other platforms and proxy-only
+  mode refuse this policy rather than pretending it is enforced. The VPN app
+  itself cannot be excluded. Unknown application identities fail closed; an
+  excluded application captured by an old VPN session is blocked until restart.
+- Changing the native application list requires a VPN restart. Until then Core
+  refuses a policy whose required exclusions are not applied. Reattaching to an
+  Android service whose original options are unknown also requires a restart.
+- **Exclusion is not an Internet block.** Excluded apps may use the direct
+  connection and the real IP; Android lockdown can instead prevent their access.
+  The app displays this condition and locks required entries in Access control.
+- Unknown versions/fields, malformed lists and unresolved/duplicate IDs reject
+  the whole import without retrying another client identity. A failed update leaves the saved subscription unchanged.
+  A successful update without the policy withdraws it; stale display metadata
+  cannot accidentally keep it. Limits: 4096 IDs and 512 required packages.
+
+Schema: [`provider-policy.schema.json`](../../provider-policy.schema.json).
+This is protection against accidental use in a cooperating ReClash client, not
+DRM or a server-side guarantee: other clients can ignore these fields. Package
+exclusions do not cover opening the same service in a browser.
+
 ## Hosts
 
 - `reclash-fallbackhosts` (up to 5 `host[:port]`): tried for the same path and query when the main host fails with a transport, TLS, timeout, rate-limit or invalid response. They never replace the stored URL.

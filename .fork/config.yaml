@@ -52,8 +52,10 @@ checks:
     argv: [dart, run, tool/gen_provider_standard.dart, --check]
   profiles:
     argv: [flutter, test, test/providers/profiles_action_test.dart, test/models/profile_test.dart, test/models/profile_save_test.dart]
+  go-provider-policy:
+    argv: [go, -C, core, test, ., -run, 'ProviderPolicy|ProviderGlobal|ProviderApps|ProviderMode']
   provider-controls:
-    argv: [flutter, test, test/subscriptions/provider_settings_test.dart, test/models/provider_apps_test.dart, test/providers/provider_restrictions_test.dart]
+    argv: [flutter, test, test/subscriptions/provider_settings_test.dart, test/subscriptions/provider_policy_test.dart, test/subscriptions/profile_update_test.dart, test/models/provider_apps_test.dart, test/providers/provider_restrictions_test.dart, test/views/access_test.dart]
   config:
     argv: [flutter, test, test/models/config_test.dart, test/providers/config_test.dart]
   tools:

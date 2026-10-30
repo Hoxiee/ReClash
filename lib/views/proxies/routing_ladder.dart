@@ -920,6 +920,7 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
     final fits = q.isLocal && servers.isNotEmpty
         ? servers.where((s) => q.matches(s) ?? false).length
         : null;
+    PopupOpen? addCondition;
     return FormPage(
       title: widget.step == null
           ? l.rcxLadderAdd
@@ -1006,25 +1007,29 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
               ),
             KeyedSubtree(
               key: const ValueKey('add'),
-              child: CommonPopupBox(
-                targetBuilder: (open) => FormRow(
-                  title: l.rcxCondAdd,
-                  leading: EntryButton.add(onPressed: open),
-                  onPressed: open,
-                ),
-                popupBuilder: (_) => CommonPopupMenu(
-                  items: [
-                    for (final extra in addable)
+              child: FormRow(
+                title: l.rcxCondAdd,
+                onPressed: () => addCondition?.call(),
+                leading: CommonPopupBox(
+                  placement: PopupPlacement.overAnchorStart,
+                  targetBuilder: (open) {
+                    addCondition = open;
+                    return EntryButton.add(onPressed: open);
+                  },
+                  popupBuilder: (_) => CommonPopupMenu(
+                    items: [
+                      for (final extra in addable)
+                        CommonPopupMenuItem(
+                          label: _extraLabel(l, extra),
+                          onPressed: () => _show(extra, servers),
+                        ),
                       CommonPopupMenuItem(
-                        label: _extraLabel(l, extra),
-                        onPressed: () => _show(extra, servers),
+                        glyph: AppGlyphs.code,
+                        label: l.rcxLadderAdvanced,
+                        onPressed: () => unawaited(_advanced()),
                       ),
-                    CommonPopupMenuItem(
-                      glyph: AppGlyphs.code,
-                      label: l.rcxLadderAdvanced,
-                      onPressed: () => unawaited(_advanced()),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

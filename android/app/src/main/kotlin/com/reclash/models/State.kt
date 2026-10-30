@@ -29,4 +29,10 @@ data class SetupParams(
     val selectedMap: Map<String, String>,
     @SerializedName("skip-cert-verify")
     val skipCertVerify: Boolean = false,
+    @SerializedName("no-global")
+    val noGlobal: Boolean? = null,
+    @SerializedName("vpn-enabled")
+    val vpnEnabled: Boolean? = null,
+    @SerializedName("excluded-apps")
+    val excludedApps: List<String>? = null,
 )

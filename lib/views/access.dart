@@ -139,7 +139,9 @@ class _AccessViewState extends ConsumerState<AccessView>
         final provided = _providedApps(state.mode);
         final released = state.currentReleased.toSet();
         final selected = _effectiveList(state, provided);
-        final shown = allValueList.toSet();
+        final shown = allValueList.toSet().difference(
+          ref.read(providerRequiredAppsProvider),
+        );
         if (selected.containsAll(shown)) {
           return state
               .copyWithNewList(
@@ -256,17 +258,21 @@ class _AccessViewState extends ConsumerState<AccessView>
   Set<String> _providedApps(AccessControlMode mode) =>
       ref.read(providerAppsProvider).asData?.value.of(mode) ?? const {};
 
-  static Set<String> _effectiveList(
-    AccessControlProps state,
-    Set<String> provided,
-  ) => {
-    ...state.currentList,
-    ...provided.difference(state.currentReleased.toSet()),
-  };
+  Set<String> _effectiveList(AccessControlProps state, Set<String> provided) {
+    final required = ref.read(providerRequiredAppsProvider);
+    final selected = {
+      ...state.currentList,
+      ...provided.difference(state.currentReleased.toSet()),
+    };
+    return state.mode == AccessControlMode.acceptSelected
+        ? selected.difference(required)
+        : {...selected, ...required};
+  }
 
   /// Unticking one of the provider's apps records that the user wants it the
   /// other way; ticking it again hands it back.
   void _handleSelected(String packageName) {
+    if (ref.read(providerRequiredAppsProvider).contains(packageName)) return;
     ref.read(accessControlStateProvider.notifier).update((state) {
       if (!_providedApps(state.mode).contains(packageName)) {
         final newSet = Set<String>.from(state.currentList)
@@ -463,6 +469,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     required List<Package> packages,
     required Set<String> selected,
     required Set<String> provided,
+    required Set<String> requiredApps,
     required bool isSearching,
   }) {
     return FutureBuilder(
@@ -497,9 +504,12 @@ class _AccessViewState extends ConsumerState<AccessView>
                   package: package,
                   value: selected.contains(package.packageName),
                   fromProvider: provided.contains(package.packageName),
-                  onChanged: (value) {
-                    _handleSelected(package.packageName);
-                  },
+                  requiredByProvider: requiredApps.contains(
+                    package.packageName,
+                  ),
+                  onChanged: requiredApps.contains(package.packageName)
+                      ? null
+                      : (value) => _handleSelected(package.packageName),
                 );
               },
             ),
@@ -548,17 +558,19 @@ class _AccessViewState extends ConsumerState<AccessView>
     final providerApps =
         ref.watch(providerAppsProvider).asData?.value ?? const ProviderApps();
     final provided = providerApps.of(mode);
+    final requiredApps = ref.watch(providerRequiredAppsProvider);
     final currentList = _effectiveList(accessControl, provided).toList();
     final viewPackageNameList = viewPackages.map((e) => e.packageName).toList();
     final valueList = currentList.intersection(viewPackageNameList);
     final needsInstalledAppsPermission =
         packages.isEmpty && !_installedAppsPermissionGranted;
+    final selectable = viewPackageNameList.toSet().difference(requiredApps);
     final selectAllAction =
         accessControl.enable &&
             !needsInstalledAppsPermission &&
-            viewPackageNameList.isNotEmpty
+            selectable.isNotEmpty
         ? _buildSelectAllAction(
-            isSelectedAll: valueList.length == viewPackageNameList.length,
+            isSelectedAll: currentList.toSet().containsAll(selectable),
             allValueList: viewPackageNameList,
           )
         : null;
@@ -597,6 +609,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                 bar: _AccessStatus(
                   accessControl: accessControl,
                   selectedCount: valueList.length,
+                  requiredApps: requiredApps.isNotEmpty,
                   onSmartSelect: isLoading ? null : _intelligentSelected,
                   onEnable: () =>
                       _update((state) => state.copyWith(enable: true)),
@@ -607,6 +620,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                     packages: viewPackages,
                     selected: valueList.toSet(),
                     provided: provided,
+                    requiredApps: requiredApps,
                     isSearching: query.isNotEmpty,
                   ),
                 ),
@@ -620,12 +634,14 @@ class _AccessStatus extends StatelessWidget {
   const _AccessStatus({
     required this.accessControl,
     required this.selectedCount,
+    required this.requiredApps,
     required this.onSmartSelect,
     required this.onEnable,
   });
 
   final AccessControlProps accessControl;
   final int selectedCount;
+  final bool requiredApps;
   final VoidCallback? onSmartSelect;
   final VoidCallback onEnable;
 
@@ -634,7 +650,9 @@ class _AccessStatus extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final enabled = accessControl.enable;
-    final description = enabled
+    final description = requiredApps
+        ? appLocalizations.providerPolicyAppsNotice
+        : enabled
         ? switch (accessControl.mode) {
             AccessControlMode.acceptSelected =>
               appLocalizations.accessControlAllowDesc,
@@ -660,7 +678,7 @@ class _AccessStatus extends StatelessWidget {
           Expanded(
             child: Text(
               description,
-              maxLines: 2,
+              maxLines: requiredApps ? 5 : 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyle.footnote
                   .of(context)
@@ -702,13 +720,15 @@ class PackageListItem extends StatelessWidget {
   final Package package;
   final bool value;
   final bool fromProvider;
-  final void Function(bool?) onChanged;
+  final bool requiredByProvider;
+  final void Function(bool?)? onChanged;
 
   const PackageListItem({
     super.key,
     required this.package,
     required this.value,
     this.fromProvider = false,
+    this.requiredByProvider = false,
     required this.onChanged,
   });
 
@@ -731,7 +751,13 @@ class PackageListItem extends StatelessWidget {
               maxLines: 1,
             ),
           ),
-          if (fromProvider) const ProviderTag(),
+          if (requiredByProvider)
+            Tooltip(
+              message: context.appLocalizations.providerPolicyAppsNotice,
+              child: const ProviderTag(requiredByProvider: true),
+            )
+          else if (fromProvider)
+            const ProviderTag(),
         ],
       ),
       value: value,

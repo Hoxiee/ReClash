@@ -19,6 +19,8 @@ import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/web_dashboard.dart';
+import 'package:reclash/providers/provider_settings.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1404,6 +1406,53 @@ void main() {
       addedRules: [],
       script: null,
       overrides: ProfileOverrides(),
+    );
+
+    test(
+      'noglobal reaches Core even when the profile YAML is unchanged',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        final applied = <SetupParams>[];
+        var restrictions = <ProviderRestriction>{};
+        when(() => core.setupConfig(any())).thenAnswer((call) async {
+          applied.add(call.positionalArguments.single as SetupParams);
+          return '';
+        });
+        when(
+          () => core.getProxies(),
+        ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
+        when(() => core.getExternalProviders()).thenAnswer((_) async => []);
+        final scoped = ProviderContainer(
+          overrides: [
+            currentProfileProvider.overrideWithValue(null),
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(SetupAction.new),
+            proxiesActionProvider.overrideWith(_NoopProxiesAction.new),
+            providersProvider.overrideWith(_NoopProviders.new),
+            providerRestrictionsProvider.overrideWith((_) => restrictions),
+            providerPolicyProvider.overrideWithValue(null),
+            safeModeProvider.overrideWithValue(true),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        globalState.container = scoped;
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+        final setup = scoped.read(setupActionProvider.notifier);
+        expect(await setup.applyProfile(force: true), isTrue);
+        expect(await setup.applyProfile(), isTrue);
+        expect(applied.map((params) => params.noGlobal), [false]);
+        restrictions = {ProviderRestriction.noGlobal};
+        scoped.invalidate(providerRestrictionsProvider);
+        expect(await setup.applyProfile(), isTrue);
+        expect(applied.map((params) => params.noGlobal), [false, true]);
+        restrictions = {};
+        scoped.invalidate(providerRestrictionsProvider);
+        expect(await setup.applyProfile(), isTrue);
+        expect(await setup.applyProfile(), isTrue);
+        expect(applied.map((params) => params.noGlobal), [false, true, false]);
+      },
     );
 
     Future<void> seedDashboard(WebDashboardFlavor flavor) async {
