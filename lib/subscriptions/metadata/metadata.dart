@@ -131,7 +131,15 @@ class SubscriptionMetadata {
 }
 
 final _token = RegExp(r'^[a-z0-9._:#-]{1,64}$');
+final _invalidPowerShapeCharacter = RegExp(r'[^a-z0-9._:#, -]');
 final _package = RegExp(r'^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$');
+
+bool _validPowerShapeList(String value) =>
+    value.length <= subscriptionHeaderLimit &&
+    !_invalidPowerShapeCharacter.hasMatch(value) &&
+    value
+        .split(',')
+        .every((name) => name.trim().isEmpty || _token.hasMatch(name.trim()));
 
 /// Gives a decoded JSON value the element types the decoder produces.
 Object? normalizeSubscriptionValue(SubscriptionFieldType type, Object? value) {
@@ -197,7 +205,9 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
                 e.key is String &&
                 e.value is String &&
                 _token.hasMatch(e.key as String) &&
-                _token.hasMatch(e.value as String),
+                (field.path == 'presentation.powerButton' && e.key == 'shape'
+                    ? _validPowerShapeList(e.value as String)
+                    : _token.hasMatch(e.value as String)),
           );
   }
 }

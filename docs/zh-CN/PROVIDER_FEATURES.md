@@ -68,7 +68,12 @@ rcx-scenarios:
 订阅可设置应用选项。当前配置生效时，这些设置会直接应用，无需确认；用户编辑时，每项旁边会显示“来自服务商”标记。用户更改某项后，该项不再跟随服务商，直到用户对该项或整个配置选择“恢复服务商设置”。
 
 - `reclash-view`：以 `key:value;...` 设置 `proxies.type`、`proxies.sort`、`proxies.layout`、`proxies.icon`、`proxies.card`、`app.navbar`、`app.tabs`、`app.glass`、`app.color`、`app.style`、`app.black`。未知键和值会被忽略。
-- `reclash-powerbutton`：以 `key:value;...` 设置简洁仪表盘运行时电源按钮的形状（`shape`：`cookie`、`circle`、`scallop`、`sunny`、`flower`、`clover`、`burst`）和类型（`type`：`solid`、`tonal`、`outline`）。仅服务商可设置；未知键和值会被忽略。
+- `reclash-powerbutton`：以 `key:value;...` 设置简洁仪表盘运行时的电源按钮。仅服务商可设置；`type` 可选 `solid`、`tonal` 或 `outline`。
+  - 形状：`cookie`、`circle`、`scallop`、`sunny`、`flower`、`clover`、`burst`、`puffy`、`puffyDiamond`、`clover8Leaf`、`cookie4Sided`、`cookie6Sided`、`verySunny`、`square`、`diamond`、`pentagon`、`gem`、`pixelCircle`、`softBoom`、`boom`、`sharpBurst`。原有的 `burst` 仍为柔和爆发形；`sharpBurst` 是尖角爆发形。
+  - 可指定单个形状，用 `shape:random` 从全部受支持形状中等概率随机选择，或传入逗号分隔的候选列表，如 `shape:puffy,puffyDiamond,clover8Leaf`，仅从列表中等概率选择。只有一个有效形状时固定使用该形状。
+  - 名称不区分大小写。未知键和形状名称会被忽略，重复项不会增加被选中的概率。未指定形状或列表中没有有效形状时使用 `cookie`；未指定类型或类型未知时使用 `solid`。只有单独传入 `random` 时才会启用全部形状。
+  - 在本次应用会话中，当前配置的选择保持稳定。切换配置或更改有效候选集合时重新选择；刷新未变化的元数据、调整列表顺序、更改填充、界面重建或重新连接都不会重新选择。随机结果不会跨应用启动保存。
+  - 示例：`reclash-powerbutton: shape:puffy,puffyDiamond,clover8Leaf;type:outline`。
 - `reclash-widgets`：逗号分隔的仪表盘卡片。`reclash-background`：图片 URL，可选追加 `,<opacity percent>`。
 - `reclash-settings`：`minimize`、`autorun`、`shadowstart`、`autostart`、`autoupdate`、`openlogs`、`closeconnections`。
 - `reclash-restrictions`：`noglobal` 移除 Global 模式；`androidsecure` 禁止 Android 打开本地端口；`denywidgets` 禁用仪表盘编辑。

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/country_profile.dart';
@@ -26,13 +28,36 @@ final providerHintsProvider = Provider<ProviderHints?>((ref) {
   return metadata == null ? ProviderHints.empty : ProviderHints(metadata);
 });
 
-final providerPowerButtonProvider = Provider<ProviderPowerButton>(
-  (ref) => ref.watch(
-    providerHintsProvider.select(
-      (hints) => hints?.powerButton ?? defaultProviderPowerButton,
-    ),
-  ),
-);
+class ProviderPowerButtonSelection extends Notifier<ProviderPowerButton> {
+  ProviderPowerButtonSelection({math.Random? random})
+    : _random = random ?? math.Random();
+
+  final math.Random _random;
+  int? _profileId;
+  List<ProviderPowerShape> _shapes = const [];
+  ProviderPowerShape _shape = ProviderPowerShape.cookie;
+
+  @override
+  ProviderPowerButton build() {
+    final profileId = ref.watch(currentProfileIdProvider);
+    final hint =
+        ref.watch(providerHintsProvider)?.powerButton ??
+        defaultProviderPowerButtonHint;
+    if (_profileId != profileId || !listEquals(_shapes, hint.shapes)) {
+      _profileId = profileId;
+      _shapes = hint.shapes;
+      _shape = _shapes.length == 1
+          ? _shapes.single
+          : _shapes[_random.nextInt(_shapes.length)];
+    }
+    return (shape: _shape, type: hint.type);
+  }
+}
+
+final providerPowerButtonProvider =
+    NotifierProvider<ProviderPowerButtonSelection, ProviderPowerButton>(
+      ProviderPowerButtonSelection.new,
+    );
 
 final providerRestrictionsProvider = Provider<Set<ProviderRestriction>>(
   (ref) => ref.watch(

@@ -104,19 +104,131 @@ void main() {
     });
 
     test('power button pairs fall back to the default per key', () {
-      expect(_hints({}).powerButton, defaultProviderPowerButton);
-      expect(
-        _hints({
-          'reclash-powerbutton': ['shape:flower;type:outline'],
-        }).powerButton,
-        (shape: ProviderPowerShape.flower, type: ProviderPowerType.outline),
-      );
-      expect(
-        _hints({
-          'reclash-powerbutton': ['shape:bogus;type:tonal;unknown:x'],
-        }).powerButton,
-        (shape: ProviderPowerShape.cookie, type: ProviderPowerType.tonal),
-      );
+      expect(_hints({}).powerButton, defaultProviderPowerButtonHint);
+      final flower = _hints({
+        'reclash-powerbutton': ['shape:flower;type:outline'],
+      }).powerButton;
+      expect(flower.shapes, [ProviderPowerShape.flower]);
+      expect(flower.type, ProviderPowerType.outline);
+      final unknown = _hints({
+        'reclash-powerbutton': ['shape:bogus;type:tonal;unknown:x'],
+      }).powerButton;
+      expect(unknown.shapes, [ProviderPowerShape.cookie]);
+      expect(unknown.type, ProviderPowerType.tonal);
+    });
+
+    test('all power button shapes accept case-insensitive header names', () {
+      expect(ProviderPowerShape.values, hasLength(21));
+      for (final shape in ProviderPowerShape.values) {
+        final hint = _hints({
+          'reclash-powerbutton': [
+            'shape:${shape.name.toUpperCase()};type:bogus',
+          ],
+        }).powerButton;
+        expect(hint.shapes, [shape]);
+        expect(hint.type, ProviderPowerType.solid);
+      }
+    });
+
+    test('random offers every concrete power button shape', () {
+      final hint = _hints({
+        'reclash-powerbutton': [' SHAPE : RaNdOm ; TYPE : OUTLINE '],
+      }).powerButton;
+      expect(hint.shapes, ProviderPowerShape.values);
+      expect(hint.type, ProviderPowerType.outline);
+      expect(() => hint.shapes.clear(), throwsUnsupportedError);
+    });
+
+    test('power button lists ignore unknown names and duplicate weights', () {
+      final hint = _hints({
+        'reclash-powerbutton': [
+          'shape:PuffyDiamond, cookie, unknown, COOKIE, ,clover8Leaf;type:tonal',
+        ],
+      }).powerButton;
+      expect(hint.shapes, [
+        ProviderPowerShape.cookie,
+        ProviderPowerShape.puffyDiamond,
+        ProviderPowerShape.clover8Leaf,
+      ]);
+      expect(hint.type, ProviderPowerType.tonal);
+      expect(() => hint.shapes.clear(), throwsUnsupportedError);
+    });
+
+    test('an empty or unknown power button list keeps the default shape', () {
+      for (final value in ['', ', ,', 'bogus,unknown', 'random,bogus']) {
+        final hint = _hints({
+          'reclash-powerbutton': ['shape:$value;type:outline'],
+        }).powerButton;
+        expect(hint.shapes, [ProviderPowerShape.cookie]);
+        expect(hint.type, ProviderPowerType.outline);
+      }
+    });
+
+    test('power button pools retain only the listed concrete shapes', () {
+      final hint = _hints({
+        'reclash-powerbutton': ['shape:random,puffy,puffy'],
+      }).powerButton;
+      expect(hint.shapes, [ProviderPowerShape.puffy]);
+    });
+
+    test('power button lists survive metadata storage', () {
+      final metadata = readSubscriptionMetadata({
+        'reclash-powerbutton': [
+          'shape:pixelCircle,sharpBurst,softBoom;type:outline',
+        ],
+      }).metadata;
+      final stored = SubscriptionMetadata.fromJson(metadata.toJson());
+      final hint = ProviderHints(stored).powerButton;
+      expect(hint.shapes, [
+        ProviderPowerShape.pixelCircle,
+        ProviderPowerShape.softBoom,
+        ProviderPowerShape.sharpBurst,
+      ]);
+      expect(hint.type, ProviderPowerType.outline);
+    });
+
+    test('shape lists do not relax other pair values', () {
+      for (final headers in [
+        {
+          'reclash-view': ['proxies.type:list,tab'],
+        },
+        {
+          'reclash-powerbutton': ['shape:cookie;type:solid,tonal'],
+        },
+        {
+          'reclash-powerbutton': ['shape:cookie;unknown:one,two'],
+        },
+      ]) {
+        final result = readSubscriptionMetadata(headers);
+        expect(result.metadata.fields, isEmpty);
+        expect(result.warnings, isNotEmpty);
+      }
+    });
+
+    test('stored shape lists reject controls and retain token size limits', () {
+      for (final value in [
+        'cookie,flower\n',
+        'cookie,flower\r',
+        'cookie,flower\t',
+        'cookie,/flower',
+        List.filled(65, 'a').join(),
+        List.filled(1500, 'cookie').join(','),
+      ]) {
+        final metadata = SubscriptionMetadata({
+          'presentation.powerButton': {'shape': value, 'type': 'tonal'},
+        });
+        final stored = SubscriptionMetadata.fromJson(metadata.toJson());
+        expect(stored.pairs('presentation.powerButton'), isEmpty);
+      }
+    });
+
+    test('an explicit pool may include every supported shape', () {
+      final names = ProviderPowerShape.values.map((shape) => shape.name);
+      final hint = _hints({
+        'reclash-powerbutton': ['shape:${names.join(',')};type:tonal'],
+      }).powerButton;
+      expect(hint.shapes, ProviderPowerShape.values);
+      expect(hint.type, ProviderPowerType.tonal);
     });
 
     test('domestic routing names the region optionally', () {

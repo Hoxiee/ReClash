@@ -41,6 +41,38 @@ final _silhouettes = <ProviderPowerShape, _Silhouette>{
   ProviderPowerShape.flower: (polygon: MaterialShapes.flower, symmetry: 8),
   ProviderPowerShape.clover: (polygon: MaterialShapes.clover4Leaf, symmetry: 4),
   ProviderPowerShape.burst: (polygon: MaterialShapes.softBurst, symmetry: 10),
+  ProviderPowerShape.puffy: (polygon: MaterialShapes.puffy, symmetry: 2),
+  ProviderPowerShape.puffyDiamond: (
+    polygon: MaterialShapes.puffyDiamond,
+    symmetry: 4,
+  ),
+  ProviderPowerShape.clover8Leaf: (
+    polygon: MaterialShapes.clover8Leaf,
+    symmetry: 8,
+  ),
+  ProviderPowerShape.cookie4Sided: (
+    polygon: MaterialShapes.cookie4Sided,
+    symmetry: 4,
+  ),
+  ProviderPowerShape.cookie6Sided: (
+    polygon: MaterialShapes.cookie6Sided,
+    symmetry: 6,
+  ),
+  ProviderPowerShape.verySunny: (
+    polygon: MaterialShapes.verySunny,
+    symmetry: 8,
+  ),
+  ProviderPowerShape.square: (polygon: MaterialShapes.square, symmetry: 4),
+  ProviderPowerShape.diamond: (polygon: MaterialShapes.diamond, symmetry: 2),
+  ProviderPowerShape.pentagon: (polygon: MaterialShapes.pentagon, symmetry: 1),
+  ProviderPowerShape.gem: (polygon: MaterialShapes.gem, symmetry: 1),
+  ProviderPowerShape.pixelCircle: (
+    polygon: MaterialShapes.pixelCircle,
+    symmetry: 2,
+  ),
+  ProviderPowerShape.softBoom: (polygon: MaterialShapes.softBoom, symmetry: 16),
+  ProviderPowerShape.boom: (polygon: MaterialShapes.boom, symmetry: 15),
+  ProviderPowerShape.sharpBurst: (polygon: MaterialShapes.burst, symmetry: 12),
 };
 
 final _morphs = <ProviderPowerShape, Morph>{};
@@ -64,8 +96,7 @@ const _greyscale = ColorFilter.matrix([
   0, 0, 0, 1, 0,
 ]);
 
-/// The provider's logo on a plate in the middle of a shape that grows from a
-/// circle into the cookie-9 of a running tunnel.
+/// The logo stays upright while the selected shape grows from a circle.
 class PowerButton extends StatefulWidget {
   const PowerButton({
     super.key,

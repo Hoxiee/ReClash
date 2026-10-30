@@ -26,6 +26,20 @@ enum ProviderPowerShape {
   flower,
   clover,
   burst,
+  puffy,
+  puffyDiamond,
+  clover8Leaf,
+  cookie4Sided,
+  cookie6Sided,
+  verySunny,
+  square,
+  diamond,
+  pentagon,
+  gem,
+  pixelCircle,
+  softBoom,
+  boom,
+  sharpBurst,
 }
 
 /// How the running power button is drawn: filled with the accent, with its
@@ -39,8 +53,18 @@ typedef ProviderPowerButton = ({
   ProviderPowerType type,
 });
 
+typedef ProviderPowerButtonHint = ({
+  List<ProviderPowerShape> shapes,
+  ProviderPowerType type,
+});
+
 const defaultProviderPowerButton = (
   shape: ProviderPowerShape.cookie,
+  type: ProviderPowerType.solid,
+);
+
+const defaultProviderPowerButtonHint = (
+  shapes: [ProviderPowerShape.cookie],
   type: ProviderPowerType.solid,
 );
 
@@ -146,14 +170,25 @@ class ProviderHints {
   ProviderView get view =>
       ProviderView.fromPairs(metadata.pairs('presentation.view'));
 
-  ProviderPowerButton get powerButton {
+  ProviderPowerButtonHint get powerButton {
     final pairs = metadata.pairs('presentation.powerButton');
-    T pick<T extends Enum>(String key, List<T> values) =>
-        values.where((value) => value.name == pairs[key]).firstOrNull ??
-        values.first;
+    final shape = pairs['shape']?.trim().toLowerCase();
+    final names = shape?.split(',').map((name) => name.trim()).toSet();
+    final shapes = shape == 'random'
+        ? ProviderPowerShape.values
+        : [
+            for (final value in ProviderPowerShape.values)
+              if (names?.contains(value.name.toLowerCase()) ?? false) value,
+          ];
     return (
-      shape: pick('shape', ProviderPowerShape.values),
-      type: pick('type', ProviderPowerType.values),
+      shapes: shapes.isEmpty
+          ? defaultProviderPowerButtonHint.shapes
+          : List.unmodifiable(shapes),
+      type:
+          ProviderPowerType.values
+              .where((value) => value.name == pairs['type']?.toLowerCase())
+              .firstOrNull ??
+          ProviderPowerType.solid,
     );
   }
 

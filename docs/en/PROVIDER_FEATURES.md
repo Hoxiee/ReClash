@@ -68,7 +68,12 @@ rcx-scenarios:
 A subscription may set app settings. They apply when the profile is current, without a confirmation, and each carries a "From provider" tag where the user edits it. A setting the user changes stops following the provider until "Return to provider" hands it back, per setting or for the whole profile.
 
 - `reclash-view`: `key:value;...` over `proxies.type`, `proxies.sort`, `proxies.layout`, `proxies.icon`, `proxies.card`, `app.navbar`, `app.tabs`, `app.glass`, `app.color`, `app.style`, `app.black`. Unknown keys and values are ignored.
-- `reclash-powerbutton`: `key:value;...` over `shape` (`cookie`, `circle`, `scallop`, `sunny`, `flower`, `clover`, `burst`) and `type` (`solid`, `tonal`, `outline`) for the simple dashboard's power button while it runs. Only the provider sets it; unknown keys and values are ignored.
+- `reclash-powerbutton`: `key:value;...` for the simple dashboard's running power button. Only the provider sets it; `type` is `solid`, `tonal` or `outline`.
+  - Shapes: `cookie`, `circle`, `scallop`, `sunny`, `flower`, `clover`, `burst`, `puffy`, `puffyDiamond`, `clover8Leaf`, `cookie4Sided`, `cookie6Sided`, `verySunny`, `square`, `diamond`, `pentagon`, `gem`, `pixelCircle`, `softBoom`, `boom`, `sharpBurst`. The existing `burst` remains the soft burst; `sharpBurst` is the sharper silhouette.
+  - Set one shape, use `shape:random` to choose uniformly from all supported shapes, or pass a comma-separated pool such as `shape:puffy,puffyDiamond,clover8Leaf` to choose uniformly from that pool. A one-shape pool is fixed.
+  - Names are case-insensitive. Unknown keys and shape names are ignored, and duplicates do not increase a shape's chance. An absent or entirely invalid shape value falls back to `cookie`; an absent or unknown type falls back to `solid`. `random` selects all shapes only when it is the entire shape value.
+  - The chosen shape stays stable for the current profile in the app session. Switching profiles or changing the valid pool selects again; refreshing unchanged metadata, reordering the pool, changing the fill, rebuilding the screen or reconnecting does not. The random result is not stored between app launches.
+  - Example: `reclash-powerbutton: shape:puffy,puffyDiamond,clover8Leaf;type:outline`.
 - `reclash-widgets`: dashboard cards, comma-separated. `reclash-background`: image URL, optionally `,<opacity percent>`.
 - `reclash-settings`: `minimize`, `autorun`, `shadowstart`, `autostart`, `autoupdate`, `openlogs`, `closeconnections`.
 - `reclash-restrictions`: `noglobal` removes the Global mode, `androidsecure` opens no local ports on Android, `denywidgets` removes dashboard editing.
