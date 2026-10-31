@@ -1,21 +1,24 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import test from 'node:test'
 import { siteSources, synchronizeSite } from '../../tool/site_docs.mjs'
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'reclash-site-docs-'))
-  t.after(() => rmSync(root, { recursive: true, force: true }))
+  const workspace = mkdtempSync(join(tmpdir(), 'reclash-site-docs-'))
+  t.after(() => rmSync(workspace, { recursive: true, force: true }))
+  const root = join(workspace, 'ReClash')
+  mkdirSync(root)
+  mkdirSync(join(workspace, 'reclash-site'))
+  symlinkSync('../reclash-site', join(root, 'site'), 'dir')
   const put = (path, value) => {
     const file = join(root, path)
     mkdirSync(dirname(file), { recursive: true })
     writeFileSync(file, value)
   }
-  put('.gitmodules', '[submodule "site"]\n\tpath = site\n\turl = https://github.com/Hoxiee/reclash-site.git\n')
-  put('site/package.json', '{}')
+  put('site/package.json', '{"name":"reclash-site"}')
   for (const [source, target] of siteSources) {
     put(source, '{"version":1}\n')
     put(`site/${target}`, '{"version":1}\n')
@@ -34,6 +37,18 @@ function fixture(t) {
 test('checks the website exports and source documentation without rewriting them', t => {
   const { root } = fixture(t)
   assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 3 })
+})
+
+test('the sibling checkout works without the shortcut or submodule configuration', t => {
+  const { root } = fixture(t)
+  rmSync(join(root, 'site'))
+  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 3 })
+})
+
+test('a missing sibling checkout reports the required location', t => {
+  const { root } = fixture(t)
+  rmSync(join(root, 'site/package.json'))
+  assert.throws(() => synchronizeSite(root), /Clone Hoxiee\/reclash-site beside ReClash/)
 })
 
 test('stale exports fail a check and only explicit synchronization copies them', t => {
@@ -65,6 +80,6 @@ test('new application chapters require updating the website inventory', t => {
 
 test('the website repository is an explicit integration boundary', t => {
   const { root, put } = fixture(t)
-  put('.gitmodules', '[submodule "site"]\n\tpath = site\n\turl = https://example.test/other.git\n')
-  assert.throws(() => synchronizeSite(root), /Hoxiee\/reclash-site/)
+  put('site/package.json', '{"name":"other-site"}')
+  assert.throws(() => synchronizeSite(root, { write: true }), /sibling website must be the reclash-site repository/)
 })

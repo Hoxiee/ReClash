@@ -149,20 +149,32 @@ void main() {
     );
   });
 
-  test('the website is owned by the pinned ReClash site repository', () {
-    final modules = File('.gitmodules').readAsStringSync();
-    expect(modules, contains('[submodule "site"]'));
-    expect(modules, contains('path = site'));
-    expect(modules, contains('https://github.com/Hoxiee/reclash-site.git'));
-    final builder = File('tool/build_site.sh').readAsStringSync();
-    expect(builder, contains(r'npm --prefix "$root/site" run build'));
-    expect(builder, isNot(contains('render_site.mjs')));
-    final generator = File(
-      'tool/generate_status_icons.dart',
-    ).readAsStringSync();
-    expect(generator, contains('assets/images/icon.png'));
-    expect(generator, contains(r'$sourceDir/glyph.svg'));
-  });
+  test(
+    'the website is an independent sibling repository with a local link',
+    () {
+      final modules = File('.gitmodules').readAsStringSync();
+      expect(modules, isNot(contains('[submodule "site"]')));
+      final target =
+          FileSystemEntity.typeSync('site', followLinks: false) ==
+              FileSystemEntityType.link
+          ? Link('site').targetSync()
+          : File('site').readAsStringSync().trim();
+      expect(target, '../reclash-site');
+      final builder = File('tool/build_site.sh').readAsStringSync();
+      expect(builder, contains(r'site="$root/../reclash-site"'));
+      expect(builder, contains(r'npm --prefix "$site" run build'));
+      expect(
+        File('.github/workflows/site-docs.yaml').readAsStringSync(),
+        contains('repository: Hoxiee/reclash-site'),
+      );
+      expect(builder, isNot(contains('render_site.mjs')));
+      final generator = File(
+        'tool/generate_status_icons.dart',
+      ).readAsStringSync();
+      expect(generator, contains('assets/images/icon.png'));
+      expect(generator, contains(r'$sourceDir/glyph.svg'));
+    },
+  );
   test(
     'TV banner is self-contained vector artwork with an outlined wordmark',
     () {

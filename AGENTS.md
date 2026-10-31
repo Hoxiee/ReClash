@@ -17,7 +17,7 @@ Read these only when the task touches their area:
   local plugins.
 - [.agents/setting-changes.md](.agents/setting-changes.md): whether a changed setting is patched live, re-applies the
   profile, or asks for an Android VPN restart.
-- [.agents/site-documentation.md](.agents/site-documentation.md): the website submodule, documentation updates alongside
+- [.agents/site-documentation.md](.agents/site-documentation.md): the sibling website repository, documentation updates alongside
   public behavior changes, source snapshots, schema synchronization, and website checks.
 - [.agents/surfaces.md](.agents/surfaces.md): fill levels, selection and status colors, and the few borders that
   remain, for any change to how a surface is colored.
@@ -37,7 +37,7 @@ Read these only when the task touches their area:
   summary, not part of the change. Edit a file surgically when a rewrite would give the same result, keep scratch checks
   out of the repository, and commit tests only where the task asks for them or the neighbouring code already keeps them.
 - Public behavior changes include the affected website documentation in the same task. Read `.agents/site-documentation.md`
-  and `site/AGENTS.md`; keep canonical documents, website snapshots and exported schemas aligned. If documentation is
+  and `../reclash-site/AGENTS.md`; keep canonical documents, website snapshots and exported schemas aligned. If documentation is
   unaffected or a source commit is not authorized, report that explicitly rather than silently leaving the site stale.
   The site is a separate repository: committing or pushing the application never authorizes a website commit or deploy.
 - Comments are allowed and sometimes necessary; excess is the problem. A comment must carry something the code cannot

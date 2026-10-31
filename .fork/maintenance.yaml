@@ -77,7 +77,7 @@ paths:
   'site':
     kind: platform
     checks: [site-docs, site-build, site-browser]
-    reason: The pinned Nuxt website requires its own source-parity, static-build and browser checks.
+    reason: The sibling Nuxt website requires its own source-parity, static-build and browser checks.
   'site/**':
     kind: platform
     checks: [site-docs, site-build, site-browser]

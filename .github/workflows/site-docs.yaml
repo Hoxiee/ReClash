@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - 'site'
-      - '.gitmodules'
       - 'docs/**'
       - 'provider_standard.g.json'
       - 'provider-policy.schema.json'
@@ -15,7 +14,6 @@ on:
   pull_request:
     paths:
       - 'site'
-      - '.gitmodules'
       - 'docs/**'
       - 'provider_standard.g.json'
       - 'provider-policy.schema.json'
@@ -31,21 +29,29 @@ permissions:
 jobs:
   documentation:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ReClash
     steps:
       - uses: actions/checkout@v4
-      - run: git submodule update --init -- site
+        with:
+          path: ReClash
+      - uses: actions/checkout@v4
+        with:
+          repository: Hoxiee/reclash-site
+          path: reclash-site
       - uses: actions/setup-node@v4
         with:
-          node-version-file: site/.node-version
+          node-version-file: reclash-site/.node-version
           cache: npm
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: reclash-site/package-lock.json
       - run: node --test test/tool/site_docs_test.mjs
       - run: node tool/site_docs.mjs --check
       - run: npm ci
-        working-directory: site
+        working-directory: reclash-site
       - run: npm run check
-        working-directory: site
+        working-directory: reclash-site
       - run: npx playwright install --with-deps chromium
-        working-directory: site
+        working-directory: reclash-site
       - run: npm run test:e2e
-        working-directory: site
+        working-directory: reclash-site

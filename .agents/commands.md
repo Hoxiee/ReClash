@@ -408,24 +408,25 @@ while `v<pubspec version>` is still tagged it refuses to collect anything and th
 
 ### Website
 
-`site/` is the pinned `Hoxiee/reclash-site` submodule. Its Nuxt site is built and deployed by that repository, not by the
-application release jobs. Public behavior changes include the affected website documentation; read
+`../reclash-site/` is the independent `Hoxiee/reclash-site` repository; `site` is a relative symlink to it for local
+navigation. Its Nuxt site is built and deployed by that repository, not by the application release jobs. Public behavior changes include the affected website documentation; read
 [site-documentation.md](site-documentation.md) for canonical sources, snapshot synchronization and separate commit/push
-boundaries. Read `site/AGENTS.md` before editing website code.
+boundaries. Read `../reclash-site/AGENTS.md` before editing website code.
 
 ```bash
-git submodule update --init -- site
-npm --prefix site ci
+git clone https://github.com/Hoxiee/reclash-site.git ../reclash-site
+npm --prefix ../reclash-site ci
 node tool/site_docs.mjs --sync
 node tool/site_docs.mjs --check
-npm --prefix site run check
-npm --prefix site run test:e2e
+npm --prefix ../reclash-site run check
+npm --prefix ../reclash-site run test:e2e
 ```
 
-`tool/build_site.sh` delegates to the Nuxt build and produces `site/.output/public` without deleting a caller-supplied
-output path. Preview the generated site with `npm --prefix site run preview`; live development uses
-`npm --prefix site run dev`. Neither command deploys it. A locally committed website revision must be pushed under
-separate authority before another checkout or CI can fetch the application's new gitlink.
+Clone only when the sibling checkout is absent; keep an existing checkout on its working branch.
+`tool/build_site.sh` delegates to the Nuxt build and produces `../reclash-site/.output/public` without deleting a
+caller-supplied output path. Preview the generated site with `npm --prefix ../reclash-site run preview`; live development uses
+`npm --prefix ../reclash-site run dev`. Neither command deploys it. The documentation workflow checks out the website's default branch alongside the app.
+Local changes in either repository need their own publication authority before CI can verify them together.
 
 Fork Atlas is a separate, loopback-only maintenance tool, not public website content:
 

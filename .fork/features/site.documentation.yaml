@@ -3,7 +3,7 @@ kind: feature
 state: active
 risk: routine
 must:
-  repository: The public website is the pinned Hoxiee/reclash-site submodule; application checkout and checks never deploy it or silently advance its revision.
+  repository: The public website is the independent sibling ../reclash-site repository, exposed locally by the site symlink; application setup and checks never deploy it or silently advance its working branch.
   documentation: Public behavior changes update the affected website documentation in the same task. RCX prose has one application source and a verifiable website snapshot; provider exports and schemas stay identical.
   presentation: Documentation reuses the website's Markdown compiler, typed components, local search, localized routes and visual language rather than introducing a parallel engine.
 watch: ['site', 'site/**', .gitmodules, Makefile, '.agents/site-documentation.md', tool/build_site.sh, tool/site_docs.mjs, test/tool/site_docs_test.mjs, '.github/workflows/site-docs.yaml', 'docs/**', provider_standard.g.json, provider-policy.schema.json, rcx-profile.schema.json]

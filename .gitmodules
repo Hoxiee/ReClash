@@ -2,6 +2,3 @@
 	path = core/mihomo
 	url = https://github.com/Hoxiee/mihomo.git
 	branch = ReClash
-[submodule "site"]
-	path = site
-	url = https://github.com/Hoxiee/reclash-site.git

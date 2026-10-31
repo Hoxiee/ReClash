@@ -6,7 +6,7 @@ must:
   application: About, setup wizard and desktop integrations use the current glyph on the established icon paths; Windows ICOs have no background.
   mark: Android vectors and normal tray sources retain the shared three-bar mark, with monochrome themed and notification icons.
   launcher: Android adaptive foreground and monochrome layers stay centered with padding inside the 66 dp circular safe zone.
-  website: The pinned Hoxiee/reclash-site repository owns the public site's three-bar mark and its visual verification; the application does not duplicate its renderer.
+  website: The independent sibling Hoxiee/reclash-site repository owns the public site's three-bar mark and its visual verification; the application does not duplicate its renderer.
   television: TV uses a full-bleed 320x180 launcher banner from self-contained vector artwork with an outlined ReClash wordmark.
 watch:
   - assets_source/images/icon/**

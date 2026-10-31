@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -11,7 +10,6 @@ export const siteSources = [
   ['rcx-profile.schema.json', 'public/schemas/rcx-profile.schema.json'],
 ]
 
-const repository = 'https://github.com/Hoxiee/reclash-site.git'
 const languages = ['en', 'ru', 'zh-CN']
 const hash = bytes => createHash('sha256').update(bytes).digest('hex')
 
@@ -25,11 +23,10 @@ function markdownFiles(directory, prefix = '') {
 }
 
 export function synchronizeSite(root, { write = false } = {}) {
-  const site = join(root, 'site')
-  assert.ok(existsSync(join(site, 'package.json')), 'Initialize the website: git submodule update --init -- site')
-  const setting = key => execFileSync('git', ['config', '-f', join(root, '.gitmodules'), '--get', `submodule.site.${key}`], { encoding: 'utf8' }).trim()
-  assert.equal(setting('url'), repository, 'The website submodule must use Hoxiee/reclash-site')
-  assert.equal(setting('path'), 'site')
+  const site = resolve(root, '../reclash-site')
+  const manifest = join(site, 'package.json')
+  assert.ok(existsSync(manifest), 'Clone Hoxiee/reclash-site beside ReClash at ../reclash-site')
+  assert.equal(JSON.parse(readFileSync(manifest, 'utf8')).name, 'reclash-site', 'The sibling website must be the reclash-site repository')
   const failures = []
   for (const [source, target] of siteSources) {
     const bytes = readFileSync(join(root, source))
@@ -39,7 +36,7 @@ export function synchronizeSite(root, { write = false } = {}) {
       mkdirSync(dirname(destination), { recursive: true })
       writeFileSync(destination, bytes)
     } else {
-      failures.push(`${source} differs from site/${target}; run node tool/site_docs.mjs --sync`)
+      failures.push(`${source} differs from ../reclash-site/${target}; run node tool/site_docs.mjs --sync`)
     }
   }
 
@@ -55,7 +52,7 @@ export function synchronizeSite(root, { write = false } = {}) {
     const source = join(root, 'docs', language, 'auto-routing', ...parts)
     const destination = join(content, file)
     if (!existsSync(destination) || hash(readFileSync(source)) !== catalogue.files[file] || hash(readFileSync(destination)) !== catalogue.files[file]) {
-      failures.push(`RCX ${file} is stale; after committing its source, run npm --prefix site run docs:sync -- "${root}"`)
+      failures.push(`RCX ${file} is stale; after committing its source, run npm --prefix ../reclash-site run docs:sync -- "${root}"`)
     }
   }
   assert.equal(failures.length, 0, failures.join('\n'))
