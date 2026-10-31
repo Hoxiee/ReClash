@@ -90,7 +90,8 @@ class _ThemeViewState extends ConsumerState<ThemeView>
       'theme.themeColor' ||
       'theme.pureBlackMode' ||
       'theme.colorContrast' ||
-      'theme.appIcon' => 0,
+      'theme.appIcon' ||
+      'theme.trayIcon' => 0,
       _ => 2,
     };
   }
@@ -340,6 +341,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
           const SizedBox(height: 16),
           const _ContrastItem(),
           const _AppIconItem(),
+          const _TrayIconItem(),
         ],
       ),
       1 => const WallpaperView(),
@@ -380,7 +382,6 @@ class _ThemeViewState extends ConsumerState<ThemeView>
           const _FontFamilyItem(),
           const SizedBox(height: 16),
           const _TextScaleFactorItem(),
-          const _TrayIconItem(),
         ],
       ),
     };

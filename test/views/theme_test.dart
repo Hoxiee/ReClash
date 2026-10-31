@@ -963,6 +963,87 @@ void main() {
       }
     });
 
+    testWidgets(
+      'tray icon choices live on the theme tab and retain their value',
+      (tester) async {
+        await pumpThemeView(tester);
+        final trayIcon = find.byWidgetPredicate(
+          (widget) =>
+              widget is SettingTarget && widget.spec.id == 'theme.trayIcon',
+        );
+        expect(
+          find.descendant(of: page('theme'), matching: trayIcon),
+          findsOneWidget,
+        );
+
+        for (final (label, style) in [
+          ('Color', TrayIconStyle.color),
+          ('White', TrayIconStyle.light),
+          ('Black', TrayIconStyle.dark),
+        ]) {
+          final choice = find.descendant(
+            of: trayIcon,
+            matching: find.text(label),
+          );
+          await tester.ensureVisible(choice);
+          await tester.tap(choice);
+          await tester.pumpAndSettle();
+          expect(container.read(appSettingProvider).trayIconStyle, style);
+        }
+
+        await tester.tap(destination('Interface'));
+        await tester.pumpAndSettle();
+        expect(trayIcon, findsNothing);
+        await tester.tap(destination('Theme'));
+        await tester.pumpAndSettle();
+        expect(trayIcon, findsOneWidget);
+        expect(
+          tester
+              .widget<PreviewChoiceGroup<TrayIconStyle>>(
+                find.byType(PreviewChoiceGroup<TrayIconStyle>),
+              )
+              .value,
+          TrayIconStyle.dark,
+        );
+        expect(tester.takeException(), isNull);
+      },
+      skip: !Platform.isLinux && !Platform.isWindows,
+    );
+
+    testWidgets(
+      'tray icon search switches from interface to theme and focuses its setting',
+      (tester) async {
+        final reveal = ValueNotifier<(String?, int)>(('theme.textScale', 0));
+        addTearDown(reveal.dispose);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: TestApp(
+              child: ValueListenableBuilder(
+                valueListenable: reveal,
+                builder: (_, request, _) => SettingsRevealScope(
+                  targetId: request.$1,
+                  nonce: request.$2,
+                  child: const ThemeView(),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(page('interface'), findsOneWidget);
+
+        reveal.value = ('theme.trayIcon', 1);
+        await tester.pumpAndSettle();
+        expect(page('theme'), findsOneWidget);
+        expect(page('interface'), findsNothing);
+        expect(find.text('Tray icon').hitTestable(), findsOneWidget);
+        expect(focusOf(tester, 'theme.trayIcon').hasPrimaryFocus, isTrue);
+        expect(tester.takeException(), isNull);
+      },
+      skip: !Platform.isLinux && !Platform.isWindows,
+    );
+
     testWidgets('search reveal selects the tab and focuses its setting', (
       tester,
     ) async {
