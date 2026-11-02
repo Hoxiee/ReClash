@@ -245,14 +245,15 @@ class AddProfileMenu extends ConsumerWidget {
   }
 }
 
-class _SendFromPhoneDialog extends StatefulWidget {
+class _SendFromPhoneDialog extends ConsumerStatefulWidget {
   const _SendFromPhoneDialog();
 
   @override
-  State<_SendFromPhoneDialog> createState() => _SendFromPhoneDialogState();
+  ConsumerState<_SendFromPhoneDialog> createState() =>
+      _SendFromPhoneDialogState();
 }
 
-class _SendFromPhoneDialogState extends State<_SendFromPhoneDialog> {
+class _SendFromPhoneDialogState extends ConsumerState<_SendFromPhoneDialog> {
   LinkReceiver? _receiver;
   bool _failed = false;
 
@@ -264,13 +265,19 @@ class _SendFromPhoneDialogState extends State<_SendFromPhoneDialog> {
 
   Future<void> _start() async {
     final appLocalizations = currentAppLocalizations;
-    final receiver = await LinkReceiver.start((
-      title: appLocalizations.sendFromPhonePageTitle,
-      hint: appLocalizations.sendFromPhonePageHint,
-      send: appLocalizations.send,
-      sent: appLocalizations.sendFromPhonePageSent,
-      invalid: appLocalizations.invalidLinkTip,
-    )).catchError((Object _) => null);
+    final receiver = await LinkReceiver.start(
+      (
+        title: appLocalizations.sendFromPhonePageTitle,
+        hint: appLocalizations.sendFromPhonePageHint,
+        send: appLocalizations.send,
+        sent: appLocalizations.sendFromPhonePageSent,
+        invalid: appLocalizations.invalidLinkTip,
+      ),
+      palette: (
+        light: ref.read(genColorSchemeProvider(Brightness.light)),
+        dark: ref.read(genColorSchemeProvider(Brightness.dark)),
+      ),
+    ).catchError((Object _) => null);
     if (!mounted) {
       unawaited(receiver?.close());
       return;
