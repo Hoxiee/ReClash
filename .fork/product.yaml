@@ -1,0 +1,12 @@
+v: 1
+identity:
+  empty-states:
+    preserve: Keep ReClash's current semantic empty-state illustrations, expressive replay and coordinated entrance motion while adapting technical compatibility separately.
+    why: The maintainer prefers the current NullStatus presentation to the newer upstream alternative; inherited upstream behavior can be a deliberate ReClash product choice too.
+    watch: [lib/ui/null_status.dart, lib/widgets/null_status.dart, test/widgets/null_status_test.dart]
+surfaces:
+  presentation: ['lib/ui/**', 'lib/widgets/**', 'lib/views/**', 'lib/pages/**', 'lib/features/**']
+  interaction: [lib/application.dart, lib/bootstrap.dart, 'lib/providers/**', 'lib/manager/**']
+  assets: ['assets/**', 'arb/**', 'arb_upstream/**', 'plugins/**/assets/**']
+  dependencies: [pubspec.yaml, pubspec.lock]
+  platform: ['android/**', 'ios/**', 'macos/**', 'windows/**', 'linux/**', 'plugins/**']

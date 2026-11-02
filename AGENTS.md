@@ -81,6 +81,10 @@ Read these only when the task touches their area:
 
 - Before editing, run `dart run tool/fork.dart context --paths <path>`; update affected contracts when intent changes.
 - Unknown paths are unclassified; critical decisions require explicit review, not a clean merge.
+- Before upstream replay, lead the operation: explain incoming changes and expected product outcomes, recommend choices,
+  provide concrete checklists, and integrate the maintainer's parallel findings beyond existing contracts. Preserve the
+  decisions in product reviews and verify candidate outcomes; clean replay and green tests do not approve visual or interaction changes. The maintainer performs visual
+  testing personally: prepare the checklist and recommendation, then record the actual manual verdict, not an inferred one.
 - For vendor sync or maintenance policy, load `fork-maintenance`; details: [.agents/fork-maintenance.md](.agents/fork-maintenance.md).
 
 ## Routine Delegation

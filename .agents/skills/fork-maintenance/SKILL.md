@@ -17,16 +17,42 @@ permits preparation, not commits or acceptance. Never invent `--reviewed` labels
 `dev` is a linear downstream replay above the current product base. Accept replaces development history, not a merge.
 Keep release tags unchanged. Never merge an old product base back into the new development line.
 
+## Product Decisions
+
+Lead the operation proactively: inventory and explain incoming changes, forecast the resulting ReClash behavior, recommend
+choices, and give the maintainer concrete comparison checklists. Own the technical checks, review JSON, open questions,
+progress checkpoints and next permitted step; do not wait for the maintainer to discover the changes or manage the process.
+Integrate their parallel findings, investigate indirect effects, and reopen affected decisions or evidence when needed.
+
+Before release replay, read `.fork/product.yaml` and generate `--json review --source <local-raw-oid>` (with `--after` for a
+recipe chain). Compare the accepted upstream, current committed ReClash and incoming upstream, including inherited behavior
+and unclassified or indirect UI changes. Group the full inventory into meaningful cards; give a recommendation, benefits,
+losses, alternatives and evidence. Ask about material or uncertain product changes even when no contract or merge conflict
+flags them. Do not prefer a variant merely because it is newer or downstream-owned. Routine nonvisual changes need a
+reasoned classification, not a maintainer question for each file.
+
+Record actual maintainer choices and evidence in the review; generated placeholders, test passes and silence grant nothing.
+The maintainer performs visual testing personally. Prepare the comparison checklist and recommendation, then wait for the
+manual verdict; `visual.status: checked` needs that verdict in `visual.approval`. A referenced manual confirmation is visual
+evidence, without mandatory screenshots or automatic golden acceptance. Reconfirm the exact candidate after replay.
+Use `sync prepare --product-review <plan.json>` for the exact reviewed source. `defer` requires explicit investigative
+permission and cannot pass verification. After assembly, `--json review --id <id>` adds candidate changes and pending
+outcomes. Confirm the chosen result with current evidence, recording visual checks, reasoned exclusions and authorized
+waivers honestly. Changed decisions need renewed approval. Supply `--product-review <result.json>` to `sync verify`;
+missing, unresolved or stale outcomes block acceptance. Full card schema and evidence rules are in the protocol.
+
 ## Required Sequence
 
 1. Read captured refs, caller state, exact released raw commit and normalization policy. Use `bootstrap --inspect`
-   only for the first audited baseline; existing initialized history uses `sync prepare`.
+   only for the first audited baseline; existing initialized history uses product review before `sync prepare`.
 2. Inspect `--json report` and contract dependencies; separate identity/storage/privacy/lifecycle/Core/policy decisions
    for authorized review. Preserve downstream release metadata and engine-source ownership.
-3. Prepare once with a unique descriptive ID, for example `flclash-v0.9.2-20261024`. Resolve replay in the assigned
-   candidate; do not change accepted development/vendor/product-base refs. Do not reuse observation IDs.
+3. Prepare once with a unique descriptive ID, for example `flclash-v0.9.2-20261024`, and the completed product-review file
+   for an ordinary release. Resolve replay according to the recorded decisions in the assigned candidate; do not change
+   accepted development/vendor/product-base refs. Do not reuse observation IDs.
 4. If normalization changed, prepare a standalone recipe migration on the accepted raw source with its reviewed audit.
-   Finish that candidate first. Prepare the release child with `sync prepare --id <child> --source <raw> --after <recipe>`.
+   Finish that candidate first. Review the release with `review --source <raw> --after <recipe>`, then prepare the child with
+   `sync prepare --id <child> --after <recipe> --product-review <plan.json>`.
    The predecessor must be clean, committed, standalone and unaccepted, with matching policy, refs and verified bundle.
    Do not accept the recipe separately once a child captures it. Multi-hop chains are unsupported.
 5. Run focused checks per cluster; commit only with authority. A changed policy invalidates preparation: reconcile

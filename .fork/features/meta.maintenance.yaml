@@ -7,6 +7,7 @@ must:
   provenance: Vendor trees retain the observed source identity and upstream gitlink values.
   skill-entry: The Claude maintenance skill resolves to the checked-in canonical agent skill.
   observability: Status and reports are read-only, distinguish missing evidence from successful checks, and never grant authority.
+  product-review: Release replay records a three-way product review with complete path coverage, expected outcomes and checklists; verification and acceptance block unresolved decisions, missing or stale candidate evidence, unconfirmed maintainer visual verdicts, and changed decisions without renewed authority.
   chain-acceptance: Chain verification binds the exact standalone recipe predecessor and includes its impact; acceptance preserves original development before moving refs and remains resumable.
   archive-retention: Accepted syncs retain the latest two managed archive/dev-before-<sync-id> branches; only receipt-owned matching refs are pruned, after successful acceptance, with recovery bundles preserved.
   history: Each sync candidate uses a parentless product base matching the prepared vendor tree; downstream history is linear above it.
@@ -14,5 +15,5 @@ watch: ['.fork/**', 'tool/fork.dart', 'tool/src/fork/**', 'tool/fork_atlas/**', 
 checks:
   fork-atlas-model: [observability]
   fork-atlas-server: [observability]
-  fork-tests: [preserve, provenance, skill-entry, history, observability, chain-acceptance, archive-retention]
+  fork-tests: [preserve, provenance, skill-entry, history, observability, product-review, chain-acceptance, archive-retention]
   generated-contracts: [observability]

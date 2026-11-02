@@ -25,6 +25,10 @@ void main(List<String> arguments) {
     ..addOption('to', mandatory: true);
   parser.addCommand('status').addOption('id', mandatory: true);
   parser.addCommand('lineage').addOption('id', mandatory: true);
+  parser.addCommand('review')
+    ..addOption('source')
+    ..addOption('after')
+    ..addOption('id');
   parser.addCommand('report')
     ..addFlag('changed', negatable: false)
     ..addOption('from')
@@ -46,12 +50,14 @@ void main(List<String> arguments) {
     ..addOption('source')
     ..addFlag('recipe-migration', negatable: false)
     ..addOption('audit')
-    ..addOption('after');
+    ..addOption('after')
+    ..addOption('product-review');
   sync.addCommand('status').addOption('id', mandatory: true);
   sync.addCommand('verify')
     ..addOption('id', mandatory: true)
     ..addMultiOption('reviewed')
-    ..addMultiOption('waive-check');
+    ..addMultiOption('waive-check')
+    ..addOption('product-review');
   sync.addCommand('accept').addOption('id', mandatory: true);
   try {
     final options = parser.parse(arguments);
@@ -125,6 +131,16 @@ void main(List<String> arguments) {
           'changes': git.changes(from, to),
           'clusters': clusters(registry, paths),
         };
+      case 'review':
+        final source = command.option('source');
+        final id = command.option('id');
+        if ((source == null) == (id == null) ||
+            (id != null && command.option('after') != null)) {
+          reject('Choose --source with optional --after, or --id');
+        }
+        output = id == null
+            ? service.reviewSource(source!, after: command.option('after'))
+            : service.reviewCandidate(id);
       case 'lineage':
         output = MaintenanceReport(registry).lineage(command.option('id')!);
       case 'status':
@@ -216,12 +232,14 @@ void main(List<String> arguments) {
             recipeMigration: action.flag('recipe-migration'),
             audit: action.option('audit'),
             after: action.option('after'),
+            productReview: action.option('product-review'),
           ),
           'status' => MaintenanceReport(registry).status(id),
           'verify' => service.verify(
             id,
             reviews: action.multiOption('reviewed'),
             waivers: action.multiOption('waive-check'),
+            productReview: action.option('product-review'),
           ),
           'accept' => service.accept(id),
           _ => reject('Unknown sync command'),

@@ -108,7 +108,7 @@ checks:
   routing-ui:
     argv: [flutter, test, test/views/proxies/routing_test.dart]
   fork-tests:
-    argv: [flutter, test, test/tool/fork_registry_test.dart, test/tool/fork_context_test.dart, test/tool/fork_normalize_test.dart, test/tool/fork_sync_test.dart, test/tool/fork_chain_test.dart, test/tool/fork_report_test.dart, test/tool/generated_contracts_test.dart, test/tool/database_schema_tool_test.dart, test/tool/check_format_test.dart]
+    argv: [flutter, test, test/tool/fork_registry_test.dart, test/tool/fork_context_test.dart, test/tool/fork_normalize_test.dart, test/tool/fork_sync_test.dart, test/tool/fork_chain_test.dart, test/tool/fork_report_test.dart, test/tool/fork_product_review_test.dart, test/tool/generated_contracts_test.dart, test/tool/database_schema_tool_test.dart, test/tool/check_format_test.dart]
   pub:
     argv: [dart, tool/prepare.dart]
   analyze:

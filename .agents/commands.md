@@ -531,6 +531,10 @@ For a pushed review branch with multiple commits, squash-merge it instead of rew
 
 - `dart run tool/fork.dart check`: validate contract/maintenance schema and show gaps; not readiness.
 - `dart run tool/fork.dart --json report --changed`: owners, invariants, dependencies and check commands.
+- `dart run tool/fork.dart --json review --source <local-raw-oid>`: read-only three-way product-review draft; `--after <recipe-id>` includes the recipe predecessor.
+- `dart run tool/fork.dart sync prepare --id <id> --product-review <plan.json>`: replay the exact reviewed source with archived choices; no implicit fetch.
+- `dart run tool/fork.dart --json review --id <id>`: candidate outcome-review draft, including additional changes introduced during replay.
+- `dart run tool/fork.dart sync verify --id <id> --product-review <result.json> --reviewed <authorized-label>`: bind product outcomes and mapped checks to the committed candidate.
 - `dart run tool/fork.dart --json status --id <id>`: read-only candidate blockers and evidence freshness.
 - `dart run tool/fork.dart --json lineage --id <id>`: captured observation ancestry.
 - `dart run tool/database_schema.dart inspect <db>` / `diff <before> <after>`: read-only SQLite shape inspection.

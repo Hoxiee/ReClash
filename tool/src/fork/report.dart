@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 
 import 'git.dart';
 import 'model.dart';
+import 'product_review.dart';
 import 'registry.dart';
 import 'sync.dart';
 
@@ -15,6 +16,7 @@ class MaintenanceReport {
   ForkGit get git => registry.git;
 
   Map<String, dynamic> policy() {
+    sync.productReviews.policy();
     final file = File(p.join(git.root, '.fork/maintenance.yaml'));
     if (!file.existsSync()) return {};
     final data = yamlObject(
@@ -325,6 +327,10 @@ class MaintenanceReport {
         ? <String, dynamic>{}
         : object(r['verified'], 'verified');
     final current = Registry(target);
+    final productReview = sync.productReviewStatus(r, head);
+    blockers.addAll(
+      strings(productReview['blockers'], 'product review blockers'),
+    );
     final currentVerification =
         blockers.isEmpty &&
         current.fingerprint == registry.fingerprint &&
@@ -337,6 +343,9 @@ class MaintenanceReport {
         verified['tree'] == target.tree(head) &&
         verified['registry'] == registry.fingerprint &&
         verified['normalizer'] == sync.normalizer.fingerprint &&
+        (!sync.requiresProductReview(r) ||
+            verified['productReview'] ==
+                productReviewDigest(r['productReviewResult'])) &&
         dirty.isEmpty;
     if (!currentVerification) blockers.add('Verification missing or stale');
     final changed = target.changed(r['preparedBase'] as String, head);
@@ -416,6 +425,7 @@ class MaintenanceReport {
             id: registry.features[id]!.uncovered,
       },
       'verification': currentVerification ? 'current' : 'missing-or-stale',
+      'productReview': productReview,
       'reviews': [
         for (final review in reviews)
           {
@@ -530,6 +540,21 @@ String renderMaintenanceMarkdown(Map<String, dynamic> report) {
       out.writeln('\n## $name\n');
       for (final value in report[name] as List) {
         out.writeln('- ${cell(value)}');
+      }
+    }
+  }
+  if (report['productReview'] is Map) {
+    final product = object(report['productReview'], 'product review');
+    out.writeln('\n## Product review\n\nStatus: ${cell(product['status'])}\n');
+    for (final value in (product['cards'] ?? []) as List) {
+      final card = object(value, 'card');
+      out.writeln(
+        '- **${cell(card['id'])}**: ${cell(card['decision'])}; visual: ${cell(card['visual'])}; outcome: ${cell(card['outcome'])}',
+      );
+      out.writeln('  Expected: ${cell(card['expected'])}');
+      out.writeln('  Recommendation: ${cell(card['recommendation'])}');
+      for (final check in strings(card['checklist'], 'product checklist')) {
+        out.writeln('  - Check: ${cell(check)}');
       }
     }
   }

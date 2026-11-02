@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'git.dart';
 import 'model.dart';
 import 'normalize.dart';
+import 'product_review.dart';
 import 'registry.dart';
 
 class VendorSync {
@@ -80,6 +81,163 @@ class VendorSync {
     };
   }
 
+  ProductReview get productReviews => ProductReview(registry);
+
+  bool requiresProductReview(Map<String, dynamic> r) =>
+      productReviews.enabled &&
+      r['bootstrap'] != true &&
+      r['recipeMigration'] != true;
+
+  Map<String, dynamic> reviewSource(String source, {String? after}) {
+    if (!productReviews.enabled) reject('Declare .fork/product.yaml first');
+    sourceIdentity();
+    final predecessor = after == null ? null : chainPredecessor(after);
+    final vendor = git.oid(vendorRef);
+    final productBase = git.oid(productBaseRef);
+    assertProductBase(productBase, vendor);
+    final observed = predecessor?['prepared'] as String? ?? vendor;
+    if (provenance(observed)['Normalizer'] != normalizer.fingerprint) {
+      reject('Review and prepare the normalization recipe migration first');
+    }
+    return productReviewDraft({
+      'dev': git.oid(devRef),
+      'vendor': vendor,
+      'productBase': productBase,
+      'source': git.oid(source),
+      'after': ?predecessor,
+    });
+  }
+
+  Map<String, dynamic> reviewCandidate(String id) {
+    final r = receipt(id);
+    assertInputs(r);
+    if (!requiresProductReview(r)) {
+      reject('This observation does not require a release product review');
+    }
+    final target = ForkGit(text(r['worktree'], 'worktree'));
+    if (target.common != git.common ||
+        target.run(['symbolic-ref', '-q', 'HEAD']).trim() !=
+            'refs/heads/sync/$id') {
+      reject('Candidate repository or branch changed');
+    }
+    return productReviewDraft(
+      r,
+      candidate: target.oid('HEAD'),
+      previous: object(r['productReview'], 'pre-replay product review'),
+    );
+  }
+
+  Map<String, dynamic> productReviewDraft(
+    Map<String, dynamic> r, {
+    NormalizedTree? incoming,
+    String? candidate,
+    Map<String, dynamic>? previous,
+  }) {
+    final predecessor = r['after'] == null ? null : object(r['after'], 'after');
+    final baseline = (predecessor?['prepared'] ?? r['vendor']) as String;
+    final downstream = (predecessor?['candidate'] ?? r['dev']) as String;
+    final source = text(r['source'], 'source');
+    return productReviews.draft(
+      inputs: {
+        'dev': r['dev'],
+        'vendor': r['vendor'],
+        'productBase': r['productBase'],
+        'source': source,
+        'sourceTree': git.tree(source),
+        'registry': registry.fingerprint,
+        'normalizer': normalizer.fingerprint,
+        'after': predecessor,
+      },
+      incoming:
+          incoming ??
+          (r['prepared'] == null
+              ? normalizer.apply(source)
+              : NormalizedTree(
+                  git,
+                  git.entries(r['prepared'] as String),
+                  {},
+                  [],
+                )),
+      baseline: baseline,
+      downstream: downstream,
+      rawPaths: git.changed(provenance(baseline)['Upstream-Commit']!, source),
+      pathMappings: object(normalizer.recipe['paths'], 'normalization paths'),
+      predecessorPaths: predecessor == null
+          ? const []
+          : strings(receipt(predecessor['id'] as String)['paths'], 'paths'),
+      candidate: candidate,
+      previous: previous,
+    );
+  }
+
+  Map<String, dynamic> readProductReview(String path) =>
+      readJson(File(p.isAbsolute(path) ? path : p.join(git.root, path)));
+
+  void assertProductPlan(Map<String, dynamic> r) {
+    if (!requiresProductReview(r)) return;
+    final review = r['productReview'] == null
+        ? null
+        : object(r['productReview'], 'product review');
+    if (review == null ||
+        productReviewDigest(review) != r['productReviewDigest']) {
+      reject('Pre-replay product review is missing or changed');
+    }
+    productReviews.requireComplete(
+      review,
+      productReviewDraft(r),
+      result: false,
+    );
+  }
+
+  Map<String, dynamic> productReviewStatus(
+    Map<String, dynamic> r,
+    String candidate,
+  ) {
+    if (!requiresProductReview(r)) {
+      return {
+        'status': productReviews.enabled
+            ? 'separate-baseline-audit'
+            : 'not-configured',
+        'blockers': <String>[],
+      };
+    }
+    try {
+      assertProductPlan(r);
+      final resultReview = r['productReviewResult'] == null
+          ? null
+          : object(r['productReviewResult'], 'product result review');
+      final expected = productReviewDraft(
+        r,
+        candidate: candidate,
+        previous: object(r['productReview'], 'pre-replay product review'),
+      );
+      final report = productReviews.assess(
+        resultReview ?? expected,
+        expected,
+        result: true,
+      );
+      if (resultReview == null) {
+        report['status'] = 'missing';
+        (report['blockers'] as List<String>).insert(
+          0,
+          'Product result review is missing',
+        );
+      }
+      if (resultReview != null) {
+        productReviews.requireDecisionContinuity(
+          object(r['productReview'], 'pre-replay product review'),
+          resultReview,
+        );
+      }
+      return report;
+    } on ForkException catch (error) {
+      return {
+        'status': 'invalid',
+        'blockers': [error.message],
+      };
+    }
+  }
+
   Map<String, dynamic> prepare(
     String id, {
     String? source,
@@ -87,6 +245,7 @@ class VendorSync {
     String? audit,
     bool recipeMigration = false,
     String? after,
+    String? productReview,
   }) {
     identifier(id);
     if (after != null && (bootstrap || recipeMigration || audit != null)) {
@@ -95,6 +254,27 @@ class VendorSync {
       );
     }
     final predecessor = after == null ? null : chainPredecessor(after);
+    final productPlan = productReview == null
+        ? null
+        : readProductReview(productReview);
+    final needsProductReview = requiresProductReview({
+      'bootstrap': bootstrap,
+      'recipeMigration': recipeMigration,
+    });
+    if (productPlan != null && !needsProductReview) {
+      reject('Product review requires a configured ordinary release sync');
+    }
+    if (needsProductReview && source == null) {
+      if (productPlan == null) {
+        reject(
+          'Inspect a local source with review --source, then supply --product-review',
+        );
+      }
+      source = text(
+        object(productPlan['inputs'], 'review inputs')['source'],
+        'review source',
+      );
+    }
     sourceIdentity();
     if (receiptFile(id).parent.existsSync() ||
         git.exists('refs/heads/sync/$id') ||
@@ -218,8 +398,21 @@ class VendorSync {
         };
       }
     }
-    if (!git.exists(rawRef)) git.createRef(rawRef, raw);
     final normalized = normalizer.apply(raw);
+    if (needsProductReview) {
+      productReviews.requireComplete(
+        productPlan,
+        productReviewDraft({
+          'dev': dev,
+          'vendor': oldVendor,
+          'productBase': oldProductBase,
+          'source': raw,
+          'after': ?predecessor,
+        }, incoming: normalized),
+        result: false,
+      );
+    }
+    if (!git.exists(rawRef)) git.createRef(rawRef, raw);
     final tree = normalized.write();
     final vendor = git.commitTree(
       tree,
@@ -268,6 +461,9 @@ class VendorSync {
           .toList(),
       'bootstrap': bootstrap,
       'recipeMigration': recipeMigration,
+      'productReview': ?productPlan,
+      if (productPlan != null)
+        'productReviewDigest': productReviewDigest(productPlan),
       'registry': registry.fingerprint,
       'normalizer': normalizer.fingerprint,
       'paths': paths,
@@ -560,6 +756,7 @@ class VendorSync {
     String id, {
     List<String> reviews = const [],
     List<String> waivers = const [],
+    String? productReview,
   }) {
     final r = receipt(id);
     r.remove('verified');
@@ -655,6 +852,33 @@ class VendorSync {
         'Explicit authorized review required: ${requiredReviews.join(', ')}',
       );
     }
+    assertProductPlan(r);
+    if (requiresProductReview(r)) {
+      final resultReview = productReview == null
+          ? r['productReviewResult'] == null
+                ? null
+                : object(r['productReviewResult'], 'product result review')
+          : readProductReview(productReview);
+      productReviews.requireComplete(
+        resultReview,
+        productReviewDraft(r, candidate: candidate),
+        result: true,
+      );
+      productReviews.requireDecisionContinuity(
+        object(r['productReview'], 'pre-replay product review'),
+        resultReview!,
+      );
+      if (r['productReviewResult'] != null) {
+        productReviews.requireDecisionContinuity(
+          object(r['productReviewResult'], 'previous product result review'),
+          resultReview,
+        );
+      }
+      r['productReviewResult'] = resultReview;
+      save(id, r);
+    } else if (productReview != null) {
+      reject('This observation does not require a release product review');
+    }
     final selectedChecks = strings(impact['checks'], 'checks');
     if (waivers.any((name) => !selectedChecks.contains(name))) {
       reject('Unknown check waiver');
@@ -728,6 +952,8 @@ class VendorSync {
       'productBase': r['preparedBase'],
       'registry': registry.fingerprint,
       'normalizer': normalizer.fingerprint,
+      if (requiresProductReview(r))
+        'productReview': productReviewDigest(r['productReviewResult']),
       'reviews': reviews,
       'waivers': waivers,
       'toolVersions': versions,
@@ -735,9 +961,18 @@ class VendorSync {
     };
     save(id, r);
     bundle(id, r);
+    final visualWaived =
+        requiresProductReview(r) &&
+        productReviews
+            .cards(object(r['productReviewResult'], 'product result review'))
+            .any(
+              (card) => object(card['visual'], 'visual')['status'] == 'waived',
+            );
     return {
       'id': id,
-      'status': waivers.isEmpty ? 'verified' : 'verified-with-waivers',
+      'status': waivers.isEmpty && !visualWaived
+          ? 'verified'
+          : 'verified-with-waivers',
       'candidate': candidate,
       'productBase': r['preparedBase'],
       'checks': results.keys.toList(),
@@ -849,6 +1084,17 @@ class VendorSync {
         target.run(['symbolic-ref', '-q', 'HEAD']).trim() !=
             'refs/heads/sync/$id') {
       reject('Candidate policy, repository or branch changed');
+    }
+    final product = productReviewStatus(r, candidate);
+    final productBlockers = strings(
+      product['blockers'],
+      'product review blockers',
+    );
+    if (productBlockers.isNotEmpty) reject(productBlockers.join('\n'));
+    if (requiresProductReview(r) &&
+        verified['productReview'] !=
+            productReviewDigest(r['productReviewResult'])) {
+      reject('Verified product review changed');
     }
     final worktrees = git.worktrees();
     if (worktrees.containsKey(vendorRef)) {
