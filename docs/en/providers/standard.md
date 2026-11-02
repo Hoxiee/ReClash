@@ -1,6 +1,8 @@
-# ReClash Subscription Provider Standard
+# Standard registry
 
-Version: 1
+Limits, metadata fields and HTTP headers of provider standard version 1, generated from the registry the app decodes with.
+
+Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g.json). Value formats and behavior: [Response headers](headers.md) and [Request headers](request.md).
 
 ## Limits
 

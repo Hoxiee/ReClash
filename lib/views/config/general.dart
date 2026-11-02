@@ -85,6 +85,7 @@ class GeneralSettings {
     ),
     SettingSpec(
       id: 'general.findProcessMode',
+      keywords: ['strict', 'process rules'],
       page: ToolPage.general,
       title: (l) => l.findProcessMode,
     ),
@@ -444,12 +445,17 @@ class GeneralView extends ConsumerWidget {
   List<Widget> _connectionItems() {
     return [
       const DelayTestTimeoutItem(),
-      _clashToggle(
-        id: 'general.findProcessMode',
-        select: (state) => state.findProcessMode == FindProcessMode.always,
-        update: (state, value) => state.copyWith(
-          findProcessMode: value ? FindProcessMode.always : FindProcessMode.off,
+      ConfigOptionsItem<FindProcessMode>(
+        title: (l) => l.findProcessMode,
+        setting: GeneralSettings.spec('general.findProcessMode'),
+        options: FindProcessMode.values,
+        textBuilder: (mode) => mode.label,
+        selector: patchClashConfigProvider.select(
+          (state) => state.findProcessMode,
         ),
+        onChanged: (ref, value) => ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(findProcessMode: value)),
       ),
     ];
   }
@@ -510,6 +516,7 @@ class GeneralView extends ConsumerWidget {
               generateSection(
                 title: appLocalizations.connection,
                 items: _connectionItems(),
+                footer: appLocalizations.findProcessModeDesc,
               ),
               OverrideSection(
                 title: appLocalizations.core,

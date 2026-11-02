@@ -49,11 +49,19 @@ class SetupAction extends _$SetupAction {
   var _lastPushDuration = Duration.zero;
   var _pendingForceApply = false;
   var _runIntentRevision = 0;
+  int _profileApplyRevision = 0;
+  int _profileApplyTasks = 0;
+  bool _profileApplyDebounced = false;
   bool _allowPrivilegePrompt = false;
   int _privilegeIntentRevision = 0;
   String _appliedWebDashboardDirectory = '';
 
   int get runIntentRevision => _runIntentRevision;
+
+  int get profileApplyRevision => _profileApplyRevision;
+
+  bool get isProfileApplyPending =>
+      ref.mounted && (_profileApplyDebounced || _profileApplyTasks > 0);
 
   Object? get runIntentOwner => _latestRunRequest?.owner;
 
@@ -61,7 +69,11 @@ class SetupAction extends _$SetupAction {
 
   @override
   void build() {
-    ref.onDispose(_stopRuntimeTicker);
+    ref.onDispose(() {
+      _stopRuntimeTicker();
+      _profileApplyDebounced = false;
+      debouncer.cancel(FunctionTag.applyProfile);
+    });
     ref.listen(appVisibleProvider, (_, _) => _syncRuntimeTicker());
     ref.listen(
       appSettingProvider.select((state) => state.showTrayTitle),
@@ -136,6 +148,7 @@ class SetupAction extends _$SetupAction {
     if (!running) {
       _startTime = null;
       debouncer.cancel(FunctionTag.applyProfile);
+      _profileApplyDebounced = false;
       _pendingForceApply = false;
       _updateRunTime();
       return;
@@ -558,11 +571,14 @@ class SetupAction extends _$SetupAction {
   }
 
   void applyProfileDebounce({bool silence = false, bool force = false}) {
+    _profileApplyRevision++;
+    _profileApplyDebounced = true;
     _pendingForceApply |= force;
     debouncer.call(
       FunctionTag.applyProfile,
       (silence) {
         final force = _pendingForceApply;
+        _profileApplyDebounced = false;
         _pendingForceApply = false;
         applyProfile(silence: silence, force: force);
       },
@@ -661,26 +677,32 @@ class SetupAction extends _$SetupAction {
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {
-    final result = await _setupScheduler.run(() {
-      return _setupConfig(
-        force: force,
-        silence: silence,
-        suppressErrors: suppressErrors,
-        preloadInvoke: preloadInvoke,
-        onUpdated: () async {
-          await ref.read(proxiesActionProvider.notifier).updateGroups();
-          await ref.read(providersProvider.notifier).syncProviders();
-        },
+    _profileApplyRevision++;
+    _profileApplyTasks++;
+    try {
+      final result = await _setupScheduler.run(() {
+        return _setupConfig(
+          force: force,
+          silence: silence,
+          suppressErrors: suppressErrors,
+          preloadInvoke: preloadInvoke,
+          onUpdated: () async {
+            await ref.read(proxiesActionProvider.notifier).updateGroups();
+            await ref.read(providersProvider.notifier).syncProviders();
+          },
+        );
+      });
+      if (result != _SetupTaskResult.handoffToCoreRestart) {
+        return result;
+      }
+      // Release the current serial task before restartCore reapplies the profile.
+      final restarted = await _restartCoreAfterAuthorization(
+        silence: suppressErrors,
       );
-    });
-    if (result != _SetupTaskResult.handoffToCoreRestart) {
-      return result;
+      return restarted ? _SetupTaskResult.completed : _SetupTaskResult.failed;
+    } finally {
+      _profileApplyTasks--;
     }
-    // Release the current serial task before restartCore reapplies the profile.
-    final restarted = await _restartCoreAfterAuthorization(
-      silence: suppressErrors,
-    );
-    return restarted ? _SetupTaskResult.completed : _SetupTaskResult.failed;
   }
 
   Future<bool> _restartCoreAfterAuthorization({bool silence = false}) async {

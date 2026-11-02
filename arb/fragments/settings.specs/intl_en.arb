@@ -95,5 +95,9 @@
   "trayIconLight": "White",
   "trayIconDark": "Black",
   "accessControlSettings": "Access control settings",
-  "hideTimeoutProxiesDesc": "Leave out proxies whose last delay test timed out"
+  "hideTimeoutProxiesDesc": "Leave out proxies whose last delay test timed out",
+  "findProcessAlways": "Always",
+  "findProcessStrict": "When required by rules",
+  "findProcessOff": "Off",
+  "findProcessModeDesc": "Find process: Always looks up every connection; When required by rules (strict) looks up only when rules need it; Off disables lookup."
 }

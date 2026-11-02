@@ -273,8 +273,7 @@ class SubscriptionSnapshot {
   final List<String> warnings;
   final ProviderPolicy? providerPolicy;
 
-  bool get usageStale =>
-      stale || staleFields.any((f) => f.startsWith('subscription.'));
+  bool get usageStale => staleFields.any((f) => f.startsWith('subscription.'));
 
   @override
   bool operator ==(Object other) =>

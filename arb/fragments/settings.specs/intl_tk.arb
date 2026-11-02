@@ -74,5 +74,9 @@
   "trayIconLight": "Ak",
   "trayIconDark": "Gara",
   "accessControlSettings": "Elyetmäge gözegçiligiň sazlamalary",
-  "hideTimeoutProxiesDesc": "Soňky gijikme synagy wagty çykan proksileri goýup geçiň"
+  "hideTimeoutProxiesDesc": "Soňky gijikme synagy wagty çykan proksileri goýup geçiň",
+  "findProcessAlways": "Hemişe",
+  "findProcessStrict": "Düzgünler talap edende",
+  "findProcessOff": "Öçürilen",
+  "findProcessModeDesc": "Proses gözlegi: «Hemişe» her bir birikme üçin; «Düzgünler talap edende» (strict) diňe düzgünlere gerek bolanda; «Öçürilen» gözlegi öçürýär."
 }

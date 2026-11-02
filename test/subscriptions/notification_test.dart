@@ -98,6 +98,7 @@ void main() {
         metadata: const SubscriptionMetadata(),
         receivedAt: now,
         stale: true,
+        staleFields: const ['subscription.total'],
       );
       await reminder.check(
         profile(1, used: 95).copyWith(subscriptionSnapshot: snapshot),

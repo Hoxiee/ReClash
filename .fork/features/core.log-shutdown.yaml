@@ -1,0 +1,11 @@
+v: 1
+kind: fix
+state: active
+risk: routine
+must:
+  normal-close: Only the exact error-level external-controller normal-close event is forwarded as info; genuine serve errors, unrelated messages and other levels remain unchanged.
+watch: [core/log.go, core/log_test.go]
+checks:
+  core-tests: [normal-close]
+deps: [core.integration]
+drop: The engine classifies a normal external-controller shutdown without reporting an error.

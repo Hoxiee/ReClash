@@ -236,7 +236,7 @@ enum CoreEventType {
   rcxStatus,
 }
 
-enum FindProcessMode { always, off }
+enum FindProcessMode { always, strict, off }
 
 enum InterfaceNameMode { clear, follow, custom }
 

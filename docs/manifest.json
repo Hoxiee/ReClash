@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "languages": {
+    "ru": {
+      "published": true
+    },
+    "en": {
+      "published": true
+    },
+    "zh-CN": {
+      "published": false
+    }
+  },
+  "home": "README.md",
+  "sections": [
+    {
+      "id": "providers",
+      "dir": "providers",
+      "slug": "providers",
+      "title": {
+        "ru": "Для провайдеров",
+        "en": "Providers",
+        "zh-CN": "服务商"
+      },
+      "groups": [
+        {
+          "title": {
+            "ru": "Основы",
+            "en": "Fundamentals",
+            "zh-CN": "基础"
+          },
+          "pages": [
+            "README.md",
+            "rollout.md"
+          ]
+        },
+        {
+          "title": {
+            "ru": "Справочник",
+            "en": "Reference",
+            "zh-CN": "参考"
+          },
+          "pages": [
+            "headers.md",
+            "request.md",
+            "policy.md",
+            "routing.md",
+            "app-settings.md",
+            "preview-api.md",
+            "standard.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rcx",
+      "dir": "auto-routing",
+      "slug": "rcx",
+      "title": {
+        "ru": "Автомаршрутизация RCX",
+        "en": "RCX auto routing",
+        "zh-CN": "RCX 自动路由"
+      },
+      "screenshots": "images/README.md",
+      "groups": [
+        {
+          "title": {
+            "ru": "Концепции",
+            "en": "Concepts",
+            "zh-CN": "概念"
+          },
+          "pages": [
+            "README.md",
+            "engine.md"
+          ]
+        },
+        {
+          "title": {
+            "ru": "Справочник языка",
+            "en": "Language reference",
+            "zh-CN": "语言参考"
+          },
+          "pages": [
+            "profiles.md",
+            "conditions.md",
+            "scenarios.md",
+            "sharing.md"
+          ]
+        },
+        {
+          "title": {
+            "ru": "Рецепты",
+            "en": "Recipes",
+            "zh-CN": "示例"
+          },
+          "pages": [
+            "cookbook.md"
+          ]
+        },
+        {
+          "title": {
+            "ru": "Редактор в приложении",
+            "en": "In-app editor",
+            "zh-CN": "应用内编辑器"
+          },
+          "pages": [
+            "editor/hub.md",
+            "editor/routes.md",
+            "editor/groups.md",
+            "editor/studio.md"
+          ]
+        },
+        {
+          "title": {
+            "ru": "Приложения",
+            "en": "Appendix",
+            "zh-CN": "附录"
+          },
+          "pages": [
+            {
+              "file": "images/README.md",
+              "slug": "screenshots"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

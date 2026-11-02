@@ -1300,14 +1300,18 @@ void main() {
   group('applyProfileDebounce', () {
     test('collapses a burst into a single apply', () async {
       final notifier = container.read(setupActionProvider.notifier);
+      final revision = notifier.profileApplyRevision;
 
       notifier.applyProfileDebounce(force: true);
       notifier.applyProfileDebounce(force: true);
       notifier.applyProfileDebounce(force: true);
       expect(action.applyProfileCalls, 0);
+      expect(notifier.profileApplyRevision, greaterThan(revision));
+      expect(notifier.isProfileApplyPending, isTrue);
 
       await Future<void>.delayed(const Duration(milliseconds: 300));
       expect(action.applyProfileCalls, 1);
+      expect(notifier.isProfileApplyPending, isFalse);
     });
 
     test('a forced apply stays forced when a plain one follows', () async {
@@ -1327,7 +1331,9 @@ void main() {
       final notifier = container.read(setupActionProvider.notifier);
 
       notifier.applyProfileDebounce(force: true);
+      expect(notifier.isProfileApplyPending, isTrue);
       await notifier.setRunning(false);
+      expect(notifier.isProfileApplyPending, isFalse);
 
       await Future<void>.delayed(const Duration(milliseconds: 300));
       expect(action.applyProfileCalls, 0);
@@ -1335,6 +1341,23 @@ void main() {
       notifier.applyProfileDebounce();
       await Future<void>.delayed(const Duration(milliseconds: 300));
       expect(action.appliedForce, [false]);
+    });
+
+    test('disposal cancels and releases a debounced apply', () async {
+      final setup = TestSetupAction();
+      final scoped = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => setup)],
+      );
+      scoped
+          .read(setupActionProvider.notifier)
+          .applyProfileDebounce(force: true);
+      expect(setup.isProfileApplyPending, isTrue);
+
+      scoped.dispose();
+
+      expect(setup.isProfileApplyPending, isFalse);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(setup.applyProfileCalls, 0);
     });
   });
 
@@ -1406,6 +1429,92 @@ void main() {
       addedRules: [],
       script: null,
       overrides: ProfileOverrides(),
+    );
+
+    ProviderContainer trackedSetupContainer(_MockCoreHandlerInterface core) {
+      final scoped = ProviderContainer(
+        overrides: [
+          currentProfileProvider.overrideWithValue(null),
+          profilesProvider.overrideWith(TestProfiles.new),
+          setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          setupActionProvider.overrideWith(SetupAction.new),
+          proxiesActionProvider.overrideWith(_NoopProxiesAction.new),
+          providersProvider.overrideWith(_NoopProviders.new),
+          providerPolicyProvider.overrideWithValue(null),
+          safeModeProvider.overrideWithValue(true),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      globalState.container = scoped;
+      scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      return scoped;
+    }
+
+    test(
+      'apply revision and pending span queued force applies with the same inputs',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        final entered = [Completer<void>(), Completer<void>()];
+        final gates = [Completer<String>(), Completer<String>()];
+        var pushes = 0;
+        when(() => core.setupConfig(any())).thenAnswer((_) async {
+          final index = pushes++;
+          entered[index].complete();
+          return gates[index].future;
+        });
+        final scoped = trackedSetupContainer(core);
+        final setup = scoped.read(setupActionProvider.notifier);
+        final pending = <Future<bool>>[];
+        addTearDown(() async {
+          for (final gate in gates) {
+            if (!gate.isCompleted) gate.complete('');
+          }
+          await Future.wait(pending);
+        });
+        final revision = setup.profileApplyRevision;
+        pending.add(setup.applyProfile(force: true));
+        expect(setup.isProfileApplyPending, isTrue);
+        expect(setup.profileApplyRevision, greaterThan(revision));
+        await entered.first.future;
+        final firstRevision = setup.profileApplyRevision;
+        pending.add(setup.applyProfile(force: true));
+        expect(setup.profileApplyRevision, greaterThan(firstRevision));
+        expect(pushes, 1);
+        gates.first.complete('');
+        expect(await pending.first, isTrue);
+        expect(setup.isProfileApplyPending, isTrue);
+        await entered.last.future;
+        gates.last.complete('');
+        expect(await pending.last, isTrue);
+
+        expect(pushes, 2);
+        expect(setup.isProfileApplyPending, isFalse);
+        expect(await setup.inputsApplied(), isTrue);
+      },
+    );
+
+    test(
+      'a failed apply releases pending state before a subsequent apply',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        when(
+          () => core.setupConfig(any()),
+        ).thenThrow(StateError('apply failed'));
+        final scoped = trackedSetupContainer(core);
+        final setup = scoped.read(setupActionProvider.notifier);
+        final failure = setup.applyProfile(force: true, suppressErrors: true);
+        expect(setup.isProfileApplyPending, isTrue);
+
+        await expectLater(failure, throwsStateError);
+
+        expect(setup.isProfileApplyPending, isFalse);
+        final revision = setup.profileApplyRevision;
+        when(() => core.setupConfig(any())).thenAnswer((_) async => '');
+        expect(await setup.applyProfile(force: true), isTrue);
+        expect(setup.profileApplyRevision, greaterThan(revision));
+        expect(setup.isProfileApplyPending, isFalse);
+      },
     );
 
     test(

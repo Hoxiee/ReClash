@@ -1,0 +1,13 @@
+v: 1
+kind: fix
+state: active
+risk: routine
+must:
+  members: A load-balancer delay test follows nested groups to distinct proxy objects and succeeds when a member succeeds, without treating a single unavailable member as a failed group.
+  bounded: Member probes share the existing concurrency limit; cycles and duplicate references cannot multiply probes, while distinct same-named proxies remain distinct.
+  completion: A successful member may cancel queued probes but never cancels another member's running URL test; timeout, failure and untested outcomes retain their existing meaning.
+watch: ['core/delay*.go']
+checks:
+  core-tests: [members, bounded, completion]
+deps: [core.integration]
+drop: Upstream group delay tests preserve these member, concurrency and cancellation semantics.

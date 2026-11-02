@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/punycode.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -211,15 +212,16 @@ class TrackerTargetText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final port = trackerInfo.metadata.destinationPort;
+    final rawHost = trackerInfo.title;
+    final displayHost = decodeIdnHost(rawHost);
+    final secondary = TextStyle(color: context.colorScheme.onSurfaceVariant);
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: trackerInfo.title),
-          if (port.isNotEmpty)
-            TextSpan(
-              text: ':$port',
-              style: TextStyle(color: context.colorScheme.onSurfaceVariant),
-            ),
+          TextSpan(text: displayHost),
+          if (port.isNotEmpty) TextSpan(text: ':$port', style: secondary),
+          if (displayHost != rawHost)
+            TextSpan(text: ' ($rawHost)', style: secondary),
         ],
       ),
     );

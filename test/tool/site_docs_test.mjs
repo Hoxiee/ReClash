@@ -23,26 +23,32 @@ function fixture(t) {
     put(source, '{"version":1}\n')
     put(`site/${target}`, '{"version":1}\n')
   }
+  const manifest = JSON.stringify({ languages: { ru: { published: true }, en: { published: true }, 'zh-CN': { published: false } } })
+  put('docs/manifest.json', manifest)
+  put('site/content/docs/manifest.json', manifest)
+  put('docs/zh-CN/auto-routing/README.md', '# Unpublished\n')
   const files = {}
-  for (const language of ['en', 'ru', 'zh-CN']) {
-    const text = `# ${language} handbook\n`
-    put(`docs/${language}/auto-routing/README.md`, text)
-    put(`site/content/rcx/${language}/README.md`, text)
-    files[`${language}/README.md`] = createHash('sha256').update(text).digest('hex')
+  for (const language of ['en', 'ru']) {
+    for (const file of ['README.md', 'auto-routing/README.md']) {
+      const text = `# ${language} ${file}\n`
+      put(`docs/${language}/${file}`, text)
+      put(`site/content/docs/${language}/${file}`, text)
+      files[`${language}/${file}`] = createHash('sha256').update(text).digest('hex')
+    }
   }
-  put('site/content/rcx/catalogue.json', JSON.stringify({ source: { repository: 'https://github.com/Hoxiee/ReClash', commit: 'a'.repeat(40) }, files }))
+  put('site/content/docs/catalogue.json', JSON.stringify({ source: { repository: 'https://github.com/Hoxiee/ReClash', commit: 'a'.repeat(40) }, files }))
   return { root, put }
 }
 
 test('checks the website exports and source documentation without rewriting them', t => {
   const { root } = fixture(t)
-  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 3 })
+  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
 })
 
 test('the sibling checkout works without the shortcut or submodule configuration', t => {
   const { root } = fixture(t)
   rmSync(join(root, 'site'))
-  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 3 })
+  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
 })
 
 test('a missing sibling checkout reports the required location', t => {
@@ -63,19 +69,27 @@ test('stale exports fail a check and only explicit synchronization copies them',
 test('a changed application document cannot pass with an old website snapshot', t => {
   const { root, put } = fixture(t)
   put('docs/en/auto-routing/README.md', '# Changed handbook\n')
-  assert.throws(() => synchronizeSite(root), /RCX en\/README.md is stale/)
+  assert.throws(() => synchronizeSite(root), /docs\/en\/auto-routing\/README.md is stale/)
 })
 
 test('a hand-edited website snapshot cannot pass its source checksum', t => {
   const { root, put } = fixture(t)
-  put('site/content/rcx/ru/README.md', '# Different handbook\n')
-  assert.throws(() => synchronizeSite(root), /RCX ru\/README.md is stale/)
+  put('site/content/docs/ru/README.md', '# Different handbook\n')
+  assert.throws(() => synchronizeSite(root), /docs\/ru\/README.md is stale/)
 })
 
-test('new application chapters require updating the website inventory', t => {
+test('new application pages require updating the website inventory', t => {
   const { root, put } = fixture(t)
-  put('docs/en/auto-routing/new-chapter.md', '# New chapter\n')
-  assert.throws(() => synchronizeSite(root), /RCX document inventory changed/)
+  put('docs/en/providers/new-page.md', '# New page\n')
+  assert.throws(() => synchronizeSite(root), /Documentation inventory changed/)
+})
+
+test('a changed manifest or newly published language requires a new snapshot', t => {
+  const { root, put } = fixture(t)
+  put('docs/manifest.json', JSON.stringify({ languages: { ru: { published: true }, en: { published: true }, 'zh-CN': { published: true } } }))
+  assert.throws(() => synchronizeSite(root), /Documentation inventory changed/)
+  put('docs/manifest.json', JSON.stringify({ languages: { en: { published: true }, ru: { published: true }, 'zh-CN': { published: false } } }))
+  assert.throws(() => synchronizeSite(root), /docs\/manifest.json is stale/)
 })
 
 test('the website repository is an explicit integration boundary', t => {

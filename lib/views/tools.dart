@@ -29,6 +29,10 @@ class ToolsViewState extends ConsumerState<ToolsView> {
   final _navigator = GlobalKey<NavigatorState>();
   final _searchFocus = FocusNode();
   final _observer = _ToolsRouteObserver();
+  late final _catalogPanel = ToolsCatalogPanel(
+    searchFocus: _searchFocus,
+    onSelect: openEntry,
+  );
   var _split = false;
   var _navigating = false;
   final _recentIds = <String>[];
@@ -261,10 +265,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
   }
 
   Widget _catalog(NavigationDockScope? navigation) {
-    final catalog = ToolsCatalogPanel(
-      searchFocus: _searchFocus,
-      onSelect: openEntry,
-    );
+    final catalog = _catalogPanel;
     if (navigation == null) return catalog;
     final bar = navigation.held
         ? navigation.navigation
@@ -400,10 +401,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                           catalogWidth,
                           constraints.maxHeight,
                         ),
-                        child: ToolsCatalogPanel(
-                          searchFocus: _searchFocus,
-                          onSelect: openEntry,
-                        ),
+                        child: _catalogPanel,
                       )
                     : const SizedBox.shrink(),
               ),

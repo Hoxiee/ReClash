@@ -10,7 +10,6 @@ export const siteSources = [
   ['rcx-profile.schema.json', 'public/schemas/rcx-profile.schema.json'],
 ]
 
-const languages = ['en', 'ru', 'zh-CN']
 const hash = bytes => createHash('sha256').update(bytes).digest('hex')
 
 function markdownFiles(directory, prefix = '') {
@@ -24,9 +23,9 @@ function markdownFiles(directory, prefix = '') {
 
 export function synchronizeSite(root, { write = false } = {}) {
   const site = resolve(root, '../reclash-site')
-  const manifest = join(site, 'package.json')
-  assert.ok(existsSync(manifest), 'Clone Hoxiee/reclash-site beside ReClash at ../reclash-site')
-  assert.equal(JSON.parse(readFileSync(manifest, 'utf8')).name, 'reclash-site', 'The sibling website must be the reclash-site repository')
+  const sitePackage = join(site, 'package.json')
+  assert.ok(existsSync(sitePackage), 'Clone Hoxiee/reclash-site beside ReClash at ../reclash-site')
+  assert.equal(JSON.parse(readFileSync(sitePackage, 'utf8')).name, 'reclash-site', 'The sibling website must be the reclash-site repository')
   const failures = []
   for (const [source, target] of siteSources) {
     const bytes = readFileSync(join(root, source))
@@ -40,19 +39,22 @@ export function synchronizeSite(root, { write = false } = {}) {
     }
   }
 
-  const content = join(site, 'content/rcx')
+  const content = join(site, 'content/docs')
+  const sync = `after committing the source, run npm --prefix ../reclash-site run docs:sync -- "${root}"`
+  const manifest = readFileSync(join(root, 'docs/manifest.json'))
+  const snapshotManifest = join(content, 'manifest.json')
+  if (!existsSync(snapshotManifest) || !readFileSync(snapshotManifest).equals(manifest)) failures.push(`docs/manifest.json is stale; ${sync}`)
+  const languages = Object.entries(JSON.parse(manifest).languages).filter(([, state]) => state.published).map(([language]) => language)
   const catalogue = JSON.parse(readFileSync(join(content, 'catalogue.json'), 'utf8'))
   assert.equal(catalogue.source.repository, 'https://github.com/Hoxiee/ReClash')
   assert.match(catalogue.source.commit, /^[a-f0-9]{40}$/)
-  const files = languages.flatMap(language => markdownFiles(join(root, 'docs', language, 'auto-routing'))
-    .map(file => `${language}/${file}`)).sort()
-  assert.deepEqual(Object.keys(catalogue.files).sort(), files, 'RCX document inventory changed; synchronize the website handbook')
+  const files = languages.flatMap(language => markdownFiles(join(root, 'docs', language)).map(file => `${language}/${file}`)).sort()
+  assert.deepEqual(Object.keys(catalogue.files).sort(), files, 'Documentation inventory changed; synchronize the website documentation')
   for (const file of files) {
-    const [language, ...parts] = file.split('/')
-    const source = join(root, 'docs', language, 'auto-routing', ...parts)
-    const destination = join(content, file)
+    const source = join(root, 'docs', ...file.split('/'))
+    const destination = join(content, ...file.split('/'))
     if (!existsSync(destination) || hash(readFileSync(source)) !== catalogue.files[file] || hash(readFileSync(destination)) !== catalogue.files[file]) {
-      failures.push(`RCX ${file} is stale; after committing its source, run npm --prefix ../reclash-site run docs:sync -- "${root}"`)
+      failures.push(`docs/${file} is stale; ${sync}`)
     }
   }
   assert.equal(failures.length, 0, failures.join('\n'))
@@ -65,7 +67,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     assert.ok(arguments_.length <= 1 && (!arguments_.length || ['--check', '--sync'].includes(arguments_[0])), 'Usage: node tool/site_docs.mjs [--check|--sync]')
     const root = fileURLToPath(new URL('../', import.meta.url))
     const result = synchronizeSite(root, { write: arguments_[0] === '--sync' })
-    console.log(`Verified ${result.exports} website exports and ${result.documents} RCX documents against the application checkout.`)
+    console.log(`Verified ${result.exports} website exports and ${result.documents} documents against the application checkout.`)
   } catch (error) {
     console.error(error.message)
     process.exitCode = 1

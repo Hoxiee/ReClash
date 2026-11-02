@@ -41,7 +41,7 @@ Simple to use, open source and ad-free.
 - **Subscriptions that understand the provider.** Traffic and expiry from `Subscription-Userinfo`, profile titles,
   provider announcements, routing profiles and settings the provider offers and you approve. Clash, INCY and Happ
   links, plain proxy URIs and several config formats import directly. See
-  [provider support](docs/en/PROVIDER_FEATURES.md).
+  [provider integration](docs/en/providers/README.md).
 - **Service checks.** See whether Google, YouTube, ChatGPT, Netflix and other services open through the current route,
   with their latency.
 - **On-demand networks.** Pause the proxy on networks you trust and resume it everywhere else; ports stay open during a
@@ -142,7 +142,7 @@ adb shell am start -a com.reclash.action.TOGGLE
 ## Documentation
 
 - [Auto routing](docs/en/auto-routing/README.md): the mental model, profiles, scenarios, conditions and a cookbook.
-- [Provider support](docs/en/PROVIDER_FEATURES.md) and [provider headers](docs/en/PROVIDER_HEADERS.md): what a
+- [Provider integration](docs/en/providers/README.md) and [response headers](docs/en/providers/headers.md): what a
   subscription provider can tell the app.
 
 ## Build from source

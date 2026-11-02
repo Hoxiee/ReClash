@@ -977,6 +977,56 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('tab switches do not rebuild Tools catalog rows '
+        'with floating=$floating', (tester) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(390, 844),
+        home: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(floatingNavigationBar: floating));
+      container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+      await tester.pumpAndSettle();
+      final panel = find.byType(ToolsCatalogPanel);
+      final catalog = tester.element(panel);
+      final logsTitle = AppLocalizations.of(catalog).logs;
+      final rows = find
+          .descendant(of: panel, matching: find.byType(ListItem))
+          .evaluate()
+          .toSet();
+      var catalogBuilds = 0;
+      var rowBuilds = 0;
+      final previous = debugOnRebuildDirtyWidget;
+      debugOnRebuildDirtyWidget = (element, builtOnce) {
+        previous?.call(element, builtOnce);
+        if (element.widget is ToolsCatalogPanel) catalogBuilds++;
+        if (rows.contains(element)) rowBuilds++;
+      };
+      try {
+        for (final label in [PageLabel.dashboard, PageLabel.tools]) {
+          container.read(currentPageLabelProvider.notifier).toPage(label);
+          await tester.pumpAndSettle();
+        }
+      } finally {
+        debugOnRebuildDirtyWidget = previous;
+      }
+      expect(tester.element(find.byType(ToolsCatalogPanel)), same(catalog));
+      expect(catalogBuilds, 0);
+      expect(rowBuilds, 0);
+
+      await tester.enterText(find.byType(TextField).first, 'logs');
+      await tester.pumpAndSettle();
+      expect(find.text(logsTitle), findsNothing);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(openLogs: true));
+      await tester.pumpAndSettle();
+      expect(find.text(logsTitle), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('mobile keyboard hides navigation with floating=$floating', (
       tester,
     ) async {

@@ -40,6 +40,8 @@ class ProxiesAction extends _$ProxiesAction {
   Timer? _delayFlushTimer;
 
   final Map<String, String> _pendingSelectedRollback = {};
+  final Map<String, int> _changingGroups = {};
+  int _selectionRevision = 0;
 
   int _groupsRevision = 0;
   int _profileRevision = 0;
@@ -49,7 +51,8 @@ class ProxiesAction extends _$ProxiesAction {
   @override
   void build() {
     ref.onDispose(() => _delayFlushTimer?.cancel());
-    ref.listen(coreStatusProvider, (_, next) {
+    ref.listen(coreStatusProvider, (previous, next) {
+      if (previous != next) _runRevision++;
       if (next != CoreStatus.connected) {
         cancelDelayTests();
       }
@@ -124,6 +127,7 @@ class ProxiesAction extends _$ProxiesAction {
   }
 
   void changeProxyDebounce(String groupName, String proxyName) {
+    _selectionRevision++;
     _pendingSelectedRollback.putIfAbsent(
       groupName,
       () => _currentSelectedName(groupName),
@@ -150,6 +154,18 @@ class ProxiesAction extends _$ProxiesAction {
     final profileRevision = _profileRevision;
     final runRevision = _runRevision;
     final runTime = ref.read(runTimeProvider);
+    final setup = ref.read(setupActionProvider.notifier);
+    final runIntentRevision = setup.runIntentRevision;
+    var requestedSelections = const <String, String>{};
+    var selectionRevision = _selectionRevision;
+    var applyRevision = setup.profileApplyRevision;
+    var canReconcilePins = false;
+    bool isCurrent() =>
+        ref.mounted &&
+        revision == _groupsRevision &&
+        profileRevision == _profileRevision &&
+        profileId == ref.read(currentProfileIdProvider) &&
+        runRevision == _runRevision;
     _groupsStale = false;
     try {
       final result = await retry(
@@ -164,6 +180,14 @@ class ProxiesAction extends _$ProxiesAction {
           final selectedMap = ref.read(
             currentProfileProvider.select((state) => state?.selectedMap ?? {}),
           );
+          requestedSelections = Map.of(selectedMap);
+          selectionRevision = _selectionRevision;
+          applyRevision = setup.profileApplyRevision;
+          canReconcilePins =
+              runTime != null &&
+              profileId != null &&
+              ref.read(coreStatusProvider) == CoreStatus.connected &&
+              !setup.isProfileApplyPending;
           try {
             return (
               groups: await _core.getProxiesGroups(
@@ -187,18 +211,37 @@ class ProxiesAction extends _$ProxiesAction {
         maxAttempts: 5,
         delay: const Duration(milliseconds: 300),
       );
-      if (revision != _groupsRevision ||
-          profileRevision != _profileRevision ||
-          profileId != ref.read(currentProfileIdProvider) ||
-          runRevision != _runRevision) {
-        return;
-      }
+      if (!isCurrent()) return;
       if (result.failed &&
           runTime != null &&
           ref.read(groupsProvider).isNotEmpty) {
         return;
       }
       ref.read(groupsProvider.notifier).value = result.groups;
+      final lostPins = {
+        for (final group in result.groups)
+          if (group.type.isComputedSelected &&
+              group.fixed == '' &&
+              (requestedSelections[group.name]?.isNotEmpty ?? false))
+            group.name: requestedSelections[group.name]!,
+      };
+      if (!canReconcilePins || lostPins.isEmpty || result.failed) return;
+      if (!await setup.inputsApplied() ||
+          !isCurrent() ||
+          applyRevision != setup.profileApplyRevision ||
+          runIntentRevision != setup.runIntentRevision ||
+          selectionRevision != _selectionRevision ||
+          setup.isProfileApplyPending) {
+        return;
+      }
+      final profiles = ref.read(profilesActionProvider.notifier);
+      for (final entry in lostPins.entries) {
+        if (!_pendingSelectedRollback.containsKey(entry.key) &&
+            !_changingGroups.containsKey(entry.key) &&
+            _currentSelectedName(entry.key) == entry.value) {
+          profiles.updateCurrentSelectedMap(entry.key, '');
+        }
+      }
     } catch (e) {
       // The Core failure path already runs inside the retry task above; a
       // throw here only means ref.read hit a disposed container or the
@@ -242,6 +285,8 @@ class ProxiesAction extends _$ProxiesAction {
         _currentSelectedName(groupName);
     profilesAction.updateCurrentSelectedMap(groupName, proxyName);
     final ChangeProxyResult result;
+    _selectionRevision++;
+    _changingGroups.update(groupName, (count) => count + 1, ifAbsent: () => 1);
     try {
       result = await _core.changeProxy(
         ChangeProxyParams(groupName: groupName, proxyName: proxyName),
@@ -265,6 +310,11 @@ class ProxiesAction extends _$ProxiesAction {
         return false;
       }
       rethrow;
+    } finally {
+      if (_changingGroups.update(groupName, (count) => count - 1) == 0) {
+        _changingGroups.remove(groupName);
+      }
+      _selectionRevision++;
     }
     if (!result.changed) {
       return true;

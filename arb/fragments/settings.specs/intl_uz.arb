@@ -74,5 +74,9 @@
   "trayIconLight": "Oq",
   "trayIconDark": "Qora",
   "accessControlSettings": "Kirish nazorati sozlamalari",
-  "hideTimeoutProxiesDesc": "Oxirgi kechikish testida vaqti tugagan proksilarni tashlab ketish"
+  "hideTimeoutProxiesDesc": "Oxirgi kechikish testida vaqti tugagan proksilarni tashlab ketish",
+  "findProcessAlways": "Har doim",
+  "findProcessStrict": "Qoidalar talab qilganda",
+  "findProcessOff": "Oʻchirilgan",
+  "findProcessModeDesc": "Jarayonni aniqlash: «Har doim» — har bir ulanish uchun; «Qoidalar talab qilganda» (strict) — faqat qoidalarga kerak boʻlganda; «Oʻchirilgan» — aniqlash oʻchiriladi."
 }

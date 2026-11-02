@@ -9,6 +9,19 @@ import 'package:mocktail/mocktail.dart';
 class MockFile extends Mock implements File {}
 
 void main() {
+  test(
+    'strict process lookup round-trips without becoming a setup-only change',
+    () {
+      final config = PatchClashConfig.fromJson({'find-process-mode': 'strict'});
+      expect(config.findProcessMode, FindProcessMode.strict);
+      expect(config.toJson()['find-process-mode'], 'strict');
+      expect(
+        config.setupOnly.findProcessMode,
+        defaultClashConfig.findProcessMode,
+      );
+    },
+  );
+
   group('FileInfo', () {
     late MockFile file;
 

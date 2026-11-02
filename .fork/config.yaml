@@ -95,8 +95,14 @@ checks:
     argv: [flutter, test, test/core/controller_test.dart, test/core/lib_test.dart, test/core/desktop/lifecycle_test.dart, test/core/desktop/transport_test.dart, test/core/desktop/helper_client_test.dart, test/core/protocol_contract_test.dart]
   desktop-window:
     argv: [flutter, test, test/manager/window_manager_test.dart, test/manager/window_header_test.dart, test/common/window_test.dart, test/common/window_visibility_test.dart]
+  process-settings:
+    argv: [flutter, test, test/views/general_config_test.dart, test/models/common_test.dart, test/models/config_test.dart]
+  glass:
+    argv: [flutter, test, test/common/frame_load_test.dart, test/manager/theme_manager_test.dart, test/widgets/liquid_glass_test.dart]
+  connection-idn:
+    argv: [flutter, test, test/common/punycode_test.dart, test/features/tracker_info_idn_test.dart]
   proxies-groups:
-    argv: [flutter, test, test/providers/proxies_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
+    argv: [flutter, test, test/providers/proxies_action_test.dart, test/providers/setup_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
   routing-engine:
     argv: [go, -C, core, test, ./rcx, -run, ., -count=1]
   routing-ui:

@@ -2,9 +2,12 @@ package core
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/constant"
 )
@@ -84,17 +87,117 @@ func handleTestDelay(params *TestDelayParams) *Delay {
 	}
 
 	timeout := timeoutFromMillis(params.Timeout, defaultDelayTestTimeout)
-	if !delayTestSlots.acquireWithin(context.Background(), timeout) {
+	nodes, balanced := balanceDelayNodes(proxy)
+	var value int32
+	var tested bool
+	if balanced {
+		value, tested = testBalancerDelay(nodes, url, timeout)
+	} else {
+		value, tested = testProxyDelay(context.Background(), proxy, url, timeout)
+	}
+	if !tested {
 		return nil
+	}
+	if balanced && adapter.UrlTestHook != nil {
+		var measured uint16
+		if value > 0 {
+			measured = uint16(value)
+		}
+		adapter.UrlTestHook(url, proxy.Name(), measured, value == delayTimedOut)
+	}
+	result.Value = value
+	return result
+}
+
+func testProxyDelay(wait context.Context, proxy constant.Proxy, url string, timeout time.Duration) (int32, bool) {
+	if !delayTestSlots.acquireWithin(wait, timeout) {
+		return 0, false
 	}
 	defer delayTestSlots.release()
 
+	// A successful sibling can cancel the wait, never a started health check:
+	// mihomo records a canceled probe as a failure of that node.
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	delay, err := proxy.URLTest(ctx, url, anyDelayTestStatus)
 	if err != nil {
 		delay = 0
 	}
-	result.Value = delayValue(delay, ctx.Err() != nil)
-	return result
+	return delayValue(delay, ctx.Err() != nil), true
+}
+
+func testBalancerDelay(nodes []constant.Proxy, url string, timeout time.Duration) (int32, bool) {
+	type nodeDelay struct {
+		value  int32
+		tested bool
+	}
+	wait, stopWaiting := context.WithTimeout(context.Background(), timeout)
+	defer stopWaiting()
+	answered, stopSending := context.WithCancel(context.Background())
+	defer stopSending()
+	workers := min(len(nodes), cap(delayTestSlots))
+	results := make(chan nodeDelay, workers)
+	var next atomic.Int64
+	var running sync.WaitGroup
+	for range workers {
+		running.Add(1)
+		safeGo("balancer delay test", func() {
+			defer running.Done()
+			for wait.Err() == nil {
+				index := int(next.Add(1)) - 1
+				if index >= len(nodes) {
+					return
+				}
+				value, tested := testProxyDelay(wait, nodes[index], url, timeout)
+				if value > 0 {
+					stopWaiting()
+				}
+				select {
+				case results <- nodeDelay{value: value, tested: tested}:
+				case <-answered.Done():
+					return
+				}
+			}
+		})
+	}
+	safeGo("balancer delay completion", func() {
+		running.Wait()
+		close(results)
+	})
+	value, complete, received := delayFailed, true, 0
+	for result := range results {
+		received++
+		if result.value > 0 {
+			return result.value, true
+		}
+		complete = complete && result.tested
+		value = max(value, result.value)
+	}
+	return value, complete && received == len(nodes)
+}
+
+func balanceDelayNodes(proxy constant.Proxy) (nodes []constant.Proxy, balanced bool) {
+	pending := []constant.Proxy{proxy}
+	seen := map[constant.Proxy]bool{}
+	for len(pending) > 0 {
+		proxy = pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		if proxy == nil || seen[proxy] {
+			continue
+		}
+		seen[proxy] = true
+		if group, ok := adapterAs[*outboundgroup.LoadBalance](proxy); ok {
+			balanced = true
+			pending = append(pending, group.GetProxies(false)...)
+			continue
+		}
+		if proxy.Type() == constant.Selector || proxy.Type() == constant.URLTest || proxy.Type() == constant.Fallback {
+			if selected := proxy.Unwrap(nil, false); selected != nil {
+				pending = append(pending, selected)
+				continue
+			}
+		}
+		nodes = append(nodes, proxy)
+	}
+	return nodes, balanced
 }

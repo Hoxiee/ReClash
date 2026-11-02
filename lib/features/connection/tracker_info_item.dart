@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/punycode.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
@@ -63,7 +64,7 @@ class TrackerInfoItem extends ConsumerWidget {
     final showIcon = ref.watch(
       patchClashConfigProvider.select(
         (state) =>
-            state.findProcessMode == FindProcessMode.always && system.isAndroid,
+            state.findProcessMode != FindProcessMode.off && system.isAndroid,
       ),
     );
     return RecordListItem(
@@ -138,13 +139,17 @@ class _TrackerInfoBody extends StatelessWidget {
 
   Widget _buildTitle(RecordTextStyles styles) {
     final metadata = trackerInfo.metadata;
+    final rawHost = trackerInfo.title;
+    final displayHost = decodeIdnHost(rawHost);
     final title = Text.rich(
       TextSpan(
         children: [
           TextSpan(
-            text: _endpointText(trackerInfo.title, metadata.destinationPort),
+            text: _endpointText(displayHost, metadata.destinationPort),
             style: styles.title,
           ),
+          if (displayHost != rawHost)
+            TextSpan(text: ' ($rawHost)', style: styles.secondary),
           if (metadata.host.isNotEmpty && metadata.destinationIP.isNotEmpty)
             TextSpan(
               text: '  ${metadata.destinationIP}',

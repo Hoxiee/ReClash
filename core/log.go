@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -29,11 +30,19 @@ type logPump struct {
 
 func (pump *logPump) run() {
 	for event := range pump.subscription {
+		event = normalizeControllerLog(event)
 		if pump.stopped.Load() || event.LogLevel < log.Level() {
 			continue
 		}
 		sendMessage(LogMessage, event)
 	}
+}
+
+func normalizeControllerLog(event log.Event) log.Event {
+	if event.LogLevel == log.ERROR && event.Payload == "External controller serve error: "+http.ErrServerClosed.Error() {
+		event.LogLevel = log.INFO
+	}
+	return event
 }
 
 func (pump *logPump) stop() {

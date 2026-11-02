@@ -45,6 +45,28 @@ void main() {
 
   PatchClashConfig config() => container.read(patchClashConfigProvider);
 
+  testWidgets('process lookup offers strict, always and off without a reload', (
+    tester,
+  ) async {
+    await pumpGeneralView(tester);
+    final l = currentAppLocalizations;
+    final setupOnly = config().setupOnly;
+
+    for (final (label, mode) in [
+      (l.findProcessStrict, FindProcessMode.strict),
+      (l.findProcessAlways, FindProcessMode.always),
+      (l.findProcessOff, FindProcessMode.off),
+    ]) {
+      await tester.tap(find.text(l.findProcessMode));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(config().findProcessMode, mode);
+      expect(config().setupOnly, setupOnly);
+    }
+    expect(find.text(l.findProcessModeDesc), findsOneWidget);
+  });
+
   testWidgets('lists no override until one is added', (tester) async {
     await pumpGeneralView(tester);
     final l = currentAppLocalizations;

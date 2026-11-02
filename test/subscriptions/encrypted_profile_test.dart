@@ -298,6 +298,7 @@ void main() {
       expect(prepared.snapshot.metadata.unlimited, isFalse);
       expect(prepared.snapshot.metadata.perpetual, isFalse);
       expect(prepared.snapshot.metadata.count('subscription.total'), 100);
+      expect(prepared.snapshot.metadata.name, 'Body provider');
     },
   );
 

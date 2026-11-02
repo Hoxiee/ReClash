@@ -106,7 +106,9 @@ class SubscriptionField {
       ],
     'trust': trust.name,
     'introduced': 1,
-    'absence': 'retain-last-known-stale',
+    'absence': path.startsWith('subscription.')
+        ? 'retain-last-known-stale'
+        : 'restore-local',
     'consumer': consumer,
     'available': true,
   };

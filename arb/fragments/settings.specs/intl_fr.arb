@@ -74,5 +74,9 @@
   "trayIconLight": "Blanc",
   "trayIconDark": "Noir",
   "accessControlSettings": "Réglages du contrôle d’accès",
-  "hideTimeoutProxiesDesc": "Ignorer les proxys dont le dernier test de délai a expiré"
+  "hideTimeoutProxiesDesc": "Ignorer les proxys dont le dernier test de délai a expiré",
+  "findProcessAlways": "Toujours",
+  "findProcessStrict": "Si les règles l’exigent",
+  "findProcessOff": "Désactivé",
+  "findProcessModeDesc": "Recherche du processus : Toujours recherche pour chaque connexion ; Si les règles l’exigent (strict) recherche uniquement en cas de besoin ; Désactivé désactive la recherche."
 }

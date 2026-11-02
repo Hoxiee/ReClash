@@ -339,6 +339,27 @@ void main() {
       );
     });
 
+    test('on another origin it carries no private headers', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile')
+          .copyWith(
+            subscriptionPreferences: const SubscriptionPreferences(
+              headers: {'x-user-token': 'private'},
+            ),
+          );
+      final transport = _BundleTransport(
+        utf8.encode('rcx: 1\nprofiles: {}\n'),
+        header: 'https://cdn.example.test/routing',
+      );
+      await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: transport,
+        validate: (_, _) async => '',
+      );
+
+      expect(transport.bundleHeaders, isNotNull);
+      expect(transport.bundleHeaders, isNot(contains('x-user-token')));
+    });
+
     test('a failed download keeps the previous bundle', () async {
       final profile = Profile.normal(url: 'https://subs.example.test/profile');
       final file = await bundleFile(profile);

@@ -74,5 +74,9 @@
   "trayIconLight": "Ақ",
   "trayIconDark": "Қара",
   "accessControlSettings": "Рұқсатты басқару баптаулары",
-  "hideTimeoutProxiesDesc": "Соңғы кідіріс сынағының уақыты өткен проксилерді көрсетпеу"
+  "hideTimeoutProxiesDesc": "Соңғы кідіріс сынағының уақыты өткен проксилерді көрсетпеу",
+  "findProcessAlways": "Әрқашан",
+  "findProcessStrict": "Ережелер талап еткенде",
+  "findProcessOff": "Өшірулі",
+  "findProcessModeDesc": "Процесті іздеу: «Әрқашан» — әр қосылым үшін; «Ережелер талап еткенде» (strict) — ережелерге қажет болғанда ғана; «Өшірулі» — іздеу өшірілген."
 }

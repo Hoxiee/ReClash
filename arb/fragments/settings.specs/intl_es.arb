@@ -74,5 +74,9 @@
   "trayIconLight": "Blanco",
   "trayIconDark": "Negro",
   "accessControlSettings": "Ajustes de control de acceso",
-  "hideTimeoutProxiesDesc": "Omite los proxies cuya última prueba de latencia superó el tiempo de espera"
+  "hideTimeoutProxiesDesc": "Omite los proxies cuya última prueba de latencia superó el tiempo de espera",
+  "findProcessAlways": "Siempre",
+  "findProcessStrict": "Cuando lo requieren las reglas",
+  "findProcessOff": "Desactivado",
+  "findProcessModeDesc": "Buscar proceso: Siempre consulta cada conexión; Cuando lo requieren las reglas (strict) consulta solo cuando es necesario para las reglas; Desactivado impide las consultas."
 }

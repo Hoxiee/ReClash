@@ -49,31 +49,6 @@ class DeviceIdentity {
   );
 }
 
-class DeviceIdentityConsent {
-  const DeviceIdentityConsent({
-    required this.profileId,
-    required this.origin,
-    required this.sendDetails,
-  });
-
-  final int profileId;
-  final String origin;
-  final bool sendDetails;
-
-  Map<String, Object?> toJson() => {
-    'profileId': profileId,
-    'origin': origin,
-    'sendDetails': sendDetails,
-  };
-
-  factory DeviceIdentityConsent.fromJson(Map<String, dynamic> json) =>
-      DeviceIdentityConsent(
-        profileId: json['profileId'] as int,
-        origin: json['origin'] as String,
-        sendDetails: json['sendDetails'] as bool? ?? false,
-      );
-}
-
 class DeviceIdentityMaterial {
   const DeviceIdentityMaterial({
     required this.value,
@@ -194,67 +169,8 @@ class DeviceIdentityStore {
         await _save(document);
       });
 
-  Future<void> allow(int profileId, Uri origin, {bool sendDetails = false}) =>
-      _serialized(() async {
-        final document = await _load();
-        final canonicalOrigin = normalizeIdentityOrigin(origin);
-        final consents = document['consents'] as List<dynamic>;
-        consents.removeWhere((raw) {
-          final item = DeviceIdentityConsent.fromJson(
-            raw as Map<String, dynamic>,
-          );
-          return item.profileId == profileId && item.origin == canonicalOrigin;
-        });
-        consents.add(
-          DeviceIdentityConsent(
-            profileId: profileId,
-            origin: canonicalOrigin,
-            sendDetails: sendDetails,
-          ).toJson(),
-        );
-        await _save(document);
-      });
-
-  Future<void> revoke(int profileId, [Uri? origin]) => _serialized(() async {
-    final document = await _load();
-    final canonicalOrigin = origin == null
-        ? null
-        : normalizeIdentityOrigin(origin);
-    (document['consents'] as List<dynamic>).removeWhere((raw) {
-      final item = DeviceIdentityConsent.fromJson(raw as Map<String, dynamic>);
-      return item.profileId == profileId &&
-          (canonicalOrigin == null || item.origin == canonicalOrigin);
-    });
-    if (origin == null) {
-      (document['profileSendOverrides'] as Map<String, dynamic>).remove(
-        '$profileId',
-      );
-    }
-    await _save(document);
-  });
-
-  Future<DeviceIdentityConsent?> consent(int profileId, Uri origin) =>
-      _serialized(() async {
-        try {
-          final document = await _load();
-          final canonicalOrigin = normalizeIdentityOrigin(origin);
-          for (final raw in document['consents'] as List<dynamic>) {
-            final item = DeviceIdentityConsent.fromJson(
-              raw as Map<String, dynamic>,
-            );
-            if (item.profileId == profileId && item.origin == canonicalOrigin) {
-              return item;
-            }
-          }
-        } catch (_) {
-          return null;
-        }
-        return null;
-      });
-
   Future<Map<String, String>?> requestFields(
-    int profileId,
-    Uri origin, {
+    int profileId, {
     bool sendByDefault = false,
   }) => _serialized(() async {
     try {
@@ -266,18 +182,14 @@ class DeviceIdentityStore {
           document['globalSendEnabled'] as bool? ??
           sendByDefault;
       if (!enabled) return null;
-      final permission = await _consentLocked(profileId, origin);
       final value = await _identityLocked();
       if (value == null) return null;
-      final fields = <String, String>{'x-hwid': value.hwid};
-      if (permission?.sendDetails == true) {
-        if (value.os.isNotEmpty) fields['x-device-os'] = value.os;
-        if (value.osVersion.isNotEmpty) {
-          fields['x-ver-os'] = value.osVersion;
-        }
-        if (value.model.isNotEmpty) fields['x-device-model'] = value.model;
-      }
-      return fields;
+      return {
+        'x-hwid': value.hwid,
+        'x-device-os': value.os,
+        'x-ver-os': value.osVersion,
+        'x-device-model': value.model,
+      };
     } on Object {
       return null;
     }
@@ -308,21 +220,6 @@ class DeviceIdentityStore {
     }
   }
 
-  Future<DeviceIdentityConsent?> _consentLocked(
-    int profileId,
-    Uri origin,
-  ) async {
-    final document = await _load();
-    final canonicalOrigin = normalizeIdentityOrigin(origin);
-    for (final raw in document['consents'] as List<dynamic>) {
-      final item = DeviceIdentityConsent.fromJson(raw as Map<String, dynamic>);
-      if (item.profileId == profileId && item.origin == canonicalOrigin) {
-        return item;
-      }
-    }
-    return null;
-  }
-
   Future<T> _serialized<T>(Future<T> Function() operation) async {
     final previous = _tail;
     final release = Completer<void>();
@@ -339,12 +236,11 @@ class DeviceIdentityStore {
     if (_document != null) return _document!;
     final raw = await storage.read();
     final value = raw == null
-        ? <String, dynamic>{'version': 1, 'consents': <dynamic>[]}
+        ? <String, dynamic>{'version': 1}
         : jsonDecode(raw) as Map<String, dynamic>;
+    value.remove('consents');
     value.putIfAbsent('profileSendOverrides', () => <String, dynamic>{});
     if (value['version'] != 1 ||
-        value['consents'] is! List ||
-        (value['consents'] as List).length > 512 ||
         (value['globalSendEnabled'] != null &&
             value['globalSendEnabled'] is! bool) ||
         value['profileSendOverrides'] is! Map ||
@@ -356,15 +252,6 @@ class DeviceIdentityStore {
               entry.value is! bool,
         )) {
       throw const FormatException('Invalid device-local state');
-    }
-    for (final item in value['consents'] as List) {
-      final consent = DeviceIdentityConsent.fromJson(
-        Map<String, dynamic>.from(item as Map),
-      );
-      if (consent.origin !=
-          normalizeIdentityOrigin(Uri.parse(consent.origin))) {
-        throw const FormatException('Invalid consent origin');
-      }
     }
     if (value['identity'] case final Map identity) {
       final device = DeviceIdentity.fromJson(
@@ -415,23 +302,6 @@ class DeviceIdentityStore {
       model: _wireDetail(material.model),
     );
   }
-}
-
-String normalizeIdentityOrigin(Uri origin) {
-  final scheme = origin.scheme.toLowerCase();
-  final host = origin.host.toLowerCase();
-  if ((scheme != 'https' && scheme != 'http') ||
-      host.isEmpty ||
-      origin.userInfo.isNotEmpty) {
-    throw ArgumentError.value(origin, 'origin', 'Expected an HTTP(S) origin');
-  }
-  final port =
-      origin.hasPort &&
-          !((scheme == 'https' && origin.port == 443) ||
-              (scheme == 'http' && origin.port == 80))
-      ? origin.port
-      : null;
-  return Uri(scheme: scheme, host: host, port: port).toString();
 }
 
 Future<DeviceIdentityMaterial?> readDeviceIdentityMaterial() async {

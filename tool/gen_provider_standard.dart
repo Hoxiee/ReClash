@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 
 const _jsonPath = 'provider_standard.g.json';
-const _markdownPath = 'docs/en/PROVIDER_HEADERS.md';
+const _markdownPath = 'docs/en/providers/standard.md';
 
 void main(List<String> arguments) {
   final json = const JsonEncoder.withIndent('  ').convert({
@@ -31,9 +31,20 @@ void main(List<String> arguments) {
 
 String _markdown() {
   final out = StringBuffer()
-    ..writeln('# ReClash Subscription Provider Standard')
+    ..writeln('# Standard registry')
     ..writeln()
-    ..writeln('Version: $subscriptionStandardVersion')
+    ..writeln(
+      'Limits, metadata fields and HTTP headers of provider standard version '
+      '$subscriptionStandardVersion, generated from the registry the app '
+      'decodes with.',
+    )
+    ..writeln()
+    ..writeln(
+      'Machine-readable copy: '
+      '[`provider_standard.g.json`](../../../provider_standard.g.json). '
+      'Value formats and behavior: [Response headers](headers.md) and '
+      '[Request headers](request.md).',
+    )
     ..writeln()
     ..writeln('## Limits')
     ..writeln()

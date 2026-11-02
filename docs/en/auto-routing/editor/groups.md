@@ -1,168 +1,125 @@
-# The group sheet
+# Group sheet
 
-The group sheet is where you watch and control one group. It lives in **Proxies**: select a group (only select groups have it) and tap the **Auto routing** button in the app bar, or use the same action on the group's row. It is also opened from rows in the hub. The sheet title is the group name.
+The per-group sheet in Proxies: status, control, pool, behaviour, explanation, history and messages.
 
-Sections, top to bottom (some appear only when they have something to show):
+## Sections
 
-1. Problems, as red lines (for example a missing profile).
-2. **Permission needed**, when the profile waits for your consent.
-3. The status card and **Change server**.
-4. **Control**.
-5. **Change to**.
-6. **Behaviour**.
-7. **Why this server**.
-8. **History**.
-9. **Auto routing settings**.
-10. **Made by a route**, or **Turn off auto routing for this group**.
+Open the sheet from the auto routing action of a select group in **Proxies**, or from a group row in the hub.
 
-> [!NOTE]
-> **Screenshot `group-sheet-auto`** — group sheet of the main group in Auto control: status card, Control, Change to chips, Behaviour section.
-
-## A group that is not yet smart
-
-A group without auto routing shows a short explanation, a section **With auto routing on** (the default profile with its description, and the server count) and a filled button.
-
-1. Open the group sheet.
-2. Read the hint: "ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network."
-3. Tap **Turn on auto routing**.
-
-What happens: the group gets its own binding with the default profile. To undo, see [turn auto routing off for one group](#turn-auto-routing-off-for-one-group).
-
-> [!NOTE]
-> **Screenshot `group-intro`** — the sheet of a group without auto routing, with the Turn on auto routing button.
-
-## Status card
-
-The top card shows:
-
-| Part | Meaning |
+| Section | Content |
 | --- | --- |
-| Server name | The current server, with its flag in front if the name lacks one. |
-| Reason line | Why this server is selected, for example "Working; kept until it fails". Codes are in [troubleshooting.md](troubleshooting.md#reasons-on-the-status-card). |
-| Forecast line | What may happen next, such as "May switch to {node} in {minutes} min", "Will switch to {node} once a check confirms it" or "Will switch to {node} if it stays {gain} ms faster". |
-| Details | Country name, step name, and "Network: {kind}", joined with "·". |
-| Latency | Right side, in ms, when known. |
-| **Change server** | Button under the card. Switches to the best other server and skips the current one for 15 minutes. Disabled in Manual. |
+| Problems | The group's problem; see [Messages](#messages). |
+| **Permission needed** | "“{profile}” wants to check these sites", the hosts, **Allow**. Until then the group runs `builtin/simple`. |
+| Status | Server, reason, forecast, exit country, tier, network kind, latency. **Change server** cools the current server for 15 minutes and switches; unavailable in Manual. |
+| **Control** | **Auto**, **Pinned** or **Manual**; see [Control](#control). |
+| **Choose from** | One-tap pools; see [Choose from](#choose-from). Hidden when held on one member. |
+| **Behaviour** | Profile opens the chooser (**Built-in**, **From provider**, **Mine**); also **Server order** and **Group settings**. A driving scenario adds the footer "The scenario «{scenario}» drives this group now." |
+| **Why this server** | "{count} servers compared"; expands to the top 8 ranking rows. |
+| **History** | Newest journal entry; expands to the last 20. |
+| **Auto routing settings** | Opens the hub. |
+| **Made by a route** or **Turn off auto routing for this group** | A route group links to **Edit the route**. Otherwise, for a group with the user's own binding, removes it; the group keeps its server. |
 
-## Control: Auto, Pinned, Manual
-
-**Control** is a three-way segmented control. The footer under it explains the chosen option.
-
-| Option | Footer hint | What happens |
-| --- | --- | --- |
-| **Auto** | Picks the best working server in the server order and switches when it fails. | The behaviour decides. |
-| **Pinned** | Stays on {node}; leaves it only when it fails and comes back when it recovers. | Pins the server in use now (it needs a current server). If it fails, auto routing leaves it, and returns when it works again. |
-| **Manual** | You pick the server in the proxies list; auto routing never switches it. | You select servers in the group list. Auto routing keeps watching only. |
-
-To return to Auto, tap **Auto**. Picking a pool in **Change to** while pinned also returns to Auto.
+Without a binding, the group shows **With auto routing on** (the profile it would get, server count) and **Turn on auto routing**, which adds a user binding with the default profile.
 
 > [!NOTE]
-> **Screenshot `group-sheet-pinned`** — Control set to Pinned with "Holding the pinned server" on the status card.
+> **Screenshot `group-sheet-auto`** — Auto group: status, Control, Choose from, Behaviour
 
-## Change to
+> [!NOTE]
+> **Screenshot `group-intro`** — no auto routing, with Turn on auto routing
 
-Hidden when the group is fixed on one member (the behaviour row then reads "Through {member}"). One tap narrows the group to a pool of servers and switches to its best server. The chips and the plus button are disabled in Manual.
+> [!NOTE]
+> **Screenshot `group-consent`** — Permission needed, hosts, Allow
 
-| Control | What it does |
+> [!NOTE]
+> **Screenshot `group-route`** — the «▶️ YouTube» sheet, Made by a route
+
+## Control
+
+| Option | Engine control |
 | --- | --- |
-| **Any** chip | No narrowing. |
-| Chips | Pools offered by the provider, pools of yours, and flags found in server names. Flag chips appear only when servers come from two or more countries; the most common flags come first, at most 8. |
-| **Add a pattern** (plus button) | Asks for a **Name pattern** (a regular expression, matched case-insensitively against server names). The dialog warns "{count} of {total} match" and does not accept a pattern that matches nothing or is not valid. The new chip is selected at once. |
-| Long-press (or right-click) a chip of yours | **Delete**. Provider and flag chips have no menu. |
+| **Auto** | `auto`: the decision runs; clears a pin. |
+| **Pinned** | `pin` on the current server, on every network: kept while it works, returned to when it recovers. |
+| **Manual** | `manual`: the user selects in the proxies list; the engine never switches and runs no checks. |
+
+Selecting a server by hand in an Auto group pins it. See [Control](../engine.md#control).
 
 > [!NOTE]
-> **Screenshot `group-change-to`** — Change to with chips Any, 🇳🇴, 🇸🇪, 🇷🇺 and one custom pattern.
+> **Screenshot `group-sheet-pinned`** — Control Pinned, Holding the pinned server
 
-## Behaviour section
+## Choose from
 
-| Row | Opens |
+Each chip sets `pool.include` of the user's binding and returns a pinned group to Auto.
+
+| Chip | Pool |
 | --- | --- |
-| Profile row (title, then its description or its level, **Simple** or **Advanced**) | The **Profile** chooser, with sections **Built-in**, **From provider** and **Mine**. Each profile shows its description and, if it waits on consent, "Needs your permission". A provider group lists only what the provider offers. A footer says profiles are made in Advanced configuration → Auto routing. |
-| **Server order** | The group's own server order page (hidden when the group is fixed on one member). The subtitle is a summary such as "1 ⚡ RU → 2 Any working server". See [the server order page](#server-order-page). |
-| **Group settings** | The [settings page](#settings-page), subtitle "Switching: … · Checks: …". |
+| **Any** | No narrowing. |
+| Provider and user chips | The binding's `chips`. |
+| Flags | Up to 8 flags found in server names, most common first, when there are at least two. |
+| **Add a pattern** | **Name pattern**, saved as `name ~ /pattern/i`; refused while invalid or matching nothing ("{count} of {total} match"). |
 
-The section footer carries the problem of the profile, if it has one, and, while a scenario drives the group: "The scenario «{scenario}» drives this group now." The profile row then also names the scenario's program for the group (for example the main group or every group) when it differs from the group's own name.
-
-Server-order precedence, strongest first: the scenario's order for the group, the order you set on the group, the profile's order. A last-resort step yields to every other step, even one below it.
-
-> [!NOTE]
-> **Screenshot `group-behaviour`** — Behaviour section with the Fastest profile, Server order summary and the settings row.
-
-## Server order page
-
-The page is titled **Server order**; its header is the group name. It edits the group's own order with the same [step editor](routes.md#the-server-order-editor) as routes.
-
-- With no steps of your own, the page shows the profile's steps greyed out, with "From the behaviour — edit a step to make the order your own". Editing or adding a step starts from a copy of them. Delete all steps to follow the profile again.
-- Each row has a number badge, the step label or condition, "Last resort" when set, and how many servers it takes ("{count} servers"; red at 0). The badge of the step the current server falls in is highlighted.
-- A caption "if none of them works" links step 1 to step 2.
-- The plus button (**Add a step**) adds a step. With two or more steps a sort button lets you drag to reorder. Long-press (or right-click) a step for **Delete**.
-- Footer: "This order is for this group only. Leave it empty to follow the profile’s order." While a scenario drives the group it reads instead: "A scenario drives this group now: a server order the scenario gives it comes before this one."
-
-## Settings page
+A user chip's context menu deletes it.
 
 > [!NOTE]
-> **Screenshot `group-settings`** — settings page with Name pattern "4 of 5 match", Switching Balanced, Checks Economical, and the direct-sites switch.
+> **Screenshot `group-change-to`** — Any, 🇳🇴, 🇸🇪, 🇷🇺 and one pattern
 
-| Section | Control | Notes |
-| --- | --- | --- |
-| **Servers** | **Name pattern** | A regular expression (hint "Any"), applied on Enter and only when valid. Empty means any server. The footer shows "{count} of {total} match" or "The pattern is not a valid regular expression". |
-| **Behaviour** | **Switching** | **Rarely**, **Balanced**, **Often**. How eager the group is to leave a working server for a better one. |
-| | **Checks** | **Economical**, **Balanced**, **Precise**. How many probe requests it may spend. |
-| **Network** | **Direct sites through this group** | "When sites your rules send direct stop opening, they go through this group. Local addresses always stay direct." Shown only when the group supports it. After switching it on, a row shows **On now** or **Ready: direct sites still open**. |
+## Behaviour
 
-## Why this server and History
-
-**Why this server** is a fold row, shown when the engine has a ranking. Collapsed, it reads "{count} servers compared"; open it to see up to 8 servers. Each row shows the server and its latency; the current server is highlighted. The line under the name joins:
-
-- either the reason the server is out, or its step and health;
-- "may reach “{tier}” after a check", when a check could lift it;
-- "exit {flag} {code}", the verified exit country;
-- check results, each with a mark: ✓ passed, × failed, ~ soft;
-- how long ago it was checked.
-
-A server that is out has one of these reasons: Not in the pool, Excluded by the profile, Not a server, Skipped after “Change server”, Matches no preference, Not checked yet. Health shows as **Working**, **Worked before**, **Not checked** or **Not working**.
+| Row | Edits |
+| --- | --- |
+| Profile | The binding's `profile`. |
+| **Server order** | The binding's `prefer`, via the [step editor](routes.md#server-order). Empty follows the profile; a scenario program's order comes first. |
+| **Group settings** → **Servers** | **Name pattern**: `pool.include`, as above. |
+| **Group settings** → **Behaviour** | **Switching**: `feel` **Rarely** (`calm`), **Balanced**, **Often** (`eager`). **Checks**: `energy` **Economical**, **Balanced**, **Precise**. |
+| **Group settings** → **Network** | **Direct sites through this group** (when the profile has `direct-split`): **On now** or **Ready: direct sites still open**. |
 
 > [!NOTE]
-> **Screenshot `group-why`** — Why this server expanded with five rows including a "Skipped after Change server" row.
-
-**History** is a fold row shown once there is at least one event. Collapsed, it shows the newest event; open it for the last 20, newest first, each with its age. Entries:
-
-- switches: "{from} → {to}: reason";
-- failures: "{node} stopped working";
-- pins: "Pinned: {node}";
-- mode changes: "Mode {from} → {to}".
+> **Screenshot `group-behaviour`** — Fastest, Server order, Group settings
 
 > [!NOTE]
-> **Screenshot `group-history`** — History expanded with a failover and a pin entry.
+> **Screenshot `group-settings`** — pattern, Switching, Checks, Direct sites
 
-## Auto routing settings
+## Explanation
 
-The row **Auto routing settings** ("Profiles, scenarios and routes") closes the sheet and opens the [hub](hub.md). Opened from the hub, it only closes the sheet.
-
-## Consent
-
-Some profiles want to contact sites to run checks. Until you allow it, the group runs Simple.
-
-1. Open the group sheet. At the top, a section **Permission needed** reads "“{profile}” wants to check these sites" and lists the hosts under it.
-2. Tap **Allow**.
-
-Footer: "Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network."
-
-The hub shows the same section for a scenario; see [hub.md](hub.md#consent).
+Each **Why this server** row shows the server and latency, then its exclusion or its tier and health (**Working**, **Worked before**, **Not checked**, **Not working**), "may reach “{tier}” after a check", "exit {country}", check results (✓ pass, × fail, ~ soft) and the last check time. **History** lists switches, failures, pins and mode changes. Fields: [Explanations and journal](../engine.md#explanations-and-journal).
 
 > [!NOTE]
-> **Screenshot `group-consent`** — Permission needed section with hosts and the Allow row.
-
-## Route groups
-
-A group created by a route shows a section **Made by a route** instead of the turn-off row. Its row **Edit the route** reads "A route in the scenario «{scenario}» created this group. Edit or remove it there." and has a disclosure chevron. Tapping it closes the sheet and opens the hub's Routes tab (Advanced configuration → Auto routing) at that route, where you edit it.
+> **Screenshot `group-why`** — Why this server, with a Skipped after «Change server» row
 
 > [!NOTE]
-> **Screenshot `group-route`** — sheet of the group "▶️ YouTube" with the Made by a route section.
+> **Screenshot `group-history`** — History with a failover and a pin
 
-## Turn auto routing off for one group
+## Messages
 
-1. Open the group sheet.
-2. Scroll to the bottom and tap **Turn off auto routing for this group** (red).
+| Text | Code |
+| --- | --- |
+| Controlled manually | `manual.requested` |
+| Holding the pinned server · Switched to the pinned server {node} | `hold.pinned` · `switch.pinned` |
+| The scenario holds {node} · The scenario moves to {node} · {node} is not in this group | `hold.fixed` · `switch.fixed` · `fixed.missing` |
+| Paused while the network is “{kind}”: nothing is checked or switched | `hold.paused` |
+| Not in use: mode {mode} | `hold.idle` |
+| No working server in the pool; holding the current one · No working server; fell back to {node} | `stranded.no-candidates` · `switch.stranded` |
+| Selected the best available server | `switch.initial` |
+| Changed server; {from} is skipped for 15 minutes | `switch.change-server` |
+| {from} stopped working; switched to the best standby | `switch.failover` |
+| {from} is no longer in the pool | `switch.out-of-pool` |
+| No other working server to change to | `hold.no-alternative` |
+| This is the best server | `hold.best` |
+| Checking a better candidate | `hold.checking` |
+| Working; kept until it fails | `hold.working` |
+| Switched recently; holding before the next change | `hold.dwell` |
+| Switch limit reached ({limit} per hour) | `hold.flap-limit` |
+| A faster server needs another measurement | `hold.confirming` |
+| Moved to a server in “{tier}” · Switched from {from}: {gain} ms faster | `switch.better-tier` · `switch.faster` |
+| Could not select the server | `select.failed` |
+| The network looks down; no server is blamed · Network changed | `network.suspect` · `network.changed` |
+| Direct sites now go through this group · Direct sites go direct again | `split.on` · `split.off` |
+| Not in the pool · Excluded by the behaviour · Not a server · Skipped after “Change server” · Matches no preference · Not checked yet | `pool.no-match` · `pool.excluded` · `pool.unroutable` · `cooldown` · `no-tier` · `pending` |
+| Behaviour {profile} was not found; the default is used | `profile.missing` |
+| Behaviour error: {error} | `profile.invalid` |
+| This group is not a selector in the current config · The group has no servers | `group.unavailable` · `group.empty` |
+| The route «{route}» was skipped: a group with its name already exists. | `route.name-taken` |
+| The route «{route}» sends traffic to «{to}», which is not in the profile. | `route.to-missing` |
+| The route «{route}» could not be applied: {error} | `route.invalid` |
+| Routing state could not be saved: {error} | `store.failed` |
 
-It removes the group's own binding. The footer says: "The group keeps its current server and stops switching on its own." The row is shown only for a group that has a binding of its own, and never for a route group. If a scenario still drives the group, change the scenario instead ([hub.md#turn-auto-routing-off](hub.md#turn-auto-routing-off)).
+The forecast line names when the hold ends: "Will switch to {node} once a check confirms it", "May switch to {node} in {minutes} min" or "Will switch to {node} if it stays {gain} ms faster". Unknown codes show as is.

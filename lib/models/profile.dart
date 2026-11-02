@@ -585,12 +585,17 @@ extension ProfileExtension on Profile {
               final staleFields = [
                 for (final key
                     in previous?.metadata.fields.keys ?? const <String>[])
-                  if (!decodedMetadata.metadata.fields.containsKey(key)) key,
+                  if (key.startsWith('subscription.') &&
+                      !decodedMetadata.metadata.fields.containsKey(key))
+                    key,
               ];
-              final mergedMetadata =
-                  (previous?.metadata ?? const SubscriptionMetadata()).merge(
-                    decodedMetadata.metadata,
-                  );
+              final mergedMetadata = SubscriptionMetadata(
+                Map.unmodifiable({
+                  for (final key in staleFields)
+                    key: previous!.metadata.fields[key],
+                  ...decodedMetadata.metadata.fields,
+                }),
+              );
               final snapshot = SubscriptionSnapshot(
                 providerPolicy: payload.summary.providerPolicy,
                 metadata: mergedMetadata,
@@ -894,7 +899,7 @@ Future<String?> _fetchRoutingBundle(
     }
     final response = await fetcher.fetch(
       uri,
-      headers: headers,
+      headers: redirectSubscriptionHeaders(headers, subscription, uri),
       timeout: timeout,
       cancellation: cancellation,
     );

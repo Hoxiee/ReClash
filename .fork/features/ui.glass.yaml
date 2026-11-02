@@ -1,0 +1,13 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  sustained: Only sustained raster overload lowers effective glass quality; isolated slow frames and ineligible or hidden periods cannot accumulate an overload decision.
+  session: Automatic quality caps are local to the current UI session and never rewrite the saved theme choice or provider ownership.
+  restore: The user can restore and keep the requested quality for the rest of the session; disposed observers cannot change quality or show feedback.
+watch: [lib/common/frame_load.dart, lib/manager/theme_manager.dart, lib/ui/liquid_glass.dart, test/common/frame_load_test.dart, test/manager/theme_manager_test.dart, test/widgets/liquid_glass_test.dart, 'arb/fragments/ui.glass/**']
+checks:
+  glass: [sustained, session, restore]
+deps: [localization.catalog]
+drop: Upstream preserves session-only adaptive glass quality and the user's restoration choice.

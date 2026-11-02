@@ -24,6 +24,45 @@ import '../helpers/test_profiles.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
+class _PinSetupAction extends SetupAction {
+  bool applied = true;
+  bool pending = false;
+  int revision = 0;
+  Completer<bool>? applicationCheck;
+  final inputCheckStarted = Completer<void>();
+
+  @override
+  int get profileApplyRevision => revision;
+
+  @override
+  bool get isProfileApplyPending => pending;
+
+  @override
+  Future<bool> inputsApplied() async {
+    if (!inputCheckStarted.isCompleted) inputCheckStarted.complete();
+    return await applicationCheck?.future ?? applied;
+  }
+}
+
+ProxiesData _computedGroups({
+  Map<String, String?> pins = const {'Proxy': ''},
+  String type = 'Fallback',
+}) => ProxiesData(
+  all: pins.keys.toList(),
+  proxies: {
+    for (final entry in pins.entries)
+      entry.key: {
+        'name': entry.key,
+        'type': type,
+        'now': 'HK-02',
+        'all': ['HK-01', 'HK-02'],
+        if (entry.value != null) 'fixed': entry.value,
+      },
+    'HK-01': {'name': 'HK-01', 'type': 'ss'},
+    'HK-02': {'name': 'HK-02', 'type': 'ss'},
+  },
+);
+
 const _testUrl = 'http://delay.test';
 
 Group _group(String name, List<Proxy> all) =>
@@ -70,12 +109,16 @@ void main() {
 
   setUp(() => reset(core));
 
-  ProviderContainer buildContainer({Profile? profile}) {
+  ProviderContainer buildContainer({
+    Profile? profile,
+    SetupAction Function()? setup,
+  }) {
     final container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
         profilesProvider.overrideWith(() => TestProfiles([?profile])),
         currentProfileIdProvider.overrideWithBuild((_, _) => profile?.id),
+        if (setup != null) setupActionProvider.overrideWith(setup),
       ],
     );
     addTearDown(container.dispose);
@@ -470,6 +513,292 @@ void main() {
         'Stale',
       ]);
     });
+  });
+
+  group('computed group pins', () {
+    late ProviderContainer scoped;
+    late _PinSetupAction setup;
+    late ProxiesAction action;
+
+    setUp(() {
+      setup = _PinSetupAction();
+      scoped = buildContainer(
+        profile: _selectedProfile('HK-01'),
+        setup: () => setup,
+      );
+      scoped.read(runTimeProvider.notifier).value = 1;
+      scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      action = actionOf(scoped);
+      when(core.getProxies).thenAnswer((_) async => _computedGroups());
+      when(
+        () => core.changeProxy(any()),
+      ).thenAnswer((_) async => const ChangeProxyResult(changed: false));
+    });
+
+    Map<String, String> selected() =>
+        scoped.read(currentProfileProvider)!.selectedMap;
+
+    test(
+      'drops an explicit lost pin and preserves the actual current node',
+      () async {
+        await action.updateGroups();
+
+        expect(selected(), {'Proxy': ''});
+        expect(scoped.read(groupsProvider).single.fixed, '');
+        expect(scoped.read(groupsProvider).single.realNow, 'HK-02');
+      },
+    );
+
+    test('also reconciles a URLTest pin', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _computedGroups(type: 'URLTest'));
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': ''});
+    });
+
+    test('keeps a pin still present in Core', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _computedGroups(pins: {'Proxy': 'HK-01'}));
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+      expect(scoped.read(groupsProvider).single.fixed, 'HK-01');
+    });
+
+    test(
+      'a missing fixed field does not prove that Core dropped a pin',
+      () async {
+        when(
+          core.getProxies,
+        ).thenAnswer((_) async => _computedGroups(pins: {'Proxy': null}));
+
+        await action.updateGroups();
+
+        expect(selected(), {'Proxy': 'HK-01'});
+        expect(scoped.read(groupsProvider).single.fixed, isNull);
+      },
+    );
+
+    test('does not change a regular Selector selection', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _computedGroups(type: 'Selector'));
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test('requires the current profile inputs to be applied', () async {
+      setup.applied = false;
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test('does not reconcile while stopped', () async {
+      scoped.read(runTimeProvider.notifier).value = null;
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test('rejects a snapshot that started during a pending apply', () async {
+      final response = Completer<ProxiesData>();
+      when(core.getProxies).thenAnswer((_) => response.future);
+      setup.pending = true;
+      final refresh = action.updateGroups();
+      await Future<void>.delayed(Duration.zero);
+      setup.pending = false;
+      response.complete(_computedGroups());
+
+      await refresh;
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test(
+      'rejects a snapshot crossing an apply with unchanged inputs',
+      () async {
+        final response = Completer<ProxiesData>();
+        when(core.getProxies).thenAnswer((_) => response.future);
+        final refresh = action.updateGroups();
+        await Future<void>.delayed(Duration.zero);
+        setup.revision++;
+        response.complete(_computedGroups());
+
+        await refresh;
+
+        expect(selected(), {'Proxy': 'HK-01'});
+      },
+    );
+
+    test('rechecks apply state after waiting for inputsApplied', () async {
+      setup.applicationCheck = Completer<bool>();
+      final refresh = action.updateGroups();
+      await setup.inputCheckStarted.future;
+      setup.revision++;
+      setup.pending = true;
+      setup.applicationCheck!.complete(true);
+
+      await refresh;
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test(
+      'rechecks profile identity even when the original profile returns',
+      () async {
+        setup.applicationCheck = Completer<bool>();
+        final refresh = action.updateGroups();
+        await setup.inputCheckStarted.future;
+        scoped.read(currentProfileIdProvider.notifier).value = 2;
+        scoped.read(currentProfileIdProvider.notifier).value = 1;
+        setup.applicationCheck!.complete(true);
+
+        await refresh;
+
+        expect(selected(), {'Proxy': 'HK-01'});
+      },
+    );
+
+    test(
+      'rejects disconnect and reconnect with the same running timestamp',
+      () async {
+        final response = Completer<ProxiesData>();
+        when(core.getProxies).thenAnswer((_) => response.future);
+        final refresh = action.updateGroups();
+        await Future<void>.delayed(Duration.zero);
+        scoped.read(coreStatusProvider.notifier).value =
+            CoreStatus.disconnected;
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+        response.complete(_computedGroups());
+
+        await refresh;
+
+        expect(selected(), {'Proxy': 'HK-01'});
+      },
+    );
+
+    test('a superseded snapshot cannot drop a newer retained pin', () async {
+      final response = Completer<ProxiesData>();
+      var calls = 0;
+      when(core.getProxies).thenAnswer(
+        (_) async => ++calls == 1
+            ? await response.future
+            : _computedGroups(pins: {'Proxy': 'HK-01'}),
+      );
+      final stale = action.updateGroups();
+      await Future<void>.delayed(Duration.zero);
+      await action.updateGroups();
+      response.complete(_computedGroups());
+
+      await stale;
+
+      expect(selected(), {'Proxy': 'HK-01'});
+    });
+
+    test('keeps a same-value pick while its Core call is in flight', () async {
+      final changed = Completer<ChangeProxyResult>();
+      when(() => core.changeProxy(any())).thenAnswer((_) => changed.future);
+      final pick = action.changeProxy(groupName: 'Proxy', proxyName: 'HK-01');
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+      changed.complete(const ChangeProxyResult(changed: false));
+      await pick;
+    });
+
+    test('one completed pick does not settle an overlapping pick', () async {
+      final first = Completer<ChangeProxyResult>();
+      final second = Completer<ChangeProxyResult>();
+      var calls = 0;
+      when(
+        () => core.changeProxy(any()),
+      ).thenAnswer((_) => ++calls == 1 ? first.future : second.future);
+      final firstPick = action.changeProxy(
+        groupName: 'Proxy',
+        proxyName: 'HK-01',
+      );
+      final secondPick = action.changeProxy(
+        groupName: 'Proxy',
+        proxyName: 'HK-01',
+      );
+      first.complete(const ChangeProxyResult(changed: false));
+      await firstPick;
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+      second.complete(const ChangeProxyResult(changed: false));
+      await secondPick;
+    });
+
+    test(
+      'does not drop a same-value pick completed during the input check',
+      () async {
+        setup.applicationCheck = Completer<bool>();
+        final refresh = action.updateGroups();
+        await setup.inputCheckStarted.future;
+        await action.changeProxy(groupName: 'Proxy', proxyName: 'HK-01');
+        setup.applicationCheck!.complete(true);
+
+        await refresh;
+
+        expect(selected(), {'Proxy': 'HK-01'});
+      },
+    );
+
+    test('keeps a pick still waiting in the debounce queue', () async {
+      action.changeProxyDebounce('Proxy', 'HK-01');
+      addTearDown(() => debouncer.cancel((FunctionTag.changeProxy, 'Proxy')));
+
+      await action.updateGroups();
+
+      expect(selected(), {'Proxy': 'HK-01'});
+      verifyNever(() => core.changeProxy(any()));
+    });
+
+    test(
+      'clears each lost computed pin without restoring another one',
+      () async {
+        scoped
+            .read(profilesProvider.notifier)
+            .put(
+              _selectedProfile('HK-01').copyWith(
+                selectedMap: const {'Proxy': 'HK-01', 'Auto': 'HK-02'},
+              ),
+            );
+        when(core.getProxies).thenAnswer(
+          (_) async => _computedGroups(pins: {'Proxy': '', 'Auto': ''}),
+        );
+
+        await action.updateGroups();
+
+        expect(selected(), {'Proxy': '', 'Auto': ''});
+      },
+    );
+
+    test(
+      'does not write a pin after disposal during the input check',
+      () async {
+        setup.applicationCheck = Completer<bool>();
+        final refresh = action.updateGroups();
+        await setup.inputCheckStarted.future;
+        scoped.dispose();
+        setup.applicationCheck!.complete(true);
+
+        await expectLater(refresh, completes);
+      },
+    );
   });
 
   group('changeProxy', () {

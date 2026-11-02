@@ -67,4 +67,4 @@ References checked for the browser routes:
 
 ## Provider-owned preview API
 
-[`PROVIDER_PREVIEW_API.md`](../PROVIDER_PREVIEW_API.md) defines the opt-in version 1 contract. A single `link[rel="reclash-preview"]` declares a same-origin JSON endpoint; no endpoint is guessed. Valid presentation fields override panel metadata. Requests carry no cookies, authorization or device identity. Account names are displayed separately, support is a top-bar action, and only one declared logo is requested. Failures preserve the page preview and never initiate a configuration download.
+[Preview API](../docs/en/providers/preview-api.md) defines the opt-in version 1 contract. A single `link[rel="reclash-preview"]` declares a same-origin JSON endpoint; no endpoint is guessed. Valid presentation fields override panel metadata. Requests carry no cookies, authorization or device identity. Account names are displayed separately, support is a top-bar action, and only one declared logo is requested. Failures preserve the page preview and never initiate a configuration download.

@@ -71,9 +71,12 @@ class ProfilesAction extends _$ProfilesAction {
       await subscriptionReminder.forget(id);
     });
     try {
-      await (await DeviceIdentityStore.create()).revoke(id);
+      await (await DeviceIdentityStore.create()).setProfileSendOverride(
+        id,
+        null,
+      );
     } on Object {
-      commonPrint.log('Could not clear local subscription consent');
+      commonPrint.log('Could not clear local subscription identity settings');
     }
     final currentProfileId = ref.read(currentProfileIdProvider);
     if (currentProfileId == id) {
@@ -222,7 +225,6 @@ class ProfilesAction extends _$ProfilesAction {
       final store = await DeviceIdentityStore.create();
       return await store.requestFields(
             profile.id,
-            origin,
             sendByDefault: sendsDeviceIdentityByDefault(
               ref.read(appSettingProvider).regionCode,
             ),

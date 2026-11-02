@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/frame_load.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/state.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -10,6 +12,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -172,16 +175,85 @@ class AppViewScope extends ConsumerWidget {
   }
 }
 
-class _LiquidGlassSetting extends ConsumerWidget {
+class _LiquidGlassSetting extends ConsumerStatefulWidget {
   const _LiquidGlassSetting({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(
+  ConsumerState<_LiquidGlassSetting> createState() =>
+      _LiquidGlassSettingState();
+}
+
+class _LiquidGlassSettingState extends ConsumerState<_LiquidGlassSetting> {
+  final _load = FrameLoadWatch();
+  var _qualityCap = LiquidGlassMode.ultra;
+  var _keepQuality = false;
+  var _notified = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addTimingsCallback(_onTimings);
+    ref.listenManual(
+      themeSettingProvider.select((state) => state.liquidGlass),
+      (_, _) => setState(_resetCap),
+    );
+    ref.listenManual(appVisibleProvider, (_, _) => _load.reset());
+  }
+
+  @override
+  void dispose() {
+    SchedulerBinding.instance.removeTimingsCallback(_onTimings);
+    super.dispose();
+  }
+
+  void _resetCap() {
+    _qualityCap = LiquidGlassMode.ultra;
+    _load.reset();
+  }
+
+  LiquidGlassMode _effectiveMode(LiquidGlassMode chosen) =>
+      chosen.index < _qualityCap.index ? chosen : _qualityCap;
+
+  void _onTimings(List<FrameTiming> timings) {
+    if (!mounted) return;
+    final mode = _effectiveMode(ref.read(themeSettingProvider).liquidGlass);
+    if (_keepQuality ||
+        mode == LiquidGlassMode.none ||
+        !ref.read(appVisibleProvider)) {
+      _load.reset();
+      return;
+    }
+    if (!_load.overloadedAfter(
+      timings.map((timing) => timing.rasterDuration),
+    )) {
+      return;
+    }
+    setState(() => _qualityCap = LiquidGlassMode.values[mode.index - 1]);
+    if (_notified) return;
+    _notified = true;
+    dialogs.showNotifier(
+      currentAppLocalizations.liquidGlassReduced,
+      actionState: MessageActionState(
+        actionText: currentAppLocalizations.restore,
+        action: () {
+          if (!mounted) return;
+          setState(() {
+            _keepQuality = true;
+            _resetCap();
+          });
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chosen = ref.watch(
       themeSettingProvider.select((state) => state.liquidGlass),
     );
+    final mode = _effectiveMode(chosen);
     return LiquidGlassScope(
       enabled: mode != LiquidGlassMode.none,
       quality: mode == LiquidGlassMode.ultra
@@ -189,7 +261,7 @@ class _LiquidGlassSetting extends ConsumerWidget {
           : LiquidGlassQuality.standard,
       child: LiquidGlassHost(
         enabled: mode != LiquidGlassMode.none,
-        child: child,
+        child: widget.child,
       ),
     );
   }

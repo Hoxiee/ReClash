@@ -22,7 +22,7 @@
       "limit": 160,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -40,7 +40,7 @@
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -63,7 +63,7 @@
       ],
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -86,7 +86,7 @@
       ],
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -109,7 +109,7 @@
       },
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -132,7 +132,7 @@
       },
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -155,7 +155,7 @@
       ],
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -173,7 +173,7 @@
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -191,7 +191,7 @@
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -209,7 +209,7 @@
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -245,7 +245,7 @@
       "limit": 160,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -272,7 +272,7 @@
       ],
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "scheduler",
       "available": true
     },
@@ -290,7 +290,7 @@
       "limit": 1024,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "routing",
       "available": true
     },
@@ -313,7 +313,7 @@
       ],
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -331,7 +331,7 @@
       "limit": 256,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "panel",
       "available": true
     },
@@ -349,7 +349,7 @@
       "limit": 32,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "appearance",
       "available": true
     },
@@ -372,7 +372,7 @@
       },
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "appearance",
       "available": true
     },
@@ -390,7 +390,7 @@
       "limit": 32,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "appearance",
       "available": true
     },
@@ -408,7 +408,7 @@
       "limit": 8,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "appearance",
       "available": true
     },
@@ -429,7 +429,7 @@
       "unit": "days",
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "reminder",
       "available": true
     },
@@ -450,7 +450,7 @@
       "unit": "percent",
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "reminder",
       "available": true
     },
@@ -468,7 +468,7 @@
       "limit": 16,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "settings",
       "available": true
     },
@@ -486,7 +486,7 @@
       "limit": 16,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "settings",
       "available": true
     },
@@ -504,7 +504,7 @@
       "limit": 5,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "transport",
       "available": true
     },
@@ -522,7 +522,7 @@
       "limit": 1,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "transport",
       "available": true
     },
@@ -540,7 +540,7 @@
       "limit": 512,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "apps",
       "available": true
     },
@@ -558,7 +558,7 @@
       "limit": 512,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "apps",
       "available": true
     },
@@ -576,7 +576,7 @@
       "limit": 1,
       "trust": "hint",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "restore-local",
       "consumer": "apps",
       "available": true
     }

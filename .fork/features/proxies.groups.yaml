@@ -4,9 +4,10 @@ state: active
 risk: routine
 must:
   refresh: A superseded proxy-group refresh cannot overwrite newer profile or runtime state.
+  computed-pins: A computed group's persisted pin is cleared only when an authoritative settled Core snapshot explicitly reports it absent; missing fields, queued or in-flight selections, profile changes and pending or superseded profile applications cannot clear it.
   dashboard: Opening a dashboard group selects that group in the proxy picker and preserves independent page search.
-watch: [lib/providers/actions/proxies.dart, lib/views/dashboard/widgets/proxy_groups.dart, lib/views/proxies/list.dart, test/providers/proxies_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
+watch: [lib/providers/actions/proxies.dart, lib/providers/actions/setup.dart, lib/models/common.dart, lib/views/dashboard/widgets/proxy_groups.dart, lib/views/proxies/list.dart, test/providers/proxies_action_test.dart, test/providers/setup_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
 checks:
-  proxies-groups: [refresh, dashboard]
+  proxies-groups: [refresh, computed-pins, dashboard]
 deps: [core.integration]
 drop: Upstream prevents stale group results from overwriting the current runtime state.

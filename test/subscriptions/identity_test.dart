@@ -4,8 +4,6 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 
-const _origin = 'https://subs.example.test';
-
 class _MemoryStorage implements DeviceIdentityStorage {
   String? value;
   bool failWrite = false;
@@ -41,14 +39,17 @@ void main() {
         },
       );
 
-      expect(await store.requestFields(1, Uri.parse(_origin)), isNull);
+      expect(await store.requestFields(1), isNull);
       expect(sourceCalls, 0);
       await store.setProfileSendOverride(1, true);
-      final fields = await store.requestFields(1, Uri.parse(_origin));
+      final fields = await store.requestFields(1);
       expect(sourceCalls, 1);
-      expect(fields, hasLength(1));
-      expect(fields!.keys.single, 'x-hwid');
-      expect(fields['x-hwid'], matches(RegExp(r'^[a-f0-9]{32}$')));
+      expect(fields, {
+        'x-hwid': matches(RegExp(r'^[a-f0-9]{32}$')),
+        'x-device-os': 'test-os',
+        'x-ver-os': '1.2',
+        'x-device-model': 'test-model',
+      });
       expect(storage.value, isNot(contains('raw-machine-value')));
     });
 
@@ -58,7 +59,7 @@ void main() {
         source: () async => _material('source-value'),
       );
       await store.setGlobalSendEnabled(true);
-      final fields = await store.requestFields(1, Uri.parse(_origin));
+      final fields = await store.requestFields(1);
       expect(
         fields?['x-hwid'],
         sha256
@@ -81,8 +82,8 @@ void main() {
           },
         );
         await store.setGlobalSendEnabled(true);
-        final first = await store.requestFields(1, Uri.parse(_origin));
-        final second = await store.requestFields(1, Uri.parse(_origin));
+        final first = await store.requestFields(1);
+        final second = await store.requestFields(1);
 
         expect(first?['x-hwid'], matches(RegExp(r'^[a-f0-9]{32}$')));
         expect(second?['x-hwid'], first?['x-hwid']);
@@ -104,12 +105,9 @@ void main() {
           },
         );
         await store.setGlobalSendEnabled(true);
-        final first = await store.requestFields(1, Uri.parse(_origin));
+        final first = await store.requestFields(1);
         current = 'upgraded-source';
-        expect(
-          (await store.requestFields(1, Uri.parse(_origin)))?['x-hwid'],
-          first?['x-hwid'],
-        );
+        expect((await store.requestFields(1))?['x-hwid'], first?['x-hwid']);
         expect(sourceCalls, 1);
       },
     );
@@ -127,7 +125,7 @@ void main() {
           },
         );
         await firstStore.setGlobalSendEnabled(true);
-        final first = await firstStore.requestFields(5, Uri.parse(_origin));
+        final first = await firstStore.requestFields(5);
 
         final restoredStore = DeviceIdentityStore(
           storage: storage,
@@ -137,7 +135,7 @@ void main() {
           },
         );
         expect(
-          (await restoredStore.requestFields(5, Uri.parse(_origin)))?['x-hwid'],
+          (await restoredStore.requestFields(5))?['x-hwid'],
           first?['x-hwid'],
         );
         expect(sourceCalls, 1);
@@ -158,7 +156,7 @@ void main() {
           },
         );
         await expectLater(store.setGlobalSendEnabled(true), throwsStateError);
-        expect(await store.requestFields(7, Uri.parse(_origin)), isNull);
+        expect(await store.requestFields(7), isNull);
         expect(sourceCalls, 0);
       },
     );
@@ -173,68 +171,65 @@ void main() {
         );
         await store.setGlobalSendEnabled(true);
         storage.failWrite = true;
-        expect(await store.requestFields(7, Uri.parse(_origin)), isNull);
+        expect(await store.requestFields(7), isNull);
         expect(storage.value, isNot(contains('private-source')));
       },
     );
 
+    test('device details always accompany the identifier', () async {
+      final store = DeviceIdentityStore(
+        storage: _MemoryStorage(),
+        source: () async => _material('stable'),
+      );
+      await store.setGlobalSendEnabled(true);
+      final fields = await store.requestFields(3);
+      expect(fields, {
+        'x-hwid': fields!['x-hwid'],
+        'x-device-os': 'test-os',
+        'x-ver-os': '1.2',
+        'x-device-model': 'test-model',
+      });
+    });
+
+    test('unavailable details keep all four identity headers', () async {
+      final store = DeviceIdentityStore(
+        storage: _MemoryStorage(),
+        source: () async => const DeviceIdentityMaterial(
+          value: 'stable',
+          source: 'test-source',
+          os: '',
+          osVersion: '',
+          model: '',
+        ),
+      );
+      await store.setGlobalSendEnabled(true);
+      expect(await store.requestFields(3), {
+        'x-hwid': matches(RegExp(r'^[a-f0-9]{32}$')),
+        'x-device-os': '',
+        'x-ver-os': '',
+        'x-device-model': '',
+      });
+    });
+
     test(
-      'consent is profile and normalized-origin scoped; details are optional',
+      'clearing a profile override preserves other profiles and identity',
       () async {
         final store = DeviceIdentityStore(
           storage: _MemoryStorage(),
           source: () async => _material('stable'),
         );
-        final pathful = Uri.parse('HTTPS://Subs.Example.Test:443/path?token=x');
-        await store.setGlobalSendEnabled(true);
-        await store.allow(3, pathful);
-        expect(await store.consent(3, Uri.parse(_origin)), isNotNull);
-        expect(await store.consent(4, Uri.parse(_origin)), isNull);
-        expect(
-          await store.consent(3, Uri.parse('https://other.example.test')),
-          isNull,
-        );
+        await store.setGlobalSendEnabled(false);
+        await store.setProfileSendOverride(1, true);
+        await store.setProfileSendOverride(2, true);
+        final fields = await store.requestFields(1);
 
-        final privateFields = await store.requestFields(3, Uri.parse(_origin));
-        expect(privateFields, hasLength(1));
-        expect(privateFields!.keys, {'x-hwid'});
-
-        await store.allow(3, Uri.parse(_origin), sendDetails: true);
-        expect(await store.requestFields(3, pathful), {
-          'x-hwid': privateFields['x-hwid'],
-          'x-device-os': 'test-os',
-          'x-ver-os': '1.2',
-          'x-device-model': 'test-model',
-        });
+        await store.setProfileSendOverride(1, null);
+        expect(await store.profileSendOverride(1), isNull);
+        expect(await store.globalSendEnabled(), isFalse);
+        expect(await store.requestFields(1), isNull);
+        expect(await store.requestFields(2), fields);
       },
     );
-
-    test('revoke scopes to profile and optional origin', () async {
-      final store = DeviceIdentityStore(
-        storage: _MemoryStorage(),
-        source: () async => _material('stable'),
-      );
-      final firstOrigin = Uri.parse(_origin);
-      final secondOrigin = Uri.parse('https://other.example.test');
-      await store.setProfileSendOverride(1, true);
-      await store.setProfileSendOverride(2, true);
-      await store.allow(1, firstOrigin);
-      await store.allow(1, secondOrigin);
-      await store.allow(2, firstOrigin);
-      await store.requestFields(1, firstOrigin);
-
-      await store.revoke(1, firstOrigin);
-      expect(await store.consent(1, firstOrigin), isNull);
-      expect(await store.consent(1, secondOrigin), isNotNull);
-      expect(await store.consent(2, firstOrigin), isNotNull);
-      expect(await store.requestFields(1, firstOrigin), isNotNull);
-
-      await store.revoke(1);
-      expect(await store.consent(1, secondOrigin), isNull);
-      expect(await store.profileSendOverride(1), isNull);
-      expect(await store.requestFields(1, firstOrigin), isNull);
-      expect(await store.requestFields(2, firstOrigin), isNotNull);
-    });
 
     test(
       'profile override follows or replaces the global identity setting',
@@ -243,19 +238,18 @@ void main() {
           storage: _MemoryStorage(),
           source: () async => _material('stable'),
         );
-        final origin = Uri.parse(_origin);
 
-        expect(await store.requestFields(9, origin), isNull);
+        expect(await store.requestFields(9), isNull);
         await store.setGlobalSendEnabled(true);
-        expect(await store.requestFields(9, origin), isNotNull);
+        expect(await store.requestFields(9), isNotNull);
         await store.setProfileSendOverride(9, false);
-        expect(await store.requestFields(9, origin), isNull);
+        expect(await store.requestFields(9), isNull);
         await store.setProfileSendOverride(9, true);
-        expect(await store.requestFields(9, origin), isNotNull);
+        expect(await store.requestFields(9), isNotNull);
         await store.setProfileSendOverride(9, null);
-        expect(await store.requestFields(9, origin), isNotNull);
+        expect(await store.requestFields(9), isNotNull);
         await store.setGlobalSendEnabled(false);
-        expect(await store.requestFields(9, origin), isNull);
+        expect(await store.requestFields(9), isNull);
       },
     );
 
@@ -264,39 +258,71 @@ void main() {
         storage: _MemoryStorage(),
         source: () async => _material('stable'),
       );
-      final origin = Uri.parse(_origin);
 
       expect(await store.globalSendEnabled(), isFalse);
       expect(await store.globalSendEnabled(byDefault: true), isTrue);
-      expect(
-        await store.requestFields(3, origin, sendByDefault: true),
-        isNotNull,
-      );
+      expect(await store.requestFields(3, sendByDefault: true), isNotNull);
       await store.setGlobalSendEnabled(false);
       expect(await store.globalSendEnabled(byDefault: true), isFalse);
-      expect(await store.requestFields(3, origin, sendByDefault: true), isNull);
+      expect(await store.requestFields(3, sendByDefault: true), isNull);
       expect(sendsDeviceIdentityByDefault('RU'), isTrue);
       expect(sendsDeviceIdentityByDefault('CN'), isFalse);
       expect(sendsDeviceIdentityByDefault(null), isFalse);
     });
 
-    test('normalizes origins and rejects non-web or credentialed values', () {
-      expect(
-        normalizeIdentityOrigin(Uri.parse('HTTPS://Example.test:443/path')),
-        'https://example.test',
-      );
-      expect(
-        normalizeIdentityOrigin(Uri.parse('http://Example.test:8080/path')),
-        'http://example.test:8080',
-      );
-      expect(
-        () => normalizeIdentityOrigin(Uri.parse('ftp://example.test')),
-        throwsArgumentError,
-      );
-      expect(
-        () => normalizeIdentityOrigin(Uri.parse('https://user@example.test')),
-        throwsArgumentError,
-      );
-    });
+    test(
+      'legacy consent data preserves identity and active send settings',
+      () async {
+        const identity = DeviceIdentity(
+          hwid: '0123456789abcdef0123456789abcdef',
+          source: 'stored-source',
+          os: 'test-os',
+          osVersion: '1.2',
+          model: 'test-model',
+        );
+        for (final consents in <Object>[
+          [
+            {
+              'profileId': 1,
+              'origin': 'https://subs.example.test',
+              'sendDetails': false,
+            },
+          ],
+          'invalid legacy data',
+        ]) {
+          final storage = _MemoryStorage()
+            ..value = jsonEncode({
+              'version': 1,
+              'identity': identity.toJson(),
+              'globalSendEnabled': true,
+              'profileSendOverrides': {'2': false},
+              'consents': consents,
+            });
+          var sourceCalls = 0;
+          final store = DeviceIdentityStore(
+            storage: storage,
+            source: () async {
+              sourceCalls++;
+              return _material('replacement-source');
+            },
+          );
+          expect(await store.globalSendEnabled(), isTrue);
+          expect(await store.profileSendOverride(2), isFalse);
+          expect(await store.requestFields(1), {
+            'x-hwid': identity.hwid,
+            'x-device-os': identity.os,
+            'x-ver-os': identity.osVersion,
+            'x-device-model': identity.model,
+          });
+          expect(await store.requestFields(2), isNull);
+          await store.setProfileSendOverride(2, null);
+          expect((await store.requestFields(2))?['x-hwid'], identity.hwid);
+          final saved = jsonDecode(storage.value!) as Map<String, dynamic>;
+          expect(saved.containsKey('consents'), isFalse);
+          expect(saved['identity'], identity.toJson());
+          expect(sourceCalls, 0);
+        }
+      },
+    );
   });
 }

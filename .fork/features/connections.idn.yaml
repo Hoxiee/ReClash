@@ -1,0 +1,11 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  display: Connection cards and tables can show decoded IDN labels while keeping the original ASCII host available for copying and technical inspection.
+  safety: Decoding is bounded and presentation-only; malformed labels and unsafe Unicode remain raw, and original metadata and rule matching never change.
+watch: [lib/common/punycode.dart, lib/features/connection/tracker_info_item.dart, lib/features/connection/tracker_info_table.dart, test/common/punycode_test.dart, test/features/tracker_info_idn_test.dart]
+checks:
+  connection-idn: [display, safety]
+drop: Upstream displays internationalized hosts without losing the original host or weakening display safety.

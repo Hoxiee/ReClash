@@ -74,5 +74,9 @@
   "trayIconLight": "白色",
   "trayIconDark": "黑色",
   "accessControlSettings": "访问控制设置",
-  "hideTimeoutProxiesDesc": "不显示上次延迟测试超时的代理"
+  "hideTimeoutProxiesDesc": "不显示上次延迟测试超时的代理",
+  "findProcessAlways": "始终",
+  "findProcessStrict": "按规则需要",
+  "findProcessOff": "关闭",
+  "findProcessModeDesc": "查找进程：“始终”会查询每个连接；“按规则需要”（strict）仅在规则需要时查询；“关闭”禁用查询。"
 }

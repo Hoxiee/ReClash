@@ -64,6 +64,17 @@ extension DnsQueryInitiatorL10n on DnsQueryInitiator {
   }
 }
 
+extension FindProcessModeL10n on FindProcessMode {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      FindProcessMode.always => appLocalizations.findProcessAlways,
+      FindProcessMode.strict => appLocalizations.findProcessStrict,
+      FindProcessMode.off => appLocalizations.findProcessOff,
+    };
+  }
+}
+
 extension ModeL10n on Mode {
   String get label {
     final appLocalizations = currentAppLocalizations;

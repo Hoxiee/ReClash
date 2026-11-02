@@ -95,7 +95,7 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
   ScrollController? _scroll;
   Object? _catalogKey;
   List<ToolEntry> _entries = const [];
-  ToolsSearch _engine = ToolsSearch(const []);
+  ToolsSearch? _engine;
   var _selected = 0;
   var _opening = false;
   List<ToolEntry> _results = const [];
@@ -217,13 +217,17 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
     if (key != _catalogKey) {
       _catalogKey = key;
       _entries = buildToolCatalog(l, env);
-      _engine = ToolsSearch(_entries.map((entry) => entry.document));
+      _engine = null;
     }
     final session = ref.watch(toolsSessionProvider);
     final busy = ref.watch(toolCommandsProvider);
     final searching = session.query.trim().isNotEmpty;
     final byId = {for (final entry in _entries) entry.id: entry};
-    final matches = _engine.search(session.query);
+    final matches = searching
+        ? (_engine ??= ToolsSearch(
+            _entries.map((entry) => entry.document),
+          )).search(session.query)
+        : const <ToolSearchMatch>[];
     _results = searching
         ? [for (final hit in matches) byId[hit.document.id]!]
         : _entries
