@@ -1,39 +1,17 @@
 import 'package:flutter/foundation.dart';
-import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/route_state.dart';
 
-enum SetupStep {
-  language,
-  agreement,
-  profile,
-  coverage,
-  region,
-  checking,
-  result,
-}
+enum SetupStep { language, agreement, profile, coverage, region, summary }
 
 enum SetupCoverage { tun, system, local }
-
-enum SetupVerdict {
-  connected,
-  partial,
-  unconfirmed,
-  failed,
-  permission,
-  local,
-  stopped,
-  saved,
-  safeMode,
-  stale,
-}
 
 SetupStep resumableSetupStep(int step, {required bool accepted}) {
   if (step <= SetupStep.language.index) return SetupStep.language;
   if (!accepted) return SetupStep.agreement;
   if (step <= SetupStep.profile.index) return SetupStep.profile;
   if (step == SetupStep.coverage.index) return SetupStep.coverage;
-  return SetupStep.region;
+  if (step == SetupStep.region.index) return SetupStep.region;
+  return SetupStep.summary;
 }
 
 AppSettingProps initializeSetupSettings(
@@ -64,7 +42,8 @@ class SetupDraft {
   final bool regionChosen;
   final bool directRoutes;
 
-  /// Packages of [regionCode] found on the device, or null before a scan.
+  /// Packages of [regionCode] the user chose to let bypass the VPN, or null
+  /// until they look for them.
   final List<String>? directApps;
 
   SetupDraft _copy({
@@ -97,61 +76,4 @@ class SetupDraft {
 
   SetupDraft withDirectApps(List<String>? packages) =>
       _copy(directApps: () => packages);
-}
-
-/// The wizard's reading of its connection path: only a passing internet step
-/// confirms a connection, and a step that is merely not up is unconfirmed
-/// rather than failed.
-SetupVerdict setupVerdictOf(
-  PathResult path, {
-  required SetupCoverage coverage,
-}) {
-  if (path.cancelled || !path.complete) return SetupVerdict.stale;
-  final failed = path.failed;
-  if (failed != null) {
-    return failed.cause == null
-        ? SetupVerdict.unconfirmed
-        : SetupVerdict.failed;
-  }
-  if (path.stepOf(PathStep.internet)?.status != PathStepStatus.pass) {
-    return SetupVerdict.unconfirmed;
-  }
-  return coverage == SetupCoverage.local
-      ? SetupVerdict.local
-      : SetupVerdict.connected;
-}
-
-@immutable
-class SetupOutcome {
-  const SetupOutcome({
-    required this.verdict,
-    this.path,
-    this.error,
-    this.stamp,
-    this.connectionActive = false,
-  });
-
-  final SetupVerdict verdict;
-
-  /// Null when the check ended before the path ran.
-  final PathResult? path;
-  final String? error;
-
-  /// The route the path confirmed; a move past it makes the outcome stale.
-  final RouteStamp? stamp;
-  final bool connectionActive;
-
-  bool get confirmed => switch (verdict) {
-    SetupVerdict.connected ||
-    SetupVerdict.partial ||
-    SetupVerdict.local => true,
-    _ => false,
-  };
-
-  SetupOutcome asStale() => SetupOutcome(
-    verdict: SetupVerdict.stale,
-    path: path,
-    error: error,
-    connectionActive: connectionActive,
-  );
 }

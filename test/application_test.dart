@@ -167,7 +167,7 @@ class _RootSetupSession extends SetupSession {
   @override
   SetupSessionState build() => SetupSessionState(
     active: active,
-    step: active ? SetupStep.language : SetupStep.result,
+    step: active ? SetupStep.language : SetupStep.summary,
     draft: const SetupDraft(coverage: SetupCoverage.tun),
   );
 }

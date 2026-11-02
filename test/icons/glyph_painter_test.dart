@@ -122,6 +122,7 @@ final _glyphs = {
   'status': AppGlyphs.status,
   'verified': AppGlyphs.verified,
   'swap': AppGlyphs.swap,
+  'skip': AppGlyphs.skip,
   'shuffle': AppGlyphs.shuffle,
   'split': AppGlyphs.split,
   'speed': AppGlyphs.speed,

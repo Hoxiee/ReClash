@@ -1,25 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/setup_check.dart';
-import 'package:reclash/features/doctor/cause.dart';
-import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/route_state.dart';
-
-final _at = DateTime(2026, 10, 29, 12);
-
-PathResult _path({
-  Map<PathStep, PathStepResult> steps = const {},
-  bool finished = true,
-  bool cancelled = false,
-}) {
-  var path = PathResult.start(PathScope.setup, _at);
-  for (final step in PathScope.setup.steps) {
-    path = path.withStep(
-      steps[step] ?? PathStepResult(step, status: PathStepStatus.pass),
-    );
-  }
-  return finished ? path.finish(_at, cancelled: cancelled) : path;
-}
 
 void main() {
   group('resumableSetupStep', () {
@@ -38,14 +19,18 @@ void main() {
         SetupStep.profile,
       );
       expect(
-        resumableSetupStep(SetupStep.checking.index, accepted: true),
+        resumableSetupStep(SetupStep.region.index, accepted: true),
         SetupStep.region,
       );
       expect(
         resumableSetupStep(SetupStep.coverage.index, accepted: true),
         SetupStep.coverage,
       );
-      expect(resumableSetupStep(99, accepted: true), SetupStep.region);
+      expect(
+        resumableSetupStep(SetupStep.summary.index, accepted: true),
+        SetupStep.summary,
+      );
+      expect(resumableSetupStep(99, accepted: true), SetupStep.summary);
     });
   });
 
@@ -107,149 +92,21 @@ void main() {
     expect(neutral.regionCode, isNull);
   });
 
-  group('setupVerdictOf', () {
-    test('a cancelled or unfinished path is stale', () {
-      expect(
-        setupVerdictOf(_path(cancelled: true), coverage: SetupCoverage.tun),
-        SetupVerdict.stale,
-      );
-      expect(
-        setupVerdictOf(_path(finished: false), coverage: SetupCoverage.tun),
-        SetupVerdict.stale,
-      );
+  group('SetupDraft.withRegion', () {
+    const packages = ['a.b', 'c.d'];
+    final draft = const SetupDraft(
+      coverage: SetupCoverage.tun,
+      regionCode: 'RU',
+      regionChosen: true,
+    ).withDirectApps(packages);
+
+    test('keeps found apps when the region stays the same', () {
+      expect(draft.withRegion('RU').directApps, packages);
     });
 
-    test('a cancelled path stays stale even with a failed step', () {
-      final path = _path(
-        cancelled: true,
-        steps: {
-          PathStep.server: const PathStepResult(
-            PathStep.server,
-            status: PathStepStatus.fail,
-            cause: FailureCause.refused,
-          ),
-        },
-      );
-
-      expect(
-        setupVerdictOf(path, coverage: SetupCoverage.tun),
-        SetupVerdict.stale,
-      );
-    });
-
-    test('a step that failed with a cause is failed', () {
-      final path = _path(
-        steps: {
-          PathStep.server: const PathStepResult(
-            PathStep.server,
-            status: PathStepStatus.fail,
-            cause: FailureCause.refused,
-          ),
-        },
-      );
-
-      expect(
-        setupVerdictOf(path, coverage: SetupCoverage.tun),
-        SetupVerdict.failed,
-      );
-    });
-
-    test('a step that is not up without a cause is unconfirmed', () {
-      final path = _path(
-        steps: {
-          PathStep.tunnel: const PathStepResult(
-            PathStep.tunnel,
-            status: PathStepStatus.fail,
-          ),
-        },
-      );
-
-      expect(
-        setupVerdictOf(path, coverage: SetupCoverage.tun),
-        SetupVerdict.unconfirmed,
-      );
-    });
-
-    test('a passing path without a passing internet step is unconfirmed', () {
-      for (final status in [PathStepStatus.unknown, PathStepStatus.skipped]) {
-        final path = _path(
-          steps: {
-            PathStep.internet: PathStepResult(
-              PathStep.internet,
-              status: status,
-            ),
-          },
-        );
-
-        expect(
-          setupVerdictOf(path, coverage: SetupCoverage.tun),
-          SetupVerdict.unconfirmed,
-          reason: status.name,
-        );
-      }
-    });
-
-    test('a passing internet step confirms the connection', () {
-      expect(
-        setupVerdictOf(_path(), coverage: SetupCoverage.tun),
-        SetupVerdict.connected,
-      );
-      expect(
-        setupVerdictOf(_path(), coverage: SetupCoverage.system),
-        SetupVerdict.connected,
-      );
-    });
-
-    test('a passing internet step on local coverage is local', () {
-      expect(
-        setupVerdictOf(_path(), coverage: SetupCoverage.local),
-        SetupVerdict.local,
-      );
-    });
-  });
-
-  group('SetupOutcome', () {
-    test('only confirmed outcomes count as confirmed', () {
-      for (final verdict in [
-        SetupVerdict.connected,
-        SetupVerdict.partial,
-        SetupVerdict.local,
-      ]) {
-        expect(SetupOutcome(verdict: verdict).confirmed, isTrue);
-      }
-      for (final verdict in SetupVerdict.values) {
-        if (verdict == SetupVerdict.connected ||
-            verdict == SetupVerdict.partial ||
-            verdict == SetupVerdict.local) {
-          continue;
-        }
-        expect(SetupOutcome(verdict: verdict).confirmed, isFalse);
-      }
-    });
-
-    test('stale outcomes keep the path but discard the route stamp', () {
-      final path = _path();
-      final outcome = SetupOutcome(
-        verdict: SetupVerdict.connected,
-        path: path,
-        error: 'x',
-        stamp: const RouteStamp(
-          coreEpoch: 2,
-          routeVersion: 3,
-          hostEpoch: 4,
-          proxied: true,
-        ),
-        connectionActive: true,
-      );
-
-      final stale = outcome.asStale();
-
-      expect(stale.verdict, SetupVerdict.stale);
-      expect(stale.path, same(path));
-      expect(stale.error, 'x');
-      expect(stale.stamp, isNull);
-      expect(stale.connectionActive, isTrue);
-      expect(stale.confirmed, isFalse);
+    test('clears found apps when the region changes', () {
+      expect(draft.withRegion('IR').directApps, isNull);
+      expect(draft.withRegion(null).directApps, isNull);
     });
   });
 }

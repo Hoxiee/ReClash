@@ -7,10 +7,7 @@ import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/features/doctor/path.dart';
-import 'package:reclash/features/doctor/providers.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/plugins/service.dart';
 
 import 'providers.dart';
 
@@ -25,13 +22,9 @@ class SetupSessionState {
     required this.step,
     required this.draft,
     this.busy = false,
-    this.checking = false,
     this.scanningApps = false,
-    this.path,
-    this.outcome,
     this.error,
     this.saveError = false,
-    this.needsVpnRestart = false,
     this.pendingLink,
   });
 
@@ -39,15 +32,9 @@ class SetupSessionState {
   final SetupStep step;
   final SetupDraft draft;
   final bool busy;
-  final bool checking;
   final bool scanningApps;
-
-  /// The wizard's connection path, step by step while the check runs.
-  final PathResult? path;
-  final SetupOutcome? outcome;
   final String? error;
   final bool saveError;
-  final bool needsVpnRestart;
   final String? pendingLink;
 
   SetupSessionState copyWith({
@@ -55,15 +42,10 @@ class SetupSessionState {
     SetupStep? step,
     SetupDraft? draft,
     bool? busy,
-    bool? checking,
     bool? scanningApps,
-    PathResult? path,
-    SetupOutcome? outcome,
     String? error,
     bool? saveError,
-    bool? needsVpnRestart,
     String? pendingLink,
-    bool clearOutcome = false,
     bool clearError = false,
     bool clearLink = false,
   }) => SetupSessionState(
@@ -71,18 +53,12 @@ class SetupSessionState {
     step: step ?? this.step,
     draft: draft ?? this.draft,
     busy: busy ?? this.busy,
-    checking: checking ?? this.checking,
     scanningApps: scanningApps ?? this.scanningApps,
-    path: path ?? this.path,
-    outcome: clearOutcome ? null : outcome ?? this.outcome,
     error: clearError ? null : error ?? this.error,
     saveError: saveError ?? this.saveError,
-    needsVpnRestart: needsVpnRestart ?? this.needsVpnRestart,
     pendingLink: clearLink ? null : pendingLink ?? this.pendingLink,
   );
 }
-
-class _SetupCancelled implements Exception {}
 
 AccessControlProps _bypassing(AccessControlProps props, List<String> apps) {
   if (props.enable && props.mode == AccessControlMode.acceptSelected) {
@@ -120,69 +96,14 @@ SetupDraft _draftOf(
 );
 
 class SetupSession extends Notifier<SetupSessionState> {
-  int _generation = 0;
-  bool _committing = false;
-  bool _probing = false;
-  bool _hadConnection = false;
-  CoreAction? _ownedCoreStart;
-  RouteTracker? _routeWatcher;
-  final Object _connectionOwner = Object();
-  Future<void>? _operation;
   Future<void>? _scan;
-  Completer<void>? _cancellation;
   Future<bool> _saveTail = Future.value(true);
+  bool _followsRegion = false;
 
   @override
   SetupSessionState build() {
     final settings = ref.read(appSettingProvider);
-    _hadConnection = ref.read(isStartProvider);
-    void invalidateInputs(Object? previous, Object? next) {
-      if (_committing || previous == next || !state.active) return;
-      _invalidate();
-    }
-
-    ref.listen<int?>(currentProfileIdProvider, invalidateInputs);
-    ref.listen(patchClashConfigProvider, invalidateInputs);
-    ref.listen(networkSettingProvider, invalidateInputs);
-    ref.listen(vpnSettingProvider, invalidateInputs);
-    ref.listen(
-      appSettingProvider.select(
-        (settings) => (settings.regionCode, settings.checkCertificate),
-      ),
-      invalidateInputs,
-    );
-    ref.listen(profilesProvider, (previous, next) {
-      if (previous == null ||
-          !state.active ||
-          (!_probing && state.outcome == null)) {
-        return;
-      }
-      final profileId = state.draft.profileId;
-      if (profileId != null &&
-          previous.getProfile(profileId) != next.getProfile(profileId)) {
-        _invalidate();
-      }
-    });
-    ref.listen(routeTrackerProvider, (previous, next) {
-      if (previous == null || !state.active) return;
-      final stamp = state.outcome?.stamp;
-      if (stamp != null && !next.isFresh(stamp)) _invalidate();
-      if (_probing &&
-          (previous.coreEpoch != next.coreEpoch ||
-              previous.hostEpoch != next.hostEpoch ||
-              previous.proxied != next.proxied ||
-              previous.resumes != next.resumes ||
-              !next.synced)) {
-        _invalidate();
-      }
-    });
-    ref.onDispose(() {
-      _cancelOperation();
-      final watcher = _routeWatcher;
-      scheduleMicrotask(() {
-        if (watcher?.ref.mounted == true) watcher!.detach();
-      });
-    });
+    _followsRegion = false;
     return SetupSessionState(
       active: settings.setupCompleted != true,
       step: resumableSetupStep(
@@ -197,6 +118,32 @@ class SetupSession extends Notifier<SetupSessionState> {
     );
   }
 
+  /// Detecting the region waits on device signals, so only a wizard that is
+  /// shown asks for it.
+  void followDetectedRegion() {
+    if (!_followsRegion) {
+      _followsRegion = true;
+      ref.listen(detectedRegionProvider, (_, next) {
+        if (next.hasValue && state.active) {
+          state = state.copyWith(draft: _withDetectedRegion(state.draft));
+        }
+      });
+    }
+    if (state.active) {
+      state = state.copyWith(draft: _withDetectedRegion(state.draft));
+    }
+  }
+
+  /// Preselects the detected region until the user picks one, a neutral
+  /// choice included.
+  SetupDraft _withDetectedRegion(SetupDraft draft) {
+    if (draft.regionChosen) return draft;
+    final code = sanitizeRegionCode(
+      ref.read(detectedRegionProvider).value?.countryCode,
+    );
+    return code == null ? draft : draft.withRegion(code);
+  }
+
   SetupCoverage get currentCoverage => isAndroid
       ? ref.read(vpnSettingProvider).enable
             ? SetupCoverage.tun
@@ -209,6 +156,10 @@ class SetupSession extends Notifier<SetupSessionState> {
 
   @protected
   bool get isAndroid => system.isAndroid;
+
+  bool get _accepted =>
+      ref.read(appSettingProvider).acceptedDisclaimerVersion >=
+      disclaimerVersion;
 
   @protected
   Future<bool> saveConfig(Config config) => preferences.saveConfig(config);
@@ -247,15 +198,9 @@ class SetupSession extends Notifier<SetupSessionState> {
 
   Future<bool> next(SetupStep step) async {
     if (state.busy) return false;
-    if (step != state.step && state.outcome != null) _invalidate();
-    if (step.index > SetupStep.agreement.index &&
-        ref.read(appSettingProvider).acceptedDisclaimerVersion <
-            disclaimerVersion) {
-      return false;
-    }
+    if (step.index > SetupStep.agreement.index && !_accepted) return false;
     final previous = state.step;
     state = state.copyWith(step: step, clearError: true);
-    if (step == SetupStep.region) unawaited(scanDirectApps());
     if (await persist()) return true;
     if (ref.mounted) state = state.copyWith(step: previous);
     return false;
@@ -278,45 +223,24 @@ class SetupSession extends Notifier<SetupSessionState> {
     return next(SetupStep.profile);
   }
 
-  void selectProfile(int? id) {
-    _invalidate();
-    state = state.copyWith(
-      draft: state.draft.withProfile(id),
-      clearError: true,
-    );
+  void _edit(SetupDraft draft) {
+    state = state.copyWith(draft: draft, clearError: true);
     unawaited(persist());
   }
 
-  void selectCoverage(SetupCoverage value) {
-    _invalidate();
-    state = state.copyWith(
-      draft: state.draft.withCoverage(value),
-      clearError: true,
-    );
-    unawaited(persist());
-  }
+  void selectProfile(int? id) => _edit(state.draft.withProfile(id));
 
-  void selectRegion(String? code) {
-    _invalidate();
-    state = state.copyWith(
-      draft: state.draft.withRegion(sanitizeRegionCode(code)),
-      clearError: true,
-    );
-    unawaited(persist());
-    unawaited(scanDirectApps());
-  }
+  void selectCoverage(SetupCoverage value) =>
+      _edit(state.draft.withCoverage(value));
 
-  void selectDirectRoutes(bool value) {
-    _invalidate();
-    state = state.copyWith(
-      draft: state.draft.withDirectRoutes(value),
-      clearError: true,
-    );
-    unawaited(persist());
-    unawaited(scanDirectApps());
-  }
+  void selectRegion(String? code) =>
+      _edit(state.draft.withRegion(sanitizeRegionCode(code)));
 
-  bool get _wantsDirectApps {
+  void selectDirectRoutes(bool value) =>
+      _edit(state.draft.withDirectRoutes(value));
+
+  /// Whether the draft lets the region's local apps bypass the VPN.
+  bool get offersDirectApps {
     final draft = state.draft;
     return isAndroid &&
         draft.coverage == SetupCoverage.tun &&
@@ -325,51 +249,51 @@ class SetupSession extends Notifier<SetupSessionState> {
         directRulesForCode(draft.regionCode).isNotEmpty;
   }
 
+  /// The region's installed packages, or null when the user refused the
+  /// installed-apps permission.
   @protected
-  Future<List<String>> domesticPackages(String regionCode) async {
+  Future<List<String>?> domesticPackages(String regionCode) async {
     final system = ref.read(systemActionProvider.notifier);
     if (!await system.isInstalledAppsPermissionGranted() &&
         !await system.requestInstalledAppsPermission()) {
-      return const [];
+      return null;
     }
-    return system.getDomesticPackageNames(regionCode);
-  }
-
-  /// Finds the region's apps once per chosen region; a region changed while
-  /// the scan ran is scanned again before the future completes.
-  Future<void> scanDirectApps() {
-    if (!_wantsDirectApps || state.draft.directApps != null) {
-      return Future.value();
-    }
-    return _scan ??= _scanDirectApps().whenComplete(() => _scan = null);
-  }
-
-  Future<void> _scanDirectApps() async {
-    state = state.copyWith(scanningApps: true);
+    final packages = await system.getDomesticPackageNames(regionCode);
     try {
-      while (ref.mounted &&
-          _wantsDirectApps &&
-          state.draft.directApps == null) {
-        final regionCode = state.draft.regionCode!;
-        List<String> packages;
-        try {
-          packages = await domesticPackages(regionCode);
-        } catch (_) {
-          packages = const [];
-        }
-        if (ref.mounted && state.draft.regionCode == regionCode) {
-          state = state.copyWith(
-            draft: state.draft.withDirectApps(List.unmodifiable(packages)),
-          );
-        }
+      await system.getPackages();
+    } catch (_) {}
+    return packages;
+  }
+
+  Future<void> findDirectApps() {
+    if (!offersDirectApps) return Future.value();
+    return _scan ??= _findDirectApps().whenComplete(() => _scan = null);
+  }
+
+  Future<void> _findDirectApps() async {
+    final regionCode = state.draft.regionCode!;
+    state = state.copyWith(scanningApps: true, clearError: true);
+    try {
+      final packages = await domesticPackages(regionCode);
+      if (ref.mounted &&
+          packages != null &&
+          state.draft.regionCode == regionCode) {
+        state = state.copyWith(
+          draft: state.draft.withDirectApps(List.unmodifiable(packages)),
+        );
       }
+    } catch (error) {
+      if (ref.mounted) showError(error);
     } finally {
       if (ref.mounted) state = state.copyWith(scanningApps: false);
     }
   }
 
+  void clearDirectApps() =>
+      state = state.copyWith(draft: state.draft.withDirectApps(null));
+
   /// Puts the region's direct rules above the global rules, skipping those
-  /// already present so a repeated check does not stack copies.
+  /// already present so a repeated setup does not stack copies.
   @protected
   Future<void> addDirectRules(List<String> rawRules) async {
     final existing = await database.rulesDao.queryGlobalRules().get();
@@ -398,528 +322,164 @@ class SetupSession extends Notifier<SetupSessionState> {
   void showError(Object error) =>
       state = state.copyWith(error: compactError(error));
 
-  void _cancelOperation() {
-    _generation++;
-    _probing = false;
-    final coreStart = _ownedCoreStart;
-    _ownedCoreStart = null;
-    if (coreStart?.ref.mounted == true) unawaited(coreStart!.cancelCoreStart());
-    final cancellation = _cancellation;
-    if (cancellation != null && !cancellation.isCompleted) {
-      cancellation.complete();
-    }
-  }
-
-  PathResult? _settledPath() => switch (state.path) {
-    final path? when !path.complete => path.finish(
-      DateTime.now(),
-      cancelled: true,
-    ),
-    final path => path,
-  };
-
-  void _invalidate() {
-    _cancelOperation();
-    if (state.checking || state.outcome != null) {
-      final path = _settledPath();
-      state = state.copyWith(
-        busy: state.checking ? false : state.busy,
-        checking: false,
-        path: path,
-        outcome:
-            state.outcome?.asStale() ??
-            SetupOutcome(
-              verdict: SetupVerdict.stale,
-              path: path,
-              connectionActive: ref.read(isStartProvider),
-            ),
-        step: state.checking ? SetupStep.result : state.step,
-        needsVpnRestart: false,
-      );
-    }
-  }
-
-  void cancelCheck() {
-    if (!state.checking) return;
-    _cancelOperation();
-    final path = _settledPath();
-    state = state.copyWith(
-      busy: false,
-      checking: false,
-      path: path,
-      step: SetupStep.result,
-      outcome: SetupOutcome(
-        verdict: SetupVerdict.stopped,
-        path: path,
-        connectionActive: ref.read(isStartProvider),
-      ),
-    );
-    unawaited(persist());
-  }
-
-  void _guard(int generation) {
-    if (!ref.mounted || generation != _generation) throw _SetupCancelled();
-  }
-
   Future<bool> prepareCore() async {
-    if (ref.read(appSettingProvider).acceptedDisclaimerVersion <
-        disclaimerVersion) {
-      return false;
-    }
+    if (!_accepted) return false;
     if (ref.read(coreStatusProvider) != CoreStatus.connected) {
-      final coreStart = ref.read(coreActionProvider.notifier);
-      _ownedCoreStart = coreStart;
-      try {
-        final started = await coreStart.startCore(
-          silence: true,
-          allowPrompt: true,
-        );
-        if (!started) {
-          throw MessageException(currentAppLocalizations.setupUnknownError);
-        }
-      } finally {
-        if (identical(_ownedCoreStart, coreStart)) _ownedCoreStart = null;
+      final started = await ref
+          .read(coreActionProvider.notifier)
+          .startCore(silence: true, allowPrompt: true);
+      if (!started) {
+        throw MessageException(currentAppLocalizations.setupUnknownError);
       }
     }
     return true;
   }
 
-  Future<bool> _commitDraft({required bool preserveRunning}) async {
+  Future<bool> _commitDraft() async {
     final draft = state.draft;
     if (draft.profileId != null &&
         ref.read(profilesProvider).getProfile(draft.profileId!) == null) {
       throw MessageException(currentAppLocalizations.nullProfileDesc);
     }
-    if (preserveRunning && ref.read(isStartProvider)) return persist();
     final directRules = draft.regionChosen && draft.directRoutes
         ? directRulesForCode(draft.regionCode)
         : const <String>[];
     if (directRules.isNotEmpty) await addDirectRules(directRules);
-    if (_wantsDirectApps && state.draft.directApps == null) {
-      await scanDirectApps();
-    }
     if (!ref.mounted) return false;
-    final directApps = _wantsDirectApps
-        ? state.draft.directApps ?? const <String>[]
+    final directApps = offersDirectApps
+        ? draft.directApps ?? const <String>[]
         : const <String>[];
-    _committing = true;
-    try {
-      ref.read(currentProfileIdProvider.notifier).value = draft.profileId;
-      if (draft.regionChosen &&
-          draft.regionCode != ref.read(appSettingProvider).regionCode) {
-        ref.read(systemActionProvider.notifier).applyRegion(draft.regionCode);
-      }
-      if (isAndroid) {
-        ref
-            .read(vpnSettingProvider.notifier)
-            .update(
-              (settings) => settings.copyWith(
-                enable: draft.coverage == SetupCoverage.tun,
-                accessControlProps: directApps.isEmpty
-                    ? settings.accessControlProps
-                    : _bypassing(settings.accessControlProps, directApps),
-              ),
-            );
-      } else {
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update(
-              (config) => config.copyWith.tun(
-                enable: draft.coverage == SetupCoverage.tun,
-              ),
-            );
-        ref
-            .read(networkSettingProvider.notifier)
-            .update(
-              (settings) => settings.copyWith(
-                systemProxy: draft.coverage == SetupCoverage.system,
-              ),
-            );
-      }
-      ref.read(configProvider);
-    } finally {
-      _committing = false;
+    ref.read(currentProfileIdProvider.notifier).value = draft.profileId;
+    if (draft.regionChosen &&
+        draft.regionCode != ref.read(appSettingProvider).regionCode) {
+      ref.read(systemActionProvider.notifier).applyRegion(draft.regionCode);
+    }
+    if (isAndroid) {
+      ref
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (settings) => settings.copyWith(
+              enable: draft.coverage == SetupCoverage.tun,
+              accessControlProps: directApps.isEmpty
+                  ? settings.accessControlProps
+                  : _bypassing(settings.accessControlProps, directApps),
+            ),
+          );
+    } else {
+      ref
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (config) => config.copyWith.tun(
+              enable: draft.coverage == SetupCoverage.tun,
+            ),
+          );
+      ref
+          .read(networkSettingProvider.notifier)
+          .update(
+            (settings) => settings.copyWith(
+              systemProxy: draft.coverage == SetupCoverage.system,
+            ),
+          );
     }
     return persist();
   }
 
+  /// Turns the connection on the way the dashboard's power button does, so
+  /// its prompts and failures surface in the app the wizard hands over to.
   @protected
-  Future<bool> startConnection() => ref
-      .read(setupActionProvider.notifier)
-      .setRunning(
-        true,
-        initialize: true,
-        silence: true,
-        owner: _connectionOwner,
-        allowPrompt: true,
-      );
+  Future<void> startConnection() =>
+      ref.read(commonActionProvider.notifier).setRunning(true);
 
   @protected
   Future<bool> applyProfile() => ref
       .read(setupActionProvider.notifier)
       .applyProfile(force: true, silence: true, suppressErrors: true);
 
-  @protected
-  Future<DateTime?> nativeRunTime() async => service?.getRunTime();
-
-  Future<bool> _confirmAndroid(int generation) async {
-    final deadline = DateTime.now().add(const Duration(seconds: 12));
-    while (DateTime.now().isBefore(deadline)) {
-      _guard(generation);
-      if (await nativeRunTime() != null) return true;
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-    }
-    return false;
-  }
-
-  @protected
-  Future<RouteSnapshot?> routeSnapshot() =>
-      ref.read(coreHandlerProvider).watchRoute(true);
-
-  Future<void> _syncRoute(int generation) async {
-    final snapshot = await routeSnapshot();
-    _guard(generation);
-    if (snapshot == null) {
-      throw MessageException(currentAppLocalizations.setupRouteChanged);
-    }
-    ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
-    await Future<void>.delayed(Duration.zero);
-    _guard(generation);
-  }
-
-  @protected
-  Future<PathResult> runPath() => ref
-      .read(diagnosticKernelProvider)
-      .runPath(scope: PathScope.setup, force: true);
-
-  @protected
-  Stream<PathResult> get pathUpdates =>
-      ref.read(diagnosticKernelProvider).pathUpdates;
-
-  /// Mirrors the kernel's setup path into the session until it ends or the
-  /// check is cancelled, so a late step never lands in a newer check.
-  Future<PathResult> _walkPath(
-    int generation,
-    Future<void> cancellation,
-  ) async {
-    final updates = pathUpdates.listen((path) {
-      if (path.scope != PathScope.setup ||
-          !ref.mounted ||
-          generation != _generation) {
-        return;
-      }
-      state = state.copyWith(path: path);
-    });
-    try {
-      return await Future.any([
-        runPath(),
-        cancellation.then<PathResult>((_) => throw _SetupCancelled()),
-      ]);
-    } finally {
-      await updates.cancel();
-    }
-  }
-
-  RouteStamp _routeStamp() {
-    final route = ref.read(routeTrackerProvider);
-    return RouteStamp(
-      coreEpoch: route.coreEpoch,
-      routeVersion: route.routeVersion,
-      hostEpoch: route.hostEpoch,
-      proxied: route.proxied,
-    );
-  }
-
-  Future<void> check({bool restartVpn = false}) {
-    if (!state.active ||
-        ref.read(appSettingProvider).setupCompleted != false ||
-        (state.step != SetupStep.region &&
-            state.step != SetupStep.result &&
-            !state.checking) ||
-        (state.busy && !state.checking) ||
-        ref.read(appSettingProvider).acceptedDisclaimerVersion <
-            disclaimerVersion) {
-      return Future.value();
-    }
-    final previous = _operation;
-    if (state.checking && previous != null) return previous;
-    final generation = ++_generation;
-    final cancellation = _cancellation = Completer<void>();
-    state = state.copyWith(
-      step: SetupStep.checking,
-      busy: true,
-      checking: true,
-      clearOutcome: true,
-      clearError: true,
-      needsVpnRestart: false,
-      path: PathResult.start(PathScope.setup, DateTime.now()),
-    );
-    late final Future<void> operation;
-    operation =
-        _check(
-          generation,
-          previous: previous,
-          cancellation: cancellation.future,
-          restartVpn: restartVpn,
-        ).whenComplete(() {
-          if (identical(_operation, operation)) _operation = null;
-          if (ref.mounted && generation == _generation) {
-            _probing = false;
-            state = state.copyWith(busy: false, checking: false);
-          }
-        });
-    _operation = operation;
-    return operation;
-  }
-
-  Future<void> _check(
-    int generation, {
-    Future<void>? previous,
-    required Future<void> cancellation,
-    required bool restartVpn,
-  }) async {
-    var connecting = false;
-    try {
-      await previous;
-      _guard(generation);
-      if (!await persist()) {
-        _guard(generation);
-        state = state.copyWith(step: SetupStep.region);
-        return;
-      }
-      _guard(generation);
-      if (ref.read(safeModeProvider)) {
-        _finish(const SetupOutcome(verdict: SetupVerdict.safeMode));
-        return;
-      }
-      if (state.draft.profileId == null) {
-        throw MessageException(currentAppLocalizations.nullProfileDesc);
-      }
-      final setup = ref.read(setupActionProvider.notifier);
-      final ownConnection = identical(setup.runIntentOwner, _connectionOwner);
-      final nativeRunning = isAndroid && await setup.restoreRunningState();
-      _guard(generation);
-      _hadConnection |=
-          !ownConnection && (ref.read(isStartProvider) || nativeRunning);
-      _guard(generation);
-      if (!await _commitDraft(preserveRunning: false)) {
-        _guard(generation);
-        state = state.copyWith(step: SetupStep.region);
-        return;
-      }
-      _guard(generation);
-      // Choosing TUN coverage here is the consent the app's TUN setup prompt
-      // would otherwise ask for, so the wizard may install its Helper.
-      if (!isAndroid && state.draft.coverage == SetupCoverage.tun) {
-        ref.read(coreHandlerProvider).allowPrivilegeInstall();
-      }
-      if (!await prepareCore()) {
-        throw MessageException(currentAppLocalizations.setupUnknownError);
-      }
-      _guard(generation);
-      if (isAndroid && ref.read(isStartProvider)) {
-        final running = ref.read(runningVpnOptionsProvider)?.effective;
-        final requested = (await ref.read(vpnOptionsProvider.future)).effective;
-        _guard(generation);
-        if (running != null && running != requested) {
-          if (!restartVpn) {
-            state = state.copyWith(needsVpnRestart: true);
-            _finish(
-              SetupOutcome(
-                verdict: SetupVerdict.permission,
-                error: currentAppLocalizations.vpnConfigChangeDetected,
-                connectionActive: true,
-              ),
-            );
-            return;
-          }
-          await ref
-              .read(setupActionProvider.notifier)
-              .setRunning(false, silence: true, owner: _connectionOwner);
-          _guard(generation);
-        }
-      }
-      final alreadyRunning = ref.read(isStartProvider);
-      connecting = true;
-      final applied = alreadyRunning
-          ? await applyProfile()
-          : await startConnection();
-      _guard(generation);
-      if (!applied) {
-        throw MessageException(currentAppLocalizations.setupUnknownError);
-      }
-      ref.read(initProvider.notifier).value = true;
-      final connectionConfirmed =
-          !isAndroid || await _confirmAndroid(generation);
-      _guard(generation);
-      connecting = false;
-      if (!connectionConfirmed ||
-          !ref.read(isStartProvider) ||
-          ref.read(suspendProvider)) {
-        _finish(
-          SetupOutcome(
-            verdict: SetupVerdict.unconfirmed,
-            connectionActive: ref.read(isStartProvider),
+  /// Marks setup complete; a failed save rolls the flag back so the wizard
+  /// reappears on the next launch.
+  Future<bool> _complete({bool? autoRun}) async {
+    final previous = ref.read(appSettingProvider);
+    ref
+        .read(appSettingProvider.notifier)
+        .update(
+          (settings) => settings.copyWith(
+            setupCompleted: true,
+            setupStep: state.step.index,
+            autoRun: autoRun ?? settings.autoRun,
           ),
         );
-        return;
-      }
-      if (_routeWatcher == null) {
-        final tracker = ref.read(routeTrackerProvider.notifier);
-        _routeWatcher = tracker;
-        tracker.attach();
-      }
-      await _syncRoute(generation);
-      _probing = true;
-      final path = await _walkPath(generation, cancellation);
-      _guard(generation);
-      _probing = false;
-      final verdict = setupVerdictOf(path, coverage: state.draft.coverage);
-      final failed = path.failed;
-      _finish(
-        SetupOutcome(
-          verdict: verdict,
-          path: path,
-          error: failed?.cause == null ? null : failed?.detail,
-          stamp: verdict == SetupVerdict.stale ? null : _routeStamp(),
-          connectionActive: ref.read(isStartProvider),
-        ),
-      );
-    } on _SetupCancelled {
-      return;
-    } catch (error) {
-      if (!ref.mounted || generation != _generation) return;
-      _finish(
-        SetupOutcome(
-          verdict: connecting && isAndroid
-              ? SetupVerdict.permission
-              : SetupVerdict.failed,
-          error: compactError(error),
-          connectionActive: ref.read(isStartProvider),
-        ),
-      );
-    }
-  }
-
-  void _finish(SetupOutcome outcome) {
-    final path = outcome.path ?? _settledPath();
-    state = state.copyWith(
-      path: path,
-      step: SetupStep.result,
-      checking: false,
-      outcome: SetupOutcome(
-        verdict: outcome.verdict,
-        path: path,
-        error: outcome.error,
-        stamp: outcome.stamp,
-        connectionActive: outcome.connectionActive,
-      ),
-    );
-    unawaited(persist());
-  }
-
-  Future<void> _stopOwnedConnection() async {
-    final setup = ref.read(setupActionProvider.notifier);
-    if (!_hadConnection && identical(setup.runIntentOwner, _connectionOwner)) {
-      await setup.setRunning(false, silence: true, owner: _connectionOwner);
-    }
-  }
-
-  Future<bool> saveWithoutConnection() async {
-    if (state.busy) return false;
-    _cancelOperation();
-    state = state.copyWith(busy: true, clearError: true);
-    try {
-      await _operation;
-      if (!ref.mounted) return false;
-      if (isAndroid && !ref.read(safeModeProvider)) {
-        final setup = ref.read(setupActionProvider.notifier);
-        final ownConnection = identical(setup.runIntentOwner, _connectionOwner);
-        final nativeRunning = await setup.restoreRunningState();
-        if (!ref.mounted) return false;
-        _hadConnection |= nativeRunning && !ownConnection;
-      }
-      await _stopOwnedConnection();
-      if (!ref.mounted || !await _commitDraft(preserveRunning: true)) {
-        return false;
-      }
-      if (!ref.mounted) return false;
-      final preserveConnection = ref.read(isStartProvider);
-      if (!preserveConnection) {
-        ref.read(initProvider.notifier).value = false;
-        ref
-            .read(appSettingProvider.notifier)
-            .update((settings) => settings.copyWith(autoRun: false));
-      }
-      if (!await persist() || !ref.mounted) return false;
-      _finish(
-        SetupOutcome(
-          verdict: SetupVerdict.saved,
-          connectionActive: ref.read(isStartProvider),
-        ),
-      );
-      return true;
-    } catch (error) {
-      if (ref.mounted) state = state.copyWith(error: compactError(error));
-      return false;
-    } finally {
-      if (ref.mounted) state = state.copyWith(busy: false);
-    }
-  }
-
-  Future<bool> finish({required bool autoRun}) async {
-    if (state.busy || state.step != SetupStep.result || state.outcome == null) {
-      return false;
-    }
-    state = state.copyWith(busy: true, clearError: true);
-    try {
-      await _operation;
-      if (!ref.mounted) return false;
-      final previous = ref.read(appSettingProvider);
-      final canAutoRun =
-          state.outcome?.confirmed == true &&
-          state.outcome?.connectionActive == true &&
-          ref.read(isStartProvider);
+    final saved = await _save();
+    if (!ref.mounted) return false;
+    if (!saved) {
       ref
           .read(appSettingProvider.notifier)
           .update(
             (settings) => settings.copyWith(
-              setupCompleted: true,
-              setupStep: SetupStep.result.index,
-              autoRun:
-                  state.outcome?.verdict == SetupVerdict.saved &&
-                      ref.read(isStartProvider)
-                  ? previous.autoRun
-                  : canAutoRun && autoRun,
+              setupCompleted: previous.setupCompleted,
+              autoRun: previous.autoRun,
             ),
           );
-      final saved = await _save();
-      if (!ref.mounted) return false;
-      if (!saved) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update(
-              (settings) => settings.copyWith(
-                setupCompleted: previous.setupCompleted,
-                autoRun: previous.autoRun,
-              ),
-            );
-        state = state.copyWith(saveError: true);
-        return false;
-      }
-      _routeWatcher?.detach();
-      _routeWatcher = null;
-      state = state.copyWith(active: false, saveError: false);
-      return true;
+      state = state.copyWith(saveError: true);
+      return false;
+    }
+    state = state.copyWith(active: false, saveError: false);
+    return true;
+  }
+
+  Future<bool> _busy(Future<bool> Function() action) async {
+    if (state.busy) return false;
+    state = state.copyWith(busy: true, clearError: true);
+    try {
+      return await action();
+    } catch (error) {
+      if (ref.mounted) showError(error);
+      return false;
     } finally {
       if (ref.mounted) state = state.copyWith(busy: false);
     }
   }
 
+  /// Applies the draft and leaves the wizard, starting the connection when
+  /// [connect] asks for it and a profile is there to run.
+  Future<bool> finish({required bool connect, required bool autoRun}) {
+    if (state.step != SetupStep.summary) return Future.value(false);
+    return _busy(() async {
+      await _scan;
+      if (!ref.mounted || !await _commitDraft() || !ref.mounted) return false;
+      final draft = state.draft;
+      final runnable = draft.profileId != null && !ref.read(safeModeProvider);
+      if (!await _complete(autoRun: runnable && autoRun)) return false;
+      if (!runnable) return true;
+      if (ref.read(isStartProvider)) {
+        unawaited(applyProfile());
+      } else if (connect) {
+        // Choosing TUN coverage here is the consent the app's TUN setup prompt
+        // would otherwise ask for, so the wizard may install its Helper.
+        if (!isAndroid && draft.coverage == SetupCoverage.tun) {
+          ref.read(coreHandlerProvider).allowPrivilegeInstall();
+        }
+        unawaited(startConnection());
+      }
+      return true;
+    });
+  }
+
+  /// Leaves the wizard keeping the current settings, apart from a profile
+  /// the user picked or imported along the way.
+  Future<bool> skip() {
+    if (!_accepted) return Future.value(false);
+    return _busy(() async {
+      final profileId = state.draft.profileId;
+      if (profileId != null &&
+          ref.read(profilesProvider).getProfile(profileId) != null) {
+        ref.read(currentProfileIdProvider.notifier).value = profileId;
+      }
+      return _complete();
+    });
+  }
+
   Future<bool> reopen() async {
     if (state.active || state.busy) return false;
-    _generation++;
-    _hadConnection = ref.read(isStartProvider);
     final settings = ref.read(appSettingProvider);
     ref
         .read(appSettingProvider.notifier)
@@ -929,10 +489,12 @@ class SetupSession extends Notifier<SetupSessionState> {
       step: settings.acceptedDisclaimerVersion >= disclaimerVersion
           ? SetupStep.profile
           : SetupStep.language,
-      draft: _draftOf(
-        settings,
-        profileId: ref.read(currentProfileIdProvider),
-        coverage: currentCoverage,
+      draft: _withDetectedRegion(
+        _draftOf(
+          settings,
+          profileId: ref.read(currentProfileIdProvider),
+          coverage: currentCoverage,
+        ),
       ),
     );
     return persist();

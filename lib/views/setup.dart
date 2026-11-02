@@ -7,10 +7,11 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/common/setup_check.dart';
-import 'package:reclash/features/doctor/path.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
@@ -21,7 +22,6 @@ import 'package:reclash/ui/code_label.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/disclaimer.dart';
-import 'package:reclash/views/doctor/path.dart';
 import 'package:reclash/views/region.dart';
 
 const _regionOptions = ['RU', 'IR', 'CN', 'EG', otherRegionCode];
@@ -31,21 +31,35 @@ const _journey = [
   SetupStep.profile,
   SetupStep.coverage,
   SetupStep.region,
-  SetupStep.checking,
+  SetupStep.summary,
 ];
+
+const _actionHeight = 56.0;
+const _sidePanelWidth = 300.0;
+const _shownApps = 8;
+const _phoneCodeSize = 132.0;
+
+/// Controls standing on the page itself: dark mode's raised card level sits
+/// too close to the page to outline a button or a progress track.
+Color _controlFill(BuildContext context) {
+  final colors = context.colorScheme;
+  return colors.brightness == Brightness.dark
+      ? SurfaceLevel.inset.colorOf(colors)
+      : context.raisedSurfaceLevel.colorOf(colors);
+}
 
 int? _journeyIndex(SetupStep step) => switch (step) {
   SetupStep.language || SetupStep.agreement => null,
   SetupStep.profile => 0,
   SetupStep.coverage => 1,
   SetupStep.region => 2,
-  SetupStep.checking || SetupStep.result => 3,
+  SetupStep.summary => 3,
 };
 
 String _journeyLabel(AppLocalizations l, SetupStep step) => switch (step) {
   SetupStep.coverage => l.setupReceiptCoverage,
   SetupStep.region => l.setupReceiptRegion,
-  SetupStep.checking || SetupStep.result => l.setupReceiptCheck,
+  SetupStep.summary => l.setupReceiptSummary,
   _ => l.setupReceiptProfile,
 };
 
@@ -56,6 +70,12 @@ String _coverageLabel(AppLocalizations l, SetupCoverage coverage) =>
       SetupCoverage.local => l.setupCoverageLocal,
     };
 
+Glyph _coverageGlyph(SetupCoverage coverage) => switch (coverage) {
+  SetupCoverage.tun => AppGlyphs.vpn,
+  SetupCoverage.system => AppGlyphs.devices,
+  SetupCoverage.local => AppGlyphs.link,
+};
+
 String _regionChoiceLabel(AppLocalizations l, SetupDraft draft) =>
     !draft.regionChosen
     ? l.regionNotSet
@@ -64,9 +84,10 @@ String _regionChoiceLabel(AppLocalizations l, SetupDraft draft) =>
     : regionLabel(l, draft.regionCode);
 
 class SetupWizard extends ConsumerStatefulWidget {
-  const SetupWizard({super.key, this.isAndroid});
+  const SetupWizard({super.key, this.isAndroid, this.isTV});
 
   final bool? isAndroid;
+  final bool? isTV;
 
   @override
   ConsumerState<SetupWizard> createState() => _SetupWizardState();
@@ -79,6 +100,10 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
   bool _importing = false;
   bool _saving = false;
   bool _autoRun = false;
+  bool _connectNow = true;
+  bool _addingProfile = false;
+  bool _requestOptions = false;
+  bool _showRules = false;
   String? _importError;
   SubscriptionCancellation? _importCancellation;
   SubscriptionClientSettings _clientSettings =
@@ -87,15 +112,21 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
   _encryptedImport;
 
   bool get _isAndroid => widget.isAndroid ?? system.isAndroid;
+  bool get _isTV => widget.isTV ?? system.isTV;
   SetupSession get _session => ref.read(setupSessionProvider.notifier);
   bool get _locked =>
       _importing || _saving || ref.read(setupSessionProvider).busy;
+  bool get _hasLink => _linkController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
     _scrollController = sheetScrollController(context);
     _autoRun = ref.read(appSettingProvider).autoRun;
+    _linkController.addListener(_onLinkChanged);
+    scheduleMicrotask(() {
+      if (mounted) _session.followDetectedRegion();
+    });
     final link = ref.read(setupSessionProvider).pendingLink;
     if (link != null) {
       _linkController.text = link;
@@ -108,10 +139,16 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
   @override
   void dispose() {
     _importCancellation?.cancel();
+    _linkController.removeListener(_onLinkChanged);
     _linkController.dispose();
     _keyController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onLinkChanged() {
+    if (!mounted) return;
+    setState(() => _importError = null);
   }
 
   Future<void> _transition(Future<bool> Function() action) async {
@@ -138,7 +175,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
       _importError = null;
       _encryptedImport = null;
     });
-    var imported = false;
     try {
       if (!await _session.prepareCore() || !mounted || cancellation.cancelled) {
         return;
@@ -149,8 +185,10 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
         _session.selectProfile(profile.id);
         _linkController.clear();
         _keyController.clear();
-        _encryptedImport = null;
-        imported = true;
+        setState(() {
+          _encryptedImport = null;
+          _addingProfile = false;
+        });
       }
     } on AgeSecretKeyRequiredException {
       if (mounted && !cancellation.cancelled) {
@@ -188,11 +226,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
         _importCancellation = null;
         if (mounted) setState(() => _importing = false);
       }
-    }
-    if (imported &&
-        mounted &&
-        ref.read(setupSessionProvider).step == SetupStep.profile) {
-      await _transition(() => _session.next(SetupStep.coverage));
     }
   }
 
@@ -235,12 +268,14 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     );
   }
 
+  /// Pastes the clipboard and, when it holds a profile link, imports it at
+  /// once: pasting is what a first-time user does with the link they got.
   Future<void> _pasteLink() async {
     try {
       final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
       if (text == null || !mounted) return;
       _linkController.text = text.trim();
-      setState(() => _importError = null);
+      if (isProfileLinkInput(_linkController.text)) _importLink();
     } catch (error) {
       if (mounted) _session.showError(error);
     }
@@ -298,63 +333,40 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     );
   }
 
-  SetupStep? _previous(SetupSessionState state) => switch (state.step) {
+  SetupStep? _previous(SetupStep step) => switch (step) {
     SetupStep.language => null,
     SetupStep.agreement || SetupStep.profile => SetupStep.language,
     SetupStep.coverage => SetupStep.profile,
     SetupStep.region => SetupStep.coverage,
-    SetupStep.checking => SetupStep.region,
-    SetupStep.result =>
-      state.draft.profileId == null ? SetupStep.profile : SetupStep.region,
+    SetupStep.summary => SetupStep.region,
   };
 
   void _goTo(SetupStep target) {
-    final state = ref.read(setupSessionProvider);
-    if (state.checking) {
-      _session.cancelCheck();
-    } else if (_locked) {
-      return;
-    }
+    if (_locked) return;
     unawaited(_transition(() => _session.next(target)));
   }
 
   void _back() {
-    final previous = _previous(ref.read(setupSessionProvider));
+    final previous = _previous(ref.read(setupSessionProvider).step);
     if (previous != null) _goTo(previous);
   }
 
-  Future<void> _leave({bool confirm = true}) async {
+  Future<void> _skip() async {
     if (_locked) return;
-    if (confirm) {
-      final l = context.appLocalizations;
-      final leave = await dialogs.showMessage(
-        context: sheetNavigatorOf(context).context,
-        title: l.setupLeaveTitle,
-        message: TextSpan(text: l.setupLeaveMessage),
-        confirmText: l.exit,
-        destructive: true,
-      );
-      if (leave != true || !mounted || _locked) return;
-    }
-    if (await _session.persist() && mounted) {
-      await ref.read(systemActionProvider.notifier).handleExit();
-    }
+    final l = context.appLocalizations;
+    final skip = await dialogs.showMessage(
+      context: sheetNavigatorOf(context).context,
+      title: l.setupSkipTitle,
+      message: TextSpan(text: l.setupSkipMessage),
+      confirmText: l.setupSkip,
+    );
+    if (skip == true && mounted) await _transition(_session.skip);
   }
 
-  Future<void> _check() async {
+  Future<void> _exit() async {
     if (_locked) return;
-    if (ref.read(setupSessionProvider).needsVpnRestart) {
-      final consent = await dialogs.showMessage(
-        context: sheetNavigatorOf(context).context,
-        message: TextSpan(
-          text: context.appLocalizations.vpnConfigChangeDetected,
-        ),
-        confirmText: context.appLocalizations.restart,
-      );
-      if (consent != true || !mounted) return;
-      await _session.check(restartVpn: true);
-    } else {
-      await _session.check();
+    if (await _session.persist() && mounted) {
+      await ref.read(systemActionProvider.notifier).handleExit();
     }
   }
 
@@ -393,112 +405,134 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     });
     final locked = _importing || _saving || state.busy;
     final error = state.saveError ? l.setupSaveError : state.error;
+    final accepted = ref.watch(
+      appSettingProvider.select(
+        (value) => value.acceptedDisclaimerVersion >= disclaimerVersion,
+      ),
+    );
+    final pageColor = SurfaceLevel.page.colorOf(context.colorScheme);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && (state.checking || !locked)) _back();
+        if (!didPop && !locked) _back();
       },
       child: Scaffold(
-        backgroundColor: SurfaceLevel.page.colorOf(context.colorScheme),
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final scale =
-                  MediaQuery.textScalerOf(
-                    context,
-                  ).scale(AppTextStyle.subheadline.size) /
-                  AppTextStyle.subheadline.size;
-              final journey = _journeyIndex(state.step) != null;
-              final wide =
-                  journey &&
-                  constraints.maxWidth >= 940 &&
-                  constraints.maxHeight >= 520 * scale;
-              final contentWidth = wide
-                  ? 1100.0
-                  : state.step == SetupStep.language
-                  ? 640.0
-                  : 760.0;
-              return Column(
-                children: [
-                  _header(state, l, locked, stepBar: journey && !wide),
-                  AnimatedReveal(
-                    visible: error != null,
+        backgroundColor: PageBackgroundRegistration.maybeOf(context) == null
+            ? pageColor
+            : Colors.transparent,
+        body: PageBackground(
+          baseColor: pageColor,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final scale =
+                    MediaQuery.textScalerOf(
+                      context,
+                    ).scale(AppTextStyle.subheadline.size) /
+                    AppTextStyle.subheadline.size;
+                final journey = _journeyIndex(state.step) != null;
+                final wide =
+                    journey &&
+                    constraints.maxWidth >= 940 &&
+                    constraints.maxHeight >= 560 * scale;
+                final gutter = constraints.maxWidth >= 600 ? 24.0 : 16.0;
+                final frameWidth = wide ? 1040.0 : 640.0;
+                Widget framed(Widget child) => Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: frameWidth + gutter * 2,
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ErrorBanner(message: error ?? ''),
+                      padding: EdgeInsets.symmetric(horizontal: gutter),
+                      child: child,
                     ),
                   ),
-                  Expanded(
-                    child: state.step == SetupStep.agreement
-                        ? DisclaimerView(
-                            key: ValueKey(
-                              ref.watch(
-                                appSettingProvider.select(
-                                  (value) => value.locale,
+                );
+                final content = _FadedEdge(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.only(top: 16, bottom: 32),
+                    child: framed(_body(state, l, locked)),
+                  ),
+                );
+                return Column(
+                  children: [
+                    framed(
+                      _header(
+                        state,
+                        l,
+                        locked,
+                        stepBar: journey && !wide,
+                        canSkip: accepted && state.step != SetupStep.agreement,
+                      ),
+                    ),
+                    AnimatedReveal(
+                      visible: error != null,
+                      child: framed(
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: ErrorBanner(message: error ?? ''),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: state.step == SetupStep.agreement
+                          ? DisclaimerView(
+                              key: ValueKey(
+                                ref.watch(
+                                  appSettingProvider.select(
+                                    (value) => value.locale,
+                                  ),
                                 ),
                               ),
-                            ),
-                            requireConsent: true,
-                            onAgree: () => unawaited(
-                              _transition(_session.acceptAgreement),
-                            ),
-                            onDecline: () => unawaited(_leave(confirm: false)),
-                          )
-                        : wide
-                        ? _wideBody(state, l, locked)
-                        : SingleChildScrollView(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.all(16),
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: contentWidth,
-                                ),
-                                child: _body(state, l, locked),
+                              requireConsent: true,
+                              onAgree: () => unawaited(
+                                _transition(_session.acceptAgreement),
                               ),
-                            ),
-                          ),
-                  ),
-                  if (state.step != SetupStep.agreement)
-                    _actions(state, l, locked, maxWidth: contentWidth),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _wideBody(SetupSessionState state, AppLocalizations l, bool locked) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1164),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 28,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: _body(state, l, locked),
-                ),
-              ),
-              SizedBox(
-                width: 300,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: _SetupReceipt(
-                    state: state,
-                    onStep: locked && !state.checking ? null : _goTo,
-                  ),
-                ),
-              ),
-            ],
+                              onDecline: () => unawaited(_exit()),
+                            )
+                          : wide
+                          ? framed(
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 32,
+                                children: [
+                                  Expanded(
+                                    child: _FadedEdge(
+                                      child: SingleChildScrollView(
+                                        controller: _scrollController,
+                                        padding: const EdgeInsets.only(
+                                          top: 16,
+                                          bottom: 32,
+                                        ),
+                                        child: _body(state, l, locked),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: _sidePanelWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 16),
+                                      child: _SetupReceipt(
+                                        state: state,
+                                        onStep: locked ? null : _goTo,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : content,
+                    ),
+                    AnimatedReveal(
+                      visible: state.step != SetupStep.agreement,
+                      child: framed(_actions(state, l, locked, wide: wide)),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -510,158 +544,188 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     AppLocalizations l,
     bool locked, {
     required bool stepBar,
+    required bool canSkip,
   }) {
-    final canGoBack = state.step != SetupStep.language;
-    final backEnabled = state.checking || !locked;
+    final index = _journeyIndex(state.step);
+    final colors = context.colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 8,
         children: [
           Row(
-            spacing: 12,
             children: [
-              if (canGoBack)
-                IconButton(
-                  tooltip: l.back,
-                  onPressed: backEnabled ? _back : null,
-                  icon: const GlyphIcon(AppGlyphs.chevronBack),
-                )
-              else
-                Image.asset('assets/images/icon.png', width: 28, height: 28),
+              Image.asset('assets/images/icon.png', width: 36, height: 36),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  l.setupTitle,
-                  style: AppTextStyle.headline.of(context),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.setupTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.headline.of(context),
+                    ),
+                    AnimatedReveal(
+                      visible: index != null,
+                      child: AnimatedSwitcher(
+                        duration: context.motionDuration(commonDuration),
+                        layoutBuilder: (current, previous) => Stack(
+                          alignment: AlignmentDirectional.centerStart,
+                          children: [...previous, ?current],
+                        ),
+                        child: Text(
+                          '${l.setupStepStatus((index ?? 0) + 1, _journey.length)}'
+                          ' · ${_journeyLabel(l, state.step)}',
+                          key: ValueKey(state.step),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.footnote
+                              .of(context)
+                              .copyWith(color: colors.onSurfaceVariant),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (stepBar)
-                IconButton(
-                  tooltip: l.setupReceipt,
-                  onPressed: _showReceipt,
-                  icon: const GlyphIcon(AppGlyphs.link),
-                ),
-              IconButton(
-                tooltip: l.exit,
-                onPressed: locked ? null : () => unawaited(_leave()),
-                icon: const GlyphIcon(AppGlyphs.close),
+              AnimatedSize(
+                duration: context.motionDuration(commonDuration),
+                curve: Curves.easeInOutCubic,
+                alignment: AlignmentDirectional.centerEnd,
+                child: canSkip
+                    ? Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 12),
+                        child: _SkipButton(
+                          label: l.setupSkip,
+                          onPressed: locked ? null : () => unawaited(_skip()),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
-          if (stepBar)
-            _StepBar(
-              current: _journeyIndex(state.step)!,
-              onStep: locked && !state.checking ? null : _goTo,
+          AnimatedReveal(
+            visible: stepBar,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: _StepBar(
+                current: index ?? 0,
+                onStep: locked ? null : _goTo,
+              ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  void _showReceipt() => unawaited(
-    showSheet<void>(
-      context: context,
-      builder: (sheetContext) => Consumer(
-        builder: (context, ref, _) {
-          final state = ref.watch(setupSessionProvider);
-          final locked = _importing || _saving || state.busy;
-          return CommonScaffold(
-            title: context.appLocalizations.setupReceipt,
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ).copyWith(top: context.appBarInset, bottom: 20),
-              child: _SetupReceipt(
-                state: state,
-                onStep: locked && !state.checking
-                    ? null
-                    : (step) {
-                        Navigator.of(sheetContext).pop();
-                        _goTo(step);
-                      },
-              ),
-            ),
-          );
-        },
-      ),
-    ),
-  );
-
-  Widget _hero({
-    required Glyph glyph,
-    required String title,
-    required String description,
-    Color? color,
-  }) {
+  Widget _hero({required String title, required String description}) {
+    final colors = context.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 12,
       children: [
-        Row(
-          spacing: 14,
-          children: [
-            CommonCard(
-              padding: const EdgeInsets.all(12),
-              shape: AppShape.md,
-              child: GlyphIcon(
-                glyph,
-                size: 24,
-                color: color ?? context.colorScheme.primary,
-              ),
-            ),
-            Expanded(
-              child: Text(
-                title,
-                style: AppTextStyle.title1.of(context, emphasized: true),
-              ),
-            ),
-          ],
-        ),
+        Text(title, style: AppTextStyle.title1.of(context, emphasized: true)),
+        const SizedBox(height: 8),
         Text(
           description,
-          style: AppTextStyle.subheadline
+          style: AppTextStyle.body
               .of(context)
-              .copyWith(color: context.colorScheme.onSurfaceVariant),
+              .copyWith(color: colors.onSurfaceVariant),
         ),
       ],
     );
   }
 
-  Widget _note(String text) => Text(
-    text,
-    style: AppTextStyle.footnote
+  /// Notes sit on the inset of list captions, like a [ListFooter].
+  Widget _note(String text, {Glyph? glyph}) {
+    final style = AppTextStyle.footnote
         .of(context)
-        .copyWith(color: context.colorScheme.onSurfaceVariant),
-  );
+        .copyWith(color: context.colorScheme.onSurfaceVariant);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: glyph == null
+          ? Text(text, style: style)
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8,
+              children: [
+                GlyphIcon(glyph, size: 18, color: style.color),
+                Expanded(child: Text(text, style: style)),
+              ],
+            ),
+    );
+  }
 
-  Widget _optionTitle(String title, {bool recommended = false}) {
+  /// A titled group without the page-level gap [generateSection] puts above
+  /// its header, which the step's own spacing already provides.
+  Widget _section(String title, List<Widget> items, {String? footer}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListHeader(
+          title: title,
+          padding: listHeaderPaddingOf(context).copyWith(top: 0),
+        ),
+        AnimatedEntries(grouped: true, children: items),
+        if (footer != null) ListFooter(text: footer),
+      ],
+    );
+  }
+
+  Widget _badge(String text) {
+    final colors = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colors.primaryContainer,
+        shape: AppShape.full,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: Text(
+          text,
+          style: AppTextStyle.caption1
+              .of(context, emphasized: true)
+              .copyWith(color: colors.onPrimaryContainer),
+        ),
+      ),
+    );
+  }
+
+  Widget _titled(String title, {bool recommended = false}) {
     if (!recommended) return Text(title);
     return Wrap(
       spacing: 8,
+      runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(title),
-        Text(
-          context.appLocalizations.setupRecommended,
-          style: AppTextStyle.caption1
-              .of(context, emphasized: true)
-              .copyWith(color: context.colorScheme.primary),
-        ),
+        _badge(context.appLocalizations.setupRecommended),
       ],
     );
   }
 
   Widget _body(SetupSessionState state, AppLocalizations l, bool locked) {
-    return switch (state.step) {
-      SetupStep.language => _language(l, locked),
-      SetupStep.profile => _profile(state, l, locked),
-      SetupStep.coverage => _coverage(state, l, locked),
-      SetupStep.region => _region(state, l, locked),
-      SetupStep.checking => _checking(state, l),
-      SetupStep.result => _result(state, l, locked),
-      SetupStep.agreement => const SizedBox.shrink(),
-    };
+    return AnimatedSwitcher(
+      duration: context.motionDuration(commonDuration),
+      layoutBuilder: (current, previous) => Stack(
+        fit: StackFit.passthrough,
+        alignment: Alignment.topCenter,
+        children: [...previous, ?current],
+      ),
+      child: KeyedSubtree(
+        key: ValueKey(state.step),
+        child: switch (state.step) {
+          SetupStep.language => _language(l, locked),
+          SetupStep.profile => _profile(state, l, locked),
+          SetupStep.coverage => _coverage(state, l, locked),
+          SetupStep.region => _region(state, l, locked),
+          SetupStep.summary => _summary(state, l, locked),
+          SetupStep.agreement => const SizedBox.shrink(),
+        },
+      ),
+    );
   }
 
   Widget _language(AppLocalizations l, bool locked) {
@@ -670,10 +734,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
+      spacing: 28,
       children: [
         _hero(
-          glyph: AppGlyphs.language,
           title: l.setupLanguageTitle,
           description: l.setupLanguageDescription,
         ),
@@ -707,26 +770,45 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
 
   Widget _profile(SetupSessionState state, AppLocalizations l, bool locked) {
     final profiles = ref.watch(profilesProvider);
+    final importing =
+        profiles.isEmpty ||
+        _addingProfile ||
+        _importing ||
+        _encryptedImport != null ||
+        _hasLink;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
       children: [
         _hero(
-          glyph: AppGlyphs.profiles,
           title: l.setupProfileTitle,
           description: l.setupProfileDescription,
         ),
-        if (profiles.isNotEmpty)
-          generateSection(
-            title: l.setupProfileCount(profiles.length),
-            items: [
+        AnimatedReveal(
+          visible: profiles.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: _section(l.setupProfileCount(profiles.length), [
               for (final profile in profiles)
                 DecorationListItem(
-                  leading: const GlyphIcon(AppGlyphs.profiles),
-                  title: Text(profile.realLabel),
-                  subtitle: profile.id == state.draft.profileId
-                      ? Text(l.setupProfileReady)
-                      : null,
+                  key: ValueKey(profile.id),
+                  leading: GlyphIcon(
+                    profile.type == ProfileType.url
+                        ? AppGlyphs.cloudDownload
+                        : AppGlyphs.profiles,
+                  ),
+                  title: Text(
+                    profile.realLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: switch (Uri.tryParse(profile.url)?.host) {
+                    final host? when host.isNotEmpty => Text(
+                      host,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    _ => null,
+                  },
                   isSelected: profile.id == state.draft.profileId,
                   trailing: profile.id == state.draft.profileId
                       ? const SelectionCheck()
@@ -735,147 +817,314 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                       ? null
                       : () => _session.selectProfile(profile.id),
                 ),
-            ],
+              if (!importing)
+                DecorationListItem(
+                  key: const ValueKey('import-another'),
+                  leading: GlyphIcon(
+                    AppGlyphs.add,
+                    color: context.colorScheme.primary,
+                  ),
+                  title: Text(
+                    l.setupProfileImportAnother,
+                    style: TextStyle(color: context.colorScheme.primary),
+                  ),
+                  onPressed: locked
+                      ? null
+                      : () => setState(() => _addingProfile = true),
+                ),
+            ]),
           ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AnimatedReveal(
-              visible: _importError != null,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: ErrorBanner(message: _importError ?? ''),
-              ),
+        ),
+        AnimatedReveal(
+          visible: importing,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: _importCard(
+              l,
+              locked,
+              another: profiles.isNotEmpty,
+              withoutProfile: state.draft.profileId == null,
             ),
-            CommonCard(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 16,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
+          ),
+        ),
+        AnimatedReveal(
+          visible: !importing && state.draft.profileId == null,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: _withoutProfile(l, locked),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _withoutProfile(AppLocalizations l, bool locked) => TextButton(
+    onPressed: locked ? null : () => _goTo(SetupStep.coverage),
+    child: Text(l.setupProfileWithout),
+  );
+
+  Widget _importCard(
+    AppLocalizations l,
+    bool locked, {
+    required bool another,
+    required bool withoutProfile,
+  }) {
+    final colors = context.colorScheme;
+    Widget source(Glyph glyph, String label, VoidCallback onPressed) =>
+        Expanded(
+          child: CommonCard(
+            shape: AppShape.lg,
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            onPressed: locked ? null : onPressed,
+            child: Column(
+              spacing: 6,
+              children: [
+                GlyphIcon(glyph, size: 24, color: colors.primary),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.footnote.of(context, emphasized: true),
+                ),
+              ],
+            ),
+          ),
+        );
+    final dismissible = another && _addingProfile && !_hasLink;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CommonCard(
+          shape: AppShape.xl,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AnimatedReveal(
+                visible: another || _importing,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
                     children: [
-                      Text(
-                        profiles.isEmpty
-                            ? l.setupProfileImport
-                            : l.setupProfileImportAnother,
-                        style: AppTextStyle.headline.of(context),
-                      ),
-                      _note(l.setupProfileImportHint),
-                    ],
-                  ),
-                  FilledInputTheme(
-                    child: TextField(
-                      controller: _linkController,
-                      enabled: !locked,
-                      autocorrect: false,
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.go,
-                      onSubmitted: (_) => _importLink(),
-                      decoration: InputDecoration(
-                        hintText: l.setupProfileLinkHint,
-                        suffixIcon: IconButton(
-                          tooltip: l.paste,
-                          onPressed: locked
-                              ? null
-                              : () => unawaited(_pasteLink()),
-                          icon: const GlyphIcon(AppGlyphs.paste, size: 20),
+                      Expanded(
+                        child: Text(
+                          another
+                              ? l.setupProfileImportAnother
+                              : l.setupProfileImport,
+                          style: AppTextStyle.headline.of(context),
                         ),
                       ),
-                    ),
-                  ),
-                  ExcludeFocus(
-                    excluding: locked,
-                    child: IgnorePointer(
-                      ignoring: locked,
-                      child: SubscriptionClientSettingsSection(
-                        initial: _clientSettings,
-                        onChanged: (value) =>
-                            setState(() => _clientSettings = value),
-                        onFormChanged: () {},
-                      ),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      OverflowBar(
-                        alignment: MainAxisAlignment.start,
-                        spacing: 12,
-                        overflowSpacing: 8,
-                        children: [
-                          FilledButton.icon(
-                            onPressed: locked ? null : _importLink,
-                            icon: _importing
-                                ? const CommonCircleLoading(size: 18)
-                                : const GlyphIcon(
-                                    AppGlyphs.link,
-                                    fill: 1,
-                                    size: 18,
-                                  ),
-                            label: Text(l.import),
-                          ),
-                          TextButton.icon(
-                            onPressed: locked ? null : _importFile,
-                            icon: const GlyphIcon(
-                              AppGlyphs.importFile,
-                              size: 18,
-                            ),
-                            label: Text(l.file),
-                          ),
-                          TextButton.icon(
-                            onPressed: locked ? null : _importQr,
-                            icon: const GlyphIcon(AppGlyphs.qrCode, size: 18),
-                            label: Text(l.qrcode),
-                          ),
-                          if (_importing)
-                            TextButton(
-                              onPressed: _cancelImport,
-                              child: Text(l.cancel),
-                            ),
-                        ],
-                      ),
-                      AnimatedReveal(
-                        visible: _encryptedImport != null,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            spacing: 16,
-                            children: [
-                              Text(
-                                l.setupAgeKeyDescription,
-                                style: AppTextStyle.subheadline.of(context),
-                              ),
-                              FilledInputTheme(
-                                child: SecretTextFormField(
-                                  controller: _keyController,
-                                  decoration: InputDecoration(
-                                    hintText: l.ageSecretKey,
-                                  ),
+                      AnimatedSize(
+                        duration: context.motionDuration(commonDuration),
+                        curve: Curves.easeInOutCubic,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: _importing || dismissible
+                            ? Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  start: 12,
                                 ),
-                              ),
-                              FilledButton(
-                                onPressed: locked || _encryptedImport == null
-                                    ? null
-                                    : () =>
-                                          unawaited(_import(_encryptedImport!)),
-                                child: Text(l.setupLanguageContinue),
-                              ),
-                            ],
-                          ),
-                        ),
+                                child: TextButton(
+                                  onPressed: _importing
+                                      ? _cancelImport
+                                      : () => setState(
+                                          () => _addingProfile = false,
+                                        ),
+                                  child: Text(l.cancel),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ],
                   ),
+                ),
+              ),
+              if (_isTV)
+                _PhoneLink(
+                  onLink: (link) {
+                    _linkController.text = link;
+                    _importLink();
+                  },
+                )
+              else
+                Text(
+                  l.setupProfileImportHint,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: colors.onSurfaceVariant),
+                ),
+              const SizedBox(height: 16),
+              FilledInputTheme(
+                child: TextField(
+                  controller: _linkController,
+                  enabled: !locked,
+                  autocorrect: false,
+                  keyboardType: TextInputType.url,
+                  textInputAction: TextInputAction.go,
+                  onSubmitted: (_) => _importLink(),
+                  decoration: InputDecoration(hintText: l.setupProfileLinkHint),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                spacing: 8,
+                children: [
+                  source(
+                    AppGlyphs.paste,
+                    l.paste,
+                    () => unawaited(_pasteLink()),
+                  ),
+                  source(AppGlyphs.importFile, l.file, _importFile),
+                  if (!_isTV) source(AppGlyphs.qrCode, l.qrcode, _importQr),
                 ],
               ),
+              AnimatedReveal(
+                visible: _importError != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ErrorBanner(message: _importError ?? ''),
+                ),
+              ),
+              AnimatedReveal(
+                visible: _encryptedImport != null,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 12,
+                    children: [
+                      Text(
+                        l.setupAgeKeyDescription,
+                        style: AppTextStyle.subheadline.of(context),
+                      ),
+                      FilledInputTheme(
+                        child: SecretTextFormField(
+                          controller: _keyController,
+                          decoration: InputDecoration(hintText: l.ageSecretKey),
+                        ),
+                      ),
+                      FilledButton(
+                        onPressed: locked || _encryptedImport == null
+                            ? null
+                            : () => unawaited(_import(_encryptedImport!)),
+                        child: Text(l.setupLanguageContinue),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            TextButton.icon(
+              onPressed: () =>
+                  setState(() => _requestOptions = !_requestOptions),
+              icon: AnimatedRotation(
+                turns: _requestOptions ? 0 : -0.25,
+                duration: context.motionDuration(commonDuration),
+                child: const GlyphIcon(AppGlyphs.chevronDown, size: 18),
+              ),
+              label: Text(l.setupProfileOptions),
+            ),
+            AnimatedReveal(
+              visible: withoutProfile && !_importing,
+              child: _withoutProfile(l, locked),
             ),
           ],
         ),
+        AnimatedReveal(
+          visible: _requestOptions,
+          child: ExcludeFocus(
+            excluding: locked || !_requestOptions,
+            child: IgnorePointer(
+              ignoring: locked,
+              child: SubscriptionClientSettingsSection(
+                initial: _clientSettings,
+                onChanged: (value) => setState(() => _clientSettings = value),
+                onFormChanged: () {},
+              ),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _choice({
+    required Glyph glyph,
+    required String title,
+    required String description,
+    required bool selected,
+    required VoidCallback? onPressed,
+    bool recommended = false,
+  }) {
+    final colors = context.colorScheme;
+    return CommonCard(
+      isSelected: selected,
+      shape: AppShape.xl,
+      padding: const EdgeInsets.all(16),
+      onPressed: onPressed,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 14,
+        children: [
+          AnimatedContainer(
+            duration: context.motionDuration(commonDuration),
+            curve: Curves.easeInOutCubic,
+            width: 44,
+            height: 44,
+            decoration: ShapeDecoration(
+              color: selected ? colors.primary : colors.primaryContainer,
+              shape: AppShape.md,
+            ),
+            child: Center(
+              child: TweenAnimationBuilder<Color?>(
+                tween: ColorTween(
+                  end: selected ? colors.onPrimary : colors.onPrimaryContainer,
+                ),
+                duration: context.motionDuration(commonDuration),
+                builder: (_, color, _) =>
+                    GlyphIcon(glyph, size: 24, color: color),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                DefaultTextStyle.merge(
+                  style: AppTextStyle.headline.of(context),
+                  child: _titled(title, recommended: recommended),
+                ),
+                Text(
+                  description,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: colors.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: AnimatedSwitcher(
+              duration: context.motionDuration(commonDuration),
+              child: selected
+                  ? const SelectionCheck(key: ValueKey('selected'))
+                  : const SizedBox.shrink(key: ValueKey('unselected')),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -886,48 +1135,37 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
         : SetupCoverage.values;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
+      spacing: 28,
       children: [
         _hero(
-          glyph: AppGlyphs.devices,
           title: l.setupCoverageTitle,
           description: l.setupCoverageDescription,
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
           children: [
-            generateGroup([
-              for (final coverage in options)
-                DecorationListItem(
-                  leading: GlyphIcon(switch (coverage) {
-                    SetupCoverage.tun => AppGlyphs.vpn,
-                    SetupCoverage.system => AppGlyphs.devices,
-                    SetupCoverage.local => AppGlyphs.link,
-                  }),
-                  title: _optionTitle(
-                    _coverageLabel(l, coverage),
-                    recommended: coverage == SetupCoverage.tun,
-                  ),
-                  subtitle: Text(switch (coverage) {
-                    SetupCoverage.tun =>
-                      _isAndroid
-                          ? l.setupCoverageAndroidDescription
-                          : l.setupCoverageAllDescription,
-                    SetupCoverage.system => l.setupCoverageSystemDescription,
-                    SetupCoverage.local => l.setupCoverageLocalDescription,
-                  }),
-                  isSelected: coverage == draft.coverage,
-                  trailing: coverage == draft.coverage
-                      ? const SelectionCheck()
-                      : null,
-                  onPressed: locked
-                      ? null
-                      : () => _session.selectCoverage(coverage),
-                ),
-            ]),
-            ListFooter(text: l.setupCoverageNote),
+            for (final coverage in options)
+              _choice(
+                glyph: _coverageGlyph(coverage),
+                title: _coverageLabel(l, coverage),
+                description: switch (coverage) {
+                  SetupCoverage.tun =>
+                    _isAndroid
+                        ? l.setupCoverageAndroidDescription
+                        : l.setupCoverageAllDescription,
+                  SetupCoverage.system => l.setupCoverageSystemDescription,
+                  SetupCoverage.local => l.setupCoverageLocalDescription,
+                },
+                recommended: coverage == SetupCoverage.tun,
+                selected: coverage == draft.coverage,
+                onPressed: locked
+                    ? null
+                    : () => _session.selectCoverage(coverage),
+              ),
           ],
         ),
+        _note(l.setupCoverageNote, glyph: AppGlyphs.info),
       ],
     );
   }
@@ -944,31 +1182,26 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     final directRules = draft.regionChosen
         ? directRulesForCode(draft.regionCode)
         : const <String>[];
-    final directApps =
-        _isAndroid && draft.coverage == SetupCoverage.tun && draft.directRoutes;
     DecorationListItem option({
       required Widget leading,
       required String title,
-      String? subtitle,
       required bool isSelected,
       required String? code,
     }) => DecorationListItem(
       isSelected: isSelected,
-      leading: leading,
-      title: _optionTitle(title, recommended: code != null && code == detected),
-      subtitle: subtitle == null ? null : Text(subtitle),
+      leading: SizedBox(width: 28, child: Center(child: leading)),
+      title: _titled(title, recommended: code != null && code == detected),
       trailing: isSelected ? const SelectionCheck() : null,
       onPressed: locked ? null : () => _session.selectRegion(code),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
       children: [
         _hero(
-          glyph: AppGlyphs.locate,
           title: l.setupRegionTitle,
           description: l.setupRegionStepDescription,
         ),
+        const SizedBox(height: 28),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -986,237 +1219,400 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                   code: code,
                 ),
               option(
-                leading: const GlyphIcon(AppGlyphs.block),
+                leading: const GlyphIcon(AppGlyphs.block, size: 24),
                 title: l.setupRegionNeutral,
-                subtitle: l.setupRegionNeutralDescription,
                 isSelected: draft.regionChosen && draft.regionCode == null,
                 code: null,
               ),
             ]),
-            ListFooter(
-              text: draft.regionChosen
-                  ? l.regionCustomPreserved
-                  : l.setupRegionUnchosen,
+            AnimatedSize(
+              duration: context.motionDuration(commonDuration),
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.topCenter,
+              child: ListFooter(
+                text: draft.regionChosen
+                    ? l.regionCustomPreserved
+                    : l.setupRegionUnchosen,
+              ),
             ),
           ],
         ),
-        if (directRules.isNotEmpty)
-          generateGroup([
-            DecorationListItem(
-              leading: const GlyphIcon(AppGlyphs.split),
-              title: _optionTitle(l.setupDirectTitle, recommended: true),
-              subtitle: Column(
+        AnimatedReveal(
+          visible: directRules.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: _directRoutes(state, l, locked, directRules),
+          ),
+        ),
+        AnimatedReveal(
+          visible: changes.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: _changes(l.regionChangesTitle, changes),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _directRoutes(
+    SetupSessionState state,
+    AppLocalizations l,
+    bool locked,
+    List<String> rules,
+  ) {
+    final draft = state.draft;
+    final routes = _section(l.setupDirectSection, footer: l.setupDirectHint, [
+      DecorationListItem(
+        key: const ValueKey('direct-routes'),
+        leading: const GlyphIcon(AppGlyphs.split),
+        title: Text(l.setupDirectTitle),
+        trailing: Switch(
+          value: draft.directRoutes,
+          onChanged: locked ? null : _session.selectDirectRoutes,
+        ),
+        onPressed: locked
+            ? null
+            : () => _session.selectDirectRoutes(!draft.directRoutes),
+      ),
+      if (draft.directRoutes)
+        AnimatedSize(
+          key: const ValueKey('direct-rules'),
+          duration: context.motionDuration(commonDuration),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          child: DecorationListItem(
+            leading: const GlyphIcon(AppGlyphs.rules),
+            title: Text(l.setupDirectRules),
+            subtitle: _showRules
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [for (final rule in rules) CodeLabel(rule)],
+                    ),
+                  )
+                : null,
+            trailing: AnimatedRotation(
+              turns: _showRules ? 0.5 : 0,
+              duration: context.motionDuration(commonDuration),
+              child: const GlyphIcon(AppGlyphs.chevronDown, size: 18),
+            ),
+            onPressed: () => setState(() => _showRules = !_showRules),
+          ),
+        ),
+    ]);
+    if (!_session.offersDirectApps) return routes;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 16,
+      children: [
+        routes,
+        generateGroup([_directApps(state, l, locked)]),
+      ],
+    );
+  }
+
+  Widget _changes(String title, List<(Glyph, String)> changes) {
+    final colors = context.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListHeader(
+          title: title,
+          padding: listHeaderPaddingOf(context).copyWith(top: 0),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: AnimatedSize(
+            duration: context.motionDuration(commonDuration),
+            curve: Curves.easeInOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: context.motionDuration(commonDuration),
+              layoutBuilder: (current, previous) => Stack(
+                fit: StackFit.passthrough,
+                alignment: Alignment.topCenter,
+                children: [...previous, ?current],
+              ),
+              child: Column(
+                key: ValueKey(changes.map((change) => change.$2).join('|')),
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 8,
+                spacing: 10,
                 children: [
-                  Text(l.setupDirectDescription),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [for (final rule in directRules) CodeLabel(rule)],
-                  ),
+                  for (final (glyph, label) in changes)
+                    Row(
+                      spacing: 12,
+                      children: [
+                        GlyphIcon(glyph, size: 20, color: colors.primary),
+                        Expanded(
+                          child: Text(
+                            label,
+                            style: AppTextStyle.subheadline.of(context),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
-              trailing: Switch(
-                value: draft.directRoutes,
-                onChanged: locked ? null : _session.selectDirectRoutes,
-              ),
-              onPressed: locked
-                  ? null
-                  : () => _session.selectDirectRoutes(!draft.directRoutes),
             ),
-            if (directApps)
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.appsList),
-                title: Text(
-                  state.scanningApps || draft.directApps == null
-                      ? l.setupDirectAppsScanning
-                      : l.setupDirectApps(draft.directApps!.length),
-                ),
-                subtitle: state.scanningApps || draft.directApps == null
-                    ? null
-                    : Text(
-                        draft.directApps!.isEmpty
-                            ? l.setupDirectAppsNone
-                            : l.setupDirectAppsReview,
-                      ),
-                trailing: state.scanningApps
-                    ? const CommonCircleLoading(size: 20)
-                    : null,
-              ),
-          ]),
-        if (changes.isNotEmpty)
-          generateSection(
-            title: l.regionChangesTitle,
-            items: [
-              for (final (glyph, label) in changes)
-                DecorationListItem(
-                  leading: GlyphIcon(glyph),
-                  title: Text(label),
-                ),
-            ],
           ),
+        ),
       ],
     );
   }
 
-  Widget _checking(SetupSessionState state, AppLocalizations l) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
-      children: [
-        _hero(
-          glyph: AppGlyphs.target,
-          title: l.setupCheckingTitle,
-          description: l.setupCheckingDescription,
+  Widget _directApps(SetupSessionState state, AppLocalizations l, bool locked) {
+    return AnimatedSize(
+      duration: context.motionDuration(commonDuration),
+      curve: Curves.easeInOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: context.motionDuration(commonDuration),
+        layoutBuilder: (current, previous) => Stack(
+          fit: StackFit.passthrough,
+          alignment: Alignment.topCenter,
+          children: [...previous, ?current],
         ),
-        if (state.path case final path?) _SetupPath(path: path),
-        _note(l.setupCheckLimit),
-      ],
+        child: _directAppsItem(state, l, locked),
+      ),
     );
   }
 
-  Widget _result(SetupSessionState state, AppLocalizations l, bool locked) {
-    final outcome =
-        state.outcome ?? const SetupOutcome(verdict: SetupVerdict.unconfirmed);
-    final verdict = outcome.verdict;
-    final node = outcome.path?.stepOf(PathStep.server)?.detail;
-    final delay = outcome.path?.stepOf(PathStep.internet)?.duration;
-    final title = switch (verdict) {
-      SetupVerdict.connected => l.setupConnectedTitle,
-      SetupVerdict.partial => l.setupPartialTitle,
-      SetupVerdict.local => l.setupLocalTitle,
-      SetupVerdict.saved || SetupVerdict.safeMode => l.setupSavedTitle,
-      SetupVerdict.stopped => l.setupStoppedTitle,
-      SetupVerdict.permission => l.setupPermissionTitle,
-      SetupVerdict.stale || SetupVerdict.unconfirmed => l.setupUnconfirmedTitle,
-      SetupVerdict.failed => l.setupFailedTitle,
-    };
-    final description = switch (verdict) {
-      SetupVerdict.connected => l.setupConnectedDescription,
-      SetupVerdict.partial => l.setupPartialDescription,
-      SetupVerdict.local => l.setupLocalDescription,
-      SetupVerdict.saved => l.setupSavedDescription,
-      SetupVerdict.safeMode => l.setupSafeMode,
-      SetupVerdict.stopped => l.setupStoppedDescription,
-      SetupVerdict.permission => l.setupPermissionDescription,
-      SetupVerdict.stale => l.setupRouteChanged,
-      SetupVerdict.unconfirmed => l.setupUnconfirmedDescription,
-      SetupVerdict.failed => l.setupUnknownError,
-    };
-    final troubled = switch (verdict) {
-      SetupVerdict.failed ||
-      SetupVerdict.unconfirmed ||
-      SetupVerdict.stale => true,
-      _ => false,
-    };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
-      children: [
-        _hero(
-          glyph: outcome.confirmed
-              ? AppGlyphs.checkCircle
-              : switch (verdict) {
-                  SetupVerdict.saved ||
-                  SetupVerdict.safeMode ||
-                  SetupVerdict.stopped => AppGlyphs.clock,
-                  SetupVerdict.permission => AppGlyphs.vpn,
-                  SetupVerdict.failed => AppGlyphs.error,
-                  _ => AppGlyphs.warning,
-                },
-          color: outcome.confirmed
-              ? context.colorScheme.success
-              : switch (verdict) {
-                  SetupVerdict.failed => context.colorScheme.error,
-                  SetupVerdict.permission ||
-                  SetupVerdict.unconfirmed ||
-                  SetupVerdict.stale => context.colorScheme.warning,
-                  _ => null,
-                },
-          title: title,
-          description: description,
+  Widget _directAppsItem(
+    SetupSessionState state,
+    AppLocalizations l,
+    bool locked,
+  ) {
+    final apps = state.draft.directApps;
+    const leading = GlyphIcon(AppGlyphs.appsList);
+    if (state.scanningApps) {
+      return DecorationListItem(
+        key: const ValueKey('scanning'),
+        leading: leading,
+        title: Text(l.setupDirectAppsScanning),
+        trailing: const CommonCircleLoading(size: 20),
+      );
+    }
+    if (apps == null) {
+      return DecorationListItem(
+        key: const ValueKey('find'),
+        leading: leading,
+        title: Text(l.setupDirectAppsTitle),
+        subtitle: Text(l.setupDirectAppsFindDescription),
+        trailing: FilledButton.tonal(
+          onPressed: locked ? null : () => unawaited(_session.findDirectApps()),
+          child: Text(l.setupDirectAppsFind),
         ),
-        if (outcome.confirmed && (node != null || delay != null))
-          CommonCard(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
-              children: [
-                GlyphIcon(
-                  AppGlyphs.target,
-                  size: 24,
-                  color: context.colorScheme.success,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 8,
-                    children: [
-                      if (node != null)
-                        Text(node, style: AppTextStyle.headline.of(context)),
-                      if (delay != null)
-                        Text(
-                          '${delay.inMilliseconds} ms',
-                          style: AppTextStyle.title2.of(context),
-                        ),
-                      _note(l.setupCheckLimit),
-                    ],
+      );
+    }
+    if (apps.isEmpty) {
+      return DecorationListItem(
+        key: const ValueKey('none'),
+        leading: leading,
+        title: Text(l.setupDirectAppsTitle),
+        subtitle: Text(l.setupDirectAppsNone),
+        trailing: TextButton(
+          onPressed: locked ? null : () => unawaited(_session.findDirectApps()),
+          child: Text(l.setupDirectAppsFind),
+        ),
+      );
+    }
+    final labels = {
+      for (final package in ref.watch(packagesProvider))
+        package.packageName: package.label,
+    };
+    final colors = context.colorScheme;
+    return DecorationListItem(
+      key: const ValueKey('apps'),
+      leading: leading,
+      title: Text(l.setupDirectApps(apps.length)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Text(l.setupDirectAppsReview),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final app in apps.take(_shownApps))
+                DecoratedBox(
+                  decoration: ShapeDecoration(
+                    color: context.raisedSurfaceLevel.colorOf(colors),
+                    shape: AppShape.full,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    child: Text(
+                      labels[app] ?? app,
+                      style: AppTextStyle.caption1
+                          .of(context)
+                          .copyWith(color: colors.onSurface),
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        if (verdict == SetupVerdict.local) _localProxy(l),
-        if (outcome.confirmed)
-          generateGroup([
-            DecorationListItem(
-              title: Text(l.setupAutoConnect),
-              subtitle: Text(l.setupAutoConnectDescription),
-              trailing: Switch(
-                value: _autoRun,
-                onChanged: locked
-                    ? null
-                    : (value) => setState(() => _autoRun = value),
-              ),
-              onPressed: locked
-                  ? null
-                  : () => setState(() => _autoRun = !_autoRun),
-            ),
-          ]),
-        if (outcome.path case final path?) _SetupPath(path: path),
-        if (outcome.error != null)
-          CommonCard(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 8,
-              children: [
-                Text(
-                  l.setupErrorDetails,
-                  style: AppTextStyle.headline.of(context),
+              if (apps.length > _shownApps)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    '+${apps.length - _shownApps}',
+                    style: AppTextStyle.caption1.of(context),
+                  ),
                 ),
-                SelectableText(
-                  outcome.error!,
-                  style: AppTextStyle.footnote.of(context),
-                ),
-              ],
-            ),
-          ),
-        if (troubled)
-          generateSection(
-            title: l.setupTipsTitle,
-            items: [
-              for (final (glyph, tip) in [
-                (AppGlyphs.wifi, l.setupTipNetwork),
-                (AppGlyphs.profiles, l.setupTipProfile),
-                (AppGlyphs.devices, l.setupTipCoverage),
-              ])
-                DecorationListItem(leading: GlyphIcon(glyph), title: Text(tip)),
             ],
           ),
-        _note(l.setupFinishDescription),
+        ],
+      ),
+      trailing: TextButton(
+        onPressed: locked ? null : _session.clearDirectApps,
+        child: Text(l.setupDirectAppsClear),
+      ),
+    );
+  }
+
+  Widget _summary(SetupSessionState state, AppLocalizations l, bool locked) {
+    final draft = state.draft;
+    final profile = ref
+        .watch(profilesProvider)
+        .getProfile(draft.profileId ?? -1);
+    final safeMode = ref.watch(safeModeProvider);
+    final running = ref.watch(isStartProvider);
+    final runnable = profile != null && !safeMode;
+    final directRules = draft.regionChosen
+        ? directRulesForCode(draft.regionCode)
+        : const <String>[];
+    final apps = _session.offersDirectApps ? draft.directApps : null;
+    final colors = context.colorScheme;
+    DecorationListItem row(
+      Glyph glyph,
+      String label,
+      String value,
+      SetupStep step, {
+      required Key key,
+      bool warning = false,
+    }) => DecorationListItem(
+      key: key,
+      leading: GlyphIcon(glyph, color: warning ? colors.warning : null),
+      title: Text(label),
+      subtitle: Text(
+        value,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: warning ? TextStyle(color: colors.warning) : null,
+      ),
+      trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 18),
+      onPressed: locked ? null : () => _goTo(step),
+    );
+    Widget below(Widget child) =>
+        Padding(padding: const EdgeInsets.only(top: 28), child: child);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _hero(
+          title: l.setupSummaryTitle,
+          description: l.setupSummaryDescription,
+        ),
+        const SizedBox(height: 28),
+        AnimatedEntries(
+          grouped: true,
+          children: [
+            row(
+              AppGlyphs.profiles,
+              l.setupReceiptProfile,
+              profile?.realLabel ?? l.setupNoProfile,
+              SetupStep.profile,
+              warning: profile == null,
+              key: const ValueKey('profile'),
+            ),
+            row(
+              _coverageGlyph(draft.coverage),
+              l.setupReceiptCoverage,
+              _coverageLabel(l, draft.coverage),
+              SetupStep.coverage,
+              key: const ValueKey('coverage'),
+            ),
+            row(
+              AppGlyphs.locate,
+              l.setupReceiptRegion,
+              _regionChoiceLabel(l, draft),
+              SetupStep.region,
+              key: const ValueKey('region'),
+            ),
+            if (directRules.isNotEmpty)
+              row(
+                AppGlyphs.split,
+                l.setupDirectSection,
+                !draft.directRoutes
+                    ? l.setupDirectOff
+                    : apps != null && apps.isNotEmpty
+                    ? '${l.setupDirectOn} · ${l.setupDirectApps(apps.length)}'
+                    : l.setupDirectOn,
+                SetupStep.region,
+                key: const ValueKey('direct'),
+              ),
+          ],
+        ),
+        AnimatedReveal(
+          visible: profile == null,
+          child: below(
+            _note(l.setupNoProfileDescription, glyph: AppGlyphs.info),
+          ),
+        ),
+        AnimatedReveal(
+          visible: safeMode,
+          child: below(_note(l.setupSafeMode, glyph: AppGlyphs.info)),
+        ),
+        AnimatedReveal(
+          visible: draft.coverage == SetupCoverage.local,
+          child: below(_localProxy(l)),
+        ),
+        AnimatedReveal(
+          visible: runnable,
+          child: below(
+            AnimatedEntries(
+              grouped: true,
+              children: [
+                if (!running)
+                  DecorationListItem(
+                    key: const ValueKey('connect-now'),
+                    leading: const GlyphIcon(AppGlyphs.power),
+                    title: Text(l.setupConnectNow),
+                    subtitle: Text(l.setupConnectNowDescription),
+                    trailing: Switch(
+                      value: _connectNow,
+                      onChanged: locked
+                          ? null
+                          : (value) => setState(() => _connectNow = value),
+                    ),
+                    onPressed: locked
+                        ? null
+                        : () => setState(() => _connectNow = !_connectNow),
+                  ),
+                DecorationListItem(
+                  key: const ValueKey('auto-connect'),
+                  leading: const GlyphIcon(AppGlyphs.sparkle),
+                  title: Text(l.setupAutoConnect),
+                  subtitle: Text(l.setupAutoConnectDescription),
+                  trailing: Switch(
+                    value: _autoRun,
+                    onChanged: locked
+                        ? null
+                        : (value) => setState(() => _autoRun = value),
+                  ),
+                  onPressed: locked
+                      ? null
+                      : () => setState(() => _autoRun = !_autoRun),
+                ),
+              ],
+            ),
+          ),
+        ),
+        below(_note(l.setupFinishDescription)),
       ],
     );
   }
@@ -1227,13 +1623,31 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     );
     final address = 'http://127.0.0.1:$port';
     return CommonCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      shape: AppShape.xl,
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      child: Row(
         spacing: 12,
         children: [
-          SelectableText(address, style: AppTextStyle.title3.of(context)),
-          TextButton.icon(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                Text(
+                  l.setupLocalTitle,
+                  style: AppTextStyle.footnote
+                      .of(context)
+                      .copyWith(color: context.colorScheme.onSurfaceVariant),
+                ),
+                SelectableText(
+                  address,
+                  style: AppTextStyle.headline.of(context),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: l.setupCopyProxy,
             onPressed: () async {
               try {
                 await Clipboard.setData(ClipboardData(text: address));
@@ -1241,8 +1655,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                 if (mounted) _session.showError(error);
               }
             },
-            icon: const GlyphIcon(AppGlyphs.copy, size: 18),
-            label: Text(l.setupCopyProxy),
+            icon: const GlyphIcon(AppGlyphs.copy),
           ),
         ],
       ),
@@ -1253,27 +1666,28 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     SetupSessionState state,
     AppLocalizations l,
     bool locked, {
-    required double maxWidth,
+    required bool wide,
   }) {
-    final outcome = state.outcome;
-    final verdict = outcome?.verdict;
-    final finishes =
-        state.step == SetupStep.result &&
-        (outcome?.confirmed == true || verdict == SetupVerdict.saved);
-    final saveInstead =
-        state.step == SetupStep.result && verdict == SetupVerdict.safeMode;
-    void saveWithoutConnection() =>
-        unawaited(_transition(_session.saveWithoutConnection));
+    final draft = state.draft;
+    final runnable =
+        draft.profileId != null &&
+        !ref.watch(safeModeProvider) &&
+        !ref.watch(isStartProvider);
     final (label, glyph, onPressed) = switch (state.step) {
       SetupStep.language => (
         l.setupLanguageContinue,
         AppGlyphs.chevronForward,
         _continueFromLanguage,
       ),
+      SetupStep.profile when _importing || _hasLink => (
+        l.setupProfileAdd,
+        AppGlyphs.add,
+        _importing ? null : _importLink,
+      ),
       SetupStep.profile => (
-        l.setupLanguageContinue,
-        AppGlyphs.chevronForward,
-        state.draft.profileId == null ? null : () => _goTo(SetupStep.coverage),
+        draft.profileId == null ? l.setupProfileAdd : l.setupLanguageContinue,
+        draft.profileId == null ? AppGlyphs.add : AppGlyphs.chevronForward,
+        draft.profileId == null ? null : () => _goTo(SetupStep.coverage),
       ),
       SetupStep.coverage => (
         l.setupLanguageContinue,
@@ -1281,127 +1695,423 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
         () => _goTo(SetupStep.region),
       ),
       SetupStep.region => (
-        l.setupCheckAction,
-        AppGlyphs.target,
-        () => unawaited(_check()),
+        l.setupLanguageContinue,
+        AppGlyphs.chevronForward,
+        () => _goTo(SetupStep.summary),
       ),
-      SetupStep.checking => (l.cancel, AppGlyphs.close, _session.cancelCheck),
-      SetupStep.result when finishes => (
+      SetupStep.summary when runnable && _connectNow => (
+        l.setupConnect,
+        AppGlyphs.power,
+        () => unawaited(
+          _transition(() => _session.finish(connect: true, autoRun: _autoRun)),
+        ),
+      ),
+      SetupStep.summary => (
         l.done,
         AppGlyphs.check,
-        () => unawaited(_transition(() => _session.finish(autoRun: _autoRun))),
-      ),
-      SetupStep.result when saveInstead => (
-        l.setupSaveWithoutConnection,
-        AppGlyphs.check,
-        saveWithoutConnection,
-      ),
-      SetupStep.result => (
-        l.setupRepeat,
-        AppGlyphs.refresh,
-        () => unawaited(_check()),
+        () => unawaited(
+          _transition(() => _session.finish(connect: false, autoRun: _autoRun)),
+        ),
       ),
       SetupStep.agreement => (l.agree, AppGlyphs.check, null),
     };
-    final enabled = state.step == SetupStep.checking || !locked;
-    final secondaryActions = <Widget>[
-      if (state.step == SetupStep.profile)
-        TextButton(
-          onPressed: locked ? null : saveWithoutConnection,
-          child: Text(l.setupProfileSkip),
-        ),
-      if (state.step == SetupStep.region ||
-          (state.step == SetupStep.result && !finishes && !saveInstead))
-        TextButton(
-          onPressed: locked ? null : saveWithoutConnection,
-          child: Text(l.setupSaveWithoutConnection),
-        ),
-      if (state.step == SetupStep.result && !finishes)
-        TextButton(
-          onPressed: locked ? null : () => _goTo(_previous(state)!),
-          child: Text(l.setupChangeSettings),
-        ),
-      if (state.step == SetupStep.result && outcome?.confirmed == true)
-        TextButton(
-          onPressed: locked ? null : () => unawaited(_check()),
-          child: Text(l.setupRepeat),
-        ),
-    ];
-    final icon = _saving
-        ? const CommonCircleLoading(size: 18)
-        : GlyphIcon(glyph, size: 18, fill: 1);
-    final iconAlignment = glyph == AppGlyphs.chevronForward
-        ? IconAlignment.end
-        : IconAlignment.start;
-    final primaryAction = state.step == SetupStep.checking
-        ? FilledButton.tonalIcon(
-            onPressed: onPressed,
-            icon: icon,
-            label: Text(label),
-          )
-        : FilledButton.icon(
-            onPressed: enabled ? onPressed : null,
-            icon: icon,
-            iconAlignment: iconAlignment,
-            label: Text(label),
-          );
-    final hint =
-        state.step == SetupStep.profile && state.draft.profileId == null
-        ? l.setupProfileContinueHint
-        : null;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Divider(height: 1),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: LayoutBuilder(
-                builder: (context, constraints) => constraints.maxWidth < 600
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: 8,
-                        children: [
-                          if (hint != null)
-                            Text(
-                              hint,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyle.footnote
-                                  .of(context)
-                                  .copyWith(
-                                    color: context.colorScheme.onSurfaceVariant,
+    final busy = _importing || _saving || state.busy;
+    final primary = _PrimaryButton(
+      label: label,
+      glyph: glyph,
+      busy: busy && state.step != SetupStep.language,
+      onPressed: locked ? null : onPressed,
+    );
+    final canGoBack = _previous(state.step) != null;
+    return Padding(
+      padding: EdgeInsets.only(top: wide ? 16 : 8, bottom: 16),
+      child: Row(
+        children: [
+          AnimatedSize(
+            duration: context.motionDuration(commonDuration),
+            curve: Curves.easeInOutCubic,
+            alignment: AlignmentDirectional.centerStart,
+            child: canGoBack
+                ? Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 12),
+                    child: _BackButton(
+                      tooltip: l.back,
+                      onPressed: locked ? null : _back,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          if (wide) ...[
+            const Spacer(),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 240),
+              child: primary,
+            ),
+          ] else
+            Expanded(child: primary),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fades a scroll view out along its bottom edge, so content passing under
+/// the action bar reads as more to scroll rather than cut off, over the page
+/// colour and a wallpaper alike.
+/// A TV has no camera to scan a code with, and typing a link on a remote takes
+/// hundreds of presses, so a phone scans this code and sends the link instead.
+class _PhoneLink extends ConsumerStatefulWidget {
+  const _PhoneLink({required this.onLink});
+
+  final ValueChanged<String> onLink;
+
+  @override
+  ConsumerState<_PhoneLink> createState() => _PhoneLinkState();
+}
+
+class _PhoneLinkState extends ConsumerState<_PhoneLink> {
+  LinkReceiver? _receiver;
+  AppLifecycleListener? _settingsReturn;
+  bool _failed = false;
+  bool _denied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_listen());
+  }
+
+  @override
+  void dispose() {
+    _settingsReturn?.dispose();
+    unawaited(_receiver?.close());
+    super.dispose();
+  }
+
+  Future<void> _listen() async {
+    final permitted = await app?.requestLocalNetworkPermission() ?? true;
+    if (!mounted) return;
+    if (!permitted) {
+      setState(() => _denied = true);
+      return;
+    }
+    final l = currentAppLocalizations;
+    final receiver = await LinkReceiver.start(
+      (
+        title: l.sendFromPhonePageTitle,
+        hint: l.sendFromPhonePageHint,
+        send: l.send,
+        sent: l.sendFromPhonePageSent,
+        invalid: l.invalidLinkTip,
+      ),
+      palette: (
+        light: ref.read(genColorSchemeProvider(Brightness.light)),
+        dark: ref.read(genColorSchemeProvider(Brightness.dark)),
+      ),
+    ).catchError((Object _) => null);
+    if (!mounted) {
+      unawaited(receiver?.close());
+      return;
+    }
+    setState(() {
+      _receiver = receiver;
+      _denied = false;
+      _failed = receiver == null;
+    });
+    final link = await receiver?.link;
+    if (link == null || !mounted) return;
+    widget.onLink(link);
+    // A receiver takes one link, and the import it starts can still fail.
+    unawaited(_listen());
+  }
+
+  void _openSettings() {
+    _settingsReturn ??= AppLifecycleListener(
+      onResume: () {
+        _settingsReturn?.dispose();
+        _settingsReturn = null;
+        unawaited(_listen());
+      },
+    );
+    unawaited(app?.openAppSettings());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final colors = context.colorScheme;
+    final secondary = AppTextStyle.subheadline
+        .of(context)
+        .copyWith(color: colors.onSurfaceVariant);
+    final address = _receiver?.address.toString();
+    final title = Text(
+      l.sendFromPhone,
+      style: AppTextStyle.headline.of(context),
+    );
+    final Widget content;
+    if (_denied || _failed) {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 6,
+        children: [
+          title,
+          Text(
+            _denied
+                ? l.sendFromPhonePermissionDenied
+                : l.sendFromPhoneNoNetwork,
+            style: secondary,
+          ),
+          if (_denied)
+            TextButton(onPressed: _openSettings, child: Text(l.settings)),
+        ],
+      );
+    } else {
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16,
+        children: [
+          if (address != null)
+            QrCodeView(data: address, size: _phoneCodeSize)
+          else
+            DecoratedBox(
+              decoration: ShapeDecoration(
+                color: SurfaceLevel.inset.colorOf(colors),
+                shape: AppShape.md,
+              ),
+              child: SizedBox.square(
+                dimension: _phoneCodeSize,
+                child: Center(
+                  child: GlyphIcon(
+                    AppGlyphs.qrCode,
+                    size: 40,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 6,
+              children: [
+                title,
+                Text(l.sendFromPhoneTip, style: secondary),
+                Text(
+                  address ?? '',
+                  style: AppTextStyle.footnote
+                      .of(context)
+                      .copyWith(color: colors.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+    return AnimatedSize(
+      duration: context.motionDuration(commonDuration),
+      curve: Curves.easeInOutCubic,
+      alignment: AlignmentDirectional.topStart,
+      child: content,
+    );
+  }
+}
+
+class _FadedEdge extends StatelessWidget {
+  const _FadedEdge({required this.child});
+
+  final Widget child;
+
+  static const _fade = 32.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (bounds) => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: const [Colors.white, Colors.white, Colors.transparent],
+        stops: [0, 1 - _fade / bounds.height.clamp(_fade, double.infinity), 1],
+      ).createShader(bounds),
+      child: child,
+    );
+  }
+}
+
+/// An icon that slides its label out while a pointer hovers it; touch has no
+/// hover, so there the icon alone leads to the confirmation.
+class _SkipButton extends StatefulWidget {
+  const _SkipButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_SkipButton> createState() => _SkipButtonState();
+}
+
+class _SkipButtonState extends State<_SkipButton> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final enabled = widget.onPressed != null;
+    final foreground = enabled
+        ? colors.onSurface
+        : colors.onSurface.withValues(alpha: 0.38);
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: widget.label,
+      excludeSemantics: true,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: ElasticPress(
+          enabled: enabled,
+          child: FocusRing(
+            shape: AppShape.full,
+            child: Material(
+              color: _controlFill(context),
+              shape: AppShape.full,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: widget.onPressed,
+                onFocusChange: (focused) => setState(() => _focused = focused),
+                child: SizedBox(
+                  height: 40,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedSize(
+                          duration: context.motionDuration(commonDuration),
+                          curve: Curves.easeOutCubic,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: (_hovered || _focused) && enabled
+                              ? Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: 6,
+                                    end: 6,
                                   ),
-                            ),
-                          primaryAction,
-                          if (secondaryActions.isNotEmpty)
-                            Row(
-                              spacing: 8,
-                              children: [
-                                for (final action in secondaryActions)
-                                  Expanded(child: action),
-                              ],
-                            ),
-                        ],
-                      )
-                    : Row(
-                        spacing: 12,
-                        children: [
-                          Expanded(
-                            child: hint == null
-                                ? const SizedBox.shrink()
-                                : _note(hint),
-                          ),
-                          ...secondaryActions,
-                          primaryAction,
-                        ],
-                      ),
+                                  child: Text(
+                                    widget.label,
+                                    maxLines: 1,
+                                    style: AppTextStyle.subheadline
+                                        .of(context, emphasized: true)
+                                        .copyWith(color: foreground),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        GlyphIcon(AppGlyphs.skip, size: 20, color: foreground),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({
+    required this.label,
+    required this.glyph,
+    required this.busy,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Glyph glyph;
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final enabled = onPressed != null;
+    final forward = glyph == AppGlyphs.chevronForward;
+    final icon = busy
+        ? CommonCircleLoading(size: 20, color: colors.onPrimary)
+        : GlyphIcon(glyph, size: 20, fill: 1);
+    return ElasticPress(
+      enabled: enabled,
+      child: AnimatedContainer(
+        duration: context.motionDuration(commonDuration),
+        decoration: ShapeDecoration(
+          shape: AppShape.full,
+          shadows: [
+            if (enabled)
+              BoxShadow(
+                color: colors.primary.withValues(alpha: 0.32),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+          ],
+        ),
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, _actionHeight),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            textStyle: AppTextStyle.headline.of(context),
+          ),
+          child: AnimatedSwitcher(
+            duration: context.motionDuration(commonDuration),
+            child: Row(
+              key: ValueKey((label, glyph, busy)),
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 10,
+              children: [
+                if (!forward || busy) icon,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (forward && !busy) icon,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BackButton extends StatelessWidget {
+  const _BackButton({required this.tooltip, required this.onPressed});
+
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElasticPress(
+      enabled: onPressed != null,
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          backgroundColor: _controlFill(context),
+          disabledBackgroundColor: _controlFill(context),
+          fixedSize: const Size.square(_actionHeight),
+          minimumSize: const Size.square(_actionHeight),
+        ),
+        icon: const GlyphIcon(AppGlyphs.chevronBack),
+      ),
     );
   }
 }
@@ -1426,33 +2136,18 @@ class _StepBar extends StatelessWidget {
               onTap: () => onStep?.call(step),
               label: _journeyLabel(l, step),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 6,
-                  children: [
-                    DecoratedBox(
-                      decoration: ShapeDecoration(
-                        shape: AppShape.full,
-                        color: index <= current
-                            ? colors.primary
-                            : colors.secondaryContainer,
-                      ),
-                      child: const SizedBox(height: 4),
-                    ),
-                    Text(
-                      _journeyLabel(l, step),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyle.caption1
-                          .of(context, emphasized: index == current)
-                          .copyWith(
-                            color: index == current
-                                ? colors.onSurface
-                                : colors.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: AnimatedContainer(
+                  duration: context.motionDuration(commonDuration),
+                  height: 6,
+                  decoration: ShapeDecoration(
+                    shape: AppShape.full,
+                    color: index <= current
+                        ? colors.primary
+                        : colors.brightness == Brightness.dark
+                        ? colors.outlineVariant
+                        : _controlFill(context),
+                  ),
                 ),
               ),
             ),
@@ -1483,52 +2178,15 @@ class _StepTap extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         type: MaterialType.transparency,
-        child: InkWell(
-          customBorder: AppShape.sm,
-          onTap: enabled ? onTap : null,
-          child: child,
+        child: FocusRing(
+          shape: AppShape.md,
+          child: InkWell(
+            customBorder: AppShape.md,
+            onTap: enabled ? onTap : null,
+            child: child,
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _SetupPath extends StatelessWidget {
-  const _SetupPath({required this.path});
-
-  final PathResult path;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final completed = path.steps.where((step) => step.settled).length;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
-      children: [
-        Row(
-          spacing: 12,
-          children: [
-            Expanded(
-              child: Text(
-                l.setupReport,
-                style: AppTextStyle.headline.of(context),
-              ),
-            ),
-            Text(
-              l.setupStepStatus(completed, path.steps.length),
-              style: AppTextStyle.caption1
-                  .of(context)
-                  .copyWith(color: context.colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-        LinearProgressIndicator(
-          value: completed / path.steps.length,
-          minHeight: 4,
-        ),
-        PathStepList(path: path),
-      ],
     );
   }
 }
@@ -1546,250 +2204,143 @@ class _SetupReceipt extends ConsumerWidget {
     final profile = ref
         .watch(profilesProvider)
         .getProfile(draft.profileId ?? -1);
-    final outcome = state.outcome;
-    final node = outcome?.path?.stepOf(PathStep.server)?.detail;
     final current = _journeyIndex(state.step) ?? 0;
-    final checkValue = state.checking
-        ? l.connecting
-        : switch (outcome?.verdict) {
-            SetupVerdict.connected || SetupVerdict.partial => l.setupConfirmed,
-            SetupVerdict.local => l.setupLocalTitle,
-            SetupVerdict.saved || SetupVerdict.safeMode => l.setupSavedTitle,
-            SetupVerdict.stopped => l.setupStoppedTitle,
-            SetupVerdict.permission => l.setupPermissionTitle,
-            SetupVerdict.failed => l.setupFailedTitle,
-            SetupVerdict.stale ||
-            SetupVerdict.unconfirmed => l.setupUnconfirmedTitle,
-            null => l.setupNotChecked,
-          };
-    final checkColor = outcome?.confirmed == true
-        ? context.colorScheme.success
-        : switch (outcome?.verdict) {
-            SetupVerdict.failed => context.colorScheme.error,
-            SetupVerdict.permission ||
-            SetupVerdict.unconfirmed ||
-            SetupVerdict.stale => context.colorScheme.warning,
-            _ => null,
-          };
     final values = [
-      profile?.realLabel ?? l.none,
+      profile?.realLabel ?? l.setupNoProfile,
       _coverageLabel(l, draft.coverage),
       _regionChoiceLabel(l, draft),
-      checkValue,
+      null,
     ];
     return CommonCard(
       shape: AppShape.xl,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 16,
+        spacing: 4,
         children: [
-          Row(
-            spacing: 10,
-            children: [
-              GlyphIcon(
-                AppGlyphs.link,
-                size: 20,
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-              Expanded(
-                child: Text(
-                  l.setupReceipt,
-                  style: AppTextStyle.headline.of(context),
-                ),
-              ),
-              Text(
-                l.setupStepStatus(current + 1, _journey.length),
-                style: AppTextStyle.caption1
-                    .of(context)
-                    .copyWith(color: context.colorScheme.onSurfaceVariant),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+            child: Text(
+              l.setupReceipt,
+              style: AppTextStyle.headline.of(context),
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 4,
-            children: [
-              for (final (index, step) in _journey.indexed)
-                _step(
-                  context,
-                  number: index + 1,
-                  label: _journeyLabel(l, step),
-                  value: values[index],
-                  current: index == current,
-                  done: index == _journey.length - 1
-                      ? outcome?.confirmed == true
-                      : index < current ||
-                            (index == 0 && profile != null) ||
-                            (step == SetupStep.region && draft.regionChosen),
-                  running: index == _journey.length - 1 && state.checking,
-                  statusColor: index == _journey.length - 1 ? checkColor : null,
-                  onTap: index < current && onStep != null
-                      ? () => onStep!(step)
-                      : null,
-                ),
-              if (outcome?.confirmed == true && node != null) ...[
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1),
-                ),
-                _fact(context, AppGlyphs.target, l.server, node),
-              ],
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 14, 12, 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
-                  children: [
-                    GlyphIcon(
-                      AppGlyphs.settings,
-                      size: 16,
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                    Expanded(
-                      child: Text(
-                        l.setupFinishDescription,
-                        style: AppTextStyle.caption1
-                            .of(context)
-                            .copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
+          for (final (index, step) in _journey.indexed)
+            _StepTap(
+              enabled: index < current && onStep != null,
+              onTap: () => onStep?.call(step),
+              label: _journeyLabel(l, step),
+              child: _row(
+                context,
+                number: index + 1,
+                label: _journeyLabel(l, step),
+                value: index < current ? values[index] : null,
+                current: index == current,
+                done: index < current,
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _step(
+  Widget _row(
     BuildContext context, {
     required int number,
     required String label,
-    required String value,
+    required String? value,
     required bool current,
     required bool done,
-    bool running = false,
-    Color? statusColor,
-    VoidCallback? onTap,
   }) {
-    Widget content(BuildContext context) {
-      final color = statusColor ?? context.colorScheme.primary;
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          Material(
-            shape: AppShape.full,
-            color: current && !done && statusColor == null
-                ? context.colorScheme.primary
-                : context.raisedSurfaceLevel.colorOf(context.colorScheme),
-            child: SizedBox.square(
-              dimension: 28,
-              child: Center(
-                child: running
-                    ? CommonCircleLoading(
-                        size: 18,
-                        color: statusColor == null
-                            ? context.colorScheme.onPrimary
-                            : null,
-                      )
-                    : done
-                    ? GlyphIcon(AppGlyphs.check, size: 16, color: color)
-                    : Text(
-                        MaterialLocalizations.of(context).formatDecimal(number),
-                        style: AppTextStyle.caption1
-                            .of(context, emphasized: true)
-                            .copyWith(
-                              color: current && statusColor == null
-                                  ? context.colorScheme.onPrimary
-                                  : context.colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4,
-              children: [
-                Text(
-                  label,
+    final colors = context.colorScheme;
+    final duration = context.motionDuration(commonDuration);
+    final marker = AnimatedContainer(
+      duration: duration,
+      curve: Curves.easeInOutCubic,
+      width: 28,
+      height: 28,
+      decoration: ShapeDecoration(
+        shape: AppShape.full,
+        color: current
+            ? colors.primary
+            : done
+            ? colors.primaryContainer
+            : context.raisedSurfaceLevel.colorOf(colors),
+      ),
+      child: Center(
+        child: AnimatedSwitcher(
+          duration: duration,
+          child: done
+              ? GlyphIcon(
+                  AppGlyphs.check,
+                  key: const ValueKey('done'),
+                  size: 16,
+                  color: colors.onPrimaryContainer,
+                )
+              : Text(
+                  MaterialLocalizations.of(context).formatDecimal(number),
+                  key: const ValueKey('number'),
                   style: AppTextStyle.caption1
-                      .of(context)
-                      .copyWith(color: context.colorScheme.onSurfaceVariant),
-                ),
-                Text(
-                  value,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.subheadline
                       .of(context, emphasized: true)
-                      .copyWith(color: statusColor),
+                      .copyWith(
+                        color: current
+                            ? colors.onPrimary
+                            : colors.onSurfaceVariant,
+                      ),
                 ),
-              ],
-            ),
-          ),
-          if (onTap != null)
-            GlyphIcon(
-              AppGlyphs.chevronForward,
-              size: 16,
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-        ],
-      );
-    }
-
-    return current
-        ? CommonCard(
-            shape: AppShape.md,
-            padding: const EdgeInsets.all(12),
-            child: Builder(builder: content),
-          )
-        : _StepTap(
-            enabled: onTap != null,
-            onTap: () => onTap?.call(),
-            label: '$label: $value',
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: content(context),
-            ),
-          );
-  }
-
-  Widget _fact(BuildContext context, Glyph glyph, String label, String value) =>
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+      ),
+    );
+    return AnimatedContainer(
+      duration: duration,
+      curve: Curves.easeInOutCubic,
+      decoration: ShapeDecoration(
+        shape: AppShape.md,
+        color: current
+            ? context.raisedSurfaceLevel.colorOf(colors)
+            : Colors.transparent,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
+          spacing: 12,
           children: [
-            GlyphIcon(
-              glyph,
-              size: 16,
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-            Text(
-              label,
-              style: AppTextStyle.caption1
-                  .of(context)
-                  .copyWith(color: context.colorScheme.onSurfaceVariant),
-            ),
+            marker,
             Expanded(
-              child: Text(
-                value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: AppTextStyle.footnote.of(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTextStyle.subheadline
+                        .of(context, emphasized: current)
+                        .copyWith(
+                          color: current || done
+                              ? colors.onSurface
+                              : colors.onSurfaceVariant,
+                        ),
+                  ),
+                  AnimatedReveal(
+                    visible: value != null,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        value ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.footnote
+                            .of(context)
+                            .copyWith(color: colors.onSurfaceVariant),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }

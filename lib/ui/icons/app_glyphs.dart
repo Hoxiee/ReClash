@@ -154,6 +154,18 @@ abstract final class AppGlyphs {
     ], role: GlyphRole.line),
   ], matchTextDirection: true);
 
+  static const skip = Glyph([
+    GlyphPolyline([
+      GlyphVertex(6.5, 5.5),
+      GlyphVertex(13, 12, 0.4),
+      GlyphVertex(6.5, 18.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(17.5, 5.5),
+      GlyphVertex(17.5, 18.5),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
   static const chevronDown = Glyph([
     GlyphPolyline([
       GlyphVertex(5.5, 8.75),
