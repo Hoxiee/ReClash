@@ -20,6 +20,8 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/external_link.dart';
+import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
@@ -27,6 +29,7 @@ import 'package:reclash/ui/card.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/list.dart';
 import 'package:reclash/ui/selection_mark.dart';
+import 'package:reclash/ui/switch.dart';
 import 'package:reclash/views/setup.dart';
 
 import '../helpers/test_app.dart';
@@ -151,6 +154,12 @@ class _WizardImportRequest {
 
 class _PendingProfilesAction extends ProfilesAction {
   final requests = <_WizardImportRequest>[];
+
+  @override
+  Future<SubscriptionPagePreview> previewProfileLinkSource(
+    ProfileLinkSource source, {
+    SubscriptionCancellation? cancellation,
+  }) async => const SubscriptionPagePreview();
 
   @override
   Future<Profile> importProfileFromLink(
@@ -370,7 +379,11 @@ Future<void> _openImport(WidgetTester tester) async {
   );
 }
 
-Future<void> _startLinkImport(WidgetTester tester, String link) async {
+Future<void> _startLinkImport(
+  WidgetTester tester,
+  String link, {
+  bool confirm = true,
+}) async {
   await _openImport(tester);
   final field = find.byType(TextField).first;
   await tester.ensureVisible(field);
@@ -380,6 +393,27 @@ Future<void> _startLinkImport(WidgetTester tester, String link) async {
       .widgetWithText(FilledButton, currentAppLocalizations.setupProfileAdd)
       .last;
   await tester.tap(button);
+  if (confirm) {
+    await _confirmPreview(tester);
+  } else {
+    await tester.pump();
+  }
+}
+
+/// Accepts the preview sheet a link import opens before it downloads. The
+/// link is resolved in an isolate, which only advances in real time.
+Future<void> _confirmPreview(WidgetTester tester) async {
+  final accept = find.widgetWithText(TextButton, currentAppLocalizations.add);
+  for (var i = 0; i < 40 && accept.evaluate().isEmpty; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 25)),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  await tester.pump(const Duration(seconds: 1));
+  await tester.tap(accept.last);
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
   await tester.pump();
 }
 
@@ -428,6 +462,32 @@ void main() {
     );
   });
 
+  testWidgets(
+    'a link held before consent fills the field at the profile step',
+    (tester) async {
+      final harness = _harness(step: SetupStep.agreement);
+      addTearDown(harness.container.dispose);
+      await _pumpWizard(tester, harness.container);
+      final session = harness.container.read(setupSessionProvider.notifier);
+
+      session.offerLink('https://x.test/held');
+      await tester.pumpAndSettle();
+      expect(
+        harness.container.read(setupSessionProvider).pendingLink,
+        'https://x.test/held',
+      );
+
+      await session.acceptAgreement();
+      await tester.pumpAndSettle();
+      await _openImport(tester);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).first).controller?.text,
+        'https://x.test/held',
+      );
+      expect(harness.container.read(setupSessionProvider).pendingLink, isNull);
+    },
+  );
+
   testWidgets('agreement requires reading to the end before accepting', (
     tester,
   ) async {
@@ -448,7 +508,10 @@ void main() {
       SetupStep.agreement,
     );
 
-    await tester.drag(find.byType(ListView).first, const Offset(0, -6000));
+    await tester.drag(
+      find.byType(SingleChildScrollView).first,
+      const Offset(0, -20000),
+    );
     await tester.pumpAndSettle();
     final agree = find.widgetWithText(FilledButton, 'Agree');
     expect(tester.widget<FilledButton>(agree).onPressed, isNotNull);
@@ -688,7 +751,9 @@ void main() {
       expect(state.draft.profileId, isNull);
     });
 
-    testWidgets('tapping a profile selects it', (tester) async {
+    testWidgets('tapping a profile previews it and Select picks it', (
+      tester,
+    ) async {
       final l = currentAppLocalizations;
       final harness = _harness(
         step: SetupStep.profile,
@@ -702,9 +767,37 @@ void main() {
 
       expect(
         harness.container.read(setupSessionProvider).draft.profileId,
+        isNull,
+      );
+      await _tap(tester, find.widgetWithText(TextButton, l.select));
+
+      expect(
+        harness.container.read(setupSessionProvider).draft.profileId,
         harness.profile.id,
       );
       expect(_primary(tester, l.setupLanguageContinue).onPressed, isNotNull);
+    });
+
+    testWidgets('holding a profile offers deleting it', (tester) async {
+      final l = currentAppLocalizations;
+      final harness = _harness(
+        step: SetupStep.profile,
+        acceptedDisclaimerVersion: disclaimerVersion,
+      );
+      addTearDown(harness.container.dispose);
+      await _pumpWizard(tester, harness.container);
+
+      final row = find.text('Wizard profile');
+      await tester.ensureVisible(row);
+      final mouse = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await mouse.down(tester.getCenter(row));
+      await mouse.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text(l.delete), findsOneWidget);
     });
 
     testWidgets('Add profile enables once the link field has text', (
@@ -822,7 +915,7 @@ void main() {
 
       await tester.enterText(find.byType(TextField).first, 'https://x.test/s');
       await tester.testTextInput.receiveAction(TextInputAction.go);
-      await tester.pump();
+      await _confirmPreview(tester);
 
       expect(imports.requests.single.link, 'https://x.test/s');
     });
@@ -843,7 +936,11 @@ void main() {
           tester,
           currentAppLocalizations.subscriptionClientCustom,
         );
-        await _startLinkImport(tester, 'https://example.test/profile');
+        await _startLinkImport(
+          tester,
+          'https://example.test/profile',
+          confirm: false,
+        );
         await tester.pumpAndSettle();
         expect(
           find.text(
@@ -979,7 +1076,7 @@ void main() {
       await _pumpWizard(tester, harness.container);
       final l = currentAppLocalizations;
 
-      await _startLinkImport(tester, 'not a profile link');
+      await _startLinkImport(tester, 'not a profile link', confirm: false);
       await tester.pumpAndSettle();
 
       expect(find.text(l.profileUrlInvalidValidationDesc), findsOneWidget);
@@ -1253,6 +1350,38 @@ void main() {
       expect(find.text(l.setupDirectApps(1)), findsOneWidget);
     });
 
+    testWidgets('the found local apps open in a sheet with a switch each', (
+      tester,
+    ) async {
+      final l = currentAppLocalizations;
+      final harness = _harness(
+        step: SetupStep.region,
+        acceptedDisclaimerVersion: disclaimerVersion,
+        regionCode: 'RU',
+        regionChosen: true,
+        android: true,
+      );
+      addTearDown(harness.container.dispose);
+      await _pumpWizard(tester, harness.container, android: true);
+      await _tap(tester, find.text(l.setupDirectAppsFind));
+      expect(find.byType(CommonSwitch), findsNothing);
+
+      await _tap(tester, find.text(l.setupDirectAppsTitle));
+      expect(find.byType(CommonSwitch), findsOneWidget);
+      expect(find.text('ru.bank'), findsWidgets);
+
+      await _tap(tester, find.byType(CommonSwitch));
+      expect(
+        harness.container.read(setupSessionProvider).draft.directApps,
+        isEmpty,
+      );
+
+      await _tap(tester, find.byType(CommonSwitch));
+      expect(harness.container.read(setupSessionProvider).draft.directApps, [
+        'ru.bank',
+      ]);
+    });
+
     testWidgets('the local apps row is absent off Android', (tester) async {
       final harness = _harness(
         step: SetupStep.region,
@@ -1326,6 +1455,56 @@ void main() {
         );
         await tester.pumpWidget(const SizedBox.shrink());
       }
+    });
+
+    testWidgets('a step opened from a row returns to the summary', (
+      tester,
+    ) async {
+      final l = currentAppLocalizations;
+      final harness = _harness(
+        step: SetupStep.summary,
+        acceptedDisclaimerVersion: disclaimerVersion,
+      );
+      addTearDown(harness.container.dispose);
+      await _pumpWizard(tester, harness.container);
+      SetupStep step() => harness.container.read(setupSessionProvider).step;
+
+      await _tap(tester, find.text(l.setupReceiptCoverage));
+      expect(step(), SetupStep.coverage);
+
+      await _tap(
+        tester,
+        find.widgetWithText(FilledButton, l.setupBackToSummary),
+      );
+      expect(step(), SetupStep.summary);
+      expect(find.text(l.setupBackToSummary), findsNothing);
+
+      await _tap(
+        tester,
+        find.widgetWithText(DecorationListItem, l.setupReceiptRegion),
+      );
+      await _tap(tester, find.byTooltip(l.back));
+      expect(step(), SetupStep.summary);
+    });
+
+    testWidgets('the step bar jumps between steps while editing', (
+      tester,
+    ) async {
+      final l = currentAppLocalizations;
+      final harness = _harness(
+        step: SetupStep.summary,
+        acceptedDisclaimerVersion: disclaimerVersion,
+      );
+      addTearDown(harness.container.dispose);
+      await _pumpWizard(tester, harness.container);
+
+      await _tap(tester, find.text(l.setupReceiptProfile));
+      await _tap(tester, find.bySemanticsLabel(l.setupReceiptRegion).first);
+
+      expect(
+        harness.container.read(setupSessionProvider).step,
+        SetupStep.region,
+      );
     });
 
     testWidgets('Connect finishes with connect on by default', (tester) async {

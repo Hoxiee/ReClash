@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "查找",
   "setupDirectAppsClear": "不排除",
   "setupDirectOn": "开启",
-  "setupDirectOff": "关闭"
+  "setupDirectOff": "关闭",
+  "setupBackToSummary": "返回摘要"
 }

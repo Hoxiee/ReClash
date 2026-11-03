@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "찾기",
   "setupDirectAppsClear": "제외하지 않음",
   "setupDirectOn": "켜짐",
-  "setupDirectOff": "꺼짐"
+  "setupDirectOff": "꺼짐",
+  "setupBackToSummary": "요약으로 돌아가기"
 }

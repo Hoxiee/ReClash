@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "検索",
   "setupDirectAppsClear": "除外しない",
   "setupDirectOn": "オン",
-  "setupDirectOff": "オフ"
+  "setupDirectOff": "オフ",
+  "setupBackToSummary": "まとめに戻る"
 }

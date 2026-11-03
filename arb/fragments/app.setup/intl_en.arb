@@ -93,5 +93,6 @@
   "setupDirectAppsFind": "Find",
   "setupDirectAppsClear": "Don't exclude",
   "setupDirectOn": "On",
-  "setupDirectOff": "Off"
+  "setupDirectOff": "Off",
+  "setupBackToSummary": "Back to summary"
 }

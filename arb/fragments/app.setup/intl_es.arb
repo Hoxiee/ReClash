@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "Buscar",
   "setupDirectAppsClear": "No excluir",
   "setupDirectOn": "Activadas",
-  "setupDirectOff": "Desactivadas"
+  "setupDirectOff": "Desactivadas",
+  "setupBackToSummary": "Volver al resumen"
 }

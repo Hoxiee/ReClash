@@ -136,12 +136,14 @@ class EntryTransition extends StatelessWidget {
 
   final Animation<double>? animation;
   final bool leaving;
+  final AlignmentGeometry alignment;
   final Widget child;
 
   const EntryTransition({
     super.key,
     required this.animation,
     this.leaving = false,
+    this.alignment = Alignment.topCenter,
     required this.child,
   });
 
@@ -152,7 +154,7 @@ class EntryTransition extends StatelessWidget {
       ignoring: leaving,
       child: SizeTransition(
         sizeFactor: animation.drive(_size),
-        alignment: Alignment.topCenter,
+        alignment: alignment,
         child: FadeTransition(opacity: animation.drive(_fade), child: child),
       ),
     );
@@ -163,9 +165,17 @@ class EntryTransition extends StatelessWidget {
 /// the motion of [AnimatedEntries]; it leaves showing the last visible child.
 class AnimatedReveal extends StatefulWidget {
   final bool visible;
+
+  /// Where a child narrower than the space it unfolds into sits.
+  final AlignmentGeometry alignment;
   final Widget child;
 
-  const AnimatedReveal({super.key, required this.visible, required this.child});
+  const AnimatedReveal({
+    super.key,
+    required this.visible,
+    this.alignment = Alignment.topCenter,
+    required this.child,
+  });
 
   @override
   State<AnimatedReveal> createState() => _AnimatedRevealState();
@@ -212,6 +222,7 @@ class _AnimatedRevealState extends State<AnimatedReveal>
     return EntryTransition(
       animation: _controller,
       leaving: !widget.visible,
+      alignment: widget.alignment,
       child: _child,
     );
   }

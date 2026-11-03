@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "Найти",
   "setupDirectAppsClear": "Не исключать",
   "setupDirectOn": "Включены",
-  "setupDirectOff": "Выключены"
+  "setupDirectOff": "Выключены",
+  "setupBackToSummary": "К итогам"
 }

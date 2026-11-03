@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form_row.dart';
 import 'package:reclash/models/common.dart' show TrafficShowExt;
 import 'package:reclash/models/profile.dart';
@@ -48,6 +49,92 @@ Future<ProfileLinkImport?> showProfileImportDialog(
   );
   await route?.completed;
   return choice;
+}
+
+/// Resolves with true when the user picks [profile] from the sheet.
+Future<bool?> showProfilePreviewDialog(
+  Profile profile, {
+  required bool selected,
+}) => dialogs.showForm<bool>(
+  builder: (_) => _ProfilePreviewSheet(profile: profile, selected: selected),
+);
+
+class _ProfilePreviewSheet extends StatelessWidget {
+  const _ProfilePreviewSheet({required this.profile, required this.selected});
+
+  final Profile profile;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    final isUrl = profile.type == ProfileType.url;
+    final metadata = isUrl ? profile.subscriptionSnapshot?.metadata : null;
+    final info = isUrl ? profile.subscriptionInfo : null;
+    final host = isUrl ? Uri.tryParse(profile.url)?.host : null;
+    final announce = metadata?.announce?.trim();
+    final support = safeSubscriptionSupportLink(
+      metadata?.text('provider.supportUrl') ?? '',
+    );
+    return CommonScaffold(
+      title: l10n.profile,
+      primaryAction: support == null
+          ? null
+          : IconButtonData(
+              glyph: AppGlyphs.openExternal,
+              tooltip: l10n.subscriptionProviderSupport,
+              onPressed: () => dialogs.openUrl(support.toString()),
+            ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ).copyWith(top: context.contentTopPadding, bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Hero(
+                    monogram: metadata?.name ?? profile.realLabel,
+                    logoBytes: null,
+                    logoIsSvg: false,
+                    account: metadata?.accountTitle,
+                    kind: metadata?.kind,
+                    glyph: isUrl ? AppGlyphs.cloudDownload : AppGlyphs.code,
+                    loading: false,
+                    title: profile.realLabel,
+                    caption: metadata?.hideUrl == true ? '' : host ?? '',
+                  ),
+                  if (announce != null && announce.isNotEmpty)
+                    _Announce(text: announce),
+                  if (info != null) _Stats(summary: null, info: info),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: AlertActions(
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.close),
+                ),
+                if (!selected)
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: Text(l10n.select),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Preview {

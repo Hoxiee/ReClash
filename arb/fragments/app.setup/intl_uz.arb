@@ -86,5 +86,6 @@
   "setupDirectAppsFind": "Topish",
   "setupDirectAppsClear": "Chetlatmaslik",
   "setupDirectOn": "Yoqilgan",
-  "setupDirectOff": "O‘chirilgan"
+  "setupDirectOff": "O‘chirilgan",
+  "setupBackToSummary": "Xulosaga qaytish"
 }
