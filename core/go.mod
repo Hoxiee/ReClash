@@ -155,3 +155,5 @@ godebug (
 	rsa1024min=0
 	x509negativeserial=1
 )
+
+replace github.com/metacubex/utls => github.com/metacubex/utls v0.0.0-20261026164304-a6a364afbd13
