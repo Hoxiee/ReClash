@@ -986,6 +986,8 @@ void main() {
 
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pump();
+    // A page built for the first time starts its motion a frame later.
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
 
     double opacityOf(String text) => tester
@@ -1121,6 +1123,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 240));
 

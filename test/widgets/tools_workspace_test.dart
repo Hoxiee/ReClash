@@ -612,6 +612,8 @@ void main() {
     final initialDivider = tester.getRect(divider);
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
     await tester.pump();
+    // A page built for the first time starts its motion a frame later.
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 160));
     final rowOffset = tester.getRect(row).left - initialRow.left;
     final dividerOffset = tester.getRect(divider).left - initialDivider.left;
@@ -2468,6 +2470,7 @@ void main() {
         .every((opacity) => opacity.opacity == 1);
     expect(barShown(), isTrue);
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+    await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
     expect(barShown(), isFalse);

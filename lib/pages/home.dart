@@ -363,6 +363,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
   final Set<PageLabel> _mounted = {};
   final _plan = TabMotionPlan<PageLabel>();
   PageLabel? _active;
+  var _switch = 0;
 
   @override
   void initState() {
@@ -370,6 +371,22 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
     _active = _shownCurrent;
     if (_active != null) _mounted.add(_active!);
     ref.listenManual(currentPageLabelProvider, (_, _) => _syncCurrent());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _mountTools());
+  }
+
+  // Tools is the heaviest page to build, and a first visit that builds it
+  // freezes the screen on the page being left.
+  void _mountTools() {
+    if (!mounted) return;
+    for (final item in widget.navigationItems) {
+      if (item.label != PageLabel.tools ||
+          !item.keep ||
+          _mounted.contains(item.label) ||
+          item.builder(context) is! ToolsView) {
+        continue;
+      }
+      setState(() => _mounted.add(item.label));
+    }
   }
 
   PageLabel? get _shownCurrent => widget.navigationItems.isEmpty
@@ -422,6 +439,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       );
     }
     _transition.stop();
+    final fresh = target != null && !_mounted.contains(target);
+    final serial = ++_switch;
     setState(() {
       _active = target;
       if (target != null) _mounted.add(target);
@@ -431,7 +450,17 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       _transition.value = 1;
     } else {
       _transition.duration = _plan.duration;
-      _transition.forward(from: 0);
+      if (fresh) {
+        // A first build swallows the start of a ticker begun beside it.
+        _transition.value = 0;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && serial == _switch && _plan.isActive) {
+            _transition.forward(from: 0);
+          }
+        });
+      } else {
+        _transition.forward(from: 0);
+      }
     }
   }
 

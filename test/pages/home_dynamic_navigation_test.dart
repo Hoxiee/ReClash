@@ -602,6 +602,7 @@ void main() {
         .read(currentPageLabelProvider.notifier)
         .toPage(PageLabel.profiles);
     await tester.pump();
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 70));
     final outgoing = tester.getCenter(find.text('page:dashboard'));
     final incoming = tester.getCenter(find.text('page:profiles'));
