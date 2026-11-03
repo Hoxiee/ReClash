@@ -2453,6 +2453,10 @@ void main() {
       home: true,
       wallpaper: true,
     );
+    // The opacity checks below hold only for the fade tab animation.
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
     container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
     await tester.pumpAndSettle();
     container
