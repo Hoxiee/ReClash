@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Téléchargement, envoi, latence et gigue, avec un budget de données.",
   "speedTestOpen": "Ouvrir le test",
   "speedTestPrivacy": "La plateforme voit l’IP publique de la connexion. Les données de test sont générées localement ; aucun fichier personnel n’est envoyé.",
-  "speedTestAgain": "Relancer le test"
+  "speedTestAgain": "Relancer le test",
+  "simpleForecastTitle": "Le trafic suffira-t-il ?",
+  "simpleForecastUnknown": "Votre fournisseur n’indique pas le trafic",
+  "simpleForecastUnlimited": "Pas de limite de trafic",
+  "simpleForecastGathering": "Collecte des statistiques",
+  "simpleForecastGatheringHint": "La prévision apparaît après un ou deux jours d’utilisation",
+  "simpleForecastDepleted": "Le trafic est épuisé",
+  "simpleForecastPlenty": "Largement suffisant",
+  "simpleForecastLasts": "Suffisant pour tout l’abonnement",
+  "simpleForecastUntil": "Jusqu’au {date}",
+  "simpleForecastPace": "Environ {amount} par jour",
+  "simpleForecastEarly": "{days, plural, =1{1 jour avant la fin de l’abonnement} other{{days} jours avant la fin de l’abonnement}}"
 }

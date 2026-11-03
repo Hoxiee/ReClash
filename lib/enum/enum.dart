@@ -527,6 +527,7 @@ enum DashboardStyle { simple, detailed }
 
 enum SimpleDashboardWidget {
   health,
+  traffic,
   outboundMode,
   speed,
   services,

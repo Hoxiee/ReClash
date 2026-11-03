@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/traffic_forecast/forecast.dart';
 import 'package:reclash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -132,6 +133,11 @@ Stream<List<Profile>> profilesStream(Ref ref) {
 }
 
 @riverpod
+Stream<List<UsageDay>> trafficUsage(Ref ref, int profileId) {
+  return database.trafficUsageDao.watch(profileId);
+}
+
+@riverpod
 Stream<Set<String>> customGroupNames(Ref ref) {
   return database.proxyGroupsDao.names().watch().map(Set.of);
 }
@@ -182,6 +188,29 @@ class Profiles extends _$Profiles {
     }
   }
 
+  /// A sample of the provider's counter is taken only when a write brings a
+  /// new one: the same counter written again says nothing about the days since.
+  Future<void> _recordUsage(Profile? previous, Profile profile) async {
+    final info = profile.subscriptionInfo;
+    if (profile.type != ProfileType.url ||
+        info == null ||
+        info == previous?.subscriptionInfo) {
+      return;
+    }
+    try {
+      await database.trafficUsageDao.sample(
+        profile.id,
+        info.upload + info.download,
+        DateTime.now(),
+      );
+    } catch (error) {
+      commonPrint.log(
+        'Traffic usage sample failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   Future<void> _optimisticAsync(
     List<Profile> next,
     FutureOr<void> Function() action,
@@ -210,7 +239,8 @@ class Profiles extends _$Profiles {
         ensureCurrent();
         final newProfile = labeled(profile);
         final previous = state;
-        final previousLabel = previous.getProfile(profile.id)?.realLabel;
+        final previousProfile = previous.getProfile(profile.id);
+        final previousLabel = previousProfile?.realLabel;
         var next = previous.copyAndPut(
           newProfile,
           (item) => item.id == newProfile.id,
@@ -252,6 +282,7 @@ class Profiles extends _$Profiles {
               } else {
                 await _putLatest([newProfile.id]);
               }
+              await _recordUsage(previousProfile, newProfile);
               ensureCurrent();
             }),
           );
@@ -277,7 +308,13 @@ class Profiles extends _$Profiles {
     if (newProfile.type == ProfileType.custom ||
         previousLabel == null ||
         previousLabel == newProfile.realLabel) {
-      _optimistic(next, () => _serial(() => _putLatest([newProfile.id])));
+      _optimistic(
+        next,
+        () => _serial(() async {
+          await _putLatest([newProfile.id]);
+          await _recordUsage(previous, newProfile);
+        }),
+      );
       return;
     }
     final names = {previousLabel: newProfile.realLabel};
@@ -303,6 +340,7 @@ class Profiles extends _$Profiles {
             newName: newProfile.realLabel,
           );
           await _putLatest([for (final user in users) user.id, newProfile.id]);
+          await _recordUsage(previous, newProfile);
         }),
       ),
     );

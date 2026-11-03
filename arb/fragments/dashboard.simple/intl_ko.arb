@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "데이터 한도 내에서 다운로드, 업로드, 지연 시간, 지터를 측정합니다.",
   "speedTestOpen": "테스트 열기",
   "speedTestPrivacy": "플랫폼은 테스트 연결의 공인 IP를 볼 수 있습니다. 테스트 데이터는 기기에서 생성되며 개인 파일은 업로드하지 않습니다.",
-  "speedTestAgain": "다시 테스트"
+  "speedTestAgain": "다시 테스트",
+  "simpleForecastTitle": "트래픽이 충분할까요?",
+  "simpleForecastUnknown": "제공업체가 트래픽 정보를 알려주지 않습니다",
+  "simpleForecastUnlimited": "트래픽 제한 없음",
+  "simpleForecastGathering": "통계를 모으는 중",
+  "simpleForecastGatheringHint": "하루 이틀 사용하면 예측이 나타납니다",
+  "simpleForecastDepleted": "트래픽을 모두 썼습니다",
+  "simpleForecastPlenty": "넉넉합니다",
+  "simpleForecastLasts": "요금제 기간 내내 충분합니다",
+  "simpleForecastUntil": "{date}까지",
+  "simpleForecastPace": "하루 약 {amount}",
+  "simpleForecastEarly": "{days, plural, other{요금제 종료 {days}일 전}}"
 }

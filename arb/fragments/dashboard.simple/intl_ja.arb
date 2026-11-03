@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "データ上限付きでダウンロード、アップロード、遅延、ジッターを測定。",
   "speedTestOpen": "テストを開く",
   "speedTestPrivacy": "サービスにはテスト接続の公開IPが見えます。テストデータは端末内で生成され、個人ファイルは送信されません。",
-  "speedTestAgain": "再テスト"
+  "speedTestAgain": "再テスト",
+  "simpleForecastTitle": "トラフィックは足りますか？",
+  "simpleForecastUnknown": "プロバイダーはトラフィック量を通知していません",
+  "simpleForecastUnlimited": "トラフィック制限なし",
+  "simpleForecastGathering": "統計を集めています",
+  "simpleForecastGatheringHint": "予測は1〜2日使うと表示されます",
+  "simpleForecastDepleted": "トラフィックを使い切りました",
+  "simpleForecastPlenty": "十分すぎるほどです",
+  "simpleForecastLasts": "契約期間中ずっと足ります",
+  "simpleForecastUntil": "{date}まで",
+  "simpleForecastPace": "1日あたり約{amount}",
+  "simpleForecastEarly": "{days, plural, other{契約終了の{days}日前}}"
 }

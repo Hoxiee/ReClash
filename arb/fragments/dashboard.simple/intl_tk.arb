@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Trafik çägi bilen ýüklemek, ibermek, gijikme we jitter.",
   "speedTestOpen": "Synagy açmak",
   "speedTestPrivacy": "Platforma synag birikmesiniň açyk IP salgysyny görýär. Synag maglumatlary ýerli döredilýär; şahsy faýllar iberilmeýär.",
-  "speedTestAgain": "Täzeden barla"
+  "speedTestAgain": "Täzeden barla",
+  "simpleForecastTitle": "Traffik ýeterlikmi?",
+  "simpleForecastUnknown": "Provaýder traffik barada habar bermeýär",
+  "simpleForecastUnlimited": "Traffik çägi ýok",
+  "simpleForecastGathering": "Statistika ýygnalýar",
+  "simpleForecastGatheringHint": "Çaklama bir-iki gün ulanandan soň görkezilýär",
+  "simpleForecastDepleted": "Traffik gutardy",
+  "simpleForecastPlenty": "Ýeterlikden köp",
+  "simpleForecastLasts": "Tutuş tarif üçin ýeterlikdir",
+  "simpleForecastUntil": "{date} çenli",
+  "simpleForecastPace": "Günde takmynan {amount}",
+  "simpleForecastEarly": "{days, plural, other{Tarif gutarmazdan {days} gün öň}}"
 }

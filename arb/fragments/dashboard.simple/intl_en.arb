@@ -243,5 +243,37 @@
   "speedTestIdleDesc": "Download, upload, latency and jitter, with a data budget.",
   "speedTestOpen": "Open test",
   "speedTestPrivacy": "The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.",
-  "speedTestAgain": "Test again"
+  "speedTestAgain": "Test again",
+  "simpleForecastTitle": "Will your data last?",
+  "simpleForecastUnknown": "Your provider does not report traffic",
+  "simpleForecastUnlimited": "No traffic limit",
+  "simpleForecastGathering": "Collecting statistics",
+  "simpleForecastGatheringHint": "The forecast appears after a day or two of use",
+  "simpleForecastDepleted": "Traffic is used up",
+  "simpleForecastPlenty": "More than enough",
+  "simpleForecastLasts": "Enough for the whole plan",
+  "simpleForecastUntil": "Until {date}",
+  "@simpleForecastUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleForecastPace": "About {amount} a day",
+  "@simpleForecastPace": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleForecastEarly": "{days, plural, =1{1 day before the plan ends} other{{days} days before the plan ends}}",
+  "@simpleForecastEarly": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
 }

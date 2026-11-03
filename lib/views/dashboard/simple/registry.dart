@@ -9,11 +9,13 @@ import 'mode_card.dart';
 import 'path_card.dart';
 import 'services_card.dart';
 import 'speed_card.dart';
+import 'traffic_card.dart';
 import 'trusted_networks_card.dart';
 
 extension SimpleDashboardWidgetView on SimpleDashboardWidget {
   Widget get card => switch (this) {
     SimpleDashboardWidget.health => const HealthCard(),
+    SimpleDashboardWidget.traffic => const SimpleTrafficCard(),
     SimpleDashboardWidget.outboundMode => const SimpleModeCard(),
     SimpleDashboardWidget.speed => const SimpleSpeedCard(),
     SimpleDashboardWidget.services => const SimpleServicesCard(),
@@ -24,6 +26,7 @@ extension SimpleDashboardWidgetView on SimpleDashboardWidget {
 
   Glyph get glyph => switch (this) {
     SimpleDashboardWidget.health => AppGlyphs.verified,
+    SimpleDashboardWidget.traffic => AppGlyphs.dataUsage,
     SimpleDashboardWidget.outboundMode => AppGlyphs.shuffle,
     SimpleDashboardWidget.speed => AppGlyphs.speed,
     SimpleDashboardWidget.services => AppGlyphs.verified,
@@ -36,6 +39,7 @@ extension SimpleDashboardWidgetView on SimpleDashboardWidget {
     final appLocalizations = context.appLocalizations;
     return switch (this) {
       SimpleDashboardWidget.health => appLocalizations.toolsObservation,
+      SimpleDashboardWidget.traffic => appLocalizations.simpleForecastTitle,
       SimpleDashboardWidget.outboundMode => appLocalizations.simpleModeTitle,
       SimpleDashboardWidget.speed => appLocalizations.simpleSpeedTitle,
       SimpleDashboardWidget.services => appLocalizations.simpleServicesTitle,

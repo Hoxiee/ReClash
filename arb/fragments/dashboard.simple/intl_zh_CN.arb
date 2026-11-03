@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "在流量限额内测量下载、上传、延迟和抖动。",
   "speedTestOpen": "打开测试",
   "speedTestPrivacy": "平台可看到测试连接的公网 IP。测试数据在本地生成，不会上传个人文件。",
-  "speedTestAgain": "重新测试"
+  "speedTestAgain": "重新测试",
+  "simpleForecastTitle": "流量够用吗？",
+  "simpleForecastUnknown": "服务商未提供流量信息",
+  "simpleForecastUnlimited": "流量无限制",
+  "simpleForecastGathering": "正在收集统计数据",
+  "simpleForecastGatheringHint": "使用一两天后显示预测",
+  "simpleForecastDepleted": "流量已用完",
+  "simpleForecastPlenty": "绰绰有余",
+  "simpleForecastLasts": "足够用完整个套餐",
+  "simpleForecastUntil": "可用至 {date}",
+  "simpleForecastPace": "每天约 {amount}",
+  "simpleForecastEarly": "{days, plural, other{套餐到期前{days}天}}"
 }

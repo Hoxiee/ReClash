@@ -260,8 +260,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsFromJson)
     List<DashboardWidget> dashboardWidgets,
-    @Default(DashboardStyle.detailed)
-    @JsonKey(unknownEnumValue: DashboardStyle.detailed)
+    @Default(DashboardStyle.simple)
+    @JsonKey(unknownEnumValue: DashboardStyle.simple)
     DashboardStyle dashboardStyle,
     @Default(defaultSimpleDashboardWidgets)
     @JsonKey(fromJson: simpleDashboardWidgetsFromJson)
@@ -279,7 +279,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool openLogs,
     @Default(true) bool closeConnections,
     @Default(defaultDelayTestTimeout) int delayTestTimeout,
-    @Default(TabAnimation.fade)
+    @Default(TabAnimation.slide)
     @JsonKey(readValue: _readTabAnimation)
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,

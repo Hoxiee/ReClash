@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Трафик шегімен жүктеу, жіберу, кідіріс және jitter.",
   "speedTestOpen": "Сынақты ашу",
   "speedTestPrivacy": "Платформа сынақ қосылымының жалпыға ашық IP мекенжайын көреді. Сынақ деректері жергілікті жасалады; жеке файлдар жіберілмейді.",
-  "speedTestAgain": "Қайта тексеру"
+  "speedTestAgain": "Қайта тексеру",
+  "simpleForecastTitle": "Трафик жетеді ме?",
+  "simpleForecastUnknown": "Провайдер трафик туралы ақпарат бермейді",
+  "simpleForecastUnlimited": "Трафик шектеусіз",
+  "simpleForecastGathering": "Статистика жиналуда",
+  "simpleForecastGatheringHint": "Болжам бір-екі күн пайдаланғаннан кейін пайда болады",
+  "simpleForecastDepleted": "Трафик таусылды",
+  "simpleForecastPlenty": "Қажеттіден де көп",
+  "simpleForecastLasts": "Бүкіл тариф мерзіміне жетеді",
+  "simpleForecastUntil": "{date} дейін",
+  "simpleForecastPace": "Күніне шамамен {amount}",
+  "simpleForecastEarly": "{days, plural, other{Тариф бітпестен {days} күн бұрын}}"
 }

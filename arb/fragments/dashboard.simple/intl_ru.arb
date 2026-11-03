@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Загрузка, отправка, задержка и jitter с лимитом трафика.",
   "speedTestOpen": "Открыть тест",
   "speedTestPrivacy": "Платформа видит публичный IP тестового соединения. Тестовые данные создаются локально; личные файлы не отправляются.",
-  "speedTestAgain": "Повторить тест"
+  "speedTestAgain": "Повторить тест",
+  "simpleForecastTitle": "Хватит ли трафика?",
+  "simpleForecastUnknown": "Провайдер не сообщает о трафике",
+  "simpleForecastUnlimited": "Без ограничения трафика",
+  "simpleForecastGathering": "Собираем статистику",
+  "simpleForecastGatheringHint": "Прогноз появится через день-два использования",
+  "simpleForecastDepleted": "Трафик закончился",
+  "simpleForecastPlenty": "Более чем достаточно",
+  "simpleForecastLasts": "Хватит на весь тариф",
+  "simpleForecastUntil": "До {date}",
+  "simpleForecastPace": "Около {amount} в день",
+  "simpleForecastEarly": "{days, plural, one{за {days} день до конца тарифа} few{за {days} дня до конца тарифа} many{за {days} дней до конца тарифа} other{за {days} дня до конца тарифа}}"
 }

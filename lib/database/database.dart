@@ -7,6 +7,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/traffic_forecast/forecast.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
@@ -24,6 +25,7 @@ part 'ip_qualities.dart';
 part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
+part 'traffic_usage.dart';
 
 @DriftDatabase(
   tables: [
@@ -38,6 +40,7 @@ part 'scripts.dart';
     CustomProxies,
     ProxyDialers,
     IpQualities,
+    TrafficUsage,
   ],
   daos: [
     ProfilesDao,
@@ -50,13 +53,14 @@ part 'scripts.dart';
     CustomProxiesDao,
     ProxyDialersDao,
     IpQualitiesDao,
+    TrafficUsageDao,
   ],
 )
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -139,6 +143,9 @@ class Database extends _$Database {
             clashProviders,
             clashProviders.requestHeaders,
           );
+        }
+        if (from < 23) {
+          await _createTableIfMissing(m, trafficUsage);
         }
       }),
       beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),

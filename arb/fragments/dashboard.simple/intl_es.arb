@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Descarga, subida, latencia y jitter con límite de datos.",
   "speedTestOpen": "Abrir prueba",
   "speedTestPrivacy": "La plataforma ve la IP pública de la conexión. Los datos de prueba se generan localmente; no se suben archivos personales.",
-  "speedTestAgain": "Repetir prueba"
+  "speedTestAgain": "Repetir prueba",
+  "simpleForecastTitle": "¿Te alcanzará el tráfico?",
+  "simpleForecastUnknown": "Tu proveedor no informa del tráfico",
+  "simpleForecastUnlimited": "Sin límite de tráfico",
+  "simpleForecastGathering": "Recopilando estadísticas",
+  "simpleForecastGatheringHint": "La previsión aparece tras uno o dos días de uso",
+  "simpleForecastDepleted": "El tráfico se ha agotado",
+  "simpleForecastPlenty": "Más que suficiente",
+  "simpleForecastLasts": "Alcanza para todo el plan",
+  "simpleForecastUntil": "Hasta {date}",
+  "simpleForecastPace": "Unos {amount} al día",
+  "simpleForecastEarly": "{days, plural, =1{1 día antes de que termine el plan} other{{days} días antes de que termine el plan}}"
 }

@@ -12,6 +12,7 @@ import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/providers.dart';
+import 'package:reclash/features/traffic_forecast/forecast.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -29,6 +30,7 @@ import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/simple/simple_dashboard.dart';
 import 'package:reclash/views/dashboard/simple/services_card.dart';
 import 'package:reclash/views/dashboard/simple/subscription_card.dart';
+import 'package:reclash/views/dashboard/simple/traffic_card.dart';
 import 'package:reclash/views/dashboard/simple/widget_list.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 
@@ -379,17 +381,21 @@ void main() {
   });
 
   testWidgets(
-    'DashboardPage shows the detailed dashboard until simple is chosen',
+    'DashboardPage shows the simple dashboard until detailed is chosen',
     (tester) async {
       await pumpPage(tester);
-      expect(find.byType(DashboardView), findsOneWidget);
-      expect(find.byType(SimpleDashboardView), findsNothing);
-
-      chooseSimple();
-      await settle(tester);
-
       expect(find.byType(SimpleDashboardView), findsOneWidget);
       expect(find.byType(DashboardView), findsNothing);
+
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(dashboardStyle: DashboardStyle.detailed),
+          );
+      await settle(tester);
+
+      expect(find.byType(DashboardView), findsOneWidget);
+      expect(find.byType(SimpleDashboardView), findsNothing);
     },
   );
 
@@ -1149,6 +1155,134 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Server maintenance'), findsOneWidget);
+    });
+  });
+
+  group('traffic forecast card', () {
+    final today = usageDayOf(DateTime.now());
+
+    List<UsageDay> pace(int perDay) => [
+      UsageDay(today - 3, 0, 0),
+      for (var day = today - 2; day <= today; day++) UsageDay(day, perDay, 0),
+    ];
+
+    Future<void> pumpForecast(
+      WidgetTester tester, {
+      Map<String, Object?> fields = const {},
+      SubscriptionInfo? info,
+      List<UsageDay> days = const [],
+    }) async {
+      useContainer(
+        profile: info == null
+            ? null
+            : _subscription(fields: fields, info: info),
+        overrides: [
+          trafficUsageProvider(7).overrideWith((ref) => Stream.value(days)),
+        ],
+      );
+      chooseSimple();
+      await pumpPage(tester);
+      await openWidgets(tester);
+    }
+
+    Finder inCard(Finder matching) =>
+        find.descendant(of: find.byType(SimpleTrafficCard), matching: matching);
+
+    testWidgets('names the day the quota runs out and the daily pace', (
+      tester,
+    ) async {
+      await pumpForecast(
+        tester,
+        info: const SubscriptionInfo(upload: 10 * _gb, total: 100 * _gb),
+        days: pace(2 * _gb),
+      );
+
+      expect(inCard(find.textContaining('Until ')), findsOneWidget);
+      expect(inCard(find.textContaining('a day')), findsOneWidget);
+    });
+
+    testWidgets('warns how many days early the quota ends', (tester) async {
+      await pumpForecast(
+        tester,
+        info: SubscriptionInfo(
+          upload: 10 * _gb,
+          total: 100 * _gb,
+          expire: _expiresIn(const Duration(days: 60)),
+        ),
+        days: pace(2 * _gb),
+      );
+
+      expect(
+        inCard(find.textContaining('before the plan ends')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a quota that lasts the plan says so', (tester) async {
+      await pumpForecast(
+        tester,
+        info: SubscriptionInfo(
+          upload: 10 * _gb,
+          total: 100 * _gb,
+          expire: _expiresIn(const Duration(days: 20)),
+        ),
+        days: pace(2 * _gb),
+      );
+
+      expect(inCard(find.text('Enough for the whole plan')), findsOneWidget);
+    });
+
+    testWidgets('collects statistics before there is a pace', (tester) async {
+      await pumpForecast(
+        tester,
+        info: const SubscriptionInfo(upload: 10 * _gb, total: 100 * _gb),
+      );
+
+      expect(inCard(find.text('Collecting statistics')), findsOneWidget);
+    });
+
+    testWidgets('an unlimited plan has no run-out day', (tester) async {
+      await pumpForecast(
+        tester,
+        fields: {'subscription.unlimited': true},
+        info: const SubscriptionInfo(upload: 10 * _gb),
+        days: pace(_gb),
+      );
+
+      expect(inCard(find.text('No traffic limit')), findsOneWidget);
+      expect(inCard(find.textContaining('Until ')), findsNothing);
+    });
+
+    testWidgets('a spent quota offers the top-up the provider links', (
+      tester,
+    ) async {
+      await pumpForecast(
+        tester,
+        fields: {'provider.buyTrafficUrl': 'https://buy.example.test/gb'},
+        info: const SubscriptionInfo(download: 100 * _gb, total: 100 * _gb),
+        days: pace(_gb),
+      );
+
+      expect(inCard(find.text('Traffic is used up')), findsOneWidget);
+      expect(inCard(find.text('Top up traffic')), findsOneWidget);
+    });
+
+    testWidgets('no top-up without a provider link', (tester) async {
+      await pumpForecast(
+        tester,
+        info: const SubscriptionInfo(download: 100 * _gb, total: 100 * _gb),
+      );
+
+      expect(inCard(find.text('Top up traffic')), findsNothing);
+    });
+
+    testWidgets('a provider that reports no traffic says so', (tester) async {
+      await pumpForecast(tester);
+
+      expect(
+        inCard(find.text('Your provider does not report traffic')),
+        findsOneWidget,
+      );
     });
   });
 }

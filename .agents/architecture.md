@@ -1416,6 +1416,8 @@ Tables:
 - `IconSets` (`icon_sets`)
 - `ClashProviders` (`clash_providers`)
 - `IpQualities` (`ip_qualities`): a cache of IP quality lookups that backups carry and a restore never reads.
+- `TrafficUsage` (`traffic_usage`): what a URL profile spent per local day, sampled by `Profiles` whenever a write brings a
+  new subscription counter and read by the simple dashboard's forecast; it cascades with its profile and keeps 60 days.
 
 `Profiles.type` is `file`, `url` or `custom`, fixed when the profile is created. A rule belongs to whoever its
 `profile_id` names: no profile makes it global, a file or url profile's rules are what its standard extension adds, and

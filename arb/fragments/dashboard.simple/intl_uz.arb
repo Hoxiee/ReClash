@@ -128,5 +128,16 @@
   "speedTestIdleDesc": "Trafik limiti bilan yuklab olish, yuborish, kechikish va jitter.",
   "speedTestOpen": "Sinovni ochish",
   "speedTestPrivacy": "Platforma sinov ulanishining ommaviy IP manzilini ko‘radi. Sinov ma’lumotlari qurilmada yaratiladi; shaxsiy fayllar yuborilmaydi.",
-  "speedTestAgain": "Qayta sinash"
+  "speedTestAgain": "Qayta sinash",
+  "simpleForecastTitle": "Trafik yetadimi?",
+  "simpleForecastUnknown": "Provayder trafik haqida xabar bermaydi",
+  "simpleForecastUnlimited": "Trafik cheklovi yo‘q",
+  "simpleForecastGathering": "Statistika yig‘ilmoqda",
+  "simpleForecastGatheringHint": "Prognoz bir-ikki kun foydalanilgandan keyin chiqadi",
+  "simpleForecastDepleted": "Trafik tugagan",
+  "simpleForecastPlenty": "Yetarlidan ham ortiq",
+  "simpleForecastLasts": "Butun tarif uchun yetadi",
+  "simpleForecastUntil": "{date} gacha",
+  "simpleForecastPace": "Kuniga taxminan {amount}",
+  "simpleForecastEarly": "{days, plural, other{Tarif tugashidan {days} kun oldin}}"
 }
