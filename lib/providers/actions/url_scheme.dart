@@ -33,12 +33,9 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     }
     await windowPort?.show();
     if (!current()) return;
+    if (_holdLink(input)) return;
     if (link?.command == ReClashCommand.doctor) {
       await openDoctor?.call(link!.payload);
-      return;
-    }
-    if (ref.read(setupSessionProvider).active) {
-      ref.read(setupSessionProvider.notifier).offerLink(input);
       return;
     }
     if (link != null && link.command == ReClashCommand.routing) {
@@ -54,7 +51,9 @@ class UrlSchemeAction extends _$UrlSchemeAction {
       reviewContext,
       cancellation,
     }) async {
-      if (!current() || ref.read(setupSessionProvider).active) return;
+      if (!current() || ref.read(setupSessionProvider.notifier).holdsLinks) {
+        return;
+      }
       await ref
           .read(profilesActionProvider.notifier)
           .addConfirmedLinkSource(
@@ -69,9 +68,16 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     if (!current() || choice == null) return;
     if (imported) {
       ref.read(profilesActionProvider.notifier).showProfiles();
-    } else if (ref.read(setupSessionProvider).active) {
-      ref.read(setupSessionProvider.notifier).offerLink(input);
+    } else {
+      _holdLink(input);
     }
+  }
+
+  bool _holdLink(String input) {
+    final session = ref.read(setupSessionProvider.notifier);
+    if (!session.holdsLinks) return false;
+    session.offerLink(input);
+    return true;
   }
 
   Future<(String, String)> _resolveRouting(String payload) async {
@@ -99,6 +105,8 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     }
   }
 
+  bool get _awaitsConsent => ref.read(setupSessionProvider.notifier).holdsLinks;
+
   Future<void> execute(
     ReClashCommand command, {
     required Future<bool> Function(ReClashCommand action) confirm,
@@ -107,7 +115,7 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     await windowPort?.show();
     if (!ref.mounted) return;
     if (command == ReClashCommand.open) return;
-    if (command.changesConnection && ref.read(setupSessionProvider).active) {
+    if (_awaitsConsent) {
       throw MessageException(currentAppLocalizations.urlSchemeSetupRequired);
     }
     final action = command == ReClashCommand.toggle
@@ -116,7 +124,7 @@ class UrlSchemeAction extends _$UrlSchemeAction {
               : ReClashCommand.connect
         : command;
     if (!await confirm(action) || !ref.mounted) return;
-    if (action.changesConnection && ref.read(setupSessionProvider).active) {
+    if (_awaitsConsent) {
       throw MessageException(currentAppLocalizations.urlSchemeSetupRequired);
     }
     if (action == ReClashCommand.close) {

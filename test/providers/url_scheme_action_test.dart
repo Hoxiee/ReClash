@@ -9,6 +9,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
@@ -73,6 +74,10 @@ void main() {
   late _Session session;
   late _ProfilesAction profiles;
 
+  void accept([int version = disclaimerVersion]) => container
+      .read(appSettingProvider.notifier)
+      .update((value) => value.copyWith(acceptedDisclaimerVersion: version));
+
   setUp(() async {
     await AppLocalizations.load(const Locale('en'));
     common = _CommonAction();
@@ -94,6 +99,8 @@ void main() {
     );
     addTearDown(container.dispose);
     container.read(setupSessionProvider);
+    container.listen(appSettingProvider, (_, _) {});
+    accept();
   });
 
   Future<void> execute(
@@ -120,6 +127,29 @@ void main() {
       expect(common.requests, isEmpty);
     },
   );
+
+  test('no command but open runs before setup or consent', () async {
+    for (final command in [
+      ReClashCommand.connect,
+      ReClashCommand.disconnect,
+      ReClashCommand.toggle,
+      ReClashCommand.close,
+    ]) {
+      session.setActive(true);
+      await expectLater(execute(command), throwsA(isA<MessageException>()));
+      session.setActive(false);
+      accept(0);
+      await expectLater(execute(command), throwsA(isA<MessageException>()));
+      accept();
+    }
+    expect(common.requests, isEmpty);
+    expect(systemAction.closes, 0);
+  });
+
+  test('close runs once setup is done and consent exists', () async {
+    await execute(ReClashCommand.close);
+    expect(systemAction.closes, 1);
+  });
 
   test('profile commands are not dispatched as application actions', () async {
     await execute(ReClashCommand.add);
@@ -240,16 +270,6 @@ void main() {
   });
 
   test(
-    'close delegates to the existing close owner even during setup',
-    () async {
-      session.setActive(true);
-      await execute(ReClashCommand.close);
-      expect(systemAction.closes, 1);
-      expect(common.requests, isEmpty);
-    },
-  );
-
-  test(
     'a failed confirmation cannot dispatch and does not block a later action',
     () async {
       await expectLater(
@@ -290,6 +310,7 @@ void main() {
       Future<bool> Function(ReClashCommand)? confirmCommand,
       Future<ProfileLinkImport?> Function(ProfileLinkSource)? confirmImport,
       Future<void> Function(String, String)? openRouting,
+      Future<void> Function(String?)? openDoctor,
       bool Function()? isCurrent,
     }) => container
         .read(urlSchemeActionProvider.notifier)
@@ -305,6 +326,7 @@ void main() {
             return choice;
           },
           openRouting: openRouting ?? (_, _) async {},
+          openDoctor: openDoctor,
           isCurrent: isCurrent,
         );
 
@@ -459,6 +481,80 @@ void main() {
         expect(profiles.reveals, 0);
       },
     );
+
+    test('a link before consent is held, not acted on', () async {
+      accept(0);
+      var confirmations = 0;
+      await handle(
+        'https://example.com/sub',
+        confirmImport: (_) async {
+          confirmations++;
+          return const ProfileLinkImport();
+        },
+      );
+      expect(
+        container.read(setupSessionProvider).pendingLink,
+        'https://example.com/sub',
+      );
+      expect(confirmations, 0);
+      expect(profiles.sources, isEmpty);
+    });
+
+    test('doctor and routing links are held during setup', () async {
+      session.setActive(true);
+      var opened = 0;
+      for (final input in ['reclash://doctor', encodeRcxLink('rcx: 1\n')]) {
+        await handle(
+          input,
+          openDoctor: (_) async => opened++,
+          openRouting: (_, _) async => opened++,
+        );
+        expect(container.read(setupSessionProvider).pendingLink, input);
+      }
+      expect(opened, 0);
+    });
+
+    test('the latest held link wins and dropped commands leave it', () async {
+      session.setActive(true);
+      await handle('https://example.com/one');
+      await handle('https://example.com/two');
+      await expectLater(
+        handle('reclash://connect'),
+        throwsA(isA<MessageException>()),
+      );
+      expect(
+        container.read(setupSessionProvider).pendingLink,
+        'https://example.com/two',
+      );
+    });
+
+    test('a held link is handed over only after setup and consent', () async {
+      session.setActive(true);
+      await handle('https://example.com/sub');
+      final notifier = container.read(setupSessionProvider.notifier);
+      expect(notifier.takeHeldLink(), isNull);
+      session.setActive(false);
+      accept(0);
+      expect(notifier.takeHeldLink(), isNull);
+      accept();
+      expect(notifier.takeHeldLink(), 'https://example.com/sub');
+      expect(container.read(setupSessionProvider).pendingLink, isNull);
+      expect(notifier.takeHeldLink(), isNull);
+    });
+
+    test('a link is handled normally once setup is done', () async {
+      var confirmations = 0;
+      await handle(
+        'https://example.com/sub',
+        confirmImport: (_) async {
+          confirmations++;
+          return const ProfileLinkImport();
+        },
+      );
+      expect(confirmations, 1);
+      expect(profiles.sources, hasLength(1));
+      expect(container.read(setupSessionProvider).pendingLink, isNull);
+    });
 
     test('malformed links fail before confirmation or import', () async {
       var confirmations = 0;

@@ -292,6 +292,18 @@ class SetupSession extends Notifier<SetupSessionState> {
   void clearDirectApps() =>
       state = state.copyWith(draft: state.draft.withDirectApps(null));
 
+  void setDirectApp(String package, {required bool bypass}) {
+    final apps = state.draft.directApps;
+    if (apps == null || apps.contains(package) == bypass) return;
+    state = state.copyWith(
+      draft: state.draft.withDirectApps(
+        List.unmodifiable(
+          bypass ? [...apps, package] : apps.where((app) => app != package),
+        ),
+      ),
+    );
+  }
+
   /// Puts the region's direct rules above the global rules, skipping those
   /// already present so a repeated setup does not stack copies.
   @protected
@@ -319,6 +331,19 @@ class SetupSession extends Notifier<SetupSessionState> {
 
   void offerLink(String link) => state = state.copyWith(pendingLink: link);
   void consumeLink() => state = state.copyWith(clearLink: true);
+
+  /// Whether external links must wait: the wizard is open or the agreement
+  /// has not been accepted.
+  bool get holdsLinks => state.active || !_accepted;
+
+  /// Hands over the held link once nothing holds it back any more.
+  String? takeHeldLink() {
+    final link = state.pendingLink;
+    if (link == null || holdsLinks) return null;
+    consumeLink();
+    return link;
+  }
+
   void showError(Object error) =>
       state = state.copyWith(error: compactError(error));
 

@@ -116,6 +116,14 @@ class ApplicationState extends ConsumerState<Application> {
     );
   }
 
+  void _releaseHeldLink() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final link = ref.read(setupSessionProvider.notifier).takeHeldLink();
+      if (link != null) unawaited(_handleLink(link));
+    });
+  }
+
   Future<void> _handleLink(String input) async {
     final context = globalState.navigatorKey.currentContext;
     if (!mounted || context == null) return;
@@ -226,6 +234,14 @@ class ApplicationState extends ConsumerState<Application> {
         _autoUpdateProfilesTask();
       }
     });
+    ref.listen(
+      setupSessionProvider.select((state) => state.active),
+      (_, _) => _releaseHeldLink(),
+    );
+    ref.listen(
+      appSettingProvider.select((state) => state.acceptedDisclaimerVersion),
+      (_, _) => _releaseHeldLink(),
+    );
     return Consumer(
       builder: (_, ref, child) {
         final locale = ref.watch(

@@ -8,7 +8,9 @@ import 'package:reclash/application.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/features/doctor/explain.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/doctor/doctor.dart';
@@ -22,8 +24,8 @@ class _Window extends Mock implements WindowPort {}
 class _Setup extends SetupSession {
   @override
   SetupSessionState build() => const SetupSessionState(
-    active: true,
-    step: SetupStep.language,
+    active: false,
+    step: SetupStep.profile,
     draft: SetupDraft(coverage: SetupCoverage.tun),
   );
 }
@@ -89,6 +91,11 @@ void main() {
           final container = ProviderContainer(
             overrides: [
               setupSessionProvider.overrideWith(_Setup.new),
+              appSettingProvider.overrideWithBuild(
+                (_, _) => const AppSettingProps(
+                  acceptedDisclaimerVersion: disclaimerVersion,
+                ),
+              ),
               viewSizeProvider.overrideWithBuild((_, _) => size),
               ...doctorOverrides(
                 kernel: kernel,
