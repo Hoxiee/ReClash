@@ -24,6 +24,21 @@ Future<void> settleUntil(bool Function() condition) async {
   expect(condition(), isTrue);
 }
 
+/// Removes [directory] once the background writes of a finished test have
+/// landed: an automatic install keeps persisting its state after the test
+/// returns, so the first attempt can find the directory non-empty.
+Future<void> deleteDirectory(Directory directory) async {
+  for (var attempt = 1; ; attempt++) {
+    try {
+      await directory.delete(recursive: true);
+      return;
+    } on FileSystemException {
+      if (attempt == 100) rethrow;
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -62,7 +77,7 @@ void main() {
   tearDown(() async {
     container.dispose();
     await runtime.dispose();
-    await directory.delete(recursive: true);
+    await deleteDirectory(directory);
     globalState.appEnv = previousEnv;
   });
 
