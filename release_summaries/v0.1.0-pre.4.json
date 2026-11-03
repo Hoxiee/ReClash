@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.4",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "The simple dashboard is now the default",
+      "spotlight": {
+        "title": "Simple dashboard by default",
+        "description": "New installs open the simple dashboard, where the traffic card forecasts when your quota runs out.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Traffic forecast",
+          "description": "The traffic card estimates when the quota runs out, from the last seven days of use.",
+          "kind": "speed"
+        },
+        {
+          "title": "Setup in one journey",
+          "description": "Setup walks through profile, coverage, region and summary; skip is available after consent.",
+          "kind": "update"
+        },
+        {
+          "title": "Preview before import",
+          "description": "Link imports show a preview first, and a long press deletes a profile.",
+          "kind": "link"
+        },
+        {
+          "title": "Links wait for consent",
+          "description": "Import, routing and diagnostics links wait for setup and consent, and only the latest is kept.",
+          "kind": "shield"
+        },
+        {
+          "title": "More power button shapes",
+          "description": "Providers can style the power button with more shapes, or let one be picked at random.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Простой дашборд теперь по умолчанию",
+      "spotlight": {
+        "title": "Простой дашборд по умолчанию",
+        "description": "Новые установки открываются на простом дашборде, где карточка трафика прогнозирует, когда закончится квота.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Прогноз трафика",
+          "description": "Карточка трафика оценивает, когда закончится квота, по последним семи дням использования.",
+          "kind": "speed"
+        },
+        {
+          "title": "Настройка одним путём",
+          "description": "Настройка проходит профиль, покрытие, регион и сводку; пропустить можно после согласия.",
+          "kind": "update"
+        },
+        {
+          "title": "Предпросмотр перед импортом",
+          "description": "Ссылки импорта сначала показывают предпросмотр, а долгое нажатие удаляет профиль.",
+          "kind": "link"
+        },
+        {
+          "title": "Ссылки ждут согласия",
+          "description": "Ссылки импорта, маршрутизации и диагностики ждут настройки и согласия; остаётся только последняя.",
+          "kind": "shield"
+        },
+        {
+          "title": "Больше форм кнопки питания",
+          "description": "Провайдер может оформить кнопку питания другими формами или выбрать форму случайно.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
