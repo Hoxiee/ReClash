@@ -6,6 +6,8 @@ import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
 
+import 'environment/healer.dart';
+import 'environment/scanner.dart';
 import 'finding.dart';
 import 'journal.dart';
 import 'kernel.dart';
@@ -14,6 +16,7 @@ import 'probes/clock.dart';
 import 'probes/path.dart';
 import 'probes/scheduler.dart';
 import 'remedies/catalog.dart';
+import 'remedies/environment.dart';
 import 'remedies/remedy.dart';
 import 'rules/rules.dart';
 import 'sensors/sensors.dart';
@@ -45,6 +48,31 @@ final incidentStoreProvider = Provider<IncidentStore>(
   (ref) => const PreferencesIncidentStore(),
 );
 
+List<Remedy> _environmentRemedies(Ref ref) {
+  final config = PatchConfigAccess(
+    read: () => ref.read(patchClashConfigProvider),
+    write: (change) =>
+        ref.read(patchClashConfigProvider.notifier).update(change),
+  );
+  final queue = systemProxyQueue;
+  return [
+    IgnoreSystemHostsRemedy(config),
+    FreePortRemedy(config),
+    FreeTunDeviceRemedy(config),
+    if (system.isDesktop) ...[
+      OpenHostsRemedy(() => ref.read(environmentScannerProvider).openHosts()),
+      RestartTunnelRemedy(
+        () => ref.read(coreActionProvider.notifier).restartCore(silence: true),
+      ),
+    ],
+    if (queue != null) ...[
+      ClearOwnProxyRemedy((port) => queue.clear(ownPort: port)),
+      ClearProxyRemedy(queue.clear),
+      ReapplyProxyRemedy(() => queue.apply(ref.read(proxyStateProvider))),
+    ],
+  ];
+}
+
 final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
   return [
     RuleModeRemedy(ref.read(setupActionProvider.notifier).changeMode),
@@ -59,6 +87,7 @@ final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
           .updateProfile(profile);
       return updated != null;
     }),
+    ..._environmentRemedies(ref),
     if (doctorPlugin case final plugin?) ...[
       VpnPermissionRemedy(plugin.requestVpnPermission),
       for (final (id, target) in const [
@@ -81,7 +110,7 @@ final remedyKindsProvider = Provider<Map<String, FixKind>>(
   },
 );
 
-final diagnosticKernelProvider = Provider<DiagnosticKernel>((ref) {
+final Provider<DiagnosticKernel> diagnosticKernelProvider = Provider((ref) {
   late final DoctorKernel kernel;
   kernel = DoctorKernel(
     engine: const RuleEngine(defaultRules),
@@ -98,6 +127,20 @@ final diagnosticKernelProvider = Provider<DiagnosticKernel>((ref) {
   ref.onDispose(kernel.dispose);
   return kernel;
 });
+
+final environmentHealerProvider = Provider<EnvironmentHealer>((ref) {
+  final healer = EnvironmentHealer(
+    kernel: ref.watch(diagnosticKernelProvider),
+    remedies: ref.read(diagnosticRemediesProvider),
+    enabled: () => ref.read(appSettingProvider).autoHeal,
+  )..start();
+  ref.onDispose(healer.dispose);
+  return healer;
+});
+
+final environmentHealNoticesProvider = StreamProvider<HealNotice>(
+  (ref) => ref.watch(environmentHealerProvider).notices,
+);
 
 final findingsProvider = StreamProvider<List<Finding>>((ref) async* {
   final kernel = ref.watch(diagnosticKernelProvider);

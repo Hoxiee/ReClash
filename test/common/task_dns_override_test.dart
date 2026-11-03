@@ -27,7 +27,7 @@ const _keys = {
   DnsOverrideKey.ipv6,
 };
 
-Future<YamlMap> _dnsOf({
+Future<RealProfile> _profileOf({
   required Map<String, dynamic> rawConfig,
   Dns dns = _dns,
   Set<DnsOverrideKey> keys = _keys,
@@ -47,6 +47,21 @@ Future<YamlMap> _dnsOf({
       addedRules: const [],
       defaultUA: 'ReClash-Test',
     ),
+  );
+  return result;
+}
+
+Future<YamlMap> _dnsOf({
+  required Map<String, dynamic> rawConfig,
+  Dns dns = _dns,
+  Set<DnsOverrideKey> keys = _keys,
+  bool keepEmpty = false,
+}) async {
+  final result = await _profileOf(
+    rawConfig: rawConfig,
+    dns: dns,
+    keys: keys,
+    keepEmpty: keepEmpty,
   );
   final config = loadYaml(result.yaml) as YamlMap;
   return config['dns'] as YamlMap;
@@ -122,5 +137,36 @@ void main() {
     expect(dns['nameserver'], ['9.9.9.9']);
     expect(dns['listen'], '');
     expect(dns['fallback-filter'], {'geoip': false, 'domain': []});
+  });
+
+  group('effective use-system-hosts', () {
+    Future<bool> effective(
+      Map<String, dynamic> dns, {
+      Set<DnsOverrideKey> keys = const {},
+      bool override = true,
+    }) async => (await _profileOf(
+      rawConfig: {'dns': dns},
+      dns: Dns(useSystemHosts: override),
+      keys: keys,
+    )).useSystemHosts;
+
+    test('follows the profile when the override is not set', () async {
+      expect(await effective({'use-system-hosts': false}), isFalse);
+      expect(await effective({'enable': true}), isTrue);
+    });
+
+    test('lets the override win over the profile', () async {
+      const keys = {DnsOverrideKey.useSystemHosts};
+
+      expect(
+        await effective(
+          {'use-system-hosts': true},
+          keys: keys,
+          override: false,
+        ),
+        isFalse,
+      );
+      expect(await effective({'use-system-hosts': false}, keys: keys), isTrue);
+    });
   });
 }

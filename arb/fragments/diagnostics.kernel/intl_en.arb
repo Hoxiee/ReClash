@@ -146,5 +146,132 @@
   "doctorEventPathFailed": "Connection failed",
   "doctorEventPathRecovered": "Connection restored",
   "doctorWhy": "Why?",
-  "doctorExplainTitle": "What went wrong"
+  "doctorExplainTitle": "What went wrong",
+  "doctorCauseHostsOverride": "The system hosts file sends this address elsewhere",
+  "doctorCausePortTaken": "Another program holds a port ReClash needs",
+  "doctorCauseSystemProxyBroken": "The system proxy points to an address that does not answer",
+  "doctorCauseCoreBlocked": "The system or an antivirus blocked the Core",
+  "doctorHostsServerTitle": "The hosts file redirects your subscription",
+  "doctorHostsServerDetail": "The system hosts file overrides {domain} (entries: {count}), so ReClash may not reach your subscription. Tools that unblock sites often add such entries.",
+  "@doctorHostsServerDetail": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorHostsServicesTitle": "The hosts file redirects popular services",
+  "doctorHostsServicesDetail": "The system hosts file overrides {domains} (entries: {count}). Traffic to them can bypass the proxy or go nowhere.",
+  "@doctorHostsServicesDetail": {
+    "placeholders": {
+      "domains": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorHostsLargeTitle": "The hosts file is very large",
+  "doctorHostsLargeDetail": "The system hosts file has {lines} lines. Lists this long come from ad blockers and unblock scripts and slow down name lookups.",
+  "@doctorHostsLargeDetail": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorInterceptorTitle": "Another program intercepts traffic",
+  "doctorInterceptorDetail": "{name} is running and alters network traffic. Together with ReClash it can break connections, so close it while ReClash is on.",
+  "@doctorInterceptorDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorInterceptorUnknownDetail": "A traffic interception driver is loaded. Programs that bypass blocking use one, and together with ReClash it can break connections.",
+  "doctorForeignTunnelTitle": "Another VPN has taken the traffic",
+  "doctorForeignTunnelDetail": "{name} holds the system route, so traffic does not reach the ReClash TUN. Turn the other VPN off, then restart TUN.",
+  "@doctorForeignTunnelDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorTunnelNameTitle": "The TUN adapter name is taken",
+  "doctorTunnelNameDetail": "Another adapter is already called {name}. ReClash can use a different name.",
+  "@doctorTunnelNameDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorDeadProxyTitle": "The system proxy does not answer",
+  "doctorDeadProxyDetail": "The system proxy is set to {address}, but nothing answers there, so browsers and apps lose the internet.",
+  "@doctorDeadProxyDetail": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorProxyTakenTitle": "Another program replaced the system proxy",
+  "doctorProxyTakenDetail": "The system proxy now points to {address} instead of ReClash, so apps go around ReClash.",
+  "@doctorProxyTakenDetail": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorPortTakenTitle": "Port {port} is busy",
+  "@doctorPortTakenTitle": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorPortTakenDetail": "{owner} already uses this port, so the Core cannot open its proxy. ReClash can switch to a free port.",
+  "@doctorPortTakenDetail": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorPortReservedDetail": "Windows has reserved port {port}. ReClash can switch to a free port.",
+  "@doctorPortReservedDetail": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorDeadDnsTitle": "The system DNS does not answer",
+  "doctorDeadDnsDetail": "The system DNS points to a local address where nothing answers, usually left behind by a closed VPN or proxy. Reset DNS in the network adapter settings.",
+  "doctorConfirmForeignTitle": "Change another program's setting?",
+  "doctorConfirmForeignDetail": "This setting was made by another program. After the change, that program may not work as before until you set it up again.",
+  "doctorConfirmForeignAction": "Change",
+  "doctorHealedNotice": "{title} — fixed automatically",
+  "@doctorHealedNotice": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorAutoHeal": "Fix problems automatically",
+  "doctorAutoHealDescription": "Fix problems automatically changes only ReClash's own settings; other programs' settings change only after you confirm.",
+  "doctorProxyOffDetail": "The ReClash system proxy was turned off outside the app, so apps go around ReClash.",
+  "doctorFixConfirm": "Fix…",
+  "@doctorFixConfirm": {
+    "description": "Button for a fix that changes another program's settings; the ellipsis signals that a confirmation follows."
+  }
 }

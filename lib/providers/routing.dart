@@ -15,6 +15,18 @@ import 'state.dart';
 
 part 'generated/routing.g.dart';
 
+/// Whether the applied config lets the Core read the system hosts file, null
+/// until a profile is built.
+final appliedUseSystemHostsProvider =
+    NotifierProvider<AppliedUseSystemHosts, bool?>(AppliedUseSystemHosts.new);
+
+class AppliedUseSystemHosts extends Notifier<bool?> {
+  @override
+  bool? build() => null;
+
+  set value(bool? next) => state = next;
+}
+
 /// Versions of a user profile kept for "restore".
 const rcxProfileHistory = 10;
 

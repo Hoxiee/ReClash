@@ -32,6 +32,9 @@ const (
 	causeAuthRejected failureCause = "authRejected"
 	causeUdpBlocked   failureCause = "udpBlocked"
 	causeNoUpstream   failureCause = "noUpstream"
+	causeTunnelTaken  failureCause = "tunnelTaken"
+	causePortTaken    failureCause = "portTaken"
+	causeCoreBlocked  failureCause = "coreBlocked"
 	causeUnknown      failureCause = "unknown"
 )
 
@@ -50,6 +53,10 @@ var failureMessages = []struct {
 	{"dns resolve failed", causeServerDns},
 	{"no route to host", causeNoUpstream},
 	{"network is unreachable", causeNoUpstream},
+	{"address already in use", causePortTaken},
+	{"only one usage of each socket address", causePortTaken},
+	{"cannot create a file when that file already exists", causeTunnelTaken},
+	{"forbidden by its access permissions", causeCoreBlocked},
 	{"tls:", causeTlsHandshake},
 	{"x509:", causeTlsHandshake},
 }

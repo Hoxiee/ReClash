@@ -47,6 +47,10 @@ func TestClassifyFailure(t *testing.T) {
 		{"dns resolve", errors.New("dns resolve failed: boom"), causeServerDns},
 		{"no route", errors.New("connect: No route to host"), causeNoUpstream},
 		{"unreachable text", errors.New("network is unreachable"), causeNoUpstream},
+		{"port in use", errors.New("listen tcp 127.0.0.1:7890: bind: address already in use"), causePortTaken},
+		{"windows port in use", errors.New("bind: Only one usage of each socket address (protocol/network address/port) is normally permitted."), causePortTaken},
+		{"wintun name taken", errors.New("create wintun adapter: Cannot create a file when that file already exists."), causeTunnelTaken},
+		{"firewall", errors.New("connectex: An attempt was made to access a socket in a way forbidden by its access permissions."), causeCoreBlocked},
 		{"unknown", errors.New("something odd"), causeUnknown},
 	}
 	for _, c := range cases {

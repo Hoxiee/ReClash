@@ -101,6 +101,11 @@ class ApplicationSettings {
       page: ToolPage.application,
       title: (l) => l.logLevel,
     ),
+    SettingSpec(
+      id: 'application.autoHeal',
+      page: ToolPage.application,
+      title: (l) => l.doctorAutoHeal,
+    ),
   ];
 
   static SettingSpec spec(String id) => all.firstWhere((item) => item.id == id);
@@ -214,6 +219,11 @@ class ApplicationSettingView extends ConsumerWidget {
     ];
     final diagnostics = <Widget>[
       _toggle(
+        id: 'application.autoHeal',
+        select: (s) => s.autoHeal,
+        update: (s, v) => s.copyWith(autoHeal: v),
+      ),
+      _toggle(
         id: 'application.openLogs',
         select: (s) => s.openLogs,
         update: (s, v) => s.copyWith(openLogs: v),
@@ -283,7 +293,7 @@ class ApplicationSettingView extends ConsumerWidget {
               generateSection(
                 title: l.logsAndDiagnostics,
                 items: diagnostics,
-                footer: [l.logcatDesc].join('\n'),
+                footer: [l.doctorAutoHealDescription, l.logcatDesc].join('\n'),
               ),
               const ProviderSettingsReturnSection(),
             ],

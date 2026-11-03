@@ -50,6 +50,9 @@ class _FakeRemedy implements Remedy {
   FixKind get kind => FixKind.auto;
 
   @override
+  RemedyReach get reach => RemedyReach.app;
+
+  @override
   bool get undoable => false;
 
   @override

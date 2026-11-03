@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/features/doctor/cause.dart';
 import 'package:reclash/features/doctor/finding.dart';
+import 'package:reclash/features/doctor/environment/scanner.dart';
 import 'package:reclash/features/doctor/journal.dart';
 import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/features/doctor/providers.dart';
@@ -67,8 +68,10 @@ class _DoctorSheetState extends ConsumerState<DoctorSheet> {
     unawaited(ref.read(diagnosticKernelProvider).runPath());
   }
 
-  Future<void> _recheck() =>
-      ref.read(diagnosticKernelProvider).runPath(force: true);
+  Future<void> _recheck() async {
+    unawaited(ref.read(environmentScannerProvider).rescan(deep: true));
+    await ref.read(diagnosticKernelProvider).runPath(force: true);
+  }
 
   @override
   Widget build(BuildContext context) {

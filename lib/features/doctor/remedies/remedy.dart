@@ -7,6 +7,19 @@ import '../snapshot.dart';
 /// The button verb: Fix, Open, How?, or nothing to press.
 enum FixKind { auto, system, guided, none }
 
+/// Whose state a remedy changes, which decides who may run it. Antivirus
+/// heuristics flag apps that silently change other software, so a [foreign]
+/// remedy runs only from a tap the user confirmed, never from a plan.
+enum RemedyReach {
+  /// Our config, caches, profiles, and the Core through its lifecycle owner.
+  app,
+
+  /// System state ReClash itself set and recorded as its own.
+  own,
+
+  foreign,
+}
+
 enum RemedyStatus {
   /// Applied, and the rules no longer raise what it addressed.
   fixed,
@@ -18,6 +31,10 @@ enum RemedyStatus {
   failed,
 
   unavailable,
+
+  /// A foreign remedy asked for without the user's confirmation, or from a
+  /// plan; nothing was changed.
+  needsConfirmation,
 
   undone,
 
@@ -42,6 +59,8 @@ abstract interface class Remedy {
   String get id;
 
   FixKind get kind;
+
+  RemedyReach get reach;
 
   /// The kernel snapshots `Config` before an undoable remedy and restores it
   /// on undo.

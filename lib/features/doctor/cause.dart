@@ -22,6 +22,11 @@ enum FailureCause {
   udpBlocked('udpBlocked'),
   noUpstream('noUpstream'),
   serviceBlocked('serviceBlocked'),
+  hostsOverride('hostsOverride'),
+  trafficIntercepted('trafficIntercepted'),
+  portTaken('portTaken'),
+  systemProxyBroken('systemProxyBroken'),
+  coreBlocked('coreBlocked'),
   unknown('unknown');
 
   const FailureCause(this.id);

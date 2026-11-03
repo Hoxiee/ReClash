@@ -2,11 +2,14 @@ import 'package:riverpod/riverpod.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 
+import '../environment/scanner.dart';
 import '../kernel.dart';
 import '../snapshot.dart';
 import 'device.dart';
+import 'routing.dart';
 
 export 'device.dart';
+export 'routing.dart';
 
 /// A passive source: it subscribes to state that already emits and turns it
 /// into facts. A sensor never polls.
@@ -18,6 +21,8 @@ const List<Sensor> defaultSensors = [
   batteryOptimizationSensor,
   subscriptionSensor,
   deviceSensor,
+  routingSensor,
+  environmentSensor,
 ];
 
 void coreStatusSensor(Ref ref, FactSink sink) {

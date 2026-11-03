@@ -58,6 +58,9 @@ class _FakeRemedy implements Remedy {
   FixKind get kind => FixKind.auto;
 
   @override
+  RemedyReach get reach => RemedyReach.app;
+
+  @override
   Future<void> apply(RemedyRequest request) => _onApply(request);
 }
 

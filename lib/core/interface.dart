@@ -16,6 +16,8 @@ import 'method.dart';
 mixin CoreInterface {
   CoreProcessOwner? get processOwner => null;
 
+  int? get processId => null;
+
   void configurePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,

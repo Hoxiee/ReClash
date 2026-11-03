@@ -53,7 +53,7 @@ class FakeDoctorKernel implements DiagnosticKernel {
       DiagnosticSnapshot(takenAt: DateTime.now());
 
   @override
-  Future<RemedyOutcome> apply(String remedyId) async {
+  Future<RemedyOutcome> apply(String remedyId, {bool confirmed = false}) async {
     applied.add(remedyId);
     return RemedyOutcome(remedyId: remedyId, status: RemedyStatus.fixed);
   }

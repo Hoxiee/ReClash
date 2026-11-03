@@ -57,6 +57,11 @@ String causeText(AppLocalizations l, FailureCause cause) => switch (cause) {
   FailureCause.udpBlocked => l.doctorCauseUdpBlocked,
   FailureCause.noUpstream => l.doctorCauseNoUpstream,
   FailureCause.serviceBlocked => l.doctorCauseServiceBlocked,
+  FailureCause.hostsOverride => l.doctorCauseHostsOverride,
+  FailureCause.trafficIntercepted => l.doctorInterceptorTitle,
+  FailureCause.portTaken => l.doctorCausePortTaken,
+  FailureCause.systemProxyBroken => l.doctorCauseSystemProxyBroken,
+  FailureCause.coreBlocked => l.doctorCauseCoreBlocked,
   FailureCause.unknown => l.doctorCauseUnknown,
 };
 

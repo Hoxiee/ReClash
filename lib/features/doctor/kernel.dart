@@ -47,10 +47,13 @@ abstract interface class DiagnosticKernel {
   /// snapshot.
   Future<T> probe<T extends Object>(ProbeRequest<T> request);
 
-  Future<RemedyOutcome> apply(String remedyId);
+  /// A [RemedyReach.foreign] remedy runs only when [confirmed]: the user
+  /// tapped it after a dialog naming what changes.
+  Future<RemedyOutcome> apply(String remedyId, {bool confirmed = false});
 
   Future<RemedyOutcome> undo(String remedyId);
 
+  /// Never runs a foreign remedy, whatever the plan lists.
   Future<PlanOutcome> heal(HealPlan plan);
 
   /// The latest path of any scope, running or finished.
@@ -87,8 +90,10 @@ const _causeRemedies = <FailureCause, List<String>>{
   FailureCause.trafficExhausted: ['profile.update'],
   FailureCause.clockSkew: ['device.openDateSettings'],
   FailureCause.tunnelDenied: ['device.requestVpnPermission'],
-  FailureCause.tunnelTaken: ['device.openVpnSettings'],
+  FailureCause.tunnelTaken: ['device.openVpnSettings', 'tunnel.restart'],
   FailureCause.captivePortal: ['network.openCaptivePortal'],
+  FailureCause.hostsOverride: ['dns.ignoreSystemHosts'],
+  FailureCause.portTaken: ['config.freePort'],
 };
 
 FailureCause failureCauseOf(Object error) => switch (error) {
@@ -308,12 +313,18 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
   }
 
   @override
-  Future<RemedyOutcome> apply(String remedyId) async {
+  Future<RemedyOutcome> apply(String remedyId, {bool confirmed = false}) async {
     final remedy = _remedies[remedyId];
     if (remedy == null) {
       return RemedyOutcome(
         remedyId: remedyId,
         status: RemedyStatus.unavailable,
+      );
+    }
+    if (remedy.reach == RemedyReach.foreign && !confirmed) {
+      return RemedyOutcome(
+        remedyId: remedyId,
+        status: RemedyStatus.needsConfirmation,
       );
     }
     await settle();

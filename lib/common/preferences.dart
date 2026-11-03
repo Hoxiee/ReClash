@@ -87,6 +87,25 @@ class Preferences {
     await store?.setStringList('doctor.incidents', incidents);
   }
 
+  Future<int?> getOwnProxyPort() async {
+    try {
+      final store = await _store.value;
+      return store?.getInt('proxy.ownPort');
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> saveOwnProxyPort(int? port) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    if (port == null) {
+      await store?.remove('proxy.ownPort');
+    } else {
+      await store?.setInt('proxy.ownPort', port);
+    }
+  }
+
   Future<int> getVersion() => _readVersionMarker('version');
 
   Future<void> setVersion(int version) async {

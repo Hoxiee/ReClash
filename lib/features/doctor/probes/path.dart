@@ -16,6 +16,7 @@ import '../cause.dart';
 import '../kernel.dart';
 import '../path.dart';
 import '../rules/device.dart';
+import '../rules/environment.dart';
 import '../rules/profile.dart';
 import '../snapshot.dart';
 import 'clock.dart';
@@ -175,6 +176,15 @@ bool _connected(Ref ref) =>
 T? _device<T extends Object>(DiagnosticKernel kernel, FactKey<T> key) =>
     kernel.snapshot.at(DateTime.now()).valueOf(key);
 
+bool _hostsOverrideActive(DiagnosticKernel kernel) =>
+    _device(kernel, Facts.useSystemHosts) != false &&
+    (_device(kernel, Facts.hosts)?.entries.any(
+          (entry) =>
+              entry.role == DomainRole.subscription ||
+              entry.role == DomainRole.test,
+        ) ??
+        false);
+
 String _signed(Duration skew) =>
     '${skew.isNegative ? '−' : '+'}${skew.inSeconds.abs()} s';
 
@@ -242,8 +252,18 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
         if (_device(kernel, Facts.vpnPermission) == VpnPermission.revoked) {
           return const StepCheck.fail(FailureCause.tunnelDenied);
         }
-        return _device(kernel, Facts.otherVpn) == true
-            ? const StepCheck.fail(FailureCause.tunnelTaken)
+        if (_device(kernel, Facts.otherVpn) == true) {
+          return const StepCheck.fail(FailureCause.tunnelTaken);
+        }
+        final holder = _device(
+          kernel,
+          Facts.tunnels,
+        )?.foreign.where((adapter) => adapter.defaultRoute).firstOrNull;
+        return holder != null && _device(kernel, Facts.tunEnabled) == true
+            ? StepCheck.fail(
+                FailureCause.tunnelTaken,
+                detail: adapterLabel(holder),
+              )
             : const StepCheck.fail(null);
       },
     ),
@@ -255,7 +275,12 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
         final reach = await _reach(ref, kernel);
         if (reach == null) return const StepCheck.unknown();
         if (reach.stage == 'dns') {
-          return StepCheck.fail(FailureCause.dnsFailed, detail: reach.message);
+          return StepCheck.fail(
+            _hostsOverrideActive(kernel)
+                ? FailureCause.hostsOverride
+                : FailureCause.dnsFailed,
+            detail: reach.message,
+          );
         }
         return _device(kernel, Facts.privateDns) == PrivateDnsMode.strict
             ? StepCheck.pass(

@@ -13,6 +13,7 @@ typedef BuiltProfile = ({
   String yaml,
   String md5,
   ConfigCounts counts,
+  bool useSystemHosts,
   SetupBase? base,
   String webDashboardDirectory,
 });
@@ -38,6 +39,8 @@ class _RunRequest {
 @Riverpod(keepAlive: true)
 class SetupAction extends _$SetupAction {
   CoreController get _core => ref.read(coreHandlerProvider);
+  AppliedUseSystemHosts get _appliedUseSystemHosts =>
+      ref.read(appliedUseSystemHostsProvider.notifier);
 
   Timer? _runtimeTimer;
   final _setupScheduler = SerialTaskScheduler();
@@ -728,6 +731,7 @@ class SetupAction extends _$SetupAction {
         yaml: '',
         md5: '',
         counts: configCountsOf(const {}),
+        useSystemHosts: true,
         base: null,
         webDashboardDirectory: '',
       );
@@ -817,6 +821,7 @@ class SetupAction extends _$SetupAction {
         yaml: res.yaml,
         md5: res.md5,
         counts: res.counts,
+        useSystemHosts: res.useSystemHosts,
         base: null,
         webDashboardDirectory: webDashboardDirectory,
       );
@@ -830,6 +835,7 @@ class SetupAction extends _$SetupAction {
         proxies: res.counts.proxies + base.proxies,
         rules: res.counts.rules + base.rules,
       ),
+      useSystemHosts: res.useSystemHosts,
       base: SetupBase(path: path, overlay: res.yaml),
       webDashboardDirectory: webDashboardDirectory,
     );
@@ -1143,6 +1149,7 @@ class SetupAction extends _$SetupAction {
         ref.read(providerPolicyProvider) == null) {
       _appliedInputs = inputs;
       globalState.lastConfigCounts = realProfile.counts;
+      _appliedUseSystemHosts.value = realProfile.useSystemHosts;
       await preloadInvoke?.call();
       _appliedWebDashboardDirectory = realProfile.webDashboardDirectory;
       return _SetupTaskResult.completed;
@@ -1153,6 +1160,7 @@ class SetupAction extends _$SetupAction {
     _appliedWebDashboardDirectory = '';
     globalState.lastConfigMd5 = null;
     globalState.lastConfigCounts = null;
+    _appliedUseSystemHosts.value = null;
     if (system.isAndroid) {
       await ref.read(vpnOptionsProvider.future);
       await preferences.saveShareState(ref.read(sharedStateProvider));
@@ -1208,6 +1216,7 @@ class SetupAction extends _$SetupAction {
       globalState.lastConfigMd5 = yamlMd5;
       globalState.lastConfigCounts =
           realProfile?.counts ?? configCountsOf(const {});
+      _appliedUseSystemHosts.value = realProfile?.useSystemHosts;
       _appliedInputs = inputs;
       if (system.isAndroid) {
         await preferences.saveAppliedConfigMd5(yamlMd5);

@@ -14,6 +14,9 @@ class RuleModeRemedy implements Remedy {
   FixKind get kind => FixKind.auto;
 
   @override
+  RemedyReach get reach => RemedyReach.app;
+
+  @override
   bool get undoable => true;
 
   @override
@@ -33,6 +36,9 @@ class BatteryExemptionRemedy implements Remedy {
 
   @override
   FixKind get kind => FixKind.system;
+
+  @override
+  RemedyReach get reach => RemedyReach.app;
 
   @override
   bool get undoable => false;
@@ -57,6 +63,9 @@ class UpdateSubscriptionRemedy implements Remedy {
 
   @override
   FixKind get kind => FixKind.auto;
+
+  @override
+  RemedyReach get reach => RemedyReach.app;
 
   @override
   bool get undoable => false;
@@ -91,6 +100,9 @@ class SystemScreenRemedy implements Remedy {
   FixKind get kind => FixKind.system;
 
   @override
+  RemedyReach get reach => RemedyReach.app;
+
+  @override
   bool get undoable => false;
 
   @override
@@ -112,6 +124,9 @@ class VpnPermissionRemedy implements Remedy {
 
   @override
   FixKind get kind => FixKind.system;
+
+  @override
+  RemedyReach get reach => RemedyReach.app;
 
   @override
   bool get undoable => false;

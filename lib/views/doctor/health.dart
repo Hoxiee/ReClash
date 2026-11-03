@@ -28,10 +28,14 @@ Future<void> fixEverything(
   List<Finding> findings,
 ) async {
   final kinds = ref.read(remedyKindsProvider);
+  final foreign = {
+    for (final remedy in ref.read(diagnosticRemediesProvider))
+      if (remedy.reach == RemedyReach.foreign) remedy.id,
+  };
   final targets = {
     for (final finding in findings)
       if (availableRemedy(kinds, finding.remedyIds) case final id?
-          when kinds[id] == FixKind.auto)
+          when kinds[id] == FixKind.auto && !foreign.contains(id))
         id: finding.id,
   };
   final kernel = ref.read(diagnosticKernelProvider);

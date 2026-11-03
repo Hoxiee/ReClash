@@ -25,6 +25,18 @@ String findingTitle(AppLocalizations l, Finding finding) =>
       'doctorAlwaysOnOffTitle' => l.doctorAlwaysOnOffTitle,
       'doctorPrivateDnsTitle' => l.doctorPrivateDnsTitle,
       'doctorCauseCaptivePortal' => l.doctorCauseCaptivePortal,
+      'doctorHostsServerTitle' => l.doctorHostsServerTitle,
+      'doctorHostsServicesTitle' => l.doctorHostsServicesTitle,
+      'doctorHostsLargeTitle' => l.doctorHostsLargeTitle,
+      'doctorInterceptorTitle' => l.doctorInterceptorTitle,
+      'doctorForeignTunnelTitle' => l.doctorForeignTunnelTitle,
+      'doctorTunnelNameTitle' => l.doctorTunnelNameTitle,
+      'doctorDeadProxyTitle' => l.doctorDeadProxyTitle,
+      'doctorProxyTakenTitle' => l.doctorProxyTakenTitle,
+      'doctorPortTakenTitle' => l.doctorPortTakenTitle(
+        finding.args['port'] as int? ?? 0,
+      ),
+      'doctorDeadDnsTitle' => l.doctorDeadDnsTitle,
       _ => finding.titleKey,
     };
 
@@ -48,6 +60,41 @@ String findingDetail(AppLocalizations l, Finding finding) {
       args['host'] as String? ?? '',
     ),
     'doctorCaptivePortalDetail' => l.doctorCaptivePortalDetail,
+    'doctorHostsServerDetail' => l.doctorHostsServerDetail(
+      args['domain'] as String? ?? '',
+      args['count'] as int? ?? 0,
+    ),
+    'doctorHostsServicesDetail' => l.doctorHostsServicesDetail(
+      args['domains'] as String? ?? '',
+      args['count'] as int? ?? 0,
+    ),
+    'doctorHostsLargeDetail' => l.doctorHostsLargeDetail(
+      args['lines'] as int? ?? 0,
+    ),
+    'doctorInterceptorDetail' => l.doctorInterceptorDetail(
+      args['name'] as String? ?? '',
+    ),
+    'doctorInterceptorUnknownDetail' => l.doctorInterceptorUnknownDetail,
+    'doctorForeignTunnelDetail' => l.doctorForeignTunnelDetail(
+      args['name'] as String? ?? '',
+    ),
+    'doctorTunnelNameDetail' => l.doctorTunnelNameDetail(
+      args['name'] as String? ?? '',
+    ),
+    'doctorDeadProxyDetail' => l.doctorDeadProxyDetail(
+      args['address'] as String? ?? '',
+    ),
+    'doctorProxyOffDetail' => l.doctorProxyOffDetail,
+    'doctorProxyTakenDetail' => l.doctorProxyTakenDetail(
+      args['address'] as String? ?? '',
+    ),
+    'doctorPortTakenDetail' => l.doctorPortTakenDetail(
+      args['owner'] as String? ?? '',
+    ),
+    'doctorPortReservedDetail' => l.doctorPortReservedDetail(
+      args['port'] as int? ?? 0,
+    ),
+    'doctorDeadDnsDetail' => l.doctorDeadDnsDetail,
     _ => finding.detailKey,
   };
 }
@@ -72,8 +119,16 @@ String? availableRemedy(Map<String, FixKind> kinds, List<String> remedyIds) =>
         .where((id) => kinds[id] != null && kinds[id] != FixKind.none)
         .firstOrNull;
 
-String fixVerb(AppLocalizations l, FixKind kind) =>
-    kind == FixKind.auto ? l.doctorFix : l.doctorOpen;
+/// A foreign fix ends in an ellipsis, since a confirmation comes first.
+String fixVerb(AppLocalizations l, FixKind kind, {bool foreign = false}) =>
+    switch (kind) {
+      FixKind.auto => foreign ? l.doctorFixConfirm : l.doctorFix,
+      _ => l.doctorOpen,
+    };
+
+bool isForeignRemedy(WidgetRef ref, String remedyId) => ref
+    .read(diagnosticRemediesProvider)
+    .any((r) => r.id == remedyId && r.reach == RemedyReach.foreign);
 
 /// Applies [remedyId] and says how it went; an undoable fix offers Undo.
 Future<RemedyOutcome> applyRemedy(
@@ -82,7 +137,16 @@ Future<RemedyOutcome> applyRemedy(
   String remedyId,
 ) async {
   final kernel = ref.read(diagnosticKernelProvider);
-  final outcome = await kernel.apply(remedyId);
+  var outcome = isForeignRemedy(ref, remedyId)
+      ? RemedyOutcome(
+          remedyId: remedyId,
+          status: RemedyStatus.needsConfirmation,
+        )
+      : await kernel.apply(remedyId);
+  if (outcome.status == RemedyStatus.needsConfirmation) {
+    if (!context.mounted || !await _confirmForeign(context)) return outcome;
+    outcome = await kernel.apply(remedyId, confirmed: true);
+  }
   if (!context.mounted) return outcome;
   final l = context.appLocalizations;
   switch (outcome.status) {
@@ -102,6 +166,17 @@ Future<RemedyOutcome> applyRemedy(
     default:
   }
   return outcome;
+}
+
+Future<bool> _confirmForeign(BuildContext context) async {
+  final l = context.appLocalizations;
+  final confirmed = await dialogs.showMessage(
+    context: context,
+    title: l.doctorConfirmForeignTitle,
+    message: TextSpan(text: l.doctorConfirmForeignDetail),
+    confirmText: l.doctorConfirmForeignAction,
+  );
+  return confirmed ?? false;
 }
 
 /// The button of one finding, verb by its remedy's kind; it stays pressed
@@ -144,7 +219,13 @@ class _FindingFixButtonState extends ConsumerState<FindingFixButton> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final label = Text(
-      _failed ? l.doctorDidntHelp : fixVerb(l, widget.kind),
+      _failed
+          ? l.doctorDidntHelp
+          : fixVerb(
+              l,
+              widget.kind,
+              foreign: isForeignRemedy(ref, widget.remedyId),
+            ),
       maxLines: 1,
     );
     final onPressed = _busy ? null : () => unawaited(_apply());

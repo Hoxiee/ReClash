@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/doctor.dart';
 
+import 'environment/facts.dart';
+
+export 'environment/facts.dart';
+
 /// Names one fact and the type of its value. Values cross into the rules
 /// isolate, so they must be plain data: no closures, handles or providers.
 @immutable
@@ -75,6 +79,24 @@ abstract final class Facts {
   static const privateDns = FactKey<PrivateDnsMode>('device.privateDns');
   static const privateDnsHost = FactKey<String>('device.privateDnsHost');
   static const captivePortal = FactKey<bool>('network.captivePortal');
+
+  static const hosts = FactKey<HostsFact>('system.hosts');
+  static const software = FactKey<SoftwareFact>('system.software');
+  static const tunnels = FactKey<TunnelsFact>('network.tunnels');
+  static const systemProxy = FactKey<SystemProxyFact>('network.systemProxy');
+  static const ports = FactKey<List<PortFact>>('network.ports');
+  static const systemDns = FactKey<SystemDnsFact>('network.systemDns');
+
+  /// Whether the Core reads the system `hosts`, after profile and overrides.
+  static const useSystemHosts = FactKey<bool>('config.useSystemHosts');
+  static const tunEnabled = FactKey<bool>('config.tun');
+  static const tunDevice = FactKey<String>('config.tunDevice');
+  static const systemProxyWanted = FactKey<bool>('config.systemProxy');
+  static const mixedPort = FactKey<int>('config.mixedPort');
+
+  /// The port of a system proxy ReClash applied and has not removed yet,
+  /// persisted, so it survives a crash; absent when none is ours.
+  static const ownProxyPort = FactKey<int>('network.ownProxyPort');
 }
 
 /// The immutable merge of every current fact. A missing fact means the kernel

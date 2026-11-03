@@ -116,6 +116,13 @@ class CoreService extends CoreHandlerInterface {
   };
 
   @override
+  int? get processId => switch (_lifecycle.state) {
+    DesktopCoreRunning(:final session) => session.pid,
+    DesktopCoreStopping(:final session) => session.pid,
+    _ => null,
+  };
+
+  @override
   void configurePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,

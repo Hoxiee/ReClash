@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:reclash/features/doctor/environment/scanner.dart';
 import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
@@ -116,6 +117,7 @@ void main() {
     final next = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
+        environmentReaderProvider.overrideWithValue(null),
         providerHintsProvider.overrideWithValue(hints),
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
         if (profile != null) currentProfileProvider.overrideWithValue(profile),

@@ -59,6 +59,8 @@ class CoreController {
 
   CoreProcessOwner? get processOwner => _interface.processOwner;
 
+  int? get processId => _interface.processId;
+
   void configurePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,
