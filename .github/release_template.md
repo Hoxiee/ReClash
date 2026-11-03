@@ -15,4 +15,4 @@
 
 <sub>Every release ships `SHA256SUMS` for verification. Pre-release builds are for testing and may be unstable — only assets attached to releases in this repository are official ReClash builds.</sub>
 
-See the complete [changelog](https://github.com/Hoxiee/ReClash/blob/main/CHANGELOG.md).
+See the complete [changelog](https://github.com/Hoxiee/ReClash/blob/vVERSION/CHANGELOG.md).

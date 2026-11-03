@@ -253,7 +253,7 @@ block checkout; standard git-lfs filters are allowed with smudge downloads disab
 
 Normalization preserves modes, binaries, symlinks and upstream gitlink semantics. It may rename `core/Clash.Meta` to
 `core/mihomo`, but never substitutes our engine fork/branch/SHA. Core source changes require review even on clean merges.
-Ownership policy restores our `CHANGELOG.md`, `changelog.json` and only the `pubspec.yaml` version field, not dependencies.
+Ownership policy restores our `CHANGELOG.md` and only the `pubspec.yaml` version field, not dependencies.
 Do not blanket-keep upstream manifests/workflows or invent branding replacements to hide behavioral changes.
 
 For an approved recipe change, first use the exact accepted `Upstream-Commit`, inspect with the new recipe, then:

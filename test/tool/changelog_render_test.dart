@@ -1,344 +1,134 @@
 import 'package:reclash/common/update_summary.dart';
 import 'package:test/test.dart';
 
-import '../../tool/src/changelog/builder.dart';
-import '../../tool/src/changelog/models.dart';
+import '../../tool/src/changelog/git.dart';
+import '../../tool/src/changelog/notes.dart';
 import '../../tool/src/changelog/render.dart';
 
-ChangelogVersion version({
-  String tag = 'v0.8.96',
-  String date = '2026-08-16',
-  bool prerelease = false,
-  List<ChangelogGroup> groups = const [],
-}) => ChangelogVersion(
-  version: tag.substring(1),
-  tag: tag,
-  date: date,
-  prerelease: prerelease,
-  groups: groups,
-);
+const validNotes = '''
+A short lead paragraph.
 
-ChangelogGroup entryGroup(
-  ChangelogType type,
-  List<(String, String?, String)> entries,
-) => ChangelogGroup(
-  type: type,
-  entries: [
-    for (final (id, scope, text) in entries)
-      ChangelogEntry(id: id, scope: scope, text: text),
-  ],
+### New
+
+- **Forecast**: estimates when the quota runs out, based on recent
+  daily usage.
+
+### Fixed
+
+- Reject malformed links.
+''';
+
+ReleaseNotes notes(String tag, [String body = validNotes]) =>
+    ReleaseNotes(tag: VersionTag.tryParse(tag)!, body: body.trim());
+
+ReleaseSummary summary({
+  String tag = 'v0.8.96',
+  List<ReleaseHighlight> highlights = const [],
+  List<ReleaseHighlight> warnings = const [],
+  String headline = 'An authored release',
+}) => ReleaseSummary(
+  tag: tag,
+  locales: {
+    'en': ReleaseSummaryLocale(
+      headline: headline,
+      spotlight: const ReleaseHighlight(
+        title: 'Spotlight',
+        description: 'Spotlight text.',
+      ),
+      highlights: highlights,
+      warnings: warnings,
+    ),
+  },
 );
 
 void main() {
-  group('renderMarkdown', () {
-    test('renders versions, groups and the frozen marker', () {
-      final markdown = renderMarkdown(
-        Changelog(
-          versions: [
-            version(
-              groups: [
-                entryGroup(ChangelogType.breaking, [
-                  ('af20769', 'lib', 'Backups need re-import'),
-                ]),
-                entryGroup(ChangelogType.feat, [
-                  ('1a2b3c4', 'profiles', 'Per-profile override scripts'),
-                  ('2b3c4d5', null, 'Scopeless entry'),
-                ]),
-              ],
-            ),
-          ],
-        ),
-      );
-
-      expect(markdown, startsWith('# Changelog\n'));
-      expect(markdown, contains('## v0.8.96 (2026-08-16)'));
-      expect(markdown, contains('**Breaking Changes**'));
-      expect(markdown, contains('- **lib** Backups need re-import (af20769)'));
-      expect(markdown, contains('- Scopeless entry (2b3c4d5)'));
-      expect(markdown, contains(changelogFrozenMarker));
-      expect(markdown.indexOf('**Features**'), greaterThan(0));
-      expect(markdown, isNot(contains('### ')));
-    });
-  });
-
-  group('mergeMarkdown', () {
-    const legacy = '## v0.8.95\n\n- Optimize core service\n';
-
-    test('keeps a legacy file below the frozen marker', () {
-      final merged = mergeMarkdown(
-        renderMarkdown(const Changelog(versions: [])),
-        legacy,
-      );
-
-      expect(merged, contains(changelogFrozenMarker));
-      expect(merged, endsWith(legacy));
-      expect(
-        merged.indexOf(legacy),
-        greaterThan(merged.indexOf(changelogFrozenMarker)),
-      );
+  group('validateReleaseNotes', () {
+    test('accepts a lead paragraph and ordered sections', () {
+      expect(validateReleaseNotes(validNotes), isEmpty);
     });
 
-    test('is idempotent once the marker exists', () {
-      final rendered = renderMarkdown(const Changelog(versions: []));
-      final once = mergeMarkdown(rendered, legacy);
-      final twice = mergeMarkdown(rendered, once);
-
-      expect(twice, once);
-    });
-
-    test('replaces only the generated head on a rerun', () {
-      final first = mergeMarkdown(
-        renderMarkdown(const Changelog(versions: [])),
-        legacy,
-      );
-      final second = mergeMarkdown(
-        renderMarkdown(
-          Changelog(
-            versions: [
-              version(
-                groups: [
-                  entryGroup(ChangelogType.fix, [
-                    ('5d6e7f8', 'windows', 'Fix TUN'),
-                  ]),
-                ],
-              ),
-            ],
-          ),
-        ),
-        first,
-      );
-
-      expect(second, contains('- **windows** Fix TUN (5d6e7f8)'));
-      expect(second, endsWith(legacy));
-    });
-  });
-
-  group('markdownHead', () {
-    test('survives a reworded frozen note', () {
-      const rendered =
-          '# Changelog\n\n$changelogFrozenMarker\n<!-- an older wording -->\n\n';
-      final merged = mergeMarkdown(rendered, '## v0.8.95\n\n- Old\n');
-
-      expect(merged, isNot(contains('an older wording\n<!--')));
-      expect(merged.split('<!--').length - 1, 2);
-      expect(merged, endsWith('- Old\n'));
-    });
-
-    test('cuts at the frozen note', () {
-      final rendered = renderMarkdown(const Changelog(versions: []));
-      final merged = mergeMarkdown(rendered, '## v0.8.95\n\n- Old\n');
-
-      expect(markdownHead(merged), rendered.trimRight());
-      expect(markdownHead(merged), isNot(contains('Old')));
-    });
+    final invalid = <String, String>{
+      'empty notes': '  \n',
+      'a level two heading': '## New\n\n- One\n',
+      'an unknown section': '### Other\n\n- One\n',
+      'sections out of order': '### Fixed\n\n- One\n\n### New\n\n- Two\n',
+      'a repeated section': '### New\n\n- One\n\n### New\n\n- Two\n',
+      'a section without bullets': '### New\n\n### Fixed\n\n- One\n',
+      'a bullet before any heading': '- One\n\n### New\n\n- Two\n',
+      'prose inside a section': '### New\n\n- One\nplain prose\n',
+      'a comment opener': '### New\n\n- One <!-- hidden\n',
+      'a comment closer': '### New\n\n- One --> hidden\n',
+      'a commit hash': '### New\n\n- One (abc1234)\n',
+      'no section at all': 'Only a lead paragraph.\n',
+    };
+    for (final MapEntry(:key, :value) in invalid.entries) {
+      test('rejects $key', () {
+        expect(validateReleaseNotes(value), isNotEmpty);
+      });
+    }
   });
 
   group('renderRelease', () {
-    const summary = ReleaseSummary(
-      tag: 'v0.8.96',
-      locales: {
-        'en': ReleaseSummaryLocale(
-          headline: 'An authored release',
-          spotlight: ReleaseHighlight(
-            title: 'A --> B',
-            description: 'Written independently of the changelog.',
-          ),
-        ),
-      },
-    );
+    test('wraps the notes between the release markers', () {
+      final body = renderRelease(notes('v0.8.96', '### Fixed\n\n- One.'));
 
-    test('keeps the full changelog alongside an authored summary', () {
-      final release = version(
-        groups: [
-          entryGroup(ChangelogType.breaking, [
-            ('af20769', 'lib', 'Backups need re-import'),
-          ]),
-        ],
-      );
-      final without = renderRelease(release);
-      final withSummary = renderRelease(release, summary: summary);
-      expect(without, isNot(contains(releaseSummaryMarker)));
-      expect(withSummary, contains('**An authored release**'));
-      expect(
-        withSummary.split(releaseEndMarker).first,
-        isNot(contains('Backups need re-import')),
-      );
-      expect(
-        decodeChangelog(
-          _payloadOf(withSummary),
-        ).versions.single.groups.single.entries.single.text,
-        'Backups need re-import',
-      );
-      expect(
-        parseReleaseSummary(
-          withSummary,
-          tag: release.tag,
-        )?.locales['en']?.spotlight.title,
-        'A --> B',
-      );
-      final start =
-          withSummary.indexOf(releaseSummaryMarker) +
-          releaseSummaryMarker.length;
-      final end = withSummary.indexOf('-->', start);
-      final payload = withSummary.substring(start, end);
-      expect(payload, isNot(contains('-->')));
-      expect(
-        payload,
-        contains(String.fromCharCodes([92, 117, 48, 48, 51, 101])),
-      );
-      expect(withSummary.substring(end), '-->\n');
+      expect(body, startsWith('$releaseBeginMarker\n### Fixed\n\n- One.\n\n'));
+      expect(body, contains('$releaseEndMarker\n'));
     });
 
-    test('lists the authored highlights on the page, not the commit list', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            entryGroup(ChangelogType.feat, [
-              ('1a2b3c4', 'profiles', 'Scripts'),
-            ]),
-          ],
-        ),
-        summary: const ReleaseSummary(
-          tag: 'v0.8.96',
-          locales: {
-            'en': ReleaseSummaryLocale(
-              headline: 'An authored release',
-              spotlight: ReleaseHighlight(
-                title: 'Spotlight',
-                description: 'Spotlight text.',
-              ),
-              highlights: [
-                ReleaseHighlight(
-                  title: 'Faster sync',
-                  description: 'Sync finishes sooner.',
-                ),
-              ],
-            ),
-          },
+    test('joins continuation lines into their bullet', () {
+      final body = renderRelease(notes('v0.8.96'));
+
+      expect(
+        body,
+        contains(
+          '- **Forecast**: estimates when the quota runs out, based on recent '
+          'daily usage.\n',
         ),
       );
-      final page = body.split(releaseEndMarker).first;
-      expect(page, contains('- **Faster sync**: Sync finishes sooner.'));
-      expect(page, isNot(contains('Scripts')));
+      expect(body, isNot(contains('\n  daily')));
+    });
+
+    test('appends a summary the app can parse back', () {
+      final authored = summary(
+        highlights: const [
+          ReleaseHighlight(title: 'Faster', description: 'Sync is quicker.'),
+        ],
+      );
+      final body = renderRelease(notes('v0.8.96'), summary: authored);
+
+      final parsed = parseReleaseSummary(body, tag: 'v0.8.96');
+      expect(parsed?.locales['en']?.headline, 'An authored release');
+      expect(parsed?.locales['en']?.highlights.single.title, 'Faster');
+      expect(body, isNot(contains('reclash:changelog:json')));
     });
 
     test('refuses a summary authored for another tag', () {
       expect(
-        () => renderRelease(version(tag: 'v0.8.97'), summary: summary),
+        () => renderRelease(notes('v0.8.97'), summary: summary()),
         throwsFormatException,
-      );
-    });
-
-    test('wraps entries in the app readable markers', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            entryGroup(ChangelogType.feat, [
-              ('1a2b3c4', 'profiles', 'Scripts'),
-            ]),
-          ],
-        ),
-      );
-
-      expect(body, startsWith(releaseBeginMarker));
-      expect(body, contains(releaseEndMarker));
-      expect(body, contains('- **profiles** Scripts'));
-    });
-
-    test('escapes the characters the caption parse mode would read', () {
-      final text = renderTelegram(
-        version(
-          groups: [
-            entryGroup(ChangelogType.fix, [
-              ('5d6e7f8', 'core', 'Reject <script> & "quoted" input'),
-            ]),
-          ],
-        ),
-        moreUrl: 'https://example.com',
-      );
-
-      expect(
-        text,
-        '<b>Bug Fixes</b>\n• Reject &lt;script&gt; &amp; "quoted" input',
-      );
-    });
-
-    test('says so when a version has no user facing changes', () {
-      expect(renderRelease(version()), contains(emptyVersionNote));
-    });
-
-    test('carries the translated payload the app reads', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            const ChangelogGroup(
-              type: ChangelogType.feat,
-              entries: [ChangelogEntry(id: '1a2b3c4', text: 'Scripts')],
-            ),
-          ],
-        ),
-      );
-
-      final payload = _payloadOf(body);
-      final decoded = decodeChangelog(payload);
-      expect(decoded.versions.single.tag, 'v0.8.96');
-      expect(
-        decoded.versions.single.groups.single.entries.single.text,
-        'Scripts',
-      );
-      expect(body.trimRight(), endsWith(releaseJsonEndMarker));
-    });
-
-    test('escapes > so an entry cannot close the comment early', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            entryGroup(ChangelogType.fix, [
-              ('1a2b3c4', null, 'Handle a --> sequence'),
-            ]),
-          ],
-        ),
-      );
-
-      final payload = _payloadOf(body);
-      expect(payload, isNot(contains(releaseJsonEndMarker)));
-      expect(
-        decodeChangelog(
-          payload,
-        ).versions.single.groups.single.entries.single.text,
-        'Handle a --> sequence',
       );
     });
   });
 
   group('renderTelegram', () {
-    test('uses the app overview and preserves release warnings', () {
-      final summary = ReleaseSummary.fromJson({
-        'schemaVersion': 1,
-        'tag': 'v0.8.96',
-        'automaticInstall': false,
-        'locales': {
-          'en': {
-            'headline': 'A clearer & safer release',
-            'spotlight': {
-              'title': 'Auto-routing',
-              'description': 'Profiles choose routes.',
-            },
-            'highlights': [
-              {'title': 'New navigation', 'description': 'New transitions.'},
-            ],
-            'warnings': [
-              {
-                'title': 'Reinstall',
-                'description': 'Do not update old builds.',
-              },
-            ],
-          },
-        },
-      });
-      final text = renderTelegram(version(), summary: summary);
-      expect(text, contains('<b>A clearer &amp; safer release</b>'));
-      expect(text, contains('Profiles choose routes.'));
+    test('formats the headline, spotlight, highlights and warnings', () {
+      final text = renderTelegram(
+        summary(
+          highlights: const [
+            ReleaseHighlight(title: 'New navigation', description: 'Moves.'),
+          ],
+          warnings: const [
+            ReleaseHighlight(
+              title: 'Reinstall',
+              description: 'Do not update old builds.',
+            ),
+          ],
+        ),
+      );
+
+      expect(text, startsWith('<b>An authored release</b>\n'));
+      expect(text, contains('<b>Spotlight</b>\nSpotlight text.'));
       expect(text, contains('• New navigation'));
       expect(
         text,
@@ -347,125 +137,63 @@ void main() {
           'Do not update old builds.</blockquote>',
         ),
       );
-      expect(text, isNot(contains(emptyVersionNote)));
-      expect(
-        () => renderTelegram(version(tag: 'v0.8.97'), summary: summary),
-        throwsFormatException,
-      );
     });
 
-    test('renders bullets without markdown scopes', () {
-      final text = renderTelegram(
-        version(
-          groups: [
-            entryGroup(ChangelogType.fix, [('5d6e7f8', 'windows', 'Fix TUN')]),
-          ],
-        ),
-        moreUrl: 'https://example.com',
-      );
+    test('escapes ampersands and angle brackets', () {
+      final text = renderTelegram(summary(headline: 'Fix <script> & more'));
 
-      expect(text, '<b>Bug Fixes</b>\n• Fix TUN');
+      expect(text, contains('<b>Fix &lt;script&gt; &amp; more</b>'));
     });
 
-    test('says so when a version has no user facing changes', () {
-      expect(
-        renderTelegram(version(), moreUrl: 'https://example.com'),
-        '• $emptyVersionNote',
-      );
-    });
-
-    ChangelogVersion longVersion() => version(
-      groups: [
-        entryGroup(ChangelogType.feat, [
-          for (var index = 0; index < 200; index++)
-            ('hash$index', null, 'A reasonably long changelog entry & more'),
-        ]),
-      ],
-    );
-
-    test('truncates past the caption limit and links out', () {
-      final text = renderTelegram(
-        longVersion(),
-        moreUrl: 'https://example.com',
-      );
-
-      expect(text.length, lessThan(telegramLimit + 200));
-      expect(text, endsWith('…\nhttps://example.com'));
-    });
-
-    test('counts visible text, not markup, against the limit', () {
-      final text = renderTelegram(longVersion());
-      final visible = text
-          .replaceAll(RegExp('<[^>]*>'), '')
-          .replaceAll('&amp;', '&');
-
-      expect(visible.length, greaterThan(telegramLimit - 60));
-      expect(visible.length, lessThanOrEqualTo(telegramLimit + 3));
-    });
-
-    test('ends on an ellipsis alone without a page to link to', () {
-      expect(
-        renderTelegram(longVersion()),
-        endsWith('• A reasonably long changelog entry &amp; more\n\n…'),
-      );
-    });
-  });
-
-  group('encodeChangelog', () {
-    test('round trips through json', () {
-      final changelog = Changelog(
-        versions: [
-          version(
-            groups: [
-              entryGroup(ChangelogType.feat, [
-                ('1a2b3c4', 'profiles', 'Scripts'),
-              ]),
-            ],
-          ),
+    test('refuses text longer than the caption limit', () {
+      final long = summary(
+        highlights: [
+          for (var index = 0; index < 40; index++)
+            ReleaseHighlight(title: 'Highlight ${'x' * 100}', description: ''),
         ],
       );
 
-      final decoded = decodeChangelog(encodeChangelog(changelog));
-
-      expect(decoded.versions.single.tag, 'v0.8.96');
-      expect(decoded.versions.single.groups.single.type, ChangelogType.feat);
-      expect(
-        decoded.versions.single.groups.single.entries.single.scope,
-        'profiles',
-      );
-    });
-
-    test('rejects a future schema version', () {
-      final decoded = decodeChangelog('{"schemaVersion": 99, "versions": []}');
-
-      expect(decoded.versions, isEmpty);
-    });
-
-    test('ends with a newline so the file is diff friendly', () {
-      expect(encodeChangelog(const Changelog(versions: [])), endsWith('\n'));
+      expect(() => renderTelegram(long), throwsFormatException);
     });
   });
 
-  group('readPubspecVersion', () {
-    test('preserves the prerelease suffix without the build number', () {
+  group('renderChangelog', () {
+    test('lists the newest tag first, one section per tag', () {
+      final markdown = renderChangelog([
+        notes('v1.1.0'),
+        notes('v1.0.0', '### Fixed\n\n- Old fix.'),
+      ]);
+
+      expect(markdown, startsWith('# Changelog\n'));
+      expect(markdown, contains('<!-- Generated from release_notes/'));
       expect(
-        readPubspecVersion('version: 0.1.0-pre.2+2026102701\n'),
-        '0.1.0-pre.2',
+        markdown.indexOf('## v1.1.0'),
+        lessThan(markdown.indexOf('## v1.0.0')),
       );
-      expect(readPubspecVersion('version: 0.1.0-pre.2\n'), '0.1.0-pre.2');
+      expect(markdown, contains('## v1.0.0\n\n### Fixed\n\n- Old fix.\n'));
+      expect(markdown, contains('based on recent\n  daily usage.'));
     });
 
-    test('reads the app version without the build number', () {
-      expect(
-        readPubspecVersion('name: reclash\nversion: 0.8.96+2026081501\n'),
-        '0.8.96',
-      );
+    test('drops prereleases once the stable notes exist', () {
+      final markdown = renderChangelog([
+        notes('v1.1.0'),
+        notes('v1.1.0-pre.2'),
+        notes('v1.1.0-pre.1'),
+      ]);
+
+      expect(markdown, contains('## v1.1.0\n'));
+      expect(markdown, isNot(contains('-pre.')));
+    });
+
+    test('keeps prereleases of an unreleased version', () {
+      final markdown = renderChangelog([
+        notes('v1.2.0-pre.1'),
+        notes('v1.1.0'),
+        notes('v1.1.0-pre.1'),
+      ]);
+
+      expect(markdown, contains('## v1.2.0-pre.1'));
+      expect(markdown, isNot(contains('## v1.1.0-pre.1')));
     });
   });
-}
-
-String _payloadOf(String body) {
-  final start =
-      body.indexOf(releaseJsonBeginMarker) + releaseJsonBeginMarker.length;
-  return body.substring(start, body.indexOf(releaseJsonEndMarker, start));
 }

@@ -1,5 +1,3 @@
 # Changelog
 
-<!-- changelog:frozen -->
-<!-- Entries below predate the structured pipeline. Their wording is kept as written; only the heading and list style were normalized. -->
-
+<!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->

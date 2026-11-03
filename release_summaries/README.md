@@ -1,15 +1,19 @@
 # Authored update summaries
 
-The update sheet reads an optional, release-authored overview, not a summary scraped from Markdown. Full changelog entries remain in the release body.
+The update sheet reads an optional, release-authored overview, not a summary scraped from Markdown. It is a short cut
+of `release_notes/<tag>.md`, which carries the complete notes on the release page.
 
-For each release, add `release_summaries/<exact-tag>.json`, then use the existing commands:
+`tool/release.sh prepare` creates `release_summaries/<exact-tag>.json` next to the notes skeleton; the
+[release skill](../.agents/skills/release/SKILL.md) covers the workflow and writing rules. Check and preview it with:
 
 ```sh
 dart run tool/changelog.dart verify
 dart run tool/changelog.dart render release --tag <exact-tag> --out release.md
 ```
 
-`render release` puts the English headline and highlights at the top of the release body, keeps the full changelog in a hidden JSON comment, and appends the validated overview under `<!-- reclash:update:json ... -->`. Stable and prerelease tags have separate files. If a file is absent, rendering keeps the existing changelog only; it does not invent release content. The generated release body uses the same request the updater already makes.
+`render release` puts the notes between the visible markers and appends the validated overview under
+`<!-- reclash:update:json ... -->`. Stable and prerelease tags have separate files. The generated release body uses the
+same request the updater already makes.
 
 ## Schema
 

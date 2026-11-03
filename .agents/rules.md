@@ -620,8 +620,8 @@ for corrections; rewrite history only when the user explicitly asks.
 
 ### Changelog Trailers
 
-`tool/changelog.dart` builds the user facing changelog from the commit history, so the trailers below are the copy that
-ships to users. The subject stays the developer facing summary and is only the fallback.
+Trailers are the per-commit hint for whoever writes the release notes: `tool/changelog.dart digest` prints the trailer
+instead of the subject. Users never see them directly; the published notes are authored, see the `release` skill.
 
 ```text
 feat(profiles): support per-profile override script
@@ -629,32 +629,24 @@ feat(profiles): support per-profile override script
 Changelog: Per-profile override scripts
 ```
 
-- `Changelog:` is the English entry. `Changelog: skip` drops the commit from the changelog entirely.
+- `Changelog:` is the English line for the digest. `Changelog: skip` moves the commit to the digest's "Other commits".
 - The changelog is English only. A `Changelog-<locale>:` or `Breaking-<locale>:` trailer fails the hook, because
-  translated release copy does not belong in the commit history. Translate after the fact if ever needed, not in the
-  commit message.
+  translated release copy does not belong in the commit history.
 - `Changelog-Type:` moves an entry into another group, for example to promote a `refactor` that users will notice. Valid
   values are `breaking`, `feat`, `fix`, `perf`, `revert`.
-- `BREAKING CHANGE:` is required whenever the subject carries `!`, and its text becomes the breaking entry. A `!` commit
-  therefore needs two lines of copy: the footer for the breaking entry and `Changelog:` for the normal one.
+- `BREAKING CHANGE:` is required whenever the subject carries `!`, and its text becomes the breaking entry.
 
-`feat`, `fix`, `perf`, `revert` and breaking commits are collected by default; every other type is dropped unless it
-carries a `Changelog:` trailer. Commits missing a trailer reuse their subject; for `feat`, `fix` and `perf` the hook
-says so without blocking.
+`feat`, `fix`, `perf`, `revert` and breaking commits land in the digest's groups by default; every other type goes to
+"Other commits" unless it carries a `Changelog:` trailer. For `feat`, `fix` and `perf` without a trailer the hook says
+so without blocking.
 
-## Version Bumps and Release Summaries
+## Version Bumps and Release Notes
 
-Every version bump, stable or prerelease, ships an authored `release_summaries/<exact-tag>.json` in the same change as the
-bump, before the tag is pushed. The file is the short, formatted overview the update sheet shows; the changelog stays the
-full list.
-
-- Keep it short: one headline, one spotlight, at most ten highlights (usually five), and warnings only for something the
-  user must act on. Write what changed for the user, not one bullet per commit. Titles stay short; each description is
-  one sentence. The release page shows this overview, so the commit list must not be copied into it.
-- Write `en` and `ru`, following the schema in [release_summaries/README.md](../release_summaries/README.md). `en` is the
-  fallback and the two locales keep the same warning count, order and platform coverage.
-- Run `dart run tool/changelog.dart verify` with the file in place. A tag without a file still renders, but the release
-  then has no authored overview, so do not push it without one unless the user says so.
+A version changes only through `tool/release.sh prepare`, and a tag only through `tool/release.sh tag`; the `release`
+skill (`.agents/skills/release/SKILL.md`) owns the workflow and the writing rules. Every tag ships
+`release_notes/<tag>.md` (the GitHub page and `CHANGELOG.md`) and `release_summaries/<tag>.json` (the update sheet),
+committed together with the bump as `chore(release): prepare <tag>`. `CHANGELOG.md` is generated; never edit it by
+hand. A feature task never bumps the version or writes release files.
 
 ## Migrations
 

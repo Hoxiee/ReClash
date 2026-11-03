@@ -65,8 +65,8 @@ if [[ "$description" =~ \.$ ]]; then
   exit 1
 fi
 
-# Changelog trailers. `tool/changelog.dart` reads these to build the user facing
-# changelog; the subject is only a fallback.
+# Changelog trailers. `tool/changelog.dart digest` shows them to whoever writes
+# the release notes; the subject is only a fallback.
 body="$(tail -n +2 <<<"$cleaned")"
 groups='breaking|feat|fix|perf|revert'
 
@@ -121,7 +121,7 @@ type="${subject%%[(:!]*}"
 
 if [[ "$type" =~ ^(feat|fix|perf)$ ]] && ! grep -qE '^Changelog:' <<<"$body"; then
   cat >&2 <<EOF
-Note: no "Changelog:" trailer, so the changelog will reuse this subject.
+Note: no "Changelog:" trailer, so the release digest will show this subject.
 
   Changelog: $description
 EOF

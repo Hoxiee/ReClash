@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reclash/common/changelog.dart';
 import 'package:reclash/common/update_summary.dart';
 import 'package:test/test.dart';
 
-import '../../tool/src/changelog/builder.dart';
+import '../../tool/src/changelog/digest.dart';
 import '../../tool/src/changelog/git.dart';
 import '../../tool/src/changelog/models.dart';
-import '../../tool/src/changelog/render.dart';
+import '../../tool/src/changelog/notes.dart';
+
+const validNotes = '### New\n\n- A shipped feature.\n';
 
 void main() {
   late Directory repo;
 
-  void git(List<String> arguments) {
+  String git(List<String> arguments) {
     final result = Process.runSync(
       'git',
       arguments,
@@ -26,298 +27,240 @@ void main() {
     if (result.exitCode != 0) {
       fail('git ${arguments.join(' ')} failed: ${result.stderr}');
     }
+    return result.stdout as String;
   }
 
   void commit(String message) {
     git(['commit', '--allow-empty', '--quiet', '--message', message]);
   }
 
+  void write(String path, String content) {
+    final file = File('${repo.path}/$path');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(content);
+  }
+
+  void writeSummary(String tag) {
+    write(
+      'release_summaries/$tag.json',
+      jsonEncode(
+        ReleaseSummary(
+          tag: tag,
+          locales: const {
+            'en': ReleaseSummaryLocale(
+              headline: 'Summary headline',
+              spotlight: ReleaseHighlight(
+                title: 'Spotlight',
+                description: 'Spotlight text.',
+              ),
+            ),
+          },
+        ).toJson(),
+      ),
+    );
+  }
+
+  ReleaseDigest digest(String tag) => buildDigest(
+    Git(workingDirectory: repo.path),
+    repo.path,
+    VersionTag.tryParse(tag)!,
+  );
+
+  ProcessResult changelog(List<String> arguments) => Process.runSync('dart', [
+    'run',
+    'tool/changelog.dart',
+    '--root',
+    repo.path,
+    ...arguments,
+  ]);
+
   setUp(() {
     repo = Directory.systemTemp.createTempSync('reclash-changelog-');
     git(['init', '--quiet', '--initial-branch=main']);
     git(['config', 'user.email', 'changelog-test@example.com']);
     git(['config', 'user.name', 'Changelog test']);
-
     commit('feat: initial release');
     git(['tag', 'v1.0.0']);
-
-    commit('feat(a): first feature');
-    commit('fix(b): first fix');
     git(['tag', 'backup-pre-squash-deadbee']);
-    git(['tag', 'v1.1.0-pre.1']);
-
-    commit('feat(c)!: second feature\n\nBREAKING CHANGE: The old flag is gone');
-    git(['tag', 'v1.1.0']);
-
-    commit('chore: bump build number');
   });
 
   tearDown(() {
     repo.deleteSync(recursive: true);
   });
 
-  ChangelogBuildResult build({PendingVersion? pending}) => ChangelogBuilder(
-    Git(workingDirectory: repo.path),
-    boundary: 'v1.0.0',
-  ).build(pending: pending);
+  group('buildDigest', () {
+    test('a prerelease covers only the commits after the last tag', () {
+      commit('feat(a): first feature');
+      git(['tag', 'v1.1.0-pre.1']);
+      commit('feat(b): second feature');
+      commit('fix(c): a fix');
+      commit('chore: bump build number');
+      commit('test: cover the fix');
+      commit('feat: hidden feature\n\nChangelog: skip');
 
-  test('collects one section per stable tag above the boundary', () {
-    final versions = build().changelog.versions;
+      final result = digest('v1.1.0-pre.2');
 
-    expect(versions.map((version) => version.tag), ['v1.1.0']);
-    expect(versions.single.date, '2026-01-02');
-  });
+      expect(result.from, 'v1.1.0-pre.1');
+      expect(result.groups.map((group) => group.type), [
+        ChangelogType.feat,
+        ChangelogType.fix,
+      ]);
+      expect(result.groups.first.entries.map((entry) => entry.text), [
+        'Second feature',
+      ]);
+      expect(
+        result.other,
+        unorderedEquals([
+          matches(r'^[0-9a-f]{7} chore: bump build number$'),
+          matches(r'^[0-9a-f]{7} test: cover the fix$'),
+          matches(r'^[0-9a-f]{7} feat: hidden feature$'),
+        ]),
+      );
+      expect(result.earlierNotes, isEmpty);
+      expect(result.warnings, isEmpty);
+    });
 
-  test('preserves frozen history before the first structured release', () {
-    git(['checkout', '--quiet', '--orphan', 'frozen-history']);
-    commit('chore: optimize commented policy');
-    git(['tag', 'v0.8.96']);
-    final builder = ChangelogBuilder(Git(workingDirectory: repo.path));
-    expect(builder.build().changelog.versions, isEmpty);
+    group('stable target', () {
+      setUp(() {
+        commit('feat(a): first feature');
+        git(['tag', 'v1.1.0-pre.1']);
+        commit('fix(b): second fix');
+        git(['tag', 'v1.1.0-pre.2']);
+        commit('feat(c): third feature');
+      });
 
-    commit('fix: new release fix');
-    final next = builder
-        .build(
-          pending: const PendingVersion(version: '0.8.97', date: '2026-09-10'),
-        )
-        .changelog;
-    expect(next.versions.single.tag, 'v0.8.97');
-    expect(
-      next.versions.single.groups.single.entries.single.text,
-      'New release fix',
-    );
+      test('starts at the newest prerelease of the cycle', () {
+        write('release_notes/v1.1.0-pre.1.md', validNotes);
+        write('release_notes/v1.1.0-pre.2.md', validNotes);
 
-    const history =
-        '## v0.8.96 (2026-08-17)\n\n'
-        '- Optimize commented policy\n'
-        '- Fix whole group delay test failing on Windows\n'
-        '- Optimize package icon loading and connections polling\n';
-    final original = '${renderMarkdown(builder.build().changelog)}$history';
-    final merged = mergeMarkdown(renderMarkdown(next), original);
-    expect(merged.substring(merged.indexOf('## v0.8.96')), history);
-  });
+        final result = digest('v1.1.0');
 
-  test('a prerelease tag does not split the stable range', () {
-    final groups = build().changelog.versions.single.groups;
-    final features = groups
-        .firstWhere((group) => group.type == ChangelogType.feat)
-        .entries
-        .map((entry) => entry.text);
-
-    expect(features, ['Second feature', 'First feature']);
-  });
-
-  test('ignores tags that are not release tags', () {
-    final tags = Git(workingDirectory: repo.path).versionTags();
-
-    expect(tags.map((tag) => tag.name), ['v1.1.0', 'v1.1.0-pre.1', 'v1.0.0']);
-  });
-
-  test('lifts breaking changes into their own group', () {
-    final groups = build().changelog.versions.single.groups;
-
-    expect(groups.first.type, ChangelogType.breaking);
-    expect(groups.first.entries.single.text, 'The old flag is gone');
-  });
-
-  test('a pending version covers the commits after the newest stable tag', () {
-    final versions = build(
-      pending: const PendingVersion(version: '1.2.0', date: '2026-02-03'),
-    ).changelog.versions;
-
-    expect(versions.map((version) => version.tag), ['v1.2.0', 'v1.1.0']);
-    expect(versions.first.date, '2026-02-03');
-    expect(versions.first.isEmpty, isTrue);
-  });
-
-  test('a pending version is skipped once its tag exists', () {
-    final versions = build(
-      pending: const PendingVersion(version: '1.1.0', date: '2026-02-03'),
-    ).changelog.versions;
-
-    expect(versions.map((version) => version.tag), ['v1.1.0']);
-    expect(versions.single.date, '2026-01-02');
-  });
-
-  test('a tagged prerelease keeps its range before the later stable tag', () {
-    final versions = build(
-      pending: const PendingVersion(
-        version: '1.1.0-pre.1',
-        date: '2026-02-03',
-        prerelease: true,
-      ),
-    ).changelog.versions;
-
-    expect(versions.map((version) => version.tag), ['v1.1.0-pre.1']);
-    expect(versions.single.date, '2026-01-02');
-    final entries = versions.single.groups
-        .expand((group) => group.entries)
-        .map((entry) => entry.text);
-    expect(entries, containsAll(['First feature', 'First fix']));
-    expect(entries, isNot(contains('The old flag is gone')));
-    expect(entries, isNot(contains('Second feature')));
-  });
-
-  for (final tagged in [false, true]) {
-    test(
-      'CLI renders the exact ${tagged ? 'tagged' : 'pending'} prerelease',
-      () {
-        commit('feat(preview): a prerelease improvement');
-        if (tagged) git(['tag', 'v1.2.0-pre.2']);
-        if (tagged) commit('feat(later): not part of the tagged release');
-        File('${repo.path}/pubspec.yaml').writeAsStringSync(
-          'name: release_fixture\nversion: 1.2.0-pre.2+2026102701\n',
+        expect(result.from, 'v1.1.0-pre.2');
+        expect(
+          result.groups.expand((group) => group.entries).map((e) => e.text),
+          ['Third feature'],
         );
-        const summary = ReleaseSummary(
-          tag: 'v1.2.0-pre.2',
-          locales: {
-            'en': ReleaseSummaryLocale(
-              headline: 'The prerelease overview',
-              spotlight: ReleaseHighlight(
-                title: 'Preview feature',
-                description: 'A prerelease improvement.',
-              ),
-            ),
-          },
-        );
-        final author = File('${repo.path}/release_summaries/v1.2.0-pre.2.json');
-        author.parent.createSync();
-        author.writeAsStringSync(jsonEncode(summary.toJson()));
-        final result = Process.runSync('dart', [
-          'run',
-          'tool/changelog.dart',
-          '--root',
-          repo.path,
-          'build',
-          '--unreleased',
+        expect(result.earlierNotes.map((notes) => notes.tag.name), [
+          'v1.1.0-pre.2',
+          'v1.1.0-pre.1',
         ]);
-        expect(
-          result.exitCode,
-          0,
-          reason: '${result.stdout}\n${result.stderr}',
-        );
-        final generated = decodeChangelog(
-          File('${repo.path}/changelog.json').readAsStringSync(),
-        ).versions.first;
-        expect(generated.tag, summary.tag);
-        expect(generated.version, '1.2.0-pre.2');
-        final entries = generated.groups
-            .expand((group) => group.entries)
-            .map((entry) => entry.text);
-        expect(entries, contains('A prerelease improvement'));
-        expect(entries, isNot(contains('Not part of the tagged release')));
+        expect(result.warnings, isEmpty);
+      });
 
-        final rendered = Process.runSync('dart', [
-          'run',
-          'tool/changelog.dart',
-          '--root',
-          repo.path,
-          'render',
-          'release',
-          '--tag',
-          summary.tag,
+      test('represents a prerelease without notes from its summary', () {
+        write('release_notes/v1.1.0-pre.2.md', validNotes);
+        writeSummary('v1.1.0-pre.1');
+
+        final result = digest('v1.1.0');
+
+        final fromSummary = result.earlierNotes.last;
+        expect(fromSummary.tag.name, 'v1.1.0-pre.1');
+        expect(fromSummary.body, contains('Summary headline'));
+        expect(fromSummary.body, contains('- Spotlight: Spotlight text.'));
+        expect(result.warnings, isEmpty);
+      });
+
+      test('warns about a prerelease with neither notes nor summary', () {
+        write('release_notes/v1.1.0-pre.2.md', validNotes);
+
+        final result = digest('v1.1.0');
+
+        expect(result.earlierNotes.map((notes) => notes.tag.name), [
+          'v1.1.0-pre.2',
         ]);
-        expect(
-          rendered.exitCode,
-          0,
-          reason: '${rendered.stdout}\n${rendered.stderr}',
-        );
-        final body = rendered.stdout as String;
-        expect(parseReleaseChangelog(body)?.tag, summary.tag);
-        expect(
-          parseReleaseSummary(body, tag: summary.tag)?.locales['en']?.headline,
-          'The prerelease overview',
-        );
-      },
-    );
-  }
+        expect(result.warnings.single, contains('v1.1.0-pre.1'));
+        expect(result.warnings.single, contains('neither notes nor a summary'));
+      });
+    });
 
-  test('CLI refuses an already tagged stable version for unreleased notes', () {
-    File(
-      '${repo.path}/pubspec.yaml',
-    ).writeAsStringSync('name: release_fixture\nversion: 1.1.0+2026102701\n');
-    final result = Process.runSync('dart', [
-      'run',
-      'tool/changelog.dart',
-      '--root',
-      repo.path,
-      'build',
-      '--unreleased',
-    ]);
-    expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains('is already tagged'));
-    expect(File('${repo.path}/changelog.json').existsSync(), isFalse);
+    test('without a reachable earlier tag the range is all history', () {
+      final result = digest('v0.5.0');
+
+      expect(result.from, isNull);
+      expect(result.warnings.single, contains('no earlier release tag'));
+    });
+
+    test('renderDigest names the range and the commit hashes', () {
+      commit('feat(a): first feature');
+      final hash = git(['rev-parse', 'HEAD']).trim().substring(0, 7);
+
+      final text = renderDigest(digest('v1.1.0-pre.1'));
+
+      expect(text, contains('# Digest for v1.1.0-pre.1'));
+      expect(text, contains('Range: v1.0.0..HEAD'));
+      expect(text, contains('- [a] First feature ($hash)'));
+    });
   });
 
-  test('a release tag on another branch is not reachable from this one', () {
-    git(['checkout', '--quiet', '-b', 'feature', 'v1.0.0']);
-    commit('feat(d): work started before the release');
+  group('release notes files', () {
+    test('readAllReleaseNotes ignores the README', () {
+      write('release_notes/README.md', 'Plain prose, not release notes.\n');
+      write('release_notes/v1.0.0.md', validNotes);
 
-    final scoped = Git(workingDirectory: repo.path);
+      expect(readAllReleaseNotes(repo.path).map((item) => item.tag.name), [
+        'v1.0.0',
+      ]);
+      expect(verifyReleaseNotes(repo.path), isEmpty);
+    });
 
-    expect(
-      scoped.tagExists('v1.1.0'),
-      isTrue,
-      reason: 'the tag is still in the repository',
-    );
-    expect(
-      scoped.tagIsReachable('v1.1.0'),
-      isFalse,
-      reason:
-          'verify must skip versions the builder cannot derive here, or every '
-          'branch forked before the newest release fails on an unrelated tag.',
-    );
-    expect(
-      scoped.versionTags().map((tag) => tag.name),
-      isNot(contains('v1.1.0')),
-      reason: 'tagIsReachable must agree with the tags the builder walks.',
-    );
-    expect(
-      scoped.tagIsReachable('v1.0.0'),
-      isTrue,
-      reason: 'a tag this branch was cut from is still checked.',
-    );
+    test('verifyReleaseNotes reports a misnamed file', () {
+      write('release_notes/notes.md', validNotes);
+
+      expect(verifyReleaseNotes(repo.path).single, contains('notes.md'));
+      expect(
+        verifyReleaseNotes(repo.path).single,
+        contains('not named after a tag'),
+      );
+    });
+
+    test('verifyReleaseNotes reports an invalid file with its path', () {
+      write('release_notes/v1.0.0.md', '## Wrong heading\n');
+
+      expect(
+        verifyReleaseNotes(repo.path).single,
+        startsWith('release_notes/v1.0.0.md:'),
+      );
+    });
   });
 
-  test('a release tag on this branch stays checked', () {
-    final scoped = Git(workingDirectory: repo.path);
+  group('CLI', () {
+    test('changelog writes CHANGELOG.md from the notes', () {
+      write('release_notes/v1.0.0.md', validNotes);
 
-    expect(scoped.tagIsReachable('v1.1.0'), isTrue);
-    expect(
-      scoped.versionTags().map((tag) => tag.name),
-      contains('v1.1.0'),
-      reason:
-          'the skip must be narrow; on the release branch verify still '
-          'compares every derivable version.',
-    );
-  });
+      final result = changelog(['changelog']);
 
-  test('a tag with no version in changelog.json is reported', () {
-    final derived = build().changelog;
-    final recorded = Changelog(
-      versions: derived.versions
-          .where((version) => version.tag != 'v1.1.0')
-          .toList(),
-    );
+      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+      expect(
+        File('${repo.path}/CHANGELOG.md').readAsStringSync(),
+        allOf(startsWith('# Changelog'), contains('## v1.0.0')),
+      );
+    });
 
-    expect(missingReleaseTags(recorded, derived), ['v1.1.0']);
-    expect(missingReleaseTags(derived, derived), isEmpty);
-  });
+    test('verify passes when everything is consistent', () {
+      write('release_notes/v1.0.0.md', validNotes);
+      expect(changelog(['changelog']).exitCode, 0);
 
-  test('is deterministic across runs', () {
-    expect(
-      encodeChangelog(build().changelog),
-      encodeChangelog(build().changelog),
-    );
-  });
+      final result = changelog(['verify']);
 
-  test('reports commits that are not conventional', () {
-    commit('Optimize core service');
+      expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+    });
 
-    final warnings = build(
-      pending: const PendingVersion(version: '1.2.0', date: '2026-02-03'),
-    ).warnings;
+    test('verify fails when CHANGELOG.md is stale', () {
+      write('release_notes/v1.0.0.md', validNotes);
+      expect(changelog(['changelog']).exitCode, 0);
+      write('release_notes/v1.0.1.md', validNotes);
 
-    expect(warnings.single, contains('not a conventional commit'));
+      final result = changelog(['verify']);
+
+      expect(result.exitCode, 1);
+      expect(result.stderr, contains('CHANGELOG.md is stale'));
+    });
+
+    test('render release fails when the notes file is missing', () {
+      final result = changelog(['render', 'release', '--tag', 'v1.0.0']);
+
+      expect(result.exitCode, isNot(0));
+      expect(result.stderr, contains('release_notes/v1.0.0.md is missing'));
+    });
   });
 }

@@ -28,7 +28,7 @@ features:
     review: Review source schema shape, fixture provenance, defaults and staged restore before accepting storage changes.
   releases.identity:
     owners:
-      downstream: [pubspec.yaml, CHANGELOG.md, changelog.json]
+      downstream: [pubspec.yaml, CHANGELOG.md, 'release_notes/**', 'release_summaries/**']
       shared: [android/app/build.gradle.kts, core/mihomo, .gitmodules]
     evidence:
       metadata: [structural, integration]
@@ -68,8 +68,6 @@ release:
     pattern: '^version:.*$'
   changelog:
     path: CHANGELOG.md
-  release-notes:
-    path: changelog.json
   android-id:
     path: android/app/build.gradle.kts
     pattern: '^\s*applicationId\s*=.*$'

@@ -6,7 +6,7 @@ source:
 development: dev
 vendor: vendor/flclash
 budget: 6144
-owned: [CHANGELOG.md, changelog.json]
+owned: [CHANGELOG.md]
 checks:
   site-docs:
     argv: [node, tool/site_docs.mjs, --check]

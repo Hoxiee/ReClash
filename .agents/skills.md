@@ -14,6 +14,7 @@ match a task against the skill `name` and `description`, then load the full inst
 - `pre-commit-quality-review`: lightweight triage before commits, with scoped structural review and user decisions on concrete regressions.
 
 - `fork-maintenance`: compact intent contracts, vendor snapshots, upstream impact, isolated sync and verification.
+- `release`: version bumps, prerelease and stable tags, authored release notes and update summaries, `CHANGELOG.md`.
 
 ## Authoring Notes
 

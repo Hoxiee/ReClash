@@ -348,63 +348,27 @@ Preview without sending: `TAG=v0.1.0-pre.1 python3 -I release_telegram.py --dry-
 complete release asset set plus SHA256SUMS in `dist/`). Offline tests run with
 `python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py`.
 
-The changelog is derived from Conventional Commits by `tool/changelog.dart` and written to two committed files:
-`CHANGELOG.md` for readers and `changelog.json` for the renderers. See `.agents/rules.md` for the `Changelog:` trailers
-that decide the wording.
-
-The app ships no changelog of its own. `render release` appends the released version as JSON inside an HTML comment
-(`<!-- reclash:changelog:json … -->`), so the release body GitHub already returns to `checkForUpdate` carries the
-notes shown in the update dialog. `parseReleaseChangelog` reads that block and falls back to the English
-bullets when a release predates it.
+Release text is authored, not derived from commits. Every tag ships `release_notes/<tag>.md`, which CI renders between
+the `<!-- reclash:changelog:begin/end -->` markers of the release body and which `CHANGELOG.md` is generated from, and
+`release_summaries/<tag>.json`, which follows as the hidden `<!-- reclash:update:json … -->` payload the update sheet
+and the Telegram post read. The `release` skill holds the workflow and the writing rules.
 
 ```bash
-dart run tool/changelog.dart verify                  # what CI checks
-dart run tool/changelog.dart release --version 0.8.96
-dart run tool/changelog.dart build --unreleased      # changelog.json only, includes untagged work
-dart run tool/changelog.dart render release --out release.md
-dart run tool/changelog.dart render telegram --out telegram.md
+tool/release.sh prepare pre                     # bump to the next -pre.N, skeletons, commit digest
+tool/release.sh prepare stable [--version X.Y.Z]
+dart run tool/changelog.dart digest [--tag vX]  # commits and earlier notes to write the notes from
+dart run tool/changelog.dart changelog          # regenerate CHANGELOG.md from release_notes/
+dart run tool/changelog.dart verify             # what CI checks on every push
+dart run tool/changelog.dart render release --tag vX --out release.md
+dart run tool/changelog.dart render telegram --tag vX --out telegram.md
+tool/release.sh tag --dry-run                   # checks and the body the tag would ship
+tool/release.sh tag --push                      # tag the prepare commit, push branch and tag
 ```
 
-Releasing a stable version, in order:
-
-```bash
-tool/bump_version.sh all
-dart run tool/changelog.dart release --version 0.8.96
-git commit -am "chore(release): v0.8.96"
-git tag v0.8.96
-git push origin main && git push origin v0.8.96
-```
-
-Push the tag by name. Every release tag here is lightweight, and `--follow-tags` carries annotated tags only: it skips a
-lightweight one silently, so the branch lands, the tag does not, and the release workflow never fires.
-
-`tool/release.sh` drives both paths so the ordering below cannot be got wrong by hand. It resolves the version (bumping
-the patch when pubspec still names an already tagged one), prints the notes the tag would ship, and only pushes with
-`--push`:
-
-```bash
-tool/release.sh pre --dry-run     # plan and notes, changes nothing
-tool/release.sh pre --push        # bump, tag vX.Y.Z-pre.N, push
-tool/release.sh stable --push     # changelog, chore(release) commit, tag, push
-```
-
-The release commit comes before the tag on purpose: the generated wording is reviewable in the diff before it ships, and
-the tag is what `render release` reads. CI never writes back to the repository; it only runs `verify`. Wording in
-`changelog.json` may be edited by hand as long as no derivable entry disappears and every entry still points at a commit
-inside that version's range.
-
-Entries at or below `v0.8.96` are frozen: they predate the pipeline, live under the `<!-- changelog:frozen -->` marker
-in `CHANGELOG.md`, and are never regenerated.
-
-`verify` compares a version only when its tag is reachable from `HEAD`, because that is the same scope the builder walks
-(`git tag --merged`). A branch cut before the newest release cannot derive that version at all, so `verify` names it as
-skipped and moves on instead of reporting drift that does not exist. Checking mere tag existence is what made every such
-branch fail on an unrelated release.
-
-Prerelease tags (`v0.8.96-pre.N`) skip the release commit, and CI renders their notes with `build --unreleased` for the
-Telegram post. GitHub marks them as prereleases, not latest stable releases. `build --unreleased` reads the
-version from `pubspec.yaml` rather than the tag, so the patch has to be bumped before the first `-pre.N` of a cycle:
-while `v<pubspec version>` is still tagged it refuses to collect anything and the release job fails.
+`prepare` commits nothing; the bump, both texts and `CHANGELOG.md` go into one `chore(release): prepare <tag>` commit,
+and `tag` refuses unless HEAD carries both files for the pubspec version. Push the tag by name: release tags are
+lightweight, and `--follow-tags` skips those silently, so the branch would land without firing the release workflow.
+GitHub marks `-pre.N` tags as prereleases, not the latest stable release.
 
 ### Website
 
@@ -450,7 +414,7 @@ dart tool/prepare.dart
 dart run tool/check_release_version.dart
 dart tool/check_format.dart
 flutter analyze --no-fatal-infos
-dart run tool/changelog.dart verify   # main and tags only
+dart run tool/changelog.dart verify
 dart run tool/test.dart -- --reporter expanded --coverage
 dart run tool/check_coverage.dart coverage/lcov.info 75
 ```
