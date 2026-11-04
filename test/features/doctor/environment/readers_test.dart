@@ -164,6 +164,41 @@ org.gnome.system.proxy.socks host ''
     );
   });
 
+  test('parses the KDE and MATE proxy settings', () {
+    expect(
+      parseKioslavercProxy('''
+[Proxy Settings]
+NoProxyFor=localhost
+ProxyType=1
+httpProxy=http://127.0.0.1:7890
+socksProxy=socks://127.0.0.1:7890
+
+[Other]
+ProxyType=0
+'''),
+      const SystemProxyFact(enabled: true, host: '127.0.0.1', port: 7890),
+    );
+    expect(
+      parseKioslavercProxy(
+        '[Proxy Settings]\nProxyType=1\nhttpProxy=10.0.0.2 3128',
+      ),
+      const SystemProxyFact(enabled: true, host: '10.0.0.2', port: 3128),
+    );
+    expect(
+      parseKioslavercProxy('[Proxy Settings]\nProxyType=0')?.enabled,
+      isFalse,
+    );
+    expect(parseKioslavercProxy('[General]\nx=1'), isNull);
+    expect(
+      parseGsettingsProxy('''
+org.mate.system.proxy mode 'manual'
+org.mate.system.proxy.http host '127.0.0.1'
+org.mate.system.proxy.http port 7890
+''', base: 'org.mate.system.proxy'),
+      const SystemProxyFact(enabled: true, host: '127.0.0.1', port: 7890),
+    );
+  });
+
   test('parses macOS netstat, scutil and lsof', () {
     final routes = parseNetstatInet('''
 Routing tables

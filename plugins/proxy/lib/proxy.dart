@@ -6,6 +6,7 @@ import 'src/macos_proxy.dart';
 import 'src/proxy_command.dart';
 import 'src/windows_proxy.dart';
 
+export 'src/linux_proxy.dart' show LinuxProxyBackend, LinuxProxyCommands;
 export 'src/proxy_command.dart' show ProxyExecutableChecker, ProxyProcessRunner;
 
 class Proxy {

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:proxy/proxy.dart';
+
 import 'catalogue.dart';
 import 'facts.dart';
 import 'reader.dart';
@@ -87,15 +89,17 @@ Map<int, String> parseProcNetTcp(String text, Set<int> ports) {
   return found;
 }
 
-/// `gsettings list-recursively org.gnome.system.proxy`.
-SystemProxyFact? parseGsettingsProxy(String text) {
+/// `gsettings list-recursively org.gnome.system.proxy`, or the MATE schema.
+SystemProxyFact? parseGsettingsProxy(
+  String text, {
+  String base = 'org.gnome.system.proxy',
+}) {
   final values = <String, String>{};
   for (final line in text.split('\n')) {
     final m = RegExp(r'^(\S+)\s+(\S+)\s+(.*)$').firstMatch(line.trim());
     if (m == null) continue;
     values['${m.group(1)}/${m.group(2)}'] = m.group(3)!.replaceAll("'", '');
   }
-  const base = 'org.gnome.system.proxy';
   final mode = values['$base/mode'];
   if (mode == null) return null;
   var host = '';
@@ -113,6 +117,44 @@ SystemProxyFact? parseGsettingsProxy(String text) {
     host: mode == 'manual' ? host : '',
     port: mode == 'manual' ? port : null,
     pac: mode == 'auto' ? values['$base/autoconfig-url'] ?? '' : '',
+  );
+}
+
+/// The `[Proxy Settings]` group of KDE's `kioslaverc`; `ProxyType` 1 is manual
+/// and 2 is an automatic configuration script.
+SystemProxyFact? parseKioslavercProxy(String text) {
+  final values = <String, String>{};
+  var inGroup = false;
+  for (final line in text.split('\n')) {
+    final l = line.trim();
+    if (l.startsWith('[')) {
+      inGroup = l == '[Proxy Settings]';
+    } else if (inGroup) {
+      final eq = l.indexOf('=');
+      if (eq > 0) values[l.substring(0, eq)] = l.substring(eq + 1).trim();
+    }
+  }
+  final type = int.tryParse(values['ProxyType'] ?? '');
+  if (type == null) return null;
+  var host = '';
+  int? port;
+  if (type == 1) {
+    for (final key in const ['httpProxy', 'httpsProxy', 'socksProxy']) {
+      final address = RegExp(
+        r'^(?:\w+://)?(\S+?)[:\s]\s*(\d+)/?$',
+      ).firstMatch(values[key] ?? '');
+      if (address != null) {
+        host = address.group(1)!;
+        port = int.tryParse(address.group(2)!);
+        break;
+      }
+    }
+  }
+  return SystemProxyFact(
+    enabled: type == 1 && host.isNotEmpty,
+    host: host,
+    port: port,
+    pac: type == 2 ? values['Proxy Config Script'] ?? '' : '',
   );
 }
 
@@ -206,13 +248,38 @@ final class LinuxReader extends EnvironmentReader {
 
   @override
   Future<SystemProxyFact?> systemProxy() async {
+    final backend = LinuxProxyCommands.preferredBackend(
+      Platform.environment['XDG_CURRENT_DESKTOP'],
+    );
+    return switch (backend) {
+      LinuxProxyBackend.kde => _kdeProxy(),
+      LinuxProxyBackend.mate => _gsettingsProxy('org.mate.system.proxy'),
+      LinuxProxyBackend.gnome => _gsettingsProxy('org.gnome.system.proxy'),
+      null =>
+        await _gsettingsProxy('org.gnome.system.proxy') ?? await _kdeProxy(),
+    };
+  }
+
+  Future<SystemProxyFact?> _gsettingsProxy(String schema) async {
     try {
       final result = await Process.run('gsettings', [
         'list-recursively',
-        'org.gnome.system.proxy',
+        schema,
       ]);
       if (result.exitCode != 0) return null;
-      return parseGsettingsProxy(result.stdout as String);
+      return parseGsettingsProxy(result.stdout as String, base: schema);
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<SystemProxyFact?> _kdeProxy() async {
+    final home = Platform.environment['HOME'];
+    if (home == null || home.isEmpty) return null;
+    try {
+      return parseKioslavercProxy(
+        await File('$home/.config/kioslaverc').readAsString(),
+      );
     } on Object {
       return null;
     }
