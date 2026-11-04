@@ -70,5 +70,7 @@
   "updateRemainingTime": "Осталось {time}",
   "updateSeconds": "{count} с",
   "updateMinutes": "{count} мин",
-  "updateResumeShort": "Продолжить"
+  "updateResumeShort": "Продолжить",
+  "changelogImproved": "Улучшения",
+  "changelogKnownIssues": "Известные проблемы"
 }

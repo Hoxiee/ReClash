@@ -70,5 +70,7 @@
   "updateRemainingTime": "残り{time}",
   "updateSeconds": "{count}秒",
   "updateMinutes": "{count}分",
-  "updateResumeShort": "再開"
+  "updateResumeShort": "再開",
+  "changelogImproved": "改善点",
+  "changelogKnownIssues": "既知の問題"
 }

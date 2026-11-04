@@ -70,5 +70,7 @@
   "updateRemainingTime": "{time} 남음",
   "updateSeconds": "{count}초",
   "updateMinutes": "{count}분",
-  "updateResumeShort": "재개"
+  "updateResumeShort": "재개",
+  "changelogImproved": "개선 사항",
+  "changelogKnownIssues": "알려진 문제"
 }

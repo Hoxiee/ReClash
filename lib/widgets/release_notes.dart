@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 
@@ -13,12 +12,10 @@ class ReleaseNotes extends StatefulWidget {
   const ReleaseNotes({
     super.key,
     required this.body,
-    required this.tag,
     required this.fullReleaseUrl,
   });
 
   final String? body;
-  final String tag;
   final String fullReleaseUrl;
 
   @override
@@ -36,10 +33,8 @@ class _ReleaseNotesState extends State<ReleaseNotes> {
 
   @override
   Widget build(BuildContext context) {
-    final version = parseReleaseChangelog(widget.body);
-    if (version != null && version.tag == widget.tag) {
-      return _structuredNotes(context, version);
-    }
+    final notes = parseReleaseNotes(widget.body);
+    if (notes != null) return _structuredNotes(context, notes);
 
     final lines = _filterReleaseMarkdown(widget.body);
     if (lines.isEmpty) {
@@ -67,43 +62,37 @@ class _ReleaseNotesState extends State<ReleaseNotes> {
     );
   }
 
-  Widget _structuredNotes(BuildContext context, ChangelogVersion version) {
-    final visibleGroups = version.visibleGroups;
-    final groups = [
-      ...visibleGroups.where((group) => group.type == ChangelogType.breaking),
-      ...visibleGroups.where((group) => group.type != ChangelogType.breaking),
-    ];
-    var remaining = _expanded
-        ? groups.fold(0, (sum, group) => sum + group.entries.length)
-        : _previewEntries;
+  Widget _structuredNotes(BuildContext context, ReleaseNotesDocument notes) {
+    final groups = notes.groups;
+    var remaining = _expanded ? notes.entryCount : _previewEntries;
     var omitted = false;
     final widgets = <Widget>[];
     for (final group in groups) {
-      final entries = group.type == ChangelogType.breaking
+      final breaking = group.section == ReleaseNotesSection.breaking;
+      final entries = breaking
           ? group.entries
           : group.entries.take(remaining).toList();
       omitted |= entries.length < group.entries.length;
       remaining = (remaining - entries.length).clamp(0, remaining);
       if (entries.isEmpty) continue;
-      final breaking = group.type == ChangelogType.breaking;
       widgets.add(
         _NoteSection(
-          title: changelogGroupTitle(context.appLocalizations, group.type),
-          glyph: switch (group.type) {
-            ChangelogType.breaking => AppGlyphs.warning,
-            ChangelogType.feat => AppGlyphs.addCircle,
-            ChangelogType.fix => AppGlyphs.wrench,
-            ChangelogType.perf => AppGlyphs.proxies,
-            ChangelogType.revert => AppGlyphs.undo,
-            ChangelogType.unknown => AppGlyphs.info,
+          title: releaseNotesSectionTitle(
+            context.appLocalizations,
+            group.section,
+          ),
+          glyph: switch (group.section) {
+            ReleaseNotesSection.breaking => AppGlyphs.warning,
+            ReleaseNotesSection.added => AppGlyphs.addCircle,
+            ReleaseNotesSection.improved => AppGlyphs.sparkle,
+            ReleaseNotesSection.fixed => AppGlyphs.wrench,
+            ReleaseNotesSection.known => AppGlyphs.info,
           },
           isWarning: breaking,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 12,
-            children: [
-              for (final entry in entries) _NoteItem(text: entry.text),
-            ],
+            children: [for (final entry in entries) _NoteItem(text: entry)],
           ),
         ),
       );
@@ -113,8 +102,9 @@ class _ReleaseNotesState extends State<ReleaseNotes> {
       mainAxisSize: MainAxisSize.min,
       spacing: 16,
       children: [
+        if (notes.lead.isNotEmpty) _MarkdownInline(text: notes.lead),
         ...widgets,
-        if (widgets.isEmpty)
+        if (widgets.isEmpty && notes.lead.isEmpty)
           Text(
             context.appLocalizations.updateNotesUnavailable,
             style: AppTextStyle.subheadline.of(context),

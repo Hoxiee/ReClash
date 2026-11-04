@@ -70,5 +70,7 @@
   "updateRemainingTime": "剩余 {time}",
   "updateSeconds": "{count} 秒",
   "updateMinutes": "{count} 分钟",
-  "updateResumeShort": "继续"
+  "updateResumeShort": "继续",
+  "changelogImproved": "改进",
+  "changelogKnownIssues": "已知问题"
 }

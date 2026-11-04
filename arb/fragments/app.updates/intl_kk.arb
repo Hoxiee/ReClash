@@ -70,5 +70,7 @@
   "updateRemainingTime": "{time} қалды",
   "updateSeconds": "{count} с",
   "updateMinutes": "{count} мин",
-  "updateResumeShort": "Жалғастыру"
+  "updateResumeShort": "Жалғастыру",
+  "changelogImproved": "Жақсартулар",
+  "changelogKnownIssues": "Белгілі мәселелер"
 }

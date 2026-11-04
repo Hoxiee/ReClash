@@ -108,5 +108,7 @@
   "updateResumeShort": "Resume",
   "@updateResumeShort": {
     "description": "Short button on the dashboard update banner that resumes a paused or failed update download."
-  }
+  },
+  "changelogImproved": "Improvements",
+  "changelogKnownIssues": "Known issues"
 }

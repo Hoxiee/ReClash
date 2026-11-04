@@ -1,103 +1,73 @@
-import 'package:reclash/common/changelog.dart';
-import 'package:reclash/models/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/common.dart';
 
-String _body(String payload) =>
-    '<!-- reclash:changelog:begin -->\n'
-    '### Features\n'
-    '- Override scripts\n'
-    '<!-- reclash:changelog:end -->\n'
-    '\n'
-    '$releaseChangelogJsonMarker\n'
-    '$payload\n'
-    '-->\n'
-    '\n'
-    '| Platform | Download |\n';
-
-const _payload =
-    '{"schemaVersion":2,"versions":[{"version":"0.8.96","tag":"v0.8.96",'
-    '"date":"2026-08-16","prerelease":false,"groups":[{"type":"feat",'
-    '"entries":[{"id":"1a2b3c4","scope":"profiles","text":'
-    '"Override scripts"}]}]}]}';
+String _body(String notes) =>
+    '$releaseNotesBeginMarker\n$notes\n$releaseNotesEndMarker\n'
+    '\n<!-- reclash:update:json\n{}\n-->\n| Platform | Download |\n';
 
 void main() {
-  group('parseReleaseChangelog', () {
-    test('reads the payload embedded in a release body', () {
-      final version = parseReleaseChangelog(_body(_payload));
-
-      expect(version?.tag, 'v0.8.96');
-      expect(version?.date, '2026-08-16');
-      final entry = version!.visibleGroups.single.entries.single;
-      expect(version.visibleGroups.single.type, ChangelogType.feat);
-      expect(entry.scope, 'profiles');
-      expect(entry.text, 'Override scripts');
-    });
-
-    test('decodes the escaped > the renderer writes for a `-->` entry', () {
-      const payload =
-          '{"schemaVersion":2,"versions":[{"version":"0.8.96",'
-          '"tag":"v0.8.96","date":"","prerelease":false,"groups":'
-          '[{"type":"fix","entries":[{"id":"1a2b3c4","text":'
-          r'"Handle a --\u003e sequence"}]}]}]}';
-
-      final version = parseReleaseChangelog(_body(payload));
-
-      expect(
-        version?.visibleGroups.single.entries.single.text,
-        'Handle a --> sequence',
-      );
-    });
-
-    test('returns null for a body without the payload', () {
-      expect(parseReleaseChangelog('- Override scripts'), isNull);
-    });
-
-    test('returns null for a null body', () {
-      expect(parseReleaseChangelog(null), isNull);
-    });
-
-    test('returns null when the comment is never closed', () {
-      expect(
-        parseReleaseChangelog('$releaseChangelogJsonMarker\n$_payload\n'),
-        isNull,
-      );
-    });
-
-    test('returns null for a payload from a newer schema', () {
-      expect(
-        parseReleaseChangelog(
-          _body(
-            '{"schemaVersion":3,"versions":[{"version":"0.9.0",'
-            '"tag":"v0.9.0","date":"","prerelease":false,"groups":[]}]}',
-          ),
+  group('parseReleaseNotes', () {
+    test('reads the lead and the sections in their fixed order', () {
+      final notes = parseReleaseNotes(
+        _body(
+          'The release is about speed.\n\n'
+          '### Fixed\n\n- Web dashboards no longer close.\n\n'
+          '### Breaking changes\n\n- Re-import backups.\n\n'
+          '### New\n\n- **Speed test**: measure routes.\n',
         ),
-        isNull,
       );
+
+      expect(notes?.lead, 'The release is about speed.');
+      expect(notes?.groups.map((group) => group.section), [
+        ReleaseNotesSection.breaking,
+        ReleaseNotesSection.added,
+        ReleaseNotesSection.fixed,
+      ]);
+      expect(notes?.breaking, ['Re-import backups.']);
+      expect(notes?.hasBreaking, isTrue);
+      expect(notes?.entryCount, 3);
     });
 
-    test('returns null for a payload that is not valid json', () {
-      expect(parseReleaseChangelog(_body('{oops')), isNull);
-    });
-
-    test('returns null when the payload carries no version', () {
-      expect(
-        parseReleaseChangelog(_body('{"schemaVersion":2,"versions":[]}')),
-        isNull,
-      );
-    });
-
-    test('returns null for the retired schema 1 payload shape', () {
-      expect(
-        parseReleaseChangelog(
-          _body(
-            '{"schemaVersion":1,"versions":[{"version":"0.8.96",'
-            '"tag":"v0.8.96","date":"","prerelease":false,"groups":'
-            '[{"type":"feat","entries":[{"id":"1a2b3c4","text":'
-            '{"en":"Override scripts"}}]}]}]}',
-          ),
+    test('joins wrapped lines into one entry and one lead', () {
+      final notes = parseReleaseNotes(
+        _body(
+          'First half\nsecond half.\n\n'
+          '### Improved\n\n'
+          '- **Setup**: walks through profile,\n'
+          '  coverage and region.\n',
         ),
-        isNull,
       );
+
+      expect(notes?.lead, 'First half second half.');
+      expect(notes?.groups.single.entries, [
+        '**Setup**: walks through profile, coverage and region.',
+      ]);
+    });
+
+    test('keeps a lead without sections', () {
+      final notes = parseReleaseNotes(_body('Maintenance release.'));
+
+      expect(notes?.lead, 'Maintenance release.');
+      expect(notes?.groups, isEmpty);
+      expect(notes?.hasBreaking, isFalse);
+    });
+
+    test('ignores empty sections', () {
+      final notes = parseReleaseNotes(
+        _body('### New\n\n### Known issues\n\n- Tray icon flickers on KDE.\n'),
+      );
+
+      expect(notes?.groups.single.section, ReleaseNotesSection.known);
+    });
+
+    test('returns null for a body without the markers', () {
+      expect(parseReleaseNotes('### New\n\n- Override scripts\n'), isNull);
+      expect(parseReleaseNotes(null), isNull);
+    });
+
+    test('returns null for loose bullets and unknown headings', () {
+      expect(parseReleaseNotes(_body('- Override scripts')), isNull);
+      expect(parseReleaseNotes(_body('### Features\n\n- Scripts')), isNull);
     });
   });
 }

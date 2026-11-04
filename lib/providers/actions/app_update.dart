@@ -615,13 +615,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         release.summary?.permitsAutomaticInstall != true) {
       return false;
     }
-    final changelog = parseReleaseChangelog(release.body);
-    return changelog != null &&
-        changelog.tag == release.tag &&
-        !changelog.groups.any(
-          (group) =>
-              group.type == ChangelogType.breaking && group.entries.isNotEmpty,
-        );
+    final notes = parseReleaseNotes(release.body);
+    return notes != null && !notes.hasBreaking;
   }
 
   Future<void> _tryAutomaticInstall() async {

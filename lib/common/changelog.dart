@@ -1,57 +1,95 @@
-import 'dart:convert';
-
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/models/changelog.dart';
 
 import 'common.dart';
 
-const releaseChangelogJsonMarker = '<!-- reclash:changelog:json';
+/// The sections an authored `release_notes/<tag>.md` may hold, in the order
+/// the notes tool enforces them.
+enum ReleaseNotesSection { breaking, added, improved, fixed, known }
 
-const _releaseChangelogJsonEndMarker = '-->';
-
-String changelogGroupTitle(
-  AppLocalizations appLocalizations,
-  ChangelogType type,
-) => switch (type) {
-  ChangelogType.breaking => appLocalizations.changelogBreaking,
-  ChangelogType.feat => appLocalizations.changelogFeatures,
-  ChangelogType.fix => appLocalizations.changelogFixes,
-  ChangelogType.perf => appLocalizations.changelogPerformance,
-  ChangelogType.revert => appLocalizations.changelogReverts,
-  ChangelogType.unknown => '',
+const _sectionHeadings = <String, ReleaseNotesSection>{
+  'breaking changes': ReleaseNotesSection.breaking,
+  'new': ReleaseNotesSection.added,
+  'improved': ReleaseNotesSection.improved,
+  'fixed': ReleaseNotesSection.fixed,
+  'known issues': ReleaseNotesSection.known,
 };
 
-ChangelogVersion? parseReleaseChangelog(String? body) {
-  if (body == null) {
-    return null;
-  }
-  final begin = body.indexOf(releaseChangelogJsonMarker);
-  if (begin < 0) {
-    return null;
-  }
-  final start = begin + releaseChangelogJsonMarker.length;
-  final end = body.indexOf(_releaseChangelogJsonEndMarker, start);
-  if (end < 0) {
-    return null;
-  }
-  try {
-    final changelog = Changelog.fromJson(
-      jsonDecode(body.substring(start, end)) as Map<String, dynamic>,
-    );
-    if (!changelog.isSupported) {
-      commonPrint.log(
-        'changelog schema ${changelog.schemaVersion} is not supported',
-        logLevel: LogLevel.warning,
-      );
-      return null;
+class ReleaseNotesGroup {
+  const ReleaseNotesGroup({required this.section, required this.entries});
+
+  final ReleaseNotesSection section;
+  final List<String> entries;
+}
+
+class ReleaseNotesDocument {
+  const ReleaseNotesDocument({required this.lead, required this.groups});
+
+  final String lead;
+  final List<ReleaseNotesGroup> groups;
+
+  List<String> get breaking => [
+    for (final group in groups)
+      if (group.section == ReleaseNotesSection.breaking) ...group.entries,
+  ];
+
+  bool get hasBreaking => breaking.isNotEmpty;
+
+  int get entryCount =>
+      groups.fold(0, (sum, group) => sum + group.entries.length);
+}
+
+String releaseNotesSectionTitle(
+  AppLocalizations appLocalizations,
+  ReleaseNotesSection section,
+) => switch (section) {
+  ReleaseNotesSection.breaking => appLocalizations.changelogBreaking,
+  ReleaseNotesSection.added => appLocalizations.changelogFeatures,
+  ReleaseNotesSection.improved => appLocalizations.changelogImproved,
+  ReleaseNotesSection.fixed => appLocalizations.changelogFixes,
+  ReleaseNotesSection.known => appLocalizations.changelogKnownIssues,
+};
+
+final _headingPattern = RegExp(r'^#{1,6}\s+(.*?)\s*$');
+final _bulletPattern = RegExp(r'^-\s+(.*)$');
+
+/// Reads the authored notes between the changelog markers of a release body.
+/// A body that is not authored notes (no markers, a heading outside the fixed
+/// set, nothing but loose bullets) returns null so the caller can fall back to
+/// plain Markdown.
+ReleaseNotesDocument? parseReleaseNotes(String? body) {
+  if (body == null || !body.contains(releaseNotesBeginMarker)) return null;
+  final scoped = scopeReleaseNotes(
+    body,
+  ).replaceAll(RegExp(r'<!--.*?-->', dotAll: true), '');
+  final lead = <String>[];
+  final entries = <ReleaseNotesSection, List<String>>{};
+  List<String>? current;
+  for (final source in scoped.split('\n')) {
+    final line = source.trimRight();
+    final heading = _headingPattern.firstMatch(line);
+    if (heading != null) {
+      final section = _sectionHeadings[heading[1]!.toLowerCase()];
+      if (section == null) return null;
+      current = entries.putIfAbsent(section, () => []);
+      continue;
     }
-    return changelog.versions.firstOrNull;
-  } catch (error) {
-    commonPrint.log(
-      'changelog decode failed ${compactError(error)}',
-      logLevel: LogLevel.warning,
-    );
-    return null;
+    if (line.trim().isEmpty) continue;
+    if (current == null) {
+      if (!_bulletPattern.hasMatch(line)) lead.add(line.trim());
+      continue;
+    }
+    final bullet = _bulletPattern.firstMatch(line);
+    if (bullet != null) {
+      current.add(bullet[1]!.trim());
+    } else if (current.isNotEmpty && source.startsWith(' ')) {
+      current[current.length - 1] = '${current.last} ${line.trim()}';
+    }
   }
+  final groups = [
+    for (final section in ReleaseNotesSection.values)
+      if (entries[section]?.isNotEmpty ?? false)
+        ReleaseNotesGroup(section: section, entries: entries[section]!),
+  ];
+  if (groups.isEmpty && lead.isEmpty) return null;
+  return ReleaseNotesDocument(lead: lead.join(' '), groups: groups);
 }

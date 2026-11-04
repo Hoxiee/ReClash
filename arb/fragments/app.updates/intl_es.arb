@@ -70,5 +70,7 @@
   "updateRemainingTime": "Quedan {time}",
   "updateSeconds": "{count} s",
   "updateMinutes": "{count} min",
-  "updateResumeShort": "Reanudar"
+  "updateResumeShort": "Reanudar",
+  "changelogImproved": "Mejoras",
+  "changelogKnownIssues": "Problemas conocidos"
 }

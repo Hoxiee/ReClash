@@ -70,5 +70,7 @@
   "updateRemainingTime": "{time} qoldi",
   "updateSeconds": "{count} s",
   "updateMinutes": "{count} daq",
-  "updateResumeShort": "Davom ettirish"
+  "updateResumeShort": "Davom ettirish",
+  "changelogImproved": "Yaxshilanishlar",
+  "changelogKnownIssues": "Ma'lum muammolar"
 }

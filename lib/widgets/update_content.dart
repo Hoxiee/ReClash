@@ -5,7 +5,6 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form_row.dart';
-import 'package:reclash/models/changelog.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 
@@ -53,13 +52,9 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
       locale,
       platform: widget.platform.name.toLowerCase(),
     );
-    final changelog = parseReleaseChangelog(release.body);
-    final breaking = changelog?.tag == release.tag
-        ? changelog!.groups
-              .where((group) => group.type == ChangelogType.breaking)
-              .expand((group) => group.entries)
-              .toList()
-        : const <ChangelogEntry>[];
+    final breaking = summary == null || summary.warnings.isNotEmpty
+        ? const <String>[]
+        : (parseReleaseNotes(release.body)?.breaking ?? const <String>[]);
     final muted = context.colorScheme.onSurfaceVariant;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -85,10 +80,7 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
               description: warning.description,
             ),
           for (final entry in breaking)
-            _ImportantNotice(
-              title: l.changelogBreaking,
-              description: entry.text,
-            ),
+            _ImportantNotice(title: l.changelogBreaking, description: entry),
           generateGroup([
             DecorationListItem(
               leading: GlyphIcon(
@@ -111,7 +103,6 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
         ] else
           ReleaseNotes(
             body: release.body,
-            tag: release.tag,
             fullReleaseUrl: release.source.releasePage(release.tag).toString(),
           ),
         if (summary != null || widget.asset != null)
@@ -134,7 +125,6 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
           if (summary != null)
             ReleaseNotes(
               body: release.body,
-              tag: release.tag,
               fullReleaseUrl: release.source
                   .releasePage(release.tag)
                   .toString(),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -129,7 +128,7 @@ void main() {
     expect(find.text('Updates without interruption'), findsOneWidget);
     expect(find.text('Your background'), findsOneWidget);
     expect(find.text('Make an explicit choice.'), findsOneWidget);
-    expect(find.text('Review this change.'), findsOneWidget);
+    expect(find.text('Review this change.'), findsNothing);
     expect(
       find.text(currentAppLocalizations.updatePackageDevice),
       findsNothing,
@@ -144,79 +143,66 @@ void main() {
     );
   });
 
-  for (final changelogPayload in [
-    null,
-    'invalid JSON',
-    jsonEncode({
-      'schemaVersion': 2,
-      'versions': [
-        {
-          'version': '0.1.0',
-          'tag': 'v0.1.0',
-          'groups': [
-            {
-              'type': 'feat',
-              'entries': [
-                {'id': 'example', 'text': 'Notes from another version.'},
-              ],
-            },
-          ],
-        },
-      ],
-    }),
-  ]) {
-    final scenario = changelogPayload == null
-        ? 'missing'
-        : changelogPayload == 'invalid JSON'
-        ? 'invalid'
-        : 'mismatched';
-    testWidgets(
-      'authored overview keeps $scenario changelog in release details',
-      (tester) async {
-        final base = testUpdateRelease(tag: 'v0.1.0-pre.2', warning: true);
-        final release = AppUpdateRelease(
-          source: base.source,
-          data: {
-            ...base.data,
-            'body':
-                '<!-- reclash:changelog:begin -->\n'
-                '- Markdown release details.\n'
-                '<!-- reclash:changelog:end -->\n'
-                '${renderReleaseSummary(base.summary!)}'
-                '${changelogPayload == null ? '' : '<!-- reclash:changelog:json\n$changelogPayload\n-->\n'}'
-                '## Downloads\n- Download boilerplate.\n',
-          },
-        );
-        await pump(
-          tester,
-          SingleChildScrollView(
-            child: UpdateReleaseContent(
-              release: release,
-              currentVersion: '0.1.0-pre.1',
-              platform: SupportPlatform.Android,
-            ),
-          ),
-        );
-        expect(find.text('Updates without interruption'), findsOneWidget);
-        expect(find.text('Your background'), findsOneWidget);
-        expect(find.text('Make an explicit choice.'), findsOneWidget);
-        expect(find.text('Markdown release details.'), findsNothing);
-        expect(find.text('Notes from another version.'), findsNothing);
-        final disclosure = find.byKey(const ValueKey('update-release-details'));
-        await tester.ensureVisible(disclosure);
-        await tester.tap(disclosure);
-        await tester.pump();
-        expect(find.text('Markdown release details.'), findsOneWidget);
-        expect(find.text('Notes from another version.'), findsNothing);
-        expect(find.text('Download boilerplate.'), findsNothing);
-        await tester.tap(disclosure);
-        await tester.pump();
-        expect(find.text('Markdown release details.'), findsNothing);
-        expect(find.text('Make an explicit choice.'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      },
+  testWidgets('a breaking note without a summary warning is shown up front', (
+    tester,
+  ) async {
+    final release = testUpdateRelease(breaking: true);
+    await pump(
+      tester,
+      SingleChildScrollView(
+        child: UpdateReleaseContent(
+          release: release,
+          currentVersion: '0.8.95',
+          platform: SupportPlatform.Android,
+        ),
+      ),
     );
-  }
+    expect(find.text('Review this change.'), findsOneWidget);
+  });
+
+  testWidgets(
+    'authored overview keeps loose markdown notes in release details',
+    (tester) async {
+      final base = testUpdateRelease(tag: 'v0.1.0-pre.2', warning: true);
+      final release = AppUpdateRelease(
+        source: base.source,
+        data: {
+          ...base.data,
+          'body':
+              '<!-- reclash:changelog:begin -->\n'
+              '- Markdown release details.\n'
+              '<!-- reclash:changelog:end -->\n'
+              '${renderReleaseSummary(base.summary!)}'
+              '## Downloads\n- Download boilerplate.\n',
+        },
+      );
+      await pump(
+        tester,
+        SingleChildScrollView(
+          child: UpdateReleaseContent(
+            release: release,
+            currentVersion: '0.1.0-pre.1',
+            platform: SupportPlatform.Android,
+          ),
+        ),
+      );
+      expect(find.text('Updates without interruption'), findsOneWidget);
+      expect(find.text('Your background'), findsOneWidget);
+      expect(find.text('Make an explicit choice.'), findsOneWidget);
+      expect(find.text('Markdown release details.'), findsNothing);
+      final disclosure = find.byKey(const ValueKey('update-release-details'));
+      await tester.ensureVisible(disclosure);
+      await tester.tap(disclosure);
+      await tester.pump();
+      expect(find.text('Markdown release details.'), findsOneWidget);
+      expect(find.text('Download boilerplate.'), findsNothing);
+      await tester.tap(disclosure);
+      await tester.pump();
+      expect(find.text('Markdown release details.'), findsNothing);
+      expect(find.text('Make an explicit choice.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('authored prerelease keeps structured notes in release details', (
     tester,

@@ -63,35 +63,17 @@ AppUpdateRelease testUpdateRelease({
       ),
     },
   );
-  final changelog = jsonEncode({
-    'schemaVersion': 2,
-    'versions': [
-      {
-        'version': tag.substring(1),
-        'tag': tag,
-        'prerelease': prerelease,
-        'groups': [
-          {
-            'type': breaking ? 'breaking' : 'feat',
-            'entries': [
-              {
-                'id': 'example',
-                'text': breaking ? 'Review this change.' : 'Improved updates.',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  });
+  final notes =
+      '<!-- reclash:changelog:begin -->\n'
+      '${breaking ? '### Breaking changes\n\n- Review this change.\n' : '### New\n\n- Improved updates.\n'}'
+      '<!-- reclash:changelog:end -->\n';
   return AppUpdateRelease(
     source: const TestUpdateSource(),
     data: {
       'tag_name': tag,
       'prerelease': prerelease,
       'published_at': '2026-10-18T10:00:00Z',
-      'body':
-          '${authored ? renderReleaseSummary(summary) : ''}<!-- reclash:changelog:json\n$changelog\n-->\n',
+      'body': '$notes${authored ? renderReleaseSummary(summary) : ''}',
       'assets': [
         {
           'name': 'ReClash-android-arm64-v8a.apk',

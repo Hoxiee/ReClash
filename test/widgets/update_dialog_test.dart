@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -21,21 +20,18 @@ import '../helpers/test_update_runtime.dart';
 
 const _runningVersion = '0.8.95';
 
-const _payload =
-    '{"schemaVersion":2,"versions":[{"version":"0.8.96","tag":"v0.8.96",'
-    '"date":"2026-08-16","prerelease":false,"groups":['
-    '{"type":"breaking","entries":[{"id":"af20769","text":'
-    '"Re-import backups"}]},'
-    '{"type":"feat","entries":[{"id":"1a2b3c4","text":'
-    '"Override scripts"}]}]}]}';
+const _notes =
+    '<!-- reclash:changelog:begin -->\n'
+    '### Breaking changes\n\n'
+    '- Re-import backups\n\n'
+    '### New\n\n'
+    '- Override scripts\n'
+    '<!-- reclash:changelog:end -->\n';
 
 const _bulletsOnly =
     '<!-- reclash:changelog:begin -->\n'
     '- Override scripts\n'
     '<!-- reclash:changelog:end -->\n';
-
-String _bodyWith(String payload) =>
-    '$_bulletsOnly\n<!-- reclash:changelog:json\n$payload\n-->\n';
 
 class _UpdateSource implements AppUpdateSource {
   const _UpdateSource();
@@ -132,10 +128,7 @@ void main() {
 
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(
-          data: release(_bodyWith(_payload)),
-          isUser: true,
-        );
+        .checkUpdateResultHandle(data: release(_notes), isUser: true);
     await tester.pumpAndSettle();
 
     expect(find.text('0.8.96'), findsOneWidget);
@@ -152,10 +145,7 @@ void main() {
 
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(
-          data: release(_bodyWith(_payload)),
-          isUser: true,
-        );
+        .checkUpdateResultHandle(data: release(_notes), isUser: true);
     await tester.pumpAndSettle();
 
     // Entry copy comes from the release payload and is English only; the group
@@ -189,7 +179,7 @@ void main() {
     final container = await pumpApp(tester);
     await container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
+        .checkUpdateResultHandle(data: release(_notes));
     await tester.pumpAndSettle();
     expect(find.byType(UpdateSheet), findsNothing);
     expect(container.read(appUpdateActionProvider).phase, UpdatePhase.offered);
@@ -202,10 +192,7 @@ void main() {
     final container = await pumpApp(tester);
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(
-          data: release(_bodyWith(_payload)),
-          isUser: true,
-        );
+        .checkUpdateResultHandle(data: release(_notes), isUser: true);
     await tester.pumpAndSettle();
     await tapCancel(tester);
     await shown;
@@ -435,39 +422,18 @@ void main() {
     'keeps all breaking changes first and expands other groups in place',
     (tester) async {
       await pumpApp(tester);
-      final payload = jsonEncode({
-        'schemaVersion': 2,
-        'versions': [
-          {
-            'version': '0.8.96',
-            'tag': 'v0.8.96',
-            'groups': [
-              {
-                'type': 'feat',
-                'entries': [
-                  {'id': 'f', 'text': 'New feature'},
-                ],
-              },
-              {
-                'type': 'fix',
-                'entries': [
-                  {'id': 'x', 'text': 'Last fix'},
-                ],
-              },
-              {
-                'type': 'breaking',
-                'entries': List.generate(
-                  7,
-                  (index) => {'id': '$index', 'text': 'Migration $index'},
-                ),
-              },
-            ],
-          },
-        ],
-      });
+      final notes =
+          '<!-- reclash:changelog:begin -->\n'
+          '### Breaking changes\n\n'
+          '${List.generate(7, (index) => '- Migration $index\n').join()}\n'
+          '### New\n\n'
+          '- New feature\n\n'
+          '### Fixed\n\n'
+          '- Last fix\n'
+          '<!-- reclash:changelog:end -->\n';
       final shown = _showOffer(
         tester.element(find.byType(Scaffold)),
-        release: release(_bodyWith(payload)),
+        release: release(notes),
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('Migration 6'), findsOneWidget);
