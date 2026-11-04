@@ -90,6 +90,16 @@ Selection selectTests(
         'l10n',
       );
     }
+    if (path.startsWith('.github/')) {
+      mapped |= addAll(
+        path,
+        (test) =>
+            test.startsWith('test/tool/github_') ||
+            test == 'test/tool/fork_identity_test.dart' ||
+            test == 'test/windows_installer_test.dart',
+        'reads .github/',
+      );
+    }
     final tool = _toolTarget(path);
     if (tool != null) {
       mapped |= addAll(

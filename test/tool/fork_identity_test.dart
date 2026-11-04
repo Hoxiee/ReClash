@@ -41,10 +41,11 @@ void main() {
       final workflow =
           loadYaml(File('.github/workflows/build.yaml').readAsStringSync())
               as Map;
-      final release = (workflow['jobs'] as Map)['build'] as Map;
+      final jobs = workflow['jobs'] as Map;
+      final release = jobs['build'] as Map;
       expect(release['if'], contains("github.repository == 'Hoxiee/ReClash'"));
       expect(
-        release['needs'],
+        (jobs['upload'] as Map)['needs'],
         containsAll([
           'dart',
           'plugins',

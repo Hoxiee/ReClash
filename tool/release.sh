@@ -171,6 +171,9 @@ tag_release() {
   done
   dart run tool/check_release_version.dart "$tag" >/dev/null
   dart run tool/changelog.dart verify
+  echo "--- full test suite ---"
+  dart run tool/test.dart --summary-only ||
+    die "the full suite fails; a tag would only publish a red release run"
 
   echo "--- release body for $tag ---"
   dart run tool/changelog.dart render release --tag "$tag" |

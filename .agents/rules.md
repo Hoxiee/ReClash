@@ -389,6 +389,10 @@ Prefer tests for user-visible behavior and stable contracts over implementation-
 maintainer will visually review a small UI change, do not add micro-tests pinning exact colors, fills, geometry, or
 internal widget flags; test meaningful interactions, accessibility contracts, and behavior regressions instead.
 
+Before a release tag or any change under `.github/`, run the whole suite with `dart run tool/test.dart --summary-only`
+(about a minute on a many-core machine), not `--changed`: the release run's Dart job executes every test, and a
+single failure there leaves the release unpublished. `tool/release.sh tag` runs it before tagging.
+
 The `core/` directory is excluded from automated coverage accounting. Do not add coverage instrumentation or coverage
 collection for code under `core/`. CI still runs `CGO_ENABLED=0 go test .` and `go vet .` to compile/check the Go wrapper,
 plus a `GOOS=android` vet that covers the `android` files the first two exclude; verify cross-language

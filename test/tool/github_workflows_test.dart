@@ -25,16 +25,19 @@ void main() {
     expect(workflow['permissions']['contents'], 'read');
     final build = jobs['build'] as YamlMap;
     expect(build['if'], contains('inputs.build_packages'));
-    expect(
-      build['needs'],
-      containsAll(['dart', 'rust', 'windows-helper-test']),
-    );
+    expect(build['needs'], isNull);
     final publish = jobs['upload'] as YamlMap;
     expect(publish['if'], contains("github.event_name == 'push'"));
     expect(publish['if'], contains("startsWith(github.ref, 'refs/tags/v')"));
     expect(
       publish['needs'],
-      containsAll(['validate-linux-packages', 'validate-windows-packages']),
+      containsAll([
+        'dart',
+        'rust',
+        'windows-helper-test',
+        'validate-linux-packages',
+        'validate-windows-packages',
+      ]),
     );
   });
 
