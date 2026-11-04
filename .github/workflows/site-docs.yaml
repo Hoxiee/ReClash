@@ -2,6 +2,8 @@ name: Website documentation
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - 'site'
       - 'docs/**'

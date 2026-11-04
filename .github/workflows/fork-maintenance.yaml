@@ -2,6 +2,8 @@ name: Fork maintenance
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - '.fork/**'
       - 'tool/fork.dart'

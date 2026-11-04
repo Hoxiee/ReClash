@@ -2,6 +2,8 @@ name: Nix development shell
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - flake.nix
       - flake.lock
