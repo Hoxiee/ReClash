@@ -147,6 +147,7 @@ class CommonScaffoldState extends State<CommonScaffold>
   final _searchLeadingKey = GlobalKey();
   final _searchFieldKey = GlobalKey();
   final _barKey = GlobalKey();
+  final _bodyKey = GlobalKey();
   var _searchFillsBar = true;
   var _searchDocked = false;
   var _sorting = false;
@@ -1022,6 +1023,7 @@ class CommonScaffoldState extends State<CommonScaffold>
     final barFloats = !isBottomSheet;
     final presentation = PagePresentationScope.of(context);
     final sortableBody = SortModeScope(
+      key: _bodyKey,
       sorting: _sorting,
       child: presentation == null
           ? widget.body

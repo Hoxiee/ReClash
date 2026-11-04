@@ -141,6 +141,7 @@ class NestedPagedSheet extends StatefulWidget {
 
 class _NestedPagedSheetState extends State<NestedPagedSheet> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+  final _sheetKey = GlobalKey();
   ValueNotifier<SheetDismissHandler?>? _dismissHandler;
 
   @override
@@ -195,6 +196,7 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
   Widget build(BuildContext context) {
     final sheetProvider = SheetProvider.of(context)!;
     final sheet = PagedSheet(
+      key: _sheetKey,
       child: SheetPagesNavigator(
         key: _navigatorKey,
         onGenerateInitialRoutes: (_, _) => [

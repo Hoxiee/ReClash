@@ -52,13 +52,11 @@ Future<T?> showSheet<T>({
   required WidgetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  if (_usesBottomSheet(context)) {
-    return _showBottomSheet<T>(context, builder: builder, props: props);
-  }
-  return _showSideSheet<T>(
+  return _showAdaptiveSheet<T>(
     context,
-    backgroundColor: props.backgroundColor,
-    builder: builder,
+    builder: (context, _) => builder(context),
+    props: props,
+    fitsContent: true,
   );
 }
 
@@ -69,34 +67,12 @@ Future<T?> showFormSheet<T>({
   required WidgetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  if (_usesBottomSheet(context)) {
-    return _showBottomSheet<T>(context, builder: builder, props: props);
-  }
-  final navigator = sheetNavigatorOf(context);
-  return navigator.push(
-    FormSheetRoute<T>(
-      builder: builder,
-      backgroundColor: props.backgroundColor,
-      barrierColor: context.colorScheme.modalScrim,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    ),
-  );
-}
-
-Future<T?> _showBottomSheet<T>(
-  BuildContext context, {
-  required WidgetBuilder builder,
-  required SheetProps props,
-}) {
-  final navigator = sheetNavigatorOf(context);
-  return navigator.push(
-    SnapSheetRoute<T>(
-      builder: (sheetContext, _) => builder(sheetContext),
-      detents: props.detents,
-      fitsContent: true,
-      sheetBarrierColor: context.colorScheme.modalScrim,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    ),
+  return _showAdaptiveSheet<T>(
+    context,
+    builder: (context, _) => builder(context),
+    props: props,
+    fitsContent: true,
+    form: true,
   );
 }
 
@@ -137,19 +113,35 @@ Future<T?> showExtend<T>(
 /// the shortest. Where a sheet cannot have detents the
 /// content keeps its own scroll controller and [initialScrollOffset] is the
 /// caller's own business.
-///
-/// The sheet follows the view across the mobile breakpoint: it reopens in the
-/// other form, and the result is whichever form the reader closes.
 Future<T?> showSnapSheet<T>(
   BuildContext context, {
   required SnapSheetBuilder builder,
   double initialScrollOffset = 0,
 }) {
-  final completer = Completer<T?>();
+  return _showAdaptiveSheet<T>(
+    context,
+    builder: builder,
+    initialScrollOffset: initialScrollOffset,
+  );
+}
 
-  void open({required bool isMobile}) {
+Future<T?> _showAdaptiveSheet<T>(
+  BuildContext context, {
+  required SnapSheetBuilder builder,
+  SheetProps props = const SheetProps(),
+  bool fitsContent = false,
+  bool form = false,
+  double initialScrollOffset = 0,
+}) {
+  final completer = Completer<T?>();
+  final contentKey = GlobalKey();
+  final barrierColor = context.colorScheme.modalScrim;
+  final localizations = MaterialLocalizations.of(context);
+
+  void open({required bool isMobile, Route<T>? replacing}) {
     var crossed = false;
     var popped = false;
+    late final ModalRoute<T> route;
 
     // The mobile layout drops a desktop page's navigator, sheet and all.
     void reopenIfDropped() {
@@ -166,47 +158,73 @@ Future<T?> showSnapSheet<T>(
       });
     }
 
-    Widget home(BuildContext sheetContext, ScrollController? controller) {
-      return _SnapSheetHome(
+    Widget home(BuildContext sheetContext, ScrollController? _) {
+      return _AdaptiveSheetHome(
         isMobile: isMobile,
         onCross: () {
-          if (crossed || !sheetContext.mounted || !context.mounted) {
+          if (crossed || popped || !sheetContext.mounted) {
             return;
           }
-          if (ModalRoute.of(sheetContext)?.isCurrent != true) {
+          if (!route.isCurrent) {
+            return;
+          }
+          final usesBottomSheet = _usesBottomSheet(sheetContext);
+          if (usesBottomSheet == isMobile) {
             return;
           }
           crossed = true;
-          Navigator.of(sheetContext).pop();
-          open(isMobile: !isMobile);
+          open(isMobile: usesBottomSheet, replacing: route);
         },
         onDispose: reopenIfDropped,
-        child: builder(sheetContext, controller),
+        child: SheetScrollScope(
+          createController: createSheetScrollController,
+          child: _AdaptiveSheetContent(
+            key: contentKey,
+            builder: builder,
+            providesController: isMobile && !fitsContent,
+            initialScrollOffset: initialScrollOffset,
+          ),
+        ),
       );
     }
 
-    final barrierColor = context.colorScheme.modalScrim;
-    final Future<T?> closed;
     if (isMobile) {
-      final navigator = sheetNavigatorOf(context);
-      closed = navigator.push(
-        SnapSheetRoute<T>(
-          builder: home,
-          initialScrollOffset: initialScrollOffset,
-          sheetBarrierColor: barrierColor,
-          barrierLabel: MaterialLocalizations.of(
-            context,
-          ).modalBarrierDismissLabel,
-        ),
+      route = SnapSheetRoute<T>(
+        builder: home,
+        detents: props.detents,
+        fitsContent: fitsContent,
+        initialScrollOffset: initialScrollOffset,
+        sheetBarrierColor: barrierColor,
+        barrierLabel: localizations.modalBarrierDismissLabel,
+      );
+    } else if (form) {
+      route = FormSheetRoute<T>(
+        builder: (context) => home(context, null),
+        backgroundColor: props.backgroundColor,
+        barrierColor: barrierColor,
+        barrierLabel: localizations.modalBarrierDismissLabel,
       );
     } else {
-      closed = _showSideSheet<T>(
-        context,
-        builder: (sheetContext) => home(sheetContext, null),
+      route = ModalSideSheetRoute<T>(
+        builder: (context) => SheetProvider(
+          type: SheetType.sideSheet,
+          child: home(context, null),
+        ),
+        backgroundColor: props.backgroundColor,
+        modalBarrierColor: barrierColor,
+        barrierLabel: localizations.scrimLabel,
+        barrierOnTapHint: localizations.scrimOnTapHint(
+          localizations.bottomSheetLabel,
+        ),
       );
     }
+    if (replacing == null) {
+      sheetNavigatorOf(context).push(route);
+    } else {
+      replacing.navigator!.replace(oldRoute: replacing, newRoute: route);
+    }
     unawaited(
-      closed.then((value) {
+      route.popped.then((value) {
         popped = true;
         if (!crossed) {
           completer.complete(value);
@@ -219,8 +237,44 @@ Future<T?> showSnapSheet<T>(
   return completer.future;
 }
 
-class _SnapSheetHome extends StatefulWidget {
-  const _SnapSheetHome({
+class _AdaptiveSheetContent extends StatefulWidget {
+  const _AdaptiveSheetContent({
+    super.key,
+    required this.builder,
+    required this.providesController,
+    required this.initialScrollOffset,
+  });
+
+  final SnapSheetBuilder builder;
+  final bool providesController;
+  final double initialScrollOffset;
+
+  @override
+  State<_AdaptiveSheetContent> createState() => _AdaptiveSheetContentState();
+}
+
+class _AdaptiveSheetContentState extends State<_AdaptiveSheetContent> {
+  ScrollController? _controller;
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = widget.providesController
+        ? _controller ??= createSheetScrollController(
+            initialScrollOffset: widget.initialScrollOffset,
+          )
+        : null;
+    return widget.builder(context, controller);
+  }
+}
+
+class _AdaptiveSheetHome extends StatefulWidget {
+  const _AdaptiveSheetHome({
     required this.isMobile,
     required this.onCross,
     required this.onDispose,
@@ -233,10 +287,10 @@ class _SnapSheetHome extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_SnapSheetHome> createState() => _SnapSheetHomeState();
+  State<_AdaptiveSheetHome> createState() => _AdaptiveSheetHomeState();
 }
 
-class _SnapSheetHomeState extends State<_SnapSheetHome> {
+class _AdaptiveSheetHomeState extends State<_AdaptiveSheetHome> {
   @override
   void dispose() {
     widget.onDispose();
@@ -245,7 +299,8 @@ class _SnapSheetHomeState extends State<_SnapSheetHome> {
 
   @override
   Widget build(BuildContext context) {
-    if (_usesBottomSheet(context) != widget.isMobile) {
+    if (_usesBottomSheet(context) != widget.isMobile &&
+        ModalRoute.isCurrentOf(context) == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) => widget.onCross());
     }
     return widget.child;

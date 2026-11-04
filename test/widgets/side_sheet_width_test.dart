@@ -44,7 +44,14 @@ void main() {
     _Opener opener, {
     double sidebarWidth = 0,
     bool? mobileLayout,
+    ValueNotifier<bool>? openerVisible,
   }) async {
+    Widget page(BuildContext context) => Scaffold(
+      body: TextButton(
+        onPressed: () => opener(context),
+        child: const Text('open'),
+      ),
+    );
     tester.view.physicalSize = view;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -62,12 +69,14 @@ void main() {
                   child: Navigator(
                     onGenerateInitialRoutes: (_, _) => [
                       MaterialPageRoute<void>(
-                        builder: (context) => Scaffold(
-                          body: TextButton(
-                            onPressed: () => opener(context),
-                            child: const Text('open'),
-                          ),
-                        ),
+                        builder: (context) => openerVisible == null
+                            ? page(context)
+                            : ValueListenableBuilder(
+                                valueListenable: openerVisible,
+                                builder: (_, visible, child) =>
+                                    visible ? child! : const SizedBox.shrink(),
+                                child: Builder(builder: page),
+                              ),
                       ),
                     ],
                   ),
@@ -191,6 +200,219 @@ void main() {
     await tester.pumpAndSettle();
     expect(completed, isTrue);
     expect(value, 'done');
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final wideType in [SheetType.sideSheet, SheetType.formSheet]) {
+    for (final initialWidth in [500.0, 1280.0]) {
+      testWidgets('an open $wideType adapts from $initialWidth dp without '
+          'losing input or completing', (tester) async {
+        var completed = false;
+        String? value;
+        await open(tester, Size(initialWidth, 800), (context) {
+          Widget page(BuildContext context) => CommonScaffold(
+            title: 'title',
+            body: ListView(
+              children: [
+                const TextField(),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop('done'),
+                  child: const Text('done'),
+                ),
+              ],
+            ),
+          );
+          final result = wideType == SheetType.formSheet
+              ? showFormSheet<String>(context: context, builder: page)
+              : showSheet<String>(context: context, builder: page);
+          result.then((result) {
+            completed = true;
+            value = result;
+          });
+        }, mobileLayout: true);
+        final navigator = Navigator.of(tester.element(find.text('title')));
+        final scaffold = tester.state(find.byType(CommonScaffold));
+        await tester.enterText(find.byType(TextField), 'unsaved input');
+
+        for (final width in [1280.0, 600.0, 601.0, 500.0]) {
+          tester.view.physicalSize = Size(width, 800);
+          await tester.pumpAndSettle();
+          expect(
+            SheetProvider.of(tester.element(find.text('title')))?.type,
+            width <= 600 ? SheetType.bottomSheet : wideType,
+          );
+          expect(tester.state(find.byType(CommonScaffold)), same(scaffold));
+          expect(find.text('unsaved input'), findsOneWidget);
+          expect(
+            Navigator.of(tester.element(find.text('title'))),
+            same(navigator),
+          );
+          expect(completed, isFalse);
+          expect(tester.takeException(), isNull);
+        }
+
+        await tester.tap(find.text('done'));
+        await tester.pumpAndSettle();
+        expect(completed, isTrue);
+        expect(value, 'done');
+        expect(find.text('title'), findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+    testWidgets('an open $wideType still adapts after its opener unmounts', (
+      tester,
+    ) async {
+      final visible = ValueNotifier(true);
+      addTearDown(visible.dispose);
+      late BuildContext openerContext;
+      var completed = false;
+      await open(tester, const Size(500, 800), (context) {
+        openerContext = context;
+        final result = wideType == SheetType.formSheet
+            ? showFormSheet<void>(context: context, builder: (_) => _page())
+            : showSheet<void>(context: context, builder: (_) => _page());
+        result.then((_) => completed = true);
+      }, openerVisible: visible);
+      visible.value = false;
+      await tester.pump();
+      expect(openerContext.mounted, isFalse);
+
+      final sheetContext = tester.element(find.text('title'));
+      showDialog<void>(
+        context: sheetContext,
+        useRootNavigator: false,
+        builder: (_) => const Text('cover'),
+      );
+      await tester.pumpAndSettle();
+      tester.view.physicalSize = const Size(1280, 800);
+      await tester.pumpAndSettle();
+      expect(find.text('cover'), findsOneWidget);
+      expect(completed, isFalse);
+      Navigator.of(tester.element(find.text('cover'))).pop();
+      await tester.pumpAndSettle();
+      expect(
+        SheetProvider.of(tester.element(find.text('title')))?.type,
+        wideType,
+      );
+      expect(completed, isFalse);
+
+      await tester.tapAt(const Offset(20, 20));
+      await tester.pumpAndSettle();
+      expect(completed, isTrue);
+      expect(find.text('title'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an open $wideType preserves nested pages and scrolling', (
+      tester,
+    ) async {
+      await open(tester, const Size(500, 800), (context) {
+        Widget builder(BuildContext context) => NestedPagedSheet(
+          builder: (context) => CommonScaffold(
+            title: 'root',
+            body: ListView(
+              padding: const EdgeInsets.only(top: 80),
+              children: [
+                TextButton(
+                  onPressed: () => showInSheet<void>(
+                    context,
+                    builder: (_) => CommonScaffold(
+                      title: 'details',
+                      body: ListView(
+                        children: [
+                          const TextField(),
+                          for (var i = 0; i < 40; i++)
+                            ListTile(title: Text('detail $i')),
+                        ],
+                      ),
+                    ),
+                  ),
+                  child: const Text('next'),
+                ),
+              ],
+            ),
+          ),
+        );
+        if (wideType == SheetType.formSheet) {
+          showFormSheet<void>(context: context, builder: builder);
+        } else {
+          showSheet<void>(
+            context: context,
+            props: nestedPagedSheetProps,
+            builder: builder,
+          );
+        }
+      });
+      await tester.tap(find.text('next'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'nested input');
+      final navigator = Navigator.of(tester.element(find.text('details')));
+
+      for (final width in [1280.0, 500.0, 1280.0]) {
+        tester.view.physicalSize = Size(width, 800);
+        await tester.pumpAndSettle();
+        expect(find.text('details'), findsOneWidget);
+        expect(find.text('nested input'), findsOneWidget);
+        expect(
+          Navigator.of(tester.element(find.text('details'))),
+          same(navigator),
+        );
+        await tester.drag(find.byType(ListView), const Offset(0, -300));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byType(ListView), const Offset(0, 300));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      }
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('root'), findsOneWidget);
+      expect(find.text('details'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('a snap sheet keeps the controller borrowed by a nested page', (
+    tester,
+  ) async {
+    late Future<void> closed;
+    await open(tester, const Size(500, 800), (context) {
+      closed = showSnapSheet<void>(
+        context,
+        builder: (_, controller) => NestedPagedSheet(
+          builder: (_) => CommonScaffold(
+            title: 'title',
+            body: ListView(
+              controller: controller,
+              children: [
+                for (var i = 0; i < 50; i++) ListTile(title: Text('row $i')),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+    final controller = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller;
+    expect(controller, isNotNull);
+
+    for (final width in [1280.0, 500.0, 1280.0]) {
+      tester.view.physicalSize = Size(width, 800);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<ListView>(find.byType(ListView)).controller,
+        same(controller),
+      );
+      await tester.drag(find.byType(ListView), const Offset(0, -350));
+      await tester.pumpAndSettle();
+      expect(controller!.offset, greaterThan(0));
+      expect(tester.takeException(), isNull);
+    }
+
+    Navigator.of(tester.element(find.byType(NestedPagedSheet))).pop();
+    await tester.pumpAndSettle();
+    await closed;
+    expect(find.text('title'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

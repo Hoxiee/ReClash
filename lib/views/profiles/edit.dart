@@ -603,7 +603,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         return false;
       },
     );
-    final data = await BaseNavigator.push<Uint8List>(context, editorPage);
+    final data = await BaseNavigator.push<Uint8List>(
+      sheetNavigatorOf(context).context,
+      editorPage,
+    );
     if (data == null || !mounted) {
       return;
     }
