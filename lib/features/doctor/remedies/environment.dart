@@ -165,7 +165,7 @@ class ClearProxyRemedy implements Remedy {
 class ReapplyProxyRemedy implements Remedy {
   const ReapplyProxyRemedy(this._apply);
 
-  final Future<void> Function() _apply;
+  final Future<bool> Function() _apply;
 
   @override
   String get id => 'proxy.reapply';
@@ -183,7 +183,9 @@ class ReapplyProxyRemedy implements Remedy {
   Duration get settle => const Duration(seconds: 2);
 
   @override
-  Future<void> apply(RemedyRequest request) => _apply();
+  Future<void> apply(RemedyRequest request) async {
+    if (!await _apply()) throw StateError('$id: the proxy was not applied');
+  }
 }
 
 class FreePortRemedy implements Remedy {

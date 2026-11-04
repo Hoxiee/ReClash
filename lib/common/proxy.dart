@@ -52,8 +52,11 @@ class SystemProxyQueue {
 
   Future<int?> ownPort() async => await _record?.read();
 
-  Future<void> apply(ProxyState state) {
-    return _enqueue(() async {
+  /// Whether the system proxy now matches [state]; false when starting it
+  /// failed.
+  Future<bool> apply(ProxyState state) async {
+    var ok = true;
+    await _enqueue(() async {
       if (_closed) {
         return;
       }
@@ -62,12 +65,14 @@ class SystemProxyQueue {
         if (await _proxy.startProxy(state.port, state.bassDomain)) {
           await _remember(state.port);
         } else {
+          ok = false;
           _logFailure();
         }
       } else {
         await _stop();
       }
     });
+    return ok;
   }
 
   Future<void> close() {

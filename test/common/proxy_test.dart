@@ -71,6 +71,15 @@ void main() {
     expect(proxy.calls, ['start 7890', 'stop']);
   });
 
+  test('apply reports whether the proxy was started', () async {
+    final proxy = _FakeProxy();
+    final queue = SystemProxyQueue(proxy);
+
+    proxy.held = Future.value(false);
+    expect(await queue.apply(_state(isStart: true)), isFalse);
+    expect(await queue.apply(_state(isStart: true)), isTrue);
+  });
+
   test('a failing call does not stall the queue', () async {
     final proxy = _FakeProxy();
     final queue = SystemProxyQueue(proxy);

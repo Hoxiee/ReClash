@@ -98,7 +98,7 @@ void main() {
         FixKind.auto,
         false,
       ),
-      ReapplyProxyRemedy(() async {}): (
+      ReapplyProxyRemedy(() async => true): (
         RemedyReach.foreign,
         FixKind.auto,
         false,
