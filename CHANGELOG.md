@@ -2,6 +2,32 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.5
+
+Speed test runs inside the Core, and diagnostics can find and fix conflicts with other software.
+
+### New
+
+- **Speed test**: measure latency, download and upload through the route you pick. The test fits on one screen, keeps a
+  history, and opens a result page with the details.
+- **Environment diagnostics**: diagnostics detect conflicting VPNs, DPI bypass tools, hosts file entries and foreign
+  proxies and fix them. Other software is never closed, and changes to foreign settings need a confirmed tap.
+  Automatic healing is on by default and can be turned off in settings.
+- **Support reports**: send a diagnostics report with one button, or share or save it when upload is unavailable.
+  Provider fix links apply only known remedies and only for a matching report.
+- **Core error pop-ups**: a new setting hides Core error pop-ups.
+
+### Improved
+
+- **Interface**: refined design of several elements, including sheets and the update dialog.
+
+### Fixed
+
+- The update sheet shows the release notes again.
+- The proxy fix in diagnostics now reports failure when the system proxy was not applied.
+- Diagnostics read the system proxy correctly on Linux desktops other than GNOME, such as KDE and MATE.
+- Linux: Helper and Core executables are labeled for SELinux on install, so the service starts on SELinux systems.
+
 ## v0.1.0-pre.4
 
 The simple dashboard becomes the default and forecasts your traffic; first-run setup is one guided journey.

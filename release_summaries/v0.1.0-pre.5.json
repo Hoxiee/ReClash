@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.5",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Speed test and smarter diagnostics",
+      "spotlight": {
+        "title": "Speed test in the Core",
+        "description": "Measure latency, download and upload through the route you pick, with history and a result page.",
+        "kind": "speed"
+      },
+      "highlights": [
+        {
+          "title": "Conflict diagnostics",
+          "description": "Diagnostics find conflicting VPNs, DPI bypass tools, hosts entries and proxies and fix them.",
+          "kind": "shield"
+        },
+        {
+          "title": "Support reports",
+          "description": "Send a diagnostics report with one button; provider fix links apply only known remedies.",
+          "kind": "link"
+        },
+        {
+          "title": "Hide Core error pop-ups",
+          "description": "A new setting turns off Core error pop-ups.",
+          "kind": "update"
+        },
+        {
+          "title": "SELinux on Linux",
+          "description": "Helper and Core executables are labeled on install, so the service starts on SELinux systems.",
+          "kind": "shield",
+          "platforms": ["linux"]
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Тест скорости и более умная диагностика",
+      "spotlight": {
+        "title": "Тест скорости в Core",
+        "description": "Измеряйте задержку, загрузку и отдачу через выбранный маршрут; есть история и страница результата.",
+        "kind": "speed"
+      },
+      "highlights": [
+        {
+          "title": "Диагностика конфликтов",
+          "description": "Диагностика находит конфликтующие VPN, средства обхода DPI, записи hosts и прокси и исправляет их.",
+          "kind": "shield"
+        },
+        {
+          "title": "Отчёты для поддержки",
+          "description": "Отправьте отчёт диагностики одной кнопкой; ссылки провайдера применяют только известные исправления.",
+          "kind": "link"
+        },
+        {
+          "title": "Скрытие ошибок Core",
+          "description": "Новая настройка отключает всплывающие ошибки Core.",
+          "kind": "update"
+        },
+        {
+          "title": "SELinux в Linux",
+          "description": "При установке исполняемые файлы Helper и Core получают метки, и служба запускается в системах с SELinux.",
+          "kind": "shield",
+          "platforms": ["linux"]
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
