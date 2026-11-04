@@ -51,6 +51,9 @@ jobs:
     # started by hand.
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -110,10 +113,20 @@ jobs:
       - name: Check coverage
         run: dart run tool/check_coverage.dart coverage/lcov.info 75
 
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
   plugins:
     name: Plugins
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -134,6 +147,13 @@ jobs:
           dart pub get
           dart analyze
           dart test
+
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
 
   desktop:
     name: Desktop ${{ matrix.platform }}
@@ -211,6 +231,9 @@ jobs:
     name: Go core
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -250,10 +273,20 @@ jobs:
           test -n "$tags" || { echo 'Could not read tags from build_config.yaml' >&2; exit 1; }
           GOOS=android GOARCH=arm64 go vet "-tags=$tags" . ./mobile ./tun ./platform
 
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
   android:
     name: Android unit tests
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -316,10 +349,20 @@ jobs:
             -Ptarget-platform=android-arm64 \
             -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
 
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
   rust:
     name: Rust
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -342,10 +385,20 @@ jobs:
           cargo test --locked --manifest-path services/helper/Cargo.toml
           cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
 
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
   windows-helper-test:
     name: Windows native backend test (${{ matrix.arch }})
     if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      actions: write
     strategy:
       fail-fast: false
       matrix:
@@ -400,6 +453,13 @@ jobs:
           CGO_ENABLED: 0
           RECLASH_REQUIRE_WINDOWS_BOOTSTRAP: '1'
         run: go test -v -count=1 -timeout=5m ./cmd/core
+
+      - name: Stop the release run
+        if: ${{ failure() && (startsWith(github.ref, 'refs/tags/v') || inputs.build_packages) }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
 
   build:
     # Releases publish where the release links point: the public repository.
