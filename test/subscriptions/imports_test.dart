@@ -125,11 +125,17 @@ void main() {
     test('converts Xray nodes and records discarded config sections', () {
       const source =
           '{"inbounds":[{"port":1080}],"dns":{"servers":["1.1.1.1"]},"routing":{"rules":[]},"outbounds":[{"tag":"edge","protocol":"vless","settings":{"vnext":[{"address":"edge.example","port":443,"users":[{"id":"11111111-1111-4111-8111-111111111111","encryption":"none"}]}]},"streamSettings":{"network":"tcp"}}]}';
-      final result = convertSubscriptionImport(_bytes(source));
-      expect(result.format, SubscriptionFormat.xray);
-      expect(result.summary.nodes, 1);
-      expect(result.summary.ignoredSections, containsAll(['inbounds', 'dns']));
-      expect(result.summary.hasLosses, isTrue);
+      for (final input in [source, '[$source,$source]']) {
+        final result = convertSubscriptionImport(_bytes(input));
+        expect(result.format, SubscriptionFormat.xray);
+        expect(result.summary.nodes, 1);
+        expect(result.summary.ignoredSections, [
+          'inbounds',
+          'dns',
+          'routing (partial conversion)',
+        ]);
+        expect(result.summary.hasLosses, isTrue);
+      }
     });
 
     test('converts sing-box nodes and records discarded config sections', () {

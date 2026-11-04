@@ -671,8 +671,8 @@ void main() {
             ),
           ),
         );
+        await tester.tap(find.text('open'));
         await tester.runAsync(() async {
-          await tester.tap(find.text('open'));
           await tester.pumpAndSettle();
           final store = await DeviceIdentityStore.create();
           await store.globalSendEnabled();

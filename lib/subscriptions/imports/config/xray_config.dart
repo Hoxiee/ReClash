@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../routing/skipped_node.dart';
 import '../subscription/subscription_links.dart';
+import '../transport/xhttp.dart';
 import 'amnezia_config.dart';
 
 bool isXrayConfigInput(String body) {
@@ -202,6 +203,7 @@ class _XrayConversion {
         continue;
       }
       if (proxy == null) continue;
+      if (proxy.remove('x-import-losses') == true) _otherLosses = true;
       final transport = proxy.remove('x-unsupported-transport')?.toString();
       if (transport != null) {
         _skip(
@@ -1125,121 +1127,19 @@ bool _applyXrayTransport(
       final xhttp = _asMap(
         streamSettings['xhttpSettings'] ?? streamSettings['splithttpSettings'],
       );
-      final extra = _asMap(xhttp?['extra']);
-      final mode = (extra?['mode'] ?? xhttp?['mode'])?.toString() ?? '';
-      final path = (extra?['path'] ?? xhttp?['path'])?.toString() ?? '';
-      final host = (extra?['host'] ?? xhttp?['host'])?.toString() ?? '';
+      final converted = convertXhttpOptions(
+        path: xhttp?['path']?.toString() ?? '',
+        host: xhttp?['host']?.toString() ?? '',
+        mode: xhttp?['mode']?.toString() ?? '',
+        extra: xhttp?['extra'],
+      );
       proxy['network'] = 'xhttp';
-      proxy['xhttp-opts'] = {
-        if (path.isNotEmpty) 'path': path,
-        if (host.isNotEmpty) 'host': host,
-        if (mode.isNotEmpty) 'mode': mode,
-        ..._xhttpExtraOpts(extra),
-      };
+      proxy['xhttp-opts'] = converted.options;
+      if (converted.hasLosses) proxy['x-import-losses'] = true;
       return true;
     default:
       return false;
   }
-}
-
-const _xhttpExtraKeys = {
-  'headers': 'headers',
-  'scMaxEachPostBytes': 'sc-max-each-post-bytes',
-  'scMinPostsIntervalMs': 'sc-min-posts-interval-ms',
-  'xPaddingBytes': 'x-padding-bytes',
-  'xPaddingObfsMode': 'x-padding-obfs-mode',
-  'xPaddingKey': 'x-padding-key',
-  'xPaddingHeader': 'x-padding-header',
-  'xPaddingPlacement': 'x-padding-placement',
-  'xPaddingMethod': 'x-padding-method',
-  'uplinkHTTPMethod': 'uplink-http-method',
-  'uplinkDataPlacement': 'uplink-data-placement',
-  'uplinkDataKey': 'uplink-data-key',
-  'uplinkChunkSize': 'uplink-chunk-size',
-  'sessionIDPlacement': 'session-placement',
-  'sessionIDKey': 'session-key',
-  'sessionIDTable': 'session-table',
-  'sessionIDLength': 'session-length',
-  'seqPlacement': 'seq-placement',
-  'seqKey': 'seq-key',
-  'noGRPCHeader': 'no-grpc-header',
-};
-
-Map<String, Object?> _xhttpExtraOpts(Map<String, Object?>? extra) {
-  if (extra == null) return const {};
-  final opts = <String, Object?>{};
-  for (final entry in _xhttpExtraKeys.entries) {
-    final value = extra[entry.key];
-    if (value is bool) {
-      opts[entry.value] = value;
-    } else if (value is Map<String, Object?>) {
-      final strings = <String, Object?>{
-        for (final e in value.entries)
-          if (e.value is String && (e.value as String).isNotEmpty)
-            e.key: e.value,
-      };
-      if (strings.isNotEmpty) opts[entry.value] = strings;
-    } else if (value != null && value.toString().isNotEmpty) {
-      opts[entry.value] = value.toString();
-    }
-  }
-  if (!_sessionIdsSafe(extra)) {
-    opts.remove('session-table');
-    opts.remove('session-length');
-  }
-  final xmux = _asMap(extra['xmux']);
-  if (xmux != null) {
-    final reuse = <String, Object?>{
-      if (xmux['maxConcurrency'] != null)
-        'max-concurrency': xmux['maxConcurrency'].toString(),
-      if (xmux['maxConnections'] != null)
-        'max-connections': xmux['maxConnections'].toString(),
-      if (xmux['cMaxReuseTimes'] != null)
-        'c-max-reuse-times': xmux['cMaxReuseTimes'].toString(),
-      if (xmux['hMaxRequestTimes'] != null)
-        'h-max-request-times': xmux['hMaxRequestTimes'].toString(),
-      if (xmux['hMaxReusableSecs'] != null)
-        'h-max-reusable-secs': xmux['hMaxReusableSecs'].toString(),
-      if (xmux['hKeepAlivePeriod'] is int)
-        'h-keep-alive-period': xmux['hKeepAlivePeriod'],
-    };
-    if (reuse.isNotEmpty) opts['reuse-settings'] = reuse;
-  }
-  return opts;
-}
-
-bool _sessionIdsSafe(Map<String, Object?> extra) {
-  final table = extra['sessionIDTable']?.toString();
-  if (table == null || table.isEmpty || table == 'uuid') return true;
-  if (!table.codeUnits.every((unit) => unit < 0x80)) return false;
-  final range = _parseSessionRange(extra['sessionIDLength']?.toString());
-  if (range == null) return false;
-  final (min, max) = range;
-  final base = table.length;
-  if (base >= 2 && max >= 31) return true;
-  if (base <= 1) return max - min + 1 >= 2147483648;
-  final bigBase = BigInt.from(base);
-  var room = BigInt.zero;
-  for (var k = min; k <= max; k++) {
-    room += bigBase.pow(k);
-  }
-  return room.compareTo(BigInt.from(2) << 30) >= 0;
-}
-
-(int, int)? _parseSessionRange(String? value) {
-  final text = (value ?? '').trim();
-  if (text.isEmpty) return (16, 32);
-  final parts = text.split('-');
-  if (parts.length == 1) {
-    final v = int.tryParse(parts[0]);
-    if (v == null || v < 0) return null;
-    return (v, v);
-  }
-  if (parts.length != 2) return null;
-  final min = int.tryParse(parts[0].trim());
-  final max = int.tryParse(parts[1].trim());
-  if (min == null || max == null || min < 0 || max < min) return null;
-  return (min, max);
 }
 
 Map<String, Object?>? _asMap(Object? value) =>

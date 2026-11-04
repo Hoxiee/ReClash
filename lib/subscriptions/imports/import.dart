@@ -391,14 +391,19 @@ List<String> _ignoredSections(SubscriptionFormat format, Object? json) {
       format == SubscriptionFormat.amnezia) {
     return const [];
   }
-  if (json is! Map) return const [];
   if (format == SubscriptionFormat.xray) {
-    return [
-      for (final key in ['inbounds', 'dns', 'stats', 'policy', 'api', 'log'])
-        if (json.containsKey(key)) key,
-      if (json.containsKey('routing')) 'routing (partial conversion)',
-    ];
+    final configs = json is List
+        ? json.whereType<Map>()
+        : [if (json is Map) json];
+    return {
+      for (final config in configs) ...[
+        for (final key in ['inbounds', 'dns', 'stats', 'policy', 'api', 'log'])
+          if (config.containsKey(key)) key,
+        if (config.containsKey('routing')) 'routing (partial conversion)',
+      ],
+    }.toList();
   }
+  if (json is! Map) return const [];
   if (format == SubscriptionFormat.singbox) {
     return [
       for (final key in json.keys)

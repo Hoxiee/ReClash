@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../config/amnezia_config.dart';
 import '../routing/skipped_node.dart';
+import '../transport/xhttp.dart';
 
 const shareLinkSchemes = [
   'vmess',
@@ -13,11 +14,15 @@ const shareLinkSchemes = [
   'trojan',
   'hysteria2',
   'hy2',
+  'hysteria2+realm',
+  'hy2+realm',
   'tuic',
   'anytls',
   'hysteria',
   'socks',
   'socks5',
+  'socks5h',
+  'mierus',
   'wireguard',
   'wg',
   'amneziawg',
@@ -25,7 +30,7 @@ const shareLinkSchemes = [
   'vpn',
 ];
 
-final _schemes = [for (final scheme in shareLinkSchemes) '$scheme://'];
+final _linkScheme = RegExp(r'^([a-zA-Z][a-zA-Z0-9+.-]*)://');
 
 abstract interface class ConvertedSubscription {
   String get config;
@@ -37,25 +42,27 @@ abstract interface class LossyConversion implements ConvertedSubscription {
   bool get hasOtherLosses;
 }
 
-class ShareLinksResult implements ConvertedSubscription {
-  const ShareLinksResult({required this.config, this.skipped = const []});
+class ShareLinksResult implements LossyConversion {
+  const ShareLinksResult({
+    required this.config,
+    this.skipped = const [],
+    this.hasOtherLosses = false,
+  });
 
   @override
   final String config;
 
   @override
   final List<SkippedNode> skipped;
+
+  @override
+  final bool hasOtherLosses;
 }
 
-bool _isLinkLine(String line) => _schemes.any(line.startsWith);
+bool _isLinkLine(String line) => shareLinkSchemes.contains(_nodeScheme(line));
 
-String? _nodeScheme(String line) {
-  for (final scheme in shareLinkSchemes) {
-    if (scheme == 'vpn' || scheme == 'amneziawg' || scheme == 'awg') continue;
-    if (line.startsWith('$scheme://')) return scheme;
-  }
-  return null;
-}
+String? _nodeScheme(String line) =>
+    _linkScheme.firstMatch(line)?.group(1)?.toLowerCase();
 
 bool isShareLinkInput(String input) {
   final trimmed = input.trim();
@@ -70,23 +77,29 @@ bool isShareLinkInput(String input) {
 }
 
 ShareLinksResult? tryConvertShareLinks(String raw) {
-  final (proxies, skipped) = _scanShareLinks(raw);
+  final (proxies, skipped, hasOtherLosses) = _scanShareLinks(raw);
   if (proxies.isEmpty) return null;
-  return ShareLinksResult(config: emitProxiesConfig(proxies), skipped: skipped);
+  return ShareLinksResult(
+    config: emitProxiesConfig(proxies),
+    skipped: skipped,
+    hasOtherLosses: hasOtherLosses,
+  );
 }
 
 List<SkippedNode> probeUnsupportedShareLinks(String raw) {
-  final (proxies, skipped) = _scanShareLinks(raw);
+  final (proxies, skipped, _) = _scanShareLinks(raw);
   return proxies.isEmpty ? skipped : const [];
 }
 
-(List<Map<String, Object?>>, List<SkippedNode>) _scanShareLinks(String raw) {
+(List<Map<String, Object?>>, List<SkippedNode>, bool) _scanShareLinks(
+  String raw,
+) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
   final seen = {...reservedProxyNames};
+  var hasOtherLosses = false;
 
-  void addProxy(Map<String, Object?>? proxy) {
-    if (proxy == null) return;
+  void addProxy(Map<String, Object?> proxy) {
     var name = proxy['name']! as String;
     if (reservedProxyNames.contains(name)) name = '$name node';
     var suffix = 2;
@@ -99,46 +112,49 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
     proxies.add(proxy);
   }
 
+  void skip(String line, String scheme) {
+    final hashIdx = line.indexOf('#');
+    skipped.add(
+      SkippedNode(
+        name: hashIdx >= 0 ? _displayName(line.substring(hashIdx + 1)) : scheme,
+        kind: scheme,
+        reason: SkippedNodeReason.protocol,
+      ),
+    );
+  }
+
   void addFrom(String text) {
     for (final line in text.split(RegExp(r'[\r\n]+'))) {
       final trimmed = line.trim();
-      if (trimmed.isEmpty) continue;
-      if (trimmed.startsWith('vpn://')) {
-        final (vpnProxies, vpnSkipped) = parseVpnLink(
-          trimmed.substring('vpn://'.length),
-        );
-        skipped.addAll(vpnSkipped);
-        vpnProxies.forEach(addProxy);
-        continue;
-      }
+      final scheme = _nodeScheme(trimmed);
+      if (scheme == null) continue;
+      final normalized = '$scheme${trimmed.substring(scheme.length)}';
       try {
-        if (trimmed.startsWith('amneziawg://') ||
-            trimmed.startsWith('awg://')) {
-          addProxy(_parseAmneziaWgLink(trimmed));
-          continue;
-        }
-        final proxy = _parseUri(trimmed);
-        if (proxy != null) {
-          addProxy(proxy);
-          continue;
-        }
-        final scheme = _nodeScheme(trimmed);
-        if (scheme != null) {
-          final hashIdx = trimmed.indexOf('#');
-          skipped.add(
-            SkippedNode(
-              name: hashIdx >= 0
-                  ? _displayName(trimmed.substring(hashIdx + 1))
-                  : scheme,
-              kind: scheme,
-              reason: SkippedNodeReason.protocol,
-            ),
+        if (scheme == 'vpn') {
+          final (vpnProxies, vpnSkipped) = parseVpnLink(
+            normalized.substring('vpn://'.length),
           );
+          skipped.addAll(vpnSkipped);
+          vpnProxies.forEach(addProxy);
+          if (vpnProxies.isEmpty && vpnSkipped.isEmpty) {
+            skip(normalized, scheme);
+          }
+          hasOtherLosses = true;
+          continue;
+        }
+        final parsed = scheme == 'amneziawg' || scheme == 'awg'
+            ? [?_parseAmneziaWgLink(normalized)]
+            : _parseUri(normalized, onLoss: () => hasOtherLosses = true);
+        if (parsed.isEmpty) {
+          skip(normalized, scheme);
+        } else {
+          parsed.forEach(addProxy);
+          if (scheme == 'amneziawg' || scheme == 'awg') hasOtherLosses = true;
         }
       } on _UnsupportedLink catch (error) {
         skipped.add(error.node);
       } catch (_) {
-        continue;
+        skip(normalized, scheme);
       }
     }
   }
@@ -156,7 +172,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
     }
   }
 
-  return (proxies, skipped);
+  return (proxies, skipped, hasOtherLosses);
 }
 
 class _UnsupportedLink implements Exception {
@@ -197,34 +213,87 @@ String _stripLinkExtras(String name) {
   return extras ? name.substring(0, cut) : name;
 }
 
-Map<String, Object?>? _parseUri(String uri) {
-  if (uri.startsWith('vmess://')) return _parseVmess(uri);
-  if (uri.startsWith('vless://')) return _parseVless(uri);
-  if (uri.startsWith('ssr://')) return _parseShadowsocksR(uri);
-  if (uri.startsWith('ss://')) return _parseShadowsocks(uri);
-  if (uri.startsWith('trojan://')) return _parseTrojan(uri);
-  if (uri.startsWith('hysteria2://') || uri.startsWith('hy2://')) {
-    return _parseHysteria2(uri);
+List<Map<String, Object?>> _parseUri(
+  String uri, {
+  required void Function() onLoss,
+}) {
+  if (uri.startsWith('mierus://')) return _parseMieru(uri, onLoss: onLoss);
+  final proxy = switch (_nodeScheme(uri)) {
+    'vmess' => _parseVmess(uri),
+    'vless' => _parseVless(uri, onLoss: onLoss),
+    'ssr' => _parseShadowsocksR(uri),
+    'ss' => _parseShadowsocks(uri),
+    'trojan' => _parseTrojan(uri),
+    'hysteria2' ||
+    'hy2' ||
+    'hysteria2+realm' ||
+    'hy2+realm' => _parseHysteria2(uri),
+    'tuic' => _parseTuic(uri),
+    'anytls' => _parseAnytls(uri),
+    'hysteria' => _parseHysteria1(uri),
+    'socks' || 'socks5' || 'socks5h' => _parseSocks(uri),
+    'wireguard' || 'wg' => _parseWireguard(uri),
+    'http' || 'https' => _parseHttpProxy(uri),
+    _ => null,
+  };
+  return [?proxy];
+}
+
+List<Map<String, Object?>> _parseMieru(
+  String uri, {
+  required void Function() onLoss,
+}) {
+  final link = Uri.parse(uri);
+  if (link.host.isEmpty || link.userInfo.isEmpty) return const [];
+  final userInfo = _decodeComponent(link.userInfo);
+  final colon = userInfo.indexOf(':');
+  final params = link.queryParametersAll;
+  final ports = params['port'] ?? const [];
+  final protocols = params['protocol'] ?? const [];
+  if (ports.isEmpty || ports.length != protocols.length) return const [];
+  final name = _displayName(link.fragment);
+  final baseName = name.isNotEmpty
+      ? name
+      : params['profile']?.firstOrNull ?? link.host;
+  final proxies = <Map<String, Object?>>[];
+  for (var i = 0; i < ports.length; i++) {
+    final port = ports[i];
+    final protocol = protocols[i].toUpperCase();
+    final range = port.split('-');
+    final bounds = range.map(int.tryParse).toList();
+    if (!const {'TCP', 'UDP'}.contains(protocol) ||
+        range.length > 2 ||
+        bounds.any((value) => value == null || value < 1 || value > 65535) ||
+        bounds.first! > bounds.last!) {
+      onLoss();
+      continue;
+    }
+    proxies.add({
+      'name': '$baseName:$port/$protocol',
+      'type': 'mieru',
+      'server': link.host,
+      if (range.length == 1) 'port': bounds.single else 'port-range': port,
+      'transport': protocol,
+      'username': colon < 0 ? userInfo : userInfo.substring(0, colon),
+      'password': colon < 0 ? '' : userInfo.substring(colon + 1),
+      'udp': true,
+      for (final field in ['multiplexing', 'handshake-mode', 'traffic-pattern'])
+        if (params[field]?.firstOrNull case final value? when value.isNotEmpty)
+          field: value,
+    });
   }
-  if (uri.startsWith('tuic://')) return _parseTuic(uri);
-  if (uri.startsWith('anytls://')) return _parseAnytls(uri);
-  if (uri.startsWith('hysteria://')) return _parseHysteria1(uri);
-  if (uri.startsWith('socks://') || uri.startsWith('socks5://')) {
-    return _parseSocks(uri);
-  }
-  if (uri.startsWith('wireguard://') || uri.startsWith('wg://')) {
-    return _parseWireguard(uri);
-  }
-  if (uri.startsWith('http://') || uri.startsWith('https://')) {
-    return _parseHttpProxy(uri);
-  }
-  return null;
+  return proxies;
 }
 
 Map<String, Object?>? _parseSocks(String uri) {
-  final parts = _splitUserinfoUri(uri);
+  final parts = _splitUserinfoUri(uri, requireUserinfo: false);
   if (parts == null) return null;
-  final (credential, server, port, params, name) = parts;
+  final (rawCredential, server, port, params, name) = parts;
+  final decoded = tryBase64Decode(rawCredential);
+  final credential =
+      !rawCredential.contains(':') && decoded?.contains(':') == true
+      ? decoded!
+      : rawCredential;
   final proxy = <String, Object?>{
     'name': name,
     'type': 'socks5',
@@ -436,7 +505,10 @@ Map<String, Object?>? _parseVmess(String uri) {
   return proxy;
 }
 
-Map<String, Object?>? _parseVless(String uri) {
+Map<String, Object?>? _parseVless(
+  String uri, {
+  required void Function() onLoss,
+}) {
   final parts = _splitUserinfoUri(uri);
   if (parts == null) return null;
   final (userinfo, server, port, params, name) = parts;
@@ -483,12 +555,14 @@ Map<String, Object?>? _parseVless(String uri) {
   final transport = network == 'splithttp' ? 'xhttp' : network;
   if (transport == 'xhttp') {
     proxy['network'] = 'xhttp';
-    final mode = params['mode'] ?? '';
-    proxy['xhttp-opts'] = {
-      if ((params['path'] ?? '').isNotEmpty) 'path': params['path'],
-      if ((params['host'] ?? '').isNotEmpty) 'host': params['host'],
-      if (mode.isNotEmpty) 'mode': mode,
-    };
+    final converted = convertXhttpOptions(
+      path: params['path'] ?? '',
+      host: params['host'] ?? '',
+      mode: params['mode'] ?? '',
+      extra: params['extra'],
+    );
+    proxy['xhttp-opts'] = converted.options;
+    if (converted.hasLosses) onLoss();
   } else if (transport != 'tcp') {
     proxy['network'] = _mihomoNetwork(transport);
   }
@@ -651,17 +725,36 @@ Map<String, Object?>? _parseTrojan(String uri) {
 
 Map<String, Object?>? _parseHysteria2(String uri) {
   final (hopUri, hopPorts) = splitHysteria2Ports(uri);
-  final parts = _splitUserinfoUri(hopUri);
-  if (parts == null) return null;
-  final (auth, server, port, params, name) = parts;
-
+  final link = Uri.parse(hopUri);
+  final server = link.host;
+  final port = link.hasPort ? link.port : 443;
+  if (server.isEmpty || port < 1 || port > 65535) return null;
+  final params = link.queryParameters;
+  final auth = _decodeComponent(link.userInfo);
+  final name = _displayName(link.fragment);
+  final realm = link.scheme.endsWith('+realm');
   final ports = hopPorts.isNotEmpty ? hopPorts : (params['mport'] ?? '');
   final proxy = <String, Object?>{
-    'name': name,
+    'name': name.isEmpty ? server : name,
     'type': 'hysteria2',
     'server': server,
     'port': port,
-    'password': auth,
+    if (!realm) 'password': auth,
+    if (realm) ...{
+      if ((params['auth'] ?? '').isNotEmpty) 'password': params['auth'],
+      'realm-opts': {
+        'enable': true,
+        'server-url': Uri(
+          scheme: 'https',
+          host: server,
+          port: link.hasPort ? port : null,
+        ).toString(),
+        if (auth.isNotEmpty) 'token': auth,
+        if (link.path.length > 1)
+          'realm-id': _decodeComponent(link.path.substring(1)),
+        'stun-servers': ?link.queryParametersAll['stun'],
+      },
+    },
   };
   final cleanPorts = ports.replaceAll(' ', '');
   if (cleanPorts.isNotEmpty && isValidPortHopping(cleanPorts)) {
@@ -834,7 +927,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   Map<String, String> params,
   String name,
 )?
-_splitUserinfoUri(String uri) {
+_splitUserinfoUri(String uri, {bool requireUserinfo = true}) {
   final schemeEnd = uri.indexOf('://') + 3;
   final noScheme = uri.substring(schemeEnd);
 
@@ -853,9 +946,11 @@ _splitUserinfoUri(String uri) {
       : withoutName;
 
   final atIdx = hostPort.lastIndexOf('@');
-  if (atIdx < 0) return null;
-  final userinfo = _decodeComponent(hostPort.substring(0, atIdx));
-  if (userinfo.isEmpty) return null;
+  if (atIdx < 0 && requireUserinfo) return null;
+  final userinfo = atIdx < 0
+      ? ''
+      : _decodeComponent(hostPort.substring(0, atIdx));
+  if (userinfo.isEmpty && requireUserinfo) return null;
   final split = splitHostPort(hostPort.substring(atIdx + 1));
   if (split == null) return null;
   final (server, port) = split;
