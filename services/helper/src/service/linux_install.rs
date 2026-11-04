@@ -11,6 +11,9 @@ use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+mod diagnostics;
+mod selinux;
+
 pub(super) const HELPER_NAME: &str = "ReClashHelperService";
 pub(super) const CORE_NAME: &str = "ReClashCore";
 const MANIFEST_NAME: &str = "manifest.json";
@@ -616,6 +619,7 @@ fn remove_staging(path: &Path) {
 pub(super) trait Systemd {
     fn run(&mut self, arguments: &[&str]) -> Result<()>;
     fn query(&mut self, action: &str, name: &str) -> Result<bool>;
+    fn diagnostics(&mut self, name: &str, since: SystemTime) -> String;
 }
 
 pub(super) struct Systemctl;
@@ -646,6 +650,10 @@ impl Systemd for Systemctl {
             Some(1 | 3 | 4) => Ok(false),
             _ => bail!("systemctl state query failed with {status}"),
         }
+    }
+
+    fn diagnostics(&mut self, name: &str, since: SystemTime) -> String {
+        diagnostics::collect(name, since)
     }
 }
 
@@ -958,7 +966,14 @@ pub(super) fn install(
     }
     source.replace_owned = replace_owned;
     source.package = package;
-    install_bundle(&Layout::system(), owner, source, &mut Systemctl)
+    let selinux = selinux::Selinux::detect().context(InstallFailure::SystemdFailed)?;
+    install_bundle(
+        &Layout::system(),
+        owner,
+        source,
+        &mut Systemctl,
+        &mut |file| selinux.label_executable(file),
+    )
 }
 
 fn install_bundle(
@@ -966,11 +981,25 @@ fn install_bundle(
     owner: Owner,
     mut source: SourceBundle,
     systemd: &mut impl Systemd,
+    label_executable: &mut dyn FnMut(&File) -> Result<()>,
 ) -> Result<()> {
     let _lock = layout.prepare(owner)?;
     let previous = snapshot(layout, owner, systemd, source.replace_owned)?;
     let bundle =
         stage_install(layout, owner, &mut source).context(InstallFailure::BundleInvalid)?;
+    let directory = secure_directory(&bundle, layout.root_uid)?;
+    for name in [HELPER_NAME, CORE_NAME] {
+        let file = open_member(&directory, name)?;
+        secure_file(&file, layout.root_uid, true)?;
+        label_executable(&file)
+            .with_context(|| {
+                format!(
+                    "prepare SELinux execution context for {}",
+                    bundle.join(name).display()
+                )
+            })
+            .context(InstallFailure::SystemdFailed)?;
+    }
     let name = service_name(owner);
     if previous.unit.is_some() {
         stop_confirmed(systemd, &name)?;
@@ -981,6 +1010,7 @@ fn install_bundle(
         bundle: source.manifest.clone(),
         package: source.package,
     };
+    let attempted_at = SystemTime::now();
     let result = (|| {
         atomic_write(
             &layout.unit(owner),
@@ -1004,6 +1034,12 @@ fn install_bundle(
     })()
     .context(InstallFailure::SystemdFailed);
     if let Err(error) = result {
+        let details = systemd.diagnostics(&name, attempted_at);
+        let error = if details.is_empty() {
+            error
+        } else {
+            error.context(details)
+        };
         if let Err(rollback) = restore(layout, owner, &previous, systemd) {
             return Err(rollback)
                 .context(format!("installation failed: {error:#}; rollback blocked"));
@@ -1210,6 +1246,15 @@ mod tests {
     use super::*;
     use std::os::unix::fs::symlink;
 
+    fn install_bundle(
+        layout: &Layout,
+        owner: Owner,
+        source: SourceBundle,
+        systemd: &mut impl Systemd,
+    ) -> Result<()> {
+        super::install_bundle(layout, owner, source, systemd, &mut |_| Ok(()))
+    }
+
     struct Fixture {
         root: PathBuf,
         layout: Layout,
@@ -1330,6 +1375,7 @@ mod tests {
         enabled: bool,
         fail_start: bool,
         fail_stop: bool,
+        diagnostic: String,
         calls: Vec<Vec<String>>,
     }
 
@@ -1359,6 +1405,143 @@ mod tests {
                 self.enabled
             })
         }
+
+        fn diagnostics(&mut self, name: &str, _: SystemTime) -> String {
+            self.calls.push(vec!["diagnostics".into(), name.into()]);
+            self.diagnostic.clone()
+        }
+    }
+
+    #[test]
+    fn executable_labels_are_prepared_for_new_and_reused_verified_pairs() {
+        for reused in [false, true] {
+            let fixture = Fixture::new();
+            let mut source = fixture.source("labels");
+            let manifest = source.manifest.clone();
+            if reused {
+                fixture.layout.prepare(fixture.owner).unwrap();
+                stage_install(&fixture.layout, fixture.owner, &mut source).unwrap();
+            }
+            let mut labeled = Vec::new();
+            let mut systemd = FakeSystemd::default();
+            super::install_bundle(
+                &fixture.layout,
+                fixture.owner,
+                source,
+                &mut systemd,
+                &mut |file| {
+                    assert_eq!(file.metadata()?.mode() & 0o777, 0o555);
+                    labeled.push(hash_file(&mut file.try_clone()?)?);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(labeled, [manifest.helper_sha256, manifest.core_sha256]);
+            assert!(systemd.active);
+        }
+    }
+
+    #[test]
+    fn unverified_cached_pair_is_not_relabelled() {
+        let fixture = Fixture::new();
+        let mut source = fixture.source("tampered-labels");
+        fixture.layout.prepare(fixture.owner).unwrap();
+        let bundle = stage_install(&fixture.layout, fixture.owner, &mut source).unwrap();
+        let helper = bundle.join(HELPER_NAME);
+        fs::set_permissions(&helper, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::write(&helper, b"\x7fELFtampered").unwrap();
+        fs::set_permissions(&helper, fs::Permissions::from_mode(0o555)).unwrap();
+        let mut systemd = FakeSystemd::default();
+        let error = super::install_bundle(
+            &fixture.layout,
+            fixture.owner,
+            source,
+            &mut systemd,
+            &mut |_| panic!("unverified executable must not be relabelled"),
+        )
+        .unwrap_err();
+        assert!(matches!(
+            error.downcast_ref::<InstallFailure>(),
+            Some(InstallFailure::BundleInvalid)
+        ));
+        assert!(systemd.calls.is_empty());
+    }
+
+    #[test]
+    fn labeling_failure_preserves_the_running_service_and_registration() {
+        let fixture = Fixture::new();
+        let mut systemd = FakeSystemd::default();
+        install_bundle(
+            &fixture.layout,
+            fixture.owner,
+            fixture.source("previous-labels"),
+            &mut systemd,
+        )
+        .unwrap();
+        let previous_unit = fs::read(fixture.layout.unit(fixture.owner)).unwrap();
+        let previous_registration = fs::read(fixture.layout.registration(fixture.owner)).unwrap();
+        systemd.calls.clear();
+        let mut labels = 0;
+        let error = super::install_bundle(
+            &fixture.layout,
+            fixture.owner,
+            fixture.source("failed-labels"),
+            &mut systemd,
+            &mut |_| {
+                labels += 1;
+                if labels == 2 {
+                    bail!("SELinux label denied");
+                }
+                Ok(())
+            },
+        )
+        .unwrap_err();
+        assert_eq!(labels, 2);
+        assert!(matches!(
+            error.downcast_ref::<InstallFailure>(),
+            Some(InstallFailure::SystemdFailed)
+        ));
+        assert!(format!("{error:#}").contains(CORE_NAME));
+        assert!(systemd.active && systemd.enabled);
+        assert!(systemd.calls.is_empty());
+        assert_eq!(
+            fs::read(fixture.layout.unit(fixture.owner)).unwrap(),
+            previous_unit
+        );
+        assert_eq!(
+            fs::read(fixture.layout.registration(fixture.owner)).unwrap(),
+            previous_registration
+        );
+    }
+
+    #[test]
+    fn failed_start_retains_diagnostics_collected_before_rollback() {
+        let fixture = Fixture::new();
+        let mut systemd = FakeSystemd {
+            fail_start: true,
+            diagnostic: "ExecMainStatus=203\nFailed at step EXEC: Permission denied".into(),
+            ..Default::default()
+        };
+        let error = install_bundle(
+            &fixture.layout,
+            fixture.owner,
+            fixture.source("failed-exec"),
+            &mut systemd,
+        )
+        .unwrap_err();
+        let error = format!("{error:#}");
+        assert!(error.contains("Helper installation rolled back"));
+        assert!(error.contains("ExecMainStatus=203"));
+        assert!(error.contains("Permission denied"));
+        let diagnostic = systemd
+            .calls
+            .iter()
+            .position(|call| call[0] == "diagnostics")
+            .unwrap();
+        assert_eq!(systemd.calls[diagnostic - 1][0], "start");
+        assert_eq!(systemd.calls[diagnostic + 1][0], "stop");
+        assert!(!fixture.layout.unit(fixture.owner).exists());
+        assert!(!fixture.layout.registration(fixture.owner).exists());
     }
 
     #[test]

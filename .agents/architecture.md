@@ -1945,11 +1945,19 @@ run as root. Core clears ambient capabilities on every Go thread before processi
 inactive-bundle pruning. AppImage uses the same stable bundle. Cancellation is final; there is no sudo/password or
 setuid fallback, and a host without systemd reports the Helper unavailable.
 
+On SELinux hosts, installation changes the generic `var_lib_t` executable label to `bin_t` for the hash-verified Helper
+and Core through their open file descriptors. It preserves the label's user, role and MLS range, leaves custom types
+alone, and does not require SELinux command-line tools or alter global policy. Both new and reused pairs are labeled
+before stopping an existing service; a labeling failure leaves that service and its registration intact. Inode labels
+survive reboot, but a host-wide SELinux relabel may reset them; an explicit Helper reinstall reapplies the executable type.
+
 An explicit authorization installs with `--replace-owned`: an unregistered unit is replaced only when its entire
 shipped ReClash unit, owner, protected executable path and Helper hash match. External units and drop-ins block
 replacement. A confirmed stop precedes the swap; failure restores the original unit and registration, including an
 originally absent registration. No old Helper protocol is accepted. Installer exit codes and bounded stderr reach
-application diagnostics, with separate registration, systemd, integrity and authorization errors.
+application diagnostics, with separate registration, systemd, integrity and authorization errors. Before rollback,
+the installer captures systemd's result and exit status plus the unit's journal for the current attempt. Each diagnostic
+command has a two-second deadline and a bounded output buffer; diagnostic failure never replaces the installation error.
 
 Native DEB/RPM installations record package origin only after matching the protected package marker and pair. Their
 pre-removal hooks run that packaged Helper while its files still exist and remove only matching owner registrations
