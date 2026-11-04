@@ -115,5 +115,6 @@
   "profileImportDownloading": "Téléchargement de l’abonnement…",
   "profileImportTryOtherFormat": "Rien n’a été ajouté. Vous pouvez choisir un autre format et réessayer.",
   "profilePasteFromClipboard": "Coller depuis le presse-papiers",
-  "urlSchemeDoctorDesc": "Ouvre le diagnostic ; avec ?check=, affiche un seul problème."
+  "urlSchemeDoctorDesc": "Ouvre le diagnostic ; avec ?check=, affiche un seul problème.",
+  "urlSchemeFixDesc": "Propose un correctif signé par le support de votre fournisseur ; rien ne change sans votre confirmation."
 }

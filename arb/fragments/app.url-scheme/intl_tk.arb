@@ -115,5 +115,6 @@
   "profileImportDownloading": "Abuna ýüklenýär…",
   "profileImportTryOtherFormat": "Hiç zat goşulmady. Başga format saýlap, täzeden synanyşyp bilersiňiz.",
   "profilePasteFromClipboard": "Alyş-çalyş buferinden goý",
-  "urlSchemeDoctorDesc": "Diagnostikany açmak; ?check= bilen diňe bir meseläni açmak."
+  "urlSchemeDoctorDesc": "Diagnostikany açmak; ?check= bilen diňe bir meseläni açmak.",
+  "urlSchemeFixDesc": "Üpjünçiňiziň goldawy tarapyndan gol çekilen düzedişi ulanmagy teklip edýär; tassyklaýançaňyz hiç zat üýtgemeýär."
 }

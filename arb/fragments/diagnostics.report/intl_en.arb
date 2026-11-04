@@ -1,0 +1,142 @@
+{
+  "reportProblem": "Report a problem",
+  "reportNoteHint": "Describe it, or tap below",
+  "reportReproduce": "Record the problem",
+  "reportContents": "What to include",
+  "reportCreate": "Create report",
+  "reportSectionServers": "Servers",
+  "reportSectionEnvironment": "Environment",
+  "reportSectionConfig": "Configuration",
+  "reportContentsFooter": "The summary and device details are always included.",
+  "reportRecording": "Repeat the problem now",
+  "reportSecondsLeft": "{seconds} s left",
+  "@reportSecondsLeft": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "reportFinishRecording": "I'm done",
+  "reportPhaseSnapshot": "Collecting the state",
+  "reportPhasePath": "Checking the connection",
+  "reportPhaseServices": "Checking services",
+  "reportPhasePacking": "Packing the report",
+  "reportSkipServers": "Skip",
+  "reportFiles": "Files",
+  "reportSend": "Send to support",
+  "reportShare": "Share",
+  "reportCopySummary": "Copy text for support",
+  "reportSaved": "Saved",
+  "reportShareFailed": "Couldn't open sharing",
+  "reportSendTitle": "Send the report?",
+  "reportSendTo": "It goes to {domain}.",
+  "@reportSendTo": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSendConfirm": "Send",
+  "reportSent": "Sent to support",
+  "reportTicket": "Ticket {ticket}",
+  "@reportTicket": {
+    "placeholders": {
+      "ticket": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSendFailed": "Not sent",
+  "reportSendOffline": "Couldn't reach the support server. Check the internet and try again.",
+  "reportSendRejected": "The support server didn't accept the report (code {code}).",
+  "@reportSendRejected": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "reportDropHint": "The report is saved and the summary is copied. Drop the file into the chat.",
+  "reportLeak": "Stopped to keep your data safe",
+  "reportFailed": "Couldn't make the report",
+  "reportStartTitle": "What went wrong?",
+  "reportStartSubtitle": "We'll check everything and make a report.",
+  "reportSymptomNoConnection": "Won't connect",
+  "reportSymptomSlow": "Slow",
+  "reportSymptomSomeSites": "Some sites don't open",
+  "reportSymptomDrops": "Keeps dropping",
+  "reportRecordStart": "Start recording",
+  "reportRecordNote": "First, 30 seconds of recording.",
+  "reportPrivacyNote": "Passwords and keys stay hidden.",
+  "reportPrivacyNotePublic": "Passwords, keys and servers stay hidden.",
+  "reportAudience": "Who will read it",
+  "reportAudienceProvider": "My VPN provider",
+  "reportAudiencePublic": "Anyone, in a public post",
+  "reportAudienceFooter": "Passwords and keys are always hidden. For a public post, server addresses are hidden too.",
+  "reportReproduceFooter": "For 30 seconds the app writes a detailed log while you repeat the problem. Useful when it happens only sometimes.",
+  "reportRecordingHint": "Open what doesn't work.",
+  "reportBuildingTitle": "Checking everything",
+  "reportBuildingHint": "Usually under a minute.",
+  "reportEtaSeconds": "About {seconds} s left",
+  "@reportEtaSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "reportEtaMinutes": "About {minutes} min left",
+  "@reportEtaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "reportPhaseRecorded": "Problem recorded",
+  "reportPhaseServers": "Checking servers",
+  "reportPhaseSkipped": "Skipped",
+  "reportCount": "{done} of {total}",
+  "@reportCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reportReady": "Report ready",
+  "reportIdHint": "Your provider may ask for this number.",
+  "reportSendToProvider": "Send to {provider}",
+  "@reportSendToProvider": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSendChat": "Send to support chat",
+  "reportOpenChat": "Open support chat",
+  "reportNextUpload": "The report goes straight to your provider.",
+  "reportNextShareChat": "Choose your provider's chat and send the file.",
+  "reportNextDownloadsChat": "Saved to Downloads; drag it into the chat.",
+  "reportNextFile": "Send the file to your provider.",
+  "reportSentTo": "Sent to {provider}",
+  "@reportSentTo": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "reportLeakHint": "Leave a section out and try again.",
+  "reportFailedHint": "Trying again usually helps.",
+  "reportStartOver": "Start over",
+  "reportChangeContents": "Change what's included",
+  "reportSupportText": "Text for support",
+  "reportRecordingSection": "Recording"
+}

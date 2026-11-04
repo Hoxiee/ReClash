@@ -110,6 +110,8 @@ mixin CoreInterface {
 
   Future<ReachResult?> reach(ReachParams params);
 
+  Future<DialDirectResult?> dialDirect(DialDirectParams params);
+
   Future<String> updateConfig(UpdateParams updateParams);
 
   Future<String> setupConfig(SetupParams setupParams);
@@ -893,6 +895,16 @@ abstract class CoreHandlerInterface with CoreInterface {
       timeout: coreGuardFor(params.timeout),
     );
     return data == null ? null : ReachResult.fromJson(data);
+  }
+
+  @override
+  Future<DialDirectResult?> dialDirect(DialDirectParams params) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.doctorDialDirect,
+      arguments: params.toJson(),
+      timeout: coreGuardFor(params.timeout),
+    );
+    return data == null ? null : DialDirectResult.fromJson(data);
   }
 
   @override

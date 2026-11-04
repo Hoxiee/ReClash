@@ -106,6 +106,7 @@ void main() {
         'reminder',
         'settings',
         'transport',
+        'support',
       });
       expect(
         subscriptionFields.map((field) => field.path).toSet(),
@@ -208,6 +209,56 @@ void main() {
       expect(
         result.warnings,
         contains('Invalid provider field: reclash-supporturl'),
+      );
+    });
+
+    test('support keys and upload come only from HTTPS response headers', () {
+      const key = 'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik';
+      const other = 'ed25519:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+      final headers = {
+        'reclash-support-key': ['$key, $other'],
+        'reclash-support-upload': ['https://support.example.test/upload'],
+      };
+      final secure = readSubscriptionMetadata(headers, secure: true).metadata;
+      expect(secure.supportKeys, [key, other]);
+      expect(secure.supportUploadUrl, 'https://support.example.test/upload');
+
+      final plain = readSubscriptionMetadata(headers);
+      expect(plain.metadata.supportKeys, isEmpty);
+      expect(plain.metadata.supportUploadUrl, isNull);
+      expect(
+        plain.warnings,
+        contains('Provider field needs an HTTPS response: reclash-support-key'),
+      );
+
+      final body = readSubscriptionMetadata(
+        const {},
+        body: '# reclash-support-key: $key\nproxies: []',
+        secure: true,
+      ).metadata;
+      expect(body.supportKeys, isEmpty);
+    });
+
+    test('support keys are bounded and well formed', () {
+      List<String> keys(String value) => readSubscriptionMetadata({
+        'reclash-support-key': [value],
+      }, secure: true).metadata.supportKeys;
+      const key = 'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik';
+      expect(keys('$key,$key'), [key]);
+      expect(keys('$key,$key,$key'), [key]);
+      for (final value in [
+        'ed25519:AA,ed25519:AB,ed25519:AC',
+        'rsa:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik',
+        'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik=',
+        'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2iL',
+      ]) {
+        expect(keys(value), isEmpty, reason: value);
+      }
+      expect(
+        readSubscriptionMetadata({
+          'reclash-support-upload': ['http://support.example.test/upload'],
+        }, secure: true).metadata.supportUploadUrl,
+        isNull,
       );
     });
 

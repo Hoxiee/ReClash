@@ -40,6 +40,7 @@ const (
 	probeMethod                    CoreMethod = "probe"
 	doctorClockSkewMethod          CoreMethod = "doctorClockSkew"
 	doctorReachMethod              CoreMethod = "doctorReach"
+	doctorDialDirectMethod         CoreMethod = "doctorDialDirect"
 	outboundIpMethod               CoreMethod = "outboundIp"
 	serviceCheckMethod             CoreMethod = "serviceCheck"
 	getConnectionsMethod           CoreMethod = "getConnections"
@@ -287,6 +288,25 @@ type ReachResult struct {
 	CoreEpoch    uint64     `json:"core-epoch"`
 	RouteVersion uint64     `json:"route-version"`
 	Hits         []RouteHit `json:"hits"`
+}
+
+type DialDirectParams struct {
+	ProxyName string `json:"proxy-name"`
+	Url       string `json:"url"`
+	Timeout   int64  `json:"timeout"`
+}
+
+// An empty Server means the node has no server of its own to dial.
+type DialDirectResult struct {
+	Stage       string `json:"stage"`
+	Type        string `json:"type"`
+	Server      string `json:"server"`
+	Port        int    `json:"port"`
+	ResolveMs   int64  `json:"resolve-ms"`
+	TcpMs       int64  `json:"tcp-ms"`
+	HandshakeMs int64  `json:"handshake-ms"`
+	Cause       string `json:"cause,omitempty"`
+	Message     string `json:"message,omitempty"`
 }
 
 type Traffic struct {

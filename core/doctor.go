@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/netip"
 	"net/url"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -312,15 +313,8 @@ func handleReach(params *ReachParams) *ReachResult {
 			node, direct := reachLeaf(proxy, metadata)
 			return node, direct, nil
 		},
-		resolveNode: func(ctx context.Context, host string) (netip.Addr, error) {
-			if resolver.ProxyServerHostResolver == nil {
-				return resolver.ResolveIP(ctx, host)
-			}
-			return resolver.ResolveIPWithResolver(ctx, host, resolver.ProxyServerHostResolver)
-		},
-		dialTCP: func(ctx context.Context, address string) (net.Conn, error) {
-			return dialer.DialContext(ctx, "tcp", address)
-		},
+		resolveNode: resolveProxyServer,
+		dialTCP:     dialDirect,
 		handshake: func(ctx context.Context, node constant.Proxy, metadata *constant.Metadata) (net.Conn, error) {
 			return node.DialContext(ctx, metadata)
 		},
@@ -332,5 +326,105 @@ func handleReach(params *ReachParams) *ReachResult {
 		address := net.JoinHostPort(host, port)
 		result.Hits = []RouteHit{{Host: address, Proxy: params.ProxyName, Exit: resolveExit(address, params.ProxyName)}}
 	}
+	return result
+}
+
+// A node resolves its server the way the outbound does, and the dialer
+// protects its socket from the tunnel the way DIRECT does.
+func resolveProxyServer(ctx context.Context, host string) (netip.Addr, error) {
+	if resolver.ProxyServerHostResolver == nil {
+		return resolver.ResolveIP(ctx, host)
+	}
+	return resolver.ResolveIPWithResolver(ctx, host, resolver.ProxyServerHostResolver)
+}
+
+func dialDirect(ctx context.Context, address string) (net.Conn, error) {
+	return dialer.DialContext(ctx, "tcp", address)
+}
+
+type dialSteps struct {
+	resolve   func(ctx context.Context, host string) (netip.Addr, error)
+	dialTCP   func(ctx context.Context, address string) (net.Conn, error)
+	handshake func(ctx context.Context) (net.Conn, error)
+}
+
+// The handshake through the node only names a TLS or authentication failure
+// the delay test would report as a bare failure.
+func (s dialSteps) run(ctx context.Context, server string) *DialDirectResult {
+	result := &DialDirectResult{Stage: reachResolve}
+	fail := func(cause failureCause, err error) *DialDirectResult {
+		result.Cause = string(cause)
+		result.Message = err.Error()
+		return result
+	}
+	elapsed := func(since time.Time) int64 { return time.Since(since).Milliseconds() }
+
+	host, port, err := net.SplitHostPort(server)
+	if err != nil {
+		return fail(classifyFailure(err), err)
+	}
+	result.Server = host
+	result.Port, _ = strconv.Atoi(port)
+	ip, err := netip.ParseAddr(host)
+	if err != nil {
+		start := time.Now()
+		ip, err = s.resolve(ctx, host)
+		result.ResolveMs = elapsed(start)
+		if err != nil {
+			return fail(causeServerDns, err)
+		}
+	}
+
+	result.Stage = reachTcp
+	start := time.Now()
+	conn, err := s.dialTCP(ctx, net.JoinHostPort(ip.String(), port))
+	result.TcpMs = elapsed(start)
+	if err != nil {
+		return fail(classifyFailure(err), err)
+	}
+	_ = conn.Close()
+
+	result.Stage = reachHandshake
+	start = time.Now()
+	conn, err = s.handshake(ctx)
+	result.HandshakeMs = elapsed(start)
+	if err != nil {
+		return fail(classifyFailure(err), err)
+	}
+	_ = conn.Close()
+
+	result.Stage = reachDone
+	return result
+}
+
+func handleDialDirect(params *DialDirectParams) *DialDirectResult {
+	proxy := lookupProxy(params.ProxyName)
+	if proxy == nil || isProxyGroupType(proxy.Type()) || proxy.Addr() == "" {
+		return &DialDirectResult{}
+	}
+	testUrl := params.Url
+	if testUrl == "" {
+		testUrl = currentTestURL()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutFromMillis(params.Timeout, defaultDelayTestTimeout))
+	defer cancel()
+
+	steps := dialSteps{
+		resolve: resolveProxyServer,
+		dialTCP: dialDirect,
+		handshake: func(ctx context.Context) (net.Conn, error) {
+			host, port, err := reachTarget(testUrl)
+			if err != nil {
+				return nil, err
+			}
+			metadata, err := probeMetadata(net.JoinHostPort(host, port))
+			if err != nil {
+				return nil, err
+			}
+			return proxy.DialContext(ctx, metadata)
+		},
+	}
+	result := steps.run(ctx, proxy.Addr())
+	result.Type = proxy.Type().String()
 	return result
 }

@@ -35,6 +35,7 @@ enum CoreMethod {
   serviceCheck,
   doctorClockSkew,
   doctorReach,
+  doctorDialDirect,
   getConnections,
   getConnectionCount,
   closeConnections,

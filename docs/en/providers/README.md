@@ -90,5 +90,6 @@ rules:
 | [Routing delivery](routing.md) | Routing profiles and scenarios, inline or in a bundle. |
 | [Required safety policy](policy.md) | GLOBAL allowlist, mandatory Android exclusions. |
 | [Preview API](preview-api.md) | Presentation before a browser import. |
+| [Support reports and fix links](support.md) | One-button reports, upload endpoint, signed fix links. |
 | [Delivery and debugging](rollout.md) | Serving headers, verification, failures, checklist. |
 | [Standard registry](standard.md) | Generated field and header tables. |

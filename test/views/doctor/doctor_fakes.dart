@@ -99,6 +99,9 @@ class FakeDoctorKernel implements DiagnosticKernel {
   Future<RemedyOutcome> undo(String remedyId) => throw UnimplementedError();
 
   @override
+  Future<void> record(DiagnosticEvent event) async {}
+
+  @override
   Future<PlanOutcome> heal(HealPlan plan) => throw UnimplementedError();
 
   @override

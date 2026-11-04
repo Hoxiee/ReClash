@@ -9,6 +9,7 @@ import 'package:riverpod/riverpod.dart';
 import 'environment/healer.dart';
 import 'environment/scanner.dart';
 import 'finding.dart';
+import 'fixlink/overrides.dart';
 import 'journal.dart';
 import 'kernel.dart';
 import 'path.dart';
@@ -57,6 +58,7 @@ List<Remedy> _environmentRemedies(Ref ref) {
   final queue = systemProxyQueue;
   return [
     IgnoreSystemHostsRemedy(config),
+    ResetOverridesRemedy(config),
     FreePortRemedy(config),
     FreeTunDeviceRemedy(config),
     if (system.isDesktop) ...[

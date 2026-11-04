@@ -132,6 +132,11 @@ class UrlSchemeView extends StatelessWidget {
                     ],
                   ),
                   UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.wrench,
+                    title: l.fixLinkTitle,
+                    formats: const ['reclash://fix?p={payload}&s={signature}'],
+                  ),
+                  UrlSchemeSupportedLinksRow(
                     glyph: AppGlyphs.vpn,
                     title: l.urlSchemeProxyLinks,
                     formats: [

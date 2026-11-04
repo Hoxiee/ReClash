@@ -15,6 +15,7 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     confirmImport,
     required Future<void> Function(String text, String origin) openRouting,
     Future<void> Function(String? check)? openDoctor,
+    Future<void> Function(String link)? openFix,
     bool Function()? isCurrent,
   }) async {
     bool current() => ref.mounted && (isCurrent?.call() ?? true);
@@ -23,7 +24,8 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     if (link != null &&
         !link.command.isProfile &&
         link.command != ReClashCommand.routing &&
-        link.command != ReClashCommand.doctor) {
+        link.command != ReClashCommand.doctor &&
+        link.command != ReClashCommand.fix) {
       await execute(
         link.command,
         confirm: (action) async =>
@@ -36,6 +38,10 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     if (_holdLink(input)) return;
     if (link?.command == ReClashCommand.doctor) {
       await openDoctor?.call(link!.payload);
+      return;
+    }
+    if (link?.command == ReClashCommand.fix) {
+      await openFix?.call(link!.payload!);
       return;
     }
     if (link != null && link.command == ReClashCommand.routing) {
@@ -111,7 +117,11 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     ReClashCommand command, {
     required Future<bool> Function(ReClashCommand action) confirm,
   }) async {
-    if (command.isProfile || command == ReClashCommand.routing) return;
+    if (command.isProfile ||
+        command == ReClashCommand.routing ||
+        command == ReClashCommand.fix) {
+      return;
+    }
     await windowPort?.show();
     if (!ref.mounted) return;
     if (command == ReClashCommand.open) return;

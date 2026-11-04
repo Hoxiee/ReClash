@@ -15,6 +15,7 @@ import 'package:reclash/providers/routing.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/features/doctor/explain.dart';
+import 'package:reclash/features/doctor/recorder/provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -209,6 +210,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       return;
     }
     ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    ref.read(passiveRecorderProvider).addEvent('coreCrash', {
+      'message': message,
+    });
     if (!_setupActive &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       context.showNotifier(message, level: MessageLevel.error);

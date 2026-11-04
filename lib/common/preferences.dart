@@ -10,6 +10,8 @@ import 'package:reclash/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const _reportCaptureRestoreLevelKey = 'report.captureRestoreLevel';
+
 class Preferences {
   static Preferences? _instance;
   var _store = ResolveOnce(_open);
@@ -87,6 +89,21 @@ class Preferences {
     await store?.setStringList('doctor.incidents', incidents);
   }
 
+  Future<List<String>> getFixLinkNonces() async {
+    try {
+      final store = await _store.value;
+      return store?.getStringList('doctor.fixLinkNonces') ?? const [];
+    } on Object {
+      return const [];
+    }
+  }
+
+  Future<void> saveFixLinkNonces(List<String> nonces) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    await store?.setStringList('doctor.fixLinkNonces', nonces);
+  }
+
   Future<int?> getOwnProxyPort() async {
     try {
       final store = await _store.value;
@@ -104,6 +121,38 @@ class Preferences {
     } else {
       await store?.setInt('proxy.ownPort', port);
     }
+  }
+
+  Future<LogLevel?> getReportCaptureRestoreLevel() async {
+    try {
+      final store = await _store.value;
+      return LogLevel.values.asNameMap()[store?.getString(
+        _reportCaptureRestoreLevelKey,
+      )];
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> saveReportCaptureRestoreLevel(LogLevel? level) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    if (level == null) {
+      await store?.remove(_reportCaptureRestoreLevelKey);
+    } else {
+      await store?.setString(_reportCaptureRestoreLevelKey, level.name);
+    }
+  }
+
+  /// Undoes the debug level of a report capture the app died during.
+  Future<Config> restoreReportCaptureLevel(Config config) async {
+    final level = await getReportCaptureRestoreLevel();
+    if (level == null) return config;
+    await saveReportCaptureRestoreLevel(null);
+    if (config.patchClashConfig.logLevel != LogLevel.debug) return config;
+    final restored = config.copyWith.patchClashConfig(logLevel: level);
+    await saveConfig(restored);
+    return restored;
   }
 
   Future<int> getVersion() => _readVersionMarker('version');

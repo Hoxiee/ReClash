@@ -26,7 +26,8 @@ Map<String, String> encodeSubscriptionMetadata(SubscriptionMetadata metadata) =>
             SubscriptionFieldType.hosts ||
             SubscriptionFieldType.tokens ||
             SubscriptionFieldType.packages ||
-            SubscriptionFieldType.numbers => (value as List).join(','),
+            SubscriptionFieldType.numbers ||
+            SubscriptionFieldType.keys => (value as List).join(','),
             SubscriptionFieldType.pairs => [
               for (final MapEntry(:key, :value) in (value as Map).entries)
                 '$key:$value',
@@ -81,6 +82,7 @@ SubscriptionMetadataResult readSubscriptionMetadata(
   Map<String, List<String>> headers, {
   String body = '',
   SubscriptionClientPreset? clientPreset,
+  bool secure = false,
 }) {
   final warnings = <String>[];
   final adapter = clientPreset == null
@@ -95,10 +97,11 @@ SubscriptionMetadataResult readSubscriptionMetadata(
   );
   final bodyValues =
       adapter?.normalizeResponseHeaders(bodyHeaders) ?? bodyHeaders;
-  final bodyMetadata = _decodeFields(bodyValues, warnings);
+  final bodyMetadata = _decodeFields(bodyValues, warnings, secure: false);
   final httpMetadata = _decodeFields(
     lowered,
     warnings,
+    secure: secure,
   ).merge(_commonUsage(lowered, warnings));
   return SubscriptionMetadataResult(
     metadata: bodyMetadata.merge(httpMetadata),
@@ -130,8 +133,9 @@ Map<String, List<String>> _normalizeHeaders(Map<String, List<String>> headers) {
 
 SubscriptionMetadata _decodeFields(
   Map<String, List<String>> headers,
-  List<String> warnings,
-) {
+  List<String> warnings, {
+  required bool secure,
+}) {
   final fields = <String, Object?>{};
   for (final field in subscriptionFields) {
     var name = field.header;
@@ -144,6 +148,10 @@ SubscriptionMetadata _decodeFields(
       scale = alias.scale;
     }
     if (values == null) continue;
+    if (field.secure && !secure) {
+      _warning(warnings, 'Provider field needs an HTTPS response: $name');
+      continue;
+    }
     if (values.length != 1) {
       _warning(warnings, 'Duplicate singleton: $name');
       continue;
@@ -185,6 +193,7 @@ SubscriptionMetadata _decodeFields(
         SubscriptionFieldType.packages => _decodePackages(raw, name, warnings),
         SubscriptionFieldType.numbers => _decodeNumbers(raw),
         SubscriptionFieldType.pairs => _decodePairs(raw),
+        SubscriptionFieldType.keys => _split(raw, ',').toSet().toList(),
       };
     } on FormatException {
       value = null;

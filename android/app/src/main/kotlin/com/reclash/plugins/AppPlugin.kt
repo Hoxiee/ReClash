@@ -25,6 +25,7 @@ import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.FileProvider
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -340,6 +341,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(openAppSettings())
             }
 
+            "shareFile" -> {
+                result.success(
+                    shareFile(
+                        call.argument<String>("path") ?: "",
+                        call.argument<String>("mimeType") ?: "application/octet-stream",
+                        call.argument<String>("text"),
+                    ),
+                )
+            }
+
             "canRequestPackageInstalls" -> {
                 result.success(UpdateInstaller.canRequestInstalls(GlobalState.application))
             }
@@ -516,6 +527,29 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 data = "package:${GlobalState.application.packageName}".toUri()
             }
             activity.startActivity(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    // Only files staged under cache/reports are exposed; the provider paths
+    // grant nothing else.
+    private fun shareFile(path: String, mimeType: String, text: String?): Boolean {
+        val activity = activity ?: return false
+        val app = GlobalState.application
+        val file = File(path).canonicalFile
+        val reports = File(app.cacheDir, "reports").canonicalFile
+        if (file.parentFile != reports || !file.isFile) return false
+        return try {
+            val uri = FileProvider.getUriForFile(app, "${app.packageName}.fileProvider", file)
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = mimeType
+                putExtra(Intent.EXTRA_STREAM, uri)
+                if (!text.isNullOrEmpty()) putExtra(Intent.EXTRA_TEXT, text)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            activity.startActivity(Intent.createChooser(send, null))
             true
         } catch (_: Exception) {
             false

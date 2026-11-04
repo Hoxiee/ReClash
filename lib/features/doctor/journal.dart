@@ -15,6 +15,9 @@ enum DiagnosticEventKind {
   disconnected,
   pathFailed,
   pathRecovered,
+
+  /// A signed fix link from the provider's support was applied.
+  supportFix,
 }
 
 /// One thing the kernel saw or did. Every event is also an incident, so the
@@ -50,7 +53,7 @@ final class DiagnosticEvent {
   final DateTime at;
 
   /// The finding, probe or remedy id; for a disconnect, the status reached;
-  /// for the path, the step.
+  /// for the path, the step; for a support fix, the report id.
   final String subject;
   final CheckSeverity? severity;
   final FailureCause? cause;

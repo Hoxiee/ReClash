@@ -1,0 +1,511 @@
+{
+  "schema": "reclash.report@1",
+  "manifest": {
+    "id": "RC-7Q2M-K4XD",
+    "createdAt": "2026-11-03T18:42:10.000Z",
+    "app": {
+      "name": "ReClash",
+      "version": "0.1.0-pre.4",
+      "build": "104",
+      "flavor": "stable"
+    },
+    "safeMode": false,
+    "platform": "android",
+    "os": "Android 15 (SDK 35)",
+    "device": "Google Pixel 8",
+    "abi": "arm64-v8a",
+    "locale": "en_US",
+    "region": "NL",
+    "uptimeMs": 5412000,
+    "redaction": "provider"
+  },
+  "summary": {
+    "verdict": "fail",
+    "failedStep": "server",
+    "cause": "timeout",
+    "detail": "nl1.edge.example.net:443 did not answer in 5 s",
+    "findings": {
+      "critical": [
+        "server.unreachable"
+      ],
+      "warning": [
+        "dns.systemLoopback"
+      ],
+      "tip": [
+        "battery.optimized"
+      ]
+    },
+    "healed": [
+      {
+        "remedy": "dns.useFakeIp",
+        "outcome": "failed",
+        "at": "2026-11-03T18:30:02.000Z"
+      }
+    ],
+    "servers": {
+      "total": 12,
+      "ok": 6,
+      "dns": 1,
+      "refused": 1,
+      "timeout": 1,
+      "tls": 1,
+      "auth": 1,
+      "skipped": 1
+    },
+    "note": "Stopped working after the evening update",
+    "app": "ReClash 0.1.0-pre.4 (104, stable)",
+    "os": "Android 15 (SDK 35)",
+    "device": "Google Pixel 8",
+    "profile": "Example VPN"
+  },
+  "findings": [
+    {
+      "id": "server.unreachable",
+      "severity": "critical",
+      "cause": "timeout",
+      "title": "doctorServerUnreachableTitle",
+      "detail": "doctorServerUnreachableDetail",
+      "args": {
+        "node": "NL 01"
+      },
+      "evidence": [
+        "path.server"
+      ],
+      "remedies": [
+        "node.switch"
+      ],
+      "tried": []
+    },
+    {
+      "id": "dns.systemLoopback",
+      "severity": "warning",
+      "cause": "dnsFailed",
+      "title": "doctorDnsLoopbackTitle",
+      "detail": "doctorDnsLoopbackDetail",
+      "args": {},
+      "evidence": [
+        "device.systemDns"
+      ],
+      "remedies": [
+        "dns.useFakeIp"
+      ],
+      "tried": [
+        {
+          "remedy": "dns.useFakeIp",
+          "action": "apply",
+          "outcome": "failed",
+          "at": "2026-11-03T18:30:02.000Z",
+          "detail": "core rejected the patch"
+        }
+      ]
+    },
+    {
+      "id": "battery.optimized",
+      "severity": "tip",
+      "cause": null,
+      "title": "doctorBatteryTitle",
+      "detail": "doctorBatteryDetail",
+      "args": {},
+      "evidence": [
+        "device.batteryOptimizationIgnored"
+      ],
+      "remedies": [
+        "battery.exempt"
+      ],
+      "tried": []
+    }
+  ],
+  "path": {
+    "scope": "full",
+    "fresh": true,
+    "verdict": "fail",
+    "startedAt": "2026-11-03T18:41:58.000Z",
+    "finishedAt": "2026-11-03T18:42:06.000Z",
+    "cancelled": false,
+    "durationMs": 5391,
+    "steps": [
+      {
+        "step": "network",
+        "status": "pass",
+        "durationMs": 3
+      },
+      {
+        "step": "clock",
+        "status": "pass",
+        "durationMs": 180
+      },
+      {
+        "step": "core",
+        "status": "pass",
+        "durationMs": 2
+      },
+      {
+        "step": "profile",
+        "status": "pass",
+        "durationMs": 1
+      },
+      {
+        "step": "tunnel",
+        "status": "pass",
+        "durationMs": 4
+      },
+      {
+        "step": "dns",
+        "status": "pass",
+        "durationMs": 201
+      },
+      {
+        "step": "server",
+        "status": "fail",
+        "durationMs": 5000,
+        "detail": "nl1.edge.example.net:443 did not answer in 5 s",
+        "cause": "timeout"
+      },
+      {
+        "step": "internet",
+        "status": "skipped"
+      },
+      {
+        "step": "services",
+        "status": "skipped"
+      }
+    ]
+  },
+  "services": {
+    "checks": [
+      {
+        "service": "youtube",
+        "label": "YouTube",
+        "routed": {
+          "status": "timeout",
+          "delayMs": null,
+          "region": null,
+          "node": "NL 01"
+        },
+        "direct": {
+          "status": "blocked",
+          "delayMs": null,
+          "region": "RU",
+          "node": null
+        }
+      },
+      {
+        "service": "chatgpt",
+        "label": "ChatGPT",
+        "routed": {
+          "status": "timeout",
+          "delayMs": null,
+          "region": null,
+          "node": "NL 01"
+        },
+        "direct": {
+          "status": "regionBlocked",
+          "delayMs": 210,
+          "region": "RU",
+          "node": null
+        }
+      }
+    ]
+  },
+  "environment": {
+    "takenAt": "2026-11-03T18:41:57.000Z",
+    "facts": {
+      "core.status": {
+        "value": "connected",
+        "at": "2026-11-03T18:41:57.000Z"
+      },
+      "device.otherVpn": {
+        "value": false,
+        "at": "2026-11-03T18:41:50.000Z"
+      },
+      "device.privateDns": {
+        "value": "off",
+        "at": "2026-11-03T18:41:50.000Z"
+      },
+      "device.systemDns": {
+        "value": {
+          "servers": [
+            "127.0.0.1"
+          ],
+          "deadLoopback": true
+        },
+        "at": "2026-11-03T18:30:00.000Z",
+        "stale": true
+      }
+    },
+    "interfaces": [
+      {
+        "name": "wlan0",
+        "addresses": [
+          "192.168.1.23"
+        ]
+      },
+      {
+        "name": "tun0",
+        "addresses": [
+          "172.19.0.1"
+        ]
+      }
+    ],
+    "ipv6": false
+  },
+  "profile": {
+    "id": 3,
+    "label": "Example VPN",
+    "type": "url",
+    "source": "https://sub.example.net/***",
+    "updatedAt": "2026-11-03T17:55:00.000Z",
+    "autoUpdate": true,
+    "autoUpdateMinutes": 1440,
+    "usage": {
+      "upload": 1073741824,
+      "download": 32212254720,
+      "total": 107374182400,
+      "expire": 1798761600
+    },
+    "subscription": {
+      "title": "Example VPN",
+      "supportUrl": "https://t.me/example_support"
+    },
+    "currentGroup": "Auto",
+    "groups": [
+      {
+        "name": "Auto",
+        "type": "URLTest",
+        "now": "NL 01",
+        "nodes": 8,
+        "hidden": false
+      },
+      {
+        "name": "Manual",
+        "type": "Selector",
+        "now": "JP 09",
+        "nodes": 4,
+        "hidden": false
+      }
+    ],
+    "selections": {
+      "Manual": "JP 09"
+    },
+    "updates": [
+      {
+        "at": "2026-11-02T17:55:00.000Z",
+        "ok": true
+      },
+      {
+        "at": "2026-11-03T17:55:00.000Z",
+        "ok": true
+      }
+    ]
+  },
+  "history": {
+    "since": "2026-10-27T18:42:10.000Z",
+    "incidents": [
+      {
+        "kind": "pathFailed",
+        "at": "2026-11-03T18:12:40.000Z",
+        "subject": "server",
+        "cause": "timeout"
+      },
+      {
+        "kind": "findingRaised",
+        "at": "2026-11-03T18:12:41.000Z",
+        "subject": "server.unreachable",
+        "severity": "critical",
+        "cause": "timeout"
+      },
+      {
+        "kind": "remedyApplied",
+        "at": "2026-11-03T18:30:02.000Z",
+        "subject": "dns.useFakeIp",
+        "outcome": "failed",
+        "detail": "core rejected the patch"
+      }
+    ],
+    "heals": [
+      {
+        "at": "2026-11-03T18:30:02.000Z",
+        "remedy": "dns.useFakeIp",
+        "outcome": "failed"
+      }
+    ],
+    "pathRuns": [
+      {
+        "at": "2026-11-03T18:12:40.000Z",
+        "verdict": "fail",
+        "step": "server"
+      }
+    ],
+    "coreCrashes": [
+      {
+        "at": "2026-11-01T09:03:11.000Z",
+        "exitCode": 2
+      }
+    ],
+    "profileUpdates": [
+      {
+        "at": "2026-11-03T17:55:00.000Z",
+        "profile": 3,
+        "ok": true
+      }
+    ]
+  },
+  "servers": [
+    {
+      "node": "NL 01",
+      "group": "Auto",
+      "type": "vless",
+      "server": "nl1.edge.example.net",
+      "port": 443,
+      "status": "ok",
+      "resolveMs": 12,
+      "tcpMs": 40,
+      "delayMs": 110,
+      "lastDelayMs": null
+    },
+    {
+      "node": "DE 02",
+      "group": "Auto",
+      "type": "trojan",
+      "server": "de2.edge.example.net",
+      "port": 8443,
+      "status": "ok",
+      "resolveMs": 13,
+      "tcpMs": 47,
+      "delayMs": 123,
+      "lastDelayMs": 129
+    },
+    {
+      "node": "FI 03",
+      "group": "Auto",
+      "type": "hysteria2",
+      "server": "fi3.edge.example.net",
+      "port": 2053,
+      "status": "ok",
+      "resolveMs": 14,
+      "tcpMs": 54,
+      "delayMs": 136,
+      "lastDelayMs": 138
+    },
+    {
+      "node": "US 04",
+      "group": "Auto",
+      "type": "vmess",
+      "server": "us4.edge.example.net",
+      "port": 443,
+      "status": "timeout",
+      "resolveMs": 15,
+      "tcpMs": null,
+      "delayMs": null,
+      "lastDelayMs": null
+    },
+    {
+      "node": "SE 05",
+      "group": "Auto",
+      "type": "vless",
+      "server": "se5.edge.example.net",
+      "port": 8443,
+      "status": "ok",
+      "resolveMs": 16,
+      "tcpMs": 68,
+      "delayMs": 162,
+      "lastDelayMs": 156
+    },
+    {
+      "node": "PL 06",
+      "group": "Auto",
+      "type": "trojan",
+      "server": "pl6.edge.example.net",
+      "port": 2053,
+      "status": "refused",
+      "resolveMs": 17,
+      "tcpMs": null,
+      "delayMs": null,
+      "lastDelayMs": 165
+    },
+    {
+      "node": "FR 07",
+      "group": "Auto",
+      "type": "hysteria2",
+      "server": "fr7.edge.example.net",
+      "port": 443,
+      "status": "dns",
+      "resolveMs": null,
+      "tcpMs": null,
+      "delayMs": null,
+      "lastDelayMs": null
+    },
+    {
+      "node": "GB 08",
+      "group": "Auto",
+      "type": "vmess",
+      "server": "gb8.edge.example.net",
+      "port": 8443,
+      "status": "ok",
+      "resolveMs": 19,
+      "tcpMs": 89,
+      "delayMs": 201,
+      "lastDelayMs": 183
+    },
+    {
+      "node": "JP 09",
+      "group": "Manual",
+      "type": "vless",
+      "server": "jp9.edge.example.net",
+      "port": 2053,
+      "status": "tls",
+      "resolveMs": 20,
+      "tcpMs": 96,
+      "delayMs": null,
+      "lastDelayMs": 192
+    },
+    {
+      "node": "SG 10",
+      "group": "Manual",
+      "type": "trojan",
+      "server": "sg10.edge.example.net",
+      "port": 443,
+      "status": "auth",
+      "resolveMs": 21,
+      "tcpMs": 103,
+      "delayMs": null,
+      "lastDelayMs": null
+    },
+    {
+      "node": "TR 11",
+      "group": "Manual",
+      "type": "hysteria2",
+      "server": "tr11.edge.example.net",
+      "port": 8443,
+      "status": "skipped",
+      "resolveMs": null,
+      "tcpMs": null,
+      "delayMs": null,
+      "lastDelayMs": 210
+    },
+    {
+      "node": "CH 12",
+      "group": "Manual",
+      "type": "vmess",
+      "server": "ch12.edge.example.net",
+      "port": 2053,
+      "status": "ok",
+      "resolveMs": 23,
+      "tcpMs": 117,
+      "delayMs": 253,
+      "lastDelayMs": 219
+    }
+  ],
+  "config": "mixed-port: 7890\nmode: rule\ndns:\n  enable: true\n  enhanced-mode: fake-ip\nproxies:\n  - name: NL 01\n    type: vless\n    server: nl1.edge.example.net\n    port: 443\n    uuid: ***\n    tls: true\n  - name: DE 02\n    type: trojan\n    server: de2.edge.example.net\n    port: 8443\n    password: ***\nrules:\n  - MATCH,Auto\n",
+  "logs": {
+    "core": [
+      "2026-11-03T18:41:58.120Z INFO [TCP] 127.0.0.1:50422 --> www.gstatic.com:443 match Match using Auto[NL 01]",
+      "2026-11-03T18:42:03.004Z WARNING [TCP] dial Auto (match Match/) 127.0.0.1:50422 --> www.gstatic.com:443 error: nl1.edge.example.net:443 connect error: i/o timeout",
+      "2026-11-03T18:42:06.410Z ERROR [Provider] Auto health check: all nodes failed"
+    ],
+    "app": [
+      "2026-11-03T18:41:57.900Z INFO [APP] doctor: path run started (full)",
+      "2026-11-03T18:42:06.500Z INFO [APP] doctor: path failed at server (timeout)"
+    ]
+  }
+}

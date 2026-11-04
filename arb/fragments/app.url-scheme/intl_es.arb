@@ -115,5 +115,6 @@
   "profileImportDownloading": "Descargando la suscripción…",
   "profileImportTryOtherFormat": "No se añadió nada. Puedes elegir otro formato e intentarlo de nuevo.",
   "profilePasteFromClipboard": "Pegar desde el portapapeles",
-  "urlSchemeDoctorDesc": "Abre el diagnóstico; con ?check= abre un solo problema."
+  "urlSchemeDoctorDesc": "Abre el diagnóstico; con ?check= abre un solo problema.",
+  "urlSchemeFixDesc": "Pide aplicar una corrección firmada por el soporte de tu proveedor; nada cambia hasta que confirmes."
 }

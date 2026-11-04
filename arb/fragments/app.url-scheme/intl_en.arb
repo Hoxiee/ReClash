@@ -136,5 +136,6 @@
   "profileImportDownloading": "Downloading the subscription…",
   "profileImportTryOtherFormat": "Nothing was added. You can pick another format and try again.",
   "profilePasteFromClipboard": "Paste from clipboard",
-  "urlSchemeDoctorDesc": "Opens the diagnostics; with ?check= on one issue."
+  "urlSchemeDoctorDesc": "Opens the diagnostics; with ?check= on one issue.",
+  "urlSchemeFixDesc": "Asks to apply a fix signed by your provider's support; nothing changes until you confirm."
 }

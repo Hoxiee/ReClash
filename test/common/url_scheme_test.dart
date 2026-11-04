@@ -11,7 +11,10 @@ void main() {
   group('parseUrlSchemeLink', () {
     test('parses every application command without parameters', () {
       for (final command in ReClashCommand.values.where(
-        (c) => !c.isProfile && c != ReClashCommand.routing,
+        (c) =>
+            !c.isProfile &&
+            c != ReClashCommand.routing &&
+            c != ReClashCommand.fix,
       )) {
         for (final suffix in ['', '/']) {
           final result = parseUrlSchemeLink(
@@ -304,13 +307,43 @@ void main() {
     });
   });
 
+  group('fix links', () {
+    test('carry the whole link to the confirmation sheet', () {
+      const link = 'reclash://fix?p=e30&s=AA';
+      final parsed = parseUrlSchemeLink(link)!;
+      expect(parsed.command, ReClashCommand.fix);
+      expect(parsed.payload, link);
+    });
+
+    test('need both the payload and the signature', () {
+      for (final link in ['reclash://fix', 'reclash://fix?p=e30']) {
+        expect(
+          () => parseUrlSchemeLink(link),
+          throwsA(_issue(UrlSchemeIssue.missingPayload)),
+          reason: link,
+        );
+      }
+      expect(
+        () => parseUrlSchemeLink('clash://fix?p=e30&s=AA'),
+        throwsA(_issue(UrlSchemeIssue.unknownCommand)),
+      );
+    });
+
+    test('are never built locally', () {
+      expect(
+        buildUrlSchemeLink(ReClashCommand.fix, payload: 'x'),
+        throwsA(_issue(UrlSchemeIssue.invalidLink)),
+      );
+    });
+  });
+
   group('buildUrlSchemeLink', () {
     test('every command round-trips through the same parser', () async {
       const url = 'https://example.com/a%2Fb?token=a+b&part=%23#anchor';
       const config = 'proxies: []\nproxy-groups: []\nrules: [MATCH,DIRECT]\n';
       const name = 'Home 🦊 & 工作 # % +';
       for (final command in ReClashCommand.values.where(
-        (c) => c != ReClashCommand.routing,
+        (c) => c != ReClashCommand.routing && c != ReClashCommand.fix,
       )) {
         final link = await buildUrlSchemeLink(
           command,

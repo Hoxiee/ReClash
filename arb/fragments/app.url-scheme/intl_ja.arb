@@ -115,5 +115,6 @@
   "profileImportDownloading": "サブスクリプションをダウンロード中…",
   "profileImportTryOtherFormat": "何も追加されていません。別の形式を選んで再試行できます。",
   "profilePasteFromClipboard": "クリップボードから貼り付け",
-  "urlSchemeDoctorDesc": "診断を開きます。?check= を付けると、1 件の問題だけを開きます。"
+  "urlSchemeDoctorDesc": "診断を開きます。?check= を付けると、1 件の問題だけを開きます。",
+  "urlSchemeFixDesc": "プロバイダーのサポートが署名した修正の適用を求めます。確認するまで何も変更されません。"
 }

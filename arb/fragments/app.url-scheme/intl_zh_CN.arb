@@ -115,5 +115,6 @@
   "profileImportDownloading": "正在下载订阅…",
   "profileImportTryOtherFormat": "未添加任何内容。可以选择其他格式后重试。",
   "profilePasteFromClipboard": "从剪贴板粘贴",
-  "urlSchemeDoctorDesc": "打开诊断；带 ?check= 时只打开一个问题。"
+  "urlSchemeDoctorDesc": "打开诊断；带 ?check= 时只打开一个问题。",
+  "urlSchemeFixDesc": "请求应用由服务商支持团队签名的修复；确认前不会做任何更改。"
 }

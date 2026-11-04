@@ -557,6 +557,7 @@ extension ProfileExtension on Profile {
                   response.headers,
                   body: body,
                   clientPreset: preset,
+                  secure: response.uri.isScheme('https'),
                 ),
                 excluded: payload.summary.excludedPackages,
                 included: payload.summary.includedPackages,

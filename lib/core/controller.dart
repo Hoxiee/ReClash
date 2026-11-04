@@ -482,6 +482,9 @@ class CoreController {
 
   Future<ReachResult?> reach(ReachParams params) => _interface.reach(params);
 
+  Future<DialDirectResult?> dialDirect(DialDirectParams params) =>
+      _interface.dialDirect(params);
+
   Future<Map<String, dynamic>> getConfig(int id) async {
     return _readConfig(await appPath.getProfilePath(id.toString()));
   }

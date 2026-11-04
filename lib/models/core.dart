@@ -377,6 +377,37 @@ abstract class ReachResult with _$ReachResult {
 }
 
 @freezed
+abstract class DialDirectParams with _$DialDirectParams {
+  const factory DialDirectParams({
+    @JsonKey(name: 'proxy-name') required String proxyName,
+    @Default('') String url,
+    required int timeout,
+  }) = _DialDirectParams;
+
+  factory DialDirectParams.fromJson(Map<String, Object?> json) =>
+      _$DialDirectParamsFromJson(json);
+}
+
+/// An empty [server] means the node has no server of its own to dial.
+@freezed
+abstract class DialDirectResult with _$DialDirectResult {
+  const factory DialDirectResult({
+    @Default('') String stage,
+    @Default('') String type,
+    @Default('') String server,
+    @Default(0) int port,
+    @JsonKey(name: 'resolve-ms') @Default(0) int resolveMs,
+    @JsonKey(name: 'tcp-ms') @Default(0) int tcpMs,
+    @JsonKey(name: 'handshake-ms') @Default(0) int handshakeMs,
+    String? cause,
+    String? message,
+  }) = _DialDirectResult;
+
+  factory DialDirectResult.fromJson(Map<String, Object?> json) =>
+      _$DialDirectResultFromJson(json);
+}
+
+@freezed
 abstract class ServiceCheckParams with _$ServiceCheckParams {
   const factory ServiceCheckParams({
     @JsonKey(name: 'proxy-name') @Default('') String proxyName,

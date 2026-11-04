@@ -26,6 +26,7 @@ import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/recorder/provider.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/service.dart';

@@ -121,6 +121,7 @@ class Bootstrap {
       config = config.copyWith(patchClashConfig: patchClashConfig);
       await preferences.saveConfig(config);
     }
+    config = await preferences.restoreReportCaptureLevel(config);
     final profiles = await database.profilesDao.query().get();
     final settings = initializeSetupSettings(
       config.appSettingProps,

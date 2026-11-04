@@ -311,6 +311,7 @@ void main() {
       Future<ProfileLinkImport?> Function(ProfileLinkSource)? confirmImport,
       Future<void> Function(String, String)? openRouting,
       Future<void> Function(String?)? openDoctor,
+      Future<void> Function(String)? openFix,
       bool Function()? isCurrent,
     }) => container
         .read(urlSchemeActionProvider.notifier)
@@ -327,6 +328,7 @@ void main() {
           },
           openRouting: openRouting ?? (_, _) async {},
           openDoctor: openDoctor,
+          openFix: openFix,
           isCurrent: isCurrent,
         );
 
@@ -497,6 +499,20 @@ void main() {
         'https://example.com/sub',
       );
       expect(confirmations, 0);
+      expect(profiles.sources, isEmpty);
+    });
+
+    test('fix links open the confirmation sheet and nothing else', () async {
+      const link = 'reclash://fix?p=e30&s=AA';
+      final opened = <String>[];
+      await handle(
+        link,
+        confirmCommand: (_) async => fail('no command runs'),
+        confirmImport: (_) async => fail('nothing is imported'),
+        openFix: (input) async => opened.add(input),
+      );
+      expect(opened, [link]);
+      expect(common.requests, isEmpty);
       expect(profiles.sources, isEmpty);
     });
 

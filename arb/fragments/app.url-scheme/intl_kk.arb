@@ -115,5 +115,6 @@
   "profileImportDownloading": "Жазылым жүктелуде…",
   "profileImportTryOtherFormat": "Ештеңе қосылмады. Басқа пішімді таңдап, қайталап көріңіз.",
   "profilePasteFromClipboard": "Алмасу буферінен қою",
-  "urlSchemeDoctorDesc": "Диагностиканы ашады; ?check= қосылса, бір мәселені ашады."
+  "urlSchemeDoctorDesc": "Диагностиканы ашады; ?check= қосылса, бір мәселені ашады.",
+  "urlSchemeFixDesc": "Провайдер қолдауы қол қойған түзетуді қолдануды ұсынады; растамайынша ештеңе өзгермейді."
 }

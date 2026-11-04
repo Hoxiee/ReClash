@@ -6,6 +6,7 @@ import 'dart:ui' show Locale;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/recorder/provider.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
@@ -67,6 +68,7 @@ class Logs extends _$Logs with AutoDisposeNotifierMixin {
     if (!ref.mounted) {
       return;
     }
+    ref.read(passiveRecorderProvider).addLog(value);
     this.value = state.append(value);
   }
 

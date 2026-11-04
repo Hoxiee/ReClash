@@ -15,6 +15,7 @@ import 'package:reclash/ui/ui.dart';
 
 import 'finding.dart';
 import 'path.dart';
+import 'report/entry.dart';
 
 const _historyRows = 30;
 const _snoozeWeek = Duration(days: 7);
@@ -45,6 +46,7 @@ String eventLabel(AppLocalizations l, DiagnosticEventKind kind) =>
       DiagnosticEventKind.disconnected => l.disconnected,
       DiagnosticEventKind.pathFailed => l.doctorEventPathFailed,
       DiagnosticEventKind.pathRecovered => l.doctorEventPathRecovered,
+      DiagnosticEventKind.supportFix => l.fixLinkTitle,
     };
 
 /// The whole kernel in one place: the path, every finding with its fix and
@@ -171,6 +173,7 @@ class _DoctorSheetState extends ConsumerState<DoctorSheet> {
                     _EventItem(key: ValueKey((index, event)), event: event),
             ],
           ),
+          generateSection(items: [const ReportProblemItem()]),
         ],
       ),
     );

@@ -23,7 +23,8 @@ enum ReClashCommand {
   importProfile('import'),
   installConfig('install-config'),
   routing('routing'),
-  doctor('doctor');
+  doctor('doctor'),
+  fix('fix');
 
   const ReClashCommand(this.host);
 
@@ -136,6 +137,7 @@ UrlSchemeLink? parseUrlSchemeLink(String input) {
   }
   if (command == ReClashCommand.routing) return _parseRoutingLink(uri);
   if (command == ReClashCommand.doctor) return _parseDoctorLink(uri);
+  if (command == ReClashCommand.fix) return _parseFixLink(uri, input.trim());
   if (!command.isProfile) {
     if (uri.path.isNotEmpty && uri.path != '/' ||
         uri.hasQuery ||
@@ -228,6 +230,16 @@ UrlSchemeLink _parseDoctorLink(Uri uri) {
   return UrlSchemeLink(command: ReClashCommand.doctor, payload: check?.single);
 }
 
+/// `reclash://fix?p=…&s=…`, whose signature and payload only the
+/// confirmation sheet checks, so a refused link still says why.
+UrlSchemeLink _parseFixLink(Uri uri, String input) {
+  final parameters = checkedLinkParameters(uri);
+  if (!parameters.containsKey('p') || !parameters.containsKey('s')) {
+    throw const UrlSchemeException(UrlSchemeIssue.missingPayload);
+  }
+  return UrlSchemeLink(command: ReClashCommand.fix, payload: input);
+}
+
 bool isProfileLinkInput(String input) {
   if (input.length > urlSchemeMaxLength) return false;
   var text = input.trim();
@@ -289,6 +301,9 @@ Future<String> buildUrlSchemeLink(
   String payload = '',
   String name = '',
 }) => Isolate.run(() {
+  if (command == ReClashCommand.fix) {
+    throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
+  }
   final label = checkedLinkName(name);
   String? data;
   if (command.isProfile) {

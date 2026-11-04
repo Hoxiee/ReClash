@@ -46,6 +46,8 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | `apps.exclude` | `reclash-excludeapps` | packages | hint | apps |  |
 | `apps.include` | `reclash-includeapps` | packages | hint | apps |  |
 | `apps.routing` | `reclash-approuting` | tokens | hint | apps |  |
+| `support.keys` | `reclash-support-key` | keys | consent | support | HTTPS response only |
+| `support.uploadUrl` | `reclash-support-upload` | url | consent | support | HTTPS response only |
 
 ## HTTP headers
 

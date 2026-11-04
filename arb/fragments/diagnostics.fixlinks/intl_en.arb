@@ -1,0 +1,69 @@
+{
+  "fixLinkTitle": "Fix from support",
+  "fixLinkVerified": "Verified by the subscription's key",
+  "fixLinkActions": "What it will do",
+  "fixLinkReport": "For report {id}",
+  "@fixLinkReport": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "fixLinkApply": "Apply",
+  "fixLinkCopyResult": "Copy result",
+  "fixLinkApplied": "Fix applied",
+  "fixLinkPartlyFailed": "Some steps failed",
+  "fixLinkUndone": "Changes undone",
+  "fixLinkUndoStale": "Couldn't undo: the settings changed since",
+  "fixLinkRejectedTitle": "This link can't be applied",
+  "fixLinkNothingChanged": "Nothing was changed.",
+  "fixLinkRejectOversized": "The link is too long to be a support fix.",
+  "fixLinkRejectMalformed": "The link is damaged or incomplete. Ask support to send it again.",
+  "fixLinkRejectUnknownKey": "This link is not from your provider.",
+  "fixLinkRejectBadSignature": "The link's signature doesn't match your provider's key, so it may have been altered.",
+  "fixLinkRejectExpired": "The link has expired. Ask support for a new one.",
+  "fixLinkRejectTooFarAhead": "The link stays valid for too long to be trusted.",
+  "fixLinkRejectReplayed": "This link has already been used.",
+  "fixLinkRejectUnknownReport": "The link names a report this device hasn't made in the last 30 days.",
+  "fixLinkRejectOtherProfile": "The link's report was made for a different profile.",
+  "fixLinkRejectUnknownAction": "The link asks for something a support fix isn't allowed to do.",
+  "fixLinkRejectUnknownGroup": "The link picks a proxy group your profile doesn't have.",
+  "fixLinkActionProfileUpdate": "Update the subscription",
+  "fixLinkActionProfileActivate": "Switch to this profile",
+  "fixLinkActionProxySelect": "Use {node} in {group}",
+  "@fixLinkActionProxySelect": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "fixLinkActionConnectionsReset": "Flush DNS and close connections",
+  "fixLinkActionCoreRestart": "Restart the core",
+  "fixLinkActionOverridesReset": "Reset app overrides (DNS, TUN, ports) to defaults",
+  "fixLinkActionRuleMode": "Switch to rule mode",
+  "fixLinkActionBattery": "Let the app run without battery limits",
+  "fixLinkActionVpnSettings": "Open VPN settings",
+  "fixLinkActionPrivateDns": "Open Private DNS settings",
+  "fixLinkActionDateSettings": "Open date and time settings",
+  "fixLinkActionCaptivePortal": "Open the network sign-in page",
+  "fixLinkActionVpnPermission": "Ask for VPN permission",
+  "fixLinkActionIgnoreSystemHosts": "Stop using the system hosts file",
+  "fixLinkActionOpenHosts": "Open the hosts file",
+  "fixLinkActionFreePort": "Move to a free port",
+  "fixLinkActionFreeDeviceName": "Give the TUN device a free name",
+  "fixLinkActionTunnelRestart": "Restart the tunnel",
+  "fixLinkActionClearOwnProxy": "Clear the system proxy ReClash left behind",
+  "fixLinkActionOther": "Run the fix “{id}”",
+  "@fixLinkActionOther": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  }
+}

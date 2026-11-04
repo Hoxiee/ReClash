@@ -211,6 +211,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	probeMethod:                    withArguments(handleProbe),
 	doctorClockSkewMethod:          withArguments(handleClockSkew),
 	doctorReachMethod:              withArguments(handleReach),
+	doctorDialDirectMethod:         withArguments(handleDialDirect),
 	outboundIpMethod:               withArguments(handleOutboundIp),
 	serviceCheckMethod:             withArguments(handleServiceCheck),
 	getTrafficMethod:               withArguments(handleGetTraffic),

@@ -579,6 +579,40 @@
       "absence": "restore-local",
       "consumer": "apps",
       "available": true
+    },
+    {
+      "path": "support.keys",
+      "name": "reclash-support-key",
+      "type": "keys",
+      "direction": "response",
+      "context": [
+        "https-response"
+      ],
+      "encoding": "comma-separated-ed25519-keys",
+      "multiplicity": "singleton",
+      "limit": 2,
+      "trust": "consent",
+      "introduced": 1,
+      "absence": "restore-local",
+      "consumer": "support",
+      "available": true
+    },
+    {
+      "path": "support.uploadUrl",
+      "name": "reclash-support-upload",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "https-response"
+      ],
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "trust": "consent",
+      "introduced": 1,
+      "absence": "restore-local",
+      "consumer": "support",
+      "available": true
     }
   ],
   "headers": [

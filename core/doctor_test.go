@@ -217,3 +217,103 @@ func TestReachTarget(t *testing.T) {
 		t.Fatal("missing host must fail")
 	}
 }
+
+func dialFakes(dialed *string) dialSteps {
+	pipe := func() (net.Conn, error) {
+		client, server := net.Pipe()
+		_ = server.Close()
+		return client, nil
+	}
+	return dialSteps{
+		resolve: func(context.Context, string) (netip.Addr, error) {
+			return netip.MustParseAddr("192.0.2.1"), nil
+		},
+		dialTCP: func(_ context.Context, address string) (net.Conn, error) {
+			*dialed = address
+			return pipe()
+		},
+		handshake: func(context.Context) (net.Conn, error) { return pipe() },
+	}
+}
+
+func TestDialStepsRun(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	closed := listener.Addr().String()
+	_ = listener.Close()
+
+	cases := []struct {
+		name   string
+		server string
+		change func(*dialSteps)
+		stage  string
+		cause  failureCause
+		dialed string
+	}{
+		{"dns", "node.example:443", func(s *dialSteps) {
+			s.resolve = func(context.Context, string) (netip.Addr, error) {
+				return netip.Addr{}, errors.New("no answer")
+			}
+		}, reachResolve, causeServerDns, ""},
+		{"refused", "node.example:443", func(s *dialSteps) {
+			s.dialTCP = func(ctx context.Context, _ string) (net.Conn, error) {
+				return (&net.Dialer{}).DialContext(ctx, "tcp", closed)
+			}
+		}, reachTcp, causeRefused, ""},
+		{"tcp timeout", "node.example:443", func(s *dialSteps) {
+			s.dialTCP = func(ctx context.Context, _ string) (net.Conn, error) {
+				<-ctx.Done()
+				return nil, ctx.Err()
+			}
+		}, reachTcp, causeTimeout, ""},
+		{"tls", "node.example:443", func(s *dialSteps) {
+			s.handshake = func(context.Context) (net.Conn, error) {
+				return nil, errors.New("tls: handshake failure")
+			}
+		}, reachHandshake, causeTlsHandshake, "192.0.2.1:443"},
+		{"auth", "node.example:443", func(s *dialSteps) {
+			s.handshake = func(context.Context) (net.Conn, error) {
+				return nil, errors.New("REALITY authentication failed")
+			}
+		}, reachHandshake, causeAuthRejected, "192.0.2.1:443"},
+		{"ip server skips resolve", "198.51.100.7:8443", func(s *dialSteps) {
+			s.resolve = func(context.Context, string) (netip.Addr, error) {
+				t.Fatal("an IP server must not be resolved")
+				return netip.Addr{}, nil
+			}
+		}, reachDone, "", "198.51.100.7:8443"},
+		{"success", "node.example:443", func(*dialSteps) {}, reachDone, "", "192.0.2.1:443"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var dialed string
+			steps := dialFakes(&dialed)
+			c.change(&steps)
+			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			defer cancel()
+			got := steps.run(ctx, c.server)
+			if got.Stage != c.stage || got.Cause != string(c.cause) {
+				t.Fatalf("got stage %q cause %q (%s)", got.Stage, got.Cause, got.Message)
+			}
+			if c.dialed != "" && dialed != c.dialed {
+				t.Fatalf("dialed %q, want %q", dialed, c.dialed)
+			}
+			host, port, _ := net.SplitHostPort(c.server)
+			if got.Server != host || fmt.Sprint(got.Port) != port {
+				t.Fatalf("server %q port %d", got.Server, got.Port)
+			}
+			if got.ResolveMs < 0 || got.TcpMs < 0 || got.HandshakeMs < 0 {
+				t.Fatalf("negative timing %+v", got)
+			}
+		})
+	}
+}
+
+func TestHandleDialDirectLeavesAnUnknownNodeWithoutServer(t *testing.T) {
+	got := handleDialDirect(&DialDirectParams{ProxyName: "no such node", Timeout: 50})
+	if got.Server != "" || got.Stage != "" || got.Cause != "" {
+		t.Fatalf("got %+v", got)
+	}
+}

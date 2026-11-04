@@ -53,6 +53,10 @@ class SubscriptionMetadata {
       SubscriptionKind.fromToken(text('subscription.type'));
   String? get announce => text('provider.announce');
   String? get logo => text('provider.logo');
+
+  /// `ed25519:<key>` values that sign this provider's support fix links.
+  List<String> get supportKeys => strings('support.keys');
+  String? get supportUploadUrl => text('support.uploadUrl');
   bool get hideUrl => flag('presentation.hideUrl') ?? false;
   bool get unlimited => flag('subscription.unlimited') ?? false;
   bool get perpetual => flag('subscription.perpetual') ?? false;
@@ -131,6 +135,10 @@ class SubscriptionMetadata {
 }
 
 final _token = RegExp(r'^[a-z0-9._:#-]{1,64}$');
+
+/// The unpadded base64url of exactly 32 bytes: its last character carries
+/// four zero bits.
+final _supportKey = RegExp(r'^ed25519:[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$');
 final _invalidPowerShapeCharacter = RegExp(r'[^a-z0-9._:#, -]');
 final _package = RegExp(r'^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$');
 
@@ -146,7 +154,8 @@ Object? normalizeSubscriptionValue(SubscriptionFieldType type, Object? value) {
   return switch (type) {
     SubscriptionFieldType.hosts ||
     SubscriptionFieldType.tokens ||
-    SubscriptionFieldType.packages when value is List =>
+    SubscriptionFieldType.packages ||
+    SubscriptionFieldType.keys when value is List =>
       value.every((v) => v is String) ? List<String>.from(value) : null,
     SubscriptionFieldType.numbers when value is List =>
       value.every((v) => v is int) ? List<int>.from(value) : null,
@@ -172,7 +181,7 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
           value.length <= field.limit &&
           (field.path == 'provider.supportUrl'
               ? safeSubscriptionSupportLink(value) != null
-              : safeSubscriptionLink(value) != null);
+              : safeSubscriptionLink(value, httpsOnly: field.secure) != null);
     case SubscriptionFieldType.integer:
       return value is int && value >= field.minimum && value <= field.maximum;
     case SubscriptionFieldType.boolean:
@@ -197,6 +206,10 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
           value.every(
             (v) => v is int && v >= field.minimum && v <= field.maximum,
           );
+    case SubscriptionFieldType.keys:
+      return value is List &&
+          value.length <= field.limit &&
+          value.every((v) => v is String && _supportKey.hasMatch(v));
     case SubscriptionFieldType.pairs:
       return value is Map &&
           value.length <= field.limit &&

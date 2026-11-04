@@ -446,11 +446,22 @@ class ProfilesAction extends _$ProfilesAction {
           ),
         );
       }
+      ref.read(passiveRecorderProvider).addEvent('profileUpdate', {
+        'profile': profile.id,
+        'ok': true,
+      });
       return updated;
     } on SubscriptionUpdateCancelled {
       return null;
     } on SubscriptionUpdateSuperseded {
       return null;
+    } on Object catch (error) {
+      ref.read(passiveRecorderProvider).addEvent('profileUpdate', {
+        'profile': profile.id,
+        'ok': false,
+        'error': error.toString(),
+      });
+      rethrow;
     } finally {
       if (identical(_profileUpdateCancellations[profile.id], cancellation)) {
         _profileUpdateCancellations.remove(profile.id);

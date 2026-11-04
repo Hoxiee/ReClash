@@ -17,6 +17,7 @@ import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/views/proxies/routing_import.dart';
 import 'package:reclash/views/setup.dart';
 import 'package:reclash/features/doctor/explain.dart';
+import 'package:reclash/features/doctor/fixlink/sheet.dart';
 import 'package:reclash/views/doctor/doctor.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/policy.dart';
@@ -160,6 +161,7 @@ class ApplicationState extends ConsumerState<Application> {
             openRouting: (text, origin) =>
                 openRoutingImport(context, text: text, origin: origin),
             openDoctor: (check) => showDoctorSheet(context, check: check),
+            openFix: (link) => showFixLinkSheet(context, link: link),
           );
     } catch (error) {
       if (!mounted) return;

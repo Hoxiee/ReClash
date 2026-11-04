@@ -11,6 +11,8 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'report/entry.dart';
+
 extension PathStepView on PathStep {
   String label(AppLocalizations l) => switch (this) {
     PathStep.network => l.network,
@@ -220,6 +222,11 @@ class _PathSheetState extends ConsumerState<PathSheet> {
             ),
           ),
           if (path != null) PathStepList(path: path, total: path.complete),
+          if (path != null &&
+              path.complete &&
+              !path.cancelled &&
+              path.failed != null)
+            generateSection(items: [const ReportProblemItem()]),
         ],
       ),
     );

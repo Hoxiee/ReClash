@@ -4,8 +4,8 @@ const subscriptionHeadersLimit = 64 * 1024;
 const subscriptionWireLimit = 16 * 1024 * 1024;
 const subscriptionPayloadLimit = 32 * 1024 * 1024;
 
-/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers] and
-/// [pairs] the field's `limit` counts entries, not bytes.
+/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers], [pairs]
+/// and [keys] the field's `limit` counts entries, not bytes.
 enum SubscriptionFieldType {
   text,
   url,
@@ -16,6 +16,7 @@ enum SubscriptionFieldType {
   pairs,
   packages,
   numbers,
+  keys,
 }
 
 enum SubscriptionTrust { display, hint, consent }
@@ -52,6 +53,7 @@ class SubscriptionField {
     this.aliases = const [],
     this.suffix,
     this.multiline = false,
+    this.secure = false,
     required this.consumer,
   });
 
@@ -66,6 +68,10 @@ class SubscriptionField {
   final List<SubscriptionAlias> aliases;
   final SubscriptionSuffix? suffix;
   final bool multiline;
+
+  /// Read only from the headers of an HTTPS response: a body comment or a
+  /// plain HTTP response cannot set it.
+  final bool secure;
   final String consumer;
 
   Map<String, Object?> toJson() => {
@@ -73,7 +79,7 @@ class SubscriptionField {
     'name': header,
     'type': type.name,
     'direction': 'response',
-    'context': ['http-response', 'body-comment'],
+    'context': secure ? ['https-response'] : ['http-response', 'body-comment'],
     'encoding': switch (type) {
       SubscriptionFieldType.text => 'text-or-base64-prefixed',
       SubscriptionFieldType.url => suffix == null ? 'url' : 'url-with-suffix',
@@ -84,6 +90,7 @@ class SubscriptionField {
       SubscriptionFieldType.pairs => 'semicolon-separated-pairs',
       SubscriptionFieldType.packages => 'comma-separated-packages',
       SubscriptionFieldType.numbers => 'comma-separated-decimals',
+      SubscriptionFieldType.keys => 'comma-separated-ed25519-keys',
     },
     'multiplicity': 'singleton',
     'limit': limit,
@@ -337,6 +344,23 @@ const subscriptionFields = <SubscriptionField>[
     limit: 1,
     trust: SubscriptionTrust.hint,
     consumer: 'apps',
+  ),
+  SubscriptionField(
+    'support.keys',
+    'reclash-support-key',
+    SubscriptionFieldType.keys,
+    limit: 2,
+    trust: SubscriptionTrust.consent,
+    secure: true,
+    consumer: 'support',
+  ),
+  SubscriptionField(
+    'support.uploadUrl',
+    'reclash-support-upload',
+    SubscriptionFieldType.url,
+    trust: SubscriptionTrust.consent,
+    secure: true,
+    consumer: 'support',
   ),
 ];
 

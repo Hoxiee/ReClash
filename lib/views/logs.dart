@@ -6,6 +6,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/views/doctor/report/report_sheet.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,6 +73,11 @@ class _LogsViewState extends ConsumerState<LogsView>
 
   List<IconButtonData> _buildActions() {
     return [
+      IconButtonData(
+        glyph: AppGlyphs.support,
+        tooltip: context.appLocalizations.reportProblem,
+        onPressed: () => unawaited(showReportSheet(context)),
+      ),
       IconButtonData(
         glyph: AppGlyphs.export,
         tooltip: context.appLocalizations.exportLogs,

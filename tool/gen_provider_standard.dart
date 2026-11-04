@@ -65,6 +65,7 @@ String _markdown() {
         'alias `${alias.header}`${alias.scale == 1 ? '' : ' x${alias.scale}'}',
       if (field.suffix case final suffix?)
         'suffix `${suffix.path}` ${suffix.minimum}-${suffix.maximum}',
+      if (field.secure) 'HTTPS response only',
     ];
     out.writeln(
       '| `${field.path}` | `${field.header}` | ${field.type.name} | '

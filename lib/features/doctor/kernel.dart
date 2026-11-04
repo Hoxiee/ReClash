@@ -53,6 +53,9 @@ abstract interface class DiagnosticKernel {
 
   Future<RemedyOutcome> undo(String remedyId);
 
+  /// Journals what a consumer did outside a remedy, such as a support fix.
+  Future<void> record(DiagnosticEvent event);
+
   /// Never runs a foreign remedy, whatever the plan lists.
   Future<PlanOutcome> heal(HealPlan plan);
 
@@ -415,6 +418,9 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
       DiagnosticEventKind.remedyUndone,
     );
   }
+
+  @override
+  Future<void> record(DiagnosticEvent event) => _journal.record(event);
 
   RemedyOutcome _recordOutcome(
     RemedyOutcome outcome,

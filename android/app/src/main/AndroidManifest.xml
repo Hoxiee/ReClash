@@ -83,6 +83,7 @@
                 <data android:host="import" />
                 <data android:host="routing" />
                 <data android:host="doctor" />
+                <data android:host="fix" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

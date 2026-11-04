@@ -190,6 +190,22 @@ class App {
     return methodChannel.invokeMethod<bool>('openAppSettings');
   }
 
+  /// Opens the system share sheet for [path], which must sit directly in
+  /// `<temporary directory>/reports`.
+  Future<bool> shareFile(
+    String path, {
+    required String mimeType,
+    String? text,
+  }) async {
+    if (!Platform.isAndroid) return false;
+    final shared = await methodChannel.invokeMethod<bool>('shareFile', {
+      'path': path,
+      'mimeType': mimeType,
+      'text': text,
+    });
+    return shared ?? false;
+  }
+
   Future<bool> canRequestPackageInstalls() async =>
       await methodChannel.invokeMethod<bool>('canRequestPackageInstalls') ??
       false;

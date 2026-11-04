@@ -14,6 +14,7 @@ String urlSchemeCommandLabel(ReClashCommand command, AppLocalizations l) =>
       ReClashCommand.installConfig => l.urlSchemeInstallConfig,
       ReClashCommand.routing => l.rcxImportTitle,
       ReClashCommand.doctor => l.toolsObservation,
+      ReClashCommand.fix => l.fixLinkTitle,
     };
 
 String urlSchemeCommandDescription(
@@ -30,6 +31,7 @@ String urlSchemeCommandDescription(
   ReClashCommand.installConfig => l.urlSchemeInstallConfigDesc,
   ReClashCommand.routing => l.rcxImportTitle,
   ReClashCommand.doctor => l.urlSchemeDoctorDesc,
+  ReClashCommand.fix => l.urlSchemeFixDesc,
 };
 
 Glyph urlSchemeCommandGlyph(ReClashCommand command) => switch (command) {
@@ -43,4 +45,5 @@ Glyph urlSchemeCommandGlyph(ReClashCommand command) => switch (command) {
   ReClashCommand.installConfig => AppGlyphs.link,
   ReClashCommand.routing => AppGlyphs.shuffle,
   ReClashCommand.doctor => AppGlyphs.verified,
+  ReClashCommand.fix => AppGlyphs.wrench,
 };
