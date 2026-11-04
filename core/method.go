@@ -177,12 +177,19 @@ func acknowledged(run func()) methodHandler {
 	}
 }
 
+func shutdownCore() bool {
+	result := handleShutdown()
+	cancelSubscriptionFetches()
+	cancelSpeedTests()
+	return result
+}
+
 var methodHandlers = map[CoreMethod]methodHandler{
 	initClashMethod:                withArguments(handleInitClash),
 	getIsInitMethod:                withoutArguments(handleGetIsInit),
 	getCoreInfoMethod:              withoutArguments(handleGetCoreInfo),
 	forceGcMethod:                  acknowledged(handleForceGC),
-	shutdownMethod:                 withoutArguments(func() bool { result := handleShutdown(); cancelSubscriptionFetches(); return result }),
+	shutdownMethod:                 withoutArguments(shutdownCore),
 	startListenerMethod:            withoutArguments(handleStartListener),
 	stopListenerMethod:             withoutArguments(handleStopListener),
 	setOnDemandPausedMethod:        withArguments(handleSetOnDemandPaused),
@@ -213,6 +220,10 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	doctorReachMethod:              withArguments(handleReach),
 	doctorDialDirectMethod:         withArguments(handleDialDirect),
 	outboundIpMethod:               withArguments(handleOutboundIp),
+	startSpeedTestMethod:           withFallible(handleStartSpeedTest),
+	getSpeedTestMethod:             withFallible(handleGetSpeedTest),
+	cancelSpeedTestMethod:          withArguments(handleCancelSpeedTest),
+	speedTestServersMethod:         withFallible(handleSpeedTestServers),
 	serviceCheckMethod:             withArguments(handleServiceCheck),
 	getTrafficMethod:               withArguments(handleGetTraffic),
 	getTotalTrafficMethod:          withArguments(handleGetTotalTraffic),
