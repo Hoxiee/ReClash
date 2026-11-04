@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:reclash/common/network_cost.dart';
-import 'package:reclash/features/speed_test/backend.dart';
+import 'package:reclash/features/speed_test/client.dart';
+import 'package:reclash/features/speed_test/history.dart';
+import 'package:reclash/features/speed_test/types.dart';
+import 'package:reclash/models/speed_test.dart';
 
 class FakeSpeedNetwork implements NetworkCostMonitor {
   FakeSpeedNetwork({
@@ -12,12 +15,19 @@ class FakeSpeedNetwork implements NetworkCostMonitor {
   });
 
   NetworkCostSnapshot snapshot;
+  Error? error;
+  int reads = 0;
+  NetworkCostSnapshot? secondRead;
   final controller = StreamController<NetworkCostSnapshot>.broadcast(
     sync: true,
   );
 
   @override
-  Future<NetworkCostSnapshot> read() async => snapshot;
+  Future<NetworkCostSnapshot> read() async {
+    reads++;
+    if (error case final error?) throw error;
+    return reads > 1 ? secondRead ?? snapshot : snapshot;
+  }
 
   @override
   Stream<NetworkCostSnapshot> get changes => controller.stream;
@@ -30,101 +40,146 @@ class FakeSpeedNetwork implements NetworkCostMonitor {
   Future<void> close() => controller.close();
 }
 
-class FakeSpeedBackend implements SpeedTestBackend {
-  FakeSpeedBackend({FakeSpeedSession? session, this.id = 'cloudflare'})
-    : session = session ?? FakeSpeedSession();
+class FakeSpeedClient implements SpeedTestClient {
+  FakeSpeedClient({this.complete = true});
 
-  final FakeSpeedSession session;
-  int opens = 0;
+  bool complete;
+  bool accepted = true;
+  bool wrongId = false;
+  Error? startError;
+  Error? snapshotError;
+  Completer<bool>? startGate;
+  Completer<SpeedTestState?>? snapshotGate;
+  Completer<List<SpeedTestServer>>? serversGate;
+  SpeedTestState? result;
+  final requests = <Map<String, Object?>>[];
+  final cancellations = <String>[];
+  final serverRequests = <Map<String, Object?>>[];
+  final started = Completer<void>();
+  int polls = 0;
 
   @override
-  final String id;
-  @override
-  String get name => 'Test service';
-  @override
-  Uri get website => Uri.https('example.test');
-  @override
-  Uri get measurementUri => website.resolve('/download');
-  @override
-  int get streams => 4;
+  Future<bool> start(
+    SpeedTestSettings settings, {
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+  }) async {
+    requests.add(
+      settings.toRequest(
+        requestId: requestId,
+        proxyName: proxyName,
+        direct: direct,
+      ),
+    );
+    if (!started.isCompleted) started.complete();
+    if (startError case final error?) throw error;
+    if (startGate case final gate?) return gate.future;
+    return accepted;
+  }
 
   @override
-  SpeedTestSession open(SpeedTestClientFactory createClient) {
-    opens++;
-    return session;
+  Future<SpeedTestState?> snapshot(String requestId) async {
+    polls++;
+    if (snapshotError case final error?) throw error;
+    if (snapshotGate case final gate?) return gate.future;
+    if (result case final value?) {
+      return value.copyWith(requestId: wrongId ? 'older' : requestId);
+    }
+    final request = requests.last;
+    final latencyOnly = request['mode'] == 'latencyOnly';
+    return SpeedTestState(
+      requestId: wrongId ? 'older' : requestId,
+      phase: complete ? SpeedTestPhase.done : SpeedTestPhase.running,
+      stage: latencyOnly ? SpeedTestStage.latency : SpeedTestStage.download,
+      backendId: request['backendId'] as String,
+      byteLimit: request['byteLimit'] as int,
+      viaVpn: request['direct'] != true,
+      proxyName: request['proxyName'] as String,
+      progress: complete ? 1 : 0.5,
+      downloadMbps: latencyOnly ? null : 123.4,
+      uploadMbps: latencyOnly ? null : 56.7,
+      liveMbps: latencyOnly ? null : 110,
+      latency: const LatencySummary(medianMs: 18, jitterMs: 2, count: 20),
+      downloadLatency: latencyOnly
+          ? null
+          : const LatencySummary(medianMs: 40, jitterMs: 4, count: 10),
+      uploadLatency: latencyOnly
+          ? null
+          : const LatencySummary(medianMs: 60, jitterMs: 5, count: 10),
+      rpm: latencyOnly ? null : 1200,
+      elapsed: const Duration(seconds: 24),
+      transferredBytes: latencyOnly ? 0 : 4096,
+      server: const SpeedTestServer(
+        name: 'Test city',
+        sponsor: 'Test operator',
+        host: 'speed.example.test:443',
+      ),
+      downloadSamples: latencyOnly
+          ? const []
+          : const [
+              SpeedTestSample(elapsedMs: 200, mbps: 100),
+              SpeedTestSample(elapsedMs: 400, mbps: 123.4),
+            ],
+      uploadSamples: latencyOnly
+          ? const []
+          : const [
+              SpeedTestSample(elapsedMs: 200, mbps: 40),
+              SpeedTestSample(elapsedMs: 400, mbps: 56.7),
+            ],
+    );
+  }
+
+  @override
+  Future<void> cancel(String requestId) async => cancellations.add(requestId);
+
+  @override
+  Future<List<SpeedTestServer>> servers({
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+    required bool useSystemDns,
+    String search = '',
+  }) async {
+    serverRequests.add({
+      'requestId': requestId,
+      'proxyName': proxyName,
+      'direct': direct,
+      'useSystemDns': useSystemDns,
+      'search': search,
+    });
+    if (serversGate case final gate?) return gate.future;
+    return const [
+      SpeedTestServer(
+        id: '1',
+        name: 'Test city',
+        host: 'speed.example.test:443',
+        sponsor: 'Test operator',
+        latencyMs: 12,
+      ),
+    ];
   }
 }
 
-class FakeSpeedSession implements SpeedTestSession {
-  FakeSpeedSession({
-    this.failUpload = false,
-    this.holdDownload = false,
-    this.holdLatency = false,
-    this.dropDownloads = 0,
-  });
+class MemorySpeedHistory implements SpeedTestHistoryStore {
+  MemorySpeedHistory([List<String> records = const []])
+    : records = [...records];
 
-  final bool failUpload;
-
-  /// Number of first downloads that fail as a dropped connection would.
-  final int dropDownloads;
-  final bool holdDownload;
-  final bool holdLatency;
-  final held = Completer<void>();
-  int probes = 0;
-  int downloads = 0;
-  int uploads = 0;
-  int bytes = 0;
-  int aborts = 0;
-  final lanes = <int>{};
-  bool closed = false;
+  List<String> records;
+  Error? saveError;
+  Error? loadError;
+  int writes = 0;
 
   @override
-  Future<double> latency() async {
-    probes++;
-    if (holdLatency) await held.future;
-    return [10.0, 12.0, 18.0, 14.0][probes % 4];
+  Future<List<String>> load() async {
+    if (loadError case final error?) throw error;
+    return [...records];
   }
 
   @override
-  Future<void> download(
-    int count,
-    SpeedTestByteCallback onBytes, {
-    int lane = 0,
-  }) async {
-    downloads++;
-    if (downloads <= dropDownloads) {
-      throw StateError('connection dropped');
-    }
-    lanes.add(lane);
-    if (holdDownload) {
-      await held.future;
-      return;
-    }
-    bytes += count;
-    onBytes(count);
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-  }
-
-  @override
-  Future<void> upload(
-    int count,
-    SpeedTestByteCallback onBytes, {
-    int lane = 0,
-  }) async {
-    uploads++;
-    bytes += count;
-    onBytes(count);
-    if (failUpload) throw StateError('upload unavailable');
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-  }
-
-  @override
-  void abortTransfer() {
-    aborts++;
-  }
-
-  @override
-  void close() {
-    closed = true;
+  Future<void> save(List<String> records) async {
+    if (saveError case final error?) throw error;
+    writes++;
+    this.records = [...records];
   }
 }

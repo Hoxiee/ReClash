@@ -188,8 +188,6 @@
   "speedTestLatencyOnly": "Latency and jitter only",
   "speedTestBudget": "Total data budget",
   "speedTestBudgetHint": "Shared by download, upload and warm-up. Network overhead is additional.",
-  "speedTestAlwaysConfirm": "Confirm on every network",
-  "speedTestSafetyHint": "Metered and unknown networks always require confirmation. Wi-Fi is not assumed to be unlimited.",
   "speedTestReady": "Ready to measure",
   "speedTestWarmup": "Warming up",
   "speedTestLatency": "HTTP latency",
@@ -228,18 +226,6 @@
   "speedTestPartial": "Some measurements failed. Available results are kept.",
   "speedTestNetworkChanged": "The network or route changed. Start a new test.",
   "speedTestOffline": "No network connection",
-  "speedTestMeteredTitle": "Use data on this metered network?",
-  "speedTestUnknownTitle": "The network’s data limit is unknown",
-  "speedTestConfirmTitle": "Start the connection test?",
-  "speedTestTrafficWarning": "The test transfers up to {size} of test data. This uses your internet and VPN allowances. Network overhead may increase usage.",
-  "@speedTestTrafficWarning": {
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "speedTestLatencyWarning": "Only small latency probes are sent. They also use data; download and upload speed are not measured.",
   "speedTestIdleDesc": "Download, upload, latency and jitter, with a data budget.",
   "speedTestOpen": "Open test",
   "speedTestPrivacy": "The platform sees the public IP of the test connection. Test data is generated locally; no personal files are uploaded.",
@@ -275,5 +261,64 @@
         "type": "int"
       }
     }
-  }
+  },
+  "speedTestHistory": "Test history",
+  "speedTestHistoryEmpty": "No completed tests yet",
+  "speedTestHistoryHint": "Completed tests are kept on this device for 14 days, up to 200 results.",
+  "speedTestClearHistory": "Clear test history",
+  "speedTestClearHistoryConfirm": "Delete all saved connection tests from this device?",
+  "speedTestHistorySaveFailed": "The result could not be saved on this device.",
+  "speedTestServer": "Test server",
+  "speedTestServerAutomatic": "Automatic selection",
+  "speedTestChooseServer": "Choose server",
+  "speedTestFindServers": "Find servers",
+  "speedTestServerSearch": "City or server operator",
+  "speedTestNoServers": "No servers found",
+  "speedTestServerFailed": "Could not load test servers. Try again.",
+  "speedTestServerPrivacy": "Searching contacts Speedtest.net and tests the listed servers through the selected route.",
+  "speedTestDuration": "Time per direction",
+  "speedTestDurationValue": "{seconds} s",
+  "@speedTestDurationValue": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "speedTestConnections": "Connections",
+  "speedTestSingleConnection": "Single connection",
+  "speedTestMultipleConnections": "Multiple connections",
+  "speedTestProtocol": "Protocol",
+  "speedTestProtocolFallback": "The server or route does not support the requested protocol. The test used {protocol}.",
+  "@speedTestProtocolFallback": {
+    "placeholders": {
+      "protocol": {
+        "type": "String"
+      }
+    }
+  },
+  "speedTestSystemDns": "Use system DNS",
+  "speedTestSystemDnsHint": "Resolve test hosts using the system DNS instead of the Core DNS. No fallback resolver is used.",
+  "speedTestProxy": "Test route",
+  "speedTestProxyHint": "Choose a proxy for this test without changing the active connection.",
+  "speedTestCurrentRoute": "Current rules",
+  "speedTestDirect": "Direct connection",
+  "speedTestProxyUnavailable": "This proxy is unavailable. Choose another route.",
+  "speedTestCoreUnavailable": "The test engine is unavailable. Try again when Core is ready.",
+  "speedTestDownloadLatency": "Download latency",
+  "speedTestUploadLatency": "Upload latency",
+  "speedTestLoadedLatency": "Latency under load",
+  "speedTestResponsiveness": "Responsiveness",
+  "speedTestRpmUnit": "RPM",
+  "speedTestRpmHint": "Estimated responses per minute, calculated from median latency under load. This is not an Apple networkQuality score.",
+  "speedTestChart": "Speed over time",
+  "speedTestChartEmpty": "The chart appears when the transfer starts.",
+  "speedTestElapsed": "Elapsed",
+  "speedTestData": "Test data",
+  "speedTestResult": "Test result",
+  "speedTestSamples": "Measurements",
+  "speedTestGbpsUnit": "Gbps",
+  "speedTestSecondsUnit": "s",
+  "speedTestTimeout": "The test timed out. Check the connection and try again.",
+  "speedTestRejected": "The selected route blocked the test."
 }

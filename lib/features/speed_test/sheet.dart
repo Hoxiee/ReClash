@@ -3,15 +3,18 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/network_cost.dart';
 import 'package:reclash/models/speed_test.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/speed_test.dart';
-import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'chart.dart';
 import 'dial.dart';
+import 'history_sheet.dart';
+import 'proxy_picker.dart';
+import 'result.dart';
 import 'settings_sheet.dart';
 
 Future<void> showSpeedTestSheet(BuildContext context) {
@@ -39,8 +42,6 @@ class SpeedTestSheet extends ConsumerStatefulWidget {
 
 class _SpeedTestSheetState extends ConsumerState<SpeedTestSheet> {
   late final SpeedTest _notifier;
-  bool _checking = false;
-  String? _preflightError;
 
   @override
   void initState() {
@@ -54,441 +55,317 @@ class _SpeedTestSheetState extends ConsumerState<SpeedTestSheet> {
     super.dispose();
   }
 
-  Future<void> _start() async {
-    if (_checking || ref.read(speedTestProvider).running) return;
-    setState(() {
-      _checking = true;
-      _preflightError = null;
-    });
-    try {
-      var settings = ref.read(appSettingProvider).speedTest;
-      final network = await ref.read(speedTestNetworkProvider).read();
-      if (!mounted) return;
-      if (network.cost == NetworkCost.offline) {
-        setState(
-          () => _preflightError = context.appLocalizations.speedTestOffline,
-        );
-        return;
-      }
-      if (settings.alwaysConfirm || network.cost != NetworkCost.unmetered) {
-        final decision = await showFloatingDialog<SpeedTestMode>(
-          context: context,
-          child: _TrafficConfirmation(
-            network: network.cost,
-            settings: settings,
-          ),
-        );
-        if (!mounted || decision == null) return;
-        settings = settings.copyWith(mode: decision);
-      }
-      unawaited(_notifier.start(settings: settings, expectedNetwork: network));
-    } on Object {
-      if (mounted) {
-        setState(
-          () => _preflightError = context.appLocalizations.simpleSpeedFailed,
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _checking = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final colorScheme = context.colorScheme;
     final test = ref.watch(speedTestProvider);
     final settings = ref.watch(
       appSettingProvider.select((value) => value.speedTest),
     );
-    final backends = ref.watch(speedTestBackendsProvider);
-    final available = backends.any((value) => value.id == settings.backendId);
+    final choice = ref.watch(speedTestProxyProvider);
+    final viaCore = ref.watch(speedTestViaVpnProvider);
     final idle = test.phase == SpeedTestPhase.idle;
-    final backend = backends
-        .where(
-          (value) => value.id == (idle ? settings.backendId : test.backendId),
-        )
-        .firstOrNull;
-    final viaCore = idle ? ref.watch(speedTestViaVpnProvider) : test.viaVpn;
-    final latencyOnly = idle
-        ? settings.mode == SpeedTestMode.latencyOnly
-        : test.byteLimit == 0;
+    final display = idle
+        ? test.copyWith(
+            backendId: settings.backendId,
+            byteLimit: settings.mode == SpeedTestMode.complete
+                ? settings.byteLimit
+                : 0,
+            protocol: settings.protocol.value,
+            viaVpn: viaCore,
+            proxyName: choice,
+          )
+        : test;
     final transferring =
         test.running &&
         (test.stage == SpeedTestStage.download ||
             test.stage == SpeedTestStage.upload);
-    final shownStage = transferring
-        ? test.stage
-        : test.downloadMbps == null && test.uploadMbps != null
-        ? SpeedTestStage.upload
-        : SpeedTestStage.download;
     final rate = transferring
-        ? test.liveMbps ?? 0
-        : test.running || latencyOnly
-        ? null
+        ? test.liveMbps
         : test.downloadMbps ?? test.uploadMbps;
-    final figure = latencyOnly ? test.latency?.medianMs : rate;
-    final caption = switch (test.phase) {
-      SpeedTestPhase.running when transferring => test.stage.label,
-      SpeedTestPhase.running => SpeedTestStage.latency.label,
-      _ when latencyOnly && test.latency != null => l.speedTestPing,
-      _ when rate != null => shownStage.label,
-      _ => test.phase.label,
-    };
-    final failed =
-        _preflightError != null || test.phase == SpeedTestPhase.failed;
-    final message =
-        _preflightError ??
-        switch (test.failure) {
-          _ when !available => l.speedTestPlatformUnavailable,
-          'routeChanged' => l.speedTestNetworkChanged,
-          'backendUnavailable' => l.speedTestPlatformUnavailable,
-          _ when test.phase == SpeedTestPhase.failed => l.simpleSpeedFailed,
-          _ when test.errors.isNotEmpty => l.speedTestPartial,
-          _ when test.limited => l.speedTestLimited,
-          _ => null,
-        };
-    final muted = colorScheme.onSurfaceVariant;
-    final details = [
-      viaCore ? l.speedTestRouteCore : l.speedTestRouteSystem,
-      ?backend?.name,
-      if (test.byteLimit > 0)
-        l.speedTestDataUsed(
-          dashboardTraffic(test.transferredBytes),
-          dashboardTraffic(test.byteLimit),
-        )
-      else if (settings.mode == SpeedTestMode.complete)
-        '${l.speedTestBudget}: ${dashboardTraffic(settings.byteLimit)}',
-    ];
+    final figure = display.latencyOnly ? test.latency?.medianMs : rate;
+    final gigabit = !display.latencyOnly && (figure ?? 0) >= 1000;
+    final caption = test.running ? test.stage.label : test.phase.label;
+    final message = speedTestMessage(context, test);
+    final route = choice.isEmpty
+        ? viaCore
+              ? l.speedTestCurrentRoute
+              : l.speedTestRouteSystem
+        : choice == 'DIRECT'
+        ? l.speedTestDirect
+        : choice;
+    final hero = CommonCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            liveRegion: !test.running,
+            child: SpeedTestDial(
+              mbps: display.latencyOnly ? null : rate,
+              footer: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    display.protocolLabel,
+                    style: AppTextStyle.caption1.of(context, emphasized: true),
+                  ),
+                  Text(
+                    settings.multiThread
+                        ? l.speedTestMultipleConnections
+                        : l.speedTestSingleConnection,
+                    style: AppTextStyle.caption2.of(context),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      speedTestNumber(gigabit ? figure! / 1000 : figure),
+                      style: AppTextStyle.display.of(context, emphasized: true),
+                    ),
+                  ),
+                  Text(
+                    display.latencyOnly
+                        ? l.speedTestMsUnit
+                        : gigabit
+                        ? l.speedTestGbpsUnit
+                        : l.simpleSpeedUnit,
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: context.colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    caption,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: AppTextStyle.footnote.of(context, emphasized: true),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _PhaseSteps(test: display),
+          const SizedBox(height: 16),
+          Center(
+            child: test.running
+                ? FilledButton.tonalIcon(
+                    onPressed: _notifier.cancel,
+                    icon: const GlyphIcon(AppGlyphs.close, fill: 1, size: 20),
+                    label: Text(l.speedTestStop),
+                  )
+                : FilledButton.icon(
+                    onPressed: () => unawaited(_notifier.start()),
+                    icon: GlyphIcon(
+                      idle ? AppGlyphs.playPause(0) : AppGlyphs.refresh,
+                      fill: 1,
+                      size: 20,
+                    ),
+                    label: Text(idle ? l.speedTestStart : l.speedTestAgain),
+                  ),
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(
+                    color: test.phase == SpeedTestPhase.failed
+                        ? context.colorScheme.error
+                        : context.colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+          const SizedBox(height: 20),
+          SpeedTestMetrics(test: display),
+        ],
+      ),
+    );
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        CommonCard(
+          child: ListItem(
+            leading: const GlyphIcon(AppGlyphs.proxies),
+            title: Text(l.speedTestProxy),
+            subtitle: Text(route),
+            trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 18),
+            onTap: test.running
+                ? null
+                : () => showInSheet<void>(
+                    context,
+                    builder: (_) => const SpeedTestProxyPicker(),
+                  ),
+          ),
+        ),
+        if (!idle)
+          CommonCard(
+            padding: const EdgeInsets.all(16),
+            child: SpeedTestResultDetails(test: test),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              '${l.speedTestDuration}: ${l.speedTestDurationValue(settings.durationSeconds)} · ${l.speedTestBudget}: ${dashboardTraffic(settings.byteLimit)}',
+              style: AppTextStyle.caption1
+                  .of(context)
+                  .copyWith(color: context.colorScheme.onSurfaceVariant),
+            ),
+          ),
+        if (!display.latencyOnly) SpeedTestCharts(test: test),
+        Text(
+          l.speedTestPrivacy,
+          style: AppTextStyle.caption1
+              .of(context)
+              .copyWith(color: context.colorScheme.onSurfaceVariant),
+        ),
+      ],
+    );
     return CommonScaffold(
       title: l.speedTestTitle,
       iconActions: [
         IconButtonData(
+          glyph: AppGlyphs.clock,
+          tooltip: l.speedTestHistory,
+          onPressed: () => showInSheet<void>(
+            context,
+            builder: (_) => const SpeedTestHistorySheet(),
+          ),
+        ),
+        IconButtonData(
           glyph: AppGlyphs.settings,
           tooltip: l.speedTestSettings,
-          onPressed: test.running || _checking
+          onPressed: test.running
               ? null
               : () => showSpeedTestSettingsSheet(context),
         ),
       ],
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          context.contentTopPadding + 12,
-          16,
-          context.bottomInset + 24,
-        ),
-        children: [
-          _Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: 18,
-                  child: test.checkedAt == null || test.running
-                      ? null
-                      : LastUpdateTimeText(
-                          lastUpdateDate: test.checkedAt,
-                          style: AppTextStyle.caption1
-                              .of(context)
-                              .copyWith(color: muted),
-                        ),
-                ),
-                Semantics(
-                  liveRegion: !test.running,
-                  child: SpeedTestDial(
-                    mbps: latencyOnly ? null : rate,
-                    footer: _LatencyLine(
-                      summary: test.latency,
-                      jitterOnly: latencyOnly,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 840;
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              context.contentTopPadding + 12,
+              16,
+              context.bottomInset + 24,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1160),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 16,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        Text(
-                          figure == null ? '—' : _number(figure),
-                          style: AppTextStyle.display
-                              .of(context, emphasized: true)
-                              .copyWith(
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
+                        for (final platform
+                            in SpeedTestSettings.platforms.entries)
+                          CommonCard(
+                            isSelected: settings.backendId == platform.key,
+                            fillsSelection: true,
+                            radius: AppCorner.full,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            onPressed: test.running
+                                ? null
+                                : () => updateSpeedTestSettings(
+                                    ref,
+                                    (value) =>
+                                        value.copyWith(backendId: platform.key),
+                                  ),
+                            child: Text(
+                              platform.value,
+                              style: AppTextStyle.footnote.of(
+                                context,
+                                emphasized: true,
                               ),
-                        ),
-                        Text(
-                          latencyOnly ? l.speedTestMsUnit : l.simpleSpeedUnit,
-                          style: AppTextStyle.subheadline
-                              .of(context)
-                              .copyWith(color: muted),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          caption,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyle.footnote.of(
-                            context,
-                            emphasized: true,
+                            ),
                           ),
-                        ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Center(child: _runButton(context, test, available)),
-                if (message != null) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    message,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(color: failed ? colorScheme.error : muted),
-                  ),
-                ],
-                if (!latencyOnly) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    spacing: 8,
-                    children: [
-                      _ResultTile(
-                        label: l.speedTestDownload,
-                        glyph: AppGlyphs.arrowDown,
-                        value: test.downloadMbps,
-                        live:
-                            test.running &&
-                                test.stage == SpeedTestStage.download
-                            ? test.liveMbps
-                            : null,
-                      ),
-                      _ResultTile(
-                        label: l.speedTestUpload,
-                        glyph: AppGlyphs.arrowUp,
-                        value: test.uploadMbps,
-                        live:
-                            test.running && test.stage == SpeedTestStage.upload
-                            ? test.liveMbps
-                            : null,
-                      ),
+                    if (wide)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Expanded(child: hero),
+                          Expanded(child: details),
+                        ],
+                      )
+                    else ...[
+                      hero,
+                      details,
                     ],
-                  ),
-                ],
-              ],
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              [
-                details.join(' · '),
-                if (viaCore) l.speedTestRouteHint,
-              ].join('\n'),
-              style: AppTextStyle.caption1.of(context).copyWith(color: muted),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _runButton(BuildContext context, SpeedTestState test, bool available) {
-    final l = context.appLocalizations;
-    if (test.running) {
-      return FilledButton.tonalIcon(
-        onPressed: _notifier.cancel,
-        icon: const GlyphIcon(AppGlyphs.close, fill: 1, size: 20),
-        label: Text(l.speedTestStop),
-      );
-    }
-    return FilledButton.icon(
-      onPressed: _checking || !available ? null : _start,
-      icon: _checking
-          ? const CommonCircleLoading(size: 18)
-          : GlyphIcon(
-              test.phase == SpeedTestPhase.idle
-                  ? AppGlyphs.playPause(0)
-                  : AppGlyphs.refresh,
-              fill: 1,
-              size: 20,
-            ),
-      label: Text(
-        test.phase == SpeedTestPhase.idle ? l.speedTestStart : l.speedTestAgain,
+          );
+        },
       ),
     );
   }
 }
 
-class _TrafficConfirmation extends StatelessWidget {
-  const _TrafficConfirmation({required this.network, required this.settings});
+class _PhaseSteps extends StatelessWidget {
+  const _PhaseSteps({required this.test});
 
-  final NetworkCost network;
-  final SpeedTestSettings settings;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    return CommonDialog(
-      title: switch (network) {
-        NetworkCost.metered => l.speedTestMeteredTitle,
-        NetworkCost.unknown => l.speedTestUnknownTitle,
-        _ => l.speedTestConfirmTitle,
-      },
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l.cancel),
-        ),
-        if (settings.mode == SpeedTestMode.complete)
-          TextButton(
-            onPressed: () =>
-                Navigator.of(context).pop(SpeedTestMode.latencyOnly),
-            child: Text(l.speedTestLatencyOnly),
-          ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(settings.mode),
-          child: Text(l.speedTestStart),
-        ),
-      ],
-      child: Text(
-        settings.mode == SpeedTestMode.latencyOnly
-            ? l.speedTestLatencyWarning
-            : l.speedTestTrafficWarning(dashboardTraffic(settings.byteLimit)),
-      ),
-    );
-  }
-}
-
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
-
-  final Widget child;
+  final SpeedTestState test;
 
   @override
   Widget build(BuildContext context) {
-    final level = context.raisedSurfaceLevel;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: level.colorOf(context.colorScheme),
-        shape: AppShape.xl,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: SurfaceScope(level: level, child: child),
-      ),
-    );
-  }
-}
-
-class _LatencyLine extends StatelessWidget {
-  const _LatencyLine({required this.summary, required this.jitterOnly});
-
-  final LatencySummary? summary;
-  final bool jitterOnly;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final muted = context.colorScheme.onSurfaceVariant;
-    String ms(double? value) =>
-        value == null ? '—' : l.speedTestMs(_number(value));
+    final stages = test.latencyOnly
+        ? const [SpeedTestStage.warmup, SpeedTestStage.latency]
+        : SpeedTestStage.values;
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      spacing: 12,
       children: [
-        if (!jitterOnly)
-          Text(
-            '${l.speedTestPing} ${ms(summary?.medianMs)}',
-            style: AppTextStyle.footnote.of(context, emphasized: true),
-          ),
-        Text(
-          '${l.speedTestJitter} ${ms(summary?.jitterMs)}',
-          style: AppTextStyle.caption1.of(context).copyWith(color: muted),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final stage in stages)
+              Expanded(
+                child: Column(
+                  spacing: 5,
+                  children: [
+                    GlyphIcon(
+                      test.phase == SpeedTestPhase.done ||
+                              stage.index < test.stage.index
+                          ? AppGlyphs.checkCircle
+                          : AppGlyphs.clock,
+                      size: 18,
+                      color:
+                          test.phase == SpeedTestPhase.done ||
+                              (test.running && stage == test.stage)
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant,
+                    ),
+                    Text(
+                      stage.label,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.caption2.of(context),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
+        LinearProgressIndicator(value: test.progress.clamp(0, 1)),
       ],
     );
   }
 }
-
-class _ResultTile extends StatelessWidget {
-  const _ResultTile({
-    required this.label,
-    required this.glyph,
-    required this.value,
-    required this.live,
-  });
-
-  final String label;
-  final Glyph glyph;
-  final double? value;
-  final double? live;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final rate = live ?? value;
-    return Expanded(
-      child: DecoratedBox(
-        decoration: ShapeDecoration(
-          color: context.raisedSurfaceLevel.colorOf(colorScheme),
-          shape: AppShape.lg,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: AlignmentDirectional.centerStart,
-                child: Text.rich(
-                  TextSpan(
-                    text: rate == null ? '—' : _number(rate),
-                    children: [
-                      TextSpan(
-                        text: ' ${context.appLocalizations.simpleSpeedUnit}',
-                        style: AppTextStyle.caption1
-                            .of(context)
-                            .copyWith(color: colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                  style: AppTextStyle.title2
-                      .of(context, emphasized: true)
-                      .copyWith(
-                        color: live == null ? null : colorScheme.primary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                ),
-              ),
-              Row(
-                spacing: 4,
-                children: [
-                  GlyphIcon(
-                    glyph,
-                    size: 14,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyle.caption1
-                          .of(context)
-                          .copyWith(color: colorScheme.onSurfaceVariant),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-String _number(double value) =>
-    value.abs() < 100 ? value.toStringAsFixed(1) : value.round().toString();

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/models/speed_test.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -103,6 +104,25 @@ mixin CoreInterface {
   Future<ProbeResult?> probe(ProbeParams params);
 
   Future<OutboundIpResult?> outboundIp(OutboundIpParams params);
+
+  Future<bool> startSpeedTest(
+    SpeedTestSettings settings, {
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+  });
+
+  Future<Map<String, dynamic>?> getSpeedTest(String requestId);
+
+  Future<bool> cancelSpeedTest(String requestId);
+
+  Future<List<SpeedTestServer>> speedTestServers({
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+    required bool useSystemDns,
+    String search = '',
+  });
 
   Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params);
 
@@ -875,6 +895,66 @@ abstract class CoreHandlerInterface with CoreInterface {
       timeout: coreGuardFor(params.timeout),
     );
     return data == null ? null : OutboundIpResult.fromJson(data);
+  }
+
+  @override
+  Future<bool> startSpeedTest(
+    SpeedTestSettings settings, {
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+  }) async =>
+      await _invokeMethod<bool>(
+        method: CoreMethod.startSpeedTest,
+        arguments: settings.toRequest(
+          requestId: requestId,
+          proxyName: proxyName,
+          direct: direct,
+        ),
+        timeout: const Duration(seconds: 10),
+      ) ??
+      false;
+
+  @override
+  Future<Map<String, dynamic>?> getSpeedTest(String requestId) =>
+      _invokeMethod<Map<String, dynamic>>(
+        method: CoreMethod.getSpeedTest,
+        arguments: {'requestId': requestId},
+        timeout: const Duration(seconds: 5),
+      );
+
+  @override
+  Future<bool> cancelSpeedTest(String requestId) async =>
+      await _invokeMethod<bool>(
+        method: CoreMethod.cancelSpeedTest,
+        arguments: {'requestId': requestId},
+        timeout: const Duration(seconds: 5),
+      ) ??
+      false;
+
+  @override
+  Future<List<SpeedTestServer>> speedTestServers({
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+    required bool useSystemDns,
+    String search = '',
+  }) async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.speedTestServers,
+      arguments: {
+        'requestId': requestId,
+        'proxyName': proxyName,
+        'direct': direct,
+        'useSystemDns': useSystemDns,
+        'search': search,
+      },
+      timeout: const Duration(seconds: 20),
+    );
+    if (data == null) throw StateError('Speed test server lookup failed');
+    return data
+        .map((item) => SpeedTestServer.fromJson(item as Map<String, dynamic>))
+        .toList(growable: false);
   }
 
   @override

@@ -1,489 +1,152 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/features/speed_test/cloudflare.dart';
-import 'package:reclash/features/speed_test/engine.dart';
-import 'package:reclash/features/speed_test/librespeed.dart';
 import 'package:reclash/features/speed_test/types.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/speed_test.dart';
 
-import 'speed_test_fakes.dart';
-
-const _plan = SpeedTestPlan(
-  latencyCount: 4,
-  probeInterval: Duration(milliseconds: 1),
-  directionDuration: Duration(milliseconds: 300),
-  minimumDuration: Duration(milliseconds: 250),
-  runTimeout: Duration(seconds: 3),
-);
-
 void main() {
-  group('LatencySummary', () {
-    test('computes median and consecutive-sample jitter', () {
-      final summary = LatencySummary.of([10, 20, 30, 100])!;
-      expect(summary.medianMs, 25);
-      expect(summary.jitterMs, 30);
-      expect(summary.count, 4);
-    });
-
-    test('missing samples and missing jitter remain unavailable', () {
-      expect(LatencySummary.of([]), isNull);
-      expect(LatencySummary.of([12])!.jitterMs, isNull);
-    });
+  test('latency uses the median and consecutive-sample jitter', () {
+    final summary = LatencySummary.of([10, 20, 30, 100])!;
+    expect(summary.medianMs, 25);
+    expect(summary.jitterMs, 30);
+    expect(summary.count, 4);
+    expect(LatencySummary.of([]), isNull);
+    expect(LatencySummary.of([12])!.jitterMs, isNull);
   });
 
-  group('SpeedTestThroughput', () {
-    const bin = 250000;
-
-    test('leaves out a slow start and short bursts', () {
-      final meter = SpeedTestThroughput(bin);
-      final rates = [1, 1, 1, 10, 10, 10, 10, 10, 10, 50];
-      for (final (index, mbps) in rates.indexed) {
-        meter.add(index * bin, mbps * bin ~/ 8);
-      }
-      expect(meter.result(10 * bin), 10);
-      expect(meter.recent(10 * bin), 20);
-    });
-
-    test('credits an acknowledged request over its whole duration', () {
-      final meter = SpeedTestThroughput(bin)..spread(0, 4 * bin, 1000000);
-      expect(meter.recent(bin), 8);
-      expect(meter.result(4 * bin), 8);
-    });
-
-    test('short transfers fall back to the overall average', () {
-      final meter = SpeedTestThroughput(bin)..add(100, 125000);
-      expect(meter.result(2 * bin), 2);
-      expect(SpeedTestThroughput(bin).result(2 * bin), isNull);
-    });
+  test('extended settings survive application persistence', () {
+    const settings = SpeedTestSettings(
+      backendId: 'speedtest',
+      mode: SpeedTestMode.latencyOnly,
+      budgetMiB: 250,
+      durationSeconds: 20,
+      multiThread: false,
+      protocol: SpeedTestProtocol.http3,
+      useSystemDns: true,
+      server: SpeedTestServer(id: '12', host: 'example.test:443', name: 'City'),
+    );
+    const app = AppSettingProps(speedTest: settings);
+    final restored = AppSettingProps.fromJson(
+      jsonDecode(jsonEncode(app)) as Map<String, dynamic>,
+    );
+    expect(restored.speedTest, settings);
   });
 
-  group('SpeedTestSettings', () {
-    test(
-      'survives app settings persistence with an independent backend id',
-      () {
-        const settings = SpeedTestSettings(
-          backendId: 'another-service',
-          mode: SpeedTestMode.latencyOnly,
-          budgetMiB: 250,
-          alwaysConfirm: true,
-        );
-        const app = AppSettingProps(speedTest: settings);
-        expect(
-          AppSettingProps.fromJson(
-            jsonDecode(jsonEncode(app)) as Map<String, dynamic>,
-          ).speedTest,
-          settings,
-        );
-      },
-    );
-
-    test('salvages invalid settings without an unsafe data budget', () {
-      final value = SpeedTestSettings.safeFromJson({
-        'budgetMiB': -1,
-        'mode': 'future',
-        'alwaysConfirm': true,
-      });
-      expect(value.budgetMiB, 100);
-      expect(value.mode, SpeedTestMode.complete);
-      expect(value.alwaysConfirm, isTrue);
-      expect(
-        SpeedTestSettings.safeFromJson('invalid'),
-        const SpeedTestSettings(),
-      );
-      expect(
-        AppSettingProps.safeFromJson({
-          'speedTest': 'invalid',
-          'hideIp': true,
-        }).hideIp,
-        isTrue,
-      );
+  test('old confirmation preferences do not enable a confirmation path', () {
+    final settings = SpeedTestSettings.safeFromJson({
+      'backendId': 'librespeed',
+      'budgetMiB': 50,
+      'alwaysConfirm': true,
     });
+    expect(settings.backendId, 'librespeed');
+    expect(settings.budgetMiB, 50);
+    expect(settings.toJson(), isNot(contains('alwaysConfirm')));
+    expect(settings.durationSeconds, 10);
   });
 
-  group('SpeedTestEngine', () {
-    test('does not start any measurement in its constructor', () {
-      final session = FakeSpeedSession();
-      SpeedTestEngine(
-        session: session,
-        settings: const SpeedTestSettings(),
-        onUpdate: (_) {},
-        viaVpn: false,
-      );
-      expect(session.probes + session.downloads + session.uploads, 0);
-    });
-
-    test('shares the payload cap across warmup, download and upload', () async {
-      final session = FakeSpeedSession();
-      final states = <SpeedTestState>[];
-      const settings = SpeedTestSettings(budgetMiB: 25);
-      final engine = SpeedTestEngine(
-        session: session,
-        settings: settings,
-        onUpdate: states.add,
-        viaVpn: true,
-        plan: _plan,
-      );
-      await engine.run();
-      final result = states.last;
-      expect(result.phase, SpeedTestPhase.done);
-      expect(result.downloadMbps, greaterThan(0));
-      expect(result.uploadMbps, greaterThan(0));
-      expect(result.latency?.count, 4);
-      expect(session.lanes, {0, 1, 2, 3});
-      expect(result.transferredBytes, session.bytes);
-      expect(result.transferredBytes, settings.byteLimit);
-      expect(
-        states.every((value) => value.transferredBytes <= settings.byteLimit),
-        isTrue,
-      );
-      expect(
-        states.every((value) => value.progress >= 0 && value.progress <= 1),
-        isTrue,
-      );
-      expect(result.limited, isTrue);
-      expect(session.closed, isTrue);
-    });
-
-    test('latency-only mode never starts bulk transfers', () async {
-      final session = FakeSpeedSession();
-      final states = <SpeedTestState>[];
-      final engine = SpeedTestEngine(
-        session: session,
-        settings: const SpeedTestSettings(mode: SpeedTestMode.latencyOnly),
-        onUpdate: states.add,
-        viaVpn: false,
-        plan: _plan,
-      );
-      await engine.run();
-      expect(session.probes, 6);
-      expect(session.downloads, 0);
-      expect(session.uploads, 0);
-      expect(states.last.downloadMbps, isNull);
-      expect(states.last.uploadMbps, isNull);
-      expect(states.last.latency, isNotNull);
-      expect(states.last.byteLimit, 0);
-    });
-
-    test('a lane reconnects after a dropped download', () async {
-      final session = FakeSpeedSession(dropDownloads: 3);
-      final states = <SpeedTestState>[];
-      final engine = SpeedTestEngine(
-        session: session,
-        settings: const SpeedTestSettings(budgetMiB: 25),
-        onUpdate: states.add,
-        viaVpn: false,
-        plan: _plan,
-        streams: 1,
-      );
-      await engine.run();
-      expect(states.last.downloadMbps, greaterThan(0));
-      expect(states.last.errors, isNot(contains(SpeedTestStage.download)));
-    });
-
-    test(
-      'a failed upload retains successful results without a fake zero',
-      () async {
-        final session = FakeSpeedSession(failUpload: true);
-        final states = <SpeedTestState>[];
-        final engine = SpeedTestEngine(
-          session: session,
-          settings: const SpeedTestSettings(budgetMiB: 25),
-          onUpdate: states.add,
-          viaVpn: false,
-          plan: _plan,
-        );
-        await engine.run();
-        expect(states.last.phase, SpeedTestPhase.done);
-        expect(states.last.downloadMbps, greaterThan(0));
-        expect(states.last.uploadMbps, isNull);
-        expect(states.last.errors, contains(SpeedTestStage.upload));
-        expect(states.last.latency, isNotNull);
-      },
+  test('malformed settings retain safe bounded defaults', () {
+    expect(
+      SpeedTestSettings.safeFromJson('invalid'),
+      const SpeedTestSettings(),
     );
-
-    test(
-      'cancellation closes a stalled session and ignores late completion',
-      () async {
-        final session = FakeSpeedSession(holdDownload: true);
-        final states = <SpeedTestState>[];
-        final engine = SpeedTestEngine(
-          session: session,
-          settings: const SpeedTestSettings(),
-          onUpdate: states.add,
-          viaVpn: false,
-          plan: _plan,
-        );
-        final running = engine.run();
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        engine.cancel();
-        await running;
-        expect(session.closed, isTrue);
-        expect(states.last.phase, SpeedTestPhase.cancelled);
-        final count = states.length;
-        session.held.complete();
-        await Future<void>.delayed(Duration.zero);
-        expect(states.length, count);
-      },
-    );
-
-    test('the absolute deadline ends a probe that never yields', () async {
-      final session = FakeSpeedSession(holdLatency: true);
-      final states = <SpeedTestState>[];
-      final engine = SpeedTestEngine(
-        session: session,
-        settings: const SpeedTestSettings(mode: SpeedTestMode.latencyOnly),
-        onUpdate: states.add,
-        viaVpn: false,
-        plan: const SpeedTestPlan(runTimeout: Duration(milliseconds: 30)),
-      );
-      await engine.run();
-      expect(states.last.phase, SpeedTestPhase.failed);
-      expect(states.last.failure, 'timeout');
-      expect(session.closed, isTrue);
-      session.held.complete();
+    final settings = SpeedTestSettings.safeFromJson({
+      'backendId': 'unknown',
+      'budgetMiB': -1,
+      'durationSeconds': 999,
+      'mode': 'unknown',
+      'protocol': 'unknown',
+      'server': {'host': 3},
     });
+    expect(settings, const SpeedTestSettings());
   });
 
-  group('Cloudflare adapter with a local server', () {
-    late HttpServer server;
-    late CloudflareSpeedTestBackend backend;
-    HttpOverrides? overrides;
-
-    setUp(() async {
-      overrides = HttpOverrides.current;
-      HttpOverrides.global = null;
-      server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      backend = CloudflareSpeedTestBackend(
-        baseUri: Uri.parse('http://127.0.0.1:${server.port}'),
-        timeout: const Duration(milliseconds: 300),
-      );
-    });
-
-    tearDown(() async {
-      await server.close(force: true);
-      HttpOverrides.global = overrides;
-    });
-
-    test(
-      'downloads the requested payload and waits for upload acknowledgement',
-      () async {
-        var uploaded = 0;
-        final paths = <String>[];
-        server.listen((request) async {
-          paths.add(request.uri.path);
-          expect(
-            request.headers.value(HttpHeaders.acceptEncodingHeader),
-            'identity',
-          );
-          if (request.method == 'POST') {
-            await for (final chunk in request) {
-              uploaded += chunk.length;
-            }
-            request.response.contentLength = 0;
-          } else {
-            final bytes = int.parse(request.uri.queryParameters['bytes']!);
-            request.response.headers.contentType = ContentType.binary;
-            request.response.add(List.filled(bytes, 1));
-          }
-          await request.response.close();
-        });
-        final session = backend.open(HttpClient.new);
-        addTearDown(session.close);
-        expect(await session.latency(), greaterThanOrEqualTo(0));
-        var downloaded = 0;
-        await session.download(4096, (value) => downloaded += value);
-        var sent = 0;
-        await session.upload(8192, (value) => sent += value);
-        expect(downloaded, 4096);
-        expect(sent, 8192);
-        expect(uploaded, 8192);
-        expect(paths, ['/__down', '/__down', '/__up']);
-      },
+  test('native request has one unit for each value and no double encoding', () {
+    const settings = SpeedTestSettings(
+      backendId: 'speedtest',
+      durationSeconds: 15,
+      budgetMiB: 25,
+      protocol: SpeedTestProtocol.http3,
+      server: SpeedTestServer(id: '7', host: 'example.test:443'),
     );
-
-    test('subtracts the edge processing time from latency', () async {
-      server.listen((request) async {
-        await Future<void>.delayed(const Duration(milliseconds: 120));
-        request.response.headers.set(
-          'server-timing',
-          'cfRequestDuration;dur=110.5',
-        );
-        await request.response.close();
-      });
-      final session = backend.open(HttpClient.new);
-      addTearDown(session.close);
-      expect(await session.latency(), lessThan(100));
-    });
-
-    test('does not follow redirects to a different endpoint', () async {
-      var requests = 0;
-      server.listen((request) async {
-        requests++;
-        request.response.statusCode = HttpStatus.found;
-        request.response.headers.set(HttpHeaders.locationHeader, '/elsewhere');
-        await request.response.close();
-      });
-      final session = backend.open(HttpClient.new);
-      addTearDown(session.close);
-      await expectLater(
-        session.download(1024, (_) {}),
-        throwsA(isA<HttpException>()),
-      );
-      expect(requests, 1);
-    });
-
-    test(
-      'rejects a truncated response instead of reporting its speed',
-      () async {
-        server.listen((request) async {
-          request.response.add([1, 2, 3]);
-          await request.response.close();
-        });
-        final session = backend.open(HttpClient.new);
-        addTearDown(session.close);
-        await expectLater(
-          session.download(1024, (_) {}),
-          throwsA(isA<HttpException>()),
-        );
-      },
+    final request = settings.toRequest(
+      requestId: 'request',
+      proxyName: 'node',
+      direct: false,
     );
-
-    test(
-      'times out while waiting for headers, not only between body chunks',
-      () async {
-        server.listen((request) {});
-        final session = backend.open(HttpClient.new);
-        addTearDown(session.close);
-        await expectLater(session.latency(), throwsA(isA<TimeoutException>()));
-      },
+    expect(request['durationSeconds'], 15);
+    expect(request['byteLimit'], 25 * 1024 * 1024);
+    expect(request['streams'], 8);
+    expect(request['protocol'], 'h3');
+    expect(request['server'], isA<Map>());
+    expect(request['proxyName'], 'node');
+    expect(request['direct'], false);
+    expect(
+      settings
+          .copyWith(mode: SpeedTestMode.latencyOnly)
+          .toRequest(requestId: 'r', proxyName: '', direct: true)['byteLimit'],
+      0,
+    );
+    expect(
+      settings
+          .copyWith(backendId: 'apple')
+          .toRequest(requestId: 'r', proxyName: '', direct: true)['server'],
+      isNull,
     );
   });
 
-  group('LibreSpeed adapter with local servers', () {
-    final servers = <HttpServer>[];
-    HttpOverrides? overrides;
-
-    setUp(() {
-      overrides = HttpOverrides.current;
-      HttpOverrides.global = null;
+  test('native snapshots preserve Mbps, milliseconds and loaded latency', () {
+    final state = SpeedTestState.fromJson({
+      'requestId': 'r',
+      'backendId': 'apple',
+      'phase': 'done',
+      'stage': 'upload',
+      'downloadMbps': 812.5,
+      'uploadMbps': 105.25,
+      'elapsedMs': 22150,
+      'latency': {'medianMs': 12.5, 'jitterMs': 1.5, 'count': 20},
+      'downloadLatency': {'medianMs': 25, 'jitterMs': 3, 'count': 12},
+      'uploadLatency': {'medianMs': 50, 'jitterMs': 4, 'count': 12},
+      'rpm': 1600,
+      'byteLimit': 104857600,
+      'transferredBytes': 4096,
+      'protocol': 'h2',
+      'protocolFallback': true,
+      'chains': ['node', 'group'],
+      'downloadSamples': [
+        {'elapsedMs': 200, 'mbps': 801.25},
+      ],
     });
+    expect(state.downloadMbps, 812.5);
+    expect(state.elapsed, const Duration(milliseconds: 22150));
+    expect(state.latency!.medianMs, 12.5);
+    expect(state.downloadLatency!.medianMs, 25);
+    expect(state.rpm, 1600);
+    expect(state.downloadSamples.single.mbps, 801.25);
+    expect(state.protocolFallback, isTrue);
+    expect(state.toJson()['elapsedMs'], 22150);
+    expect(
+      () => state.downloadSamples.add(
+        const SpeedTestSample(elapsedMs: 400, mbps: 1),
+      ),
+      throwsUnsupportedError,
+    );
+  });
 
-    tearDown(() async {
-      for (final server in servers) {
-        await server.close(force: true);
-      }
-      servers.clear();
-      HttpOverrides.global = overrides;
-    });
-
-    Future<HttpServer> serve(
-      Future<void> Function(HttpRequest request) handle,
-    ) async {
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      servers.add(server);
-      server.listen(handle);
-      return server;
-    }
-
-    Future<void> speedServer(HttpRequest request, {Duration? delay}) async {
-      if (delay != null) await Future<void>.delayed(delay);
-      if (request.uri.path.endsWith('garbage.php')) {
-        final chunks = int.parse(request.uri.queryParameters['ckSize']!);
-        request.response.headers.contentType = ContentType.binary;
-        for (var i = 0; i < chunks; i++) {
-          request.response.add(List.filled(1024 * 1024, 1));
-        }
-      } else {
-        await request.drain<void>();
-      }
-      await request.response.close();
-    }
-
-    Future<LibreSpeedBackend> backendFor(List<Object?> list) async {
-      final index = await serve((request) async {
-        request.response.write(jsonEncode(list));
-        await request.response.close();
-      });
-      return LibreSpeedBackend(
-        serverList: Uri.parse('http://127.0.0.1:${index.port}/servers'),
-        timeout: const Duration(seconds: 2),
-        pingTimeout: const Duration(seconds: 1),
-      );
-    }
-
-    test('measures against the nearest server in whole chunks', () async {
-      final paths = <String>[];
-      final near = await serve((request) async {
-        paths.add(request.uri.path);
-        await speedServer(request);
-      });
-      final far = await serve(
-        (request) =>
-            speedServer(request, delay: const Duration(milliseconds: 150)),
-      );
-      final backend = await backendFor([
-        {'name': 'broken', 'server': 42},
-        {
-          'name': 'far',
-          'server': 'http://127.0.0.1:${far.port}/speed',
-          'dlURL': 'garbage.php',
-        },
-        {
-          'name': 'near',
-          'server': 'http://127.0.0.1:${near.port}/speed',
-          'dlURL': 'garbage.php',
-        },
-      ]);
-      final session = backend.open(HttpClient.new);
-      addTearDown(session.close);
-      expect(await session.latency(), lessThan(150));
-      var downloaded = 0;
-      await session.download(
-        2 * 1024 * 1024 + 4096,
-        (value) => downloaded += value,
-      );
-      var sent = 0;
-      await session.upload(8192, (value) => sent += value);
-      expect(downloaded, 2 * 1024 * 1024);
-      expect(sent, 8192);
-      expect(paths, containsAll(['/speed/garbage.php', '/speed/empty.php']));
-    });
-
-    test('resolves endpoints under a server path without a slash', () {
-      final server = LibreSpeedServer.tryParse({
-        'name': 'remote',
-        'server': '//example.test/backend',
-      })!;
-      expect(
-        server.download,
-        Uri.parse('https://example.test/backend/garbage.php'),
-      );
-      expect(server.ping, Uri.parse('https://example.test/backend/empty.php'));
-    });
-
-    test('stops a download below one chunk at the requested size', () async {
-      final server = await serve(speedServer);
-      final backend = await backendFor([
-        {'name': 'only', 'server': 'http://127.0.0.1:${server.port}/'},
-      ]);
-      final session = backend.open(HttpClient.new);
-      addTearDown(session.close);
-      var downloaded = 0;
-      await session.download(4096, (value) => downloaded += value);
-      expect(downloaded, 4096);
-    });
-
-    test('fails when no listed server answers', () async {
-      final backend = await backendFor([
-        {'name': 'gone', 'server': 'http://127.0.0.1:1/'},
-      ]);
-      final session = backend.open(HttpClient.new);
-      addTearDown(session.close);
-      await expectLater(session.latency(), throwsA(isA<HttpException>()));
-    });
+  test('persistent records exclude live samples and request ownership', () {
+    final state = SpeedTestState(
+      requestId: 'private-request',
+      phase: SpeedTestPhase.done,
+      checkedAt: DateTime.now(),
+      downloadMbps: 100,
+      liveMbps: 90,
+      downloadSamples: const [SpeedTestSample(elapsedMs: 200, mbps: 90)],
+    );
+    final record =
+        jsonDecode(jsonEncode(state.toRecord())) as Map<String, dynamic>;
+    expect(record['requestId'], '');
+    expect(record['downloadSamples'], isEmpty);
+    expect(record['liveMbps'], isNull);
+    expect(SpeedTestState.fromJson(record).downloadMbps, 100);
   });
 }

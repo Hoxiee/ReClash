@@ -10,6 +10,7 @@ import 'package:reclash/core/spill.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/models/speed_test.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -476,6 +477,38 @@ class CoreController {
   Future<List<ServiceCheckItem>> serviceCheck(
     ServiceCheckParams params,
   ) async => sandbox?.serviceCheck(params) ?? _interface.serviceCheck(params);
+
+  Future<bool> startSpeedTest(
+    SpeedTestSettings settings, {
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+  }) => _interface.startSpeedTest(
+    settings,
+    requestId: requestId,
+    proxyName: proxyName,
+    direct: direct,
+  );
+
+  Future<Map<String, dynamic>?> getSpeedTest(String requestId) =>
+      _interface.getSpeedTest(requestId);
+
+  Future<bool> cancelSpeedTest(String requestId) =>
+      _interface.cancelSpeedTest(requestId);
+
+  Future<List<SpeedTestServer>> speedTestServers({
+    required String requestId,
+    required String proxyName,
+    required bool direct,
+    required bool useSystemDns,
+    String search = '',
+  }) => _interface.speedTestServers(
+    requestId: requestId,
+    proxyName: proxyName,
+    direct: direct,
+    useSystemDns: useSystemDns,
+    search: search,
+  );
 
   Future<ClockSkewResult?> clockSkew(ClockSkewParams params) =>
       _interface.clockSkew(params);

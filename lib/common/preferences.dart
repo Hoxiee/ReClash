@@ -74,6 +74,22 @@ class Preferences {
     await store?.setStringList('provider.notices', dismissed);
   }
 
+  Future<List<String>> getSpeedTestHistory() async {
+    final store = await _store.value;
+    if (store == null) throw StateError('Preferences are unavailable');
+    return store.getStringList('speedTest.history') ?? const [];
+  }
+
+  Future<void> saveSpeedTestHistory(List<String> records) async {
+    final store = await _store.value;
+    if (store == null || _preventWrites) {
+      throw StateError('Preferences are not writable');
+    }
+    if (!await store.setStringList('speedTest.history', records)) {
+      throw StateError('Could not save speed test history');
+    }
+  }
+
   Future<List<String>> getDoctorIncidents() async {
     try {
       final store = await _store.value;
