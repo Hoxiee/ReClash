@@ -82,15 +82,34 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
   }
 
-  testWidgets('opening the sheet sends no requests and shows all platforms', (
+  Future<void> openResult(WidgetTester tester) async {
+    final row = find.text('Test result');
+    await tester.ensureVisible(row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+  }
+
+  double overflow(WidgetTester tester) => tester
+      .state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(SpeedTestSheet),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      )
+      .position
+      .maxScrollExtent;
+
+  testWidgets('opening the sheet sends no requests and names one platform', (
     tester,
   ) async {
     final client = FakeSpeedClient();
     await mount(tester, client);
     expect(find.text('Ready to measure'), findsOneWidget);
-    for (final name in ['Apple', 'Cloudflare', 'Speedtest.net', 'LibreSpeed']) {
-      expect(find.text(name), findsOneWidget);
-    }
+    expect(find.text('Cloudflare'), findsOneWidget);
+    expect(find.text('Apple'), findsNothing);
+    expect(find.text('Test result'), findsNothing);
     expect(client.requests, isEmpty);
     expect(client.serverRequests, isEmpty);
     expect(tester.takeException(), isNull);
@@ -175,11 +194,35 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SpeedTestSettingsSheet), findsOneWidget);
       expect(find.text('Time per direction'), findsOneWidget);
-      expect(find.text('Protocol'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Protocol'),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(SpeedTestSettingsSheet),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(find.text('Connections'), findsOneWidget);
       expect(find.text('Confirm on every network'), findsNothing);
       expect(client.requests, isEmpty);
     },
   );
+
+  testWidgets('latency-only settings drop what only a transfer uses', (
+    tester,
+  ) async {
+    await mount(
+      tester,
+      FakeSpeedClient(),
+      child: const SpeedTestSettingsSheet(),
+      settings: const SpeedTestSettings(mode: SpeedTestMode.latencyOnly),
+    );
+    expect(find.text('Protocol'), findsOneWidget);
+    expect(find.text('Time per direction'), findsNothing);
+    expect(find.text('Connections'), findsNothing);
+  });
 
   for (final size in [const Size(412, 915), const Size(1280, 800)]) {
     testWidgets('settings stay on the same sheet navigator at $size', (
@@ -240,9 +283,12 @@ void main() {
     await mount(tester, client);
     await start(tester);
     await tester.pumpAndSettle();
-    expect(find.text('Latency under load'), findsOneWidget);
+    expect(find.byType(SpeedTestCharts), findsNothing);
+    await openResult(tester);
     expect(find.text('1200 RPM'), findsOneWidget);
     expect(find.byType(SpeedTestCharts), findsOneWidget);
+    Navigator.of(tester.element(find.byType(SpeedTestCharts))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Test history'));
     await tester.pumpAndSettle();
     expect(find.byType(SpeedTestHistorySheet), findsOneWidget);
@@ -286,8 +332,20 @@ void main() {
       await mount(tester, FakeSpeedClient(), size: size);
       await start(tester);
       await tester.pumpAndSettle();
+      await openResult(tester);
       await tester.ensureVisible(find.byType(SpeedTestCharts));
       await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final size in [const Size(360, 600), const Size(412, 823)]) {
+    testWidgets('a finished test needs no scrolling at $size', (tester) async {
+      await mount(tester, FakeSpeedClient(), size: size);
+      expect(overflow(tester), 0);
+      await start(tester);
+      await tester.pumpAndSettle();
+      expect(overflow(tester), 0);
       expect(tester.takeException(), isNull);
     });
   }

@@ -6,7 +6,7 @@ import 'package:reclash/widgets/widgets.dart';
 
 import 'history.dart';
 import 'result.dart';
-import 'types.dart';
+import 'result_page.dart';
 
 class SpeedTestHistorySheet extends ConsumerStatefulWidget {
   const SpeedTestHistorySheet({super.key});
@@ -106,7 +106,7 @@ class _SpeedTestHistorySheetState extends ConsumerState<SpeedTestHistorySheet> {
                   trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 18),
                   onTap: () => showInSheet<void>(
                     context,
-                    builder: (_) => _HistoryResult(test: record),
+                    builder: (_) => SpeedTestResultPage(test: record),
                   ),
                 ),
               ),
@@ -116,42 +116,4 @@ class _SpeedTestHistorySheetState extends ConsumerState<SpeedTestHistorySheet> {
       ),
     );
   }
-}
-
-class _HistoryResult extends StatelessWidget {
-  const _HistoryResult({required this.test});
-
-  final SpeedTestState test;
-
-  @override
-  Widget build(BuildContext context) => CommonScaffold(
-    title: context.appLocalizations.speedTestResult,
-    body: ListView(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        context.contentTopPadding + 12,
-        16,
-        context.bottomInset + 24,
-      ),
-      children: [
-        if (test.checkedAt != null)
-          LastUpdateTimeText(lastUpdateDate: test.checkedAt),
-        const SizedBox(height: 12),
-        CommonCard(
-          padding: const EdgeInsets.all(16),
-          child: SpeedTestMetrics(test: test),
-        ),
-        const SizedBox(height: 12),
-        CommonCard(
-          padding: const EdgeInsets.all(16),
-          child: SpeedTestResultDetails(test: test),
-        ),
-        if (speedTestMessage(context, test) case final message?)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(message),
-          ),
-      ],
-    ),
-  );
 }

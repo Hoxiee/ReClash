@@ -18,6 +18,7 @@ class SpeedTestCharts extends StatelessWidget {
     final l = context.appLocalizations;
     final empty = test.downloadSamples.isEmpty && test.uploadSamples.isEmpty;
     return CommonCard(
+      radius: AppCorner.xl,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -185,7 +185,7 @@
   "speedTestPlatformUnavailable": "This platform is unavailable. Choose another in settings.",
   "speedTestMode": "Measurements",
   "speedTestComplete": "Full test",
-  "speedTestLatencyOnly": "Latency and jitter only",
+  "speedTestLatencyOnly": "Latency only",
   "speedTestBudget": "Total data budget",
   "speedTestBudgetHint": "Shared by download, upload and warm-up. Network overhead is additional.",
   "speedTestReady": "Ready to measure",
@@ -286,8 +286,8 @@
     }
   },
   "speedTestConnections": "Connections",
-  "speedTestSingleConnection": "Single connection",
-  "speedTestMultipleConnections": "Multiple connections",
+  "speedTestSingleConnection": "One",
+  "speedTestMultipleConnections": "Multiple",
   "speedTestProtocol": "Protocol",
   "speedTestProtocolFallback": "The server or route does not support the requested protocol. The test used {protocol}.",
   "@speedTestProtocolFallback": {
@@ -307,7 +307,6 @@
   "speedTestCoreUnavailable": "The test engine is unavailable. Try again when Core is ready.",
   "speedTestDownloadLatency": "Download latency",
   "speedTestUploadLatency": "Upload latency",
-  "speedTestLoadedLatency": "Latency under load",
   "speedTestResponsiveness": "Responsiveness",
   "speedTestRpmUnit": "RPM",
   "speedTestRpmHint": "Estimated responses per minute, calculated from median latency under load. This is not an Apple networkQuality score.",

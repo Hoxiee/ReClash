@@ -29,25 +29,26 @@ class SpeedTestSettingsSheet extends ConsumerWidget {
     final settings = ref.watch(
       appSettingProvider.select((value) => value.speedTest),
     );
+    final complete = settings.mode == SpeedTestMode.complete;
+    final viaCore = ref.watch(speedTestViaVpnProvider);
     return CommonScaffold(
       title: l.speedTestSettings,
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
-          context.contentTopPadding,
+          context.sectionsTopPadding,
           16,
           context.bottomInset + 24,
         ),
         children: [
           generateSection(
-            title: l.speedTestPlatform,
+            footer: '${l.speedTestPlatformHint} ${l.speedTestPrivacy}',
             items: [
               ConfigOptionsItem<String>(
                 selector: appSettingProvider.select(
                   (value) => value.speedTest.backendId,
                 ),
                 title: (l) => l.speedTestPlatform,
-                subtitle: (l) => l.speedTestPlatformHint,
                 options: SpeedTestSettings.platforms.keys.toList(),
                 textBuilder: (id) => SpeedTestSettings.platforms[id] ?? id,
                 onChanged: (ref, value) => updateSpeedTestSettings(
@@ -70,68 +71,7 @@ class SpeedTestSettingsSheet extends ConsumerWidget {
             ],
           ),
           generateSection(
-            title: l.speedTestConnections,
-            items: [
-              ConfigOptionsItem<int>(
-                selector: appSettingProvider.select(
-                  (value) => value.speedTest.durationSeconds,
-                ),
-                title: (l) => l.speedTestDuration,
-                options: SpeedTestSettings.durations,
-                textBuilder: l.speedTestDurationValue,
-                onChanged: (ref, value) => updateSpeedTestSettings(
-                  ref,
-                  (state) => state.copyWith(durationSeconds: value),
-                ),
-              ),
-              ConfigOptionsItem<bool>(
-                selector: appSettingProvider.select(
-                  (value) => value.speedTest.multiThread,
-                ),
-                title: (l) => l.speedTestConnections,
-                options: const [true, false],
-                textBuilder: (value) => value
-                    ? l.speedTestMultipleConnections
-                    : l.speedTestSingleConnection,
-                onChanged: (ref, value) => updateSpeedTestSettings(
-                  ref,
-                  (state) => state.copyWith(multiThread: value),
-                ),
-              ),
-              ConfigOptionsItem<SpeedTestProtocol>(
-                selector: appSettingProvider.select(
-                  (value) => value.speedTest.protocol,
-                ),
-                title: (l) => l.speedTestProtocol,
-                options: SpeedTestProtocol.values,
-                textBuilder: (value) => value.label,
-                onChanged: (ref, value) => updateSpeedTestSettings(
-                  ref,
-                  (state) => state.copyWith(protocol: value),
-                ),
-              ),
-              if (!ref.watch(speedTestViaVpnProvider))
-                ConfigToggleItem(
-                  selector: appSettingProvider.select(
-                    (value) => value.speedTest.useSystemDns,
-                  ),
-                  title: (l) => l.speedTestSystemDns,
-                  onChanged: (ref, value) => updateSpeedTestSettings(
-                    ref,
-                    (state) => state.copyWith(useSystemDns: value),
-                  ),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            child: Text(
-              l.speedTestSystemDnsHint,
-              style: AppTextStyle.footnote.of(context),
-            ),
-          ),
-          generateSection(
-            title: l.speedTestMode,
+            footer: complete ? l.speedTestBudgetHint : null,
             items: [
               ConfigOptionsItem<SpeedTestMode>(
                 selector: appSettingProvider.select(
@@ -145,27 +85,77 @@ class SpeedTestSettingsSheet extends ConsumerWidget {
                   (state) => state.copyWith(mode: value),
                 ),
               ),
-              ConfigOptionsItem<int>(
-                selector: appSettingProvider.select(
-                  (value) => value.speedTest.budgetMiB,
+              if (complete) ...[
+                ConfigOptionsItem<int>(
+                  selector: appSettingProvider.select(
+                    (value) => value.speedTest.durationSeconds,
+                  ),
+                  title: (l) => l.speedTestDuration,
+                  options: SpeedTestSettings.durations,
+                  textBuilder: l.speedTestDurationValue,
+                  onChanged: (ref, value) => updateSpeedTestSettings(
+                    ref,
+                    (state) => state.copyWith(durationSeconds: value),
+                  ),
                 ),
-                title: (l) => l.speedTestBudget,
-                subtitle: (l) => l.speedTestBudgetHint,
-                options: SpeedTestSettings.budgets,
-                textBuilder: (value) => dashboardTraffic(value * 1024 * 1024),
-                onChanged: (ref, value) => updateSpeedTestSettings(
-                  ref,
-                  (state) => state.copyWith(budgetMiB: value),
+                ConfigOptionsItem<int>(
+                  selector: appSettingProvider.select(
+                    (value) => value.speedTest.budgetMiB,
+                  ),
+                  title: (l) => l.speedTestBudget,
+                  options: SpeedTestSettings.budgets,
+                  textBuilder: (value) => dashboardTraffic(value * 1024 * 1024),
+                  onChanged: (ref, value) => updateSpeedTestSettings(
+                    ref,
+                    (state) => state.copyWith(budgetMiB: value),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            child: Text(
-              l.speedTestPrivacy,
-              style: AppTextStyle.footnote.of(context),
-            ),
+          generateSection(
+            title: l.rcxAdvanced,
+            footer: viaCore ? null : l.speedTestSystemDnsHint,
+            items: [
+              if (complete)
+                ConfigOptionsItem<bool>(
+                  selector: appSettingProvider.select(
+                    (value) => value.speedTest.multiThread,
+                  ),
+                  title: (l) => l.speedTestConnections,
+                  options: const [true, false],
+                  textBuilder: (value) => value
+                      ? l.speedTestMultipleConnections
+                      : l.speedTestSingleConnection,
+                  onChanged: (ref, value) => updateSpeedTestSettings(
+                    ref,
+                    (state) => state.copyWith(multiThread: value),
+                  ),
+                ),
+              ConfigOptionsItem<SpeedTestProtocol>(
+                selector: appSettingProvider.select(
+                  (value) => value.speedTest.protocol,
+                ),
+                title: (l) => l.speedTestProtocol,
+                options: SpeedTestProtocol.values,
+                textBuilder: (value) => value.label,
+                onChanged: (ref, value) => updateSpeedTestSettings(
+                  ref,
+                  (state) => state.copyWith(protocol: value),
+                ),
+              ),
+              if (!viaCore)
+                ConfigToggleItem(
+                  selector: appSettingProvider.select(
+                    (value) => value.speedTest.useSystemDns,
+                  ),
+                  title: (l) => l.speedTestSystemDns,
+                  onChanged: (ref, value) => updateSpeedTestSettings(
+                    ref,
+                    (state) => state.copyWith(useSystemDns: value),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

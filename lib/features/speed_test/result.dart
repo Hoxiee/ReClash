@@ -11,12 +11,17 @@ String speedTestNumber(double? value) {
   return value < 100 ? value.toStringAsFixed(1) : value.round().toString();
 }
 
+(String, String) speedTestRateParts(BuildContext context, double? value) {
+  final l = context.appLocalizations;
+  return value != null && value >= 1000
+      ? (speedTestNumber(value / 1000), l.speedTestGbpsUnit)
+      : (speedTestNumber(value), l.simpleSpeedUnit);
+}
+
 String speedTestRate(BuildContext context, double? value) {
   if (value == null) return '—';
-  final l = context.appLocalizations;
-  return value >= 1000
-      ? '${speedTestNumber(value / 1000)} ${l.speedTestGbpsUnit}'
-      : '${speedTestNumber(value)} ${l.simpleSpeedUnit}';
+  final (number, unit) = speedTestRateParts(context, value);
+  return '$number $unit';
 }
 
 String? speedTestMessage(BuildContext context, SpeedTestState test) {
@@ -51,96 +56,55 @@ class SpeedTestMetrics extends StatelessWidget {
     final upload = test.running && test.stage == SpeedTestStage.upload
         ? test.liveMbps
         : test.uploadMbps;
-    String ms(double? value) =>
-        value == null ? '—' : l.speedTestMs(speedTestNumber(value));
-    return Column(
-      spacing: 10,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (!test.latencyOnly)
-          Row(
-            spacing: 10,
-            children: [
-              Expanded(
-                child: _Metric(
-                  glyph: AppGlyphs.arrowDown,
-                  label: l.speedTestDownload,
-                  value: speedTestRate(context, download),
-                  active: test.running && test.stage == SpeedTestStage.download,
-                ),
-              ),
-              Expanded(
-                child: _Metric(
-                  glyph: AppGlyphs.arrowUp,
-                  label: l.speedTestUpload,
-                  value: speedTestRate(context, upload),
-                  active: test.running && test.stage == SpeedTestStage.upload,
-                ),
-              ),
-            ],
-          ),
-        Row(
-          spacing: 10,
-          children: [
+    return CommonCard(
+      radius: AppCorner.xl,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      child: Row(
+        spacing: 4,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!test.latencyOnly) ...[
             Expanded(
               child: _Metric(
-                glyph: AppGlyphs.clock,
-                label: l.speedTestPing,
-                value: ms(test.latency?.medianMs),
-                active: test.running && test.stage == SpeedTestStage.latency,
+                glyph: AppGlyphs.arrowDown,
+                label: l.speedTestDownload,
+                value: speedTestRateParts(context, download),
+                active: test.running && test.stage == SpeedTestStage.download,
               ),
             ),
+            Expanded(
+              child: _Metric(
+                glyph: AppGlyphs.arrowUp,
+                label: l.speedTestUpload,
+                value: speedTestRateParts(context, upload),
+                active: test.running && test.stage == SpeedTestStage.upload,
+              ),
+            ),
+          ],
+          Expanded(
+            child: _Metric(
+              glyph: AppGlyphs.clock,
+              label: l.speedTestPing,
+              value: (
+                speedTestNumber(test.latency?.medianMs),
+                l.speedTestMsUnit,
+              ),
+              active: test.running && test.stage == SpeedTestStage.latency,
+            ),
+          ),
+          if (test.latencyOnly)
             Expanded(
               child: _Metric(
                 glyph: AppGlyphs.connections,
                 label: l.speedTestJitter,
-                value: ms(test.latency?.jitterMs),
+                value: (
+                  speedTestNumber(test.latency?.jitterMs),
+                  l.speedTestMsUnit,
+                ),
               ),
             ),
-          ],
-        ),
-        if (!test.latencyOnly) ...[
-          const SizedBox(height: 2),
-          Text(
-            l.speedTestLoadedLatency,
-            style: AppTextStyle.footnote.of(context, emphasized: true),
-          ),
-          Wrap(
-            spacing: 16,
-            runSpacing: 6,
-            children: [
-              Text(
-                '${l.speedTestDownload}: ${ms(test.downloadLatency?.medianMs)}',
-              ),
-              Text('${l.speedTestUpload}: ${ms(test.uploadLatency?.medianMs)}'),
-            ],
-          ),
-          Row(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: Text(
-                  l.speedTestResponsiveness,
-                  style: AppTextStyle.footnote.of(context),
-                ),
-              ),
-              Text(
-                '${test.rpm ?? '—'} ${l.speedTestRpmUnit}',
-                style: AppTextStyle.footnote.of(context, emphasized: true),
-              ),
-              Tooltip(
-                message: l.speedTestRpmHint,
-                triggerMode: TooltipTriggerMode.tap,
-                child: GlyphIcon(
-                  AppGlyphs.info,
-                  size: 18,
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -155,47 +119,89 @@ class _Metric extends StatelessWidget {
 
   final Glyph glyph;
   final String label;
-  final String value;
+  final (String, String) value;
   final bool active;
 
   @override
-  Widget build(BuildContext context) => CommonCard(
-    radius: AppCorner.lg,
-    padding: const EdgeInsets.all(12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 6,
+  Widget build(BuildContext context) {
+    final muted = context.colorScheme.onSurfaceVariant;
+    final (number, unit) = value;
+    return MergeSemantics(
+      child: Column(
+        spacing: 2,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                GlyphIcon(
+                  glyph,
+                  size: 14,
+                  color: active ? context.colorScheme.primary : muted,
+                ),
+                Text(
+                  label,
+                  style: AppTextStyle.caption1
+                      .of(context)
+                      .copyWith(color: muted),
+                ),
+              ],
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              number,
+              style: AppTextStyle.title2.of(context, emphasized: true),
+            ),
+          ),
+          Text(
+            unit,
+            style: AppTextStyle.caption2.of(context).copyWith(color: muted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Jitter and what a full run measured under load, which the metrics leave out.
+class SpeedTestLatencyDetails extends StatelessWidget {
+  const SpeedTestLatencyDetails({super.key, required this.test});
+
+  final SpeedTestState test;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    String ms(double? value) =>
+        value == null ? '—' : l.speedTestMs(speedTestNumber(value));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
       children: [
-        Row(
-          spacing: 5,
-          children: [
-            GlyphIcon(
-              glyph,
-              size: 16,
-              color: active
-                  ? context.colorScheme.primary
-                  : context.colorScheme.onSurfaceVariant,
-            ),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyle.caption1.of(context),
-                maxLines: 2,
-              ),
-            ),
-          ],
+        _Detail(label: l.speedTestJitter, value: ms(test.latency?.jitterMs)),
+        _Detail(
+          label: l.speedTestDownloadLatency,
+          value: ms(test.downloadLatency?.medianMs),
         ),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerStart,
-          child: Text(
-            value,
-            style: AppTextStyle.title3.of(context, emphasized: true),
+        _Detail(
+          label: l.speedTestUploadLatency,
+          value: ms(test.uploadLatency?.medianMs),
+        ),
+        Tooltip(
+          message: l.speedTestRpmHint,
+          triggerMode: TooltipTriggerMode.tap,
+          child: _Detail(
+            label: l.speedTestResponsiveness,
+            value: '${test.rpm ?? '—'} ${l.speedTestRpmUnit}',
           ),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
 
 class SpeedTestResultDetails extends StatelessWidget {
@@ -269,7 +275,6 @@ class _Detail extends StatelessWidget {
     spacing: 16,
     children: [
       Expanded(
-        flex: 2,
         child: Text(
           label,
           style: AppTextStyle.footnote
@@ -278,7 +283,6 @@ class _Detail extends StatelessWidget {
         ),
       ),
       Expanded(
-        flex: 3,
         child: Text(
           value,
           textAlign: TextAlign.end,

@@ -60,13 +60,13 @@ class SpeedTestDial extends StatelessWidget {
         );
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = math.min(constraints.maxWidth, 300.0);
+        final size = math.min(constraints.maxWidth, 340.0);
         final radius = size / 2 - _labelGap - _stroke / 2;
         final ends = size / 2 + radius * math.sin(math.pi / 4);
         return Center(
           child: SizedBox(
             width: size,
-            height: ends + _labelGap + 12,
+            height: ends + 24,
             child: TweenAnimationBuilder<double>(
               tween: Tween(end: speedTestDialPosition(mbps ?? 0)),
               duration: context.motionDuration(
@@ -77,7 +77,7 @@ class SpeedTestDial extends StatelessWidget {
                 painter: _DialPainter(
                   position: position,
                   filled: mbps != null,
-                  track: SurfaceLevel.inset.colorOf(colorScheme),
+                  track: colorScheme.onSurface.withValues(alpha: 0.14),
                   ink: colorScheme.primary,
                   knob: colorScheme.onSurface,
                   label: label,
@@ -90,14 +90,14 @@ class SpeedTestDial extends StatelessWidget {
                   Positioned(
                     left: 0,
                     right: 0,
-                    top: size / 2 - radius * 0.62,
-                    height: radius * 1.24,
+                    top: size / 2 - radius * 0.75,
+                    height: radius * 1.5,
                     child: Center(child: child),
                   ),
                   Positioned(
                     left: 0,
                     right: 0,
-                    top: ends - 14,
+                    top: ends - 8,
                     child: Center(
                       child: SizedBox(
                         width: 2 * radius * math.cos(math.pi / 4) - 2 * _stroke,
