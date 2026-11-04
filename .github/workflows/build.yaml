@@ -137,7 +137,11 @@ jobs:
 
   desktop:
     name: Desktop ${{ matrix.platform }}
-    if: (github.event_name == 'workflow_dispatch' || !github.event.repository.private) && !startsWith(github.ref, 'refs/tags/v') && !inputs.build_packages
+    # The tag pushed with a release commit packages the same sources.
+    if: >-
+      (github.event_name == 'workflow_dispatch' || !github.event.repository.private) &&
+      !startsWith(github.ref, 'refs/tags/v') && !inputs.build_packages &&
+      !startsWith(github.event.head_commit.message, 'chore(release): prepare')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -402,7 +406,7 @@ jobs:
     if: >-
       (github.repository == 'Hoxiee/ReClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
       (github.event_name == 'workflow_dispatch' && inputs.build_packages)
-    needs: [ dart, plugins, go, android, rust, windows-helper-test ]
+    # Packaging runs beside the checks; upload waits for both.
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
