@@ -107,5 +107,7 @@
   "doctorAutoHeal": "自动修复问题",
   "doctorAutoHealDescription": "自动修复问题只会更改 ReClash 自身的设置；其他程序的设置仅在你确认后才会更改。",
   "doctorProxyOffDetail": "ReClash 的系统代理在应用外被关闭，因此应用会绕过 ReClash。",
-  "doctorFixConfirm": "修复…"
+  "doctorFixConfirm": "修复…",
+  "coreErrorNotices": "内核错误通知",
+  "coreErrorNoticesDesc": "关闭后，连接被关闭等内核错误不再弹出提示，日志中仍会保留。"
 }

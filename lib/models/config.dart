@@ -277,6 +277,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool silentLaunch,
     @Default(false) bool autoRun,
     @Default(false) bool openLogs,
+    @Default(true) bool coreErrorNotices,
     @Default(true) bool closeConnections,
     @Default(defaultDelayTestTimeout) int delayTestTimeout,
     @Default(TabAnimation.slide)

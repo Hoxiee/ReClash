@@ -107,5 +107,7 @@
   "doctorAutoHeal": "Meseleleri awtomatik düzet",
   "doctorAutoHealDescription": "Meseleleri awtomatik düzetmek diňe ReClash-yň öz sazlamalaryny üýtgedýär; beýleki programmalaryň sazlamalary diňe siz tassyklandan soň üýtgeýär.",
   "doctorProxyOffDetail": "ReClash-yň ulgam proksisi programmadan daşarda öçürildi, şonuň üçin programmalar ReClash-dan aýlanyp geçýär.",
-  "doctorFixConfirm": "Düzet…"
+  "doctorFixConfirm": "Düzet…",
+  "coreErrorNotices": "Ýadro säwlikleri barada habarlar",
+  "coreErrorNoticesDesc": "Öçürilende ýapylan birikmeler ýaly ýadro säwlikleri gapma-gapdal habar bolup görkezilmeýär. Olar žurnalda galýar."
 }

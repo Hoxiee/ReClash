@@ -107,5 +107,7 @@
   "doctorAutoHeal": "Muammolarni avtomatik tuzatish",
   "doctorAutoHealDescription": "Muammolarni avtomatik tuzatish faqat ReClash sozlamalarini oʻzgartiradi; boshqa dasturlar sozlamalari faqat siz tasdiqlaganingizdan keyin oʻzgaradi.",
   "doctorProxyOffDetail": "ReClash tizim proksisi ilovadan tashqarida o‘chirildi, shuning uchun ilovalar ReClash’ni chetlab o‘tmoqda.",
-  "doctorFixConfirm": "Tuzatish…"
+  "doctorFixConfirm": "Tuzatish…",
+  "coreErrorNotices": "Yadro xatolari haqida bildirishnomalar",
+  "coreErrorNoticesDesc": "Oʻchirilsa, yopilgan ulanishlar kabi yadro xatolari qalqib chiquvchi xabar sifatida koʻrsatilmaydi. Ular jurnalda qoladi."
 }

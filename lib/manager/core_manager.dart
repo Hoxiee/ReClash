@@ -128,7 +128,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void onLog(Log log) {
     ref.read(logsProvider.notifier).add(log);
-    if (log.logLevel == LogLevel.error && !_setupActive) {
+    if (log.logLevel == LogLevel.error &&
+        !_setupActive &&
+        ref.read(appSettingProvider).coreErrorNotices) {
       throttler.call(
         FunctionTag.coreErrorNotifier,
         () => dialogs.showNotifier(

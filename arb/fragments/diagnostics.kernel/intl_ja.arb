@@ -107,5 +107,7 @@
   "doctorAutoHeal": "問題を自動で修正",
   "doctorAutoHealDescription": "問題を自動で修正は ReClash 自身の設定だけを変更します。他のプログラムの設定は確認後にのみ変更されます。",
   "doctorProxyOffDetail": "ReClash のシステムプロキシがアプリの外でオフにされたため、アプリは ReClash を経由しません。",
-  "doctorFixConfirm": "修正…"
+  "doctorFixConfirm": "修正…",
+  "coreErrorNotices": "コアのエラー通知",
+  "coreErrorNoticesDesc": "オフにすると、接続の切断などコアのエラーがポップアップ表示されなくなります。ログには引き続き記録されます。"
 }

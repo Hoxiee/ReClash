@@ -107,5 +107,7 @@
   "doctorAutoHeal": "Corregir problemas automáticamente",
   "doctorAutoHealDescription": "Corregir problemas automáticamente solo cambia los ajustes de ReClash; los de otros programas cambian solo tras tu confirmación.",
   "doctorProxyOffDetail": "El proxy del sistema de ReClash se desactivó fuera de la app, así que las apps no pasan por ReClash.",
-  "doctorFixConfirm": "Corregir…"
+  "doctorFixConfirm": "Corregir…",
+  "coreErrorNotices": "Avisos de errores del núcleo",
+  "coreErrorNoticesDesc": "Al desactivarlo, los errores del núcleo, como conexiones cerradas, dejan de mostrarse como avisos. Siguen apareciendo en los registros."
 }

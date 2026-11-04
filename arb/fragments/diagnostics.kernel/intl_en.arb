@@ -273,5 +273,7 @@
   "doctorFixConfirm": "Fix…",
   "@doctorFixConfirm": {
     "description": "Button for a fix that changes another program's settings; the ellipsis signals that a confirmation follows."
-  }
+  },
+  "coreErrorNotices": "Core error notices",
+  "coreErrorNoticesDesc": "Turning this off stops error pop-ups from the core, such as closed connections. Errors still appear in the logs."
 }

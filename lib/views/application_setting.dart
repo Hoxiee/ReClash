@@ -97,6 +97,11 @@ class ApplicationSettings {
       title: (l) => l.logcat,
     ),
     SettingSpec(
+      id: 'application.coreErrorNotices',
+      page: ToolPage.application,
+      title: (l) => l.coreErrorNotices,
+    ),
+    SettingSpec(
       id: 'application.logLevel',
       page: ToolPage.application,
       title: (l) => l.logLevel,
@@ -228,6 +233,11 @@ class ApplicationSettingView extends ConsumerWidget {
         select: (s) => s.openLogs,
         update: (s, v) => s.copyWith(openLogs: v),
       ),
+      _toggle(
+        id: 'application.coreErrorNotices',
+        select: (s) => s.coreErrorNotices,
+        update: (s, v) => s.copyWith(coreErrorNotices: v),
+      ),
       ConfigOptionsItem<LogLevel>(
         setting: ApplicationSettings.spec('application.logLevel'),
         title: (l) => l.logLevel,
@@ -293,7 +303,11 @@ class ApplicationSettingView extends ConsumerWidget {
               generateSection(
                 title: l.logsAndDiagnostics,
                 items: diagnostics,
-                footer: [l.doctorAutoHealDescription, l.logcatDesc].join('\n'),
+                footer: [
+                  l.doctorAutoHealDescription,
+                  l.logcatDesc,
+                  l.coreErrorNoticesDesc,
+                ].join('\n'),
               ),
               const ProviderSettingsReturnSection(),
             ],
