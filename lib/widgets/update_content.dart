@@ -20,6 +20,7 @@ class UpdateReleaseContent extends StatefulWidget {
     this.asset,
     this.verified = false,
     this.note,
+    this.header = true,
   });
 
   final AppUpdateRelease release;
@@ -28,6 +29,7 @@ class UpdateReleaseContent extends StatefulWidget {
   final AndroidUpdateAsset? asset;
   final bool verified;
   final String? note;
+  final bool header;
 
   @override
   State<UpdateReleaseContent> createState() => _UpdateReleaseContentState();
@@ -58,48 +60,19 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
               .expand((group) => group.entries)
               .toList()
         : const <ChangelogEntry>[];
-    final published = DateTime.tryParse(
-      release.data['published_at']?.toString() ?? '',
-    );
     final muted = context.colorScheme.onSurfaceVariant;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 16,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 10,
-          children: [
-            Semantics(
-              header: true,
-              child: Text(
-                summary?.headline ?? l.updateOfferTitle,
-                style: AppTextStyle.title1.of(context, emphasized: true),
-              ),
-            ),
-            Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                _VersionStep(
-                  from: widget.currentVersion,
-                  to: release.tag.replaceFirst(RegExp('^v'), ''),
-                ),
-                if (release.prerelease) CommonChip(label: l.updateChannelPre),
-                if (published != null)
-                  Text(
-                    DateFormat.yMMMd(
-                      DateFormat.localeExists(locale) ? locale : 'en',
-                    ).format(published.toLocal()),
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(color: muted),
-                  ),
-              ],
-            ),
-          ],
-        ),
+        if (widget.header)
+          UpdateOfferHead(
+            release: release,
+            currentVersion: widget.currentVersion,
+            platform: widget.platform,
+            alignment: CrossAxisAlignment.start,
+            style: AppTextStyle.title1,
+          ),
         if (widget.note case final note?)
           Text(
             note,
@@ -192,6 +165,75 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
   }
 }
 
+/// The offer's title and a line under it: the version step, the channel and
+/// the publication date.
+class UpdateOfferHead extends StatelessWidget {
+  const UpdateOfferHead({
+    super.key,
+    required this.release,
+    required this.currentVersion,
+    required this.platform,
+    this.alignment = CrossAxisAlignment.center,
+    this.style = AppTextStyle.title2,
+  });
+
+  final AppUpdateRelease release;
+  final String currentVersion;
+  final SupportPlatform platform;
+  final CrossAxisAlignment alignment;
+  final AppTextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final locale = Localizations.localeOf(context).toString();
+    final summary = release.summary?.localized(
+      locale,
+      platform: platform.name.toLowerCase(),
+    );
+    final published = DateTime.tryParse(
+      release.data['published_at']?.toString() ?? '',
+    );
+    final centered = alignment == CrossAxisAlignment.center;
+    return Column(
+      crossAxisAlignment: alignment,
+      spacing: 10,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            summary?.headline ?? l.updateOfferTitle,
+            textAlign: centered ? TextAlign.center : TextAlign.start,
+            style: style.of(context, emphasized: true),
+          ),
+        ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          alignment: centered ? WrapAlignment.center : WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _VersionStep(
+              from: currentVersion,
+              to: release.tag.replaceFirst(RegExp('^v'), ''),
+            ),
+            if (release.prerelease) CommonChip(label: l.updateChannelPre),
+            if (published != null)
+              Text(
+                DateFormat.yMMMd(
+                  DateFormat.localeExists(locale) ? locale : 'en',
+                ).format(published.toLocal()),
+                style: AppTextStyle.footnote
+                    .of(context)
+                    .copyWith(color: context.colorScheme.onSurfaceVariant),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 String _abiOf(String name) {
   for (final abi in [
     'arm64-v8a',
@@ -256,12 +298,12 @@ class _ImportantNotice extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 12,
+      spacing: 16,
       children: [
         GlyphIcon(
           AppGlyphs.warning,
           color: context.colorScheme.warning,
-          size: 22,
+          size: 24,
         ),
         Expanded(
           child: Column(

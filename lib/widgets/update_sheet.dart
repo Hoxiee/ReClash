@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/models/common.dart' show TrafficShowExt;
 import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -14,6 +15,17 @@ import 'package:reclash/ui/ui.dart';
 
 import 'update_content.dart';
 import 'update_preferences.dart';
+
+const _contentMaxWidth = 520.0;
+const _orbSide = 112.0;
+const _orbCompactSide = 88.0;
+const _orbCompactBelow = 400.0;
+const _scrollBottomPadding = 24.0;
+const _fadeHeight = 24.0;
+const _orbCentre = 0.3;
+const _orbCompactCentre = 0.24;
+const _primaryHeight = 52.0;
+const _secondaryHeight = 48.0;
 
 class UpdateSheet extends ConsumerStatefulWidget {
   const UpdateSheet({super.key, this.platform});
@@ -100,6 +112,7 @@ class _TrackedState extends State<_Tracked> {
 
 class _UpdateSheetState extends ConsumerState<UpdateSheet> {
   ScrollController? _scrollController;
+  final _underFooter = ValueNotifier(false);
 
   @override
   void didChangeDependencies() {
@@ -110,7 +123,13 @@ class _UpdateSheetState extends ConsumerState<UpdateSheet> {
   @override
   void dispose() {
     _scrollController?.dispose();
+    _underFooter.dispose();
     super.dispose();
+  }
+
+  bool _track(ScrollMetrics metrics) {
+    _underFooter.value = metrics.extentAfter > _scrollBottomPadding;
+    return false;
   }
 
   void _close() => context.safeNestedPop();
@@ -140,55 +159,160 @@ class _UpdateSheetState extends ConsumerState<UpdateSheet> {
       ],
       body: Builder(
         builder: (context) => Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: SingleChildScrollView(
-                key: const ValueKey('update-offer-scroll'),
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ).copyWith(top: context.contentTopPadding, bottom: 16),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 240),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  layoutBuilder: (current, previous) => Stack(
-                    alignment: Alignment.topCenter,
-                    children: [...previous, ?current],
+            Expanded(
+              child: NotificationListener<ScrollMetricsNotification>(
+                onNotification: (n) => _track(n.metrics),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (n) => _track(n.metrics),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _underFooter,
+                    builder: (context, under, child) => ShaderMask(
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (bounds) => LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white,
+                          under ? Colors.transparent : Colors.white,
+                        ],
+                        stops: [
+                          (1 - _fadeHeight / bounds.height).clamp(0.0, 1.0),
+                          1,
+                        ],
+                      ).createShader(bounds),
+                      child: child,
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact =
+                            constraints.maxHeight < _orbCompactBelow;
+                        final side = compact ? _orbCompactSide : _orbSide;
+                        final centre = compact ? _orbCompactCentre : _orbCentre;
+                        return SingleChildScrollView(
+                          key: const ValueKey('update-offer-scroll'),
+                          controller: _scrollController,
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            math.max(
+                              context.contentTopPadding,
+                              constraints.maxHeight * centre - side / 2,
+                            ),
+                            16,
+                            24,
+                          ),
+                          child: _Limit(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 240),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              layoutBuilder: (current, previous) => Stack(
+                                alignment: Alignment.topCenter,
+                                children: [...previous, ?current],
+                              ),
+                              child: offer
+                                  ? _UpdateOffer(
+                                      key: const ValueKey('update-offer'),
+                                      update: update,
+                                      release: release,
+                                      orbSide: side,
+                                      platform: platform,
+                                      note:
+                                          action.isSupported &&
+                                              update.asset?.sha256 == null
+                                          ? l.updateDirectUnavailable
+                                          : null,
+                                    )
+                                  : _UpdateStatus(
+                                      key: const ValueKey('update-status'),
+                                      update: update,
+                                      currentVersion:
+                                          globalState.packageInfo.version,
+                                      orbSide: side,
+                                    ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  child: offer
-                      ? UpdateReleaseContent(
-                          key: const ValueKey('update-offer'),
-                          release: release,
-                          currentVersion: globalState.packageInfo.version,
-                          platform: platform,
-                          asset: update.asset,
-                          verified: update.verified,
-                          note:
-                              action.isSupported && update.asset?.sha256 == null
-                              ? l.updateDirectUnavailable
-                              : null,
-                        )
-                      : _UpdateStatus(
-                          key: const ValueKey('update-status'),
-                          update: update,
-                          currentVersion: globalState.packageInfo.version,
-                        ),
                 ),
               ),
             ),
-            if (update.phase != UpdatePhase.checking)
-              _UpdateFooter(
-                update: update,
-                supported: action.isSupported,
-                onClose: _close,
-              ),
+            _UpdateFooter(
+              update: update,
+              supported: action.isSupported,
+              onClose: _close,
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Limit extends StatelessWidget {
+  const _Limit({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+      child: child,
+    ),
+  );
+}
+
+class _UpdateOffer extends StatelessWidget {
+  const _UpdateOffer({
+    super.key,
+    required this.update,
+    required this.release,
+    required this.platform,
+    required this.orbSide,
+    this.note,
+  });
+
+  final AppUpdateState update;
+  final AppUpdateRelease release;
+  final SupportPlatform platform;
+  final double orbSide;
+  final String? note;
+
+  @override
+  Widget build(BuildContext context) {
+    final currentVersion = globalState.packageInfo.version;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: UpdateOrb(
+            update: update,
+            glyph: AppGlyphs.cloudDownload,
+            color: context.colorScheme.primary,
+            side: orbSide,
+          ),
+        ),
+        const SizedBox(height: 16),
+        UpdateOfferHead(
+          release: release,
+          currentVersion: currentVersion,
+          platform: platform,
+        ),
+        const SizedBox(height: 24),
+        UpdateReleaseContent(
+          release: release,
+          currentVersion: currentVersion,
+          platform: platform,
+          asset: update.asset,
+          verified: update.verified,
+          note: note,
+          header: false,
+        ),
+      ],
     );
   }
 }
@@ -200,10 +324,12 @@ class _UpdateStatus extends StatelessWidget {
     super.key,
     required this.update,
     required this.currentVersion,
+    required this.orbSide,
   });
 
   final AppUpdateState update;
   final String currentVersion;
+  final double orbSide;
 
   @override
   Widget build(BuildContext context) {
@@ -311,35 +437,41 @@ class _UpdateStatus extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 6,
           children: [
-            UpdateOrb(
-              update: update,
-              glyph: glyph,
-              color: switch (tone) {
-                _Tone.accent => context.colorScheme.primary,
-                _Tone.success => context.colorScheme.success,
-                _Tone.warning => context.colorScheme.warning,
-                _Tone.error => context.colorScheme.error,
-              },
+            Center(
+              child: UpdateOrb(
+                update: update,
+                glyph: glyph,
+                side: orbSide,
+                color: switch (tone) {
+                  _Tone.accent => context.colorScheme.primary,
+                  _Tone.success => context.colorScheme.success,
+                  _Tone.warning => context.colorScheme.warning,
+                  _Tone.error => context.colorScheme.error,
+                },
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,
               style: AppTextStyle.title2.of(context, emphasized: true),
             ),
             if (detail != null)
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: Text(
-                  detail,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyle.subheadline
-                      .of(context)
-                      .copyWith(color: muted),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Text(
+                    detail,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: muted),
+                  ),
                 ),
               ),
             if (transfer) _TransferLine(update: update),
@@ -407,7 +539,11 @@ class UpdateOrb extends StatelessWidget {
         (phase == UpdatePhase.downloading && progress == null);
     final filled =
         update.verified ||
-        const {UpdatePhase.installed, UpdatePhase.upToDate}.contains(phase);
+        const {
+          UpdatePhase.ready,
+          UpdatePhase.installed,
+          UpdatePhase.upToDate,
+        }.contains(phase);
     final value = transfer ? progress ?? 0.0 : (filled ? 1.0 : 0.0);
     // A small orb keeps its glyph instead of the percentage, and draws the
     // glyph larger so it still reads inside the narrower well.
@@ -576,6 +712,7 @@ class _UpdateFooter extends ConsumerWidget {
         l.updatePauseAction,
       ),
       UpdatePhase.paused => (l.updateResumeAction, l.updateCancelDownload),
+      UpdatePhase.checking => ('', ''),
       UpdatePhase.verifying => (l.updateContinueBackground, ''),
       UpdatePhase.ready => (l.updateInstallNow, l.updateNotNow),
       UpdatePhase.vpnActive => (l.updateDisconnectInstall, l.updateNotNow),
@@ -637,29 +774,47 @@ class _UpdateFooter extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: AlertActions(
-        actions: [
-          if (secondary.isNotEmpty)
-            TextButton(
-              key: const ValueKey('update-offer-dismiss'),
-              onPressed: dismiss,
-              child: Text(secondary, textAlign: TextAlign.center),
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 12 + context.bottomInset),
+      child: _Limit(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: _primaryHeight,
+              child: primary.isEmpty
+                  ? null
+                  : external
+                  ? FilledButton.icon(
+                      key: const ValueKey('update-offer-accept'),
+                      onPressed: accept,
+                      iconAlignment: IconAlignment.end,
+                      icon: const GlyphIcon(
+                        AppGlyphs.openExternal,
+                        size: 18,
+                        fill: 1,
+                      ),
+                      label: Text(primary, textAlign: TextAlign.center),
+                    )
+                  : FilledButton(
+                      key: const ValueKey('update-offer-accept'),
+                      onPressed: accept,
+                      child: Text(primary, textAlign: TextAlign.center),
+                    ),
             ),
-          external
-              ? TextButton.icon(
-                  key: const ValueKey('update-offer-accept'),
-                  onPressed: accept,
-                  iconAlignment: IconAlignment.end,
-                  icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
-                  label: Text(primary, textAlign: TextAlign.center),
-                )
-              : TextButton(
-                  key: const ValueKey('update-offer-accept'),
-                  onPressed: accept,
-                  child: Text(primary, textAlign: TextAlign.center),
-                ),
-        ],
+            SizedBox(
+              height: _secondaryHeight,
+              child: Center(
+                child: secondary.isEmpty
+                    ? null
+                    : TextButton(
+                        key: const ValueKey('update-offer-dismiss'),
+                        onPressed: dismiss,
+                        child: Text(secondary, textAlign: TextAlign.center),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
