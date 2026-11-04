@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbps",
   "speedTestSecondsUnit": "s",
   "speedTestTimeout": "La prueba agotó el tiempo de espera. Comprueba la conexión e inténtalo de nuevo.",
-  "speedTestRejected": "La ruta seleccionada bloqueó la prueba."
+  "speedTestRejected": "La ruta seleccionada bloqueó la prueba.",
+  "dashboardStyleSimplest": "Aún más sencillo",
+  "simplestOff": "SOLTAR LA PASTA",
+  "simplestConnecting": "LA PASTA VUELA…",
+  "simplestOn": "PASTA RECIBIDA",
+  "simplestPaused": "LA PASTA DESCANSA",
+  "simplestOffNote": "Renovación automática para siempre",
+  "simplestConnectingNote": "No cierres la cartera",
+  "simplestOnNote": "Sin reembolso",
+  "simplestPausedNote": "Volvemos pronto"
 }

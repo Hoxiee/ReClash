@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbit/s",
   "speedTestSecondsUnit": "s",
   "speedTestTimeout": "Sinovni kutish vaqti tugadi. Ulanishni tekshiring va qayta urinib ko‘ring.",
-  "speedTestRejected": "Tanlangan yo‘nalish sinovni blokladi."
+  "speedTestRejected": "Tanlangan yo‘nalish sinovni blokladi.",
+  "dashboardStyleSimplest": "Yanada sodda",
+  "simplestOff": "PUL TASHLASH",
+  "simplestConnecting": "PUL UCHMOQDA…",
+  "simplestOn": "PUL QABUL QILINDI",
+  "simplestPaused": "PUL DAM OLMOQDA",
+  "simplestOffNote": "Abadiy avtouzaytirish",
+  "simplestConnectingNote": "Hamyonni yopmang",
+  "simplestOnNote": "Qaytarilmaydi",
+  "simplestPausedNote": "Tez orada qaytamiz"
 }

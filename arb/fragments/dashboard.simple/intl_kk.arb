@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Гбит/с",
   "speedTestSecondsUnit": "с",
   "speedTestTimeout": "Тесттің күту уақыты аяқталды. Қосылымды тексеріп, қайталап көріңіз.",
-  "speedTestRejected": "Таңдалған маршрут тестті бұғаттады."
+  "speedTestRejected": "Таңдалған маршрут тестті бұғаттады.",
+  "dashboardStyleSimplest": "Одан да оңай",
+  "simplestOff": "АҚША САЛУ",
+  "simplestConnecting": "АҚША ҰШЫП БАРАДЫ…",
+  "simplestOn": "АҚША ҚАБЫЛДАНДЫ",
+  "simplestPaused": "АҚША ДЕМАЛЫП ЖАТЫР",
+  "simplestOffNote": "Мәңгілік автожаңарту",
+  "simplestConnectingNote": "Әмиянды жаппаңыз",
+  "simplestOnNote": "Қайтарылмайды",
+  "simplestPausedNote": "Жақында ораламыз"
 }

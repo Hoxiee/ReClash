@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbps",
   "speedTestSecondsUnit": "초",
   "speedTestTimeout": "테스트 시간이 초과되었습니다. 연결을 확인하고 다시 시도하세요.",
-  "speedTestRejected": "선택한 경로가 테스트를 차단했습니다."
+  "speedTestRejected": "선택한 경로가 테스트를 차단했습니다.",
+  "dashboardStyleSimplest": "더 간단하게",
+  "simplestOff": "돈 넣기",
+  "simplestConnecting": "돈 날아가는 중…",
+  "simplestOn": "돈 받았습니다",
+  "simplestPaused": "돈이 쉬는 중",
+  "simplestOffNote": "평생 자동 갱신",
+  "simplestConnectingNote": "지갑 닫지 마세요",
+  "simplestOnNote": "환불 불가",
+  "simplestPausedNote": "곧 돌아옵니다"
 }

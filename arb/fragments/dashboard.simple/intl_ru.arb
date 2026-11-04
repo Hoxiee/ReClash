@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Гбит/с",
   "speedTestSecondsUnit": "с",
   "speedTestTimeout": "Время ожидания теста истекло. Проверьте соединение и попробуйте ещё раз.",
-  "speedTestRejected": "Выбранный маршрут заблокировал тест."
+  "speedTestRejected": "Выбранный маршрут заблокировал тест.",
+  "dashboardStyleSimplest": "Ещё проще",
+  "simplestOff": "ЗАКИНУТЬ БАБЛО",
+  "simplestConnecting": "БАБЛО ЛЕТИТ…",
+  "simplestOn": "БАБЛО ПРИНЯТО",
+  "simplestPaused": "БАБЛО ОТДЫХАЕТ",
+  "simplestOffNote": "Автопродление навсегда",
+  "simplestConnectingNote": "Не закрывайте кошелёк",
+  "simplestOnNote": "Возврату не подлежит",
+  "simplestPausedNote": "Скоро продолжим"
 }

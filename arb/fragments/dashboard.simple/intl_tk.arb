@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbit/s",
   "speedTestSecondsUnit": "s",
   "speedTestTimeout": "Synagyň garaşma wagty gutardy. Birikmäni barlaň we gaýtadan synanyşyň.",
-  "speedTestRejected": "Saýlanan ugur synagy petikledi."
+  "speedTestRejected": "Saýlanan ugur synagy petikledi.",
+  "dashboardStyleSimplest": "Has-da ýönekeý",
+  "simplestOff": "PUL GOÝMAK",
+  "simplestConnecting": "PUL UÇÝAR…",
+  "simplestOn": "PUL ALYNDY",
+  "simplestPaused": "PUL DYNÇ ALÝAR",
+  "simplestOffNote": "Hemişelik awto-täzelenme",
+  "simplestConnectingNote": "Gapjygy ýapmaň",
+  "simplestOnNote": "Yzyna gaýtarylmaýar",
+  "simplestPausedNote": "Ýakynda gaýdyp geleris"
 }

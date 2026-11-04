@@ -523,7 +523,7 @@ enum DashboardWidget {
   const DashboardWidget({this.platforms = SupportPlatform.values});
 }
 
-enum DashboardStyle { simple, detailed }
+enum DashboardStyle { simplest, simple, detailed }
 
 enum SimpleDashboardWidget {
   health,

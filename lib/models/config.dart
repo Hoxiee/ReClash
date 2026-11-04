@@ -212,6 +212,15 @@ Object? _readSidebarExpanded(Map<dynamic, dynamic> json, String key) {
   return json.containsKey(key) ? json[key] : json['showLabel'];
 }
 
+/// The simplest dashboard outlives a restart only once pinned.
+Object? _readDashboardStyle(Map<dynamic, dynamic> json, String key) {
+  final style = json[key];
+  final forgotten =
+      style == DashboardStyle.simplest.name &&
+      json['simplestDashboardPinned'] != true;
+  return forgotten ? null : style;
+}
+
 Object? _readTabAnimation(Map<dynamic, dynamic> json, String key) {
   if (json.containsKey(key)) {
     return json[key];
@@ -261,8 +270,12 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: dashboardWidgetsFromJson)
     List<DashboardWidget> dashboardWidgets,
     @Default(DashboardStyle.simple)
-    @JsonKey(unknownEnumValue: DashboardStyle.simple)
+    @JsonKey(
+      unknownEnumValue: DashboardStyle.simple,
+      readValue: _readDashboardStyle,
+    )
     DashboardStyle dashboardStyle,
+    @Default(false) bool simplestDashboardPinned,
     @Default(defaultSimpleDashboardWidgets)
     @JsonKey(fromJson: simpleDashboardWidgetsFromJson)
     List<SimpleDashboardWidget> simpleDashboardWidgets,

@@ -176,6 +176,21 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
+    test('the simplest dashboard survives a restart only once pinned', () {
+      const saved = {'dashboardStyle': 'simplest'};
+      expect(
+        AppSettingProps.fromJson(saved).dashboardStyle,
+        DashboardStyle.simple,
+      );
+      expect(
+        AppSettingProps.fromJson({
+          ...saved,
+          'simplestDashboardPinned': true,
+        }).dashboardStyle,
+        DashboardStyle.simplest,
+      );
+    });
+
     test('service automation defaults and choices survive JSON', () {
       final defaults = AppSettingProps.fromJson({});
       expect(defaults.autoCheckActiveServices, isTrue);

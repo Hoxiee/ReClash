@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbps",
   "speedTestSecondsUnit": "秒",
   "speedTestTimeout": "テストがタイムアウトしました。接続を確認して再試行してください。",
-  "speedTestRejected": "選択した経路がテストをブロックしました。"
+  "speedTestRejected": "選択した経路がテストをブロックしました。",
+  "dashboardStyleSimplest": "もっとシンプル",
+  "simplestOff": "金を入れる",
+  "simplestConnecting": "金が飛んでいます…",
+  "simplestOn": "金を受領しました",
+  "simplestPaused": "金は休憩中",
+  "simplestOffNote": "自動更新・永久",
+  "simplestConnectingNote": "財布は閉じないで",
+  "simplestOnNote": "返金不可",
+  "simplestPausedNote": "すぐ戻ります"
 }

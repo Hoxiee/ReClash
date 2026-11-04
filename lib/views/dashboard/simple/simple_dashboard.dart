@@ -17,6 +17,7 @@ import 'package:reclash/widgets/announcement_card.dart';
 
 import 'home.dart';
 import 'location_card.dart';
+import 'simplest.dart';
 import 'widget_list.dart';
 
 const _maxWidth = 1120.0;
@@ -39,6 +40,7 @@ class DashboardPage extends ConsumerWidget {
       appSettingProvider.select((state) => state.dashboardStyle),
     );
     return switch (style) {
+      DashboardStyle.simplest => const SimplestDashboardView(),
       DashboardStyle.simple => const SimpleDashboardView(),
       DashboardStyle.detailed => const DashboardView(),
     };

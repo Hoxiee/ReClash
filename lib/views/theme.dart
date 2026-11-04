@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/views/dashboard/simple/simplest.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/common/common.dart';
@@ -1045,7 +1046,7 @@ final _liquidGlassProvider = themeSettingProvider.select(
 );
 
 final _simpleDashboardProvider = appSettingProvider.select(
-  (state) => state.dashboardStyle == DashboardStyle.simple,
+  (state) => state.dashboardStyle != DashboardStyle.detailed,
 );
 
 class _PureBlackItem extends ConsumerWidget {
@@ -1619,6 +1620,10 @@ class _DashboardStyleItem extends ConsumerWidget {
     final labels = ref.watch(
       appSettingProvider.select((state) => state.navigationLabels),
     );
+    final pinned = ref.watch(
+      appSettingProvider.select((state) => state.simplestDashboardPinned),
+    );
+    final revealed = pinned || ref.watch(simplestDashboardRevealProvider);
     Widget tile(DashboardStyle value, String label) => _ChoiceTile(
       size: _screen * _scale,
       corner: AppCorner.md * _scale,
@@ -1626,9 +1631,14 @@ class _DashboardStyleItem extends ConsumerWidget {
       isSelected: value == style,
       onPressed: value == style
           ? null
-          : () => ref
-                .read(appSettingProvider.notifier)
-                .update((state) => state.copyWith(dashboardStyle: value)),
+          : () {
+              if (value == DashboardStyle.simple) {
+                ref.read(simplestDashboardRevealProvider.notifier).roll();
+              }
+              ref
+                  .read(appSettingProvider.notifier)
+                  .update((state) => state.copyWith(dashboardStyle: value));
+            },
       child: FittedBox(
         child: SizedBox.fromSize(
           size: _screen,
@@ -1638,6 +1648,7 @@ class _DashboardStyleItem extends ConsumerWidget {
             liquidGlass: liquidGlass,
             labels: labels,
             simpleDashboard: value == DashboardStyle.simple,
+            simplestDashboard: value == DashboardStyle.simplest,
           ),
         ),
       ),
@@ -1665,8 +1676,35 @@ class _DashboardStyleItem extends ConsumerWidget {
                 level: level,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 40,
+                  spacing: revealed ? 8 : 40,
                   children: [
+                    if (revealed)
+                      Flexible(
+                        child: _PoppingIn(
+                          enabled: !pinned,
+                          child: ContextMenuRegion(
+                            menuItems: [
+                              CommonPopupMenuItem(
+                                glyph: AppGlyphs.pin,
+                                label: pinned
+                                    ? appLocalizations.toolsUnpin
+                                    : appLocalizations.toolsPin,
+                                onPressed: () => ref
+                                    .read(appSettingProvider.notifier)
+                                    .update(
+                                      (state) => state.copyWith(
+                                        simplestDashboardPinned: !pinned,
+                                      ),
+                                    ),
+                              ),
+                            ],
+                            child: tile(
+                              DashboardStyle.simplest,
+                              appLocalizations.dashboardStyleSimplest,
+                            ),
+                          ),
+                        ),
+                      ),
                     for (final (value, label) in [
                       (
                         DashboardStyle.simple,
@@ -1677,7 +1715,12 @@ class _DashboardStyleItem extends ConsumerWidget {
                         appLocalizations.dashboardStyleDetailed,
                       ),
                     ])
-                      tile(value, label),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: tile(value, label),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -1685,6 +1728,26 @@ class _DashboardStyleItem extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PoppingIn extends StatelessWidget {
+  const _PoppingIn({required this.enabled, required this.child});
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final fitted = FittedBox(fit: BoxFit.scaleDown, child: child);
+    if (!enabled) return fitted;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: context.motionDuration(const Duration(milliseconds: 420)),
+      curve: Curves.easeOutBack,
+      builder: (_, scale, child) => Transform.scale(scale: scale, child: child),
+      child: fitted,
     );
   }
 }

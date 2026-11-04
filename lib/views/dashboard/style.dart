@@ -163,3 +163,6 @@ abstract final class DashboardText {
   static TextStyle rowTitle(BuildContext context) =>
       AppTextStyle.subheadline.of(context, emphasized: true);
 }
+
+/// The simplest dashboard's button is the color of money in every theme.
+const dashboardMoneyGreen = Color(0xFF0B8F4D);

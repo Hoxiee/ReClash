@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbps",
   "speedTestSecondsUnit": "秒",
   "speedTestTimeout": "测试超时，请检查连接后重试。",
-  "speedTestRejected": "所选路由阻止了测试。"
+  "speedTestRejected": "所选路由阻止了测试。",
+  "dashboardStyleSimplest": "更简单",
+  "simplestOff": "立即打钱",
+  "simplestConnecting": "钱在路上…",
+  "simplestOn": "钱已到账",
+  "simplestPaused": "钱在休息",
+  "simplestOffNote": "终身自动续费",
+  "simplestConnectingNote": "钱包别合上",
+  "simplestOnNote": "概不退款",
+  "simplestPausedNote": "马上回来"
 }

@@ -176,5 +176,14 @@
   "speedTestGbpsUnit": "Gbit/s",
   "speedTestSecondsUnit": "s",
   "speedTestTimeout": "Le délai du test est dépassé. Vérifiez la connexion et réessayez.",
-  "speedTestRejected": "L’itinéraire sélectionné a bloqué le test."
+  "speedTestRejected": "L’itinéraire sélectionné a bloqué le test.",
+  "dashboardStyleSimplest": "Encore plus simple",
+  "simplestOff": "LÂCHER LE FRIC",
+  "simplestConnecting": "LE FRIC S'ENVOLE…",
+  "simplestOn": "FRIC REÇU",
+  "simplestPaused": "LE FRIC SE REPOSE",
+  "simplestOffNote": "Renouvellement automatique à vie",
+  "simplestConnectingNote": "Gardez le portefeuille ouvert",
+  "simplestOnNote": "Non remboursable",
+  "simplestPausedNote": "On revient vite"
 }

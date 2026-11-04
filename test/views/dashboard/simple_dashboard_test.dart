@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -29,6 +30,7 @@ import 'package:reclash/views/dashboard/simple/mode_card.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/simple/simple_dashboard.dart';
+import 'package:reclash/views/dashboard/simple/simplest.dart';
 import 'package:reclash/views/dashboard/simple/services_card.dart';
 import 'package:reclash/views/dashboard/simple/subscription_card.dart';
 import 'package:reclash/views/dashboard/simple/traffic_card.dart';
@@ -67,6 +69,21 @@ const _automaticMode = RcxStatus(
   tunnelMode: 'direct',
   scenario: RcxScenarioStatus(id: 'user/home', holdsMode: true),
 );
+
+class _FixedRandom implements math.Random {
+  _FixedRandom(this.value);
+
+  final double value;
+
+  @override
+  double nextDouble() => value;
+
+  @override
+  bool nextBool() => throw UnimplementedError();
+
+  @override
+  int nextInt(int max) => throw UnimplementedError();
+}
 
 const _phone = Size(412, 915);
 const _desktop = Size(1280, 800);
@@ -380,6 +397,57 @@ void main() {
     expect(action.manualCalls, [true, true]);
     await tester.pump(const Duration(seconds: 5));
     expect(tester.takeException(), isNull);
+  });
+
+  group('simplest dashboard', () {
+    void rollFrom(DashboardStyle style, double dice, {bool profile = true}) {
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(
+            () => TestProfiles([if (profile) Profile.normal(label: 'Test')]),
+          ),
+          simplestDashboardRevealProvider.overrideWith(
+            () => SimplestDashboardReveal(_FixedRandom(dice)),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(dashboardStyle: style));
+      container.read(simplestDashboardRevealProvider.notifier).roll();
+    }
+
+    bool revealed() => container.read(simplestDashboardRevealProvider);
+
+    test('a lucky retreat from the detailed dashboard reveals it', () {
+      rollFrom(DashboardStyle.detailed, 0.009);
+      expect(revealed(), isTrue);
+    });
+
+    test('the other 99% and every other path keep it hidden', () {
+      rollFrom(DashboardStyle.detailed, 0.01);
+      expect(revealed(), isFalse);
+      rollFrom(DashboardStyle.simple, 0);
+      expect(revealed(), isFalse);
+      rollFrom(DashboardStyle.detailed, 0, profile: false);
+      expect(revealed(), isFalse);
+    });
+
+    testWidgets('the page holds the toggle and nothing else of the home', (
+      tester,
+    ) async {
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(dashboardStyle: DashboardStyle.simplest),
+          );
+      await pumpPage(tester);
+      expect(find.byType(SimplestDashboardView), findsOneWidget);
+      expect(find.byType(SimplePower), findsNothing);
+      expect(find.byType(PowerButton), findsNothing);
+      expect(find.byType(PowerRequest), findsOneWidget);
+    });
   });
 
   testWidgets(

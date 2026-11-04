@@ -319,5 +319,14 @@
   "speedTestGbpsUnit": "Gbps",
   "speedTestSecondsUnit": "s",
   "speedTestTimeout": "The test timed out. Check the connection and try again.",
-  "speedTestRejected": "The selected route blocked the test."
+  "speedTestRejected": "The selected route blocked the test.",
+  "dashboardStyleSimplest": "Even simpler",
+  "simplestOff": "TOSS IN THE CASH",
+  "simplestConnecting": "CASH IN FLIGHT…",
+  "simplestOn": "CASH RECEIVED",
+  "simplestPaused": "CASH IS RESTING",
+  "simplestOffNote": "Auto-renews forever",
+  "simplestConnectingNote": "Keep your wallet open",
+  "simplestOnNote": "Non-refundable",
+  "simplestPausedNote": "Back soon"
 }

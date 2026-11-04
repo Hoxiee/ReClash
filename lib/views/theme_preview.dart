@@ -11,6 +11,7 @@ import 'package:reclash/providers/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/views/dashboard/style.dart';
 
 class PreviewChoice<T> {
   const PreviewChoice({
@@ -435,6 +436,7 @@ class MiniScreen extends StatelessWidget {
     this.tabAnimation = TabAnimation.slide,
     this.labels = NavigationLabels.always,
     this.simpleDashboard = false,
+    this.simplestDashboard = false,
     this.onSelect,
   });
 
@@ -455,6 +457,7 @@ class MiniScreen extends StatelessWidget {
   final TabAnimation tabAnimation;
   final NavigationLabels labels;
   final bool simpleDashboard;
+  final bool simplestDashboard;
   final ValueChanged<int>? onSelect;
 
   @override
@@ -474,6 +477,7 @@ class MiniScreen extends StatelessWidget {
           tabAnimation: tabAnimation,
           labels: labels,
           simpleDashboard: simpleDashboard,
+          simplestDashboard: simplestDashboard,
           cardOpacity: active ? wallpaper.cardOpacity : 1,
         ),
         child: const SizedBox.expand(),
@@ -584,6 +588,7 @@ class _MiniScreenPainter extends CustomPainter {
     required this.tabAnimation,
     required this.labels,
     required this.simpleDashboard,
+    required this.simplestDashboard,
     required this.cardOpacity,
   });
 
@@ -596,6 +601,7 @@ class _MiniScreenPainter extends CustomPainter {
   final TabAnimation tabAnimation;
   final NavigationLabels labels;
   final bool simpleDashboard;
+  final bool simplestDashboard;
   final double cardOpacity;
 
   bool get _glass => floatingBar && liquidGlass;
@@ -748,6 +754,7 @@ class _MiniScreenPainter extends CustomPainter {
       content,
       clear: math.min(content.bottom, geometry.bar.top - geometry.margin / 2),
       simpleDashboard: simpleDashboard,
+      simplestDashboard: simplestDashboard,
       cardOpacity: cardOpacity,
     ).paint(_pageOf(index));
     canvas.restore();
@@ -820,6 +827,7 @@ class _MiniScreenPainter extends CustomPainter {
         oldDelegate.tabAnimation != tabAnimation ||
         oldDelegate.labels != labels ||
         oldDelegate.simpleDashboard != simpleDashboard ||
+        oldDelegate.simplestDashboard != simplestDashboard ||
         oldDelegate.cardOpacity != cardOpacity;
   }
 }
@@ -834,6 +842,7 @@ class _PageSketch {
     this.content, {
     required double clear,
     required this.simpleDashboard,
+    required this.simplestDashboard,
     required double cardOpacity,
   }) : width = content.width / unit,
        height = (clear - content.top) / unit,
@@ -856,6 +865,7 @@ class _PageSketch {
   /// How far down the page shows clear of the bar.
   final double height;
   final bool simpleDashboard;
+  final bool simplestDashboard;
   final Color card;
   final Color inset;
   final Color text;
@@ -864,6 +874,8 @@ class _PageSketch {
 
   void paint(_MiniPage page) {
     switch (page) {
+      case _MiniPage.dashboard when simplestDashboard:
+        _simplestDashboard();
       case _MiniPage.dashboard when simpleDashboard:
         _simpleDashboard(_header(actions: 1));
       case _MiniPage.dashboard:
@@ -987,6 +999,18 @@ class _PageSketch {
       _pill(1, y + 0.9, 3.5 + i % 2, 0.7, line);
       y += 4.5 + _gap;
     }
+  }
+
+  /// Nothing but the button that asks for money.
+  void _simplestDashboard() {
+    final extent = width * 0.8;
+    _pill(
+      (width - extent) / 2,
+      height / 2 - 1.2,
+      extent,
+      2.4,
+      dashboardMoneyGreen,
+    );
   }
 
   /// The power button over its status, the server and plan cards at the

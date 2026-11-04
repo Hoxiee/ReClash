@@ -148,22 +148,22 @@ class _RenderFillHero extends RenderBox
 /// Asks for a run and shows the request: a start reads as connecting for at
 /// least [_holdDuration] and until the request settles, while the run state
 /// itself stays with the providers.
-class SimplePower extends ConsumerStatefulWidget {
-  const SimplePower({super.key, required this.minSize, required this.maxSize});
+class PowerRequest extends ConsumerStatefulWidget {
+  const PowerRequest({super.key, required this.builder});
 
-  /// The button grows with its room between these, the status always under
-  /// it.
-  final double minSize;
-  final double maxSize;
-
-  static double heightOf(double size) =>
-      PowerButton.extentOf(size) + _statusHeight;
+  /// A null toggle means there is no profile to run.
+  final Widget Function(
+    BuildContext context,
+    PowerLink link,
+    VoidCallback? toggle,
+  )
+  builder;
 
   @override
-  ConsumerState<SimplePower> createState() => _SimplePowerState();
+  ConsumerState<PowerRequest> createState() => _PowerRequestState();
 }
 
-class _SimplePowerState extends ConsumerState<SimplePower> {
+class _PowerRequestState extends ConsumerState<PowerRequest> {
   static const _holdDuration = Duration(milliseconds: 600);
 
   var _request = 0;
@@ -199,7 +199,6 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
     final hasProfile = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
     );
@@ -216,45 +215,66 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
         : isStart
         ? PowerLink.on
         : PowerLink.off;
+    return widget.builder(context, link, hasProfile ? _toggle : null);
+  }
+}
+
+String powerTooltip(BuildContext context, PowerLink link) {
+  final appLocalizations = context.appLocalizations;
+  return switch (link) {
+    PowerLink.paused => appLocalizations.onDemandResume,
+    PowerLink.on || PowerLink.connecting => appLocalizations.stop,
+    PowerLink.off => appLocalizations.start,
+  };
+}
+
+/// The power button over its status.
+class SimplePower extends ConsumerWidget {
+  const SimplePower({super.key, required this.minSize, required this.maxSize});
+
+  /// The button grows with its room between these, the status always under
+  /// it.
+  final double minSize;
+  final double maxSize;
+
+  static double heightOf(double size) =>
+      PowerButton.extentOf(size) + _statusHeight;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final logo = ref.watch(
       currentProfileProvider.select(
         (profile) => profile?.subscriptionSnapshot?.metadata.logo ?? '',
       ),
     );
     final look = ref.watch(providerPowerButtonProvider);
-    final tooltip = switch (link) {
-      PowerLink.paused => appLocalizations.onDemandResume,
-      PowerLink.on || PowerLink.connecting => appLocalizations.stop,
-      PowerLink.off => appLocalizations.start,
-    };
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final room = math.min(
-          constraints.maxHeight - _statusHeight,
-          constraints.maxWidth,
-        );
-        final size = (room / PowerButton.extentOf(1)).clamp(
-          widget.minSize,
-          widget.maxSize,
-        );
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PowerButton(
-                link: link,
-                size: size,
-                logo: logo,
-                look: look,
-                tooltip: tooltip,
-                onPressed: hasProfile ? _toggle : null,
-              ),
-              const SizedBox(height: 20),
-              _StatusText(link: link, hasProfile: hasProfile),
-            ],
-          ),
-        );
-      },
+    return PowerRequest(
+      builder: (context, link, toggle) => LayoutBuilder(
+        builder: (context, constraints) {
+          final room = math.min(
+            constraints.maxHeight - _statusHeight,
+            constraints.maxWidth,
+          );
+          final size = (room / PowerButton.extentOf(1)).clamp(minSize, maxSize);
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PowerButton(
+                  link: link,
+                  size: size,
+                  logo: logo,
+                  look: look,
+                  tooltip: powerTooltip(context, link),
+                  onPressed: toggle,
+                ),
+                const SizedBox(height: 20),
+                _StatusText(link: link, hasProfile: toggle != null),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
