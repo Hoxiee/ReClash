@@ -37,6 +37,15 @@ class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class TelegramProxySetting extends _$TelegramProxySetting
+    with AutoDisposeNotifierMixin {
+  @override
+  TelegramProxyProps build() {
+    return defaultTelegramProxyProps;
+  }
+}
+
+@riverpod
 class ThemeSetting extends _$ThemeSetting with AutoDisposeNotifierMixin {
   @override
   ThemeProps build() {
@@ -118,6 +127,7 @@ Config _config(Ref ref) {
   final windowProps = ref.watch(windowSettingProvider);
   final vpnProps = ref.watch(vpnSettingProvider);
   final networkProps = ref.watch(networkSettingProvider);
+  final telegramProxyProps = ref.watch(telegramProxySettingProvider);
   final themeProps = ref.watch(themeSettingProvider);
   final currentProfileId = ref.watch(currentProfileIdProvider);
   final davProps = ref.watch(davSettingProvider);
@@ -132,6 +142,7 @@ Config _config(Ref ref) {
     windowProps: windowProps,
     vpnProps: vpnProps,
     networkProps: networkProps,
+    telegramProxyProps: telegramProxyProps,
     themeProps: themeProps,
     currentProfileId: currentProfileId,
     davProps: davProps,
@@ -149,6 +160,8 @@ void writeConfig(Ref ref, Config config) {
   ref.read(windowSettingProvider.notifier).value = config.windowProps;
   ref.read(vpnSettingProvider.notifier).value = config.vpnProps;
   ref.read(networkSettingProvider.notifier).value = config.networkProps;
+  ref.read(telegramProxySettingProvider.notifier).value =
+      config.telegramProxyProps;
   ref.read(themeSettingProvider.notifier).value = config.themeProps;
   ref.read(currentProfileIdProvider.notifier).value = config.currentProfileId;
   ref.read(davSettingProvider.notifier).value = config.davProps;
@@ -168,6 +181,9 @@ List<Override> buildConfigOverrides(Config config) {
     windowSettingProvider.overrideWithBuild((_, _) => config.windowProps),
     vpnSettingProvider.overrideWithBuild((_, _) => config.vpnProps),
     networkSettingProvider.overrideWithBuild((_, _) => config.networkProps),
+    telegramProxySettingProvider.overrideWithBuild(
+      (_, _) => config.telegramProxyProps,
+    ),
     themeSettingProvider.overrideWithBuild((_, _) => config.themeProps),
     currentProfileIdProvider.overrideWithBuild(
       (_, _) => config.currentProfileId,

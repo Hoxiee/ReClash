@@ -218,6 +218,14 @@ String generateRandomString({int minLength = 10, int maxLength = 100}) {
   return result;
 }
 
+String newTelegramProxySecret() {
+  final random = Random.secure();
+  return List.generate(
+    16,
+    (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
+}
+
 String generateRandomSecret(int length) {
   const chars =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

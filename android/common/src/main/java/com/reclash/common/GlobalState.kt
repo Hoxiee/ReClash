@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     const val NOTIFICATION_CHANNEL = "ReClash"
     const val NOTIFICATION_ID = 1
+    const val TELEGRAM_PROXY_NOTIFICATION_ID = 2
     private const val ANY_PID = 0
     private const val EVERY_EXIT_RECORD = 0
 

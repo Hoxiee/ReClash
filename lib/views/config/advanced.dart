@@ -7,6 +7,7 @@ import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/scripts.dart';
+import 'package:reclash/views/telegram_proxy.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
@@ -65,6 +66,11 @@ class AdvancedConfigView extends StatelessWidget {
                   SettingTarget(
                     spec: advancedToolSettings[3],
                     child: routingSettingsItem(appLocalizations),
+                  ),
+                  ListItem.open(
+                    title: Text(appLocalizations.telegramProxyTitle),
+                    leading: const GlyphIcon(AppGlyphs.send),
+                    widget: const TelegramProxyView(),
                   ),
                 ],
               ),

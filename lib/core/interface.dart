@@ -174,6 +174,16 @@ mixin CoreInterface {
 
   Future<bool> setOnDemandPaused(bool paused, {required bool fullStop});
 
+  Future<void> setTelegramProxy(
+    TelegramProxyProps props, {
+    required String notificationTitle,
+    required String notificationStop,
+  });
+
+  Future<TelegramProxyState?> getTelegramProxy();
+
+  Future<String> telegramProxySelfTest(int dc);
+
   Future<List<ExternalProvider>> getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(String externalProviderName);
@@ -215,6 +225,14 @@ mixin CoreInterface {
 
   FutureOr<bool> clearDnsCache();
 }
+
+Map<String, Object?> telegramProxyArguments(TelegramProxyProps props) => {
+  'enabled': props.enabled,
+  'port': props.port,
+  'secret': props.secret,
+  'endpoints': props.endpoints,
+  'outbound': props.outbound,
+};
 
 abstract class CoreHandlerInterface with CoreInterface {
   Future<T?> _invokeMethod<T>({
@@ -857,6 +875,32 @@ abstract class CoreHandlerInterface with CoreInterface {
         arguments: {'paused': paused, 'fullStop': fullStop},
       ) ??
       false;
+
+  @override
+  Future<void> setTelegramProxy(
+    TelegramProxyProps props, {
+    required String notificationTitle,
+    required String notificationStop,
+  }) => _invokeMethod<Map<String, Object?>>(
+    method: CoreMethod.setTelegramProxy,
+    arguments: telegramProxyArguments(props),
+  );
+
+  @override
+  Future<TelegramProxyState?> getTelegramProxy() async {
+    final data = await _invokeMethod<Map<String, Object?>>(
+      method: CoreMethod.getTelegramProxy,
+    );
+    return data == null ? null : TelegramProxyState.fromJson(data);
+  }
+
+  @override
+  Future<String> telegramProxySelfTest(int dc) async =>
+      await _invokeMethod<String>(
+        method: CoreMethod.telegramProxySelfTest,
+        arguments: dc,
+      ) ??
+      '';
 
   @override
   Future<Delay?> asyncTestDelay(

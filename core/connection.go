@@ -59,6 +59,7 @@ func handleClearDnsCache() {
 func handleResetNetwork() {
 	handleCloseConnections()
 	handleClearDnsCache()
+	resetTelegramProxyConnections()
 }
 
 func handleCloseConnection(connectionId string) bool {

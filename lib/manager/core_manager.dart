@@ -5,6 +5,7 @@ import 'package:reclash/core/core.dart';
 import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/plugins/service.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -16,6 +17,8 @@ import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/features/doctor/explain.dart';
 import 'package:reclash/features/doctor/recorder/provider.dart';
+import 'package:reclash/features/doctor/probes/telegram.dart';
+import 'package:reclash/features/doctor/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,8 +97,52 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     ref.listenManual(coreStatusProvider, (prev, next) {
       if (next == CoreStatus.connected && prev != CoreStatus.connected) {
         _syncLogStream();
+        unawaited(_syncTelegramProxy(afterCoreStart: true));
       }
     }, fireImmediately: true);
+    ref.listenManual(telegramProxySettingProvider, (prev, next) {
+      if (prev != next) {
+        unawaited(_syncTelegramProxy());
+      }
+    });
+  }
+
+  // A relay lives and dies with its Core process, so each new Core gets the
+  // desired state again; on Android the service has it already and this merely
+  // restates it, unless the notification stopped the relay while no engine ran.
+  Future<void> _syncTelegramProxy({bool afterCoreStart = false}) async {
+    if (ref.read(safeModeProvider)) {
+      return;
+    }
+    if (afterCoreStart &&
+        system.isAndroid &&
+        await (service?.consumeTelegramProxyStop() ?? Future.value(false))) {
+      ref
+          .read(telegramProxySettingProvider.notifier)
+          .update((props) => props.copyWith(enabled: false));
+      return;
+    }
+    final props = ref.read(telegramProxySettingProvider);
+    if (!props.enabled && afterCoreStart) {
+      return;
+    }
+    if (props.enabled && props.secret.isEmpty) {
+      ref
+          .read(telegramProxySettingProvider.notifier)
+          .update((props) => props.copyWith(secret: newTelegramProxySecret()));
+      return;
+    }
+    await _core.setTelegramProxy(
+      props,
+      notificationTitle: currentAppLocalizations.telegramProxyNotificationTitle,
+      notificationStop: currentAppLocalizations.telegramProxyNotificationStop,
+    );
+    unawaited(
+      ref
+          .read(diagnosticKernelProvider)
+          .probe(telegramProxyProbe(_core).forced())
+          .then<void>((_) {}, onError: (_) {}),
+    );
   }
 
   void _syncLogStream() {

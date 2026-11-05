@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/models/config.dart';
 import 'package:reclash/plugins/service.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -152,6 +154,28 @@ class CoreLib extends CoreHandlerInterface {
   Future<CoreLifecycleResult> _close() async {
     _closed = true;
     return _stop(allowClosed: true);
+  }
+
+  // The foreground service owns the relay here: it has to outlive this engine and
+  // bring the relay back without one, so the intent cannot go straight to the Core.
+  @override
+  Future<void> setTelegramProxy(
+    TelegramProxyProps props, {
+    required String notificationTitle,
+    required String notificationStop,
+  }) async {
+    final Service? service = _service;
+    if (service == null) return;
+    await service.setTelegramProxy(
+      props.enabled
+          ? json.encode({
+              ...telegramProxyArguments(props),
+              'notificationTitle': notificationTitle,
+              'notificationStop': notificationStop,
+            })
+          : null,
+      autostart: props.autostart,
+    );
   }
 
   // Native service transitions own the Core listeners. Separate RPCs here

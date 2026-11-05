@@ -1,0 +1,25 @@
+v: 1
+kind: feature
+state: active
+risk: critical
+why: Telegram works without a VPN or profile by relaying MTProto over Telegram's own WebSocket addresses.
+must:
+  independent: The relay runs with no profile, TUN or listener, and a run, profile or setting patch never restarts it.
+  loopback: The listener binds to loopback only; the random per-install secret is stored like other secrets and is never logged.
+  no-tls-weakening: Upstream TLS verifies Telegram's certificate under Telegram's own SNI; no third-party relay, plaintext mode or unsigned remote domain list.
+  routing: DC 2 and DC 4 prefer WebSocket; the profile is used only after the user picks a route, otherwise DC 1, 3 and 5 report unavailable.
+  latest-intent: A stale setTelegramProxy call never overrides a newer one.
+  android-process: A dedicated foreground service holds the relay across Flutter engine loss and boot autostart, and the notification stop wins over the stored intent.
+  desktop-restart: Each newly connected desktop Core receives the desired relay state again.
+watch:
+  - core/telegram/**
+  - core/cmd/tgrelay/**
+  - core/telegram_proxy.go
+  - android/service/src/main/java/com/reclash/service/TelegramProxyService.kt
+  - lib/views/telegram_proxy.dart
+  - lib/manager/core_manager.dart
+  - lib/features/doctor/probes/telegram.dart
+checks:
+  telegram-proxy-core: [independent, loopback, no-tls-weakening, routing, latest-intent]
+  telegram-proxy-ui: [desktop-restart, android-process]
+drop: Telegram becomes reachable without a relay, or upstream ships an equivalent proxy.

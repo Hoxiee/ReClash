@@ -15,6 +15,7 @@ import 'package:reclash/ui/ui.dart';
 String findingTitle(AppLocalizations l, Finding finding) =>
     switch (finding.titleKey) {
       'doctorCauseClockSkew' => l.doctorCauseClockSkew,
+      'doctorTelegramProxyTitle' => l.doctorTelegramProxyTitle,
       'doctorBatteryOptimizationTitle' => l.doctorBatteryOptimizationTitle,
       'doctorCauseSubscriptionExpired' => l.doctorCauseSubscriptionExpired,
       'doctorCauseTrafficExhausted' => l.doctorCauseTrafficExhausted,
@@ -45,6 +46,9 @@ String findingDetail(AppLocalizations l, Finding finding) {
   return switch (finding.detailKey) {
     'doctorClockSkewBehind' => l.doctorClockSkewBehind(
       args['seconds'] as int? ?? 0,
+    ),
+    'doctorTelegramProxyDetail' => l.doctorTelegramProxyDetail(
+      args['error'] as String? ?? '',
     ),
     'doctorClockSkewAhead' => l.doctorClockSkewAhead(
       args['seconds'] as int? ?? 0,

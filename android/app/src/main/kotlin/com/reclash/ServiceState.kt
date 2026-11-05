@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.reclash.common.GlobalState
 import com.reclash.service.ServiceConfig
+import com.reclash.service.TelegramProxy
 
 object ServiceState {
     private val machine = ServiceStateMachine(AndroidServiceStateHost)
@@ -54,6 +55,10 @@ object ServiceState {
 
     val isRunRequested: Boolean
         get() = machine.isRunRequested
+
+    // The relay's intent lives beside the run's, not in the machine: neither one may wait on the other.
+    fun requestTelegramProxy(params: String?, autostart: Boolean) =
+        TelegramProxy.request(GlobalState.application, params, autostart)
 
     fun attachFlutterEngine(engine: FlutterEngine) =
         AndroidServiceStateHost.attachFlutterEngine(engine)

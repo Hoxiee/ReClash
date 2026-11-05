@@ -36,6 +36,8 @@ abstract mixin class ServiceListener {
   void onServiceStopped() {}
 
   void onOnDemandPause(bool paused) {}
+
+  void onTelegramProxyStopped() {}
 }
 
 class Service {
@@ -75,6 +77,12 @@ class Service {
           _dispatch(
             'on-demand pause',
             (listener) => listener.onOnDemandPause(call.arguments == true),
+          );
+          break;
+        case 'telegramProxyStopped':
+          _dispatch(
+            'Telegram proxy stop',
+            (listener) => listener.onTelegramProxyStopped(),
           );
           break;
         case 'stopped':
@@ -132,6 +140,16 @@ class Service {
     return await methodChannel.invokeMethod<bool>('stop', ++_commandRevision) ??
         false;
   }
+
+  Future<void> setTelegramProxy(String? params, {required bool autostart}) =>
+      methodChannel.invokeMethod<void>('setTelegramProxy', {
+        'params': params,
+        'autostart': autostart,
+      });
+
+  Future<bool> consumeTelegramProxyStop() async =>
+      await methodChannel.invokeMethod<bool>('consumeTelegramProxyStop') ??
+      false;
 
   Future<void> setOnDemandPaused(bool paused) =>
       methodChannel.invokeMethod<void>('setOnDemandPaused', paused);

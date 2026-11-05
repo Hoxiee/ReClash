@@ -559,6 +559,22 @@ class CoreController {
         _interface.getTotalTraffic(onlyStatisticsProxy);
   }
 
+  Future<void> setTelegramProxy(
+    TelegramProxyProps props, {
+    required String notificationTitle,
+    required String notificationStop,
+  }) => _interface.setTelegramProxy(
+    props,
+    notificationTitle: notificationTitle,
+    notificationStop: notificationStop,
+  );
+
+  Future<TelegramProxyState?> getTelegramProxy() =>
+      _interface.getTelegramProxy();
+
+  Future<String> telegramProxySelfTest(int dc) =>
+      _interface.telegramProxySelfTest(dc);
+
   Future<CoreMemoryStats?> getMemoryStats() async {
     return _interface.getMemoryStats();
   }

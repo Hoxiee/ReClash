@@ -244,6 +244,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     root: false,
   );
   page(
+    ToolPage.telegram,
+    l.telegramProxyTitle,
+    ToolCategory.configuration,
+    AppGlyphs.send,
+    root: false,
+    keywords: ['proxy', 'mtproto', 'unblock', 'прокси', 'разблокировка', '代理'],
+  );
+  page(
     ToolPage.onDemand,
     l.onDemand,
     ToolCategory.application,

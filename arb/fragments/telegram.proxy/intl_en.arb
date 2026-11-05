@@ -1,0 +1,77 @@
+{
+  "telegramProxyTitle": "Telegram proxy",
+  "telegramProxyEnable": "Telegram without VPN",
+  "telegramProxyAutostart": "Start with the device",
+  "telegramProxyFooter": "Runs a local proxy on this device that carries Telegram over Telegram's own web addresses. It needs no VPN and no profile. Turning it off does not remove the proxy from Telegram: to go back to a direct connection, turn it off or delete it in Telegram under Settings → Data and Storage → Proxy.",
+  "telegramProxyOpen": "Open in Telegram",
+  "telegramProxyLink": "Proxy link",
+  "telegramProxyCopyLink": "Copy proxy link",
+  "telegramProxyManualSteps": "Scan the code or open the link on this device. If Telegram does not offer to add the proxy, add it by hand under Settings → Data and Storage → Proxy → Add Proxy → MTProto, with server 127.0.0.1, port {port} and the secret from the link.",
+  "@telegramProxyManualSteps": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "telegramProxyStatus": "Status",
+  "telegramProxyConnected": "Telegram connected",
+  "telegramProxyWaiting": "Waiting for Telegram",
+  "telegramProxyBadSecret": "Telegram is using an old link. Add the proxy again.",
+  "telegramProxyStartFailed": "The proxy did not start: {error}",
+  "@telegramProxyStartFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "telegramProxyDc": "DC {dc}",
+  "@telegramProxyDc": {
+    "placeholders": {
+      "dc": {
+        "type": "int"
+      }
+    }
+  },
+  "telegramProxyLatency": "{ms} ms",
+  "@telegramProxyLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "telegramProxyRouteDirect": "Direct",
+  "telegramProxyRouteOutbound": "Through {name}",
+  "@telegramProxyRouteOutbound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "telegramProxyRouteUnavailable": "No route",
+  "telegramProxyRouteIdle": "Not used yet",
+  "telegramProxyStatusFooter": "Telegram keeps data in five data centres. DC 2 and DC 4 work through Telegram's web addresses. DC 1, DC 3 and DC 5 need the route chosen below.",
+  "telegramProxyOutbound": "Route for other data centres",
+  "telegramProxyByRules": "By profile rules",
+  "telegramProxyOutboundFooter": "By default, the proxy doesn't use your profile or spend subscription traffic. DC 1, DC 3 and DC 5 may then be unavailable: media stored there won't load, and an account that lives there may not sign in. If you choose a route, these DCs go through it, as do DC 2 and DC 4 when their web addresses fail, and that traffic counts against your subscription even with the VPN off.",
+  "telegramProxyAdvanced": "Advanced",
+  "telegramProxyPort": "Port",
+  "telegramProxyInvalidPort": "Enter a port from 1024 to 65535",
+  "telegramProxyEndpoints": "Telegram web addresses",
+  "telegramProxyAdvancedFooter": "After changing the port, add the proxy to Telegram again. Leave the addresses empty to use the built-in one.",
+  "telegramProxyNotificationTitle": "Telegram proxy is running",
+  "telegramProxyNotificationStop": "Stop",
+  "doctorTelegramProxyTitle": "Telegram proxy is not working",
+  "doctorTelegramProxyDetail": "A test connection through the proxy failed: {error}",
+  "@doctorTelegramProxyDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "telegramProxyOutboundOff": "Don't use the profile"
+}

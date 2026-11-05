@@ -70,6 +70,7 @@ abstract final class Facts {
 
   /// Device clock minus server clock: positive when the device runs ahead.
   static const clockSkew = FactKey<Duration>('device.clockSkew');
+  static const telegramProxyFailure = FactKey<String>('telegram.proxyFailure');
   static const subscription = FactKey<SubscriptionFact>('profile.subscription');
   static const vpnPermission = FactKey<VpnPermission>('device.vpnPermission');
   static const otherVpn = FactKey<bool>('device.otherVpn');

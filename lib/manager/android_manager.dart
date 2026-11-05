@@ -180,6 +180,18 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   }
 
   @override
+  void onTelegramProxyStopped() {
+    unawaited(_acknowledgeTelegramProxyStop());
+  }
+
+  Future<void> _acknowledgeTelegramProxyStop() async {
+    await service?.consumeTelegramProxyStop();
+    ref
+        .read(telegramProxySettingProvider.notifier)
+        .update((props) => props.copyWith(enabled: false));
+  }
+
+  @override
   void onServiceStopped() {
     unawaited(ref.read(setupActionProvider.notifier).setRunning(false));
     super.onServiceStopped();

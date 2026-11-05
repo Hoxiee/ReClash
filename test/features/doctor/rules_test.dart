@@ -12,6 +12,23 @@ final _now = DateTime(2026, 10, 29, 12);
 DiagnosticSnapshot _snapshot() => DiagnosticSnapshot(takenAt: _now);
 
 void main() {
+  group('telegramProxyRule', () {
+    test('stays quiet without a failure', () {
+      expect(telegramProxyRule(_snapshot()), isNull);
+    });
+
+    test('carries the failure into the finding', () {
+      final finding = telegramProxyRule(
+        _snapshot().withFact(
+          Facts.telegramProxyFailure,
+          Fact('no route', at: _now),
+        ),
+      )!;
+      expect(finding.id, 'telegram.proxy');
+      expect(finding.args['error'], 'no route');
+    });
+  });
+
   group('clockSkewRule', () {
     test('stays silent for a skew under thirty seconds', () {
       final snapshot = _snapshot().withFact(

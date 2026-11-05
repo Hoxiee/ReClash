@@ -79,15 +79,18 @@ fun Context.ensureNotificationChannel() {
     )
 }
 
-fun Service.startForeground(notification: Notification) {
+fun Service.startForeground(
+    notification: Notification,
+    id: Int = GlobalState.NOTIFICATION_ID,
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         startForeground(
-            GlobalState.NOTIFICATION_ID,
+            id,
             notification,
             FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
     } else {
-        startForeground(GlobalState.NOTIFICATION_ID, notification)
+        startForeground(id, notification)
     }
 }
 

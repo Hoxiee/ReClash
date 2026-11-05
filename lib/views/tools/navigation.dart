@@ -28,6 +28,7 @@ import 'package:reclash/views/hotkey.dart';
 import 'package:reclash/views/hotkey_desktop.dart';
 import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
+import 'package:reclash/views/telegram_proxy.dart';
 import 'package:reclash/views/profiles/custom/custom_proxies.dart';
 import 'package:reclash/views/region.dart';
 import 'package:reclash/views/resources.dart';
@@ -45,6 +46,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   DnsView(spec: final spec) when spec.target is PatchOverrideTarget =>
     ToolPage.dns,
   OnDemandView() => ToolPage.onDemand,
+  TelegramProxyView() => ToolPage.telegram,
   RegionView() => ToolPage.appRegion,
   NotificationSettingsView() => ToolPage.notifications,
   UserAgentsView() => ToolPage.userAgents,
@@ -84,6 +86,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.network => const NetworkView(),
   ToolPage.dns => const DnsView(),
   ToolPage.onDemand => const OnDemandView(),
+  ToolPage.telegram => const TelegramProxyView(),
   ToolPage.appRegion => const RegionView(),
   ToolPage.notifications => const NotificationSettingsView(),
   ToolPage.userAgents => const UserAgentsView(),

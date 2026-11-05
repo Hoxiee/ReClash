@@ -7,6 +7,7 @@ enum ToolPage {
   network,
   dns,
   onDemand,
+  telegram,
   appRegion,
   notifications,
   userAgents,
@@ -42,6 +43,7 @@ extension ToolPageHierarchy on ToolPage {
   ToolPage? get parent => switch (this) {
     ToolPage.network ||
     ToolPage.dns ||
+    ToolPage.telegram ||
     ToolPage.rules ||
     ToolPage.scripts ||
     ToolPage.routing => ToolPage.advanced,

@@ -16,6 +16,7 @@ export 'tunnel.dart';
 
 const List<Rule> defaultRules = [
   clockSkewRule,
+  telegramProxyRule,
   batteryOptimizationRule,
   subscriptionRule,
   directModeRule,

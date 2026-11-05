@@ -30,6 +30,11 @@ checks:
     argv: [flutter, test, test/common/file_test.dart, test/providers/clash_providers_action_test.dart]
   generated-contracts:
     argv: [dart, run, tool/check_generated_contracts.dart]
+  telegram-proxy-core:
+    argv: [go, test, -race, ./telegram, -run, .]
+    cwd: core
+  telegram-proxy-ui:
+    argv: [flutter, test, test/views/telegram_proxy_test.dart, test/features/doctor/rules_test.dart, test/views/tools_catalog_test.dart]
   on-demand:
     argv: [flutter, test, test/common/on_demand_test.dart, test/widgets/on_demand_test.dart, test/widgets/on_demand_network_picker_test.dart, test/manager/connectivity_manager_test.dart, test/providers/setup_action_test.dart, test/models/core_test.dart]
   android-notifications:

@@ -83,6 +83,8 @@ const defaultAppSettingProps = AppSettingProps();
 const defaultVpnProps = VpnProps();
 const defaultAuthenticationProps = AuthenticationProps();
 const defaultNetworkProps = NetworkProps();
+const defaultTelegramProxyPort = 1443;
+const defaultTelegramProxyProps = TelegramProxyProps();
 const defaultProxiesStyleProps = ProxiesStyleProps();
 const defaultWindowProps = WindowProps();
 const defaultAccessControlProps = AccessControlProps();
@@ -544,6 +546,25 @@ extension AuthenticationPropsExt on AuthenticationProps {
       enable && username.isNotEmpty ? ['$username:$password'] : [];
 }
 
+/// Picks the profile's rules for the DCs the relay cannot reach itself; an empty
+/// outbound leaves the profile unused. Mirrors `telegramOutboundRules` in Core.
+const telegramProxyOutboundRules = '@rules';
+
+@freezed
+abstract class TelegramProxyProps with _$TelegramProxyProps {
+  const factory TelegramProxyProps({
+    @Default(false) bool enabled,
+    @Default(defaultTelegramProxyPort) int port,
+    @Default('') String secret,
+    @Default([]) List<String> endpoints,
+    @Default('') String outbound,
+    @Default(false) bool autostart,
+  }) = _TelegramProxyProps;
+
+  factory TelegramProxyProps.fromJson(Map<String, Object?> json) =>
+      _$TelegramProxyPropsFromJson(json);
+}
+
 @freezed
 abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
@@ -681,6 +702,7 @@ abstract class Config with _$Config {
     DAVProps? davProps,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
+    @Default(defaultTelegramProxyProps) TelegramProxyProps telegramProxyProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
     // A new key opens every window once at defaultWindowSize.

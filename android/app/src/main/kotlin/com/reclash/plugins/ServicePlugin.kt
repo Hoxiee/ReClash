@@ -6,6 +6,7 @@ import com.reclash.service.ServiceConfig
 import com.reclash.common.Components
 import com.reclash.models.SharedState
 import com.reclash.service.NetworkObserver
+import com.reclash.service.TelegramProxy
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
@@ -16,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
@@ -34,6 +36,11 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         scope.launch {
             ServiceConfig.onDemandPaused.collect { paused ->
                 launch(Dispatchers.Main) { channel.invokeMethod("onDemandPaused", paused) }
+            }
+        }
+        scope.launch {
+            TelegramProxy.stops.drop(1).collect {
+                launch(Dispatchers.Main) { channel.invokeMethod("telegramProxyStopped", null) }
             }
         }
         // Serial: watchRoute keeps the latest intent by the order calls reach the Core.
@@ -61,6 +68,14 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "syncState" -> syncState(call, result)
             "start" -> start(call, result)
             "stop" -> stop(call, result)
+            "setTelegramProxy" -> {
+                ServiceState.requestTelegramProxy(
+                    call.argument<String>("params"),
+                    call.argument<Boolean>("autostart") == true,
+                )
+                result.success(true)
+            }
+            "consumeTelegramProxyStop" -> result.success(TelegramProxy.consumeStoppedByUser())
             "getOnDemandPaused" -> result.success(ServiceConfig.onDemandPaused.value)
             "setOnDemandPaused" -> {
                 scope.launch {

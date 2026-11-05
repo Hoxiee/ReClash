@@ -456,6 +456,72 @@ abstract class CoreInfo with _$CoreInfo {
 }
 
 @freezed
+abstract class TelegramProxyDc with _$TelegramProxyDc {
+  const factory TelegramProxyDc({
+    required int dc,
+    @Default('idle') String route,
+    @Default(0) int active,
+    @Default(0) int connects,
+    @Default(0) int failures,
+    @Default(0) int fastFails,
+    @Default(0) int connectMs,
+    @Default(0) int lastConnect,
+    @Default('') String lastError,
+    @Default(0) int bytesUp,
+    @Default(0) int bytesDown,
+  }) = _TelegramProxyDc;
+
+  factory TelegramProxyDc.fromJson(Map<String, Object?> json) =>
+      _$TelegramProxyDcFromJson(json);
+}
+
+@freezed
+abstract class TelegramProxyEndpoint with _$TelegramProxyEndpoint {
+  const factory TelegramProxyEndpoint({
+    required String address,
+    @Default(0) int latencyMs,
+    @Default(0) int successes,
+    @Default(0) int failures,
+    @Default(false) bool healthy,
+    @Default('') String lastError,
+  }) = _TelegramProxyEndpoint;
+
+  factory TelegramProxyEndpoint.fromJson(Map<String, Object?> json) =>
+      _$TelegramProxyEndpointFromJson(json);
+}
+
+@freezed
+abstract class TelegramProxyStatus with _$TelegramProxyStatus {
+  const factory TelegramProxyStatus({
+    @Default(0) int port,
+    @Default(0) int clients,
+    @Default(0) int badSecrets,
+    @Default(0) int bytesUp,
+    @Default(0) int bytesDown,
+    @Default(0) int lastTraffic,
+    @Default([]) List<TelegramProxyDc> dcs,
+    @Default([]) List<TelegramProxyEndpoint> endpoints,
+  }) = _TelegramProxyStatus;
+
+  factory TelegramProxyStatus.fromJson(Map<String, Object?> json) =>
+      _$TelegramProxyStatusFromJson(json);
+}
+
+@freezed
+abstract class TelegramProxyState with _$TelegramProxyState {
+  const factory TelegramProxyState({
+    @Default(false) bool running,
+    @Default('') String error,
+    @Default(false) bool outboundAvailable,
+    @Default('') String outboundName,
+    TelegramProxyStatus? status,
+  }) = _TelegramProxyState;
+
+  factory TelegramProxyState.fromJson(Map<String, Object?> json) =>
+      _$TelegramProxyStateFromJson(json);
+}
+
+@freezed
 abstract class CoreMemoryStats with _$CoreMemoryStats {
   const factory CoreMemoryStats({
     @Default(0) int rss,

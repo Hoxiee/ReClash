@@ -52,6 +52,7 @@ func handleStartListener() bool {
 	signalListenersStarted()
 	updateListeners(currentConfig)
 	resolver.ResetConnection()
+	resetTelegramProxyConnections()
 	// A probe already out left before the TUN routes and over the DNS
 	// connections just dropped, so its answer must not stand for this route.
 	bumpRouteEpoch()
@@ -191,6 +192,7 @@ func handleSetOnDemandPaused(params *OnDemandPauseParams) bool {
 	onDemandPaused.Store(params.Paused)
 	updateListeners(currentConfig)
 	resolver.ResetConnection()
+	resetTelegramProxyConnections()
 	bumpRouteEpoch()
 	return true
 }

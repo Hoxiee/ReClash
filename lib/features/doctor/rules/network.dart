@@ -31,3 +31,16 @@ Finding? captivePortalRule(DiagnosticSnapshot snapshot) {
     remedyIds: const ['network.openCaptivePortal'],
   );
 }
+
+Finding? telegramProxyRule(DiagnosticSnapshot snapshot) {
+  final failure = snapshot.valueOf(Facts.telegramProxyFailure);
+  if (failure == null || failure.isEmpty) return null;
+  return Finding(
+    id: 'telegram.proxy',
+    severity: CheckSeverity.warning,
+    evidence: [Facts.telegramProxyFailure.id],
+    titleKey: 'doctorTelegramProxyTitle',
+    detailKey: 'doctorTelegramProxyDetail',
+    args: {'error': failure},
+  );
+}
