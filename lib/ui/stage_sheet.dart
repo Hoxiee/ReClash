@@ -1,21 +1,34 @@
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
-import 'package:reclash/ui/ui.dart';
+import 'package:reclash/ui/context.dart';
+import 'package:reclash/ui/sheet.dart';
+import 'package:reclash/ui/surface.dart';
+import 'package:reclash/ui/typography.dart';
 
 const _contentMaxWidth = 520.0;
 const _badgeSize = 96.0;
 const _ringWidth = 6.0;
+const _ringInset = 2.0;
 const _badgeCentre = 0.3;
 const _secondaryHeight = 48.0;
 const _fadeHeight = 32.0;
 const _ctaHeight = 52.0;
+const _textMotion = Duration(milliseconds: 240);
+const _spinTurn = Duration(milliseconds: 1000);
+const _spinArc = 0.25;
 
-/// One step of the report. The badge centre rests at a fixed share of the
-/// height and the foot keeps both slots even when empty, so neither the
-/// badge nor the main button moves between steps.
-class ReportStageLayout extends StatefulWidget {
-  const ReportStageLayout({
+/// One detent, so the layout's height stays put while the sheet is open.
+const stageSheetProps = SheetProps(
+  backgroundColor: Colors.transparent,
+  detents: [0.9],
+);
+
+/// One step of a sheet that walks through a process. The badge centre rests at
+/// a fixed share of the height and the foot keeps both slots even when empty,
+/// so neither the badge nor the main button moves between steps.
+class StageSheetLayout extends StatefulWidget {
+  const StageSheetLayout({
     super.key,
     required this.hero,
     this.body = const [],
@@ -29,10 +42,10 @@ class ReportStageLayout extends StatefulWidget {
   final Widget? secondary;
 
   @override
-  State<ReportStageLayout> createState() => _ReportStageLayoutState();
+  State<StageSheetLayout> createState() => _StageSheetLayoutState();
 }
 
-class _ReportStageLayoutState extends State<ReportStageLayout> {
+class _StageSheetLayoutState extends State<StageSheetLayout> {
   final _underFoot = ValueNotifier(false);
 
   @override
@@ -136,8 +149,8 @@ class _Limit extends StatelessWidget {
 }
 
 /// The badge, a title and an optional line under it, centered.
-class ReportHero extends StatelessWidget {
-  const ReportHero({
+class StageSheetHero extends StatelessWidget {
+  const StageSheetHero({
     super.key,
     required this.badge,
     required this.title,
@@ -157,22 +170,38 @@ class ReportHero extends StatelessWidget {
         children: [
           badge,
           const SizedBox(height: 16),
-          Text(
-            title,
-            key: const ValueKey('report-title'),
-            textAlign: TextAlign.center,
-            style: AppTextStyle.title2.of(context, emphasized: true),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
-            DefaultTextStyle.merge(
-              textAlign: TextAlign.center,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: context.colorScheme.onSurfaceVariant),
-              child: subtitle,
+          AnimatedSwitcher(
+            duration: context.motionDuration(_textMotion),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
             ),
-          ],
+            child: Column(
+              key: ValueKey(title),
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.title2.of(context, emphasized: true),
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  DefaultTextStyle.merge(
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: context.colorScheme.onSurfaceVariant),
+                    child: subtitle,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -181,16 +210,16 @@ class ReportHero extends StatelessWidget {
 
 /// The error tone for a ring: the dark scheme's error is a pale pastel that
 /// reads as salmon on a thick stroke.
-Color reportAlertColor(BuildContext context) {
+Color stageAlertColor(BuildContext context) {
   final error = context.colorScheme.error;
   if (context.colorScheme.brightness == Brightness.light) return error;
   return HSLColor.fromColor(error).withLightness(0.64).toColor();
 }
 
 /// A round well with a ring along its edge filled to [value], which eases
-/// to each new value.
-class ReportBadge extends StatelessWidget {
-  const ReportBadge({
+/// to each new value, or spinning while [value] is null.
+class StageSheetBadge extends StatelessWidget {
+  const StageSheetBadge({
     super.key,
     required this.color,
     this.value = 0,
@@ -200,7 +229,7 @@ class ReportBadge extends StatelessWidget {
   });
 
   final Color color;
-  final double value;
+  final double? value;
   final Duration motion;
   final Curve curve;
   final Widget child;
@@ -220,10 +249,11 @@ class ReportBadge extends StatelessWidget {
         ),
       ),
     );
+    final value = this.value;
     return SizedBox.square(
       dimension: _badgeSize,
       child: TweenAnimationBuilder<double>(
-        tween: Tween(end: value.clamp(0, 1)),
+        tween: Tween(end: (value ?? 0).clamp(0, 1)),
         duration: context.motionDuration(motion),
         curve: curve,
         builder: (context, shown, child) => CustomPaint(
@@ -235,10 +265,57 @@ class ReportBadge extends StatelessWidget {
           ),
           child: child,
         ),
-        child: content,
+        child: value != null
+            ? content
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  _RingSpinner(color: color),
+                  content,
+                ],
+              ),
       ),
     );
   }
+}
+
+class _RingSpinner extends StatefulWidget {
+  const _RingSpinner({required this.color});
+
+  final Color color;
+
+  @override
+  State<_RingSpinner> createState() => _RingSpinnerState();
+}
+
+class _RingSpinnerState extends State<_RingSpinner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _turns;
+
+  @override
+  void initState() {
+    super.initState();
+    _turns = AnimationController(vsync: this, duration: _spinTurn)..repeat();
+  }
+
+  @override
+  void dispose() {
+    _turns.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => RotationTransition(
+    turns: _turns,
+    child: CustomPaint(
+      painter: _RingPainter(
+        well: Colors.transparent,
+        track: Colors.transparent,
+        color: widget.color,
+        value: _spinArc,
+      ),
+    ),
+  );
 }
 
 class _RingPainter extends CustomPainter {
@@ -261,7 +338,7 @@ class _RingPainter extends CustomPainter {
     canvas.drawCircle(center, radius, Paint()..color = well);
     final rect = Rect.fromCircle(
       center: center,
-      radius: radius - _ringWidth / 2 - 2,
+      radius: radius - _ringWidth / 2 - _ringInset,
     );
     final stroke = Paint()
       ..style = PaintingStyle.stroke
@@ -287,6 +364,6 @@ class _RingPainter extends CustomPainter {
 }
 
 /// A step's text as a tabular figure, so a counting number holds its width.
-TextStyle reportFigureStyle(BuildContext context, AppTextStyle style) => style
+TextStyle stageFigureStyle(BuildContext context, AppTextStyle style) => style
     .of(context, emphasized: true)
     .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);

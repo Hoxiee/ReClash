@@ -15,7 +15,6 @@ import 'delivery.dart';
 import 'options.dart';
 import 'progress.dart';
 import 'result.dart';
-import 'stage.dart';
 import 'start.dart';
 
 /// Pushes the report into the sheet [context] is a page of, and opens a
@@ -28,10 +27,7 @@ Future<void> showReportSheet(BuildContext context) {
   }
   return showSheet<void>(
     context: context,
-    props: const SheetProps(
-      backgroundColor: Colors.transparent,
-      detents: [0.9],
-    ),
+    props: stageSheetProps,
     builder: (_) => NestedPagedSheet(builder: (_) => const ReportSheet()),
   );
 }
@@ -218,10 +214,10 @@ class _ReportSheetState extends ConsumerState<ReportSheet> {
       _Stage.result => ReportResultView(result: _result!),
       _Stage.failed => CommonScaffold(
         title: l.reportProblem,
-        body: ReportStageLayout(
-          hero: ReportHero(
-            badge: ReportBadge(
-              color: reportAlertColor(context),
+        body: StageSheetLayout(
+          hero: StageSheetHero(
+            badge: StageSheetBadge(
+              color: stageAlertColor(context),
               value: 1,
               child: GlyphIcon(_leaked ? AppGlyphs.lock : AppGlyphs.error),
             ),

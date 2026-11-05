@@ -19,7 +19,6 @@ class UpdateReleaseContent extends StatefulWidget {
     this.asset,
     this.verified = false,
     this.note,
-    this.header = true,
   });
 
   final AppUpdateRelease release;
@@ -28,7 +27,6 @@ class UpdateReleaseContent extends StatefulWidget {
   final AndroidUpdateAsset? asset;
   final bool verified;
   final String? note;
-  final bool header;
 
   @override
   State<UpdateReleaseContent> createState() => _UpdateReleaseContentState();
@@ -60,14 +58,6 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 16,
       children: [
-        if (widget.header)
-          UpdateOfferHead(
-            release: release,
-            currentVersion: widget.currentVersion,
-            platform: widget.platform,
-            alignment: CrossAxisAlignment.start,
-            style: AppTextStyle.title1,
-          ),
         if (widget.note case final note?)
           Text(
             note,
@@ -157,68 +147,56 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
 
 /// The offer's title and a line under it: the version step, the channel and
 /// the publication date.
-class UpdateOfferHead extends StatelessWidget {
-  const UpdateOfferHead({
+String updateOfferHeadline(
+  BuildContext context,
+  AppUpdateRelease release,
+  SupportPlatform platform,
+) {
+  final summary = release.summary?.localized(
+    Localizations.localeOf(context).toString(),
+    platform: platform.name.toLowerCase(),
+  );
+  return summary?.headline ?? context.appLocalizations.updateOfferTitle;
+}
+
+/// The version step, the channel and the publication date of an offer.
+class UpdateOfferMeta extends StatelessWidget {
+  const UpdateOfferMeta({
     super.key,
     required this.release,
     required this.currentVersion,
-    required this.platform,
-    this.alignment = CrossAxisAlignment.center,
-    this.style = AppTextStyle.title2,
   });
 
   final AppUpdateRelease release;
   final String currentVersion;
-  final SupportPlatform platform;
-  final CrossAxisAlignment alignment;
-  final AppTextStyle style;
 
   @override
   Widget build(BuildContext context) {
-    final l = context.appLocalizations;
     final locale = Localizations.localeOf(context).toString();
-    final summary = release.summary?.localized(
-      locale,
-      platform: platform.name.toLowerCase(),
-    );
     final published = DateTime.tryParse(
       release.data['published_at']?.toString() ?? '',
     );
-    final centered = alignment == CrossAxisAlignment.center;
-    return Column(
-      crossAxisAlignment: alignment,
+    return Wrap(
       spacing: 10,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Semantics(
-          header: true,
-          child: Text(
-            summary?.headline ?? l.updateOfferTitle,
-            textAlign: centered ? TextAlign.center : TextAlign.start,
-            style: style.of(context, emphasized: true),
+        _VersionStep(
+          from: currentVersion,
+          to: release.tag.replaceFirst(RegExp('^v'), ''),
+        ),
+        if (release.prerelease)
+          CommonChip(label: context.appLocalizations.updateChannelPre),
+        if (published != null)
+          Text(
+            DateFormat.yMMMd(
+              DateFormat.localeExists(locale) ? locale : 'en',
+            ).format(published.toLocal()),
+            style: AppTextStyle.footnote
+                .of(context)
+                .copyWith(color: context.colorScheme.onSurfaceVariant),
           ),
-        ),
-        Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          alignment: centered ? WrapAlignment.center : WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            _VersionStep(
-              from: currentVersion,
-              to: release.tag.replaceFirst(RegExp('^v'), ''),
-            ),
-            if (release.prerelease) CommonChip(label: l.updateChannelPre),
-            if (published != null)
-              Text(
-                DateFormat.yMMMd(
-                  DateFormat.localeExists(locale) ? locale : 'en',
-                ).format(published.toLocal()),
-                style: AppTextStyle.footnote
-                    .of(context)
-                    .copyWith(color: context.colorScheme.onSurfaceVariant),
-              ),
-          ],
-        ),
       ],
     );
   }

@@ -7,7 +7,6 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 
 import 'capture.dart';
-import 'stage.dart';
 
 const _rowHeight = 48.0;
 const _markSize = 22.0;
@@ -50,20 +49,20 @@ class ReportRecordingView extends StatelessWidget {
     final total = reportCaptureLength.inSeconds;
     return CommonScaffold(
       title: l.reportProblem,
-      body: ReportStageLayout(
-        hero: ReportHero(
+      body: StageSheetLayout(
+        hero: StageSheetHero(
           badge: Semantics(
             label: l.reportSecondsLeft(secondsLeft),
             excludeSemantics: true,
-            child: ReportBadge(
-              color: reportAlertColor(context),
+            child: StageSheetBadge(
+              color: stageAlertColor(context),
               value: (total - secondsLeft + 1) / total,
               motion: const Duration(seconds: 1),
               curve: Curves.linear,
               child: Text(
                 '$secondsLeft',
                 key: const ValueKey('report-seconds'),
-                style: reportFigureStyle(context, AppTextStyle.title1),
+                style: stageFigureStyle(context, AppTextStyle.title1),
               ),
             ),
           ),
@@ -135,17 +134,17 @@ class ReportBuildingView extends StatelessWidget {
     final level = context.raisedSurfaceLevel;
     return CommonScaffold(
       title: l.reportProblem,
-      body: ReportStageLayout(
-        hero: ReportHero(
+      body: StageSheetLayout(
+        hero: StageSheetHero(
           badge: Semantics(
             label: percent,
             excludeSemantics: true,
-            child: ReportBadge(
+            child: StageSheetBadge(
               color: colorScheme.primary,
               value: overall,
               child: Text(
                 percent,
-                style: reportFigureStyle(context, AppTextStyle.title3),
+                style: stageFigureStyle(context, AppTextStyle.title3),
               ),
             ),
           ),

@@ -7,6 +7,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/update_sheet.dart';
 import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/providers/app_update.dart';
@@ -476,10 +477,7 @@ void main() {
       final dismiss = find.byKey(const ValueKey('update-offer-dismiss'));
       expect(accept.hitTestable(), findsOneWidget);
       expect(dismiss.hitTestable(), findsOneWidget);
-      await tester.drag(
-        find.byKey(const ValueKey('update-offer-scroll')),
-        const Offset(0, -400),
-      );
+      await tester.drag(find.byType(StageSheetLayout), const Offset(0, -400));
       await tester.pumpAndSettle();
       expect(accept.hitTestable(), findsOneWidget);
       expect(tester.takeException(), isNull);

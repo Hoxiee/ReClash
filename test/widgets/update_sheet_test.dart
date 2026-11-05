@@ -27,6 +27,8 @@ class _DisplayUpdateAction extends AppUpdateAction {
   final AppUpdateState initial;
   @override
   AppUpdateState build() => initial;
+
+  void show(AppUpdateState next) => state = next;
 }
 
 void main() {
@@ -125,7 +127,6 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Updates without interruption'), findsOneWidget);
     expect(find.text('Your background'), findsOneWidget);
     expect(find.text('Make an explicit choice.'), findsOneWidget);
     expect(find.text('Review this change.'), findsNothing);
@@ -186,7 +187,6 @@ void main() {
           ),
         ),
       );
-      expect(find.text('Updates without interruption'), findsOneWidget);
       expect(find.text('Your background'), findsOneWidget);
       expect(find.text('Make an explicit choice.'), findsOneWidget);
       expect(find.text('Markdown release details.'), findsNothing);
@@ -594,6 +594,50 @@ void main() {
       find.widgetWithText(TextButton, currentAppLocalizations.cancel),
     );
     await tester.pumpAndSettle();
+    await shown;
+  });
+
+  testWidgets('the badge and the buttons hold their place across phases', (
+    tester,
+  ) async {
+    final release = testUpdateRelease();
+    final states = [
+      const AppUpdateState(phase: UpdatePhase.checkFailed),
+      AppUpdateState(phase: UpdatePhase.offered, release: release),
+      AppUpdateState(
+        phase: UpdatePhase.downloading,
+        release: release,
+        received: 12,
+        total: 40,
+      ),
+      AppUpdateState(phase: UpdatePhase.ready, release: release),
+      const AppUpdateState(phase: UpdatePhase.upToDate),
+    ];
+    final display = _DisplayUpdateAction(states.first);
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        appUpdateRuntimeProvider.overrideWithValue(runtime),
+        appUpdateActionProvider.overrideWith(() => display),
+      ],
+    );
+    globalState.container = container;
+    await pump(tester, const SizedBox.shrink());
+    final shown = UpdateSheet.show(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    Rect badge() => tester.getRect(find.byType(StageSheetBadge));
+    Rect accept() =>
+        tester.getRect(find.byKey(const ValueKey('update-offer-accept')));
+    final badgeRest = badge();
+    final acceptRest = accept();
+    expect(badgeRest.center.dx, 195);
+    for (final state in states) {
+      display.show(state);
+      await tester.pumpAndSettle();
+      expect(badge(), badgeRest, reason: '${state.phase}');
+      expect(accept(), acceptRest, reason: '${state.phase}');
+    }
+    await close(tester);
     await shown;
   });
 

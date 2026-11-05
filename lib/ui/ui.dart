@@ -69,6 +69,7 @@ export 'skeleton.dart';
 export 'snap_sheet.dart';
 export 'sortable.dart';
 export 'spring.dart';
+export 'stage_sheet.dart';
 export 'super_reorderable_list.dart';
 export 'surface.dart';
 export 'switch.dart';

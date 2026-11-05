@@ -6,7 +6,6 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 
 import 'options.dart';
-import 'stage.dart';
 
 const _chipHeight = 32.0;
 
@@ -48,9 +47,9 @@ class ReportStartView extends StatelessWidget {
       ],
       body: ListenableBuilder(
         listenable: draft,
-        builder: (context, _) => ReportStageLayout(
-          hero: ReportHero(
-            badge: ReportBadge(
+        builder: (context, _) => StageSheetLayout(
+          hero: StageSheetHero(
+            badge: StageSheetBadge(
               color: colorScheme.primary,
               child: const GlyphIcon(AppGlyphs.support),
             ),

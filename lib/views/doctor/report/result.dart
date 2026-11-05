@@ -12,7 +12,6 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 
 import 'delivery.dart';
-import 'stage.dart';
 
 String _byteSize(num bytes) {
   final size = bytes.traffic;
@@ -211,9 +210,9 @@ class _ReportResultViewState extends ConsumerState<ReportResultView> {
           onPressed: () => unawaited(_save()),
         ),
       ],
-      body: ReportStageLayout(
-        hero: ReportHero(
-          badge: ReportBadge(
+      body: StageSheetLayout(
+        hero: StageSheetHero(
+          badge: StageSheetBadge(
             color: colorScheme.success,
             value: 1,
             child: GlyphIcon(sent == null ? AppGlyphs.check : AppGlyphs.send),
