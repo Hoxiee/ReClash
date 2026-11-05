@@ -191,6 +191,9 @@ class Window implements WindowPort {
   @override
   Future<void> toggle() => _visibility.toggle();
 
+  @override
+  Future<bool> isVisible() => desktopWindow.isVisible();
+
   Future<void> _showWindow() async {
     await desktopWindow.show();
     await desktopWindow.focus();

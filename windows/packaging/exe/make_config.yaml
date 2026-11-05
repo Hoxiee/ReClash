@@ -18,4 +18,5 @@ locales:
     file: ..\windows\packaging\exe\ChineseSimplified.isl
   - lang: ko
     file: ..\windows\packaging\exe\Korean.isl
-privileges_required: admin
+privileges_required: lowest
+install_dir_name: '{localappdata}\Programs\ReClash'

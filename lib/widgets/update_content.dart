@@ -24,7 +24,7 @@ class UpdateReleaseContent extends StatefulWidget {
   final AppUpdateRelease release;
   final String currentVersion;
   final SupportPlatform platform;
-  final AndroidUpdateAsset? asset;
+  final UpdateAsset? asset;
   final bool verified;
   final String? note;
 

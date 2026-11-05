@@ -72,5 +72,8 @@
   "updateMinutes": "{count} daq",
   "updateResumeShort": "Davom ettirish",
   "changelogImproved": "Yaxshilanishlar",
-  "changelogKnownIssues": "Ma'lum muammolar"
+  "changelogKnownIssues": "Ma'lum muammolar",
+  "updateDesktopAutomatic": "Avtomatik yangilash",
+  "updateDesktopAutoDescription": "ReClash yangilanishlarni fonda yuklab oladi va ilova ishga tushganda, yopilganda yoki kompyuter bo‘sh turganda o‘rnatadi. Faol ulanish o‘zi tiklanadi.",
+  "updateRestartNow": "Yangilash uchun qayta ishga tushirish"
 }

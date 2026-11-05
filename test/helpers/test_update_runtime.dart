@@ -31,6 +31,7 @@ class TestUpdateSource implements AppUpdateSource {
 }
 
 final updateTestBytes = utf8.encode('a verified package for the update tests');
+const testUpdateAbis = ['arm64-v8a'];
 
 AppUpdateRelease testUpdateRelease({
   String tag = 'v0.8.96',
@@ -96,6 +97,10 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   bool permission = true;
   bool validPackage = true;
   bool saved = true;
+  bool desktopMode = false;
+  bool desktopAssetMissing = false;
+  bool hidden = false;
+  Duration? idle;
   String version = '0.8.95';
   String actualVersion = '0.8.95';
   int downloads = 0;
@@ -117,12 +122,27 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   final installEvents = StreamController<ApkInstallStatus>.broadcast(
     sync: true,
   );
+  final List<bool> relaunches = [];
 
   @override
   bool get supported => enabled;
 
   @override
+  bool get desktop => desktopMode;
+
+  @override
   String get installedVersion => version;
+
+  @override
+  UpdateAsset? desktopAsset(AppUpdateRelease release) => desktopAssetMissing
+      ? null
+      : selectAndroidUpdateAsset(release.assets, supportedAbis: testUpdateAbis);
+
+  @override
+  Duration? systemIdle() => idle;
+
+  @override
+  Future<bool> windowHidden() async => hidden;
 
   @override
   Future<AppUpdateRelease?> check(UpdateChannel channel) async {
@@ -137,10 +157,10 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   }
 
   @override
-  Future<List<String>> supportedAbis() async => ['arm64-v8a'];
+  Future<List<String>> supportedAbis() async => testUpdateAbis;
 
   @override
-  Future<bool> onWifi() async => wifi;
+  Future<bool> onWifi() async => desktop || wifi;
 
   @override
   Stream<bool> get wifiChanges => wifiEvents.stream;
@@ -172,11 +192,7 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   }
 
   @override
-  Future<bool> verify(
-    File file,
-    AndroidUpdateAsset asset,
-    String version,
-  ) async {
+  Future<bool> verify(File file, UpdateAsset asset, String version) async {
     verifies++;
     return (verifyOperation != null
             ? await verifyOperation!()
@@ -202,11 +218,13 @@ class TestUpdateRuntime extends AppUpdateRuntime {
     required String version,
     required String sha256,
     required bool automatic,
+    bool relaunch = true,
   }) async {
     if (vpn) return ApkInstallResult.vpnActive;
     if (!permission) return ApkInstallResult.permissionRequired;
     installations++;
     lastAutomatic = automatic;
+    relaunches.add(relaunch);
     return ApkInstallResult.started;
   }
 

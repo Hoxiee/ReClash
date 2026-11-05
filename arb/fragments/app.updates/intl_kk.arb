@@ -72,5 +72,8 @@
   "updateMinutes": "{count} мин",
   "updateResumeShort": "Жалғастыру",
   "changelogImproved": "Жақсартулар",
-  "changelogKnownIssues": "Белгілі мәселелер"
+  "changelogKnownIssues": "Белгілі мәселелер",
+  "updateDesktopAutomatic": "Автоматты түрде жаңарту",
+  "updateDesktopAutoDescription": "ReClash жаңартуларды фонда жүктеп, қолданба іске қосылғанда, жабылғанда немесе компьютер бос тұрғанда орнатады. Белсенді қосылым өздігінен қалпына келеді.",
+  "updateRestartNow": "Жаңарту үшін қайта іске қосу"
 }

@@ -102,28 +102,28 @@ void main() {
       expect(
         await matchesUpdateAsset(
           file,
-          AndroidUpdateAsset(name: 'v1.apk', url: '', sha256: digest),
+          UpdateAsset(name: 'v1.apk', url: '', sha256: digest),
         ),
         isTrue,
       );
       expect(
         await matchesUpdateAsset(
           file,
-          AndroidUpdateAsset(name: 'v1.apk', url: '', sha256: '0' * 64),
+          UpdateAsset(name: 'v1.apk', url: '', sha256: '0' * 64),
         ),
         isFalse,
       );
       expect(
         await matchesUpdateAsset(
           file,
-          const AndroidUpdateAsset(name: 'v1.apk', url: ''),
+          const UpdateAsset(name: 'v1.apk', url: ''),
         ),
         isFalse,
       );
       expect(
         await matchesUpdateAsset(
           file,
-          AndroidUpdateAsset(name: 'v1.apk', url: '', size: 1, sha256: digest),
+          UpdateAsset(name: 'v1.apk', url: '', size: 1, sha256: digest),
         ),
         isFalse,
       );
@@ -149,7 +149,7 @@ void main() {
         await File(join(directory.path, name)).writeAsString('data');
       }
 
-      await removeStaleUpdateApks(directory, keep: {'update-v1.apk'});
+      await removeStaleUpdateFiles(directory, keep: {'update-v1.apk'});
 
       expect(
         await File(join(directory.path, 'update-v1.apk')).exists(),
@@ -191,7 +191,7 @@ void main() {
       await older.setLastModified(now.subtract(const Duration(days: 1)));
       await latest.setLastModified(now);
 
-      await removeStaleUpdateApks(directory);
+      await removeStaleUpdateFiles(directory);
 
       expect(await older.exists(), isFalse);
       expect(await latest.exists(), isTrue);
@@ -219,7 +219,7 @@ void main() {
       ]) {
         await File(join(directory.path, name)).writeAsString('data');
       }
-      await removeStaleUpdateApks(
+      await removeStaleUpdateFiles(
         directory,
         keep: {'update-pending.apk'},
         keepPartial: {'update-next.apk'},
@@ -252,7 +252,7 @@ void main() {
   );
 
   test('sanitizes release tags for update cache filenames', () {
-    expect(updateApkFileName('v1.2.3'), 'update-v1.2.3.apk');
-    expect(updateApkFileName('../v1 beta'), 'update-.._v1_beta.apk');
+    expect(updateFileName('v1.2.3'), 'update-v1.2.3.apk');
+    expect(updateFileName('../v1 beta'), 'update-.._v1_beta.apk');
   });
 }

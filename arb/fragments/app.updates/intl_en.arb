@@ -110,5 +110,8 @@
     "description": "Short button on the dashboard update banner that resumes a paused or failed update download."
   },
   "changelogImproved": "Improvements",
-  "changelogKnownIssues": "Known issues"
+  "changelogKnownIssues": "Known issues",
+  "updateDesktopAutomatic": "Update automatically",
+  "updateDesktopAutoDescription": "ReClash downloads updates in the background and installs them when it starts or quits, or while the computer is idle. An active connection comes back by itself.",
+  "updateRestartNow": "Restart to update"
 }

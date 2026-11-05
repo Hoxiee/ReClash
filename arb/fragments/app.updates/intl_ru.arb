@@ -72,5 +72,8 @@
   "updateMinutes": "{count} мин",
   "updateResumeShort": "Продолжить",
   "changelogImproved": "Улучшения",
-  "changelogKnownIssues": "Известные проблемы"
+  "changelogKnownIssues": "Известные проблемы",
+  "updateDesktopAutomatic": "Обновлять автоматически",
+  "updateDesktopAutoDescription": "ReClash скачивает обновления в фоне и ставит их при запуске, при выходе или пока компьютер простаивает. Активное подключение восстановится само.",
+  "updateRestartNow": "Перезапустить для обновления"
 }

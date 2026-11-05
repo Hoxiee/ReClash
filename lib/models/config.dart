@@ -313,6 +313,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool autoDownloadUpdate,
     @Default(false) bool autoInstallUpdate,
+    @Default(true) bool desktopAutoUpdate,
     @JsonKey(fromJson: updateChannelFromJson) UpdateChannel? updateChannel,
     @Default(false)
     @JsonKey(readValue: _readSidebarExpanded)

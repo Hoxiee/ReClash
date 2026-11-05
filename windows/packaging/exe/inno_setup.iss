@@ -16,6 +16,7 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 SetupMutex=ReClashSetupMutex
+RestartApplications=no
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 MinVersion=10.0
@@ -31,6 +32,7 @@ const
   ServiceMarkedForDelete = 1072;
   QueryAndSynchronize = $00101000;
   WaitCompleted = 0;
+  UninstallKey = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{{APP_ID}}_is1';
 
 function EnumWindows(Callback: LongWord; Param: LongWord): Boolean;
   external 'EnumWindows@user32.dll stdcall';
@@ -52,7 +54,8 @@ function PostMessage(Window: HWND; Message: LongWord; WParam: LongWord; LParam: 
 var
   ShutdownMessage: LongWord;
   ShutdownHandles: TArrayOfInteger;
-  ShutdownFailed: Boolean;
+  RelaunchHandled: Boolean;
+  MachineWideAppPath: String;
 
 function ShutdownInstalledWindow(Window: HWND; Param: LongWord): Boolean;
 var
@@ -76,7 +79,8 @@ begin
       Count := GetArrayLength(ShutdownHandles);
       SetArrayLength(ShutdownHandles, Count + 1);
       ShutdownHandles[Count] := Process;
-      if not PostMessage(Window, ShutdownMessage, 0, 0) then ShutdownFailed := True;
+      // A window closing as the app exits refuses the post; the wait on its process decides.
+      PostMessage(Window, ShutdownMessage, 0, 0);
       Exit;
     end;
   end;
@@ -88,7 +92,6 @@ var
   i: Integer;
 begin
   SetArrayLength(ShutdownHandles, 0);
-  ShutdownFailed := False;
   ShutdownMessage := RegisterWindowMessage('ReClash.InstalledProductMaintenance');
   if ShutdownMessage = 0 then
   begin
@@ -96,7 +99,6 @@ begin
     Exit;
   end;
   Result := EnumWindows(CreateCallback(@ShutdownInstalledWindow), 0);
-  Result := Result and not ShutdownFailed;
   for i := 0 to GetArrayLength(ShutdownHandles) - 1 do
   begin
     if WaitForSingleObject(ShutdownHandles[i], 20000) <> WaitCompleted then Result := False;
@@ -144,7 +146,7 @@ begin
   Expected := ExpandConstant('{app}\ReClashHelperService.exe');
   if CompareText(Value, Expected) <> 0 then
   begin
-    Result := False;
+    Log('Leaving the legacy service registered outside this install: ' + Value);
     Exit;
   end;
   if not RunServiceCommand('stop', ResultCode) then
@@ -266,20 +268,115 @@ begin
     Result := FmtMessage(CustomMessage('CloseInstalledApp'), ['{{DISPLAY_NAME}}']);
     Exit;
   end;
-  if not UnregisterHelperService() then
+  if IsAdmin and not UnregisterHelperService() then
     Result := FmtMessage(CustomMessage('LegacyServiceRemovalFailed'), ['{{DISPLAY_NAME}}']);
+end;
+
+function RemoveMachineWideInstall(): String;
+var
+  Uninstaller: String;
+  ErrorCode: Integer;
+  Attempt: Integer;
+begin
+  Result := '';
+  if not RegQueryStringValue(HKLM64, UninstallKey, 'UninstallString', Uninstaller) then Exit;
+  Uninstaller := RemoveQuotes(Uninstaller);
+  if not FileExists(Uninstaller) then
+  begin
+    Log('Ignoring a machine-wide registration without its uninstaller: ' + Uninstaller);
+    Exit;
+  end;
+  MachineWideAppPath := ExtractFilePath(Uninstaller) + '{{EXECUTABLE_NAME}}';
+  if ShellExec('runas', Uninstaller, '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ErrorCode) then
+  begin
+    // unins000.exe exits once its temporary copy takes over; only the key going away means done.
+    for Attempt := 1 to 240 do
+    begin
+      if not RegKeyExists(HKLM64, UninstallKey) then Exit;
+      Sleep(250);
+    end;
+    Log('The machine-wide uninstaller did not finish in time');
+  end
+  else
+    Log('The machine-wide uninstaller did not start: ' + SysErrorMessage(ErrorCode));
+  Result := FmtMessage(CustomMessage('MachineInstallRemovalFailed'), ['{{DISPLAY_NAME}}']);
+end;
+
+// The app closes its window before its Core, so the handshake alone can miss a process still holding files.
+function WaitForUpdatingApp(): Boolean;
+var
+  Process: THandle;
+begin
+  Result := True;
+  Process := OpenProcess(QueryAndSynchronize, False, StrToIntDef(ExpandConstant('{param:WAITPID|0}'), 0));
+  if Process = 0 then Exit;
+  Result := WaitForSingleObject(Process, 20000) = WaitCompleted;
+  CloseHandle(Process);
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   Result := PrepareInstalledProduct();
+  if (Result = '') and not WaitForUpdatingApp() then
+    Result := FmtMessage(CustomMessage('CloseInstalledApp'), ['{{DISPLAY_NAME}}']);
+  if Result = '' then Result := RemoveMachineWideInstall();
+end;
+
+function RelaunchRequested(): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  if not WizardSilent then Exit;
+  for i := 1 to ParamCount do
+    if CompareText(ParamStr(i), '/RELAUNCH') = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
+
+procedure MarkRelaunched();
+begin
+  RelaunchHandled := True;
+end;
+
+function FindExistingApp(): String;
+var
+  Dir: String;
+begin
+  Dir := '';
+  try
+    Dir := ExpandConstant('{app}');
+  except
+    if not RegQueryStringValue(HKCU, UninstallKey, 'Inno Setup: App Path', Dir) then Dir := '';
+  end;
+  Result := AddBackslash(Dir) + '{{EXECUTABLE_NAME}}';
+  if (Dir <> '') and FileExists(Result) then Exit;
+  Result := MachineWideAppPath;
+  if (Result <> '') and not FileExists(Result) then Result := '';
+end;
+
+procedure DeinitializeSetup();
+var
+  AppPath: String;
+  ResultCode: Integer;
+begin
+  if RelaunchHandled or not RelaunchRequested() then Exit;
+  MarkRelaunched();
+  AppPath := FindExistingApp();
+  if AppPath = '' then
+    Log('No installed app to relaunch')
+  else if not ExecAsOriginalUser(AppPath, '', ExtractFilePath(AppPath), SW_SHOWNORMAL, ewNoWait, ResultCode) then
+    Log('Relaunch failed: ' + SysErrorMessage(ResultCode));
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
-    RunReClashService('upgrade');
+    // Without elevation the app detects the stale service bundle and prompts when TUN next starts.
+    if IsAdmin then RunReClashService('upgrade');
     ClearStaleProxy;
   end;
 end;
@@ -309,11 +406,22 @@ begin
   RemoveDir(ExpandConstant('{localappdata}\com.follow'));
 end;
 
+procedure RemoveReClashServiceElevated;
+var
+  ErrorCode: Integer;
+begin
+  if not RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\ReClashService') then Exit;
+  if not ShellExec('runas', ExpandConstant('{app}\ReClashService.exe'), 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ErrorCode) then
+    Log('Keeping the ReClash Service registered: ' + SysErrorMessage(ErrorCode));
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usUninstall then
   begin
-    if not RunReClashService('uninstall') then
+    if not IsAdmin then
+      RemoveReClashServiceElevated
+    else if not RunReClashService('uninstall') then
       SuppressibleMsgBox(FmtMessage(CustomMessage('ServiceRemovalFailed'), ['{{DISPLAY_NAME}}']), mbError, MB_OK, IDOK);
   end;
   if CurUninstallStep = usPostUninstall then
@@ -363,18 +471,22 @@ english.RemoveUserData=Also delete your profiles and settings?
 english.CloseInstalledApp=Close %1 running from this installation before continuing.
 english.LegacyServiceRemovalFailed=The legacy %1 service could not be safely removed.
 english.ServiceRemovalFailed=The %1 service could not be fully removed. See the setup log for details.
+english.MachineInstallRemovalFailed=The previous system-wide installation of %1 must be removed first. Run setup again and approve the administrator prompt.
 russian.RemoveUserData=Также удалить ваши профили и настройки?
 russian.CloseInstalledApp=Чтобы продолжить, закройте %1, запущенный из этой папки установки.
 russian.LegacyServiceRemovalFailed=Не удалось безопасно удалить службу предыдущей версии %1.
 russian.ServiceRemovalFailed=Не удалось полностью удалить службу %1. Подробности в журнале установки.
+russian.MachineInstallRemovalFailed=Сначала нужно удалить предыдущую установку %1 для всех пользователей. Запустите установку снова и подтвердите запрос администратора.
 chineseSimplified.RemoveUserData=是否同时删除配置文件和设置？
 chineseSimplified.CloseInstalledApp=请关闭从此安装目录运行的 %1，然后继续。
 chineseSimplified.LegacyServiceRemovalFailed=无法安全移除旧版 %1 服务。
 chineseSimplified.ServiceRemovalFailed=无法完全移除 %1 服务。详情请参阅安装日志。
+chineseSimplified.MachineInstallRemovalFailed=必须先移除系统范围内安装的旧版 %1。请重新运行安装程序并批准管理员权限请求。
 korean.RemoveUserData=프로필과 설정도 삭제하시겠습니까?
 korean.CloseInstalledApp=계속하려면 이 설치 경로에서 실행 중인 %1을(를) 종료하세요.
 korean.LegacyServiceRemovalFailed=설치된 이전 버전의 %1 서비스를 안전하게 제거하지 못했습니다.
 korean.ServiceRemovalFailed=%1 서비스를 완전히 제거하지 못했습니다. 자세한 내용은 설치 로그를 확인하세요.
+korean.MachineInstallRemovalFailed=먼저 시스템 전체에 설치된 이전 버전의 %1을(를) 제거해야 합니다. 설치 프로그램을 다시 실행하고 관리자 권한 요청을 승인하세요.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}
@@ -393,3 +505,5 @@ Name: "{autoprograms}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
 Filename: "{app}\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: runasoriginaluser nowait postinstall skipifsilent
+; postinstall because plain entries run before ssPostInstall, which starts the app to clear a stale proxy.
+Filename: "{app}\{{EXECUTABLE_NAME}}"; Check: RelaunchRequested; BeforeInstall: MarkRelaunched; Flags: runasoriginaluser nowait postinstall skipifnotsilent

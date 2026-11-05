@@ -322,6 +322,23 @@ Direct launch is used whenever TUN is off, and whenever TUN has no usable privil
 unregistered or outdated Helper or service, a background start, or a privileged start that just failed. TUN then stays
 off instead of the Core failing. When the Helper is ready, it owns the Core child and Dart owns it through a session-scoped lease.
 
+### Desktop Self-Update
+
+`AppUpdateAction` drives every platform; `DesktopUpdater` (`lib/common/desktop_update.dart`) is the only per-OS part, and
+`detectDesktopUpdater` returns null for an install it cannot replace (deb, rpm, pacman, portable ZIP, read-only location),
+which keeps the release-page link.
+
+- A verified package waits for a safe moment: launch, quit, proxy off with a hidden window, or 15 minutes of system idle
+  with the proxy on, restoring the connection afterwards. An applied TUN skips the idle moment, because a new Core can
+  leave TUN off until its service is confirmed, and nobody is there to do that. A release with warnings or breaking notes waits for a click.
+- A replacement interrupted before the new version reports back restores as `installFailed`. It is never retried
+  automatically, so a broken package cannot loop; only a newer release replaces it.
+- Windows installs per user. `inno_setup.iss` waits on `/WAITPID` because the app closes its window before its Core, runs
+  the old machine-wide uninstaller once through UAC, and with `/RELAUNCH` restarts whichever version is on disk. The
+  ReClash Service is not upgraded without elevation; the app sees the stale bundle and prompts when TUN next starts.
+- Linux and macOS replace the AppImage or bundle from a detached script that waits for the app's pid. Windows and macOS
+  report system idle; Linux reports null, so with the proxy on it applies only at launch or quit.
+
 ### Android Service Lifecycle
 
 Android deliberately keeps Flutter requests optimistic and the native layer authoritative:

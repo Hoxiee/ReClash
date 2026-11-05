@@ -11,9 +11,14 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 
 class UpdatePreferences extends ConsumerStatefulWidget {
-  const UpdatePreferences({super.key, required this.isAndroid});
+  const UpdatePreferences({
+    super.key,
+    required this.isAndroid,
+    this.selfUpdating = false,
+  });
 
   final bool isAndroid;
+  final bool selfUpdating;
 
   @override
   ConsumerState<UpdatePreferences> createState() => _UpdatePreferencesState();
@@ -23,6 +28,7 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
   late bool _check;
   late bool _download;
   late bool _install;
+  late bool _desktopAuto;
   late UpdateChannel _channel;
   bool _saving = false;
   bool _failed = false;
@@ -34,6 +40,7 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
     _check = setting.autoCheckUpdate;
     _download = setting.autoDownloadUpdate;
     _install = setting.autoInstallUpdate;
+    _desktopAuto = setting.desktopAutoUpdate;
     _channel = effectiveUpdateChannel(
       configured: setting.updateChannel,
       isPreBuild: globalState.isPre,
@@ -69,6 +76,7 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
             check: _check,
             preload: _download,
             install: _install,
+            desktopAuto: _desktopAuto,
             channel: _channel,
           );
       if (!saved) {
@@ -107,6 +115,12 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
               _check,
               (value) => setState(() => _check = value),
             ),
+            if (widget.selfUpdating)
+              _toggle(
+                l.updateDesktopAutomatic,
+                _desktopAuto,
+                (value) => setState(() => _desktopAuto = value),
+              ),
             if (widget.isAndroid) ...[
               _toggle(
                 l.updatePreload,
@@ -138,7 +152,11 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
               ),
             ),
           ],
-          footer: widget.isAndroid ? null : l.updateDesktopDescription,
+          footer: widget.isAndroid
+              ? null
+              : widget.selfUpdating
+              ? l.updateDesktopAutoDescription
+              : l.updateDesktopDescription,
         ),
       ],
     );

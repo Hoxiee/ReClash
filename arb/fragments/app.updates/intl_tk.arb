@@ -72,5 +72,8 @@
   "updateMinutes": "{count} min",
   "updateResumeShort": "Dowam et",
   "changelogImproved": "Gowulandyrmalar",
-  "changelogKnownIssues": "Mälim meseleler"
+  "changelogKnownIssues": "Mälim meseleler",
+  "updateDesktopAutomatic": "Awtomatik täzelemek",
+  "updateDesktopAutoDescription": "ReClash täzelemeleri arka planda ýükleýär we başlananda, çykanda ýa-da kompýuter boş duranda gurnaýar. Işjeň birikme özi dikelýär.",
+  "updateRestartNow": "Täzelemek üçin gaýtadan işletmek"
 }

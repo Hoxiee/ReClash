@@ -22,12 +22,16 @@ void main() {
       expect(config['publisher_name'], 'Hoxiee');
       expect(config.containsKey('publisher'), isFalse);
       expect(config['create_desktop_icon'], isTrue);
+      expect(config['privileges_required'], 'lowest');
+      expect(config['install_dir_name'], contains('{localappdata}'));
       expect(config['executable_name'], 'ReClash.exe');
       expect(
         installer.split('[Run]').last,
         contains('runasoriginaluser nowait postinstall skipifsilent'),
       );
       expect(installer, isNot(contains('runascurrentuser')));
+      expect(installer, contains('Check: RelaunchRequested'));
+      expect(installer, contains('{param:WAITPID|0}'));
       final manifest = File(
         'windows/runner/runner.exe.manifest',
       ).readAsStringSync();
@@ -85,6 +89,7 @@ void main() {
             'CloseInstalledApp',
             'LegacyServiceRemovalFailed',
             'ServiceRemovalFailed',
+            'MachineInstallRemovalFailed',
           ]),
         );
         for (final entry in entries.entries) {

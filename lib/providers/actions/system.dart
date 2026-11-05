@@ -84,6 +84,9 @@ class SystemAction extends _$SystemAction {
 
   @protected
   Future<void> cleanupExitResources(bool needSave) async {
+    if (needSave) {
+      await ref.read(appUpdateActionProvider.notifier).applyOnExit();
+    }
     final saveOperation = needSave ? _savePreferencesSafely() : null;
     final tray = trayPort;
     if (tray != null) {

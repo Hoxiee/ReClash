@@ -217,6 +217,11 @@ class Bootstrap {
     final hasPendingInstall = await _container
         .read(appUpdateActionProvider.notifier)
         .restorePendingInstall();
+    if (await _container
+        .read(appUpdateActionProvider.notifier)
+        .applyAtLaunch()) {
+      return;
+    }
     unawaited(
       autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
     );

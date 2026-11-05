@@ -13,8 +13,8 @@ class UpdateDownloadVerificationException implements Exception {
   String toString() => message;
 }
 
-class AndroidUpdateAsset {
-  const AndroidUpdateAsset({
+class UpdateAsset {
+  const UpdateAsset({
     required this.name,
     required this.url,
     this.size,
@@ -30,12 +30,12 @@ class AndroidUpdateAsset {
 bool matchesAndroidTarget(String assetName, String target) =>
     assetName.toLowerCase().endsWith('-android-${target.toLowerCase()}.apk');
 
-AndroidUpdateAsset? selectAndroidUpdateAsset(
+UpdateAsset? selectAndroidUpdateAsset(
   Object? assets, {
   required List<String> supportedAbis,
 }) {
   if (assets is! List) return null;
-  final candidates = <AndroidUpdateAsset>[];
+  final candidates = <UpdateAsset>[];
   for (final raw in assets) {
     if (raw is! Map) continue;
     final name = raw['name'];
@@ -46,7 +46,7 @@ AndroidUpdateAsset? selectAndroidUpdateAsset(
       continue;
     }
     candidates.add(
-      AndroidUpdateAsset(
+      UpdateAsset(
         name: name,
         url: url,
         size: raw['size'] is int ? raw['size'] as int : null,
@@ -74,9 +74,15 @@ String? parseAssetSha256(Object? digest) {
   return RegExp(r'^[0-9a-f]{64}$').hasMatch(value) ? value : null;
 }
 
-String updateApkFileName(String tag) {
+const updatePackageSuffixes = ['.apk', '-setup.exe', '.AppImage', '.dmg'];
+
+final updatePackageNamePattern = RegExp(
+  r'^update-[A-Za-z0-9._-]+(\.apk|-setup\.exe|\.AppImage|\.dmg)$',
+);
+
+String updateFileName(String tag, {String suffix = '.apk'}) {
   final safeTag = tag.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-  return 'update-${safeTag.isEmpty ? 'latest' : safeTag}.apk';
+  return 'update-${safeTag.isEmpty ? 'latest' : safeTag}$suffix';
 }
 
 Future<String> fileSha256(File file) {
@@ -87,7 +93,7 @@ Future<String> fileSha256(File file) {
 Future<String> _fileSha256AtPath(String path) async =>
     (await sha256.bind(File(path).openRead()).first).toString();
 
-Future<bool> matchesUpdateAsset(File file, AndroidUpdateAsset asset) async {
+Future<bool> matchesUpdateAsset(File file, UpdateAsset asset) async {
   final expected = asset.sha256;
   if (expected == null || !await file.exists()) return false;
   try {
@@ -99,41 +105,39 @@ Future<bool> matchesUpdateAsset(File file, AndroidUpdateAsset asset) async {
   }
 }
 
-Future<void> removeStaleUpdateApks(
+Future<void> removeStaleUpdateFiles(
   Directory directory, {
   Set<String> keep = const {},
   Set<String> keepPartial = const {},
 }) async {
   try {
-    final apkFiles = <File>[];
+    final packages = <File>[];
     final temporaryFiles = <File>[];
     await for (final entity in directory.list()) {
       if (entity is! File) continue;
       final name = basename(entity.path);
       if (!name.startsWith('update-')) continue;
-      final partialAt = name.lastIndexOf('.apk.tmp');
-      if (partialAt >= 0 &&
-          (name.endsWith('.apk.tmp') ||
-              name.endsWith('.apk.tmp.json') ||
-              RegExp(r'\.apk\.tmp\.json\.\d+\.tmp$').hasMatch(name))) {
-        final apkName = name.substring(0, partialAt + '.apk'.length);
-        if (!keepPartial.contains(apkName)) temporaryFiles.add(entity);
-      } else if (name.endsWith('.apk')) {
-        apkFiles.add(entity);
+      final partial = RegExp(
+        r'^(.+?)\.tmp(\.json(\.\d+\.tmp)?)?$',
+      ).firstMatch(name)?.group(1);
+      if (partial != null && updatePackageSuffixes.any(partial.endsWith)) {
+        if (!keepPartial.contains(partial)) temporaryFiles.add(entity);
+      } else if (updatePackageSuffixes.any(name.endsWith)) {
+        packages.add(entity);
       }
     }
     for (final file in temporaryFiles) {
       await file.delete();
     }
     var retained = keep;
-    if (retained.isEmpty && apkFiles.isNotEmpty) {
-      apkFiles.sort(
+    if (retained.isEmpty && packages.isNotEmpty) {
+      packages.sort(
         (left, right) =>
             right.lastModifiedSync().compareTo(left.lastModifiedSync()),
       );
-      retained = {basename(apkFiles.first.path)};
+      retained = {basename(packages.first.path)};
     }
-    for (final file in apkFiles) {
+    for (final file in packages) {
       if (!retained.contains(basename(file.path))) await file.delete();
     }
   } on FileSystemException {

@@ -135,6 +135,9 @@ class _GeometryWindowPort implements WindowPort {
   Future<void> hide() async {}
 
   @override
+  Future<bool> isVisible() async => true;
+
+  @override
   Future<void> toggle() async {}
 
   @override

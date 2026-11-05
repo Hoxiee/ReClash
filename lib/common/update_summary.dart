@@ -120,9 +120,10 @@ class ReleaseSummary {
     );
   }
 
-  bool get permitsAutomaticInstall =>
-      automaticInstall &&
-      locales.values.every((locale) => locale.warnings.isEmpty);
+  bool get hasWarnings =>
+      locales.values.any((locale) => locale.warnings.isNotEmpty);
+
+  bool get permitsAutomaticInstall => automaticInstall && !hasWarnings;
 
   Map<String, Object> toJson() => {
     'schemaVersion': 1,

@@ -69,8 +69,10 @@ class UpdateSheet extends ConsumerWidget {
           onPressed: () => unawaited(
             showInSheet<void>(
               context,
-              builder: (context) =>
-                  UpdatePreferences(isAndroid: action.isSupported),
+              builder: (context) => UpdatePreferences(
+                isAndroid: action.isSupported && !action.isDesktop,
+                selfUpdating: action.isDesktop,
+              ),
             ),
           ),
         ),
@@ -566,7 +568,10 @@ class _TransferLine extends StatelessWidget {
     UpdatePhase.paused => (l.updateResumeAction, l.updateCancelDownload),
     UpdatePhase.checking => ('', ''),
     UpdatePhase.verifying => (l.updateContinueBackground, ''),
-    UpdatePhase.ready => (l.updateInstallNow, l.updateNotNow),
+    UpdatePhase.ready => (
+      action.isDesktop ? l.updateRestartNow : l.updateInstallNow,
+      l.updateNotNow,
+    ),
     UpdatePhase.vpnActive => (l.updateDisconnectInstall, l.updateNotNow),
     UpdatePhase.permission => (l.updateOpenAndroidSettings, l.updateNotNow),
     UpdatePhase.confirmation => (l.updateContinueInstall, l.updateNotNow),

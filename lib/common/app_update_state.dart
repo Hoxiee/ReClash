@@ -35,7 +35,7 @@ class AppUpdateState {
 
   final UpdatePhase phase;
   final AppUpdateRelease? release;
-  final AndroidUpdateAsset? asset;
+  final UpdateAsset? asset;
   final int received;
   final int total;
   final double bytesPerSecond;
@@ -63,7 +63,7 @@ class AppUpdateState {
   AppUpdateState copyWith({
     UpdatePhase? phase,
     AppUpdateRelease? release,
-    AndroidUpdateAsset? asset,
+    UpdateAsset? asset,
     int? received,
     int? total,
     double? bytesPerSecond,

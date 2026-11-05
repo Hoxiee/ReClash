@@ -39,6 +39,13 @@ Future<void> deleteDirectory(Directory directory) async {
   }
 }
 
+class _FakeSystemAction extends SystemAction {
+  int exits = 0;
+
+  @override
+  Future<void> handleExit([bool needSave = true]) async => exits++;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -49,7 +56,11 @@ void main() {
 
   void recreate() {
     container = ProviderContainer(
-      overrides: [appUpdateRuntimeProvider.overrideWithValue(runtime)],
+      overrides: [
+        appUpdateRuntimeProvider.overrideWithValue(runtime),
+        if (runtime.desktopMode)
+          systemActionProvider.overrideWith(_FakeSystemAction.new),
+      ],
     );
     globalState.container = container;
     container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
@@ -484,4 +495,244 @@ void main() {
       await settleUntil(() => runtime.installations == 1);
     },
   );
+
+  group('desktop self-update', () {
+    int exits() =>
+        (container.read(systemActionProvider.notifier) as _FakeSystemAction)
+            .exits;
+    void setProxy(bool running) =>
+        container.read(runTimeProvider.notifier).value = running ? 1 : null;
+    void markInitialized() =>
+        container.read(initProvider.notifier).value = true;
+
+    /// download() hands back the task in flight, which ends with the install check.
+    Future<void> finishDownload() => action.download();
+
+    setUp(() {
+      container.dispose();
+      runtime.desktopMode = true;
+      recreate();
+    });
+
+    test(
+      'a prerelease downloads but waits while the window is visible',
+      () async {
+        settings(const AppSettingProps(desktopAutoUpdate: true));
+        markInitialized();
+        runtime.available = testUpdateRelease(
+          tag: 'v0.8.96-pre.1',
+          prerelease: true,
+          automatic: false,
+        );
+        await action.check(automatic: true);
+        await finishDownload();
+        expect(current().phase, UpdatePhase.ready);
+        expect(current().verified, isTrue);
+        expect(runtime.installations, 0);
+        expect(exits(), 0);
+      },
+    );
+
+    test('a hidden window with the proxy off applies at once', () async {
+      markInitialized();
+      runtime.hidden = true;
+      runtime.available = testUpdateRelease();
+      await action.check(automatic: true);
+      await finishDownload();
+      expect(runtime.relaunches, [true]);
+      expect(exits(), 1);
+    });
+
+    test(
+      'a running proxy holds the install until the machine is idle for 15 minutes',
+      () async {
+        markInitialized();
+        setProxy(true);
+        runtime.hidden = true;
+        runtime.idle = const Duration(minutes: 14);
+        final phases = <UpdatePhase>[];
+        container.listen(
+          appUpdateActionProvider,
+          (_, next) => phases.add(next.phase),
+        );
+        runtime.available = testUpdateRelease();
+        await action.check(automatic: true);
+        await finishDownload();
+        await action.check(automatic: true);
+        expect(current().phase, UpdatePhase.ready);
+        expect(runtime.installations, 0);
+        expect(phases, isNot(contains(UpdatePhase.vpnActive)));
+        runtime.idle = const Duration(minutes: 15);
+        await action.check(automatic: true);
+        expect(runtime.installations, 1);
+        expect(runtime.relaunches, [true]);
+        expect(exits(), 1);
+        expect(phases, isNot(contains(UpdatePhase.vpnActive)));
+        final pending = jsonDecode(
+          await File('${directory.path}/pending-install.json').readAsString(),
+        );
+        expect(pending['resumeProxy'], isTrue);
+      },
+    );
+
+    test(
+      'a running TUN holds the idle install until an explicit restart',
+      () async {
+        markInitialized();
+        setProxy(true);
+        container.read(tunAppliedProvider.notifier).value = true;
+        runtime.idle = const Duration(minutes: 30);
+        runtime.available = testUpdateRelease();
+        await action.check(automatic: true);
+        await finishDownload();
+        await action.check(automatic: true);
+        expect(current().phase, UpdatePhase.ready);
+        expect(runtime.installations, 0);
+        await action.installNow();
+        expect(runtime.installations, 1);
+        expect(runtime.relaunches, [true]);
+      },
+    );
+
+    for (final (name, release) in [
+      ('warning', testUpdateRelease(warning: true)),
+      ('breaking', testUpdateRelease(breaking: true)),
+    ]) {
+      test(
+        'a $name release waits for an explicit click even when idle',
+        () async {
+          markInitialized();
+          setProxy(true);
+          runtime.idle = const Duration(minutes: 20);
+          runtime.available = release;
+          await action.check(automatic: true);
+          await finishDownload();
+          await action.check(automatic: true);
+          expect(current().phase, UpdatePhase.ready);
+          expect(runtime.installations, 0);
+          await action.installNow();
+          expect(runtime.installations, 1);
+          expect(runtime.relaunches, [true]);
+          expect(exits(), 1);
+        },
+      );
+    }
+
+    test(
+      'disabled desktop updates stay offered and download nothing',
+      () async {
+        settings(const AppSettingProps(desktopAutoUpdate: false));
+        markInitialized();
+        runtime.hidden = true;
+        runtime.available = testUpdateRelease();
+        await action.check(automatic: true);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(current().phase, UpdatePhase.offered);
+        expect(runtime.downloads, 0);
+      },
+    );
+
+    test('a release without a desktop package stays offered', () async {
+      runtime.desktopAssetMissing = true;
+      runtime.available = testUpdateRelease();
+      await action.check(automatic: true);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(current().phase, UpdatePhase.offered);
+      expect(current().asset, isNull);
+      expect(runtime.downloads, 0);
+    });
+
+    test('applyOnExit installs from ready without relaunching', () async {
+      await action.offer(testUpdateRelease());
+      await finishDownload();
+      expect(current().phase, UpdatePhase.ready);
+      await action.applyOnExit();
+      expect(runtime.relaunches, [false]);
+      expect(exits(), 0);
+      await action.applyOnExit();
+      expect(runtime.relaunches, [false]);
+      expect(runtime.installations, 1);
+    });
+
+    test(
+      'applyOnExit leaves a ready update when the setting is turned off',
+      () async {
+        await action.offer(testUpdateRelease());
+        await finishDownload();
+        settings(const AppSettingProps(desktopAutoUpdate: false));
+        await action.applyOnExit();
+        expect(current().phase, UpdatePhase.ready);
+        expect(runtime.relaunches, isEmpty);
+      },
+    );
+
+    test(
+      'an install cut short by exit restores as failed and is retried only by a newer release',
+      () async {
+        await action.offer(testUpdateRelease());
+        await finishDownload();
+        await action.installNow();
+        expect(runtime.relaunches, [true]);
+        expect(exits(), 1);
+        container.dispose();
+        recreate();
+        expect(await action.restorePendingInstall(), isTrue);
+        expect(current().phase, UpdatePhase.installFailed);
+        expect(await action.applyAtLaunch(), isFalse);
+        expect(exits(), 0);
+        markInitialized();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(runtime.installations, 1);
+        runtime.available = testUpdateRelease(tag: 'v0.8.97');
+        await action.check(automatic: true);
+        await finishDownload();
+        expect(current().release?.tag, 'v0.8.97');
+        expect(current().phase, UpdatePhase.ready);
+        expect(runtime.downloads, 2);
+        expect(runtime.installations, 1);
+      },
+    );
+
+    test(
+      'a ready update restored at launch applies before the window opens',
+      () async {
+        await action.offer(testUpdateRelease());
+        await finishDownload();
+        container.dispose();
+        recreate();
+        expect(await action.restorePendingInstall(), isTrue);
+        expect(current().phase, UpdatePhase.ready);
+        expect(await action.applyAtLaunch(), isTrue);
+        expect(runtime.relaunches, [true]);
+        expect(exits(), 1);
+      },
+    );
+
+    test(
+      'an update installed by launch clears its record and package',
+      () async {
+        await action.offer(testUpdateRelease());
+        await finishDownload();
+        expect(
+          await File('${directory.path}/update-v0.8.96.apk').exists(),
+          isTrue,
+        );
+        container.dispose();
+        recreate();
+        runtime.version = '0.8.96';
+        expect(await action.restorePendingInstall(), isFalse);
+        expect(current().phase, UpdatePhase.installed);
+        expect(current().hasUpdate, isFalse);
+        expect(
+          await File('${directory.path}/pending-install.json').exists(),
+          isFalse,
+        );
+        expect(
+          await File('${directory.path}/update-v0.8.96.apk').exists(),
+          isFalse,
+        );
+        expect(runtime.installations, 0);
+      },
+    );
+  });
 }

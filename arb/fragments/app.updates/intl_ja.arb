@@ -72,5 +72,8 @@
   "updateMinutes": "{count}分",
   "updateResumeShort": "再開",
   "changelogImproved": "改善点",
-  "changelogKnownIssues": "既知の問題"
+  "changelogKnownIssues": "既知の問題",
+  "updateDesktopAutomatic": "自動的に更新",
+  "updateDesktopAutoDescription": "ReClashは更新をバックグラウンドでダウンロードし、起動時、終了時、またはコンピューターのアイドル時にインストールします。有効な接続は自動的に復帰します。",
+  "updateRestartNow": "再起動して更新"
 }

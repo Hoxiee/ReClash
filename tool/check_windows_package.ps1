@@ -57,6 +57,24 @@ function Confirm-OwnedExit {
     }
 }
 
+function Confirm-RelaunchedApp {
+    $guiPath = Join-Path $installed 'ReClash.exe'
+    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    do {
+        $guis = @(Get-Process -Name 'ReClash' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $guiPath })
+        $cores = @(Get-InstalledCores)
+        if ($guis.Count -eq 1 -and $guis[0].MainWindowHandle -ne 0 -and $cores.Count -eq 1) {
+            $script:process = $guis[0]
+            $null = $process.Handle
+            $script:coreProcess = $cores[0]
+            Write-Host "Silent /RELAUNCH upgrade restarted the GUI ($($process.Id))."
+            return
+        }
+        Start-Sleep -Milliseconds 250
+    } while ([DateTime]::UtcNow -lt $deadline)
+    throw 'Silent /RELAUNCH upgrade did not restart the installed GUI within 60 seconds'
+}
+
 function Assert-Signature([string]$Path) {
     $signature = Get-AuthenticodeSignature -LiteralPath $Path
     Write-Host ("Authenticode {0}: {1}" -f [IO.Path]::GetFileName($Path), $signature.Status)
@@ -157,6 +175,10 @@ try {
     & dart run "$PSScriptRoot/windows_package.dart" --arch $Arch --zip $ZipPath --compare-installed $installed
     if ($LASTEXITCODE -ne 0) { throw 'Upgraded payload does not match the ZIP' }
     Start-InstalledApp
+    Invoke-Setup $SetupPath @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/SP-', '/NORESTART', '/RELAUNCH',
+        "/DIR=`"$installed`"", "/LOG=`"$diagnostics/relaunch.log`"")
+    Confirm-OwnedExit
+    Confirm-RelaunchedApp
     Write-Host 'This hosted-session smoke does not prove clean-OS dependencies, UAC or TUN operation.'
 } finally {
     $cleanupErrors = @()

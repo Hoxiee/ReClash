@@ -72,5 +72,8 @@
   "updateMinutes": "{count} min",
   "updateResumeShort": "Reprendre",
   "changelogImproved": "Améliorations",
-  "changelogKnownIssues": "Problèmes connus"
+  "changelogKnownIssues": "Problèmes connus",
+  "updateDesktopAutomatic": "Mettre à jour automatiquement",
+  "updateDesktopAutoDescription": "ReClash télécharge les mises à jour en arrière-plan et les installe au démarrage, à la fermeture ou lorsque l'ordinateur est inactif. Une connexion active se rétablit d'elle-même.",
+  "updateRestartNow": "Redémarrer pour mettre à jour"
 }

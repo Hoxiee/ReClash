@@ -2,6 +2,8 @@ part of '../action.dart';
 
 const _pendingUpdateInstallFile = 'pending-install.json';
 const _updateCheckInterval = Duration(hours: 6);
+const _desktopApplyInterval = Duration(minutes: 1);
+const _desktopApplyIdle = Duration(minutes: 15);
 
 @Riverpod(keepAlive: true)
 class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
@@ -12,6 +14,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   StreamSubscription<bool>? _wifiSubscription;
   StreamSubscription<ApkInstallStatus>? _installSubscription;
   Timer? _checkTimer;
+  Timer? _desktopApplyTimer;
+  bool _resumeProxy = false;
   _PendingUpdate? _pending;
   bool _installing = false;
   bool _checking = false;
@@ -27,6 +31,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   bool get isSupported => _runtime.supported;
 
+  bool get isDesktop => _runtime.desktop;
+
   @override
   AppUpdateState build() {
     ref.listen(initProvider, (_, ready) {
@@ -35,6 +41,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     ref.listen(appSettingProvider, (previous, next) {
       if (previous?.autoDownloadUpdate != next.autoDownloadUpdate ||
           previous?.autoInstallUpdate != next.autoInstallUpdate ||
+          previous?.desktopAutoUpdate != next.desktopAutoUpdate ||
           previous?.autoCheckUpdate != next.autoCheckUpdate) {
         unawaited(_applyPolicy());
       }
@@ -48,6 +55,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       unawaited(_wifiSubscription?.cancel());
       unawaited(_installSubscription?.cancel());
       _checkTimer?.cancel();
+      _desktopApplyTimer?.cancel();
       if (_observerAttached) WidgetsBinding.instance.removeObserver(this);
     });
     return const AppUpdateState();
@@ -60,6 +68,12 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         unawaited(check(automatic: true));
       }
     });
+    if (_resumeProxy) {
+      _resumeProxy = false;
+      if (!ref.read(isStartProvider) && !ref.read(appSettingProvider).autoRun) {
+        unawaited(ref.read(commonActionProvider.notifier).setRunning(true));
+      }
+    }
     await _applyPolicy();
     if (_permissionOpened) await _onResume();
   }
@@ -69,7 +83,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         _restoring ||
         state.busy ||
         _installing ||
-        (_pending != null && state.hasUpdate)) {
+        (_pending != null && state.hasUpdate && !_supersedable)) {
       return;
     }
     final setting = ref.read(appSettingProvider);
@@ -121,12 +135,14 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         (state.busy && state.phase != UpdatePhase.checking) ||
         _installing ||
         _downloadTask != null ||
-        (_pending != null && state.hasUpdate)) {
+        (_pending != null && state.hasUpdate && !_supersedable)) {
       return;
     }
     final revision = ++_revision;
-    AndroidUpdateAsset? asset;
-    if (isSupported) {
+    UpdateAsset? asset;
+    if (_runtime.desktop) {
+      asset = _runtime.desktopAsset(release);
+    } else if (isSupported) {
       try {
         asset = selectAndroidUpdateAsset(
           release.assets,
@@ -157,11 +173,23 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   bool _current(int revision) => ref.mounted && revision == _revision;
 
+  /// A tray app can wait weeks for its moment to apply, and a failed package
+  /// would otherwise pin it to that version: a newer release takes the place.
+  bool get _supersedable =>
+      _runtime.desktop &&
+      const {
+        UpdatePhase.ready,
+        UpdatePhase.installFailed,
+        UpdatePhase.verifyFailed,
+        UpdatePhase.downloadFailed,
+      }.contains(state.phase);
+
   Future<bool> savePreferences({
     required bool check,
     required bool preload,
     required bool install,
     required UpdateChannel channel,
+    bool? desktopAuto,
   }) async {
     final settings = ref
         .read(appSettingProvider)
@@ -169,6 +197,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           autoCheckUpdate: check,
           autoDownloadUpdate: preload,
           autoInstallUpdate: install,
+          desktopAutoUpdate:
+              desktopAuto ?? ref.read(appSettingProvider).desktopAutoUpdate,
           updateChannel: channel,
         );
     final saved = await _runtime.saveConfig(
@@ -182,6 +212,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
               autoCheckUpdate: check,
               autoDownloadUpdate: preload,
               autoInstallUpdate: install,
+              desktopAutoUpdate: desktopAuto ?? value.desktopAutoUpdate,
               updateChannel: channel,
             ),
           );
@@ -241,7 +272,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     );
     try {
       final directory = await _runtime.directory();
-      final name = updateApkFileName(release.tag);
+      final name = _runtime.packageFileName(release.tag);
       final file = File(join(directory.path, name));
       if (restart) {
         await file.safeDelete();
@@ -257,7 +288,11 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       );
       await _savePending(directory);
       if (!_current(revision)) return;
-      await removeStaleUpdateApks(directory, keep: {name}, keepPartial: {name});
+      await removeStaleUpdateFiles(
+        directory,
+        keep: {name},
+        keepPartial: {name},
+      );
       if (!_current(revision)) return;
       if (cancel.isCancelled) {
         await _recordPhase(directory);
@@ -438,7 +473,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     _installing = true;
     final revision = _revision;
     try {
-      if (ref.read(isStartProvider) || await _runtime.vpnActive()) {
+      if (await _blockedByVpn()) {
         if (!disconnectVpn || automatic) {
           state = state.copyWith(phase: UpdatePhase.vpnActive);
           return;
@@ -492,7 +527,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         await _recordPhase(directory);
         return;
       }
-      if (ref.read(isStartProvider) || await _runtime.vpnActive()) {
+      if (await _blockedByVpn()) {
         if (_current(revision)) {
           state = state.copyWith(phase: UpdatePhase.vpnActive);
         }
@@ -502,6 +537,9 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       if (automatic && !_automaticAllowed) {
         state = state.copyWith(phase: UpdatePhase.ready);
         return;
+      }
+      if (_runtime.desktop) {
+        _pending = _pending!.copyWith(resumeProxy: ref.read(isStartProvider));
       }
       state = state.copyWith(phase: UpdatePhase.installing);
       await _recordPhase(directory);
@@ -524,6 +562,10 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         case ApkInstallResult.vpnActive:
           state = state.copyWith(phase: UpdatePhase.vpnActive);
         case ApkInstallResult.started:
+          if (_runtime.desktop) {
+            unawaited(ref.read(systemActionProvider.notifier).handleExit());
+            return;
+          }
           _attachObservers();
           await _queueInstallStatus(await _runtime.installStatus());
       }
@@ -585,7 +627,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     _installing = true;
     final revision = _revision;
     try {
-      if (ref.read(isStartProvider) || await _runtime.vpnActive()) {
+      if (await _blockedByVpn()) {
         state = state.copyWith(phase: UpdatePhase.vpnActive);
         return;
       }
@@ -605,7 +647,26 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     }
   }
 
+  Future<bool> _blockedByVpn() async =>
+      !_runtime.desktop &&
+      (ref.read(isStartProvider) || await _runtime.vpnActive());
+
+  /// On the desktop the pick of channel is the consent, so a prerelease on the
+  /// Pre channel applies by itself; only a warning waits for the user's click.
+  bool get _desktopSilentAllowed {
+    final release = state.release;
+    if (!ref.read(appSettingProvider).desktopAutoUpdate ||
+        release == null ||
+        release.summary?.hasWarnings == true) {
+      return false;
+    }
+    return parseReleaseNotes(release.body)?.hasBreaking != true;
+  }
+
   bool get _automaticAllowed {
+    if (_runtime.desktop) {
+      return ref.read(initProvider) && _desktopSilentAllowed;
+    }
     final release = state.release;
     final setting = ref.read(appSettingProvider);
     if (!ref.read(initProvider) ||
@@ -629,26 +690,105 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     }.contains(state.phase)) {
       return;
     }
-    if (ref.read(isStartProvider) || await _runtime.vpnActive()) return;
+    if (_runtime.desktop) {
+      if (state.phase != UpdatePhase.ready || !await _desktopMoment()) return;
+    } else if (await _blockedByVpn()) {
+      return;
+    }
     await installNow(automatic: true);
+  }
+
+  Future<bool> _desktopMoment() async {
+    // A new Core can leave TUN off until its service is confirmed, unattended.
+    if (ref.read(tunAppliedProvider)) return false;
+    final idle = _runtime.systemIdle();
+    if (idle != null && idle >= _desktopApplyIdle) return true;
+    return !ref.read(isStartProvider) && await _runtime.windowHidden();
+  }
+
+  bool get _desktopReadyToApply =>
+      _runtime.desktop &&
+      state.verified &&
+      state.phase == UpdatePhase.ready &&
+      _pending != null &&
+      !_installing &&
+      _desktopSilentAllowed;
+
+  /// True means this process is leaving.
+  Future<bool> applyAtLaunch() async {
+    if (!_desktopReadyToApply) return false;
+    return _launchInstaller(relaunch: true, resumeProxy: _pending!.resumeProxy);
+  }
+
+  Future<void> applyOnExit() async {
+    if (_desktopReadyToApply) {
+      await _launchInstaller(relaunch: false, resumeProxy: false);
+    }
+  }
+
+  Future<bool> _launchInstaller({
+    required bool relaunch,
+    required bool resumeProxy,
+  }) async {
+    _installing = true;
+    try {
+      final pending = _pending!;
+      final directory = await _runtime.directory();
+      final path = join(directory.path, pending.fileName);
+      if (!await _runtime.verify(
+        File(path),
+        pending.asset,
+        pending.release.tag,
+      )) {
+        state = state.copyWith(
+          phase: UpdatePhase.verifyFailed,
+          verified: false,
+        );
+        await _recordPhase(directory);
+        return false;
+      }
+      _pending = pending.copyWith(resumeProxy: resumeProxy);
+      state = state.copyWith(phase: UpdatePhase.installing);
+      await _recordPhase(directory);
+      await _runtime.install(
+        path,
+        version: pending.release.tag,
+        sha256: pending.asset.sha256!,
+        automatic: true,
+        relaunch: relaunch,
+      );
+      if (relaunch) {
+        unawaited(ref.read(systemActionProvider.notifier).handleExit());
+      }
+      return true;
+    } catch (error) {
+      commonPrint.log(
+        'update launch failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      state = state.copyWith(phase: UpdatePhase.installFailed);
+      return false;
+    } finally {
+      _installing = false;
+    }
   }
 
   Future<void> _applyPolicy() async {
     if (!ref.mounted || !isSupported || _cancelling) return;
-    final setting = ref.read(appSettingProvider);
     if (state.phase == UpdatePhase.downloading &&
         state.automaticDownload &&
-        !setting.autoDownloadUpdate) {
+        !_preloadEnabled) {
       pause();
     }
     _attachObservers();
     if ((state.phase == UpdatePhase.offered ||
-            (state.phase == UpdatePhase.paused && state.automaticDownload)) &&
-        setting.autoDownloadUpdate) {
+            (state.automaticDownload &&
+                (state.phase == UpdatePhase.paused ||
+                    _runtime.desktop &&
+                        state.phase == UpdatePhase.downloadFailed))) &&
+        _preloadEnabled) {
       try {
-        if (await _runtime.onWifi() &&
-            ref.mounted &&
-            ref.read(appSettingProvider).autoDownloadUpdate) {
+        if (await _runtime.onWifi() && ref.mounted && _preloadEnabled) {
           unawaited(download(automatic: true));
         }
       } catch (error) {
@@ -658,7 +798,19 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     await _tryAutomaticInstall();
   }
 
+  bool get _preloadEnabled {
+    final setting = ref.read(appSettingProvider);
+    return _runtime.desktop
+        ? setting.desktopAutoUpdate && state.asset?.sha256 != null
+        : setting.autoDownloadUpdate;
+  }
+
   void _attachObservers() {
+    if (_runtime.desktop) {
+      _desktopApplyTimer ??= Timer.periodic(_desktopApplyInterval, (_) {
+        if (ref.mounted) unawaited(_tryAutomaticInstall());
+      });
+    }
     if (!_observerAttached) {
       WidgetsBinding.instance.addObserver(this);
       _observerAttached = true;
@@ -680,7 +832,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
             state.automaticDownload &&
             state.phase == UpdatePhase.downloading) {
           pause(forWifi: true);
-        } else if (wifi && ref.read(appSettingProvider).autoDownloadUpdate) {
+        } else if (wifi && _preloadEnabled) {
           if (state.phase == UpdatePhase.offered ||
               (state.phase == UpdatePhase.paused && state.automaticDownload)) {
             unawaited(download(automatic: true));
@@ -796,7 +948,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       final directory = await _runtime.directory();
       final file = File(join(directory.path, _pendingUpdateInstallFile));
       if (!await file.exists()) {
-        await removeStaleUpdateApks(directory);
+        await removeStaleUpdateFiles(directory);
         return false;
       }
       if (await file.length() > 512 * 1024) {
@@ -838,15 +990,18 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           state = state.copyWith(
             phase: pending.phase == UpdatePhase.permission
                 ? UpdatePhase.permission
+                : _runtime.desktop && pending.phase == UpdatePhase.installing
+                ? UpdatePhase.installFailed
                 : UpdatePhase.ready,
             verified: true,
             received: await apk.length(),
             total: await apk.length(),
           );
-          if (const {
-            UpdatePhase.installing,
-            UpdatePhase.confirmation,
-          }.contains(pending.phase)) {
+          if (!_runtime.desktop &&
+              const {
+                UpdatePhase.installing,
+                UpdatePhase.confirmation,
+              }.contains(pending.phase)) {
             await _queueInstallStatus(await _runtime.installStatus());
           }
         }
@@ -859,7 +1014,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           received: await partial.exists() ? await partial.length() : 0,
         );
       }
-      await removeStaleUpdateApks(
+      await removeStaleUpdateFiles(
         directory,
         keep: {pending.fileName},
         keepPartial: {pending.fileName},
@@ -884,7 +1039,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         await File(
           join(directory.path, _pendingUpdateInstallFile),
         ).safeDelete();
-        await removeStaleUpdateApks(directory);
+        await removeStaleUpdateFiles(directory);
       } catch (_) {}
       return false;
     } finally {
@@ -897,12 +1052,13 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     final pending = _pending;
     _pending = null;
     _permissionOpened = false;
+    _resumeProxy = pending?.resumeProxy ?? false;
     await _persistTail;
     await File(join(directory.path, _pendingUpdateInstallFile)).safeDelete();
     if (pending != null) {
       await File(join(directory.path, pending.fileName)).safeDelete();
     }
-    await removeStaleUpdateApks(directory);
+    await removeStaleUpdateFiles(directory);
     if (ref.mounted) state = state.copyWith(phase: UpdatePhase.installed);
   }
 
@@ -942,21 +1098,24 @@ class _PendingUpdate {
     this.verified = false,
     this.automaticDownload = false,
     this.permissionOpened = false,
+    this.resumeProxy = false,
   });
 
   final AppUpdateRelease release;
-  final AndroidUpdateAsset asset;
+  final UpdateAsset asset;
   final String fileName;
   final UpdatePhase phase;
   final bool verified;
   final bool automaticDownload;
   final bool permissionOpened;
+  final bool resumeProxy;
 
   _PendingUpdate copyWith({
     UpdatePhase? phase,
     bool? verified,
     bool? permissionOpened,
     bool? automaticDownload,
+    bool? resumeProxy,
   }) => _PendingUpdate(
     release: release,
     asset: asset,
@@ -965,6 +1124,7 @@ class _PendingUpdate {
     verified: verified ?? this.verified,
     automaticDownload: automaticDownload ?? this.automaticDownload,
     permissionOpened: permissionOpened ?? this.permissionOpened,
+    resumeProxy: resumeProxy ?? this.resumeProxy,
   );
 
   Map<String, Object?> toJson() => {
@@ -987,6 +1147,7 @@ class _PendingUpdate {
     'verified': verified,
     'automaticDownload': automaticDownload,
     'permissionOpened': permissionOpened,
+    'resumeProxy': resumeProxy,
   };
 
   factory _PendingUpdate.fromJson(
@@ -995,9 +1156,7 @@ class _PendingUpdate {
   }) {
     if (json['schemaVersion'] != 1 ||
         json['fileName'] is! String ||
-        !RegExp(
-          r'^update-[A-Za-z0-9._-]+\.apk$',
-        ).hasMatch(json['fileName'] as String) ||
+        !updatePackageNamePattern.hasMatch(json['fileName'] as String) ||
         json['source'] is! String ||
         json['release'] is! Map<String, dynamic> ||
         json['asset'] is! Map<String, dynamic>) {
@@ -1023,7 +1182,7 @@ class _PendingUpdate {
     final phase = UpdatePhase.values.byName(json['phase'] as String);
     return _PendingUpdate(
       release: AppUpdateRelease(data: data, source: provider),
-      asset: AndroidUpdateAsset(
+      asset: UpdateAsset(
         name: rawAsset['name'] as String,
         url: rawAsset['url'] as String,
         sha256: digest,
@@ -1034,6 +1193,7 @@ class _PendingUpdate {
       verified: json['verified'] == true,
       automaticDownload: json['automaticDownload'] == true,
       permissionOpened: json['permissionOpened'] == true,
+      resumeProxy: json['resumeProxy'] == true,
     );
   }
 }

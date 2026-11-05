@@ -10,10 +10,19 @@ import 'package:reclash/state.dart';
 import 'package:reclash/enum/enum.dart';
 
 import 'common.dart';
+import 'desktop_update.dart';
 import 'update.dart';
 
 class AppUpdateRuntime {
-  bool get supported => system.isAndroid && app != null;
+  late final DesktopUpdater? _desktop = system.isDesktop
+      ? detectDesktopUpdater()
+      : null;
+
+  /// Replaces itself in the background rather than asking the OS to install a
+  /// package; a package-managed or portable desktop build has no such path.
+  bool get desktop => _desktop != null;
+
+  bool get supported => desktop || (system.isAndroid && app != null);
 
   String get installedVersion => globalState.packageInfo.version;
 
@@ -31,12 +40,27 @@ class AppUpdateRuntime {
   Future<List<String>> supportedAbis() async =>
       (await DeviceInfoPlugin().androidInfo).supportedAbis;
 
-  Future<bool> onWifi() async => (await Connectivity().checkConnectivity())
-      .contains(ConnectivityResult.wifi);
+  UpdateAsset? desktopAsset(AppUpdateRelease release) =>
+      _desktop?.selectAsset(release.assets, release.tag);
 
-  Stream<bool> get wifiChanges => Connectivity().onConnectivityChanged
-      .map((results) => results.contains(ConnectivityResult.wifi))
-      .distinct();
+  String packageFileName(String tag) =>
+      updateFileName(tag, suffix: _desktop?.fileSuffix ?? '.apk');
+
+  Duration? systemIdle() => _desktop?.systemIdle();
+
+  Future<bool> windowHidden() async => !(await windowPort?.isVisible() ?? true);
+
+  Future<bool> onWifi() async =>
+      desktop ||
+      (await Connectivity().checkConnectivity()).contains(
+        ConnectivityResult.wifi,
+      );
+
+  Stream<bool> get wifiChanges => desktop
+      ? const Stream.empty()
+      : Connectivity().onConnectivityChanged
+            .map((results) => results.contains(ConnectivityResult.wifi))
+            .distinct();
 
   Stream<ApkInstallStatus> get installChanges =>
       app?.updateInstallChanges ?? const Stream.empty();
@@ -58,12 +82,9 @@ class AppUpdateRuntime {
     expectedSize: size,
   );
 
-  Future<bool> verify(
-    File file,
-    AndroidUpdateAsset asset,
-    String version,
-  ) async {
+  Future<bool> verify(File file, UpdateAsset asset, String version) async {
     if (!await matchesUpdateAsset(file, asset)) return false;
+    if (desktop) return true;
     await app!.verifyUpdateApk(
       file.path,
       expectedVersion: version,
@@ -72,9 +93,11 @@ class AppUpdateRuntime {
     return true;
   }
 
-  Future<bool> vpnActive() => app!.updateInstallBlockedByVpn();
+  Future<bool> vpnActive() async =>
+      !desktop && await app!.updateInstallBlockedByVpn();
 
-  Future<bool> installPermission() => app!.canRequestPackageInstalls();
+  Future<bool> installPermission() async =>
+      desktop || await app!.canRequestPackageInstalls();
 
   Future<bool> openPermission() => app!.openUpdateInstallPermission();
 
@@ -83,12 +106,24 @@ class AppUpdateRuntime {
     required String version,
     required String sha256,
     required bool automatic,
-  }) => app!.installApk(
-    path,
-    expectedVersion: version,
-    expectedSha256: sha256,
-    automatic: automatic,
-  );
+    bool relaunch = true,
+  }) async {
+    final desktop = _desktop;
+    if (desktop == null) {
+      return app!.installApk(
+        path,
+        expectedVersion: version,
+        expectedSha256: sha256,
+        automatic: automatic,
+      );
+    }
+    await desktop.launch(
+      path,
+      relaunch: relaunch,
+      logPath: join(dirname(path), 'install.log'),
+    );
+    return ApkInstallResult.started;
+  }
 
   Future<ApkInstallStatus> installStatus() => app!.updateInstallStatus();
 

@@ -72,5 +72,8 @@
   "updateMinutes": "{count}분",
   "updateResumeShort": "재개",
   "changelogImproved": "개선 사항",
-  "changelogKnownIssues": "알려진 문제"
+  "changelogKnownIssues": "알려진 문제",
+  "updateDesktopAutomatic": "자동으로 업데이트",
+  "updateDesktopAutoDescription": "ReClash는 업데이트를 백그라운드에서 다운로드하고, 시작하거나 종료할 때 또는 컴퓨터가 유휴 상태일 때 설치합니다. 활성 연결은 자동으로 복구됩니다.",
+  "updateRestartNow": "업데이트를 위해 재시작"
 }

@@ -68,7 +68,7 @@ The following is an example only, not an announcement or a real release file:
 - Each locale needs a headline, one spotlight, and explicit `highlights` and `warnings` arrays. Titles and headlines are nonempty and at most 120 characters; descriptions are at most 600. There are at most ten highlights, twelve warnings, and thirty-two locales. Keep the encoded payload below 65,536 characters.
 - Supported kinds: `wallpaper`, `link`, `dashboard`, `shield`, `speed`, `update`. Kinds select built-in artwork or glyphs; no remote HTML, images, scripts, or arbitrary UI are accepted.
 - Optional `platforms` uses `android`, `windows`, `macos`, `linux`. An omitted or empty list means every platform. Every locale must match English warning count, order, and platform coverage; translate their text without omitting or rearranging them. Warnings stay outside collapsed details.
-- Set `automaticInstall` explicitly. `false` is the normal authoring choice. `true` is only eligibility metadata: any warning blocks automatic installation, and user consent, stable-channel policy, an inactive VPN, and Android installer requirements still apply.
+- Set `automaticInstall` explicitly. `false` is the normal authoring choice. `true` is only eligibility metadata: any warning blocks automatic installation, and user consent, stable-channel policy, an inactive VPN, and Android installer requirements still apply. The flag binds Android only: a self-updating desktop build applies any release of its channel silently unless a warning or breaking notes make it wait for an explicit restart.
 - The renderer escapes every `>` as the literal JSON sequence `\u003e`, so user-authored text such as `-->` cannot close the hidden comment early.
 
 ## Trust and installation

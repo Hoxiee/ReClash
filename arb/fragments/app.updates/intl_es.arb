@@ -72,5 +72,8 @@
   "updateMinutes": "{count} min",
   "updateResumeShort": "Reanudar",
   "changelogImproved": "Mejoras",
-  "changelogKnownIssues": "Problemas conocidos"
+  "changelogKnownIssues": "Problemas conocidos",
+  "updateDesktopAutomatic": "Actualizar automáticamente",
+  "updateDesktopAutoDescription": "ReClash descarga las actualizaciones en segundo plano y las instala al iniciar o cerrar la aplicación, o cuando el equipo está inactivo. Una conexión activa se restablece sola.",
+  "updateRestartNow": "Reiniciar para actualizar"
 }
