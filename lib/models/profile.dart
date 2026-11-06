@@ -14,6 +14,7 @@ import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/subscriptions/metadata/provider_config_store.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -193,6 +194,7 @@ class PreparedSubscriptionUpdate {
     required this.client,
     this.clientFingerprint = '',
     this.routingBundle,
+    this.providerConfig = const ProviderConfigDelivery(),
     this.migratedUrl,
   });
 
@@ -208,6 +210,7 @@ class PreparedSubscriptionUpdate {
   final SubscriptionClientPreset client;
   final String clientFingerprint;
   final String? routingBundle;
+  final ProviderConfigDelivery providerConfig;
 
   /// The subscription URL the profile moves to once this update commits.
   final String? migratedUrl;
@@ -228,6 +231,7 @@ class PreparedSubscriptionUpdate {
         client: client,
         clientFingerprint: clientFingerprint,
         routingBundle: routingBundle,
+        providerConfig: providerConfig,
         migratedUrl: url,
       );
 }
@@ -500,6 +504,7 @@ extension ProfileExtension on Profile {
           isCancelled: () => cancellation?.cancelled ?? false,
           cancellationSignal: cancellation?.whenCancelled,
           runAttempt: (preset, timeout, attemptCancellation) async {
+            final attemptClock = Stopwatch()..start();
             final requestCancellation = SubscriptionCancellation();
             unawaited(
               attemptCancellation.whenCancelled.then(
@@ -582,6 +587,19 @@ extension ProfileExtension on Profile {
                   isCancelled: () => requestCancellation.cancelled,
                 );
               }
+              // Outrunning the attempt's deadline would fail the update.
+              final attemptLeft = timeout - attemptClock.elapsed;
+              final configBudget = attemptLeft ~/ 2;
+              final providerConfig = await fetchProviderConfig(
+                profileId: id,
+                url: decodedMetadata.metadata.text('presentation.config'),
+                transport: fetcher,
+                budget: configBudget < providerConfigFetchBudget
+                    ? configBudget
+                    : providerConfigFetchBudget,
+                cancellation: requestCancellation,
+                locale: locale ?? 'en',
+              );
               final previous = subscriptionSnapshot;
               final staleFields = [
                 for (final key
@@ -605,7 +623,10 @@ extension ProfileExtension on Profile {
                 staleFields: staleFields,
                 source: decodedMetadata.source,
                 deviceStatus: decodedMetadata.deviceStatus,
-                warnings: decodedMetadata.warnings,
+                warnings: [
+                  ...decodedMetadata.warnings,
+                  ...providerConfig.warnings,
+                ],
               );
               final info = _mergeSubscriptionInfo(
                 subscriptionInfo,
@@ -649,6 +670,7 @@ extension ProfileExtension on Profile {
                   client: preset,
                   clientFingerprint: requestFingerprint,
                   routingBundle: routingBundle,
+                  providerConfig: providerConfig,
                 ),
                 requiresReview:
                     payload.summary.hasLosses &&
@@ -739,16 +761,23 @@ extension ProfileExtension on Profile {
           validate: validate,
           isCurrent: isCurrent,
           onCommitted: (saved) async {
-            await onCommitted?.call(saved);
-            if (prepared.clientFingerprint.isNotEmpty) {
-              await const SubscriptionClientCache().remember(
-                id,
-                subscriptionClientCacheKey(
-                  prepared.clientFingerprint,
-                  saved.subscriptionPreferences.client.importPolicy.toJson(),
-                ),
-                prepared.client,
-              );
+            // Publishing the profile makes the UI read this file again.
+            final undoConfig = await prepared.providerConfig.commit(id);
+            try {
+              await onCommitted?.call(saved);
+              if (prepared.clientFingerprint.isNotEmpty) {
+                await const SubscriptionClientCache().remember(
+                  id,
+                  subscriptionClientCacheKey(
+                    prepared.clientFingerprint,
+                    saved.subscriptionPreferences.client.importPolicy.toJson(),
+                  ),
+                  prepared.client,
+                );
+              }
+            } on Object {
+              await undoConfig();
+              rethrow;
             }
           },
         );

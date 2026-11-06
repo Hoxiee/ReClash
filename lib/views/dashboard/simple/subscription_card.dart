@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/provider_conditions.dart';
 import 'package:reclash/subscriptions/notification/record.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
@@ -69,7 +70,13 @@ class SubscriptionCard extends ConsumerWidget {
                       child: profile == null
                           ? const GlyphIcon(AppGlyphs.add, size: 22)
                           : CommonTargetIcon(
-                              src: metadata.logo ?? '',
+                              src:
+                                  metadata.logoFor(
+                                    dark:
+                                        context.colorScheme.brightness ==
+                                        Brightness.dark,
+                                  ) ??
+                                  '',
                               fallback: const GlyphIcon(
                                 AppGlyphs.profiles,
                                 size: 22,
@@ -203,7 +210,7 @@ class SubscriptionCard extends ConsumerWidget {
     final levels = metadata.numbers('reminder.trafficPercent');
     final warnAt = (levels.isEmpty ? defaultTrafficNotifyPercent : levels)
         .reduce(math.min);
-    final percent = used * 100 / info.total;
+    final percent = usedPercent(used: used, total: info.total);
     final low = percent >= warnAt;
     final buyAt = metadata.count('provider.buyTrafficPercent');
     final show = left.traffic;
@@ -249,10 +256,7 @@ class SubscriptionCard extends ConsumerWidget {
         action: null,
       );
     }
-    final days = math.max(
-      0,
-      subscriptionDaysLeft(expire: info.expire, now: DateTime.now()),
-    );
+    final days = remainingDays(expire: info.expire, now: DateTime.now());
     final thresholds = metadata.numbers('reminder.expireDays');
     final warnAt = (thresholds.isEmpty ? defaultExpireNotifyDays : thresholds)
         .reduce(math.max);

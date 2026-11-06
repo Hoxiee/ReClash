@@ -79,6 +79,7 @@ Subscription-Userinfo: upload=455727941; download=6174315083; total=107374182400
 | --- | --- | --- |
 | `reclash-servicename` | text, 160 Б | Имя сервиса на карточке дашборда и в окне импорта. |
 | `reclash-servicelogo` | url | Логотип на простом дашборде. |
+| `reclash-servicelogodark` | url | Логотип в тёмной теме. Если не задан, берётся `reclash-servicelogo`. |
 | `reclash-supporturl` | url | Действие «Поддержка». Принимает также `https://t.me/…`, `https://telegram.me/…` и ссылки `tg://`, например `tg://resolve?domain=…`. |
 | `reclash-webpageurl` | url | Действие «Сайт». |
 | `reclash-subscriptiontype` | text, 32 Б | Значок в окне импорта и списке профилей: `test`, `promo` или `dev`. Другие значения значка не дают. |
@@ -89,7 +90,7 @@ Subscription-Userinfo: upload=455727941; download=6174315083; total=107374182400
 
 | Заголовок | Тип | Поведение |
 | --- | --- | --- |
-| `reclash-announce` | text, многострочный, 1024 Б | Описание. Показывается в окне импорта и в карточке дашборда, которую пользователь может переместить, но не убрать. |
+| `reclash-announce` | text, многострочный, 1024 Б | Описание. Показывается в окне импорта и в карточке дашборда над виджетами, которую пользователь не может ни переместить, ни убрать. |
 | `reclash-announceurl` | url | Ссылка в карточке описания. |
 | `reclash-notice` | text, многострочный, 1024 Б | Закрываемое уведомление на дашборде. Закрытие запоминается для этого текста и ссылки; при их изменении уведомление появится снова. |
 | `reclash-noticeurl` | url | Ссылка в уведомлении. |
@@ -130,6 +131,7 @@ reclash-noticeurl: https://status.example.net
 | `reclash-excludeapps`, `reclash-includeapps`, `reclash-approuting` | [«Приложения Android»](app-settings.md#android-apps) |
 | `reclash-fallbackhosts`, `reclash-newdomain` | [«Резервные хосты»](request.md#fallback-hosts) |
 | `reclash-routing` | [«Бандл маршрутизации»](routing.md#routing-bundle) |
+| `reclash-config` | [«Размещённый конфиг»](config.md) |
 | `x-hwid-max-devices-reached`, `x-hwid-not-supported` | [«Статус устройства»](request.md#device-status) |
 
 ## Имена FlClashX

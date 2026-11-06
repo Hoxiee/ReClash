@@ -48,6 +48,7 @@ ColorScheme genColorScheme(
     themeSettingProvider.select(
       (state) => (
         primaryColor: state.primaryColor,
+        primaryColorDark: state.primaryColorDark,
         colorStyle: state.colorStyle,
         contrast: state.contrast,
         pureBlack: state.pureBlack,
@@ -60,7 +61,19 @@ ColorScheme genColorScheme(
       (ignoreConfig == true || themeSetting.primaryColor == null)) {
     seedColor = dynamicColor.seedOf(brightness);
   } else {
-    seedColor = color ?? Color(themeSetting.primaryColor!);
+    final providerDark =
+        brightness == Brightness.dark &&
+        ref.watch(
+          configProvider.select(
+            (config) => isProviderManaged(config, 'app.color'),
+          ),
+        );
+    seedColor =
+        color ??
+        Color(
+          (providerDark ? themeSetting.primaryColorDark : null) ??
+              themeSetting.primaryColor!,
+        );
   }
   return _cachedColorScheme(
     seedColor,

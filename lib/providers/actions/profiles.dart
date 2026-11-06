@@ -1180,6 +1180,7 @@ class ProfilesAction extends _$ProfilesAction {
     await File(
       await appPath.getProfileRoutingPath(profileId.toString()),
     ).safeDelete();
+    await deleteStoredProviderConfig(profileId);
     try {
       final error = await _core.clearEffect(profileId);
       if (error.isNotEmpty) {

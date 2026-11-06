@@ -6,6 +6,9 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/subscriptions/metadata/provider_conditions.dart';
+import 'package:reclash/subscriptions/metadata/provider_power_labels.dart';
+import 'package:reclash/subscriptions/notification/record.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/style.dart';
@@ -242,9 +245,11 @@ class SimplePower extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dark = context.colorScheme.brightness == Brightness.dark;
     final logo = ref.watch(
       currentProfileProvider.select(
-        (profile) => profile?.subscriptionSnapshot?.metadata.logo ?? '',
+        (profile) =>
+            profile?.subscriptionSnapshot?.metadata.logoFor(dark: dark) ?? '',
       ),
     );
     final look = ref.watch(providerPowerButtonProvider);
@@ -309,31 +314,44 @@ class _StatusText extends ConsumerWidget {
       ),
       PowerLink.paused => (
         appLocalizations.simpleStatusPaused,
-        switch (ref.watch(onDemandMatchedNetworksProvider).firstOrNull) {
-          final network? => appLocalizations.simpleStatusPausedOn(network),
-          null => appLocalizations.simpleStatusPausedHint,
-        },
+        _pausedHint(context, ref),
       ),
       PowerLink.on => (appLocalizations.simpleStatusOn, null),
     };
+    final custom = hasProfile ? _customLabel(ref) : null;
+    final shownTitle = custom?.title ?? title;
+    final shownHint = custom == null
+        ? hint
+        : custom.hint ??
+              switch (link) {
+                PowerLink.paused => _pausedHint(context, ref),
+                _ => null,
+              };
+    final showLive = hasProfile && link == PowerLink.on;
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 6,
       children: [
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyle.title1.of(context, emphasized: true),
+        Semantics(
+          label: custom == null ? null : '$title. ${custom.title}',
+          excludeSemantics: custom != null,
+          child: Text(
+            shownTitle,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.title1.of(context, emphasized: true),
+          ),
         ),
         SizedBox(
           height: 24,
           child: Center(
-            child: hint == null
+            child: showLive
                 ? const FittedBox(fit: BoxFit.scaleDown, child: _LiveLine())
+                : shownHint == null
+                ? null
                 : Text(
-                    hint,
+                    shownHint,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: secondary,
@@ -342,6 +360,42 @@ class _StatusText extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  String _pausedHint(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    return switch (ref.watch(onDemandMatchedNetworksProvider).firstOrNull) {
+      final network? => appLocalizations.simpleStatusPausedOn(network),
+      null => appLocalizations.simpleStatusPausedHint,
+    };
+  }
+
+  /// The provider's label for the real state, null when it has none or a
+  /// placeholder has no value.
+  ProviderPowerLabel? _customLabel(WidgetRef ref) {
+    final label = ref.watch(providerPowerLabelProvider)[link.name];
+    if (label == null) return null;
+    final info = ref.watch(
+      currentProfileProvider.select((profile) => profile?.subscriptionInfo),
+    );
+    final metadata = ref.watch(
+      currentProfileProvider.select(
+        (profile) => profile?.subscriptionSnapshot?.metadata,
+      ),
+    );
+    final expiry = metadata?.perpetual == true || info == null
+        ? null
+        : subscriptionExpireDate(info.expire);
+    final left = info == null || metadata?.unlimited == true || info.total <= 0
+        ? null
+        : math.max(0, info.total - info.upload - info.download);
+    return resolveProviderPowerLabel(label, {
+      'daysLeft': expiry == null
+          ? null
+          : '${remainingDays(expire: info!.expire, now: DateTime.now())}',
+      'trafficLeft': left == null ? null : dashboardTraffic(left),
+      'server': ref.watch(providerServerNodeProvider),
+    });
   }
 }
 

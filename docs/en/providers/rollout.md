@@ -31,7 +31,7 @@ In the app:
 | Profiles → profile menu → Subscription inspector | What was decoded and kept ([Subscription inspector](#subscription-inspector)). |
 | Dashboard and application settings | Applied hints, tagged "From provider". |
 
-Validate routing with `dart run tool/rcx.dart lint` and policy against [`provider-policy.schema.json`](../../../provider-policy.schema.json).
+Validate routing with `dart run tool/rcx.dart lint` policy against [`provider-policy.schema.json`](../../../provider-policy.schema.json), and the hosted config against [`provider-config.schema.json`](../../../provider-config.schema.json).
 
 ## Subscription inspector
 
@@ -72,6 +72,7 @@ Validate routing with `dart run tool/rcx.dart lint` and policy against [`provide
 - [ ] Settings-changing hints are intended: [App settings](app-settings.md).
 - [ ] Routing bundle and inline profiles pass `rcx.dart lint`.
 - [ ] Any policy passes the schema, and every `reclash-id` is unique.
+- [ ] Any [hosted config](config.md) passes `provider-config.schema.json`, and the Subscription inspector shows no config warnings.
 - [ ] Fallback hosts serve the same path and query.
 - [ ] Device ID matches [Device ID](request.md#device-id); `x-hwid-max-devices-reached` is sent only on refusal.
 - [ ] Any [Preview API](preview-api.md) endpoint changes no account state.

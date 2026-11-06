@@ -14,6 +14,7 @@
 | Ресурс | Назначение |
 | --- | --- |
 | [`provider-policy.schema.json`](../../provider-policy.schema.json) | JSON Schema блока политики провайдера |
+| [`provider-config.schema.json`](../../provider-config.schema.json) | JSON Schema размещённого конфига провайдера |
 | [`rcx-profile.schema.json`](../../rcx-profile.schema.json) | JSON Schema профилей RCX и наборов маршрутизации |
 | [`provider_standard.g.json`](../../provider_standard.g.json) | Сгенерированный реестр всех заголовков, псевдонимов и токенов провайдера |
 

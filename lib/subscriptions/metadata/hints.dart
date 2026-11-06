@@ -2,6 +2,9 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/color.dart';
 
 import 'metadata.dart';
+import 'provider_cards.dart';
+import 'provider_config.dart';
+import 'provider_power_labels.dart';
 
 enum ProviderRestriction { noGlobal, androidSecure, denyWidgets }
 
@@ -80,6 +83,7 @@ class ProviderView {
     this.tabAnimation,
     this.liquidGlass,
     this.primaryColor,
+    this.primaryColorDark,
     this.colorStyle,
     this.pureBlack,
   });
@@ -102,6 +106,7 @@ class ProviderView {
       tabAnimation: pick('app.tabs', TabAnimation.values),
       liquidGlass: pick('app.glass', LiquidGlassMode.values),
       primaryColor: _color(pairs['app.color']),
+      primaryColorDark: _color(pairs['app.colordark']),
       colorStyle: pick('app.style', ColorStyle.values),
       pureBlack: switch (pairs['app.black']) {
         'true' => true,
@@ -122,6 +127,9 @@ class ProviderView {
 
   /// An opaque ARGB value; a six-digit colour gets a full alpha.
   final int? primaryColor;
+
+  /// Replaces [primaryColor] in the dark theme; means nothing without it.
+  final int? primaryColorDark;
   final ColorStyle? colorStyle;
   final bool? pureBlack;
 }
@@ -161,17 +169,32 @@ const _simpleCounterparts = {
 };
 
 class ProviderHints {
-  const ProviderHints(this.metadata);
+  const ProviderHints(this.metadata, {this.config, this.configPending = false});
 
   static const empty = ProviderHints(SubscriptionMetadata());
 
   final SubscriptionMetadata metadata;
 
+  /// The validated hosted file; its sections win over the headers.
+  final ProviderConfig? config;
+
+  /// The profile names a hosted file that has not been read yet, so its
+  /// absence from [config] says nothing about what the provider asks for.
+  final bool configPending;
+
+  /// The headers with the hosted file's valid presentation sections laid over.
+  SubscriptionMetadata get _presented {
+    final overrides = config?.overrides;
+    return overrides == null || overrides.isEmpty
+        ? metadata
+        : SubscriptionMetadata({...metadata.fields, ...overrides});
+  }
+
   ProviderView get view =>
-      ProviderView.fromPairs(metadata.pairs('presentation.view'));
+      ProviderView.fromPairs(_presented.pairs('presentation.view'));
 
   ProviderPowerButtonHint get powerButton {
-    final pairs = metadata.pairs('presentation.powerButton');
+    final pairs = _presented.pairs('presentation.powerButton');
     final shape = pairs['shape']?.trim().toLowerCase();
     final names = shape?.split(',').map((name) => name.trim()).toSet();
     final shapes = shape == 'random'
@@ -195,7 +218,7 @@ class ProviderHints {
   /// Null when the provider sends no list or no name it lists is known, so
   /// the user's dashboard stays as it is.
   List<DashboardWidget>? get widgets {
-    final names = metadata.strings('presentation.widgets');
+    final names = _presented.strings('presentation.widgets');
     final widgets = [
       for (final name in names)
         ?DashboardWidget.values
@@ -216,11 +239,16 @@ class ProviderHints {
     return mapped.isEmpty ? null : mapped;
   }
 
+  List<ProviderCard> get cards => config?.cards ?? const [];
+
+  ProviderPowerLabels get powerLabels => config?.powerLabels ?? const {};
+
   ProviderBackground? get background {
-    final raw = metadata.text('presentation.background');
+    final presented = _presented;
+    final raw = presented.text('presentation.background');
     final url = raw == null ? null : safeSubscriptionLink(raw);
     if (url == null) return null;
-    final opacity = metadata.count('presentation.backgroundOpacity') ?? 8;
+    final opacity = presented.count('presentation.backgroundOpacity') ?? 8;
     return ProviderBackground(url, opacity / 100);
   }
 

@@ -42,13 +42,13 @@ function fixture(t) {
 
 test('checks the website exports and source documentation without rewriting them', t => {
   const { root } = fixture(t)
-  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
+  assert.deepEqual(synchronizeSite(root), { exports: 4, documents: 4 })
 })
 
 test('the sibling checkout works without the shortcut or submodule configuration', t => {
   const { root } = fixture(t)
   rmSync(join(root, 'site'))
-  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
+  assert.deepEqual(synchronizeSite(root), { exports: 4, documents: 4 })
 })
 
 test('a missing sibling checkout reports the required location', t => {

@@ -13,6 +13,7 @@ A subscription is one HTTP GET. The body carries configuration; headers carry me
 | Body comments | Same metadata as leading `#name: value` lines, for hosts that cannot set headers. | [Body comments](headers.md#body-comments) |
 | Body keys | `rcx-profiles`, `rcx-scenarios`, `rcx-scenario`, group key `rcx`, `reclash-policy`. Vanilla mihomo ignores them. | [Routing delivery](routing.md), [Required safety policy](policy.md) |
 | Routing bundle | Separate YAML named by `reclash-routing`. | [Routing bundle](routing.md#routing-bundle) |
+| Hosted config | Separate static YAML named by `reclash-config`: cards, power-button labels, appearance. | [Hosted config](config.md) |
 | Preview endpoint | JSON shown before a browser import is confirmed. | [Preview API](preview-api.md) |
 
 ## Fetch cycle
@@ -22,7 +23,8 @@ A subscription is one HTTP GET. The body carries configuration; headers carry me
 3. Decodes headers and body comments against the [registry](standard.md). Invalid values are dropped with a warning.
 4. Merges the result into stored metadata ([Metadata lifetime](#metadata-lifetime)).
 5. Fetches the routing bundle, if named.
-6. Applies configuration, hints and policy.
+6. Fetches the hosted config, if named.
+7. Applies configuration, hints and policy.
 
 The update is rejected, and the saved profile stays unchanged, when the body is empty, its format is unknown, or it has no nodes, groups or remote providers.
 
@@ -87,6 +89,7 @@ rules:
 | [Response headers](headers.md) | Parsing, value formats, account, panel, message and reminder fields. |
 | [Request headers](request.md) | Client headers, presets, redirects, statuses, fallback hosts, device ID. |
 | [App settings](app-settings.md) | Appearance, dashboard, flags, restrictions, Android apps. |
+| [Hosted config](config.md) | Cards, power-button labels and appearance in a static YAML file. |
 | [Routing delivery](routing.md) | Routing profiles and scenarios, inline or in a bundle. |
 | [Required safety policy](policy.md) | GLOBAL allowlist, mandatory Android exclusions. |
 | [Preview API](preview-api.md) | Presentation before a browser import. |

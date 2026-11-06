@@ -45,6 +45,24 @@
       "available": true
     },
     {
+      "path": "provider.logoDark",
+      "name": "reclash-servicelogodark",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "trust": "display",
+      "introduced": 1,
+      "absence": "restore-local",
+      "consumer": "panel",
+      "available": true
+    },
+    {
       "path": "provider.supportUrl",
       "name": "reclash-supporturl",
       "type": "url",
@@ -347,6 +365,23 @@
       "encoding": "comma-separated-tokens",
       "multiplicity": "singleton",
       "limit": 32,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "restore-local",
+      "consumer": "appearance",
+      "available": true
+    },
+    {
+      "path": "presentation.config",
+      "name": "reclash-config",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "https-response"
+      ],
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limit": 1024,
       "trust": "hint",
       "introduced": 1,
       "absence": "restore-local",

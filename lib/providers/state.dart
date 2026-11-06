@@ -15,6 +15,7 @@ import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'notification.dart';
 import 'package:reclash/ui/ui.dart';

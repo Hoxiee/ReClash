@@ -341,6 +341,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(openAppSettings())
             }
 
+            "shareText" -> {
+                result.success(shareText(call.argument<String>("text") ?: ""))
+            }
+
             "shareFile" -> {
                 result.success(
                     shareFile(
@@ -548,6 +552,21 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 putExtra(Intent.EXTRA_STREAM, uri)
                 if (!text.isNullOrEmpty()) putExtra(Intent.EXTRA_TEXT, text)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            activity.startActivity(Intent.createChooser(send, null))
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun shareText(text: String): Boolean {
+        val activity = activity ?: return false
+        if (text.isEmpty()) return false
+        return try {
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
             }
             activity.startActivity(Intent.createChooser(send, null))
             true

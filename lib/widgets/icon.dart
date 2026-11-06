@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/cache.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/plugins/app.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:flutter/foundation.dart';
@@ -271,6 +272,71 @@ Future<void> precacheTargetIcons(Iterable<String> srcs) async {
         }
       });
   await Future.wait(pending);
+}
+
+/// A provider's remote picture may not pass this size; a larger file counts
+/// as a failed load.
+const providerImageLimit = 2 << 20;
+
+bool _isRasterImage(Uint8List b) =>
+    (b.length > 8 &&
+        b[0] == 0x89 &&
+        b[1] == 0x50 &&
+        b[2] == 0x4E &&
+        b[3] == 0x47) ||
+    (b.length > 3 && b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF) ||
+    (b.length > 12 &&
+        String.fromCharCodes(b.sublist(0, 4)) == 'RIFF' &&
+        String.fromCharCodes(b.sublist(8, 12)) == 'WEBP');
+
+final _providerImageTransport = SubscriptionTransport();
+
+/// The transport stops at the limit, so an oversize file is never stored; a
+/// failed refresh keeps showing the copy it would have replaced.
+Future<Uint8List?> _readProviderImage(String src) async {
+  final cached = await _cacheManager.getFileFromCache(src);
+  if (cached != null && cached.validTill.isAfter(DateTime.now())) {
+    return cached.file.readAsBytes();
+  }
+  try {
+    final response = await _providerImageTransport.fetchCapped(
+      Uri.parse(src),
+      limit: providerImageLimit,
+    );
+    if (response.uri.scheme != 'https') return null;
+    final bytes = Uint8List.fromList(response.bytes);
+    if (_isRasterImage(bytes)) {
+      await _cacheManager.putFile(src, bytes, maxAge: const Duration(days: 1));
+    }
+    return bytes;
+  } on SubscriptionException {
+    if (cached == null) rethrow;
+    return cached.file.readAsBytes();
+  }
+}
+
+var _providerImageReader = _readProviderImage;
+
+@visibleForTesting
+set providerImageReader(Future<Uint8List?> Function(String src)? value) {
+  _providerImageReader = value ?? _readProviderImage;
+}
+
+/// PNG, JPEG or WebP of at most [providerImageLimit] bytes through the icon
+/// download cache; null for anything else, SVG included, or on any failure.
+Future<Uint8List?> loadProviderImage(String src) async {
+  try {
+    final bytes = await _providerImageReader(src);
+    if (bytes == null ||
+        bytes.length > providerImageLimit ||
+        !_isRasterImage(bytes)) {
+      return null;
+    }
+    return bytes;
+  } catch (error) {
+    commonPrint.log('Failed to load provider image $src: $error');
+    return null;
+  }
 }
 
 class ImageCacheWidget extends StatefulWidget {

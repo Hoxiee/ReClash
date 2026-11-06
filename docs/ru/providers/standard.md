@@ -19,6 +19,7 @@
 | --- | --- | --- | --- | --- | --- |
 | `provider.name` | `reclash-servicename` | text | display | panel |  |
 | `provider.logo` | `reclash-servicelogo` | url | display | panel |  |
+| `provider.logoDark` | `reclash-servicelogodark` | url | display | panel |  |
 | `provider.supportUrl` | `reclash-supporturl` | url | display | panel | псевдоним `support-url` |
 | `provider.webUrl` | `reclash-webpageurl` | url | display | panel | псевдоним `profile-web-page-url` |
 | `provider.buyPlanUrl` | `reclash-buyplan` | url | display | panel | суффикс `provider.buyPlanDays` от 1 до 3650 |
@@ -34,6 +35,7 @@
 | `presentation.hideUrl` | `reclash-hideurl` | boolean | display | panel | псевдоним `hide-url` |
 | `presentation.serverGroup` | `reclash-serverinfo` | text | display | panel |  |
 | `presentation.widgets` | `reclash-widgets` | tokens | hint | appearance |  |
+| `presentation.config` | `reclash-config` | url | hint | appearance | только HTTPS-ответ |
 | `presentation.background` | `reclash-background` | url | hint | appearance | суффикс `presentation.backgroundOpacity` от 1 до 100 |
 | `presentation.view` | `reclash-view` | pairs | hint | appearance |  |
 | `presentation.powerButton` | `reclash-powerbutton` | pairs | hint | appearance |  |

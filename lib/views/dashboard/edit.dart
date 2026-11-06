@@ -50,16 +50,13 @@ class DashboardEditor extends ConsumerWidget {
 
   /// Cards this platform cannot show stay where they were among the rest.
   List<DashboardWidget> _keepingOtherPlatforms(
-    WidgetRef ref,
     List<DashboardWidget> saved,
     List<DashboardWidget> shown,
   ) {
     final result = [...shown];
     var at = 0;
     for (final card in saved) {
-      if (card.platforms.contains(platform) &&
-          (card != DashboardWidget.announcement ||
-              ref.read(providerAnnouncementProvider) != null)) {
+      if (card.platforms.contains(platform)) {
         final index = result.indexOf(card);
         if (index != -1) at = index + 1;
       } else {
@@ -75,9 +72,7 @@ class DashboardEditor extends ConsumerWidget {
       cards: widgets,
       candidates: [
         for (final card in DashboardWidget.values)
-          if (card != DashboardWidget.announcement &&
-              card.platforms.contains(platform))
-            card,
+          if (card.platforms.contains(platform)) card,
       ],
       cardOf: (card) => card.card,
       cardKeyOf: cardKeyOf,
@@ -93,7 +88,6 @@ class DashboardEditor extends ConsumerWidget {
           .update(
             (state) => state.copyWith(
               dashboardWidgets: _keepingOtherPlatforms(
-                ref,
                 state.dashboardWidgets,
                 shown,
               ),

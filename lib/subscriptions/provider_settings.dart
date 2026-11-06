@@ -163,6 +163,17 @@ final providerSettingsCatalog = <ProviderSetting>[
           )
         : config,
   ),
+  ProviderSetting(
+    'app.colordark',
+    provided: (input) {
+      final view = input.hints.view;
+      return view.primaryColor == null ? null : view.primaryColorDark;
+    },
+    read: (config) => config.themeProps.primaryColorDark,
+    write: (config, value) => value is int?
+        ? _theme(config, (p) => p.copyWith(primaryColorDark: value))
+        : config,
+  ),
   _enum(
     'app.style',
     ColorStyle.values,

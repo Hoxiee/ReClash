@@ -2,7 +2,7 @@
 
 Настройки, раскладка дашборда, ограничения и списки приложений Android, которые может задать подписка, и то, как они уступают пользователю.
 
-Синтаксис значений — по [«Форматам значений»](headers.md#value-formats). Подсказки берутся из текущего профиля.
+Синтаксис значений — по [«Форматам значений»](headers.md#value-formats). Подсказки берутся из текущего профиля. [Размещённый конфиг](config.md) тоже может задать вид, кнопку питания, обои и виджеты и важнее этих заголовков.
 
 ## Владение
 
@@ -29,6 +29,7 @@
 | `app.tabs` | `slide`, `fade` |
 | `app.glass` | `none`, `standard`, `ultra` |
 | `app.color` | `RRGGBB` или `AARRGGBB`, `#` необязателен |
+| `app.colordark` | Как `app.color`. Заменяет его в тёмной теме; без `app.color` игнорируется. |
 | `app.style` | `vivid`, `tinted`, `soft`, `monochrome` |
 | `app.black` | `true`, `false` |
 
@@ -61,12 +62,12 @@ reclash-powerbutton: shape:puffy,puffyDiamond,clover8Leaf;type:outline
 
 `reclash-widgets` задаёт карточки дашборда как `tokens`, не больше 32, в порядке показа.
 
-Токены: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (десктоп), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`, `announcement`.
+Токены: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (десктоп), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`.
 
 - Токены не зависят от регистра. Неизвестные игнорируются; значение без известных токенов оставляет дашборд без изменений.
 - `currentOutbound` добавляется первым, если его нет.
 - Простой дашборд использует перечисленные `outboundMode`, `serviceStatus` и `health`; если ни один не указан, он не меняется.
-- `announcement` показывается, только пока задан `reclash-announce`: на своём месте в списке или первой, если в списке её нет.
+- `reclash-announce` — не виджет: его карточка показывается над виджетами, пока заголовок задан, и её нельзя перечислить, переместить или убрать.
 
 ### Фон
 

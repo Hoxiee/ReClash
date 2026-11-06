@@ -20,6 +20,8 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/provider_config.dart';
+import 'package:reclash/subscriptions/metadata/provider_power_labels.dart';
 import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
@@ -1176,6 +1178,43 @@ void main() {
         findsNothing,
       );
       expect(find.byType(SimplePower), findsOneWidget);
+    });
+
+    testWidgets('a provider label on the running state keeps the live line', (
+      tester,
+    ) async {
+      useContainer(
+        hints: const ProviderHints(
+          SubscriptionMetadata(),
+          config: ProviderConfig(
+            cards: [],
+            powerLabels: {
+              'on': [ProviderPowerLabel('Protected', 'Replaces nothing')],
+            },
+          ),
+        ),
+        profile: _subscription(
+          info: const SubscriptionInfo(total: 10 * _gb, expire: 0),
+        ),
+      );
+      container
+          .read(profilesProvider.notifier)
+          .put(Profile.normal(label: 'Test'));
+      container.read(runTimeProvider.notifier).value = 1;
+      container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            child: Scaffold(
+              body: Center(child: SimplePower(minSize: 120, maxSize: 200)),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('Protected'), findsOneWidget);
+      expect(find.text('Replaces nothing'), findsNothing);
     });
 
     testWidgets('an announcement opens the widgets page and is not on home', (

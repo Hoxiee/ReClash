@@ -136,6 +136,12 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'panel',
   ),
   SubscriptionField(
+    'provider.logoDark',
+    'reclash-servicelogodark',
+    SubscriptionFieldType.url,
+    consumer: 'panel',
+  ),
+  SubscriptionField(
     'provider.supportUrl',
     'reclash-supporturl',
     SubscriptionFieldType.url,
@@ -242,6 +248,14 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.tokens,
     limit: 32,
     trust: SubscriptionTrust.hint,
+    consumer: 'appearance',
+  ),
+  SubscriptionField(
+    'presentation.config',
+    'reclash-config',
+    SubscriptionFieldType.url,
+    trust: SubscriptionTrust.hint,
+    secure: true,
     consumer: 'appearance',
   ),
   SubscriptionField(

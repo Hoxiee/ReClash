@@ -79,6 +79,7 @@ A name the user set is never replaced.
 | --- | --- | --- |
 | `reclash-servicename` | text, 160 B | Service name on the dashboard card and in the import dialog. |
 | `reclash-servicelogo` | url | Logo on the simple dashboard. |
+| `reclash-servicelogodark` | url | Logo in the dark theme. Falls back to `reclash-servicelogo`. |
 | `reclash-supporturl` | url | Support action. Also accepts `https://t.me/…`, `https://telegram.me/…` and `tg://` links, such as `tg://resolve?domain=…`. |
 | `reclash-webpageurl` | url | Website action. |
 | `reclash-subscriptiontype` | text, 32 B | Badge in the import dialog and profile list: `test`, `promo` or `dev`. Other values show none. |
@@ -89,7 +90,7 @@ A name the user set is never replaced.
 
 | Header | Type | Behavior |
 | --- | --- | --- |
-| `reclash-announce` | text, multiline, 1024 B | Description. Shown in the import dialog and in a dashboard card the user can move but not remove. |
+| `reclash-announce` | text, multiline, 1024 B | Description. Shown in the import dialog and in a dashboard card above the widgets that the user can neither move nor remove. |
 | `reclash-announceurl` | url | Link on the description card. |
 | `reclash-notice` | text, multiline, 1024 B | Dismissible dashboard notice. A dismissal is remembered for that exact text and link; a change shows it again. |
 | `reclash-noticeurl` | url | Link on the notice. |
@@ -130,6 +131,7 @@ reclash-noticeurl: https://status.example.net
 | `reclash-excludeapps`, `reclash-includeapps`, `reclash-approuting` | [Android apps](app-settings.md#android-apps) |
 | `reclash-fallbackhosts`, `reclash-newdomain` | [Fallback hosts](request.md#fallback-hosts) |
 | `reclash-routing` | [Routing bundle](routing.md#routing-bundle) |
+| `reclash-config` | [Hosted config](config.md) |
 | `x-hwid-max-devices-reached`, `x-hwid-not-supported` | [Device status](request.md#device-status) |
 
 ## FlClashX names

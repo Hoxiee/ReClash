@@ -8,6 +8,7 @@ import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/announcement_card.dart';
+import 'package:reclash/widgets/provider_cards.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -155,6 +156,9 @@ class _DesktopDashboard extends ConsumerWidget {
     final hasNotice = ref.watch(
       providerNoticeProvider.select((card) => card != null),
     );
+    final hasCards = ref.watch(
+      providerCardsProvider.select((cards) => cards.isNotEmpty),
+    );
     final density = DashboardDensityScope.of(context);
     final compact = density.isCompact;
     final scale = DashboardDensityScope.scaleOf(context);
@@ -215,6 +219,7 @@ class _DesktopDashboard extends ConsumerWidget {
               children: [
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
                 if (hasNotice) const NoticeCard(),
+                if (hasCards) const ProviderCards(),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
@@ -300,6 +305,11 @@ class _DesktopDashboard extends ConsumerWidget {
                       Padding(
                         padding: EdgeInsets.only(bottom: gap),
                         child: const NoticeCard(),
+                      ),
+                    if (hasCards)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: const ProviderCards(),
                       ),
                   ],
                 ),
@@ -402,13 +412,8 @@ class _MobileDashboard extends ConsumerWidget {
           builder: (context, constraints) {
             final side = dashboardMobileSideOf(constraints.crossAxisExtent);
             final widgets = [
-              if (hasAnnouncement &&
-                  !saved.contains(DashboardWidget.announcement))
-                DashboardWidget.announcement,
               for (final widget in saved)
-                if (widget.platforms.contains(platform) &&
-                    (widget != DashboardWidget.announcement || hasAnnouncement))
-                  widget,
+                if (widget.platforms.contains(platform)) widget,
             ];
             if (editing) {
               return DashboardEditor(
@@ -436,6 +441,11 @@ class _MobileDashboard extends ConsumerWidget {
                       const UpdateCard(),
                     if (ref.watch(providerNoticeProvider) != null)
                       const NoticeCard(),
+                    if (hasAnnouncement) const AnnouncementCard(),
+                    if (ref.watch(
+                      providerCardsProvider.select((cards) => cards.isNotEmpty),
+                    ))
+                      const ProviderCards(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),

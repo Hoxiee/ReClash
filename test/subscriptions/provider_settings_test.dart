@@ -101,6 +101,7 @@ void main() {
       expect(view.proxiesSort, isNull);
       expect(view.floatingNavigationBar, isTrue);
       expect(view.primaryColor, 0xffff8800);
+      expect(view.primaryColorDark, isNull);
     });
 
     test('power button pairs fall back to the default per key', () {
@@ -333,6 +334,31 @@ void main() {
       'reclash-view': ['proxies.type:list;app.black:true'],
     };
 
+    test('a dark colour needs the colour and leaves with it', () {
+      ProviderSettingsInput withView(String pairs) => _input({
+        'reclash-view': [pairs],
+      });
+      final alone = applyProviderSettings(
+        _base,
+        withView('app.colordark:#eeddcc'),
+      );
+      expect(alone.themeProps.primaryColorDark, isNull);
+
+      final both = applyProviderSettings(
+        _base,
+        withView('app.color:#112233;app.colordark:#eeddcc'),
+      );
+      expect(both.themeProps.primaryColorDark, 0xFFEEDDCC);
+      expect(isProviderManaged(both, 'app.colordark'), isTrue);
+
+      final withdrawn = applyProviderSettings(
+        both,
+        withView('app.color:#112233'),
+      );
+      expect(withdrawn.themeProps.primaryColorDark, isNull);
+      expect(withdrawn.themeProps.primaryColor, 0xFF112233);
+    });
+
     test('applies a provided value and remembers the user baseline', () {
       final config = applyProviderSettings(_base, _input(view));
       expect(config.proxiesStyleProps.type, ProxiesType.list);
@@ -545,6 +571,31 @@ void main() {
       expect(
         config.providerSettings.applied.containsKey('background'),
         isFalse,
+      );
+    });
+
+    test('the announcement token is ignored as unknown', () {
+      expect(
+        _hints({
+          'reclash-widgets': ['announcement'],
+        }).widgets,
+        isNull,
+      );
+      final config = applyProviderSettings(
+        _base,
+        _input({
+          'reclash-widgets': ['announcement'],
+        }),
+      );
+      expect(
+        config.appSettingProps.dashboardWidgets,
+        _base.appSettingProps.dashboardWidgets,
+      );
+      expect(
+        _hints({
+          'reclash-widgets': ['announcement,profiles'],
+        }).widgets,
+        [DashboardWidget.profiles],
       );
     });
 

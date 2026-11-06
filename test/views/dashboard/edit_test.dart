@@ -124,75 +124,24 @@ void main() {
     await teardown(tester);
   });
 
-  testWidgets(
-    'announcement reorders, stays mandatory and keeps its saved place',
-    (tester) async {
-      seed(const [
-        DashboardWidget.currentOutbound,
-        DashboardWidget.networkSpeed,
-        DashboardWidget.announcement,
-      ]);
-      container.updateOverrides([
-        profilesProvider.overrideWith(TestProfiles.new),
-        providerHintsProvider.overrideWithValue(
-          ProviderHints(
-            readSubscriptionMetadata({
-              'announce': ['Your subscription description'],
-            }).metadata,
-          ),
-        ),
-      ]);
-      await pumpEditor(tester);
-      final card = find.byType(AnnouncementCard);
-      expect(card, findsOneWidget);
-      expect(find.byTooltip('Remove Announcement'), findsNothing);
-      expect(find.byTooltip('Add Announcement'), findsNothing);
-      final distance =
-          top(tester, find.byType(NetworkSpeedCard)) - top(tester, card) - 10;
-      final gesture = await tester.startGesture(tester.getCenter(card));
-      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
-      for (var step = 0; step < 4; step++) {
-        await gesture.moveBy(Offset(0, distance / 4));
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-      await gesture.up();
-      await settle(tester);
-      expect(saved(), const [
-        DashboardWidget.currentOutbound,
-        DashboardWidget.announcement,
-        DashboardWidget.networkSpeed,
-      ]);
-      await tester.tap(find.byTooltip('Done'));
-      await settle(tester);
-      expect(
-        top(tester, card),
-        greaterThan(top(tester, find.byType(CurrentOutboundCard))),
-      );
-      expect(
-        top(tester, card),
-        lessThan(top(tester, find.byType(NetworkSpeedCard))),
-      );
-      await teardown(tester);
-    },
-  );
-
-  testWidgets('an absent announcement keeps its position through other edits', (
+  testWidgets('the announcement is not listed and a saved one is kept out', (
     tester,
   ) async {
-    seed(const [
-      DashboardWidget.currentOutbound,
-      DashboardWidget.announcement,
-      DashboardWidget.networkSpeed,
+    seed(const [DashboardWidget.currentOutbound, DashboardWidget.networkSpeed]);
+    container.updateOverrides([
+      profilesProvider.overrideWith(TestProfiles.new),
+      providerHintsProvider.overrideWithValue(
+        ProviderHints(
+          readSubscriptionMetadata({
+            'announce': ['Your subscription description'],
+          }).metadata,
+        ),
+      ),
     ]);
     await pumpEditor(tester);
     expect(find.byType(AnnouncementCard), findsNothing);
+    expect(find.byTooltip('Remove Announcement'), findsNothing);
     expect(find.byTooltip('Add Announcement'), findsNothing);
-    await tester.tap(find.byTooltip('Remove Network speed'));
-    await settle(tester);
-    expect(saved(), const [
-      DashboardWidget.currentOutbound,
-      DashboardWidget.announcement,
-    ]);
     await teardown(tester);
   });
 

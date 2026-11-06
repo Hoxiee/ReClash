@@ -2,7 +2,7 @@
 
 Settings, layout, restrictions and Android app lists a subscription can set, and how they yield to the user.
 
-Value syntax follows [Value formats](headers.md#value-formats). Hints come from the current profile.
+Value syntax follows [Value formats](headers.md#value-formats). Hints come from the current profile. The [hosted config](config.md) can set view, power button, wallpaper and widgets too, and wins over these headers.
 
 ## Ownership
 
@@ -29,6 +29,7 @@ Value syntax follows [Value formats](headers.md#value-formats). Hints come from 
 | `app.tabs` | `slide`, `fade` |
 | `app.glass` | `none`, `standard`, `ultra` |
 | `app.color` | `RRGGBB` or `AARRGGBB`, optional `#` |
+| `app.colordark` | Same as `app.color`. Replaces it in the dark theme; ignored without `app.color`. |
 | `app.style` | `vivid`, `tinted`, `soft`, `monochrome` |
 | `app.black` | `true`, `false` |
 
@@ -61,12 +62,12 @@ reclash-powerbutton: shape:puffy,puffyDiamond,clover8Leaf;type:outline
 
 `reclash-widgets` sets the dashboard cards as `tokens`, at most 32, in display order.
 
-Tokens: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (desktop), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`, `announcement`.
+Tokens: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (desktop), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`.
 
 - Tokens are case-insensitive. Unknown tokens are ignored; with no known token, the dashboard is unchanged.
 - `currentOutbound` is added first when missing.
 - The simple dashboard uses the listed `outboundMode`, `serviceStatus` and `health`; with none listed, it is unchanged.
-- `announcement` shows only while `reclash-announce` is set, at its listed position or first when unlisted.
+- `reclash-announce` is not a widget: its card shows above the widgets whenever the header is set, and cannot be listed, moved or removed.
 
 ### Background
 

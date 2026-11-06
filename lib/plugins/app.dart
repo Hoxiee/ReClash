@@ -206,6 +206,15 @@ class App {
     return shared ?? false;
   }
 
+  /// Opens the system share sheet for [text].
+  Future<bool> shareText(String text) async {
+    if (!Platform.isAndroid) return false;
+    final shared = await methodChannel.invokeMethod<bool>('shareText', {
+      'text': text,
+    });
+    return shared ?? false;
+  }
+
   Future<bool> canRequestPackageInstalls() async =>
       await methodChannel.invokeMethod<bool>('canRequestPackageInstalls') ??
       false;

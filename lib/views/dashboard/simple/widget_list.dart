@@ -6,6 +6,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/edit.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/widgets/announcement_card.dart';
+import 'package:reclash/widgets/provider_cards.dart';
 
 import 'registry.dart';
 
@@ -46,6 +47,9 @@ class SimpleWidgetList extends ConsumerWidget {
     final hasNotice = ref.watch(
       providerNoticeProvider.select((card) => card != null),
     );
+    final hasCards = ref.watch(
+      providerCardsProvider.select((cards) => cards.isNotEmpty),
+    );
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
@@ -59,6 +63,7 @@ class SimpleWidgetList extends ConsumerWidget {
               children: [
                 ...leading,
                 if (hasNotice) const NoticeCard(),
+                if (hasCards) const ProviderCards(gap: _gap),
                 for (final widget in widgets)
                   RepaintBoundary(key: ValueKey(widget), child: widget.card),
                 if (widgets.isEmpty)

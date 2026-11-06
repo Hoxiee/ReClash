@@ -10,7 +10,13 @@ import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/provider_cards.dart';
+import 'package:reclash/subscriptions/metadata/provider_conditions.dart';
+import 'package:reclash/subscriptions/metadata/provider_config.dart';
+import 'package:reclash/subscriptions/metadata/provider_config_store.dart';
 import 'package:reclash/subscriptions/metadata/provider_policy.dart';
+import 'package:reclash/subscriptions/metadata/provider_power_labels.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 
 import 'action.dart';
@@ -18,14 +24,51 @@ import 'config.dart';
 import 'state.dart';
 import 'wallpaper.dart';
 
+typedef LoadedProviderConfig = ({int profileId, ProviderConfig? config});
+
+/// Rebuilt by the snapshot time, because an update replaces the file before
+/// it publishes the new snapshot. A rebuild keeps the previous value, so an
+/// update or a locale change never leaves the profile without its file.
+final _providerConfigProvider =
+    FutureProvider.autoDispose<LoadedProviderConfig?>((ref) async {
+      final current = ref.watch(
+        currentProfileProvider.select((profile) {
+          return profile == null
+              ? null
+              : (id: profile.id, at: profile.subscriptionSnapshot?.receivedAt);
+        }),
+      );
+      if (current == null) return null;
+      final locale =
+          ref.watch(appSettingProvider.select((state) => state.locale)) ??
+          PlatformDispatcher.instance.locale.toLanguageTag();
+      final stored = await readStoredProviderConfig(current.id);
+      final parsed = stored == null
+          ? null
+          : await parseProviderConfigOffThread(
+              stored.source,
+              locale.replaceAll('_', '-'),
+            );
+      return (profileId: current.id, config: parsed?.config);
+    });
+
 /// Null until the current profile has loaded, so a launch does not read the
 /// subscription's settings as withdrawn before the profiles arrive.
 final providerHintsProvider = Provider<ProviderHints?>((ref) {
   final profileId = ref.watch(currentProfileIdProvider);
   final profile = ref.watch(currentProfileProvider);
   if (profileId != null && profile == null) return null;
-  final metadata = profile?.subscriptionSnapshot?.metadata;
-  return metadata == null ? ProviderHints.empty : ProviderHints(metadata);
+  final snapshot = profile?.subscriptionSnapshot;
+  if (profile == null || snapshot == null) return ProviderHints.empty;
+  final metadata = snapshot.metadata;
+  if (metadata.text('presentation.config') == null) {
+    return ProviderHints(metadata);
+  }
+  final loaded = ref.watch(_providerConfigProvider);
+  final held = loaded.value;
+  return held?.profileId == profile.id
+      ? ProviderHints(metadata, config: held?.config)
+      : ProviderHints(metadata, configPending: !loaded.hasError);
 });
 
 class ProviderPowerButtonSelection extends Notifier<ProviderPowerButton> {
@@ -58,6 +101,43 @@ final providerPowerButtonProvider =
     NotifierProvider<ProviderPowerButtonSelection, ProviderPowerButton>(
       ProviderPowerButtonSelection.new,
     );
+
+/// One entry per state from the provider's label arrays, held for the app
+/// session until the labels change.
+class ProviderPowerLabelSelection
+    extends Notifier<Map<String, ProviderPowerLabel>> {
+  ProviderPowerLabelSelection({math.Random? random})
+    : _random = random ?? math.Random();
+
+  final math.Random _random;
+  ProviderPowerLabels _labels = const {};
+  Map<String, ProviderPowerLabel> _picked = const {};
+
+  @override
+  Map<String, ProviderPowerLabel> build() {
+    final labels = ref.watch(providerHintsProvider)?.powerLabels ?? const {};
+    if (!_sameLabels(labels, _labels)) {
+      _labels = labels;
+      _picked = {
+        for (final MapEntry(:key, :value) in labels.entries)
+          key: value.length == 1
+              ? value.single
+              : value[_random.nextInt(value.length)],
+      };
+    }
+    return _picked;
+  }
+}
+
+bool _sameLabels(ProviderPowerLabels a, ProviderPowerLabels b) =>
+    a.length == b.length &&
+    a.entries.every((entry) => listEquals(entry.value, b[entry.key]));
+
+final providerPowerLabelProvider =
+    NotifierProvider<
+      ProviderPowerLabelSelection,
+      Map<String, ProviderPowerLabel>
+    >(ProviderPowerLabelSelection.new);
 
 final providerRestrictionsProvider = Provider<Set<ProviderRestriction>>(
   (ref) => ref.watch(
@@ -139,6 +219,103 @@ final providerNoticeProvider = Provider<ProviderNoticeCard?>((ref) {
   return (announcement: announcement, id: id);
 });
 
+typedef ProviderCardsEnvironment = ({
+  DateTime Function() now,
+  String platform,
+  String appVersion,
+});
+
+/// What conditions are judged against; tests replace the clock and version.
+final providerCardsEnvironmentProvider = Provider<ProviderCardsEnvironment>(
+  (ref) => (
+    now: DateTime.now,
+    platform: system.isAndroid
+        ? 'android'
+        : system.isWindows
+        ? 'windows'
+        : system.isMacOS
+        ? 'macos'
+        : 'linux',
+    appVersion: globalState.packageInfo.version,
+  ),
+);
+
+String _actionKey(ProviderAction? action) => action == null
+    ? ''
+    : '${action.kind.name}:${action.url ?? action.text ?? action.app?.name}';
+
+String _cardContent(ProviderCard card) => switch (card) {
+  ProviderNote() =>
+    '${card.level.name}\n${card.text}\n${_actionKey(card.action)}',
+  ProviderBanner() =>
+    '${card.layout.name}\n${card.title}\n${card.text}\n${card.image}\n'
+        '${card.imageDark}\n${card.countdown}\n${card.button?.label}\n'
+        '${_actionKey(card.button?.action)}\n${_actionKey(card.action)}',
+  ProviderActions() => [
+    for (final item in card.items)
+      '${item.icon}|${item.label}|${_actionKey(item.action)}',
+  ].join('\n'),
+};
+
+/// Identifies a card's exact content, so a changed card shows again.
+String providerCardDismissId(ProviderCard card) =>
+    md5.convert(utf8.encode('${card.id}\n${_cardContent(card)}')).toString();
+
+/// The current profile's cards whose conditions hold now, in file order.
+/// One timer re-evaluates at the nearest condition or countdown boundary.
+final providerCardsProvider = Provider<List<ProviderCard>>((ref) {
+  final cards =
+      ref.watch(providerHintsProvider.select((hints) => hints?.cards)) ??
+      const <ProviderCard>[];
+  if (cards.isEmpty) return const [];
+  final env = ref.watch(providerCardsEnvironmentProvider);
+  final info = ref.watch(
+    currentProfileProvider.select((profile) => profile?.subscriptionInfo),
+  );
+  final metadata = ref.watch(
+    currentProfileProvider.select(
+      (profile) => profile?.subscriptionSnapshot?.metadata,
+    ),
+  );
+  final stale = ref.watch(
+    currentProfileProvider.select(
+      (profile) => profile?.subscriptionSnapshot?.usageStale ?? false,
+    ),
+  );
+  final dismissed = ref.watch(dismissedNoticesProvider);
+  final now = env.now();
+  final snapshot = ProviderConditionSnapshot(
+    now: now,
+    platform: env.platform,
+    appVersion: env.appVersion,
+    expire: metadata?.perpetual == true ? 0 : info?.expire ?? 0,
+    total: metadata?.unlimited == true ? 0 : info?.total ?? 0,
+    used: info == null ? 0 : info.upload + info.download,
+    usageStale: stale,
+  );
+  final seconds = now.millisecondsSinceEpoch ~/ 1000;
+  final timer = nearestFutureBoundary(now, [
+    for (final card in cards) ...card.boundaries,
+  ]);
+  if (timer != null) {
+    final handle = Timer(
+      timer.difference(now) + const Duration(milliseconds: 50),
+      ref.invalidateSelf,
+    );
+    ref.onDispose(handle.cancel);
+  }
+  return [
+    for (final card in cards)
+      if (card.when.holds(snapshot) &&
+          !(card is ProviderBanner &&
+              card.countdown != null &&
+              card.countdown! <= seconds) &&
+          !(card.dismissible &&
+              dismissed.contains(providerCardDismissId(card))))
+        card,
+  ];
+});
+
 /// The proxy the subscription's named group currently routes through.
 final providerServerNodeProvider = Provider<String?>((ref) {
   final group = ref.watch(
@@ -209,7 +386,7 @@ final _providerBackgroundProvider = FutureProvider<String?>((ref) async {
 
 final providerSettingsInputProvider = Provider<ProviderSettingsInput?>((ref) {
   final hints = ref.watch(providerHintsProvider);
-  if (hints == null) return null;
+  if (hints == null || hints.configPending) return null;
   final background = ref.watch(_providerBackgroundProvider);
   if (background.hasError) {
     commonPrint.log(

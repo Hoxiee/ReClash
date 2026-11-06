@@ -1,0 +1,813 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReClash Provider Config",
+  "description": "The YAML document a provider hosts for ReClash. Anchors and aliases are rejected, and the document is limited to 256 KiB. Unknown keys are ignored with a warning, so the schema is stricter than the parser.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "const": 1,
+      "type": "integer"
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proxies": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "tab",
+                "list"
+              ]
+            },
+            "sort": {
+              "enum": [
+                "none",
+                "delay",
+                "name"
+              ]
+            },
+            "layout": {
+              "enum": [
+                "loose",
+                "standard",
+                "tight"
+              ]
+            },
+            "icon": {
+              "enum": [
+                "filled",
+                "plain",
+                "hidden"
+              ]
+            },
+            "card": {
+              "enum": [
+                "loose",
+                "standard",
+                "compact",
+                "oneline"
+              ]
+            }
+          }
+        },
+        "app": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "navbar": {
+              "enum": [
+                "floating",
+                "docked"
+              ]
+            },
+            "tabs": {
+              "enum": [
+                "slide",
+                "fade"
+              ]
+            },
+            "glass": {
+              "enum": [
+                "none",
+                "standard",
+                "ultra"
+              ]
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "color-dark": {
+              "$ref": "#/$defs/color"
+            },
+            "style": {
+              "enum": [
+                "vivid",
+                "tinted",
+                "soft",
+                "monochrome"
+              ]
+            },
+            "black": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "power-button": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shape": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/powerShape"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/powerShape"
+              }
+            }
+          ]
+        },
+        "type": {
+          "enum": [
+            "solid",
+            "tonal",
+            "outline"
+          ]
+        }
+      }
+    },
+    "wallpaper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        "opacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 8
+        }
+      }
+    },
+    "widgets": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 32,
+      "items": {
+        "enum": [
+          "currentOutbound",
+          "health",
+          "networkSpeed",
+          "outboundMode",
+          "vpnButton",
+          "networkTakeover",
+          "serviceStatus",
+          "profiles",
+          "proxyGroups",
+          "connectionStats",
+          "intranetIp",
+          "memoryInfo"
+        ]
+      }
+    },
+    "cards": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/card"
+      }
+    },
+    "power-labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "off": {
+          "$ref": "#/$defs/powerLabelState"
+        },
+        "connecting": {
+          "$ref": "#/$defs/powerLabelState"
+        },
+        "on": {
+          "$ref": "#/$defs/powerLabelState"
+        },
+        "paused": {
+          "$ref": "#/$defs/powerLabelState"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#?([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+    },
+    "powerShape": {
+      "anyOf": [
+        {
+          "enum": [
+            "random"
+          ]
+        },
+        {
+          "enum": [
+            "cookie",
+            "circle",
+            "scallop",
+            "sunny",
+            "flower",
+            "clover",
+            "burst",
+            "puffy",
+            "puffyDiamond",
+            "clover8Leaf",
+            "cookie4Sided",
+            "cookie6Sided",
+            "verySunny",
+            "square",
+            "diamond",
+            "pentagon",
+            "gem",
+            "pixelCircle",
+            "softBoom",
+            "boom",
+            "sharpBurst"
+          ]
+        }
+      ]
+    },
+    "text32": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 32
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 32
+          }
+        }
+      ]
+    },
+    "text64": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 64
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 64
+          }
+        }
+      ]
+    },
+    "text80": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 80
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 80
+          }
+        }
+      ]
+    },
+    "text96": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 96
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 96
+          }
+        }
+      ]
+    },
+    "text280": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "\\S",
+          "maxLength": 280
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 280
+          }
+        }
+      ]
+    },
+    "cardId": {
+      "type": "string",
+      "pattern": "^[a-z0-9._:#-]{1,64}$"
+    },
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 253402300799
+        },
+        "until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 253402300799
+        },
+        "days-left-below": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "traffic-above": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "platforms": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "android",
+              "windows",
+              "macos",
+              "linux"
+            ]
+          }
+        },
+        "client-below": {
+          "type": "string"
+        }
+      }
+    },
+    "urlAction": {
+      "type": "string",
+      "pattern": "^(https?://|tg://)",
+      "maxLength": 2048
+    },
+    "copyAction": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "At most 256 bytes in UTF-8."
+    },
+    "shareAction": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "At most 1024 bytes in UTF-8."
+    },
+    "appAction": {
+      "enum": [
+        "support",
+        "website",
+        "renew",
+        "topUp",
+        "updateProfile",
+        "speedTest",
+        "doctor",
+        "updateApp"
+      ]
+    },
+    "exactlyOneAction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "url"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "copy"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "share"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "app"
+          ]
+        }
+      ]
+    },
+    "atMostOneAction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "url"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "copy"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "share"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "app"
+          ]
+        },
+        {
+          "not": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": [
+                  "url"
+                ]
+              },
+              {
+                "type": "object",
+                "required": [
+                  "copy"
+                ]
+              },
+              {
+                "type": "object",
+                "required": [
+                  "share"
+                ]
+              },
+              {
+                "type": "object",
+                "required": [
+                  "app"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "icon": {
+      "description": "An unknown name renders a neutral icon in the app.",
+      "enum": [
+        "support",
+        "help",
+        "chat",
+        "speed",
+        "link",
+        "open",
+        "copy",
+        "share",
+        "refresh",
+        "update",
+        "sync",
+        "info",
+        "warning",
+        "star",
+        "bolt",
+        "key",
+        "lock",
+        "gift",
+        "sparkle",
+        "web",
+        "website",
+        "globe",
+        "send",
+        "telegram",
+        "download",
+        "doctor",
+        "tools",
+        "clock",
+        "renew",
+        "account"
+      ]
+    },
+    "card": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/banner"
+        },
+        {
+          "$ref": "#/$defs/note"
+        },
+        {
+          "$ref": "#/$defs/actions"
+        }
+      ]
+    },
+    "banner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "const": "banner"
+        },
+        "id": {
+          "$ref": "#/$defs/cardId"
+        },
+        "when": {
+          "$ref": "#/$defs/when"
+        },
+        "dismissible": {
+          "type": "boolean"
+        },
+        "layout": {
+          "enum": [
+            "hero",
+            "split",
+            "strip",
+            "image"
+          ],
+          "default": "hero"
+        },
+        "title": {
+          "$ref": "#/$defs/text80"
+        },
+        "text": {
+          "$ref": "#/$defs/text280"
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        "image-dark": {
+          "type": "string",
+          "pattern": "^https://",
+          "maxLength": 2048
+        },
+        "side": {
+          "enum": [
+            "start",
+            "end"
+          ],
+          "default": "end"
+        },
+        "tone": {
+          "enum": [
+            "surface",
+            "primary",
+            "secondary",
+            "tertiary"
+          ],
+          "default": "surface"
+        },
+        "countdown": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 253402300799
+        },
+        "button": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ],
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/text32"
+            },
+            "url": {
+              "$ref": "#/$defs/urlAction"
+            },
+            "copy": {
+              "$ref": "#/$defs/copyAction"
+            },
+            "share": {
+              "$ref": "#/$defs/shareAction"
+            },
+            "app": {
+              "$ref": "#/$defs/appAction"
+            }
+          },
+          "allOf": [
+            {
+              "$ref": "#/$defs/exactlyOneAction"
+            }
+          ]
+        },
+        "url": {
+          "$ref": "#/$defs/urlAction"
+        },
+        "copy": {
+          "$ref": "#/$defs/copyAction"
+        },
+        "share": {
+          "$ref": "#/$defs/shareAction"
+        },
+        "app": {
+          "$ref": "#/$defs/appAction"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/$defs/atMostOneAction"
+        }
+      ]
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "const": "note"
+        },
+        "id": {
+          "$ref": "#/$defs/cardId"
+        },
+        "when": {
+          "$ref": "#/$defs/when"
+        },
+        "dismissible": {
+          "type": "boolean"
+        },
+        "text": {
+          "$ref": "#/$defs/text280"
+        },
+        "level": {
+          "enum": [
+            "info",
+            "warning",
+            "critical"
+          ],
+          "default": "info"
+        },
+        "url": {
+          "$ref": "#/$defs/urlAction"
+        },
+        "copy": {
+          "$ref": "#/$defs/copyAction"
+        },
+        "share": {
+          "$ref": "#/$defs/shareAction"
+        },
+        "app": {
+          "$ref": "#/$defs/appAction"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/$defs/atMostOneAction"
+        }
+      ]
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "items"
+      ],
+      "properties": {
+        "type": {
+          "const": "actions"
+        },
+        "id": {
+          "$ref": "#/$defs/cardId"
+        },
+        "when": {
+          "$ref": "#/$defs/when"
+        },
+        "dismissible": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "icon",
+              "label"
+            ],
+            "properties": {
+              "icon": {
+                "$ref": "#/$defs/icon"
+              },
+              "label": {
+                "$ref": "#/$defs/text32"
+              },
+              "url": {
+                "$ref": "#/$defs/urlAction"
+              },
+              "copy": {
+                "$ref": "#/$defs/copyAction"
+              },
+              "share": {
+                "$ref": "#/$defs/shareAction"
+              },
+              "app": {
+                "$ref": "#/$defs/appAction"
+              }
+            },
+            "allOf": [
+              {
+                "$ref": "#/$defs/exactlyOneAction"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "powerLabelEntry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/text64"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/text64"
+            },
+            "hint": {
+              "$ref": "#/$defs/text96"
+            }
+          }
+        }
+      ]
+    },
+    "powerLabelState": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/powerLabelEntry"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/powerLabelEntry"
+          }
+        }
+      ]
+    }
+  }
+}

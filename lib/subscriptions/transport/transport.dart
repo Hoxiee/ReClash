@@ -90,6 +90,35 @@ class SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+  }) => _request(
+    source,
+    limit: subscriptionWireLimit,
+    headers: headers,
+    timeout: timeout,
+    cancellation: cancellation,
+  );
+
+  /// [fetch] with a smaller [limit] on both wire and decompressed bytes.
+  Future<SubscriptionResponse> fetchCapped(
+    Uri source, {
+    required int limit,
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 30),
+    SubscriptionCancellation? cancellation,
+  }) => _request(
+    source,
+    limit: limit,
+    headers: headers,
+    timeout: timeout,
+    cancellation: cancellation,
+  );
+
+  Future<SubscriptionResponse> _request(
+    Uri source, {
+    required int limit,
+    required Map<String, String> headers,
+    required Duration timeout,
+    required SubscriptionCancellation? cancellation,
   }) async {
     final client = _createClient();
     client.autoUncompress = false;
@@ -116,6 +145,7 @@ class SubscriptionTransport {
           source,
           headers,
           localCancellation,
+          limit: limit,
           onResponse: () => receivedResponse = true,
         );
         return await pending.timeout(
@@ -190,7 +220,7 @@ class SubscriptionTransport {
             throw const SubscriptionException(SubscriptionFailure.cancelled);
           }),
         ]).timeout(remaining);
-        if (response.bytes.length > subscriptionWireLimit) {
+        if (response.bytes.length > limit) {
           throw const SubscriptionException(SubscriptionFailure.oversized);
         }
         _validateResponseStatus(response.status, response.headers);
@@ -198,6 +228,7 @@ class SubscriptionTransport {
           response.bytes,
           response.headers,
           localCancellation,
+          limit,
         );
         return SubscriptionResponse(
           bytes: bytes,
@@ -234,6 +265,7 @@ class SubscriptionTransport {
     Uri source,
     Map<String, String> fields,
     SubscriptionCancellation cancellation, {
+    required int limit,
     required void Function() onResponse,
   }) async {
     var uri = source;
@@ -298,7 +330,7 @@ class SubscriptionTransport {
       }
       final status = response.statusCode;
       _validateResponseStatus(status, responseHeaders);
-      if (response.contentLength > subscriptionWireLimit) {
+      if (response.contentLength > limit) {
         throw const SubscriptionException(SubscriptionFailure.oversized);
       }
       final builder = BytesBuilder(copy: false);
@@ -306,7 +338,7 @@ class SubscriptionTransport {
         if (cancellation.cancelled) {
           throw const SubscriptionException(SubscriptionFailure.cancelled);
         }
-        if (builder.length + chunk.length > subscriptionWireLimit) {
+        if (builder.length + chunk.length > limit) {
           throw const SubscriptionException(SubscriptionFailure.oversized);
         }
         builder.add(chunk);
@@ -315,6 +347,7 @@ class SubscriptionTransport {
         builder.takeBytes(),
         responseHeaders,
         cancellation,
+        limit,
       );
       return SubscriptionResponse(
         bytes: bytes,
@@ -371,6 +404,7 @@ Future<Uint8List> _decodeResponseBody(
   Uint8List bytes,
   Map<String, List<String>> headers,
   SubscriptionCancellation cancellation,
+  int limit,
 ) async {
   final decoded = await decompressSubscriptionPayload(
     bytes,
@@ -381,6 +415,9 @@ Future<Uint8List> _decodeResponseBody(
   }
   if (decoded.isEmpty) {
     throw const SubscriptionException(SubscriptionFailure.empty);
+  }
+  if (decoded.length > limit) {
+    throw const SubscriptionException(SubscriptionFailure.oversized);
   }
   return decoded;
 }

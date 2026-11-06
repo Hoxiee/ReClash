@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 export const siteSources = [
   ['provider_standard.g.json', 'shared/provider/standard.json'],
   ['provider-policy.schema.json', 'public/schemas/provider-policy.schema.json'],
+  ['provider-config.schema.json', 'public/schemas/provider-config.schema.json'],
   ['rcx-profile.schema.json', 'public/schemas/rcx-profile.schema.json'],
 ]
 

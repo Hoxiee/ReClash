@@ -11,6 +11,9 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/notification.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/views/navigation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -767,6 +770,62 @@ void main() {
       container.read(realTestUrlProvider('https://custom.test')),
       'https://custom.test',
     );
+  });
+
+  group('a provider\'s dark seed', () {
+    const light = 0xFF112233;
+    const dark = 0xFFEEDDCC;
+
+    Color seedOf(int color, [Brightness brightness = Brightness.dark]) =>
+        seededColorScheme(
+          seedColor: Color(color),
+          brightness: brightness,
+        ).primary;
+
+    Future<ProviderContainer> applied() async {
+      final next = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          providerHintsProvider.overrideWithValue(
+            ProviderHints(
+              readSubscriptionMetadata({
+                'reclash-view': ['app.color:#112233;app.colordark:#eeddcc'],
+              }).metadata,
+            ),
+          ),
+        ],
+      );
+      addTearDown(next.dispose);
+      next.listen(providerSettingsSyncProvider, (_, _) {});
+      await Future<void>.delayed(Duration.zero);
+      return next;
+    }
+
+    Color shown(ProviderContainer from, Brightness brightness) =>
+        from.read(genColorSchemeProvider(brightness)).primary;
+
+    test('replaces the colour in the dark theme only', () async {
+      final from = await applied();
+      expect(from.read(themeSettingProvider).primaryColor, light);
+      expect(shown(from, Brightness.dark), seedOf(dark));
+      expect(shown(from, Brightness.light), seedOf(light, Brightness.light));
+    });
+
+    test('stops once the user picks a colour', () async {
+      final from = await applied();
+      from
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(primaryColor: 0xFF445566));
+      expect(shown(from, Brightness.dark), seedOf(0xFF445566));
+    });
+
+    test('never overrides an explicit colour', () async {
+      final from = await applied();
+      final preview = from.read(
+        genColorSchemeProvider(Brightness.dark, color: const Color(light)),
+      );
+      expect(preview.primary, seedOf(light));
+    });
   });
 
   test('a color scheme outlives the provider that generated it', () {

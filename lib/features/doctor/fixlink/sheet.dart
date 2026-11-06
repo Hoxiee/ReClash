@@ -191,7 +191,13 @@ class _FixLinkSheetState extends ConsumerState<FixLinkSheet> {
                           leading: SizedBox.square(
                             dimension: 32,
                             child: CommonTargetIcon(
-                              src: metadata?.logo ?? '',
+                              src:
+                                  metadata?.logoFor(
+                                    dark:
+                                        context.colorScheme.brightness ==
+                                        Brightness.dark,
+                                  ) ??
+                                  '',
                               fallback: const GlyphIcon(AppGlyphs.profiles),
                             ),
                           ),

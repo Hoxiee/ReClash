@@ -158,6 +158,43 @@ void main() {
       );
     });
 
+    test('the dark service logo is decoded and rejects non-link values', () {
+      final result = readSubscriptionMetadata({
+        'reclash-servicelogodark': ['https://cdn.example.net/dark.png'],
+      });
+      expect(
+        result.metadata.text('provider.logoDark'),
+        'https://cdn.example.net/dark.png',
+      );
+      expect(
+        result.metadata.logoFor(dark: true),
+        'https://cdn.example.net/dark.png',
+      );
+      final invalid = readSubscriptionMetadata({
+        'reclash-servicelogodark': ['javascript:alert(1)'],
+      });
+      expect(invalid.metadata.text('provider.logoDark'), isNull);
+      expect(
+        invalid.warnings,
+        contains('Invalid provider field: reclash-servicelogodark'),
+      );
+    });
+
+    test('logoFor reads the dark logo only in dark mode', () {
+      const light = 'https://cdn.example.net/light.png';
+      const dark = 'https://cdn.example.net/dark.png';
+      const both = SubscriptionMetadata({
+        'provider.logo': light,
+        'provider.logoDark': dark,
+      });
+      const lightOnly = SubscriptionMetadata({'provider.logo': light});
+      expect(both.logoFor(dark: true), dark);
+      expect(both.logoFor(dark: false), light);
+      expect(lightOnly.logoFor(dark: true), light);
+      expect(lightOnly.logoFor(dark: false), light);
+      expect(const SubscriptionMetadata().logoFor(dark: true), isNull);
+    });
+
     test('FlClashX aliases normalize only for its selected preset', () {
       final alias = {
         'flclashx-servicename': ['FlClashX provider'],

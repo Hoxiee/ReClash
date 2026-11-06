@@ -1179,6 +1179,21 @@ void main() {
       );
     });
 
+    test('drops the announcement a saved layout still lists', () {
+      expect(
+        dashboardWidgetsFromJson([
+          'currentOutbound',
+          'announcement',
+          'memoryInfo',
+        ]),
+        [DashboardWidget.currentOutbound, DashboardWidget.memoryInfo],
+      );
+      expect(dashboardWidgetsFromJson(['announcement', 'memoryInfo']), [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.memoryInfo,
+      ]);
+    });
+
     test('fromJson keeps everything but the values it cannot read', () {
       final json = <String, Object?>{
         'currentProfileId': 'one',

@@ -54,6 +54,9 @@ class SubscriptionMetadata {
   String? get announce => text('provider.announce');
   String? get logo => text('provider.logo');
 
+  String? logoFor({required bool dark}) =>
+      dark ? text('provider.logoDark') ?? logo : logo;
+
   /// `ed25519:<key>` values that sign this provider's support fix links.
   List<String> get supportKeys => strings('support.keys');
   String? get supportUploadUrl => text('support.uploadUrl');

@@ -658,6 +658,9 @@ Object? _readLiquidGlass(Map<dynamic, dynamic> json, String key) {
 abstract class ThemeProps with _$ThemeProps {
   const factory ThemeProps({
     int? primaryColor,
+
+    /// A provider's seed for the dark theme, while its `app.color` holds.
+    int? primaryColorDark,
     @Default(defaultPrimaryColors) List<int> primaryColors,
     @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(ColorStyle.vivid)
