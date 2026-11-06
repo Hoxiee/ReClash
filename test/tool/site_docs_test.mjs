@@ -42,13 +42,13 @@ function fixture(t) {
 
 test('checks the website exports and source documentation without rewriting them', t => {
   const { root } = fixture(t)
-  assert.deepEqual(synchronizeSite(root), { exports: 4, documents: 4 })
+  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
 })
 
 test('the sibling checkout works without the shortcut or submodule configuration', t => {
   const { root } = fixture(t)
   rmSync(join(root, 'site'))
-  assert.deepEqual(synchronizeSite(root), { exports: 4, documents: 4 })
+  assert.deepEqual(synchronizeSite(root), { exports: 3, documents: 4 })
 })
 
 test('a missing sibling checkout reports the required location', t => {
@@ -59,11 +59,11 @@ test('a missing sibling checkout reports the required location', t => {
 
 test('stale exports fail a check and only explicit synchronization copies them', t => {
   const { root, put } = fixture(t)
-  put('provider-policy.schema.json', '{"version":2}\n')
-  assert.throws(() => synchronizeSite(root), /provider-policy.schema.json differs/)
-  assert.equal(readFileSync(join(root, 'site/public/schemas/provider-policy.schema.json'), 'utf8'), '{"version":1}\n')
+  put('provider-config.schema.json', '{"version":2}\n')
+  assert.throws(() => synchronizeSite(root), /provider-config.schema.json differs/)
+  assert.equal(readFileSync(join(root, 'site/public/schemas/provider-config.schema.json'), 'utf8'), '{"version":1}\n')
   synchronizeSite(root, { write: true })
-  assert.equal(readFileSync(join(root, 'site/public/schemas/provider-policy.schema.json'), 'utf8'), '{"version":2}\n')
+  assert.equal(readFileSync(join(root, 'site/public/schemas/provider-config.schema.json'), 'utf8'), '{"version":2}\n')
 })
 
 test('a changed application document cannot pass with an old website snapshot', t => {

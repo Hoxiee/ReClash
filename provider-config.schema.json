@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReClash Provider Config",
-  "description": "The YAML document a provider hosts for ReClash. Anchors and aliases are rejected, and the document is limited to 256 KiB. Unknown keys are ignored with a warning, so the schema is stricter than the parser.",
+  "description": "The YAML manifest a provider hosts for ReClash, named by the reclash-config response header. Anchors and aliases are rejected, and the document is limited to 512 KiB. Unknown keys are ignored with a warning and an invalid section is ignored whole, so the schema is stricter than the parser.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -192,6 +192,274 @@
         },
         "paused": {
           "$ref": "#/$defs/powerLabelState"
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text160"
+        },
+        "logo": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "pattern": "^https?://"
+        },
+        "logo-dark": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "pattern": "^https?://"
+        },
+        "support-url": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "web-url": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "pattern": "^https?://"
+        },
+        "type": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "test, promo or dev show a badge in the import dialog; other values show none."
+        },
+        "hide-url": {
+          "type": "boolean"
+        },
+        "server-group": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "announce": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "$ref": "#/$defs/text1024"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 1024,
+              "pattern": "^https?://"
+            }
+          }
+        },
+        "notice": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "$ref": "#/$defs/text1024"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 1024,
+              "pattern": "^https?://"
+            }
+          }
+        },
+        "renew": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 1024,
+              "pattern": "^https?://"
+            },
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3650
+            }
+          }
+        },
+        "top-up": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 1024,
+              "pattern": "^https?://"
+            },
+            "percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        }
+      }
+    },
+    "reminders": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expire-days": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365
+          }
+        },
+        "traffic-percent": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimize-on-exit": {
+          "type": "boolean"
+        },
+        "launch-at-login": {
+          "type": "boolean"
+        },
+        "start-hidden": {
+          "type": "boolean"
+        },
+        "connect-on-launch": {
+          "type": "boolean"
+        },
+        "check-app-updates": {
+          "type": "boolean"
+        },
+        "capture-logs": {
+          "type": "boolean"
+        },
+        "close-connections": {
+          "type": "boolean"
+        }
+      }
+    },
+    "apps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/androidPackage"
+          }
+        },
+        "include": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/androidPackage"
+          }
+        },
+        "routing": {
+          "type": "string",
+          "pattern": "^domestic(:[A-Za-z]{2})?$"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fallback-hosts": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/authority"
+          }
+        },
+        "new-domain": {
+          "$ref": "#/$defs/authority"
+        }
+      }
+    },
+    "support": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "pattern": "^ed25519:[A-Za-z0-9_-]{43}$"
+          }
+        },
+        "upload-url": {
+          "$ref": "#/$defs/httpsUrl"
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Profiles, scenarios and bindings as the Core reads them; the Core validates their content.",
+      "properties": {
+        "profiles": {
+          "type": "object"
+        },
+        "scenarios": {
+          "type": "object"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "bindings": {
+          "type": "object",
+          "description": "Proxy-group name to binding."
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "global": {
+          "enum": [
+            "any",
+            "listed",
+            "off"
+          ]
+        },
+        "apps": {
+          "enum": [
+            "recommended",
+            "required"
+          ]
+        },
+        "local-ports": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "dashboard": {
+          "enum": [
+            "editable",
+            "locked"
+          ]
         }
       }
     }
@@ -808,6 +1076,57 @@
           }
         }
       ]
+    },
+    "text160": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      ]
+    },
+    "text1024": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        }
+      ]
+    },
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "maxLength": 1024
+    },
+    "androidPackage": {
+      "type": "string",
+      "maxLength": 255,
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"
+    },
+    "authority": {
+      "type": "string",
+      "maxLength": 259
     }
   }
 }

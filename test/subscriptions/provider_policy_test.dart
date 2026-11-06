@@ -3,115 +3,183 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 
-const _profile = '''
-reclash-policy:
-  version: 1
-  global: {allow: [safe]}
-  apps:
-    android:
-      exclude: [com.example.bank]
+import '../helpers/provider_presentation.dart';
+
+const _proxies = '''
 proxies:
-  - {name: display name, reclash-id: safe, type: socks5, server: example.test, port: 1080}
+  - {name: a, type: socks5, server: a.test, port: 1080}
+  - {name: b, type: socks5, server: b.test, port: 1080}
+  - {name: c, type: socks5, server: c.test, port: 1080}
+''';
+
+const _nested =
+    '''
+$_proxies
+proxy-groups:
+  - {name: GLOBAL, type: select, proxies: [pool, a]}
+  - {name: pool, type: select, proxies: [b, pool, DIRECT]}
 ''';
 
 SubscriptionImportResult _import(String value) =>
     convertSubscriptionImport(Uint8List.fromList(utf8.encode(value)));
 
+ProviderPolicy? _derive(
+  Map<String, Object?> policy,
+  String body, {
+  Map<String, Object?> sections = const {},
+  int? globalNodes,
+}) {
+  final hints = ProviderHints(
+    manifestMetadata({'policy': policy, ...sections}),
+  );
+  return ProviderPolicy.derive(
+    restrictions: hints.restrictions.map((r) => r.name.toLowerCase()),
+    globalNodes: globalNodes,
+    excluded: _import(body).summary.excludedPackages,
+  );
+}
+
 void main() {
-  test('native policy is validated before the subscription is saved', () {
-    final result = _import(_profile);
-    expect(result.summary.providerPolicy?.globalAllow, ['safe']);
-    expect(result.summary.providerPolicy?.requiredExcludedApps, {
-      'com.example.bank',
+  test('Dart cannot evaluate a group filter, so the Core has to', () {
+    // ignore: valid_regexps
+    expect(() => RegExp(r'(?i)\bLTE\b'), throwsFormatException);
+    // regexp2 sees no word boundary inside this name; ASCII-only \b would.
+    expect(RegExp(r'\bLTE\b').hasMatch('МегаLTE'), isTrue);
+  });
+
+  test('the Core wire form matches its Go encoding', () {
+    final nodes = ProviderGlobalNodes.fromJson(
+      jsonDecode('{"allowed":1,"inline":3}') as Map<String, Object?>,
+    );
+    expect((nodes.allowed, nodes.inline), (1, 3));
+  });
+
+  test('global listed follows the Core count for a filtered group', () {
+    const filtered =
+        '''
+$_proxies
+proxy-groups:
+  - {name: GLOBAL, type: select, include-all-proxies: true, filter: '(?i)^a\$'}
+''';
+    final policy = _derive({'global': 'listed'}, filtered, globalNodes: 1)!;
+    expect(policy.lockGlobal, isTrue);
+    expect(policy.isGlobalRestricted, isFalse);
+    expect(
+      _derive(
+        {'global': 'listed'},
+        filtered,
+        globalNodes: 0,
+      )?.isGlobalRestricted,
+      isTrue,
+    );
+  });
+
+  test('global listed restricts Global when the Core was not asked', () {
+    expect(_derive({'global': 'listed'}, _nested)?.isGlobalRestricted, isTrue);
+  });
+
+  group('unrestricted lock warning', () {
+    List<String> warnings(int allowed, int inline, {int remoteProviders = 0}) =>
+        ProviderPolicy.warnings(
+          ProviderGlobalNodes(allowed: allowed, inline: inline),
+          remoteProviders: remoteProviders,
+        );
+
+    test('warns when GLOBAL reaches every inline route', () {
+      expect(warnings(3, 3), [providerGlobalUnrestrictedWarning]);
     });
-    expect(utf8.decode(result.bytes), _profile);
+
+    test('stays quiet when the lock denies something', () {
+      expect(warnings(2, 3), isEmpty);
+      expect(warnings(3, 3, remoteProviders: 1), isEmpty);
+    });
+
+    test('stays quiet with nothing to narrow or nothing allowed', () {
+      expect(warnings(1, 1), isEmpty);
+      expect(warnings(0, 3), isEmpty);
+      expect(warnings(0, 0), isEmpty);
+      expect(ProviderPolicy.warnings(null, remoteProviders: 0), isEmpty);
+    });
+  });
+
+  test('global off locks nothing in the policy and removes Global mode', () {
+    final hints = ProviderHints(
+      manifestMetadata({
+        'policy': {'global': 'off'},
+      }),
+    );
+    expect(hints.restrictions, {ProviderRestriction.noGlobal});
+    expect(_derive({'global': 'off'}, _nested), isNull);
+  });
+
+  test('apps required picks up the body tun exclude-package', () {
+    const body = '''
+tun:
+  exclude-package: [com.example.bank, not a package]
+$_proxies''';
+    expect(_import(body).summary.excludedPackages, ['com.example.bank']);
+    final policy = _derive({'apps': 'required'}, body)!;
+    expect(policy.lockApps, isTrue);
+    expect(policy.requiredExcludedApps, {'com.example.bank'});
+    expect(_derive({'apps': 'recommended'}, body), isNull);
+  });
+
+  test('an invalid value withdraws the whole policy section', () {
+    expect(
+      manifestMetadata({
+        'policy': {'global': 'listed', 'apps': 'sometimes'},
+      }).fields,
+      isEmpty,
+    );
+    expect(_derive({'global': 'listed', 'apps': 'sometimes'}, _nested), isNull);
+  });
+
+  test('the policy values map to their restriction tokens', () {
+    final metadata = manifestMetadata({
+      'policy': {
+        'global': 'listed',
+        'apps': 'required',
+        'local-ports': 'closed',
+        'dashboard': 'locked',
+      },
+    });
+    expect(metadata.strings('settings.restrictions'), [
+      'lockglobal',
+      'lockapps',
+      'androidsecure',
+      'denywidgets',
+    ]);
   });
 
   test('an old subscription remains unrestricted', () {
-    final result = _import('proxies: []\n');
-    expect(result.summary.providerPolicy, isNull);
-  });
-
-  test('an empty allow list forbids every global node', () {
-    final policy = _import(
-      _profile.replaceFirst('[safe]', '[]'),
-    ).summary.providerPolicy!;
-    expect(policy.isGlobalRestricted, isTrue);
-    expect(policy.globalAllow, isEmpty);
-  });
-
-  for (final entry in <String, String>{
-    'unknown version': _profile.replaceFirst('version: 1', 'version: 2'),
-    'unknown node': _profile.replaceFirst('allow: [safe]', 'allow: [missing]'),
-    'duplicate permission': _profile.replaceFirst(
-      'allow: [safe]',
-      'allow: [safe, safe]',
-    ),
-    'unknown setting': _profile.replaceFirst(
-      'global: {allow: [safe]}',
-      'global: {allow: [safe], fallback: direct}',
-    ),
-    'null policy': 'reclash-policy: null\nproxies: []\n',
-    'missing version': 'reclash-policy: {global: {allow: []}}\nproxies: []\n',
-    'bad package': _profile.replaceFirst('com.example.bank', '*'),
-    'unknown platform': _profile.replaceFirst('android:', 'linux:'),
-    'duplicate node ID':
-        '$_profile  - {name: other, reclash-id: safe, type: socks5, server: other.test, port: 1080}\n',
-    'missing allow': 'reclash-policy: {version: 1, global: {}}\nproxies: []\n',
-  }.entries) {
-    test('rejects ${entry.key} rather than discarding the policy', () {
-      expect(
-        () => _import(entry.value),
-        throwsA(isA<SubscriptionImportException>()),
-      );
-    });
-  }
-
-  test('conversion cannot silently strip a provider policy', () {
-    final content = jsonEncode({
-      'outbounds': [
-        {'type': 'direct', 'tag': 'direct'},
-      ],
-      'reclash-policy': {
-        'version': 1,
-        'apps': {
-          'android': {
-            'exclude': ['com.example.bank'],
-          },
-        },
-      },
-    });
-    expect(() => _import(content), throwsA(isA<SubscriptionImportException>()));
-  });
-
-  test('lists are bounded and strict', () {
     expect(
-      () => ProviderPolicy.fromJson({
-        'version': 1,
-        'global': {
-          'allow': List.generate(maxProviderPolicyNodes + 1, (i) => 'node-$i'),
-        },
-      }),
-      throwsFormatException,
+      ProviderPolicy.derive(
+        restrictions: const [],
+        globalNodes: 0,
+        excluded: [],
+      ),
+      isNull,
     );
-    expect(
-      () => ProviderPolicy.fromJson({
-        'version': 1,
-        'apps': {
-          'android': {
-            'exclude': ['com.example.bank', 1],
-          },
-        },
-      }),
-      throwsFormatException,
-    );
+  });
+
+  test('legacy policy keys in the body are ignored, not rejected', () {
+    const body = '''
+reclash-policy: {version: 9, nonsense: true}
+rcx: 1
+$_proxies''';
+    final result = _import(body);
+    expect(result.summary.nodes, 3);
+    expect(utf8.decode(result.bytes), body);
   });
 
   test('the snapshot persists required policy independently of hints', () {
-    final policy = _import(_profile).summary.providerPolicy!;
+    final policy = _derive({
+      'apps': 'required',
+    }, 'tun:\n  exclude-package: [com.example.bank]\n$_proxies')!;
     final snapshot = SubscriptionSnapshot(
       metadata: const SubscriptionMetadata({
         'apps.exclude': ['com.example.optional'],

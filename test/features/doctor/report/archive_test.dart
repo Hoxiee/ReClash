@@ -104,7 +104,7 @@ void main() {
       final readme = _text(archive.findFile('README.md')!);
       expect(readme.trim().split('\n').length, lessThanOrEqualTo(25));
       expect(readme, contains('reclash://fix'));
-      expect(readme, contains('reclash-support-key'));
+      expect(readme, contains('support.keys'));
       expect(readme, contains('RC-7Q2M-K4XD'));
     },
   );

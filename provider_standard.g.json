@@ -7,568 +7,300 @@
     "wireBytes": 16777216,
     "payloadBytes": 33554432
   },
-  "fields": [
+  "manifestFields": [
     {
       "path": "provider.name",
-      "name": "reclash-servicename",
       "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
+      "encoding": "string-or-locale-map",
       "limit": 160,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
       "path": "provider.logo",
-      "name": "reclash-servicelogo",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.logoDark",
-      "name": "reclash-servicelogodark",
+      "path": "provider.logo-dark",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.supportUrl",
-      "name": "reclash-supporturl",
+      "path": "provider.support-url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
-      "aliases": [
-        {
-          "name": "support-url"
-        }
-      ],
+      "fallbackHeader": "support-url",
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.webUrl",
-      "name": "reclash-webpageurl",
+      "path": "provider.web-url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
-      "aliases": [
-        {
-          "name": "profile-web-page-url"
-        }
-      ],
+      "fallbackHeader": "profile-web-page-url",
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.buyPlanUrl",
-      "name": "reclash-buyplan",
+      "path": "provider.renew.url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "url-with-suffix",
-      "multiplicity": "singleton",
+      "encoding": "url",
       "limit": 1024,
       "suffix": {
-        "path": "provider.buyPlanDays",
+        "path": "provider.renew.days",
         "minimum": 1,
         "maximum": 3650
       },
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.buyTrafficUrl",
-      "name": "reclash-buytraffic",
+      "path": "provider.top-up.url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "url-with-suffix",
-      "multiplicity": "singleton",
+      "encoding": "url",
       "limit": 1024,
       "suffix": {
-        "path": "provider.buyTrafficPercent",
+        "path": "provider.top-up.percent",
         "minimum": 1,
         "maximum": 100
       },
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.announce",
-      "name": "reclash-announce",
+      "path": "provider.announce.text",
       "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
+      "encoding": "string-or-locale-map",
       "limit": 1024,
-      "aliases": [
-        {
-          "name": "announce"
-        }
-      ],
+      "fallbackHeader": "announce",
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.announceUrl",
-      "name": "reclash-announceurl",
+      "path": "provider.announce.url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.notice",
-      "name": "reclash-notice",
+      "path": "provider.notice.text",
       "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
+      "encoding": "string-or-locale-map",
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "provider.noticeUrl",
-      "name": "reclash-noticeurl",
+      "path": "provider.notice.url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "subscription.type",
-      "name": "reclash-subscriptiontype",
+      "path": "provider.type",
       "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
+      "encoding": "string-or-locale-map",
       "limit": 32,
       "trust": "display",
       "introduced": 1,
-      "absence": "retain-last-known-stale",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "account.title",
-      "name": "profile-title",
-      "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
-      "limit": 160,
-      "trust": "display",
-      "introduced": 1,
-      "absence": "restore-local",
-      "consumer": "panel",
-      "available": true
-    },
-    {
-      "path": "update.intervalMinutes",
-      "name": "reclash-autoupdateinterval",
-      "type": "integer",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "decimal",
-      "multiplicity": "singleton",
-      "limit": 1024,
-      "minimum": 5,
-      "maximum": 43200,
-      "unit": "minutes",
-      "aliases": [
-        {
-          "name": "profile-update-interval",
-          "scale": 60
-        }
-      ],
-      "trust": "hint",
-      "introduced": 1,
-      "absence": "restore-local",
-      "consumer": "scheduler",
-      "available": true
-    },
-    {
-      "path": "routing.bundleUrl",
-      "name": "reclash-routing",
-      "type": "url",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "url",
-      "multiplicity": "singleton",
-      "limit": 1024,
-      "trust": "hint",
-      "introduced": 1,
-      "absence": "restore-local",
-      "consumer": "routing",
-      "available": true
-    },
-    {
-      "path": "presentation.hideUrl",
-      "name": "reclash-hideurl",
+      "path": "provider.hide-url",
       "type": "boolean",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
       "encoding": "boolean",
-      "multiplicity": "singleton",
       "limit": 1024,
-      "aliases": [
-        {
-          "name": "hide-url"
-        }
-      ],
+      "fallbackHeader": "hide-url",
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "presentation.serverGroup",
-      "name": "reclash-serverinfo",
+      "path": "provider.server-group",
       "type": "text",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "text-or-base64-prefixed",
-      "multiplicity": "singleton",
+      "encoding": "string-or-locale-map",
       "limit": 256,
       "trust": "display",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "panel",
       "available": true
     },
     {
-      "path": "presentation.config",
-      "name": "reclash-config",
-      "type": "url",
-      "direction": "response",
-      "context": [
-        "https-response"
-      ],
-      "encoding": "url",
-      "multiplicity": "singleton",
-      "limit": 1024,
-      "trust": "hint",
-      "introduced": 1,
-      "absence": "restore-local",
-      "consumer": "appearance",
-      "available": true
-    },
-    {
-      "path": "reminder.expireDays",
-      "name": "reclash-expiredays",
+      "path": "reminders.expire-days",
       "type": "numbers",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-decimals",
-      "multiplicity": "singleton",
+      "encoding": "list-of-integers",
       "limit": 8,
       "minimum": 0,
       "maximum": 365,
       "unit": "days",
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "reminder",
       "available": true
     },
     {
-      "path": "reminder.trafficPercent",
-      "name": "reclash-trafficpercent",
+      "path": "reminders.traffic-percent",
       "type": "numbers",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-decimals",
-      "multiplicity": "singleton",
+      "encoding": "list-of-integers",
       "limit": 8,
       "minimum": 1,
       "maximum": 100,
       "unit": "percent",
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "reminder",
       "available": true
     },
     {
-      "path": "settings.flags",
-      "name": "reclash-settings",
-      "type": "tokens",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-tokens",
-      "multiplicity": "singleton",
+      "path": "settings",
+      "type": "flags",
+      "encoding": "map-of-booleans",
       "limit": 16,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "settings",
       "available": true
     },
     {
-      "path": "settings.restrictions",
-      "name": "reclash-restrictions",
-      "type": "tokens",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-tokens",
-      "multiplicity": "singleton",
+      "path": "policy",
+      "type": "policy",
+      "encoding": "map-of-named-values",
       "limit": 16,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "settings",
       "available": true
     },
     {
-      "path": "transport.fallbackHosts",
-      "name": "reclash-fallbackhosts",
+      "path": "transport.fallback-hosts",
       "type": "hosts",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-authorities",
-      "multiplicity": "singleton",
+      "encoding": "list-of-authorities",
       "limit": 5,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "transport",
       "available": true
     },
     {
-      "path": "transport.newDomain",
-      "name": "reclash-newdomain",
+      "path": "transport.new-domain",
       "type": "hosts",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-authorities",
-      "multiplicity": "singleton",
+      "encoding": "list-of-authorities",
       "limit": 1,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "transport",
       "available": true
     },
     {
       "path": "apps.exclude",
-      "name": "reclash-excludeapps",
       "type": "packages",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-packages",
-      "multiplicity": "singleton",
+      "encoding": "list-of-packages",
       "limit": 512,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "apps",
       "available": true
     },
     {
       "path": "apps.include",
-      "name": "reclash-includeapps",
       "type": "packages",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-packages",
-      "multiplicity": "singleton",
+      "encoding": "list-of-packages",
       "limit": 512,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "apps",
       "available": true
     },
     {
       "path": "apps.routing",
-      "name": "reclash-approuting",
       "type": "tokens",
-      "direction": "response",
-      "context": [
-        "http-response",
-        "body-comment"
-      ],
-      "encoding": "comma-separated-tokens",
-      "multiplicity": "singleton",
+      "encoding": "list-of-tokens",
       "limit": 1,
       "trust": "hint",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "apps",
       "available": true
     },
     {
       "path": "support.keys",
-      "name": "reclash-support-key",
       "type": "keys",
-      "direction": "response",
-      "context": [
-        "https-response"
-      ],
-      "encoding": "comma-separated-ed25519-keys",
-      "multiplicity": "singleton",
+      "encoding": "list-of-ed25519-keys",
       "limit": 2,
       "trust": "consent",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "support",
       "available": true
     },
     {
-      "path": "support.uploadUrl",
-      "name": "reclash-support-upload",
+      "path": "support.upload-url",
       "type": "url",
-      "direction": "response",
-      "context": [
-        "https-response"
-      ],
       "encoding": "url",
-      "multiplicity": "singleton",
       "limit": 1024,
+      "https": true,
       "trust": "consent",
       "introduced": 1,
-      "absence": "restore-local",
+      "absence": "withdraw",
       "consumer": "support",
       "available": true
     }
@@ -740,6 +472,101 @@
       "introduced": 1,
       "context": [
         "subscription"
+      ],
+      "available": true
+    },
+    {
+      "name": "support-url",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "fallback:provider.support-url"
+      ],
+      "available": true
+    },
+    {
+      "name": "profile-web-page-url",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "fallback:provider.web-url"
+      ],
+      "available": true
+    },
+    {
+      "name": "announce",
+      "direction": "response",
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "fallback:provider.announce.text"
+      ],
+      "available": true
+    },
+    {
+      "name": "profile-title",
+      "direction": "response",
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response"
+      ],
+      "available": true
+    },
+    {
+      "name": "profile-update-interval",
+      "direction": "response",
+      "encoding": "decimal",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response"
+      ],
+      "available": true
+    },
+    {
+      "name": "hide-url",
+      "direction": "response",
+      "encoding": "boolean",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "fallback:provider.hide-url"
+      ],
+      "available": true
+    },
+    {
+      "name": "reclash-config",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "https-response"
       ],
       "available": true
     }

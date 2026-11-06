@@ -20,26 +20,31 @@ proxy-groups:
   - { name: g, type: select, proxies: [a, b] }
 rules:
   - MATCH,g
-rcx-scenario: routed
-rcx-scenarios:
-  routed:
-    title: Routed
-    routes:
-      - name: Video
-        match: [DOMAIN-SUFFIX,youtube.com, "IP-CIDR,10.0.0.0/8,no-resolve"]
-      - name: Broken
-        match: ["DOMAIN-REGEX,(unclosed"]
-      - name: g
-        match: [DOMAIN,taken.example]
-      - name: Away
-        match: [DOMAIN,away.example]
-        to: nowhere
-      - name: Bank
-        match: [DOMAIN-KEYWORD,bank]
-        to: DIRECT
 `
 
-func setupHome(t *testing.T, profile string) {
+const routedManifest = `
+version: 1
+routing:
+  scenario: routed
+  scenarios:
+    routed:
+      title: Routed
+      routes:
+        - name: Video
+          match: [DOMAIN-SUFFIX,youtube.com, "IP-CIDR,10.0.0.0/8,no-resolve"]
+        - name: Broken
+          match: ["DOMAIN-REGEX,(unclosed"]
+        - name: g
+          match: [DOMAIN,taken.example]
+        - name: Away
+          match: [DOMAIN,away.example]
+          to: nowhere
+        - name: Bank
+          match: [DOMAIN-KEYWORD,bank]
+          to: DIRECT
+`
+
+func setupHome(t *testing.T, profile, manifest string) {
 	t.Helper()
 	home := t.TempDir()
 	previous := constant.Path.HomeDir()
@@ -48,10 +53,13 @@ func setupHome(t *testing.T, profile string) {
 	if err := os.WriteFile(filepath.Join(home, "config.yaml"), []byte(profile), 0o600); err != nil {
 		t.Fatalf("write config: %v", err)
 	}
+	if err := os.WriteFile(rcxBundlePath(filepath.Join(home, "config.yaml")), []byte(manifest), 0o600); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
 }
 
 func TestRoutesBuildIntoTheConfigAndABrokenOneStaysOut(t *testing.T) {
-	setupHome(t, routedProfile)
+	setupHome(t, routedProfile, routedManifest)
 	params := defaultSetupParams()
 	params.Rcx = &rcx.UserLayer{}
 	load, err := loadSetupConfig(params)
@@ -105,7 +113,7 @@ func TestRoutesBuildIntoTheConfigAndABrokenOneStaysOut(t *testing.T) {
 }
 
 func TestRoutesStayOutWhenTheScenarioIsOff(t *testing.T) {
-	setupHome(t, routedProfile)
+	setupHome(t, routedProfile, routedManifest)
 	params := defaultSetupParams()
 	params.Rcx = &rcx.UserLayer{ScenarioOff: true}
 	load, err := loadSetupConfig(params)
@@ -117,18 +125,23 @@ func TestRoutesStayOutWhenTheScenarioIsOff(t *testing.T) {
 	}
 }
 
-func TestSubscriptionScenarioSurvivesTheBaseMerge(t *testing.T) {
+func TestManifestScenarioReachesTheEngineThroughTheBase(t *testing.T) {
 	path := writeBaseProfile(t, routedProfile)
+	if err := os.WriteFile(rcxBundlePath(path), []byte(routedManifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	base, err := handleGetProfileBase(path)
 	if err != nil {
 		t.Fatalf("handleGetProfileBase = %v", err)
 	}
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	if _, err := loadConfigWithBase(&SetupBase{Path: path, Overlay: overlayOf(t, base, []string{"MATCH,g"}, nil)}, configPath); err != nil {
-		t.Fatalf("loadConfigWithBase = %v", err)
+	setupHome(t, "", "")
+	params := defaultSetupParams()
+	params.Base = &SetupBase{Path: path, Overlay: overlayOf(t, base, []string{"MATCH,g"}, nil)}
+	load, err := loadSetupConfig(params)
+	if err != nil {
+		t.Fatalf("loadSetupConfig = %v", err)
 	}
-	layer := rcxReadSubscription(configPath)
-	if _, ok := layer.Scenarios["routed"]; !ok || layer.Scenario != "routed" {
-		t.Fatalf("scenario lost in the merge: %+v", layer)
+	if _, ok := load.subscription.Scenarios["routed"]; !ok || load.subscription.Scenario != "routed" {
+		t.Fatalf("manifest scenario not read: %+v", load.subscription)
 	}
 }

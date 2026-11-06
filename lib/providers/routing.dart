@@ -142,7 +142,7 @@ List<String> _providerHosts(Profile profile) {
   return {
     for (final url in [
       profile.url,
-      profile.subscriptionSnapshot?.metadata.text('routing.bundleUrl'),
+      profile.subscriptionSnapshot?.metadata.text('presentation.config'),
     ])
       if (Uri.tryParse(url ?? '')?.host case final host? when host.isNotEmpty)
         host,

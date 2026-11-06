@@ -10,6 +10,7 @@ enum CoreMethod {
   forceGc,
   shutdown,
   validateConfig,
+  getProviderGlobalNodes,
   decryptConfig,
   validateProxies,
   validateFilters,

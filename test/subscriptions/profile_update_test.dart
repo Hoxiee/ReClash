@@ -6,19 +6,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
-import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
 import '../helpers/app_paths.dart';
 
 class _SubscriptionTransport extends SubscriptionTransport {
-  _SubscriptionTransport(this.body, this.responseHeaders);
+  _SubscriptionTransport(
+    this.body,
+    Map<String, List<String>> headers, {
+    this.manifest,
+  }) : responseHeaders = {
+         ...headers,
+         if (manifest != null) 'reclash-config': [_manifestUrl],
+       };
 
   final String body;
+  final String? manifest;
   final Map<String, List<String>> responseHeaders;
   Map<String, String>? requestHeaders;
   int requests = 0;
+
+  @override
+  Future<SubscriptionResponse> fetchCapped(
+    Uri source, {
+    required int limit,
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 30),
+    SubscriptionCancellation? cancellation,
+  }) async => SubscriptionResponse(
+    bytes: Uint8List.fromList(utf8.encode(manifest!)),
+    headers: const {},
+    status: 200,
+    uri: source,
+  );
 
   @override
   Future<SubscriptionResponse> fetch(
@@ -38,49 +60,39 @@ class _SubscriptionTransport extends SubscriptionTransport {
   }
 }
 
-class _BundleTransport extends SubscriptionTransport {
-  _BundleTransport(this.bundle, {this.fail = false, this.header});
-
-  final List<int> bundle;
-  final bool fail;
-  final String? header;
-  final fetched = <Uri>[];
-  Map<String, String>? bundleHeaders;
+class _FailingManifestTransport extends _SubscriptionTransport {
+  _FailingManifestTransport(String body) : super(body, const {}, manifest: '');
 
   @override
-  Future<SubscriptionResponse> fetch(
+  Future<SubscriptionResponse> fetchCapped(
     Uri source, {
+    required int limit,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
-  }) async {
-    fetched.add(source);
-    if (source.path == '/routing') {
-      bundleHeaders = headers;
-      if (fail) throw const SubscriptionException(SubscriptionFailure.http);
-      return SubscriptionResponse(
-        bytes: Uint8List.fromList(bundle),
-        headers: const {},
-        status: 200,
-        uri: source,
-      );
-    }
-    return SubscriptionResponse(
-      bytes: Uint8List.fromList(utf8.encode(_nodeBody)),
-      headers: {
-        'reclash-routing': ?header == null ? null : [header!],
-      },
-      status: 200,
-      uri: source,
-    );
-  }
+  }) async => throw const SubscriptionException(SubscriptionFailure.transport);
 }
 
 class _HostTransport extends SubscriptionTransport {
-  _HostTransport(this.hosts);
+  _HostTransport(this.hosts, {this.manifest});
 
   final Map<String, Map<String, List<String>>?> hosts;
+  final String? manifest;
   final fetched = <Uri>[];
+
+  @override
+  Future<SubscriptionResponse> fetchCapped(
+    Uri source, {
+    required int limit,
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 30),
+    SubscriptionCancellation? cancellation,
+  }) async => SubscriptionResponse(
+    bytes: Uint8List.fromList(utf8.encode(manifest!)),
+    headers: const {},
+    status: 200,
+    uri: source,
+  );
 
   @override
   Future<SubscriptionResponse> fetch(
@@ -103,6 +115,12 @@ class _HostTransport extends SubscriptionTransport {
   }
 }
 
+const _manifestUrl = 'https://cdn.example.test/reclash.yaml';
+const _newDomainManifest =
+    'version: 1\ntransport:\n  new-domain: new.example.test\n';
+const _configHeader = {
+  'reclash-config': [_manifestUrl],
+};
 const _nodeBody =
     'proxies:\n  - name: node\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n';
 
@@ -131,14 +149,9 @@ void main() {
               headers: {'x-user-token': 'private'},
             ),
           );
-      final transport = _SubscriptionTransport(
-        '# reclash-servicename: Provider\nproxies:\n  - name: node\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n',
-        {
-          'subscription-userinfo': [
-            'upload=5; download=15; total=100; expire=0',
-          ],
-        },
-      );
+      final transport = _SubscriptionTransport(_nodeBody, {
+        'subscription-userinfo': ['upload=5; download=15; total=100; expire=0'],
+      }, manifest: 'version: 1\nprovider:\n  name: Provider\n');
 
       final prepared = await profile.prepareUpdate(
         defaultUserAgent: 'ReClash/test',
@@ -162,13 +175,13 @@ void main() {
     },
   );
 
-  test('required policy refresh is atomic and withdrawal is not stale', () async {
-    const policy =
-        'reclash-policy: {version: 1, global: {allow: []}, apps: {android: {exclude: [com.bank.app]}}}\n';
+  test('required policy follows the manifest and its withdrawal', () async {
+    const manifest = 'version: 1\npolicy:\n  apps: required\n';
+    const body = 'tun:\n  exclude-package: [com.bank.app]\n$_nodeBody';
     final profile = Profile.normal(url: 'https://subs.example.test/policy');
     final prepared = await profile.prepareUpdate(
       defaultUserAgent: 'ReClash/test',
-      transport: _SubscriptionTransport('$policy$_nodeBody', const {}),
+      transport: _SubscriptionTransport(body, const {}, manifest: manifest),
     );
     final saved = await profile.commitPreparedUpdate(
       prepared,
@@ -177,49 +190,99 @@ void main() {
     expect(saved.subscriptionSnapshot?.providerPolicy?.requiredExcludedApps, {
       'com.bank.app',
     });
-    final file = File(await appPath.getProfilePath(saved.id.toString()));
-    final before = await file.readAsString();
-    await expectLater(
-      saved.prepareUpdate(
-        defaultUserAgent: 'ReClash/test',
-        transport: _SubscriptionTransport(
-          '${policy.replaceFirst('version: 1', 'version: 2')}$_nodeBody',
-          const {},
-        ),
-      ),
-      throwsA(anything),
+    final failed = await saved.prepareUpdate(
+      defaultUserAgent: 'ReClash/test',
+      transport: _FailingManifestTransport(body),
     );
-    expect(await file.readAsString(), before);
-    expect(saved.subscriptionSnapshot?.providerPolicy?.requiredExcludedApps, {
+    expect(failed.snapshot.providerPolicy?.requiredExcludedApps, {
       'com.bank.app',
     });
     final withdrawn = await saved.prepareUpdate(
       defaultUserAgent: 'ReClash/test',
-      transport: _SubscriptionTransport(_nodeBody, const {}),
+      transport: _SubscriptionTransport(body, const {}),
     );
     expect(withdrawn.snapshot.providerPolicy, isNull);
   });
 
-  test(
-    'an invalid required policy never retries another client identity',
-    () async {
-      final transport = _SubscriptionTransport(
-        'reclash-policy: {version: 2}\n$_nodeBody',
-        const {},
+  group('global listed asks the Core', () {
+    const manifest = 'version: 1\npolicy:\n  global: listed\n';
+
+    Future<PreparedSubscriptionUpdate> prepare(
+      ResolveProviderGlobalNodes? resolve, {
+      String manifest = manifest,
+      String body = _nodeBody,
+    }) => Profile.normal(url: 'https://subs.example.test/global').prepareUpdate(
+      defaultUserAgent: 'ReClash/test',
+      transport: _SubscriptionTransport(body, const {}, manifest: manifest),
+      globalNodes: resolve,
+    );
+
+    test('the body goes to the Core and its count decides Global', () async {
+      List<int>? asked;
+      final prepared = await prepare((body) async {
+        asked = body;
+        return const ProviderGlobalNodes(allowed: 1, inline: 3);
+      });
+      expect(utf8.decode(asked!), _nodeBody);
+      expect(prepared.snapshot.providerPolicy?.isGlobalRestricted, isFalse);
+      expect(prepared.snapshot.warnings, isEmpty);
+    });
+
+    test('a filter that matches nothing removes Global', () async {
+      final prepared = await prepare(
+        (_) async => const ProviderGlobalNodes(allowed: 0, inline: 3),
       );
-      final profile = Profile.normal(
-        url: 'https://subs.example.test/policy-error',
+      expect(prepared.snapshot.providerPolicy?.isGlobalRestricted, isTrue);
+      expect(prepared.snapshot.warnings, isEmpty);
+    });
+
+    test('a lock that restricts nothing warns in the snapshot', () async {
+      final prepared = await prepare(
+        (_) async => const ProviderGlobalNodes(allowed: 3, inline: 3),
       );
+      expect(prepared.snapshot.warnings, [providerGlobalUnrestrictedWarning]);
+    });
+
+    test('remote providers keep the lock meaningful', () async {
+      const body =
+          '${_nodeBody}proxy-providers:\n  remote: {type: http, url: https://example.test/p}\n';
+      final prepared = await prepare(
+        (_) async => const ProviderGlobalNodes(allowed: 1, inline: 1),
+        body: body,
+      );
+      expect(prepared.snapshot.warnings, isEmpty);
+    });
+
+    test('without the switch the Core is not asked', () async {
+      var asked = false;
+      final prepared = await prepare((_) async {
+        asked = true;
+        return const ProviderGlobalNodes(allowed: 0, inline: 0);
+      }, manifest: 'version: 1\npolicy:\n  global: off\n');
+      expect(asked, isFalse);
+      expect(prepared.snapshot.providerPolicy, isNull);
+    });
+
+    test('a bad pattern rejects the update and keeps the old body', () async {
       await expectLater(
-        profile.prepareUpdate(
-          defaultUserAgent: 'ReClash/test',
-          transport: transport,
-        ),
-        throwsA(isA<SubscriptionPolicyException>()),
+        prepare((_) async => throw Exception('invalid filter')),
+        throwsA(isA<SubscriptionUpdateRejected>()),
       );
-      expect(transport.requests, 1);
-    },
-  );
+    });
+  });
+
+  test('an invalid policy value never blocks the update', () async {
+    final transport = _SubscriptionTransport(
+      _nodeBody,
+      const {},
+      manifest: 'version: 1\npolicy:\n  apps: sometimes\n',
+    );
+    final prepared = await Profile.normal(
+      url: 'https://subs.example.test/policy-error',
+    ).prepareUpdate(defaultUserAgent: 'ReClash/test', transport: transport);
+    expect(prepared.snapshot.providerPolicy, isNull);
+    expect(transport.requests, 1);
+  });
 
   test('a provider refresh never renames an existing profile', () async {
     final profile = Profile.normal(url: 'https://subs.example.test/profile');
@@ -255,12 +318,12 @@ void main() {
     final updated = await profile.update(
       defaultUserAgent: 'ReClash/test',
       transport: _SubscriptionTransport(body, {
-        'reclash-autoupdateinterval': ['31'],
+        'profile-update-interval': ['31'],
       }),
       validate: (_, _) async => '',
     );
 
-    expect(updated.autoUpdateDuration, const Duration(minutes: 31));
+    expect(updated.autoUpdateDuration, const Duration(hours: 31));
   });
 
   test('lossy conversion requires explicit approval before writing', () async {
@@ -309,121 +372,49 @@ void main() {
     },
   );
 
-  group('routing bundle', () {
-    const bundleUrl = 'https://subs.example.test/routing';
+  group('manifest routing', () {
+    const routing = 'version: 1\nrouting:\n  profiles: {}\n';
 
-    Future<File> bundleFile(Profile profile) async =>
+    Future<File> routingFile(Profile profile) async =>
         File(await appPath.getProfileRoutingPath(profile.id.toString()));
 
-    test('is downloaded with the subscription headers and stored', () async {
-      final profile = Profile.normal(url: 'https://subs.example.test/profile')
-          .copyWith(
-            subscriptionPreferences: const SubscriptionPreferences(
-              headers: {'x-user-token': 'private'},
-            ),
-          );
-      final transport = _BundleTransport(
-        utf8.encode('rcx: 1\nprofiles: {}\n'),
-        header: bundleUrl,
-      );
-      await profile.update(
-        defaultUserAgent: 'ReClash/test',
-        transport: transport,
-        validate: (_, _) async => '',
-      );
+    Future<Profile> update(Profile profile, String manifest) => profile.update(
+      defaultUserAgent: 'ReClash/test',
+      transport: _SubscriptionTransport(
+        _nodeBody,
+        const {},
+        manifest: manifest,
+      ),
+      validate: (_, _) async => '',
+    );
 
-      expect(transport.bundleHeaders?['x-user-token'], 'private');
-      expect(
-        await (await bundleFile(profile)).readAsString(),
-        'rcx: 1\nprofiles: {}\n',
-      );
-    });
-
-    test('on another origin it carries no private headers', () async {
-      final profile = Profile.normal(url: 'https://subs.example.test/profile')
-          .copyWith(
-            subscriptionPreferences: const SubscriptionPreferences(
-              headers: {'x-user-token': 'private'},
-            ),
-          );
-      final transport = _BundleTransport(
-        utf8.encode('rcx: 1\nprofiles: {}\n'),
-        header: 'https://cdn.example.test/routing',
-      );
-      await profile.update(
-        defaultUserAgent: 'ReClash/test',
-        transport: transport,
-        validate: (_, _) async => '',
-      );
-
-      expect(transport.bundleHeaders, isNotNull);
-      expect(transport.bundleHeaders, isNot(contains('x-user-token')));
-    });
-
-    test('a failed download keeps the previous bundle', () async {
+    test('a routing section stores the manifest for the Core', () async {
       final profile = Profile.normal(url: 'https://subs.example.test/profile');
-      final file = await bundleFile(profile);
-      await file.parent.create(recursive: true);
-      await file.writeAsString('old');
+      await update(profile, routing);
 
-      final updated = await profile.update(
-        defaultUserAgent: 'ReClash/test',
-        transport: _BundleTransport(const [], fail: true, header: bundleUrl),
-        validate: (_, _) async => '',
-      );
-
-      expect(updated.lastUpdateDate, isNotNull);
-      expect(await file.readAsString(), 'old');
+      expect(await (await routingFile(profile)).readAsString(), routing);
     });
 
-    test('an oversized or non-UTF-8 bundle is rejected', () async {
-      for (final body in [
-        List.filled(256 * 1024 + 1, 0x61),
-        [0xff, 0xfe, 0xfd],
-      ]) {
-        final profile = Profile.normal(
-          url: 'https://subs.example.test/profile',
-        );
-        final updated = await profile.update(
-          defaultUserAgent: 'ReClash/test',
-          transport: _BundleTransport(body, header: bundleUrl),
-          validate: (_, _) async => '',
-        );
-
-        expect(updated.lastUpdateDate, isNotNull);
-        expect(await (await bundleFile(profile)).exists(), isFalse);
-      }
-    });
-
-    test('plain http bundles need an http subscription', () async {
+    test('a manifest without routing leaves no bundle', () async {
       final profile = Profile.normal(url: 'https://subs.example.test/profile');
-      final transport = _BundleTransport(
-        utf8.encode('rcx: 1\n'),
-        header: 'http://subs.example.test/routing',
-      );
-      await profile.update(
-        defaultUserAgent: 'ReClash/test',
-        transport: transport,
-        validate: (_, _) async => '',
-      );
+      await update(profile, 'version: 1\n');
 
-      expect(transport.fetched, hasLength(1));
-      expect(await (await bundleFile(profile)).exists(), isFalse);
+      expect(await (await routingFile(profile)).exists(), isFalse);
     });
 
-    test('an absent header keeps the existing bundle', () async {
+    test('dropping the section deletes the stored bundle', () async {
       final profile = Profile.normal(url: 'https://subs.example.test/profile');
-      final file = await bundleFile(profile);
-      await file.parent.create(recursive: true);
-      await file.writeAsString('kept');
+      await update(profile, routing);
+      await update(profile, 'version: 1\n');
 
-      await profile.update(
-        defaultUserAgent: 'ReClash/test',
-        transport: _BundleTransport(utf8.encode('new')),
-        validate: (_, _) async => '',
-      );
+      expect(await (await routingFile(profile)).exists(), isFalse);
+    });
 
-      expect(await file.readAsString(), 'kept');
+    test('a malformed section is not stored', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile');
+      await update(profile, 'version: 1\nrouting: [1]\n');
+
+      expect(await (await routingFile(profile)).exists(), isFalse);
     });
   });
 
@@ -468,11 +459,9 @@ void main() {
 
     test('a validated new domain moves the profile', () async {
       final transport = _HostTransport({
-        'main.example.test': {
-          'reclash-newdomain': ['new.example.test'],
-        },
+        'main.example.test': _configHeader,
         'new.example.test': const {},
-      });
+      }, manifest: _newDomainManifest);
 
       final prepared = await profile().prepareUpdate(
         defaultUserAgent: 'ReClash/test',
@@ -484,10 +473,8 @@ void main() {
 
     test('a new domain that fails validation is ignored', () async {
       final transport = _HostTransport({
-        'main.example.test': {
-          'reclash-newdomain': ['new.example.test'],
-        },
-      });
+        'main.example.test': _configHeader,
+      }, manifest: _newDomainManifest);
 
       final prepared = await profile().prepareUpdate(
         defaultUserAgent: 'ReClash/test',
@@ -497,13 +484,11 @@ void main() {
       expect(prepared.migratedUrl, isNull);
     });
 
-    test('hints on a plain http subscription are not followed', () async {
+    test('a manifest on a plain http subscription is not followed', () async {
       final transport = _HostTransport({
-        'main.example.test': {
-          'reclash-newdomain': ['new.example.test'],
-        },
+        'main.example.test': _configHeader,
         'new.example.test': const {},
-      });
+      }, manifest: _newDomainManifest);
 
       final prepared = await Profile.normal(
         url: 'http://main.example.test/sub',

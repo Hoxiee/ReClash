@@ -15,6 +15,8 @@ abstract class SetupParams with _$SetupParams {
     @JsonKey(includeIfNull: false) RcxUserLayer? rcx,
     @JsonKey(name: 'policy-path', includeIfNull: false) String? policyPath,
     @JsonKey(name: 'no-global', includeIfNull: false) bool? noGlobal,
+    @JsonKey(name: 'lock-global', includeIfNull: false) bool? lockGlobal,
+    @JsonKey(name: 'lock-apps', includeIfNull: false) bool? lockApps,
     @JsonKey(name: 'vpn-enabled', includeIfNull: false) bool? vpnEnabled,
     @JsonKey(name: 'excluded-apps', includeIfNull: false)
     List<String>? excludedApps,

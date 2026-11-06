@@ -19,8 +19,7 @@ import 'package:reclash/subscriptions/transport/transport.dart';
 import '../helpers/app_paths.dart';
 
 const _encrypted = '-----BEGIN AGE ENCRYPTED FILE-----\nYWdl\n';
-const _plain = '''# reclash-servicename: Body provider
-proxies:
+const _plain = '''proxies:
   - name: node
     type: ss
     server: example.test
@@ -106,7 +105,7 @@ void main() {
         transport: _Transport(
           _encrypted,
           headers: {
-            'reclash-servicename': ['HTTP provider'],
+            'profile-title': ['HTTP provider'],
           },
         ),
         decrypt: controller.decryptProfilePayload,
@@ -115,7 +114,7 @@ void main() {
 
       expect(prepared.payload.format, SubscriptionFormat.clash);
       expect(prepared.summary.nodes, 1);
-      expect(prepared.snapshot.metadata.name, 'HTTP provider');
+      expect(prepared.snapshot.metadata.accountTitle, 'HTTP provider');
       expect(await hasFile(value), isFalse);
       expect(await File(encryptedPath!).exists(), isFalse);
       await value.commitPreparedUpdate(
@@ -291,14 +290,19 @@ void main() {
       );
       final prepared = await value.prepareUpdate(
         defaultUserAgent: 'ReClash/test',
-        transport: _Transport(_plain),
+        transport: _Transport(
+          _plain,
+          headers: {
+            'profile-title': ['Body provider'],
+          },
+        ),
       );
       expect(prepared.subscriptionInfo, value.subscriptionInfo);
       expect(prepared.snapshot.usageStale, isTrue);
       expect(prepared.snapshot.metadata.unlimited, isFalse);
       expect(prepared.snapshot.metadata.perpetual, isFalse);
       expect(prepared.snapshot.metadata.count('subscription.total'), 100);
-      expect(prepared.snapshot.metadata.name, 'Body provider');
+      expect(prepared.snapshot.metadata.accountTitle, 'Body provider');
     },
   );
 

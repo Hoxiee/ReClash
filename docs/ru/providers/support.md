@@ -33,12 +33,13 @@ reclash-report-2026-11-04-1530-RC-7K3F-92QD.zip
 
 ## Приём отчётов
 
-По умолчанию пользователь отправляет архив в чат по ссылке `reclash-supporturl`. На телефоне — через системное меню «Поделиться», на компьютере приложение сохраняет файл, копирует сводку и открывает чат.
+По умолчанию пользователь отправляет архив в чат по ссылке `provider.support-url`. На телефоне — через системное меню «Поделиться», на компьютере приложение сохраняет файл, копирует сводку и открывает чат.
 
-Чтобы получать отчёты напрямую, передайте адрес загрузки:
+Чтобы получать отчёты напрямую, задайте адрес загрузки в [манифесте](manifest.md#support):
 
-```http
-reclash-support-upload: https://support.example.com/reclash/reports
+```yaml
+support:
+  upload-url: https://support.example.com/reclash/reports
 ```
 
 Приложение один раз спрашивает пользователя, называя ваш домен, и отправляет:
@@ -62,7 +63,7 @@ report=<zip, application/zip>
 reclash://fix?p=<payload>&s=<signature>
 ```
 
-Посторонний такую ссылку не сделает: она подписана вашим ключом, и приложение сверяет её с ключом из вашей подписки.
+Посторонний такую ссылку не сделает: она подписана вашим ключом, и приложение сверяет её с ключом из вашего манифеста.
 
 ### Ключ
 
@@ -73,14 +74,22 @@ go run ./core/cmd/reclash-fix keygen -out key.txt
 go run ./core/cmd/reclash-fix header -key key.txt
 ```
 
-Отдавайте напечатанный заголовок вместе с подпиской:
+`keygen` записывает закрытый ключ в `key.txt` (существующий файл он не перезаписывает) и печатает две строки:
 
-```http
-reclash-support-key: ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik
+```text
+support.keys value: ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik
+kid: E545QOZLVJE
 ```
 
-- Принимается только из подписки по `https`; обновляется при каждом обновлении подписки.
-- До двух ключей через запятую, для ротации.
+Значение `ed25519:…` положите в [манифест](manifest.md#support). `header` снова печатает это значение, без префикса, из `key.txt`; `kid` — идентификатор ключа внутри данных ссылки.
+
+```yaml
+support:
+  keys: ["ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik"]
+```
+
+- Принимается только из манифеста, на который указал ответ по `https`; обновляется при каждом обновлении.
+- До двух ключей списком, для ротации.
 
 ### Подпись ссылки
 
@@ -132,4 +141,4 @@ go run ./core/cmd/reclash-fix sign -key key.txt -report RC-7K3F-92QD -ttl 48h \
 - Неизвестные поля отклоняются.
 
 > [!TIP]
-> Тестовый вектор: ключ из 32 нулевых байт даёт заголовок выше, а подпись этого JSON — `s=XEdYg90ecSzT7cV1dRxH9cCVLpw01KXGiWC1Lz4iUD0kYga2zSoZwr1VQnkXVkVlyx5D3L3fGx_ursuvQvmBDQ`.
+> Тестовый вектор: ключ из 32 нулевых байт даёт ключ выше, а подпись этого JSON — `s=XEdYg90ecSzT7cV1dRxH9cCVLpw01KXGiWC1Lz4iUD0kYga2zSoZwr1VQnkXVkVlyx5D3L3fGx_ursuvQvmBDQ`.

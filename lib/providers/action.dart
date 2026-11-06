@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:reclash/subscriptions/metadata/provider_config_store.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -39,6 +40,7 @@ import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/compatibility/import_policy.dart';
 import 'package:reclash/subscriptions/compatibility/cache.dart';
 import 'package:reclash/subscriptions/compatibility/import_review.dart';
+import 'package:reclash/subscriptions/compatibility/prepare.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/subscriptions/notification/reminder.dart';
 import 'package:reclash/subscriptions/imports/import.dart';

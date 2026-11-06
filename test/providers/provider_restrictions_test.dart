@@ -5,17 +5,29 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/provider_policy.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
 
-ProviderContainer _container(Map<String, List<String>> headers) =>
+import '../helpers/provider_presentation.dart';
+
+ProviderContainer _container(Map<String, Object?> sections) =>
     ProviderContainer(
       overrides: [
         providerPolicyProvider.overrideWithValue(null),
         providerHintsProvider.overrideWithValue(
-          ProviderHints(readSubscriptionMetadata(headers).metadata),
+          ProviderHints(manifestMetadata(sections)),
         ),
       ],
     );
+
+Map<String, Object?> _provider(
+  String? announce,
+  String notice, [
+  String link = 'https://status.example.test',
+]) => {
+  'provider': {
+    'announce': ?announce == null ? null : {'text': announce},
+    'notice': {'text': notice, 'url': link},
+  },
+};
 
 void main() {
   test('closing provider-restricted ports preserves the other settings', () {
@@ -44,20 +56,20 @@ void main() {
     expect(config.mixedPort, 7890);
     expect(withoutLocalProxyPorts(effective), effective);
   });
-  test('noglobal removes the Global mode', () {
+  test('policy global off removes the Global mode', () {
     final container = _container({
-      'reclash-restrictions': ['noglobal'],
+      'policy': {'global': 'off'},
     });
     addTearDown(container.dispose);
     expect(container.read(availableModesProvider), [Mode.rule, Mode.direct]);
   });
 
-  test('a required empty global allowlist removes Global', () {
+  test('a listed global policy with no nodes removes Global', () {
     final container = ProviderContainer(
       overrides: [
         providerHintsProvider.overrideWithValue(ProviderHints.empty),
         providerPolicyProvider.overrideWithValue(
-          const ProviderPolicy(globalAllow: []),
+          const ProviderPolicy(lockGlobal: true, globalEmpty: true),
         ),
       ],
     );
@@ -72,11 +84,9 @@ void main() {
   });
 
   test('only notices are dismissible and changed content shows again', () {
-    final container = _container({
-      'announce': ['Plan description'],
-      'reclash-notice': ['Maintenance tonight'],
-      'reclash-noticeurl': ['https://status.example.test'],
-    });
+    final container = _container(
+      _provider('Plan description', 'Maintenance tonight'),
+    );
     addTearDown(container.dispose);
     final card = container.read(providerNoticeProvider)!;
     expect(card.announcement.text, 'Maintenance tonight');
@@ -91,11 +101,9 @@ void main() {
       providerPolicyProvider.overrideWithValue(null),
       providerHintsProvider.overrideWithValue(
         ProviderHints(
-          readSubscriptionMetadata({
-            'announce': ['Plan description'],
-            'reclash-notice': ['Maintenance tomorrow'],
-            'reclash-noticeurl': ['https://status.example.test'],
-          }).metadata,
+          manifestMetadata(
+            _provider('Plan description', 'Maintenance tomorrow'),
+          ),
         ),
       ),
     ]);
@@ -106,10 +114,9 @@ void main() {
   });
 
   test('a changed notice link shows again', () {
-    final container = _container({
-      'reclash-notice': ['Maintenance'],
-      'reclash-noticeurl': ['https://status.example.test/one'],
-    });
+    final container = _container(
+      _provider(null, 'Maintenance', 'https://status.example.test/one'),
+    );
     addTearDown(container.dispose);
     final card = container.read(providerNoticeProvider)!;
     container.read(dismissedNoticesProvider.notifier).state = {card.id};
@@ -117,10 +124,9 @@ void main() {
       providerPolicyProvider.overrideWithValue(null),
       providerHintsProvider.overrideWithValue(
         ProviderHints(
-          readSubscriptionMetadata({
-            'reclash-notice': ['Maintenance'],
-            'reclash-noticeurl': ['https://status.example.test/two'],
-          }).metadata,
+          manifestMetadata(
+            _provider(null, 'Maintenance', 'https://status.example.test/two'),
+          ),
         ),
       ),
     ]);

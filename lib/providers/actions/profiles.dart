@@ -514,7 +514,19 @@ class ProfilesAction extends _$ProfilesAction {
         if (accepted != true) return null;
       }
       final previous = candidate.subscriptionSnapshot;
-      final policy = imported.summary.providerPolicy;
+      final restrictions =
+          previous?.metadata.strings('settings.restrictions') ?? const [];
+      final globalNodes = await resolveSubscriptionGlobalNodes(
+        imported,
+        restrictions: restrictions,
+        resolve: _core.getProviderGlobalNodes,
+      );
+      ensureCurrent();
+      final policy = ProviderPolicy.derive(
+        restrictions: restrictions,
+        globalNodes: globalNodes?.allowed,
+        excluded: imported.summary.excludedPackages,
+      );
       final stored = policy != null || previous?.providerPolicy != null
           ? candidate.copyWith(
               subscriptionSnapshot: SubscriptionSnapshot(
@@ -522,6 +534,10 @@ class ProfilesAction extends _$ProfilesAction {
                 receivedAt: DateTime.now().toUtc(),
                 source: SubscriptionDataSource.body,
                 providerPolicy: policy,
+                warnings: ProviderPolicy.warnings(
+                  globalNodes,
+                  remoteProviders: imported.summary.remoteProviders,
+                ),
               ),
             )
           : candidate;

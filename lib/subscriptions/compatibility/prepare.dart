@@ -3,7 +3,25 @@ import 'dart:io';
 import 'package:reclash/common/common.dart';
 
 import '../imports/import.dart';
+import '../metadata/provider_policy.dart';
 import '../transport/transport.dart';
+
+/// Asked only under `global: listed`, after validation accepted the body, so a
+/// failure here means the Core cannot derive the allowlist it would enforce.
+Future<ProviderGlobalNodes?> resolveSubscriptionGlobalNodes(
+  SubscriptionImportResult payload, {
+  required Iterable<String> restrictions,
+  required ResolveProviderGlobalNodes? resolve,
+}) async {
+  if (resolve == null || !restrictions.contains('lockglobal')) return null;
+  try {
+    return await resolve(payload.bytes);
+  } on Exception {
+    throw const SubscriptionImportException(
+      'Core rejected subscription import',
+    );
+  }
+}
 
 Future<void> validateSubscriptionImport(
   SubscriptionImportResult payload, {

@@ -22,44 +22,45 @@ proxy-groups:
   - name: g
     type: select
     proxies: [a, b]
-    rcx:
-      profiles: [builtin/simple, mobile]
-      default: mobile
-rcx-profiles:
-  mobile:
-    title: Mobile
-    extends: builtin/fastest
-    pool: { include: 'name ~ /a|b/' }
 rules:
   - MATCH,g
 `
 
-// A subscription that carries routing profiles must still load in any mihomo,
-// and the engine must find both keys after the base merge.
-func TestSmartSubscriptionLoadsAndKeepsItsRoutingKeys(t *testing.T) {
+const smartManifest = `
+version: 1
+routing:
+  profiles:
+    mobile:
+      title: Mobile
+      extends: builtin/fastest
+      pool: { include: 'name ~ /a|b/' }
+  bindings:
+    g:
+      profiles: [builtin/simple, mobile]
+      default: mobile
+`
+
+// The manifest beside the profile is the only source of routing; the
+// subscription body stays plain mihomo.
+func TestManifestRoutingReachesTheEngine(t *testing.T) {
 	path := writeBaseProfile(t, smartProfile)
-	base, err := handleGetProfileBase(path)
-	if err != nil {
-		t.Fatalf("handleGetProfileBase = %v", err)
+	if err := os.WriteFile(rcxBundlePath(path), []byte(smartManifest), 0o600); err != nil {
+		t.Fatal(err)
 	}
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	cfg, err := loadConfigWithBase(&SetupBase{Path: path, Overlay: overlayOf(t, base, nil, nil)}, configPath)
-	if err != nil {
-		t.Fatalf("loadConfigWithBase = %v", err)
-	}
-	if cfg.Proxies["g"] == nil {
-		t.Fatal("the smart group did not load")
-	}
-	layer := rcxReadSubscription(configPath)
+	layer := rcxReadSubscription(path)
 	binding, ok := layer.Groups["g"]
 	if !ok || binding.Default != "mobile" || len(binding.Profiles) != 2 {
 		t.Fatalf("group binding = %+v", layer.Groups)
 	}
 	if _, ok := layer.Profiles["mobile"]; !ok {
-		t.Fatalf("rcx-profiles lost in the merge: %v", layer.Profiles)
+		t.Fatalf("profiles = %v", layer.Profiles)
 	}
-	if _, err := loadConfig(configPath); err != nil {
-		t.Fatalf("the written config does not load alone: %v", err)
+}
+
+func TestBodyRoutingKeysAreIgnored(t *testing.T) {
+	path := writeBaseProfile(t, smartProfile+"rcx-profiles:\n  mobile: { title: Mobile }\n")
+	if layer := rcxReadSubscription(path); len(layer.Groups) != 0 || len(layer.Profiles) != 0 {
+		t.Fatalf("layer = %+v", layer)
 	}
 }
 
@@ -162,36 +163,23 @@ func TestEchoFormatsYieldAddressAndCountry(t *testing.T) {
 	}
 }
 
-func TestRoutingBundleYieldsToTheSubscription(t *testing.T) {
-	dir := t.TempDir()
-	config := filepath.Join(dir, "p1.yaml")
-	writeFile := func(path, text string) {
-		if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
-			t.Fatal(err)
-		}
+func TestManifestWithoutRoutingYieldsNoLayer(t *testing.T) {
+	config := filepath.Join(t.TempDir(), "p1.yaml")
+	if err := os.WriteFile(rcxBundlePath(config), []byte("version: 1\nprovider: { name: X }\n"), 0o600); err != nil {
+		t.Fatal(err)
 	}
-	writeFile(config, "proxy-groups:\n  - { name: A, type: select, rcx: { default: inline } }\nrcx-profiles:\n  inline: { title: Inline }\n  shared: { title: From subscription }\n")
-	writeFile(rcxBundlePath(config), "rcx: 1\nprofiles:\n  shared: { title: From bundle }\n  extra: { title: Extra }\ngroups:\n  A: { default: extra }\n  B: { default: extra }\n")
-	layer := rcxReadSubscription(config)
-	if layer.Groups["A"].Default != "inline" || layer.Groups["B"].Default != "extra" {
-		t.Fatalf("groups %+v", layer.Groups)
-	}
-	if title := layer.Profiles["shared"].(map[string]any)["title"]; title != "From subscription" || layer.Profiles["extra"] == nil {
-		t.Fatalf("profiles %+v", layer.Profiles)
+	if layer := rcxReadSubscription(config); len(layer.Groups) != 0 || len(layer.Profiles) != 0 || layer.Scenario != "" {
+		t.Fatalf("layer = %+v", layer)
 	}
 }
 
-func TestSubscriptionScenarioAndMainGroup(t *testing.T) {
-	dir := t.TempDir()
-	config := filepath.Join(dir, "p2.yaml")
-	if err := os.WriteFile(config, []byte("rcx-scenario: mobile\nrcx-scenarios:\n  mobile: { mode: rule }\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(rcxBundlePath(config), []byte("rcx: 1\nscenario: other\nscenarios:\n  other: { mode: global }\n"), 0o600); err != nil {
+func TestManifestScenarioAndMainGroup(t *testing.T) {
+	config := filepath.Join(t.TempDir(), "p2.yaml")
+	if err := os.WriteFile(rcxBundlePath(config), []byte("version: 1\nrouting:\n  scenario: other\n  scenarios:\n    other: { mode: global }\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	layer := rcxReadSubscription(config)
-	if layer.Scenario != "mobile" || layer.Scenarios["mobile"] == nil || layer.Scenarios["other"] == nil {
+	if layer.Scenario != "other" || layer.Scenarios["other"] == nil {
 		t.Fatalf("layer %+v", layer)
 	}
 	cfg, err := loadConfig(writeBaseProfile(t, nestedProfile))

@@ -113,7 +113,7 @@ String reportReadme(ReportData data, List<String> files) {
     '',
     '## Answer with a fix',
     'Reply with a signed link `reclash://fix?p=…&s=…` whose `rid` is $id.',
-    'Sign it with the key your subscription sends in `reclash-support-key`:',
+    'Sign it with the key your manifest lists in `support.keys`:',
     '`reclash-fix sign -key key.txt -report $id <actions>`.',
     'It works once, on this device, within 30 days.',
   ];

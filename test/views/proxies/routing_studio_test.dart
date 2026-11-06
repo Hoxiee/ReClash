@@ -521,7 +521,7 @@ void main() {
           ),
           subscriptionSnapshot: SubscriptionSnapshot(
             metadata: const SubscriptionMetadata({
-              'routing.bundleUrl': 'https://bundle.example.net/rcx.zip',
+              'presentation.config': 'https://bundle.example.net/config.yaml',
             }),
             receivedAt: DateTime(2026),
           ),

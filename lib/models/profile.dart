@@ -15,6 +15,7 @@ import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:reclash/subscriptions/metadata/provider_config_store.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -193,7 +194,6 @@ class PreparedSubscriptionUpdate {
     required this.label,
     required this.client,
     this.clientFingerprint = '',
-    this.routingBundle,
     this.providerConfig = const ProviderConfigDelivery(),
     this.migratedUrl,
   });
@@ -209,7 +209,6 @@ class PreparedSubscriptionUpdate {
   final String label;
   final SubscriptionClientPreset client;
   final String clientFingerprint;
-  final String? routingBundle;
   final ProviderConfigDelivery providerConfig;
 
   /// The subscription URL the profile moves to once this update commits.
@@ -230,7 +229,6 @@ class PreparedSubscriptionUpdate {
         label: label,
         client: client,
         clientFingerprint: clientFingerprint,
-        routingBundle: routingBundle,
         providerConfig: providerConfig,
         migratedUrl: url,
       );
@@ -367,6 +365,7 @@ extension ProfileExtension on Profile {
     required ValidateConfig validate,
     required String defaultUserAgent,
     DecryptProfilePayload? decrypt,
+    ResolveProviderGlobalNodes? globalNodes,
   }) async {
     if (type != ProfileType.url) {
       return null;
@@ -379,6 +378,7 @@ extension ProfileExtension on Profile {
       validate: validate,
       defaultUserAgent: defaultUserAgent,
       decrypt: decrypt,
+      globalNodes: globalNodes,
     );
   }
 
@@ -401,6 +401,7 @@ extension ProfileExtension on Profile {
     Map<String, String> identityHeaders = const {},
     DecryptProfilePayload? decrypt,
     ValidateConfig? validate,
+    ResolveProviderGlobalNodes? globalNodes,
     String? locale,
   }) async {
     if (type != ProfileType.url) {
@@ -420,6 +421,7 @@ extension ProfileExtension on Profile {
       identityHeaders: identityHeaders,
       decrypt: decrypt,
       validate: validate,
+      globalNodes: globalNodes,
       locale: locale,
     );
     final stored = subscriptionSnapshot?.metadata;
@@ -468,6 +470,7 @@ extension ProfileExtension on Profile {
     Map<String, String> identityHeaders = const {},
     DecryptProfilePayload? decrypt,
     ValidateConfig? validate,
+    ResolveProviderGlobalNodes? globalNodes,
     String? locale,
   }) async {
     final preferences = subscriptionPreferences;
@@ -557,15 +560,9 @@ extension ProfileExtension on Profile {
                 );
               }
               final payload = await prepareSubscriptionImport(content);
-              final decodedMetadata = withConfigPackages(
-                readSubscriptionMetadata(
-                  response.headers,
-                  body: body,
-                  clientPreset: preset,
-                  secure: response.uri.isScheme('https'),
-                ),
-                excluded: payload.summary.excludedPackages,
-                included: payload.summary.includedPackages,
+              final headerMetadata = readSubscriptionMetadata(
+                response.headers,
+                secure: response.uri.isScheme('https'),
               );
               if (payload.summary.rejectCoreFallback ||
                   payload.format == SubscriptionFormat.unknown) {
@@ -592,13 +589,21 @@ extension ProfileExtension on Profile {
               final configBudget = attemptLeft ~/ 2;
               final providerConfig = await fetchProviderConfig(
                 profileId: id,
-                url: decodedMetadata.metadata.text('presentation.config'),
+                url: headerMetadata.metadata.text('presentation.config'),
                 transport: fetcher,
                 budget: configBudget < providerConfigFetchBudget
                     ? configBudget
                     : providerConfigFetchBudget,
                 cancellation: requestCancellation,
                 locale: locale ?? 'en',
+                subscription: uri,
+                headers: headers,
+              );
+              final decodedMetadata = withManifest(
+                headerMetadata,
+                providerConfig.config,
+                excluded: payload.summary.excludedPackages,
+                included: payload.summary.includedPackages,
               );
               final previous = subscriptionSnapshot;
               final staleFields = [
@@ -615,8 +620,23 @@ extension ProfileExtension on Profile {
                   ...decodedMetadata.metadata.fields,
                 }),
               );
+              final restrictions = mergedMetadata.strings(
+                'settings.restrictions',
+              );
+              final resolvedGlobal = await resolveSubscriptionGlobalNodes(
+                payload,
+                restrictions: restrictions,
+                resolve: globalNodes,
+              );
+              if (requestCancellation.cancelled) {
+                throw const SubscriptionUpdateCancelled();
+              }
               final snapshot = SubscriptionSnapshot(
-                providerPolicy: payload.summary.providerPolicy,
+                providerPolicy: ProviderPolicy.derive(
+                  restrictions: restrictions,
+                  globalNodes: resolvedGlobal?.allowed,
+                  excluded: payload.summary.excludedPackages,
+                ),
                 metadata: mergedMetadata,
                 receivedAt: DateTime.now().toUtc(),
                 stale: staleFields.isNotEmpty,
@@ -626,25 +646,16 @@ extension ProfileExtension on Profile {
                 warnings: [
                   ...decodedMetadata.warnings,
                   ...providerConfig.warnings,
+                  ...ProviderPolicy.warnings(
+                    resolvedGlobal,
+                    remoteProviders: payload.summary.remoteProviders,
+                  ),
                 ],
               );
               final info = _mergeSubscriptionInfo(
                 subscriptionInfo,
                 decodedMetadata.metadata,
               );
-              final bundleUrl = decodedMetadata.metadata.text(
-                'routing.bundleUrl',
-              );
-              final routingBundle = bundleUrl == null
-                  ? null
-                  : await _fetchRoutingBundle(
-                      fetcher,
-                      bundleUrl,
-                      subscription: uri,
-                      headers: headers,
-                      timeout: timeout,
-                      cancellation: requestCancellation,
-                    );
               if (requestCancellation.cancelled) {
                 throw const SubscriptionUpdateCancelled();
               }
@@ -669,7 +680,6 @@ extension ProfileExtension on Profile {
                   label: resolvedLabel,
                   client: preset,
                   clientFingerprint: requestFingerprint,
-                  routingBundle: routingBundle,
                   providerConfig: providerConfig,
                 ),
                 requiresReview:
@@ -682,8 +692,6 @@ extension ProfileExtension on Profile {
               );
             } on SubscriptionException catch (error) {
               return SubscriptionClientRejected(_retryReason(error));
-            } on SubscriptionPolicyException {
-              rethrow;
             } on SubscriptionImportException {
               return const SubscriptionClientRejected(
                 SubscriptionRetryReason.invalidResponse,
@@ -781,25 +789,7 @@ extension ProfileExtension on Profile {
             }
           },
         );
-    await _storeRoutingBundle(prepared.routingBundle);
     return saved;
-  }
-
-  Future<void> _storeRoutingBundle(String? bundle) async {
-    if (bundle == null) return;
-    try {
-      await serializeProfileMutation(
-        id,
-        () async => File(
-          await appPath.getProfileRoutingPath(id.toString()),
-        ).writeAsStringAtomically(bundle),
-      );
-    } on Object catch (error) {
-      commonPrint.log(
-        'Could not store the routing bundle: $error',
-        logLevel: LogLevel.warning,
-      );
-    }
   }
 
   Future<Profile> update({
@@ -810,6 +800,7 @@ extension ProfileExtension on Profile {
     SubscriptionCancellation? cancellation,
     Map<String, String> identityHeaders = const {},
     DecryptProfilePayload? decrypt,
+    ResolveProviderGlobalNodes? globalNodes,
   }) async {
     final prepared = await prepareUpdate(
       defaultUserAgent: defaultUserAgent,
@@ -818,6 +809,7 @@ extension ProfileExtension on Profile {
       identityHeaders: identityHeaders,
       decrypt: decrypt,
       validate: validate,
+      globalNodes: globalNodes,
     );
     final accepted =
         !prepared.summary.hasLosses ||
@@ -903,49 +895,5 @@ extension ProfileExtension on Profile {
     } finally {
       await tempFile.safeDelete();
     }
-  }
-}
-
-const routingBundleMaxBytes = 256 * 1024;
-
-Future<String?> _fetchRoutingBundle(
-  SubscriptionTransport fetcher,
-  String bundleUrl, {
-  required Uri subscription,
-  required Map<String, String> headers,
-  required Duration timeout,
-  required SubscriptionCancellation cancellation,
-}) async {
-  try {
-    final uri = Uri.tryParse(bundleUrl.trim());
-    final scheme = uri?.scheme.toLowerCase();
-    if (uri == null ||
-        uri.host.isEmpty ||
-        uri.userInfo.isNotEmpty ||
-        scheme != 'https' &&
-            !(scheme == 'http' &&
-                subscription.scheme.toLowerCase() == 'http')) {
-      throw const FormatException('unsupported routing bundle URL');
-    }
-    final response = await fetcher.fetch(
-      uri,
-      headers: redirectSubscriptionHeaders(headers, subscription, uri),
-      timeout: timeout,
-      cancellation: cancellation,
-    );
-    if (response.bytes.length > routingBundleMaxBytes) {
-      throw const FormatException('routing bundle is too large');
-    }
-    final text = utf8.decode(response.bytes);
-    if (text.trim().isEmpty) throw const FormatException('empty bundle');
-    return text;
-  } on Object catch (error) {
-    if (!cancellation.cancelled) {
-      commonPrint.log(
-        'Could not download the routing bundle: $error',
-        logLevel: LogLevel.warning,
-      );
-    }
-    return null;
   }
 }

@@ -96,8 +96,11 @@ func handleGetProxyDefinition(name string) (map[string]any, error) {
 }
 
 func handleValidateConfig(path string) error {
-	_, err := handleGetConfig(path)
-	return err
+	raw, err := handleGetConfig(path)
+	if err != nil {
+		return err
+	}
+	return checkGroupFilters(raw)
 }
 
 func handleDecryptConfig(params DecryptConfigParams) (string, error) {
@@ -121,7 +124,7 @@ func loadConfig(path string) (*config.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := config.ParseRawConfig(raw)
+	cfg, err := parseRawConfig(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +172,15 @@ func loadSetupConfig(params *SetupParams) (setupLoad, error) {
 	if err != nil {
 		return setupLoad{}, err
 	}
-	load := setupLoad{subscription: rcxReadSubscription(path)}
+	// A scripted profile has no base; its manifest still sits beside the
+	// original profile file, not the running config.
+	manifestOwner := path
+	if params.Base != nil {
+		manifestOwner = params.Base.Path
+	} else if params.PolicyPath != nil && *params.PolicyPath != "" {
+		manifestOwner = *params.PolicyPath
+	}
+	load := setupLoad{subscription: rcxReadSubscription(manifestOwner)}
 	user := rcxCurrentUser()
 	if params.Rcx != nil {
 		user = *params.Rcx

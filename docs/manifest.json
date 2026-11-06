@@ -41,12 +41,10 @@
             "zh-CN": "参考"
           },
           "pages": [
+            "manifest.md",
             "headers.md",
             "request.md",
             "policy.md",
-            "routing.md",
-            "app-settings.md",
-            "config.md",
             "preview-api.md",
             "support.md",
             "standard.md"

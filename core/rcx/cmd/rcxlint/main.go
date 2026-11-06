@@ -1,4 +1,4 @@
-// Command rcxlint checks routing profiles and routing bundles the way the app
+// Command rcxlint checks routing profiles, scenarios and provider manifests the way the app
 // does when it imports them.
 package main
 
@@ -18,7 +18,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: rcxlint <profile.yaml | bundle.yaml>...")
+		fmt.Fprintln(os.Stderr, "usage: rcxlint <profile.yaml | scenario.yaml | manifest.yaml>...")
 		os.Exit(2)
 	}
 	failed := false
@@ -50,8 +50,11 @@ func lintFile(file string) bool {
 	if result, ok := rcx.LintBundle(string(data)); ok {
 		return report(file, "", result, func(issue rcx.Issue) int { return issue.Line })
 	}
+	if routing := child(root, "routing"); routing != nil {
+		return lintRouting(file, data, routing)
+	}
 	if child(root, "profiles") != nil || child(root, "scenarios") != nil {
-		return lintBundle(file, data, root)
+		return lintRouting(file, data, root)
 	}
 	name := strings.TrimSuffix(strings.TrimSuffix(filepath.Base(file), ".yaml"), ".rcx")
 	// Only a scenario names groups, routes or a tunnel mode.
@@ -63,22 +66,24 @@ func lintFile(file string) bool {
 	return report(file, "", result, func(issue rcx.Issue) int { return issue.Line })
 }
 
-func lintBundle(file string, data []byte, root *yaml.Node) bool {
+// lintRouting lints a routing section: the `routing` key of a manifest, or the
+// top level of a document that only carries profiles and scenarios.
+func lintRouting(file string, data []byte, root *yaml.Node) bool {
 	var bundle struct {
 		Profiles  map[string]any         `yaml:"profiles"`
-		Groups    map[string]rcx.Binding `yaml:"groups"`
+		Bindings  map[string]rcx.Binding `yaml:"bindings"`
 		Scenarios map[string]any         `yaml:"scenarios"`
 		Scenario  string                 `yaml:"scenario"`
 	}
-	if err := yaml.Unmarshal(data, &bundle); err != nil {
+	if err := root.Decode(&bundle); err != nil {
 		fmt.Printf("%s: error: %v\n", file, err)
 		return false
 	}
-	if len(data) > 256<<10 {
-		fmt.Printf("%s: error: bundle larger than 256 KiB\n", file)
+	if len(data) > 512<<10 {
+		fmt.Printf("%s: error: manifest larger than 512 KiB\n", file)
 		return false
 	}
-	layer := rcx.SubscriptionLayer{Groups: bundle.Groups, Profiles: bundle.Profiles, Scenarios: bundle.Scenarios}
+	layer := rcx.SubscriptionLayer{Groups: bundle.Bindings, Profiles: bundle.Profiles, Scenarios: bundle.Scenarios}
 	ok := true
 	for _, name := range slices.Sorted(maps.Keys(bundle.Profiles)) {
 		text, err := yaml.Marshal(bundle.Profiles[name])
@@ -107,17 +112,17 @@ func lintBundle(file string, data []byte, root *yaml.Node) bool {
 		}
 	}
 	if ref := bundle.Scenario; ref != "" && !strings.HasPrefix(ref, "builtin/") && bundle.Scenarios[strings.TrimPrefix(ref, "provider/")] == nil {
-		fmt.Printf("%s: error: scenario %q is not defined in the bundle\n", file, ref)
+		fmt.Printf("%s: error: scenario %q is not defined in the routing section\n", file, ref)
 		ok = false
 	}
-	for _, group := range slices.Sorted(maps.Keys(bundle.Groups)) {
-		binding := bundle.Groups[group]
+	for _, group := range slices.Sorted(maps.Keys(bundle.Bindings)) {
+		binding := bundle.Bindings[group]
 		refs := append([]string{binding.Default}, binding.Profiles...)
 		for _, ref := range refs {
 			if ref == "" || strings.HasPrefix(ref, "builtin/") || bundle.Profiles[strings.TrimPrefix(ref, "provider/")] != nil {
 				continue
 			}
-			fmt.Printf("%s: error: group %q names profile %q, which the bundle does not define\n", file, group, ref)
+			fmt.Printf("%s: error: binding %q names profile %q, which the routing section does not define\n", file, group, ref)
 			ok = false
 		}
 	}

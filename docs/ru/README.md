@@ -6,17 +6,16 @@
 
 | Раздел | Для кого | Что внутри |
 | --- | --- | --- |
-| [Для провайдеров](providers/README.md) | Сервисы подписок | Заголовки ответа, запросы клиента, обязательная политика, наборы маршрутизации, API предпросмотра, внедрение |
+| [Для провайдеров](providers/README.md) | Сервисы подписок | Заголовки ответа, манифест провайдера, запросы клиента, обязательная политика, API предпросмотра, внедрение |
 | [Автомаршрутизация RCX](auto-routing/README.md) | Пользователи и провайдеры, поставляющие маршрутизацию | Профили, условия, сценарии, обмен, редактор в приложении |
 
 ## Машиночитаемые источники
 
 | Ресурс | Назначение |
 | --- | --- |
-| [`provider-policy.schema.json`](../../provider-policy.schema.json) | JSON Schema блока политики провайдера |
-| [`provider-config.schema.json`](../../provider-config.schema.json) | JSON Schema размещённого конфига провайдера |
-| [`rcx-profile.schema.json`](../../rcx-profile.schema.json) | JSON Schema профилей RCX и наборов маршрутизации |
-| [`provider_standard.g.json`](../../provider_standard.g.json) | Сгенерированный реестр всех заголовков, псевдонимов и токенов провайдера |
+| [`provider-config.schema.json`](../../provider-config.schema.json) | JSON Schema манифеста провайдера |
+| [`rcx-profile.schema.json`](../../rcx-profile.schema.json) | JSON Schema профилей и сценариев RCX |
+| [`provider_standard.g.json`](../../provider_standard.g.json) | Сгенерированный реестр всех заголовков, псевдонимов и полей манифеста провайдера |
 
 ## Соглашения
 

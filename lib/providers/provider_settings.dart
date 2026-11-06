@@ -165,7 +165,7 @@ final availableModesProvider = Provider<List<Mode>>(
       ref
               .watch(providerRestrictionsProvider)
               .contains(ProviderRestriction.noGlobal) ||
-          ref.watch(providerPolicyProvider)?.globalAllow?.isEmpty == true
+          ref.watch(providerPolicyProvider)?.isGlobalRestricted == true
       ? [
           for (final mode in Mode.values)
             if (mode != Mode.global) mode,

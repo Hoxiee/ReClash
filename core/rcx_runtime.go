@@ -1,8 +1,6 @@
 package core
 
 import (
-	"bytes"
-	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -29,7 +27,7 @@ import (
 
 const rcxStateFile = "rcx-state.json"
 
-const rcxBundleLimit = 256 << 10
+const rcxBundleLimit = 512 << 10
 
 var (
 	rcxMu           sync.Mutex
@@ -535,58 +533,36 @@ func rcxNode(proxy constant.Proxy) rcx.Node {
 	return node
 }
 
-// mihomo ignores a group's rcx key and the top-level rcx-profiles, so the
-// applied config file is read once more for them.
+// rcxReadSubscription reads the routing a provider's manifest declares. The
+// subscription body carries none: mihomo ignores unknown keys, and other
+// clients must not have to carry ReClash's.
 func rcxReadSubscription(path string) rcx.SubscriptionLayer {
-	var raw struct {
-		ProxyGroups []struct {
-			Name string       `yaml:"name"`
-			Rcx  *rcx.Binding `yaml:"rcx"`
-		} `yaml:"proxy-groups"`
-		Profiles  map[string]any `yaml:"rcx-profiles"`
-		Scenarios map[string]any `yaml:"rcx-scenarios"`
-		Scenario  string         `yaml:"rcx-scenario"`
-	}
-	layer := rcxReadBundle(rcxBundlePath(path))
-	buf, err := readCoreFile(path)
-	if err != nil || !bytes.Contains(buf, []byte("rcx")) || yaml.Unmarshal(buf, &raw) != nil {
-		return layer
-	}
-	for _, group := range raw.ProxyGroups {
-		if group.Rcx != nil && group.Name != "" {
-			layer.Groups[group.Name] = *group.Rcx
-		}
-	}
-	maps.Copy(layer.Profiles, raw.Profiles)
-	maps.Copy(layer.Scenarios, raw.Scenarios)
-	layer.Scenario = cmp.Or(raw.Scenario, layer.Scenario)
-	return layer
+	return rcxReadBundle(rcxBundlePath(path))
 }
 
-// rcxBundlePath is where the host keeps the routing bundle a provider serves
-// beside a universal subscription (header reclash-routing).
 func rcxBundlePath(path string) string {
 	return strings.TrimSuffix(path, filepath.Ext(path)) + ".routing.yaml"
 }
 
-// rcxReadBundle reads a routing bundle: profiles and bindings to groups by
-// name. What the subscription itself declares wins over it.
 func rcxReadBundle(path string) rcx.SubscriptionLayer {
-	var bundle struct {
-		Profiles  map[string]any         `yaml:"profiles"`
-		Groups    map[string]rcx.Binding `yaml:"groups"`
-		Scenarios map[string]any         `yaml:"scenarios"`
-		Scenario  string                 `yaml:"scenario"`
+	var manifest struct {
+		Routing struct {
+			Profiles  map[string]any         `yaml:"profiles"`
+			Bindings  map[string]rcx.Binding `yaml:"bindings"`
+			Scenarios map[string]any         `yaml:"scenarios"`
+			Scenario  string                 `yaml:"scenario"`
+		} `yaml:"routing"`
 	}
 	layer := rcx.SubscriptionLayer{Groups: map[string]rcx.Binding{}, Profiles: map[string]any{}, Scenarios: map[string]any{}}
 	buf, err := readCoreFile(path)
-	if err != nil || len(buf) > rcxBundleLimit || yaml.Unmarshal(buf, &bundle) != nil {
+	if err != nil || len(buf) > rcxBundleLimit || yaml.Unmarshal(buf, &manifest) != nil {
 		return layer
 	}
-	maps.Copy(layer.Groups, bundle.Groups)
-	maps.Copy(layer.Profiles, bundle.Profiles)
-	maps.Copy(layer.Scenarios, bundle.Scenarios)
-	layer.Scenario = bundle.Scenario
+	routing := manifest.Routing
+	maps.Copy(layer.Groups, routing.Bindings)
+	maps.Copy(layer.Profiles, routing.Profiles)
+	maps.Copy(layer.Scenarios, routing.Scenarios)
+	layer.Scenario = routing.Scenario
 	return layer
 }
 

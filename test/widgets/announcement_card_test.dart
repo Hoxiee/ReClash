@@ -4,16 +4,16 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 
+import '../helpers/provider_presentation.dart';
 import '../helpers/test_app.dart';
 
-ProviderContainer _container(Map<String, List<String>> headers) =>
+ProviderContainer _container(Map<String, Object?> provider) =>
     ProviderContainer(
       overrides: [
         providerHintsProvider.overrideWithValue(
-          ProviderHints(readSubscriptionMetadata(headers).metadata),
+          ProviderHints(manifestMetadata({'provider': provider})),
         ),
       ],
     );
@@ -47,8 +47,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     final text = List.filled(30, 'Subscription news and details.').join('\n');
     final container = _container({
-      'announce': [text],
-      'reclash-announceurl': ['https://example.test/news'],
+      'announce': {'text': text, 'url': 'https://example.test/news'},
     });
     addTearDown(container.dispose);
     globalState.container = container;
@@ -117,8 +116,7 @@ void main() {
       'Your subscription includes every region.',
     ).join('\n');
     final container = _container({
-      'announce': [text],
-      'reclash-announceurl': ['https://example.test/plan'],
+      'announce': {'text': text, 'url': 'https://example.test/plan'},
     });
     addTearDown(container.dispose);
     await _pump(tester, container);
@@ -141,8 +139,8 @@ void main() {
     tester,
   ) async {
     final container = _container({
-      'announce': ['Plan description'],
-      'reclash-notice': ['Maintenance tonight'],
+      'announce': {'text': 'Plan description'},
+      'notice': {'text': 'Maintenance tonight'},
     });
     addTearDown(container.dispose);
     await _pump(tester, container);
@@ -156,7 +154,7 @@ void main() {
 
   testWidgets('notice without a link opens its full message', (tester) async {
     final container = _container({
-      'reclash-notice': ['Maintenance tonight'],
+      'notice': {'text': 'Maintenance tonight'},
     });
     addTearDown(container.dispose);
     await _pump(tester, container);
@@ -170,10 +168,14 @@ void main() {
     'notice and description links use the external link confirmation',
     (tester) async {
       final container = _container({
-        'announce': ['Plan description'],
-        'reclash-announceurl': ['https://example.test/plan'],
-        'reclash-notice': ['Maintenance tonight'],
-        'reclash-noticeurl': ['https://example.test/status'],
+        'announce': {
+          'text': 'Plan description',
+          'url': 'https://example.test/plan',
+        },
+        'notice': {
+          'text': 'Maintenance tonight',
+          'url': 'https://example.test/status',
+        },
       });
       addTearDown(container.dispose);
       await _pump(tester, container);
@@ -194,8 +196,8 @@ void main() {
 
   testWidgets('missing or blank messages render no cards', (tester) async {
     final container = _container({
-      'announce': ['  '],
-      'reclash-notice': ['  '],
+      'announce': {'text': '  '},
+      'notice': {'text': '  '},
     });
     addTearDown(container.dispose);
     await _pump(tester, container);

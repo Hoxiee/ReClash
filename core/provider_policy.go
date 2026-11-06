@@ -24,8 +24,8 @@ import (
 
 const maxPolicyNodes = 4096
 const maxPolicyApps = 512
+const maxPolicyGroupDepth = 16
 
-var policyNodeID = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$`)
 var policyPackage = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$`)
 var providerPolicyMu sync.Mutex
 var activeProviderPolicy atomic.Pointer[providerPolicy]
@@ -62,117 +62,133 @@ func providerPolicyPath() string {
 	return filepath.Join(C.Path.HomeDir(), "provider-policy.json")
 }
 
-func parseProviderPolicy(data []byte) (*providerPolicy, error) {
-	data, err := age.DecryptBytes(data)
+func parseProviderPolicy(data []byte, lockGlobal, lockApps bool) (*providerPolicy, error) {
+	raw, err := policyRawConfig(data)
 	if err != nil {
-		return nil, err
-	}
-	var document map[string]any
-	if err := yaml.Unmarshal(data, &document); err != nil {
 		return nil, err
 	}
 	policy := &providerPolicy{Version: 1}
-	value, present := document["reclash-policy"]
-	if !present {
+	if !lockGlobal && !lockApps {
 		return policy, nil
 	}
-	root, err := policyMapping(value, "version", "global", "apps")
+	if lockGlobal {
+		policy.Restricted = true
+		if policy.Allowed, err = policyGlobalRoutes(raw); err != nil {
+			return nil, err
+		}
+	}
+	if lockApps {
+		if policy.Apps, err = policyStrings(raw.Tun.ExcludePackage, maxPolicyApps, policyPackage); err != nil {
+			return nil, err
+		}
+	}
+	return policy, nil
+}
+
+// policyGlobalRoutes expands the members of the GLOBAL group down to inline
+// proxies. Names that are neither a group nor an inline proxy (provider
+// names, DIRECT, REJECT) add nothing, so they stay denied. A pattern that
+// cannot be evaluated fails the whole policy rather than narrowing it.
+func policyGlobalRoutes(raw *config.RawConfig) ([]string, error) {
+	resolver := newGroupResolver(raw)
+	var allowed []string
+	visited := map[string]bool{}
+	var walk func(name string, depth int) error
+	walk = func(name string, depth int) error {
+		if visited[name] || depth > maxPolicyGroupDepth {
+			return nil
+		}
+		visited[name] = true
+		if _, ok := resolver.groups[name]; ok {
+			members, err := resolver.members(name)
+			if err != nil {
+				return err
+			}
+			for _, member := range members {
+				if err := walk(member, depth+1); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		if node, ok := resolver.nodes[name]; ok {
+			if fingerprint := adapter.RouteFingerprintOf(node); fingerprint != "" {
+				allowed = append(allowed, fingerprint)
+			}
+		}
+		return nil
+	}
+	if _, ok := resolver.groups["GLOBAL"]; ok {
+		if err := walk("GLOBAL", 0); err != nil {
+			return nil, err
+		}
+	}
+	slices.Sort(allowed)
+	allowed = slices.Compact(allowed)
+	if len(allowed) > maxPolicyNodes {
+		return nil, errors.New("provider GLOBAL node limit exceeded")
+	}
+	return allowed, nil
+}
+
+// providerGlobalNodes is the Core's own view for the app, which cannot run
+// regexp2: Dart's RegExp rejects `(?i)` and has ASCII-only `\b` and `\w`.
+type providerGlobalNodes struct {
+	Allowed int `json:"allowed"`
+	Inline  int `json:"inline"`
+}
+
+func handleGetProviderGlobalNodes(path string) (providerGlobalNodes, error) {
+	data, err := readCoreFile(path)
+	if err != nil {
+		return providerGlobalNodes{}, err
+	}
+	raw, err := policyRawConfig(data)
+	if err != nil {
+		return providerGlobalNodes{}, err
+	}
+	allowed, err := policyGlobalRoutes(raw)
+	if err != nil {
+		return providerGlobalNodes{}, err
+	}
+	routes := map[string]bool{}
+	inline := 0
+	for _, node := range raw.Proxy {
+		fingerprint := adapter.RouteFingerprintOf(node)
+		if fingerprint == "" || !routes[fingerprint] {
+			inline++
+		}
+		routes[fingerprint] = true
+	}
+	return providerGlobalNodes{Allowed: len(allowed), Inline: inline}, nil
+}
+
+func policyRawConfig(data []byte) (*config.RawConfig, error) {
+	data, err := age.DecryptBytes(data)
 	if err != nil {
 		return nil, err
-	}
-	if version, ok := root["version"].(int); !ok || version != 1 {
-		return nil, errors.New("unsupported provider policy version")
-	}
-	var allowed []string
-	if value, present := root["global"]; present {
-		global, err := policyMapping(value, "allow")
-		if err != nil {
-			return nil, err
-		}
-		allowed, err = policyStrings(global["allow"], maxPolicyNodes, policyNodeID)
-		if err != nil {
-			return nil, err
-		}
-		policy.Restricted = true
-	}
-	if value, present := root["apps"]; present {
-		apps, err := policyMapping(value, "android")
-		if err != nil {
-			return nil, err
-		}
-		if value, present := apps["android"]; present {
-			android, err := policyMapping(value, "exclude")
-			if err != nil {
-				return nil, err
-			}
-			policy.Apps, err = policyStrings(android["exclude"], maxPolicyApps, policyPackage)
-			if err != nil {
-				return nil, err
-			}
-		}
 	}
 	raw := config.DefaultRawConfig()
 	if err := yaml.Unmarshal(data, raw); err != nil {
 		return nil, err
 	}
-	nodes := map[string]string{}
-	for _, node := range raw.Proxy {
-		value, present := node["reclash-id"]
-		if !present {
-			continue
-		}
-		id, ok := value.(string)
-		if !ok || !policyNodeID.MatchString(id) || nodes[id] != "" {
-			return nil, errors.New("invalid or duplicate provider node ID")
-		}
-		fingerprint := adapter.RouteFingerprintOf(node)
-		if fingerprint == "" {
-			return nil, errors.New("invalid provider node definition")
-		}
-		nodes[id] = fingerprint
-	}
-	if len(nodes) > maxPolicyNodes {
-		return nil, errors.New("provider node ID limit exceeded")
-	}
-	for _, id := range allowed {
-		fingerprint, ok := nodes[id]
-		if !ok {
-			return nil, fmt.Errorf("provider policy references unknown node ID %q", id)
-		}
-		policy.Allowed = append(policy.Allowed, fingerprint)
-	}
-	slices.Sort(policy.Allowed)
-	policy.Allowed = slices.Compact(policy.Allowed)
-	return policy, nil
+	return raw, nil
 }
 
-func policyMapping(value any, keys ...string) (map[string]any, error) {
-	mapping, ok := value.(map[string]any)
-	if !ok || mapping == nil {
-		return nil, errors.New("provider policy must contain mappings")
-	}
-	for key := range mapping {
-		if !slices.Contains(keys, key) {
-			return nil, fmt.Errorf("unknown provider policy field %q", key)
-		}
-	}
-	return mapping, nil
-}
-
-func policyStrings(value any, limit int, pattern *regexp.Regexp) ([]string, error) {
-	values, ok := value.([]any)
-	if !ok || len(values) > limit {
+func policyStrings(values []string, limit int, pattern *regexp.Regexp) ([]string, error) {
+	if len(values) > limit {
 		return nil, errors.New("invalid provider policy list")
 	}
 	result := make([]string, 0, len(values))
 	seen := map[string]bool{}
-	for _, value := range values {
-		text, ok := value.(string)
-		if !ok || !pattern.MatchString(text) || seen[text] {
-			return nil, errors.New("invalid or duplicate provider policy list entry")
+	for _, text := range values {
+		if !pattern.MatchString(text) {
+			return nil, errors.New("invalid provider policy list entry")
 		}
-		seen[text] = true
-		result = append(result, text)
+		if !seen[text] {
+			seen[text] = true
+			result = append(result, text)
+		}
 	}
 	slices.Sort(result)
 	return result, nil
@@ -180,6 +196,8 @@ func policyStrings(value any, limit int, pattern *regexp.Regexp) ([]string, erro
 
 func loadProviderPolicy(params *SetupParams) (*providerPolicy, error) {
 	var policy *providerPolicy
+	lockGlobal := params.LockGlobal != nil && *params.LockGlobal
+	lockApps := providerPolicyAndroid && params.LockApps != nil && *params.LockApps
 	if params.PolicyPath != nil {
 		policy = &providerPolicy{Version: 1}
 		if *params.PolicyPath != "" {
@@ -187,7 +205,7 @@ func loadProviderPolicy(params *SetupParams) (*providerPolicy, error) {
 			if err != nil {
 				return nil, err
 			}
-			policy, err = parseProviderPolicy(data)
+			policy, err = parseProviderPolicy(data, lockGlobal, lockApps)
 			if err != nil {
 				return nil, err
 			}
@@ -202,7 +220,7 @@ func loadProviderPolicy(params *SetupParams) (*providerPolicy, error) {
 			if errors.Is(err, os.ErrNotExist) {
 				policy = &providerPolicy{Version: 1}
 			} else if err == nil {
-				policy, err = parseProviderPolicy(data)
+				policy, err = parseProviderPolicy(data, lockGlobal, lockApps)
 			}
 		} else if err == nil {
 			policy = &providerPolicy{}
@@ -219,7 +237,7 @@ func loadProviderPolicy(params *SetupParams) (*providerPolicy, error) {
 		policy.NoGlobal = *params.NoGlobal
 	}
 	if len(policy.Apps) != 0 {
-		if !providerPolicyAndroid || params.VPNEnabled == nil || !*params.VPNEnabled {
+		if params.VPNEnabled == nil || !*params.VPNEnabled {
 			return nil, errors.New("provider policy requires Android VPN app exclusions")
 		}
 		for _, app := range policy.Apps {

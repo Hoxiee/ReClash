@@ -1,6 +1,6 @@
 # Standard registry
 
-Limits, metadata fields and HTTP headers of provider standard version 1, generated from the registry the app decodes with.
+Limits, manifest fields and HTTP headers of provider standard version 1, generated from the registry the app decodes with.
 
 Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g.json). Value formats and behavior: [Response headers](headers.md) and [Request headers](request.md).
 
@@ -13,39 +13,35 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | Wire payload | 16777216 |
 | Decoded payload | 33554432 |
 
-## Metadata fields
+## Manifest fields
 
-| Path | Header | Type | Trust | Consumer | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `provider.name` | `reclash-servicename` | text | display | panel |  |
-| `provider.logo` | `reclash-servicelogo` | url | display | panel |  |
-| `provider.logoDark` | `reclash-servicelogodark` | url | display | panel |  |
-| `provider.supportUrl` | `reclash-supporturl` | url | display | panel | alias `support-url` |
-| `provider.webUrl` | `reclash-webpageurl` | url | display | panel | alias `profile-web-page-url` |
-| `provider.buyPlanUrl` | `reclash-buyplan` | url | display | panel | suffix `provider.buyPlanDays` 1-3650 |
-| `provider.buyTrafficUrl` | `reclash-buytraffic` | url | display | panel | suffix `provider.buyTrafficPercent` 1-100 |
-| `provider.announce` | `reclash-announce` | text | display | panel | alias `announce` |
-| `provider.announceUrl` | `reclash-announceurl` | url | display | panel |  |
-| `provider.notice` | `reclash-notice` | text | display | panel |  |
-| `provider.noticeUrl` | `reclash-noticeurl` | url | display | panel |  |
-| `subscription.type` | `reclash-subscriptiontype` | text | display | panel |  |
-| `account.title` | `profile-title` | text | display | panel |  |
-| `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler | alias `profile-update-interval` x60 |
-| `routing.bundleUrl` | `reclash-routing` | url | hint | routing |  |
-| `presentation.hideUrl` | `reclash-hideurl` | boolean | display | panel | alias `hide-url` |
-| `presentation.serverGroup` | `reclash-serverinfo` | text | display | panel |  |
-| `presentation.config` | `reclash-config` | url | hint | appearance | HTTPS response only |
-| `reminder.expireDays` | `reclash-expiredays` | numbers | hint | reminder |  |
-| `reminder.trafficPercent` | `reclash-trafficpercent` | numbers | hint | reminder |  |
-| `settings.flags` | `reclash-settings` | tokens | hint | settings |  |
-| `settings.restrictions` | `reclash-restrictions` | tokens | hint | settings |  |
-| `transport.fallbackHosts` | `reclash-fallbackhosts` | hosts | hint | transport |  |
-| `transport.newDomain` | `reclash-newdomain` | hosts | hint | transport |  |
-| `apps.exclude` | `reclash-excludeapps` | packages | hint | apps |  |
-| `apps.include` | `reclash-includeapps` | packages | hint | apps |  |
-| `apps.routing` | `reclash-approuting` | tokens | hint | apps |  |
-| `support.keys` | `reclash-support-key` | keys | consent | support | HTTPS response only |
-| `support.uploadUrl` | `reclash-support-upload` | url | consent | support | HTTPS response only |
+| Path | Type | Limit | Trust | Consumer | Notes |
+| --- | --- | ---: | --- | --- | --- |
+| `provider.name` | text | 160 | display | panel |  |
+| `provider.logo` | url | 1024 | display | panel |  |
+| `provider.logo-dark` | url | 1024 | display | panel |  |
+| `provider.support-url` | url | 1024 | display | panel | fallback header `support-url` |
+| `provider.web-url` | url | 1024 | display | panel | fallback header `profile-web-page-url` |
+| `provider.renew.url` | url | 1024 | display | panel | `provider.renew.days` 1-3650 |
+| `provider.top-up.url` | url | 1024 | display | panel | `provider.top-up.percent` 1-100 |
+| `provider.announce.text` | text | 1024 | display | panel | fallback header `announce` |
+| `provider.announce.url` | url | 1024 | display | panel |  |
+| `provider.notice.text` | text | 1024 | display | panel |  |
+| `provider.notice.url` | url | 1024 | display | panel |  |
+| `provider.type` | text | 32 | display | panel |  |
+| `provider.hide-url` | boolean | 1024 | display | panel | fallback header `hide-url` |
+| `provider.server-group` | text | 256 | display | panel |  |
+| `reminders.expire-days` | numbers | 8 | hint | reminder |  |
+| `reminders.traffic-percent` | numbers | 8 | hint | reminder |  |
+| `settings` | flags | 16 | hint | settings |  |
+| `policy` | policy | 16 | hint | settings |  |
+| `transport.fallback-hosts` | hosts | 5 | hint | transport |  |
+| `transport.new-domain` | hosts | 1 | hint | transport |  |
+| `apps.exclude` | packages | 512 | hint | apps |  |
+| `apps.include` | packages | 512 | hint | apps |  |
+| `apps.routing` | tokens | 1 | hint | apps |  |
+| `support.keys` | keys | 2 | consent | support |  |
+| `support.upload-url` | url | 1024 | consent | support | https only |
 
 ## HTTP headers
 
@@ -64,3 +60,10 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | `x-client` | request | ascii | no |
 | `x-app-version` | request | ascii | no |
 | `x-device-locale` | request | ascii | yes |
+| `support-url` | response | url | no |
+| `profile-web-page-url` | response | url | no |
+| `announce` | response | text-or-base64-prefixed | no |
+| `profile-title` | response | text-or-base64-prefixed | no |
+| `profile-update-interval` | response | decimal | no |
+| `hide-url` | response | boolean | no |
+| `reclash-config` | response | url | no |

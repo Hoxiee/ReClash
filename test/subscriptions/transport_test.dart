@@ -236,7 +236,7 @@ void main() {
     final uri = await serve((request) async {
       request.response.headers
         ..set('x-hwid-max-devices-reached', 'true')
-        ..set('reclash-supporturl', 'https://provider.example/account');
+        ..set('support-url', 'https://provider.example/account');
       await request.response.close();
     });
     await expectLater(

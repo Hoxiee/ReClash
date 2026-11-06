@@ -96,6 +96,7 @@ class SetupAction extends _$SetupAction {
     final required = ref.read(providerRequiredAppsProvider);
     final running = ref.read(runningVpnOptionsProvider);
     final applied = running == null || running.excludesRequiredApps(required);
+    final policy = ref.read(providerPolicyProvider);
     return SetupParams(
       selectedMap: selectedMap,
       testUrl: ref.read(patchClashConfigProvider).testUrl,
@@ -104,6 +105,8 @@ class SetupAction extends _$SetupAction {
       noGlobal: ref
           .read(providerRestrictionsProvider)
           .contains(ProviderRestriction.noGlobal),
+      lockGlobal: policy?.lockGlobal,
+      lockApps: policy?.lockApps,
       vpnEnabled: system.isAndroid && ref.read(vpnSettingProvider).enable,
       excludedApps: applied ? (required.toList()..sort()) : const [],
     );
@@ -770,14 +773,6 @@ class SetupAction extends _$SetupAction {
     if (hasScript) {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
-    final policy = ref
-        .read(profilesProvider)
-        .getProfile(profileId)
-        ?.subscriptionSnapshot
-        ?.providerPolicy;
-    if (policy != null) {
-      rawConfig = {...rawConfig, 'reclash-policy': policy.toJson()};
-    }
     if (ref.read(sandboxProvider)) {
       rawConfig = withSandboxNodes(rawConfig);
     }
@@ -1088,6 +1083,7 @@ class SetupAction extends _$SetupAction {
           validate: (path, key) => _core.validateProfile(path, key),
           defaultUserAgent: globalState.ua,
           decrypt: _core.decryptProfilePayload,
+          globalNodes: _core.getProviderGlobalNodes,
         );
     final nextProfile = suppressErrors
         ? await refreshProfile()

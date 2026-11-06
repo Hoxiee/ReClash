@@ -15,6 +15,7 @@ import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
 import '../helpers/app_paths.dart';
+import '../helpers/provider_presentation.dart';
 
 const _configUrl = 'https://cdn.example.test/reclash.yaml';
 const _nodeBody =
@@ -125,7 +126,7 @@ void main() {
     final stored = await readStoredProviderConfig(profile.id);
     expect(stored?.source, _config('First'));
     expect(stored?.etag, '"v1"');
-    expect(transport.configHeaders, isEmpty);
+    expect(transport.configHeaders, {'user-agent': 'ReClash/test'});
     expect(saved.subscriptionSnapshot?.warnings, isEmpty);
   });
 
@@ -139,7 +140,10 @@ void main() {
     );
     final saved = await update(profile, transport);
 
-    expect(transport.configHeaders, {'if-none-match': '"v1"'});
+    expect(transport.configHeaders, {
+      'user-agent': 'ReClash/test',
+      'if-none-match': '"v1"',
+    });
     expect(saved.subscriptionSnapshot?.warnings, isEmpty);
     final stored = await readStoredProviderConfig(profile.id);
     expect(stored?.source, _config('First'));
@@ -152,7 +156,7 @@ void main() {
       config: _serves(_config('Other')),
     );
     await update(profile, transport);
-    expect(transport.configHeaders, isEmpty);
+    expect(transport.configHeaders, {'user-agent': 'ReClash/test'});
   });
 
   test('a network failure keeps the copy and the update succeeds', () async {
@@ -230,6 +234,36 @@ void main() {
     expect(File(path).existsSync(), isTrue);
     await deleteStoredProviderConfig(profile.id);
     expect(File(path).existsSync(), isFalse);
+  });
+
+  group('the routing section', () {
+    const routing = '''
+version: 1
+routing:
+  scenario: home
+''';
+
+    Future<File> routingFile(Profile profile) async =>
+        File(await appPath.getProfileRoutingPath(profile.id.toString()));
+
+    test(
+      'is stored as the whole manifest and removed when withdrawn',
+      () async {
+        final profile = newProfile();
+        await update(profile, _Transport(config: _serves(routing)));
+        expect((await routingFile(profile)).readAsStringSync(), routing);
+
+        await update(profile, _Transport(config: _serves(_config('Plain'))));
+        expect((await routingFile(profile)).existsSync(), isFalse);
+      },
+    );
+
+    test('is removed with the manifest header', () async {
+      final profile = newProfile();
+      await update(profile, _Transport(config: _serves(routing)));
+      await update(profile, _Transport(header: null));
+      expect((await routingFile(profile)).existsSync(), isFalse);
+    });
   });
 
   group('a superseded update', () {
@@ -365,10 +399,14 @@ void main() {
   });
 
   group('consumption', () {
-    final headers = readSubscriptionMetadata({
-      'reclash-config': [_configUrl],
-      'reclash-restrictions': ['noglobal'],
-    }, secure: true).metadata;
+    final headers =
+        readSubscriptionMetadata({
+          'reclash-config': [_configUrl],
+        }, secure: true).metadata.merge(
+          manifestMetadata({
+            'policy': {'global': 'off'},
+          }),
+        );
 
     test('the file holds the cards and labels', () {
       final config = parseProviderConfig(_config('File'), 'en').config;

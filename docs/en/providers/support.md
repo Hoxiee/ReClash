@@ -33,12 +33,13 @@ Every JSON file has a `schema` field (`reclash.report.*@1`), so a panel can pars
 
 ## Receiving reports
 
-By default the user sends the archive to the chat behind `reclash-supporturl`. On mobile it goes through the share sheet; on desktop the app saves the file, copies the summary and opens the chat.
+By default the user sends the archive to the chat behind `provider.support-url`. On mobile it goes through the share sheet; on desktop the app saves the file, copies the summary and opens the chat.
 
-To receive reports directly, send an upload URL:
+To receive reports directly, set an upload URL in the [manifest](manifest.md#support):
 
-```http
-reclash-support-upload: https://support.example.com/reclash/reports
+```yaml
+support:
+  upload-url: https://support.example.com/reclash/reports
 ```
 
 The app asks the user once, naming your domain, and then sends:
@@ -62,7 +63,7 @@ You answer with a link; the user taps it, sees what it will do and confirms.
 reclash://fix?p=<payload>&s=<signature>
 ```
 
-A stranger cannot make such a link: it is signed with your key, and the app checks it against the key from your subscription.
+A stranger cannot make such a link: it is signed with your key, and the app checks it against the key from your manifest.
 
 ### Key
 
@@ -73,14 +74,22 @@ go run ./core/cmd/reclash-fix keygen -out key.txt
 go run ./core/cmd/reclash-fix header -key key.txt
 ```
 
-Send the printed header with the subscription:
+`keygen` writes the private key to `key.txt` (it never overwrites an existing file) and prints two lines:
 
-```http
-reclash-support-key: ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik
+```text
+support.keys value: ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik
+kid: E545QOZLVJE
 ```
 
-- Accepted only from an `https` subscription; refreshed on each update.
-- Up to two keys, comma-separated, for rotation.
+Put the `ed25519:…` value in the [manifest](manifest.md#support). `header` prints that bare value again from `key.txt`; `kid` is the key identifier inside link payloads.
+
+```yaml
+support:
+  keys: ["ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik"]
+```
+
+- Accepted only from a manifest named in an `https` response; refreshed on each update.
+- Up to two keys, a list, for rotation.
 
 ### Signing a link
 
@@ -132,4 +141,4 @@ For panel integrations without the CLI. `p` is base64url of the UTF-8 JSON paylo
 - Unknown fields are refused.
 
 > [!TIP]
-> Test vector: the key from 32 zero bytes gives the header above, and signing this payload gives `s=XEdYg90ecSzT7cV1dRxH9cCVLpw01KXGiWC1Lz4iUD0kYga2zSoZwr1VQnkXVkVlyx5D3L3fGx_ursuvQvmBDQ`.
+> Test vector: the key from 32 zero bytes gives the key above, and signing this payload gives `s=XEdYg90ecSzT7cV1dRxH9cCVLpw01KXGiWC1Lz4iUD0kYga2zSoZwr1VQnkXVkVlyx5D3L3fGx_ursuvQvmBDQ`.

@@ -2,7 +2,6 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/widgets/traffic.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../helpers/provider_presentation.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
 
@@ -87,12 +87,17 @@ void main() {
         profilesProvider.overrideWith(TestProfiles.new),
         providerHintsProvider.overrideWithValue(
           ProviderHints(
-            readSubscriptionMetadata({
-              'announce': [
-                List.filled(30, 'Your subscription description.').join('\n'),
-              ],
-              'reclash-notice': ['Maintenance tonight'],
-            }).metadata,
+            manifestMetadata({
+              'provider': {
+                'announce': {
+                  'text': List.filled(
+                    30,
+                    'Your subscription description.',
+                  ).join('\n'),
+                },
+                'notice': {'text': 'Maintenance tonight'},
+              },
+            }),
           ),
         ),
       ]);
@@ -155,9 +160,11 @@ void main() {
         profilesProvider.overrideWith(TestProfiles.new),
         providerHintsProvider.overrideWithValue(
           ProviderHints(
-            readSubscriptionMetadata({
-              'announce': ['Your subscription description.'],
-            }).metadata,
+            manifestMetadata({
+              'provider': {
+                'announce': {'text': 'Your subscription description.'},
+              },
+            }),
           ),
         ),
       ]);

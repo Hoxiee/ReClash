@@ -34,7 +34,7 @@ The profile's "Request as" setting picks the preset. New profiles use Automatica
 
 Automatically tries the last successful preset first, then the table order from ReClash to v2rayNG. Presets that would send identical headers are skipped. At most 8 attempts run within 20 seconds.
 
-The next preset is tried only on `406`, `415` or an unknown body format. Any other failure stops negotiation. `flclashx-*` metadata applies only to the FlClashX preset ([FlClashX names](headers.md#flclashx-names)).
+The next preset is tried only on `406`, `415` or an unknown body format. Any other failure stops negotiation.
 
 A preset changes only request headers, never the device ID.
 
@@ -58,7 +58,7 @@ VLESS XHTTP conversion preserves supported `extra` options, including headers, p
 
 | Response | Result |
 | --- | --- |
-| `x-hwid-max-devices-reached: 1` with any status | Device-limit failure. The error offers `reclash-supporturl` from the same response, if it is an `http(s)` link. |
+| `x-hwid-max-devices-reached: 1` with any status | Device-limit failure. The error offers `support-url` from the same response, if it is an `http(s)` link. |
 | `401`, `403` | Unauthorized. |
 | `429` | Rate-limited. |
 | `406`, `415` | Fails; Automatically tries the next preset. |
@@ -66,22 +66,23 @@ VLESS XHTTP conversion preserves supported `extra` options, including headers, p
 | `2xx` with an empty body, or no nodes, groups or remote providers | Fails. |
 | `2xx` in an unknown format | Fails; Automatically tries the next preset. |
 
-A failed update leaves the saved profile, its metadata and its policy unchanged.
+A failed update leaves the saved profile, its metadata and its manifest unchanged.
 
 ## Fallback hosts
 
 Both fields work only for `https` subscriptions. The path and query are kept; only `host[:port]` changes.
 
-| Header | Value | Behavior |
+| Manifest key | Value | Behavior |
 | --- | --- | --- |
-| `reclash-fallbackhosts` | Up to 5 `host[:port]` | Tried in order after a transport, TLS, timeout, rate-limit or invalid-response error on the main host. Never replaces the stored URL. |
-| `reclash-newdomain` | One `host[:port]` | Tried first. After a successful update, the new host is fetched and validated; the profile moves to it only if that succeeds. Failure is ignored. |
+| `transport.fallback-hosts` | Up to 5 `host[:port]` | Tried in order after a transport, TLS, timeout, rate-limit or invalid-response error on the main host. Never replaces the stored URL. |
+| `transport.new-domain` | One `host[:port]` | Tried first. After a successful update, the new host is fetched and validated; the profile moves to it only if that succeeds. Failure is ignored. |
 
-Fallbacks come from stored metadata, so an earlier successful update must deliver them. Requests to them carry the same headers as to the main host, including the device ID.
+Fallbacks come from the stored [manifest](manifest.md#transport), so an earlier successful update must deliver it. Requests to them carry the same headers as to the main host, including the device ID.
 
-```http
-reclash-fallbackhosts: sub2.example.net, sub3.example.org:8443
-reclash-newdomain: sub.example.com
+```yaml
+transport:
+  fallback-hosts: [sub2.example.net, sub3.example.org:8443]
+  new-domain: sub.example.com
 ```
 
 ## Device ID
@@ -99,7 +100,7 @@ The platform ID is `ANDROID_ID` on Android, `MachineGuid` on Windows, the system
 
 - "Send HWID" has a global value and a per-profile override; "Use global" follows the global value.
 - Turning it on shows a disclosure.
-- The ID goes only to the subscription URL's origin and its fallback hosts. A cross-origin redirect drops it.
+- The ID goes only to the subscription URL's origin and its fallback hosts. A cross-origin redirect drops it, and a manifest on another origin never receives it.
 - [Preview API](preview-api.md) and logo requests never carry it.
 
 ## Device status

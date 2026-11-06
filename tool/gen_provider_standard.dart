@@ -16,9 +16,16 @@ void main(List<String> arguments) {
       'wireBytes': subscriptionWireLimit,
       'payloadBytes': subscriptionPayloadLimit,
     },
-    'fields': [for (final field in subscriptionFields) field.toJson()],
-    'headers': [for (final header in subscriptionHeaders) header.toJson()],
+    'manifestFields': [
+      for (final field in subscriptionFields)
+        if (field.manifest != null) field.toJson(),
+    ],
+    'headers': [for (final header in _headers()) header.toJson()],
   });
+  if (arguments.contains('--json-only')) {
+    File(_jsonPath).writeAsStringSync('$json\n');
+    return;
+  }
   final markdown = _markdown();
   if (arguments.contains('--check')) {
     _check(_jsonPath, '$json\n');
@@ -29,12 +36,33 @@ void main(List<String> arguments) {
   File(_markdownPath).writeAsStringSync(markdown);
 }
 
+/// The device headers, then every standard header that supplies a field.
+List<SubscriptionHeader> _headers() => [
+  ...subscriptionHeaders,
+  for (final field in subscriptionFields)
+    if (field.header case final header?)
+      SubscriptionHeader(
+        header,
+        'response',
+        switch (field.type) {
+          SubscriptionFieldType.integer => 'decimal',
+          SubscriptionFieldType.boolean => 'boolean',
+          SubscriptionFieldType.url => 'url',
+          _ => 'text-or-base64-prefixed',
+        },
+        context: [
+          field.secure ? 'https-response' : 'http-response',
+          if (field.manifest != null) 'fallback:${field.manifest}',
+        ],
+      ),
+];
+
 String _markdown() {
   final out = StringBuffer()
     ..writeln('# Standard registry')
     ..writeln()
     ..writeln(
-      'Limits, metadata fields and HTTP headers of provider standard version '
+      'Limits, manifest fields and HTTP headers of provider standard version '
       '$subscriptionStandardVersion, generated from the registry the app '
       'decodes with.',
     )
@@ -55,20 +83,21 @@ String _markdown() {
     ..writeln('| Wire payload | $subscriptionWireLimit |')
     ..writeln('| Decoded payload | $subscriptionPayloadLimit |')
     ..writeln()
-    ..writeln('## Metadata fields')
+    ..writeln('## Manifest fields')
     ..writeln()
-    ..writeln('| Path | Header | Type | Trust | Consumer | Notes |')
-    ..writeln('| --- | --- | --- | --- | --- | --- |');
+    ..writeln('| Path | Type | Limit | Trust | Consumer | Notes |')
+    ..writeln('| --- | --- | ---: | --- | --- | --- |');
   for (final field in subscriptionFields) {
+    final manifest = field.manifest;
+    if (manifest == null) continue;
     final notes = [
-      for (final alias in field.aliases)
-        'alias `${alias.header}`${alias.scale == 1 ? '' : ' x${alias.scale}'}',
+      if (field.header case final header?) 'fallback header `$header`',
       if (field.suffix case final suffix?)
-        'suffix `${suffix.path}` ${suffix.minimum}-${suffix.maximum}',
-      if (field.secure) 'HTTPS response only',
+        '`${suffix.manifest}` ${suffix.minimum}-${suffix.maximum}',
+      if (field.secure) 'https only',
     ];
     out.writeln(
-      '| `${field.path}` | `${field.header}` | ${field.type.name} | '
+      '| `$manifest` | ${field.type.name} | ${field.limit} | '
       '${field.trust.name} | ${field.consumer} | ${notes.join('; ')} |',
     );
   }
@@ -78,7 +107,7 @@ String _markdown() {
     ..writeln()
     ..writeln('| Header | Direction | Encoding | Sensitive |')
     ..writeln('| --- | --- | --- | --- |');
-  for (final header in subscriptionHeaders) {
+  for (final header in _headers()) {
     out.writeln(
       '| `${header.name}` | ${header.direction} | ${header.encoding} | '
       '${header.sensitive ? 'yes' : 'no'} |',

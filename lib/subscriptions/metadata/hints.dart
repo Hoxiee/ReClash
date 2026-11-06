@@ -6,10 +6,15 @@ import 'provider_cards.dart';
 import 'provider_config.dart';
 import 'provider_power_labels.dart';
 
-enum ProviderRestriction { noGlobal, androidSecure, denyWidgets }
+enum ProviderRestriction {
+  noGlobal,
+  lockGlobal,
+  lockApps,
+  androidSecure,
+  denyWidgets,
+}
 
-/// The app settings `reclash-settings` names; listed ones turn on and the
-/// rest of this set turns off.
+/// The app settings the manifest's `settings` map can set.
 enum ProviderSettingFlag {
   minimize,
   autorun,
@@ -241,13 +246,14 @@ class ProviderHints {
         : ProviderBackground(url, wallpaper!.opacity / 100);
   }
 
-  /// Null when the provider does not send `reclash-settings`.
+  /// Null when the manifest has no valid `settings` section; only the
+  /// listed settings are touched.
   Map<ProviderSettingFlag, bool>? get settings {
-    if (!metadata.fields.containsKey('settings.flags')) return null;
-    final named = metadata.strings('settings.flags').toSet();
+    final named = metadata.fields['settings.flags'];
+    if (named is! Map) return null;
     return {
       for (final flag in ProviderSettingFlag.values)
-        flag: named.contains(flag.name),
+        if (named[flag.name] case final bool value) flag: value,
     };
   }
 
@@ -279,7 +285,7 @@ class ProviderHints {
 
   List<String> get includedApps => metadata.strings('apps.include');
 
-  /// `reclash-approuting: domestic` keeps the home region's apps out of the
+  /// `apps.routing: domestic` keeps the home region's apps out of the
   /// tunnel; `domestic:<cc>` names the region instead of the app's own.
   ({bool enabled, String? region}) get domesticApps {
     final value = metadata.strings('apps.routing').firstOrNull;

@@ -5,8 +5,8 @@ import 'package:reclash/ui/code_label.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// What a dev subscription's last response set, in protocol terms, so a
-/// panel author can check their headers without a proxy log.
+/// What a dev subscription's last response and manifest set, in protocol
+/// terms, so a panel author can check them without a proxy log.
 class SubscriptionInspectorSheet extends StatelessWidget {
   const SubscriptionInspectorSheet({super.key, required this.snapshot});
 
@@ -73,7 +73,7 @@ class SubscriptionInspectorSheet extends StatelessWidget {
               items: [
                 for (final path in paths)
                   _row(
-                    known[path]?.header ?? path,
+                    known[path]?.manifest ?? known[path]?.header ?? path,
                     _value(fields[path]),
                     trailing: switch ([
                       ?known[path]?.trust.name,

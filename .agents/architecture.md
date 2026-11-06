@@ -1401,8 +1401,9 @@ errors, compiles it beside the live library and decides the group under it from 
 parses conditions for the builder and merges a fork with its changed source, all without changing what any group runs
 (`core/rcx/studio.go`). The user's own profiles live in `Config.rcxProfiles`, shared by every subscription, and reach
 the Core inside the user layer that `currentRoutingLayerProvider` builds, with the subscription's hosts, which a
-provider profile may contact without asking. A provider's routing bundle (`reclash-routing`) is saved beside the
-config as `<id>.routing.yaml`, and the Core reads it with the subscription.
+provider profile may contact without asking. A provider's manifest (header `reclash-config`) is saved beside the
+profile as `<id>.routing.yaml` when it has a `routing` section, and the Core reads that section (`profiles`, `scenarios`,
+`scenario`, `bindings`) with the subscription; the subscription body carries no routing.
 
 A scenario (`core/rcx/scenario.go`) is the second level above smart groups: chosen per subscription, it lays programs
 over the group bindings for the current network kind and publishes a tunnel mode through `Runtime.ApplyMode`.

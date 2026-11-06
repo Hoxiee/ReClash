@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
+import '../protocol/registry.dart';
 import 'metadata.dart';
 import 'provider_cards.dart';
 import 'provider_power_labels.dart';
 
-const providerConfigSizeLimit = 256 * 1024;
+const providerConfigSizeLimit = 512 * 1024;
 const providerConfigDepthLimit = 32;
 const providerConfigVersion = 1;
 
@@ -20,6 +21,8 @@ class ProviderConfig {
     this.powerButton = const {},
     this.wallpaper,
     this.widgets,
+    this.fields = const {},
+    this.routing,
   });
 
   final List<ProviderCard> cards;
@@ -34,6 +37,14 @@ class ProviderConfig {
 
   /// Lowercased widget names in display order, null without a valid section.
   final List<String>? widgets;
+
+  /// The valid manifest sections as snapshot metadata fields, keyed by
+  /// registry path; text is resolved for the locale given to the parser.
+  final Map<String, Object?> fields;
+
+  /// The `routing` section when its shape is valid. The Core reads it from
+  /// the stored source, so only its presence matters here.
+  final Map<String, Object?>? routing;
 }
 
 typedef ProviderConfigResult = ({
@@ -77,6 +88,8 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
     List<String>? widgets;
     var cards = const <ProviderCard>[];
     var labels = const <String, List<ProviderPowerLabel>>{};
+    final fields = <String, Object?>{};
+    Map<String, Object?>? routing;
     for (final MapEntry(:key, :value) in plain.entries) {
       switch (key) {
         case 'version':
@@ -114,6 +127,11 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
           labels = parseProviderPowerLabels(
             _labelStates(value, tags, warnings),
           );
+        case 'routing':
+          routing = _routing(value);
+          if (routing == null) warnings.add('Invalid routing section');
+        case _ when _fieldSections.contains(key):
+          fields.addAll(_section(key, value, tags, warnings));
         default:
           warnings.add('Unknown key $key');
       }
@@ -126,6 +144,8 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         powerButton: Map.unmodifiable(powerButton),
         wallpaper: wallpaper,
         widgets: widgets == null ? null : List.unmodifiable(widgets),
+        fields: Map.unmodifiable(fields),
+        routing: routing,
       ),
       warnings: List.unmodifiable(warnings),
     );
@@ -322,4 +342,208 @@ Map<String, String> _powerButton(
     warnings.add('Invalid opacity in wallpaper');
   }
   return (url: url, opacity: valid ? opacity : _wallpaperDefaultOpacity);
+}
+
+const _fieldSections = {
+  'provider',
+  'reminders',
+  'settings',
+  'policy',
+  'apps',
+  'transport',
+  'support',
+};
+
+/// Manifest key to [ProviderSettingFlag] name.
+const providerSettingKeys = {
+  'minimize-on-exit': 'minimize',
+  'launch-at-login': 'autorun',
+  'start-hidden': 'shadowstart',
+  'connect-on-launch': 'autostart',
+  'check-app-updates': 'autoupdate',
+  'capture-logs': 'openlogs',
+  'close-connections': 'closeconnections',
+};
+
+/// Each policy key's values, mapped to the restriction the value turns on;
+/// null is the unrestricted default.
+const providerPolicyValues = <String, Map<String, String?>>{
+  'global': {'any': null, 'listed': 'lockglobal', 'off': 'noglobal'},
+  'apps': {'recommended': null, 'required': 'lockapps'},
+  'local-ports': {'open': null, 'closed': 'androidsecure'},
+  'dashboard': {'editable': null, 'locked': 'denywidgets'},
+};
+
+/// A section with any invalid value is ignored whole, so its fields are
+/// withdrawn rather than half applied.
+Map<String, Object?> _section(
+  String name,
+  Object? value,
+  List<String> tags,
+  List<String> warnings,
+) {
+  final fields = <String, Object?>{};
+  final known = <String>{};
+  void invalid(String detail) => warnings.add('Invalid $name section: $detail');
+
+  if (value is! Map<String, Object?>) {
+    invalid('expected a map');
+    return const {};
+  }
+  if (name == 'policy') {
+    final tokens = <String>[];
+    for (final MapEntry(:key, :value) in value.entries) {
+      final values = providerPolicyValues[key];
+      if (values == null) {
+        warnings.add('Unknown key $key in policy');
+      } else if (!values.containsKey(value)) {
+        invalid('$key has no value $value');
+        return const {};
+      } else if (values[value] case final token?) {
+        tokens.add(token);
+      }
+    }
+    return _checked(name, 'settings.restrictions', tokens, warnings);
+  }
+  if (name == 'settings') {
+    final flags = <String, bool>{};
+    for (final MapEntry(:key, :value) in value.entries) {
+      final flag = providerSettingKeys[key];
+      if (flag == null) {
+        warnings.add('Unknown key $key in settings');
+      } else if (value is bool) {
+        flags[flag] = value;
+      } else {
+        invalid('$key must be a boolean');
+        return const {};
+      }
+    }
+    return flags.isEmpty
+        ? const {}
+        : _checked(name, 'settings.flags', flags, warnings);
+  }
+  for (final field in subscriptionFields) {
+    final manifest = field.manifest;
+    if (manifest == null || manifest.split('.').first != name) continue;
+    final rest = manifest.split('.').skip(1).toList();
+    known.add(rest.join('.'));
+    final raw = _lookup(value, rest);
+    if (raw != null) {
+      final converted = _convert(field, raw, tags);
+      if (converted == null || !validSubscriptionField(field, converted)) {
+        invalid(manifest);
+        return const {};
+      }
+      fields[field.path] = converted;
+    }
+    if (field.suffix case final suffix?) {
+      final count = _lookup(value, suffix.manifest.split('.').skip(1).toList());
+      known.add(suffix.manifest.split('.').skip(1).join('.'));
+      if (count != null) {
+        if (count is! int || count < suffix.minimum || count > suffix.maximum) {
+          invalid(suffix.manifest);
+          return const {};
+        }
+        fields[suffix.path] = count;
+      }
+    }
+  }
+  _unknownKeys(value, '', known, name, warnings);
+  return fields;
+}
+
+Map<String, Object?> _checked(
+  String section,
+  String path,
+  Object value,
+  List<String> warnings,
+) {
+  final field = subscriptionFields.firstWhere((f) => f.path == path);
+  if (value is Iterable && value.isEmpty) return const {};
+  if (!validSubscriptionField(field, value)) {
+    warnings.add('Invalid $section section');
+    return const {};
+  }
+  return {path: value};
+}
+
+Object? _lookup(Map<String, Object?> map, List<String> path) {
+  Object? current = map;
+  for (final key in path) {
+    if (current is! Map<String, Object?>) return null;
+    current = current[key];
+  }
+  return current;
+}
+
+void _unknownKeys(
+  Map<String, Object?> map,
+  String prefix,
+  Set<String> known,
+  String section,
+  List<String> warnings,
+) {
+  for (final MapEntry(:key, :value) in map.entries) {
+    final path = prefix.isEmpty ? key : '$prefix.$key';
+    final isPrefix = known.any((k) => k.startsWith('$path.'));
+    if (known.contains(path)) continue;
+    if (isPrefix && value is Map<String, Object?>) {
+      _unknownKeys(value, path, known, section, warnings);
+    } else {
+      warnings.add('Unknown key $path in $section');
+    }
+  }
+}
+
+Object? _convert(SubscriptionField field, Object raw, List<String> tags) {
+  switch (field.type) {
+    case SubscriptionFieldType.text:
+      final text = switch (raw) {
+        final String text => text,
+        final Map<String, Object?> map => _localized(map, tags),
+        _ => null,
+      };
+      return text == null || text.trim().isEmpty ? null : text.trim();
+    case SubscriptionFieldType.tokens:
+    case SubscriptionFieldType.hosts:
+      final list = field.limit == 1 ? (raw is String ? [raw] : null) : raw;
+      if (list is! List || list.any((item) => item is! String)) return null;
+      final items = [
+        for (final item in list.cast<String>())
+          if (field.type == SubscriptionFieldType.hosts)
+            subscriptionAuthority(item.trim()) ?? item
+          else
+            item.trim().toLowerCase(),
+      ];
+      return items.toSet().toList();
+    case SubscriptionFieldType.numbers:
+      return raw is List && raw.every((n) => n is int)
+          ? (raw.cast<int>().toSet().toList()..sort())
+          : null;
+    case SubscriptionFieldType.packages:
+    case SubscriptionFieldType.keys:
+      return raw is List && raw.every((item) => item is String)
+          ? raw.cast<String>().toSet().toList()
+          : null;
+    default:
+      return raw;
+  }
+}
+
+const _routingKeys = {'profiles', 'scenarios', 'scenario', 'bindings'};
+
+Map<String, Object?>? _routing(Object? value) {
+  if (value is! Map<String, Object?> ||
+      value.keys.any((key) => !_routingKeys.contains(key))) {
+    return null;
+  }
+  for (final key in ['profiles', 'scenarios', 'bindings']) {
+    if (value.containsKey(key) && value[key] is! Map<String, Object?>) {
+      return null;
+    }
+  }
+  if (value.containsKey('scenario') && value['scenario'] is! String) {
+    return null;
+  }
+  return value;
 }

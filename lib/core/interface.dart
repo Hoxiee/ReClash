@@ -6,6 +6,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/speed_test.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -56,6 +57,8 @@ mixin CoreInterface {
   Future<bool> forceGc();
 
   Future<String> validateConfig(String path);
+
+  Future<ProviderGlobalNodes> getProviderGlobalNodes(String path);
 
   Future<String> decryptConfig(String path, String ageSecretKey);
 
@@ -316,6 +319,21 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<String> validateConfig(String path) async {
     return _invokeMessage(method: CoreMethod.validateConfig, arguments: path);
+  }
+
+  @override
+  Future<ProviderGlobalNodes> getProviderGlobalNodes(String path) async {
+    final result = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getProviderGlobalNodes,
+      arguments: path,
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned no GLOBAL nodes',
+      );
+    }
+    return ProviderGlobalNodes.fromJson(result);
   }
 
   @override

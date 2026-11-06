@@ -2,7 +2,7 @@
 
 A read-only JSON endpoint, version 1, that supplies the provider's presentation before the user confirms an import from a browser subscription page.
 
-It is separate from the subscription download and from the [response headers](headers.md) applied to saved profiles.
+It is separate from the subscription download and from the [provider manifest](manifest.md) and [response headers](headers.md) applied to saved profiles.
 
 ## Discovery
 
@@ -72,7 +72,7 @@ Valid API fields override recognized panel branding, which overrides generic HTM
 - Do not put configuration or connection keys in the response.
 - Send `Cache-Control: private, no-store` on account-specific responses. Keep private tokens out of logs and public caches.
 
-ReClash cannot enforce server-side read-only behavior. Only the user's Add action starts the subscription download and any device identification. Preview data is display-only: it does not change settings, routing, transport identity, the client preset or the stored URL, and it is not kept as subscription metadata. The same `subscription.type` sent as [`reclash-subscriptiontype`](headers.md#provider-panel) marks the saved profile.
+ReClash cannot enforce server-side read-only behavior. Only the user's Add action starts the subscription download and any device identification. Preview data is display-only: it does not change settings, routing, transport identity, the client preset or the stored URL, and it is not kept as subscription metadata. The same `subscription.type` sent as [`provider.type`](manifest.md#provider) marks the saved profile.
 
 ## Existing panels
 

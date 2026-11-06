@@ -63,6 +63,7 @@ extension _SubscriptionProfilePreparation on ProfilesAction {
       identityHeaders: inputs.managedHeaders,
       decrypt: _core.decryptProfilePayload,
       validate: (path, _) => _core.validateConfig(path),
+      globalNodes: _core.getProviderGlobalNodes,
       locale: inputs.locale,
     );
   }

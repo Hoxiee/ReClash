@@ -4,7 +4,7 @@ const subscriptionHeadersLimit = 64 * 1024;
 const subscriptionWireLimit = 16 * 1024 * 1024;
 const subscriptionPayloadLimit = 32 * 1024 * 1024;
 
-/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers] and [keys] the field's `limit` counts entries, not bytes.
+/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers] and [keys] the field's `limit` counts entries, not characters.
 enum SubscriptionFieldType {
   text,
   url,
@@ -15,40 +15,45 @@ enum SubscriptionFieldType {
   packages,
   numbers,
   keys,
+  flags,
+
+  /// Stored as restriction tokens; the manifest writes a map of named values.
+  policy,
 }
 
 enum SubscriptionTrust { display, hint, consent }
 
-/// A de-facto name other clients and panels already emit for a field.
-class SubscriptionAlias {
-  const SubscriptionAlias(this.header, {this.scale = 1});
-
-  final String header;
-
-  /// Multiplies an integer value, as hours become minutes.
-  final int scale;
-}
-
-/// The optional `,<n>` that follows a URL, stored as its own integer field.
+/// The count that accompanies a URL field in the manifest, stored as its own
+/// integer field.
 class SubscriptionSuffix {
-  const SubscriptionSuffix(this.path, {this.minimum = 1, this.maximum = 100});
+  const SubscriptionSuffix(
+    this.path,
+    this.manifest, {
+    this.minimum = 1,
+    this.maximum = 100,
+  });
 
   final String path;
+  final String manifest;
   final int minimum;
   final int maximum;
 }
 
+/// A value the snapshot keeps under [path]. The manifest names it at
+/// [manifest]; [header] is the standard response header that supplies it when
+/// the manifest does not (or, with no [manifest], the only source).
 class SubscriptionField {
   const SubscriptionField(
     this.path,
-    this.header,
     this.type, {
+    this.manifest,
+    this.header,
+    this.headerScale = 1,
     this.limit = 1024,
     this.minimum = 0,
     this.maximum = 9007199254740991,
     this.unit,
     this.trust = SubscriptionTrust.display,
-    this.aliases = const [],
     this.suffix,
     this.multiline = false,
     this.secure = false,
@@ -56,40 +61,40 @@ class SubscriptionField {
   });
 
   final String path;
-  final String header;
   final SubscriptionFieldType type;
+  final String? manifest;
+  final String? header;
+
+  /// Multiplies an integer header value, as hours become minutes.
+  final int headerScale;
   final int limit;
   final int minimum;
   final int maximum;
   final String? unit;
   final SubscriptionTrust trust;
-  final List<SubscriptionAlias> aliases;
   final SubscriptionSuffix? suffix;
   final bool multiline;
 
-  /// Read only from the headers of an HTTPS response: a body comment or a
-  /// plain HTTP response cannot set it.
+  /// An `https` URL only.
   final bool secure;
   final String consumer;
 
   Map<String, Object?> toJson() => {
-    'path': path,
-    'name': header,
+    'path': manifest,
     'type': type.name,
-    'direction': 'response',
-    'context': secure ? ['https-response'] : ['http-response', 'body-comment'],
     'encoding': switch (type) {
-      SubscriptionFieldType.text => 'text-or-base64-prefixed',
-      SubscriptionFieldType.url => suffix == null ? 'url' : 'url-with-suffix',
-      SubscriptionFieldType.integer => 'decimal',
+      SubscriptionFieldType.text => 'string-or-locale-map',
+      SubscriptionFieldType.url => 'url',
+      SubscriptionFieldType.integer => 'integer',
       SubscriptionFieldType.boolean => 'boolean',
-      SubscriptionFieldType.hosts => 'comma-separated-authorities',
-      SubscriptionFieldType.tokens => 'comma-separated-tokens',
-      SubscriptionFieldType.packages => 'comma-separated-packages',
-      SubscriptionFieldType.numbers => 'comma-separated-decimals',
-      SubscriptionFieldType.keys => 'comma-separated-ed25519-keys',
+      SubscriptionFieldType.hosts => 'list-of-authorities',
+      SubscriptionFieldType.tokens => 'list-of-tokens',
+      SubscriptionFieldType.packages => 'list-of-packages',
+      SubscriptionFieldType.numbers => 'list-of-integers',
+      SubscriptionFieldType.keys => 'list-of-ed25519-keys',
+      SubscriptionFieldType.flags => 'map-of-booleans',
+      SubscriptionFieldType.policy => 'map-of-named-values',
     },
-    'multiplicity': 'singleton',
     'limit': limit,
     if (type == SubscriptionFieldType.integer ||
         type == SubscriptionFieldType.numbers) ...{
@@ -99,20 +104,15 @@ class SubscriptionField {
     if (unit != null) 'unit': unit,
     if (suffix case final suffix?)
       'suffix': {
-        'path': suffix.path,
+        'path': suffix.manifest,
         'minimum': suffix.minimum,
         'maximum': suffix.maximum,
       },
-    if (aliases.isNotEmpty)
-      'aliases': [
-        for (final alias in aliases)
-          {'name': alias.header, if (alias.scale != 1) 'scale': alias.scale},
-      ],
+    if (secure) 'https': true,
+    if (header != null) 'fallbackHeader': header,
     'trust': trust.name,
     'introduced': 1,
-    'absence': path.startsWith('subscription.')
-        ? 'retain-last-known-stale'
-        : 'restore-local',
+    'absence': 'withdraw',
     'consumer': consumer,
     'available': true,
   };
@@ -121,136 +121,136 @@ class SubscriptionField {
 const subscriptionFields = <SubscriptionField>[
   SubscriptionField(
     'provider.name',
-    'reclash-servicename',
     SubscriptionFieldType.text,
+    manifest: 'provider.name',
     limit: 160,
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.logo',
-    'reclash-servicelogo',
     SubscriptionFieldType.url,
+    manifest: 'provider.logo',
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.logoDark',
-    'reclash-servicelogodark',
     SubscriptionFieldType.url,
+    manifest: 'provider.logo-dark',
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.supportUrl',
-    'reclash-supporturl',
     SubscriptionFieldType.url,
-    aliases: [SubscriptionAlias('support-url')],
+    manifest: 'provider.support-url',
+    header: 'support-url',
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.webUrl',
-    'reclash-webpageurl',
     SubscriptionFieldType.url,
-    aliases: [SubscriptionAlias('profile-web-page-url')],
+    manifest: 'provider.web-url',
+    header: 'profile-web-page-url',
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.buyPlanUrl',
-    'reclash-buyplan',
     SubscriptionFieldType.url,
-    suffix: SubscriptionSuffix('provider.buyPlanDays', maximum: 3650),
+    manifest: 'provider.renew.url',
+    suffix: SubscriptionSuffix(
+      'provider.buyPlanDays',
+      'provider.renew.days',
+      maximum: 3650,
+    ),
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.buyTrafficUrl',
-    'reclash-buytraffic',
     SubscriptionFieldType.url,
-    suffix: SubscriptionSuffix('provider.buyTrafficPercent'),
+    manifest: 'provider.top-up.url',
+    suffix: SubscriptionSuffix(
+      'provider.buyTrafficPercent',
+      'provider.top-up.percent',
+    ),
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.announce',
-    'reclash-announce',
     SubscriptionFieldType.text,
-    aliases: [SubscriptionAlias('announce')],
+    manifest: 'provider.announce.text',
+    header: 'announce',
     multiline: true,
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.announceUrl',
-    'reclash-announceurl',
     SubscriptionFieldType.url,
+    manifest: 'provider.announce.url',
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.notice',
-    'reclash-notice',
     SubscriptionFieldType.text,
+    manifest: 'provider.notice.text',
     multiline: true,
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.noticeUrl',
-    'reclash-noticeurl',
     SubscriptionFieldType.url,
+    manifest: 'provider.notice.url',
     consumer: 'panel',
   ),
   SubscriptionField(
     'subscription.type',
-    'reclash-subscriptiontype',
     SubscriptionFieldType.text,
+    manifest: 'provider.type',
     limit: 32,
     consumer: 'panel',
   ),
   SubscriptionField(
     'account.title',
-    'profile-title',
     SubscriptionFieldType.text,
+    header: 'profile-title',
     limit: 160,
     consumer: 'panel',
   ),
   SubscriptionField(
     'update.intervalMinutes',
-    'reclash-autoupdateinterval',
     SubscriptionFieldType.integer,
+    header: 'profile-update-interval',
+    headerScale: 60,
     minimum: 5,
     maximum: 43200,
     unit: 'minutes',
     trust: SubscriptionTrust.hint,
-    aliases: [SubscriptionAlias('profile-update-interval', scale: 60)],
     consumer: 'scheduler',
   ),
   SubscriptionField(
-    'routing.bundleUrl',
-    'reclash-routing',
-    SubscriptionFieldType.url,
-    trust: SubscriptionTrust.hint,
-    consumer: 'routing',
-  ),
-  SubscriptionField(
     'presentation.hideUrl',
-    'reclash-hideurl',
     SubscriptionFieldType.boolean,
-    aliases: [SubscriptionAlias('hide-url')],
+    manifest: 'provider.hide-url',
+    header: 'hide-url',
     consumer: 'panel',
   ),
   SubscriptionField(
     'presentation.serverGroup',
-    'reclash-serverinfo',
     SubscriptionFieldType.text,
+    manifest: 'provider.server-group',
     limit: 256,
     consumer: 'panel',
   ),
   SubscriptionField(
     'presentation.config',
-    'reclash-config',
     SubscriptionFieldType.url,
+    header: 'reclash-config',
     trust: SubscriptionTrust.hint,
     secure: true,
-    consumer: 'appearance',
+    consumer: 'manifest',
   ),
   SubscriptionField(
     'reminder.expireDays',
-    'reclash-expiredays',
     SubscriptionFieldType.numbers,
+    manifest: 'reminders.expire-days',
     limit: 8,
     maximum: 365,
     unit: 'days',
@@ -259,8 +259,8 @@ const subscriptionFields = <SubscriptionField>[
   ),
   SubscriptionField(
     'reminder.trafficPercent',
-    'reclash-trafficpercent',
     SubscriptionFieldType.numbers,
+    manifest: 'reminders.traffic-percent',
     limit: 8,
     minimum: 1,
     maximum: 100,
@@ -270,86 +270,81 @@ const subscriptionFields = <SubscriptionField>[
   ),
   SubscriptionField(
     'settings.flags',
-    'reclash-settings',
-    SubscriptionFieldType.tokens,
+    SubscriptionFieldType.flags,
+    manifest: 'settings',
     limit: 16,
     trust: SubscriptionTrust.hint,
     consumer: 'settings',
   ),
   SubscriptionField(
     'settings.restrictions',
-    'reclash-restrictions',
-    SubscriptionFieldType.tokens,
+    SubscriptionFieldType.policy,
+    manifest: 'policy',
     limit: 16,
     trust: SubscriptionTrust.hint,
     consumer: 'settings',
   ),
   SubscriptionField(
     'transport.fallbackHosts',
-    'reclash-fallbackhosts',
     SubscriptionFieldType.hosts,
+    manifest: 'transport.fallback-hosts',
     limit: 5,
     trust: SubscriptionTrust.hint,
     consumer: 'transport',
   ),
   SubscriptionField(
     'transport.newDomain',
-    'reclash-newdomain',
     SubscriptionFieldType.hosts,
+    manifest: 'transport.new-domain',
     limit: 1,
     trust: SubscriptionTrust.hint,
     consumer: 'transport',
   ),
   SubscriptionField(
     'apps.exclude',
-    'reclash-excludeapps',
     SubscriptionFieldType.packages,
+    manifest: 'apps.exclude',
     limit: 512,
     trust: SubscriptionTrust.hint,
     consumer: 'apps',
   ),
   SubscriptionField(
     'apps.include',
-    'reclash-includeapps',
     SubscriptionFieldType.packages,
+    manifest: 'apps.include',
     limit: 512,
     trust: SubscriptionTrust.hint,
     consumer: 'apps',
   ),
   SubscriptionField(
     'apps.routing',
-    'reclash-approuting',
     SubscriptionFieldType.tokens,
+    manifest: 'apps.routing',
     limit: 1,
     trust: SubscriptionTrust.hint,
     consumer: 'apps',
   ),
   SubscriptionField(
     'support.keys',
-    'reclash-support-key',
     SubscriptionFieldType.keys,
+    manifest: 'support.keys',
     limit: 2,
     trust: SubscriptionTrust.consent,
-    secure: true,
     consumer: 'support',
   ),
   SubscriptionField(
     'support.uploadUrl',
-    'reclash-support-upload',
     SubscriptionFieldType.url,
+    manifest: 'support.upload-url',
     trust: SubscriptionTrust.consent,
     secure: true,
     consumer: 'support',
   ),
 ];
 
-/// Every header name the decoder reads for [subscriptionFields], aliases
-/// included.
+/// Every standard header the decoder reads for [subscriptionFields].
 Iterable<String> get subscriptionFieldHeaders => [
-  for (final field in subscriptionFields) ...[
-    field.header,
-    for (final alias in field.aliases) alias.header,
-  ],
+  for (final field in subscriptionFields) ?field.header,
 ];
 
 class SubscriptionHeader {

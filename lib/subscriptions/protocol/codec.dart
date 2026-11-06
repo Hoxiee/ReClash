@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import '../compatibility/clients.dart';
-import '../compatibility/metadata_adapter.dart';
 import '../metadata/metadata.dart';
+import '../metadata/provider_config.dart';
 import 'registry.dart';
 
 class SubscriptionMetadataResult {
@@ -18,32 +17,25 @@ class SubscriptionMetadataResult {
   final List<String> warnings;
 }
 
-Map<String, String> encodeSubscriptionMetadata(SubscriptionMetadata metadata) =>
-    {
-      for (final field in subscriptionFields)
-        if (metadata.fields[field.path] case final value?)
-          field.header: switch (field.type) {
-            SubscriptionFieldType.hosts ||
-            SubscriptionFieldType.tokens ||
-            SubscriptionFieldType.packages ||
-            SubscriptionFieldType.numbers ||
-            SubscriptionFieldType.keys => (value as List).join(','),
-            SubscriptionFieldType.text => _encodeText(value as String),
-            SubscriptionFieldType.url => switch (field.suffix) {
-              final suffix? when metadata.count(suffix.path) != null =>
-                '$value,${metadata.count(suffix.path)}',
-              _ => value as String,
-            },
-            _ => value.toString(),
-          },
-    };
-
-String _encodeText(String value) =>
-    value.runes.every((r) => r >= 32 && r < 127) &&
-        !value.startsWith('base64:') &&
-        !value.startsWith('base64,')
-    ? value
-    : 'base64:${base64.encode(utf8.encode(value))}';
+/// Lays the manifest's fields over the standard headers' fallbacks, then adds
+/// the config's own package lists. A missing manifest leaves only the headers.
+SubscriptionMetadataResult withManifest(
+  SubscriptionMetadataResult headers,
+  ProviderConfig? manifest, {
+  required List<String> excluded,
+  required List<String> included,
+}) => withConfigPackages(
+  SubscriptionMetadataResult(
+    metadata: headers.metadata.merge(
+      SubscriptionMetadata(manifest?.fields ?? const {}),
+    ),
+    source: headers.source,
+    deviceStatus: headers.deviceStatus,
+    warnings: headers.warnings,
+  ),
+  excluded: excluded,
+  included: included,
+);
 
 /// Adds a Clash config's own `tun` package lists to what the headers sent.
 SubscriptionMetadataResult withConfigPackages(
@@ -76,34 +68,17 @@ SubscriptionMetadataResult withConfigPackages(
 
 SubscriptionMetadataResult readSubscriptionMetadata(
   Map<String, List<String>> headers, {
-  String body = '',
-  SubscriptionClientPreset? clientPreset,
   bool secure = false,
 }) {
   final warnings = <String>[];
-  final adapter = clientPreset == null
-      ? null
-      : subscriptionCompatibilityAdapterFor(clientPreset);
-  final normalizedHeaders = _normalizeHeaders(headers);
-  final lowered =
-      adapter?.normalizeResponseHeaders(normalizedHeaders) ?? normalizedHeaders;
-  final bodyHeaders = subscriptionBodyHeaders(
-    body,
-    additionalHeaders: adapter?.responseHeaderAliases.keys ?? const [],
-  );
-  final bodyValues =
-      adapter?.normalizeResponseHeaders(bodyHeaders) ?? bodyHeaders;
-  final bodyMetadata = _decodeFields(bodyValues, warnings, secure: false);
-  final httpMetadata = _decodeFields(
-    lowered,
-    warnings,
-    secure: secure,
-  ).merge(_commonUsage(lowered, warnings));
+  final lowered = _normalizeHeaders(headers);
   return SubscriptionMetadataResult(
-    metadata: bodyMetadata.merge(httpMetadata),
-    source: httpMetadata.fields.isNotEmpty
-        ? SubscriptionDataSource.http
-        : SubscriptionDataSource.body,
+    metadata: _decodeFields(
+      lowered,
+      warnings,
+      secure: secure,
+    ).merge(_commonUsage(lowered, warnings)),
+    source: SubscriptionDataSource.http,
     deviceStatus: _deviceStatus(lowered),
     warnings: List.unmodifiable(warnings),
   );
@@ -134,15 +109,9 @@ SubscriptionMetadata _decodeFields(
 }) {
   final fields = <String, Object?>{};
   for (final field in subscriptionFields) {
-    var name = field.header;
-    var scale = 1;
-    var values = headers[name];
-    for (final alias in field.aliases) {
-      if (values != null) break;
-      values = headers[alias.header];
-      name = alias.header;
-      scale = alias.scale;
-    }
+    final name = field.header;
+    if (name == null) continue;
+    final values = headers[name];
     if (values == null) continue;
     if (field.secure && !secure) {
       _warning(warnings, 'Provider field needs an HTTPS response: $name');
@@ -152,28 +121,14 @@ SubscriptionMetadata _decodeFields(
       _warning(warnings, 'Duplicate singleton: $name');
       continue;
     }
-    var raw = values.single.trim();
-    if (field.suffix case final suffix?) {
-      final comma = raw.lastIndexOf(',');
-      if (comma != -1) {
-        final count = int.tryParse(raw.substring(comma + 1).trim());
-        if (count != null) {
-          raw = raw.substring(0, comma).trim();
-          if (count >= suffix.minimum && count <= suffix.maximum) {
-            fields[suffix.path] = count;
-          } else {
-            _warning(warnings, 'Invalid provider field suffix: $name');
-          }
-        }
-      }
-    }
+    final raw = values.single.trim();
     Object? value;
     try {
       value = switch (field.type) {
         SubscriptionFieldType.text => _decodeText(raw),
         SubscriptionFieldType.url => raw,
         SubscriptionFieldType.integer => switch (int.tryParse(raw)) {
-          final count? => count * scale,
+          final count? => count * field.headerScale,
           null => null,
         },
         SubscriptionFieldType.boolean => switch (raw.toLowerCase()) {
@@ -181,71 +136,23 @@ SubscriptionMetadata _decodeFields(
           '0' || 'false' || 'no' => false,
           _ => null,
         },
-        SubscriptionFieldType.hosts => _decodeHosts(raw),
-        SubscriptionFieldType.tokens => _split(
-          raw,
-          ',',
-        ).map((v) => v.toLowerCase()).toSet().toList(),
-        SubscriptionFieldType.packages => _decodePackages(raw, name, warnings),
-        SubscriptionFieldType.numbers => _decodeNumbers(raw),
-        SubscriptionFieldType.keys => _split(raw, ',').toSet().toList(),
+        _ => null,
       };
     } on FormatException {
       value = null;
     }
     if (value == null || !validSubscriptionField(field, value)) {
-      fields.remove(field.suffix?.path);
       _warning(warnings, 'Invalid provider field: $name');
       continue;
     }
     fields[field.path] = value;
   }
-  final supported = subscriptionFieldHeaders.toSet();
   for (final key in headers.keys) {
-    if ((key.startsWith('reclash-') || key.startsWith('flclashx-')) &&
-        !supported.contains(key)) {
+    if (key.startsWith('reclash-') && key != 'reclash-config') {
       _warning(warnings, 'Unsupported provider field: $key');
     }
   }
   return SubscriptionMetadata(Map.unmodifiable(fields));
-}
-
-Iterable<String> _split(String raw, String separator) =>
-    raw.split(separator).map((v) => v.trim()).where((v) => v.isNotEmpty);
-
-List<String>? _decodeHosts(String raw) {
-  final hosts = <String>{};
-  for (final item in _split(raw, ',')) {
-    final authority = subscriptionAuthority(item);
-    if (authority == null) return null;
-    hosts.add(authority);
-  }
-  return hosts.toList();
-}
-
-/// One malformed name drops only itself: a long list from a panel should not
-/// be lost to a typo.
-List<String> _decodePackages(String raw, String header, List<String> warnings) {
-  final packages = <String>{};
-  for (final item in raw.split(RegExp(r'[\s,]+'))) {
-    if (item.isEmpty) continue;
-    if (isAndroidPackageName(item)) {
-      packages.add(item);
-    } else {
-      _warning(warnings, 'Invalid package in $header');
-    }
-  }
-  return packages.toList();
-}
-
-List<int>? _decodeNumbers(String raw) {
-  final numbers = <int>{};
-  for (final item in _split(raw, ',')) {
-    final number = int.tryParse(item);
-    if (number == null) return null;
-    numbers.add(number);
-  }
-  return numbers.toList()..sort();
 }
 
 String _decodeText(String value) {
@@ -317,36 +224,6 @@ SubscriptionMetadata _commonUsage(
     fields['subscription.perpetual'] = fields['subscription.expire'] == 0;
   }
   return SubscriptionMetadata(Map.unmodifiable(fields));
-}
-
-Map<String, List<String>> subscriptionBodyHeaders(
-  String body, {
-  Iterable<String> additionalHeaders = const [],
-}) {
-  final result = <String, List<String>>{};
-  final names = {...subscriptionFieldHeaders, ...additionalHeaders};
-  var used = 0;
-  for (final line in const LineSplitter().convert(
-    body.length > subscriptionHeadersLimit
-        ? body.substring(0, subscriptionHeadersLimit)
-        : body,
-  )) {
-    used += line.length;
-    if (used > subscriptionHeadersLimit) break;
-    final text = line.trim();
-    if (text.isEmpty) continue;
-    if (!text.startsWith('#')) break;
-    final value = text.substring(1).trimLeft();
-    final separator = value.indexOf(':');
-    if (separator <= 0) continue;
-    final name = value.substring(0, separator).trim().toLowerCase();
-    if (names.contains(name)) {
-      result
-          .putIfAbsent(name, () => [])
-          .add(value.substring(separator + 1).trim());
-    }
-  }
-  return result;
 }
 
 void _warning(List<String> warnings, String message) {

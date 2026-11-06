@@ -1,6 +1,6 @@
 # Реестр стандарта
 
-Ограничения, поля метаданных и HTTP-заголовки стандарта провайдеров версии 1, сгенерированные из реестра, по которому декодирует приложение.
+Ограничения, поля манифеста и HTTP-заголовки стандарта провайдеров версии 1, сгенерированные из реестра, по которому декодирует приложение.
 
 Машиночитаемая копия: [`provider_standard.g.json`](../../../provider_standard.g.json). Форматы значений и поведение: [«Заголовки ответа»](headers.md) и [«Заголовки запроса»](request.md).
 
@@ -13,37 +13,35 @@
 | Передаваемые данные | 16777216 |
 | Декодированные данные | 33554432 |
 
-## Поля метаданных
+## Поля манифеста
 
-| Путь | Заголовок | Тип | Доверие | Получатель | Примечания |
-| --- | --- | --- | --- | --- | --- |
-| `provider.name` | `reclash-servicename` | text | display | panel |  |
-| `provider.logo` | `reclash-servicelogo` | url | display | panel |  |
-| `provider.logoDark` | `reclash-servicelogodark` | url | display | panel |  |
-| `provider.supportUrl` | `reclash-supporturl` | url | display | panel | псевдоним `support-url` |
-| `provider.webUrl` | `reclash-webpageurl` | url | display | panel | псевдоним `profile-web-page-url` |
-| `provider.buyPlanUrl` | `reclash-buyplan` | url | display | panel | суффикс `provider.buyPlanDays` от 1 до 3650 |
-| `provider.buyTrafficUrl` | `reclash-buytraffic` | url | display | panel | суффикс `provider.buyTrafficPercent` от 1 до 100 |
-| `provider.announce` | `reclash-announce` | text | display | panel | псевдоним `announce` |
-| `provider.announceUrl` | `reclash-announceurl` | url | display | panel |  |
-| `provider.notice` | `reclash-notice` | text | display | panel |  |
-| `provider.noticeUrl` | `reclash-noticeurl` | url | display | panel |  |
-| `subscription.type` | `reclash-subscriptiontype` | text | display | panel |  |
-| `account.title` | `profile-title` | text | display | panel |  |
-| `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler | псевдоним `profile-update-interval`, умножается на 60 |
-| `routing.bundleUrl` | `reclash-routing` | url | hint | routing |  |
-| `presentation.hideUrl` | `reclash-hideurl` | boolean | display | panel | псевдоним `hide-url` |
-| `presentation.serverGroup` | `reclash-serverinfo` | text | display | panel |  |
-| `presentation.config` | `reclash-config` | url | hint | appearance | только HTTPS-ответ |
-| `reminder.expireDays` | `reclash-expiredays` | numbers | hint | reminder |  |
-| `reminder.trafficPercent` | `reclash-trafficpercent` | numbers | hint | reminder |  |
-| `settings.flags` | `reclash-settings` | tokens | hint | settings |  |
-| `settings.restrictions` | `reclash-restrictions` | tokens | hint | settings |  |
-| `transport.fallbackHosts` | `reclash-fallbackhosts` | hosts | hint | transport |  |
-| `transport.newDomain` | `reclash-newdomain` | hosts | hint | transport |  |
-| `apps.exclude` | `reclash-excludeapps` | packages | hint | apps |  |
-| `apps.include` | `reclash-includeapps` | packages | hint | apps |  |
-| `apps.routing` | `reclash-approuting` | tokens | hint | apps |  |
+| Путь | Тип | Лимит | Доверие | Получатель | Примечания |
+| --- | --- | ---: | --- | --- | --- |
+| `provider.name` | text | 160 | display | panel |  |
+| `provider.logo` | url | 1024 | display | panel |  |
+| `provider.logo-dark` | url | 1024 | display | panel |  |
+| `provider.support-url` | url | 1024 | display | panel | резервный заголовок `support-url` |
+| `provider.web-url` | url | 1024 | display | panel | резервный заголовок `profile-web-page-url` |
+| `provider.renew.url` | url | 1024 | display | panel | `provider.renew.days` от 1 до 3650 |
+| `provider.top-up.url` | url | 1024 | display | panel | `provider.top-up.percent` от 1 до 100 |
+| `provider.announce.text` | text | 1024 | display | panel | резервный заголовок `announce` |
+| `provider.announce.url` | url | 1024 | display | panel |  |
+| `provider.notice.text` | text | 1024 | display | panel |  |
+| `provider.notice.url` | url | 1024 | display | panel |  |
+| `provider.type` | text | 32 | display | panel |  |
+| `provider.hide-url` | boolean | 1024 | display | panel | резервный заголовок `hide-url` |
+| `provider.server-group` | text | 256 | display | panel |  |
+| `reminders.expire-days` | numbers | 8 | hint | reminder |  |
+| `reminders.traffic-percent` | numbers | 8 | hint | reminder |  |
+| `settings` | flags | 16 | hint | settings |  |
+| `policy` | policy | 16 | hint | settings |  |
+| `transport.fallback-hosts` | hosts | 5 | hint | transport |  |
+| `transport.new-domain` | hosts | 1 | hint | transport |  |
+| `apps.exclude` | packages | 512 | hint | apps |  |
+| `apps.include` | packages | 512 | hint | apps |  |
+| `apps.routing` | tokens | 1 | hint | apps |  |
+| `support.keys` | keys | 2 | consent | support |  |
+| `support.upload-url` | url | 1024 | consent | support | только https |
 
 ## HTTP-заголовки
 
@@ -62,3 +60,10 @@
 | `x-client` | запрос | ascii | нет |
 | `x-app-version` | запрос | ascii | нет |
 | `x-device-locale` | запрос | ascii | да |
+| `support-url` | ответ | url | нет |
+| `profile-web-page-url` | ответ | url | нет |
+| `announce` | ответ | text-or-base64-prefixed | нет |
+| `profile-title` | ответ | text-or-base64-prefixed | нет |
+| `profile-update-interval` | ответ | decimal | нет |
+| `hide-url` | ответ | boolean | нет |
+| `reclash-config` | ответ | url | нет |

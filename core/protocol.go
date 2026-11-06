@@ -24,6 +24,7 @@ const (
 	forceGcMethod                  CoreMethod = "forceGc"
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigMethod           CoreMethod = "validateConfig"
+	getProviderGlobalNodesMethod   CoreMethod = "getProviderGlobalNodes"
 	decryptConfigMethod            CoreMethod = "decryptConfig"
 	validateProxiesMethod          CoreMethod = "validateProxies"
 	validateFiltersMethod          CoreMethod = "validateFilters"
@@ -127,6 +128,8 @@ type DecryptConfigParams struct {
 type SetupParams struct {
 	PolicyPath     *string           `json:"policy-path,omitempty"`
 	NoGlobal       *bool             `json:"no-global,omitempty"`
+	LockGlobal     *bool             `json:"lock-global,omitempty"`
+	LockApps       *bool             `json:"lock-apps,omitempty"`
 	VPNEnabled     *bool             `json:"vpn-enabled,omitempty"`
 	ExcludedApps   []string          `json:"excluded-apps,omitempty"`
 	SelectedMap    map[string]string `json:"selected-map"`

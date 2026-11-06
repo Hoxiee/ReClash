@@ -126,31 +126,32 @@ groups:
 
 A pin still wins over `to`. When the config has no `Balancer`, the group reports `fixed.missing` and keeps its member.
 
-## Provider routing bundle
+## Provider routing
 
-A provider ships a profile and a default scenario through the `reclash-routing` field.
+A provider ships a profile and a default scenario in the `routing` section of its manifest.
 
-```yaml title="routing.yaml"
-profiles:
-  fast-de:
-    rcx: 1
-    title: Fast Germany
-    prefer:
-      - { label: Germany, when: 'country = DE' }
-      - { label: Any, when: 'not dead', last-resort: true }
-groups:
-  Proxy: { profiles: [provider/fast-de, builtin/stable], default: provider/fast-de }
-scenarios:
-  work:
-    rcx: 1
-    title: Work
-    groups:
-      $main: { profile: provider/fast-de }
-    routes:
-      - name: Intranet
-        match: [DOMAIN-SUFFIX,corp.example]
-        to: DIRECT
-scenario: provider/work
+```yaml title="reclash.yaml"
+routing:
+  profiles:
+    fast-de:
+      rcx: 1
+      title: Fast Germany
+      prefer:
+        - { label: Germany, when: 'country = DE' }
+        - { label: Any, when: 'not dead', last-resort: true }
+  bindings:
+    Proxy: { profiles: [provider/fast-de, builtin/stable], default: provider/fast-de }
+  scenarios:
+    work:
+      rcx: 1
+      title: Work
+      groups:
+        $main: { profile: provider/fast-de }
+      routes:
+        - name: Intranet
+          match: [DOMAIN-SUFFIX,corp.example]
+          to: DIRECT
+  scenario: provider/work
 ```
 
 Nothing here contacts a host, so no consent is needed; see [Provider delivery](sharing.md#provider-delivery).

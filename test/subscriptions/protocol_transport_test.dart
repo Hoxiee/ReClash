@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/subscriptions/metadata/provider_config.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
+
+import '../helpers/provider_presentation.dart';
 
 void main() {
   group('subscription headers', () {
@@ -100,8 +103,7 @@ void main() {
       expect(subscriptionFields.map((field) => field.consumer).toSet(), {
         'panel',
         'scheduler',
-        'routing',
-        'appearance',
+        'manifest',
         'apps',
         'reminder',
         'settings',
@@ -112,71 +114,145 @@ void main() {
         subscriptionFields.map((field) => field.path).toSet(),
         hasLength(subscriptionFields.length),
       );
-      expect(
-        subscriptionFields.map((field) => field.header).toSet(),
-        hasLength(subscriptionFields.length),
-      );
+      final headers = subscriptionFieldHeaders.toList();
+      expect(headers.toSet(), hasLength(headers.length));
+      expect(headers.where((header) => header.startsWith('reclash-')), [
+        'reclash-config',
+      ]);
     });
 
-    test('subscription kind is display only and tolerates unknown tokens', () {
-      SubscriptionKind? kindOf(String value) => readSubscriptionMetadata({
-        'reclash-subscriptiontype': [value],
-      }).metadata.kind;
-      expect(kindOf('test'), SubscriptionKind.test);
-      expect(kindOf(' Promo '), SubscriptionKind.promo);
-      expect(kindOf('base64:ZGV2'), SubscriptionKind.dev);
-      expect(kindOf('vip'), isNull);
-      expect(kindOf('x' * 33), isNull);
-      expect(
-        readSubscriptionMetadata(
-          const {},
-          body: '# ReClash-SubscriptionType: test\nproxies: []',
-        ).metadata.kind,
-        SubscriptionKind.test,
-      );
-    });
-
-    test('provider hosts are kept as validated authorities', () {
+    test('standard headers decode into their fields', () {
       final result = readSubscriptionMetadata({
-        'reclash-newdomain': ['https://Other.example.test/'],
-        'reclash-fallbackhosts': ['one.example.test, two.example.test:8443'],
+        'Support-URL': ['https://support.example.test'],
+        'Profile-Web-Page-URL': ['https://web.example.test'],
+        'Announce': ['base64:SGVsbG8='],
+        'Hide-URL': ['yes'],
+        'Profile-Title': ['UHJvdmlkZXI='],
+        'Profile-Update-Interval': ['6'],
+        'Subscription-Userinfo': ['upload=1; download=2; total=0; expire=0'],
       });
-      expect(result.metadata.strings('transport.newDomain'), [
-        'other.example.test',
-      ]);
-      expect(result.metadata.strings('transport.fallbackHosts'), [
-        'one.example.test',
-        'two.example.test:8443',
-      ]);
+      expect(result.metadata.fields, {
+        'provider.supportUrl': 'https://support.example.test',
+        'provider.webUrl': 'https://web.example.test',
+        'provider.announce': 'Hello',
+        'presentation.hideUrl': true,
+        'account.title': 'UHJvdmlkZXI=',
+        'update.intervalMinutes': 360,
+        'subscription.upload': 1,
+        'subscription.download': 2,
+        'subscription.total': 0,
+        'subscription.unlimited': true,
+        'subscription.expire': 0,
+        'subscription.perpetual': true,
+      });
+      expect(result.warnings, isEmpty);
       final invalid = readSubscriptionMetadata({
-        'reclash-fallbackhosts': ['one.example.test/path'],
+        'profile-update-interval': ['0'],
+        'support-url': ['javascript:alert(1)'],
       });
       expect(invalid.metadata.fields, isEmpty);
       expect(
         invalid.warnings,
-        contains('Invalid provider field: reclash-fallbackhosts'),
+        containsAll([
+          'Invalid provider field: profile-update-interval',
+          'Invalid provider field: support-url',
+        ]),
+      );
+    });
+
+    test('removed reclash headers warn and decode nothing', () {
+      final result = readSubscriptionMetadata({
+        'reclash-servicename': ['Provider'],
+        'flclashx-servicename': ['Provider'],
+        'reclash-routing': ['https://routing.example.test/bundle.yaml'],
+      });
+      expect(result.metadata.fields, isEmpty);
+      expect(
+        result.warnings,
+        containsAll([
+          'Unsupported provider field: reclash-servicename',
+          'Unsupported provider field: reclash-routing',
+        ]),
+      );
+    });
+
+    test('the manifest address needs an HTTPS response', () {
+      final headers = {
+        'reclash-config': ['https://cdn.example.test/config.yaml'],
+      };
+      expect(
+        readSubscriptionMetadata(
+          headers,
+          secure: true,
+        ).metadata.text('presentation.config'),
+        'https://cdn.example.test/config.yaml',
+      );
+      final plain = readSubscriptionMetadata(headers);
+      expect(plain.metadata.fields, isEmpty);
+      expect(
+        plain.warnings,
+        contains('Provider field needs an HTTPS response: reclash-config'),
+      );
+    });
+
+    test('subscription kind is display only and tolerates unknown tokens', () {
+      SubscriptionKind? kindOf(String value) => manifestMetadata({
+        'provider': {'type': value},
+      }).kind;
+      expect(kindOf('test'), SubscriptionKind.test);
+      expect(kindOf(' Promo '), SubscriptionKind.promo);
+      expect(kindOf('vip'), isNull);
+      expect(kindOf('x' * 33), isNull);
+    });
+
+    test('provider hosts are kept as validated authorities', () {
+      final metadata = manifestMetadata({
+        'transport': {
+          'new-domain': 'https://Other.example.test/',
+          'fallback-hosts': ['one.example.test', 'two.example.test:8443'],
+        },
+      });
+      expect(metadata.strings('transport.newDomain'), ['other.example.test']);
+      expect(metadata.strings('transport.fallbackHosts'), [
+        'one.example.test',
+        'two.example.test:8443',
+      ]);
+      final invalid = parseProviderConfig(
+        jsonEncode({
+          'version': 1,
+          'transport': {
+            'fallback-hosts': ['one.example.test/path'],
+          },
+        }),
+        'en',
+      );
+      expect(invalid.config!.fields, isEmpty);
+      expect(
+        invalid.warnings,
+        contains('Invalid transport section: transport.fallback-hosts'),
       );
     });
 
     test('the dark service logo is decoded and rejects non-link values', () {
-      final result = readSubscriptionMetadata({
-        'reclash-servicelogodark': ['https://cdn.example.net/dark.png'],
+      final metadata = manifestMetadata({
+        'provider': {'logo-dark': 'https://cdn.example.net/dark.png'},
       });
       expect(
-        result.metadata.text('provider.logoDark'),
+        metadata.text('provider.logoDark'),
         'https://cdn.example.net/dark.png',
       );
-      expect(
-        result.metadata.logoFor(dark: true),
-        'https://cdn.example.net/dark.png',
+      expect(metadata.logoFor(dark: true), 'https://cdn.example.net/dark.png');
+      final invalid = parseProviderConfig(
+        jsonEncode({
+          'version': 1,
+          'provider': {'logo-dark': 'javascript:alert(1)'},
+        }),
+        'en',
       );
-      final invalid = readSubscriptionMetadata({
-        'reclash-servicelogodark': ['javascript:alert(1)'],
-      });
-      expect(invalid.metadata.text('provider.logoDark'), isNull);
+      expect(invalid.config!.fields, isEmpty);
       expect(
         invalid.warnings,
-        contains('Invalid provider field: reclash-servicelogodark'),
+        contains('Invalid provider section: provider.logo-dark'),
       );
     });
 
@@ -195,106 +271,74 @@ void main() {
       expect(const SubscriptionMetadata().logoFor(dark: true), isNull);
     });
 
-    test('FlClashX aliases normalize only for its selected preset', () {
-      final alias = {
-        'flclashx-servicename': ['FlClashX provider'],
-      };
-      expect(readSubscriptionMetadata(alias).metadata.name, isNull);
-      expect(
-        readSubscriptionMetadata(alias).warnings,
-        contains('Unsupported provider field: flclashx-servicename'),
-      );
-      expect(
-        readSubscriptionMetadata(
-          alias,
-          clientPreset: SubscriptionClientPreset.flClashX,
-        ).metadata.name,
-        'FlClashX provider',
-      );
-      expect(
-        readSubscriptionMetadata(
-          {
-            ...alias,
-            'reclash-servicename': ['Native provider'],
+    test('valid manifest fields win over header fallbacks independently', () {
+      final headers = readSubscriptionMetadata({
+        'support-url': ['javascript:invalid'],
+        'profile-web-page-url': ['https://header.example.test'],
+        'announce': ['Header announcement'],
+      });
+      final manifest = parseProviderConfig(
+        jsonEncode({
+          'version': 1,
+          'provider': {
+            'name': 'Manifest provider',
+            'web-url': 'https://manifest.example.test',
           },
-          body:
-              '# flclashx-supporturl: https://support.example.test\nproxies: []',
-          clientPreset: SubscriptionClientPreset.flClashX,
-        ).metadata.fields,
-        {
-          'provider.name': 'Native provider',
-          'provider.supportUrl': 'https://support.example.test',
-        },
+        }),
+        'en',
+      ).config;
+      final result = withManifest(
+        headers,
+        manifest,
+        excluded: const [],
+        included: const [],
       );
-    });
-
-    test('valid HTTP metadata wins over body fields independently', () {
-      final result = readSubscriptionMetadata(
-        {
-          'ReClash-ServiceName': ['HTTP provider'],
-          'reclash-supporturl': ['javascript:invalid'],
-        },
-        body:
-            '# reclash-servicename: Body provider\n# reclash-supporturl: https://support.example.test\nproxies: []',
-      );
-      expect(result.metadata.name, 'HTTP provider');
-      expect(
-        result.metadata.text('provider.supportUrl'),
-        'https://support.example.test',
-      );
+      expect(result.metadata.fields, {
+        'provider.name': 'Manifest provider',
+        'provider.webUrl': 'https://manifest.example.test',
+        'provider.announce': 'Header announcement',
+      });
       expect(result.source, SubscriptionDataSource.http);
-      expect(
-        result.warnings,
-        contains('Invalid provider field: reclash-supporturl'),
-      );
+      expect(result.warnings, contains('Invalid provider field: support-url'));
     });
 
-    test('support keys and upload come only from HTTPS response headers', () {
+    test('support keys and upload come from the manifest', () {
       const key = 'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik';
       const other = 'ed25519:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-      final headers = {
-        'reclash-support-key': ['$key, $other'],
-        'reclash-support-upload': ['https://support.example.test/upload'],
-      };
-      final secure = readSubscriptionMetadata(headers, secure: true).metadata;
-      expect(secure.supportKeys, [key, other]);
-      expect(secure.supportUploadUrl, 'https://support.example.test/upload');
+      final metadata = manifestMetadata({
+        'support': {
+          'keys': [key, other],
+          'upload-url': 'https://support.example.test/upload',
+        },
+      });
+      expect(metadata.supportKeys, [key, other]);
+      expect(metadata.supportUploadUrl, 'https://support.example.test/upload');
 
-      final plain = readSubscriptionMetadata(headers);
-      expect(plain.metadata.supportKeys, isEmpty);
-      expect(plain.metadata.supportUploadUrl, isNull);
-      expect(
-        plain.warnings,
-        contains('Provider field needs an HTTPS response: reclash-support-key'),
-      );
-
-      final body = readSubscriptionMetadata(
-        const {},
-        body: '# reclash-support-key: $key\nproxies: []',
-        secure: true,
-      ).metadata;
-      expect(body.supportKeys, isEmpty);
+      final headers = readSubscriptionMetadata({
+        'reclash-support-key': [key],
+      }, secure: true);
+      expect(headers.metadata.supportKeys, isEmpty);
     });
 
     test('support keys are bounded and well formed', () {
-      List<String> keys(String value) => readSubscriptionMetadata({
-        'reclash-support-key': [value],
-      }, secure: true).metadata.supportKeys;
+      List<String> keys(List<String> value) => manifestMetadata({
+        'support': {'keys': value},
+      }).supportKeys;
       const key = 'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik';
-      expect(keys('$key,$key'), [key]);
-      expect(keys('$key,$key,$key'), [key]);
+      expect(keys([key, key]), [key]);
+      expect(keys([key, key, key]), [key]);
       for (final value in [
-        'ed25519:AA,ed25519:AB,ed25519:AC',
-        'rsa:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik',
-        'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik=',
-        'ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2iL',
+        ['ed25519:AA', 'ed25519:AB', 'ed25519:AC'],
+        ['rsa:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik'],
+        ['ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik='],
+        ['ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2iL'],
       ]) {
-        expect(keys(value), isEmpty, reason: value);
+        expect(keys(value), isEmpty, reason: '$value');
       }
       expect(
-        readSubscriptionMetadata({
-          'reclash-support-upload': ['http://support.example.test/upload'],
-        }, secure: true).metadata.supportUploadUrl,
+        manifestMetadata({
+          'support': {'upload-url': 'http://support.example.test/upload'},
+        }).supportUploadUrl,
         isNull,
       );
     });
@@ -313,24 +357,6 @@ void main() {
       );
       expect(metadata.text('provider.logo'), isNull);
       expect(metadata.text('provider.webUrl'), isNull);
-    });
-
-    test('explicit Base64 text round-trips without guessing plain text', () {
-      const metadata = SubscriptionMetadata({'provider.name': 'Províder'});
-      final encoded = encodeSubscriptionMetadata(metadata);
-      expect(encoded['reclash-servicename'], startsWith('base64:'));
-      expect(
-        readSubscriptionMetadata({
-          for (final entry in encoded.entries) entry.key: [entry.value],
-        }).metadata,
-        metadata,
-      );
-      expect(
-        readSubscriptionMetadata({
-          'reclash-servicename': ['UHJvdmlkZXI='],
-        }).metadata.name,
-        'UHJvdmlkZXI=',
-      );
     });
   });
 

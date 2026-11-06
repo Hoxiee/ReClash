@@ -72,15 +72,10 @@ The link carries exactly one of `p` or `url`, with no path or fragment. Opening 
 
 ## Provider delivery
 
-A subscription serves RCX through one of two channels. What the subscription file declares wins over the bundle.
-
-| Channel | Content |
-| --- | --- |
-| Subscription config | `rcx:` bindings on `proxy-groups`, top-level `rcx-profiles`, `rcx-scenarios` and `rcx-scenario`. |
-| Routing bundle | A YAML file at the URL in the `reclash-routing` subscription field, with `profiles`, `groups` (bindings by group name), `scenarios` and `scenario`; at most 256 KiB. |
+A subscription serves RCX through the `routing` section of its provider manifest, the YAML file named by the `reclash-config` header. The section has `profiles`, `scenarios`, `scenario` and `bindings` (bindings by group name). The subscription body carries no RCX keys.
 
 Provider profiles and scenarios get the ids `provider/<name>`. Field syntax and delivery details are in
-[Routing delivery](../providers/routing.md).
+[Provider manifest](../providers/manifest.md#routing).
 
 ## Consent
 
@@ -88,7 +83,7 @@ A provider profile or scenario may contact hosts through checks, diagnostics and
 without asking:
 
 - the default echo services and every endpoint of the built-in profiles;
-- the provider's registrable domain, from the subscription URL and the routing bundle URL;
+- the provider's registrable domain, from the subscription URL;
 - hosts the user already allowed for this subscription.
 
 Any other host holds the item back until the user allows it; the problem `profile.consent` lists those hosts. A group with
@@ -97,7 +92,7 @@ chain is checked. User profiles and scenarios never need consent.
 
 ## rcxlint
 
-`rcxlint` checks profiles, scenarios and bundles with the same validation the app uses.
+`rcxlint` checks profiles, scenarios, bundles and provider manifests with the same validation the app uses.
 
 ```sh
 cd core
@@ -108,7 +103,8 @@ dart run tool/rcx.dart lint profile.rcx.yaml
 | Input | Detected by | Checked as |
 | --- | --- | --- |
 | Shared bundle | `kind: bundle` | Its profiles as `user/<key>` |
-| Provider bundle | Top-level `profiles` or `scenarios` | `provider/<name>`; also checks that `scenario`, and each group's `default` and `profiles`, are defined |
+| Provider manifest | A `routing` key | Its profiles and scenarios as `provider/<name>`; also checks that `scenario`, and each binding's `default` and `profiles`, are defined |
+| Provider routing document | Top-level `profiles` or `scenarios` | Same as the `routing` section of a manifest |
 | Scenario | Top-level `groups`, `routes` or `mode` | `provider/<file name>` |
 | Profile | Anything else | `provider/<file name>` |
 
@@ -135,8 +131,8 @@ Exit status: 0 without errors, 1 with any error, 2 on wrong usage.
 
 ## JSON schema
 
-`rcx-profile.schema.json` at the repository root validates a profile at its root; `$defs.scenario` and `$defs.bundle` cover
-the other documents. It checks structure and value shapes, not conditions.
+`rcx-profile.schema.json` at the repository root validates a profile at its root; `$defs.scenario` covers a scenario.
+It checks structure and value shapes, not conditions. The `routing` section of a manifest is checked by `rcxlint`.
 
 ```json title=".vscode/settings.json"
 {

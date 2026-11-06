@@ -1,86 +1,175 @@
-# Required safety policy
+# Safety policy
 
-A versioned `reclash-policy` section in a native Clash subscription that limits GLOBAL traffic to listed nodes and keeps listed Android apps outside the VPN.
+What a provider can enforce in ReClash so that the user cannot undo it.
 
-The policy is not a routing profile, an app-setting hint or a user-editable rule. Subscriptions without `reclash-policy` are unaffected. Schema: [`provider-policy.schema.json`](../../../provider-policy.schema.json).
+A policy has up to two parts. The **rule** sits in the subscription body as plain mihomo config, so every client honors it. The **switch** sits in the manifest's `policy` section and makes ReClash enforce the rule.
 
-## Structure
+| You want | Subscription body | Manifest |
+| --- | --- | --- |
+| [Global mode only through chosen nodes](#only-listed-nodes-in-global) | A `GLOBAL` group that lists them | `global: listed` |
+| [No Global mode at all](#no-global) | Nothing | `global: off` |
+| [Android apps always outside the VPN](#apps-that-must-stay-outside-the-vpn) | `tun.exclude-package` | `apps: required` |
+| [No local proxy ports on Android](#no-local-proxy-ports) | Nothing | `local-ports: closed` |
+| [No dashboard editing](#locked-dashboard) | Nothing | `dashboard: locked` |
+
+Every key is optional. A key you leave out restricts nothing.
 
 ```yaml
-reclash-policy:
-  version: 1
-  global:
-    allow: [de-01]
-  apps:
-    android:
-      exclude: [com.example.bank]
-proxies:
-  - name: Germany
-    reclash-id: de-01
-    type: socks5
-    server: proxy.example.net
-    port: 1080
-  - name: Restricted
-    reclash-id: restricted-01
-    type: socks5
-    server: restricted.example.net
-    port: 1080
+policy:
+  global: listed       # any (default) | listed | off
+  apps: required       # recommended (default) | required
+  local-ports: closed  # open (default) | closed
+  dashboard: locked    # editable (default) | locked
 ```
 
-| Key | Type | Rules |
-| --- | --- | --- |
-| `version` | integer | Must be `1`. |
-| `global.allow` | list of node IDs | Unique, max 4096. |
-| `apps.android.exclude` | list of package names | Unique, max 512. |
+## Only listed nodes in Global
 
-Unknown keys are rejected at every level.
+Rule mode stays free: your `rules` decide. In Global mode, traffic may leave only through nodes reachable from the `GLOBAL` group.
 
-## Node IDs
+The simplest form is mihomo's native `filter`. Say the fleet has nodes named `Germany`, `Poland LTE`, `Russia LTE` and `Streaming`, and Global mode may use only the LTE ones.
 
-- `reclash-id` on an inline `proxies` entry names the node for the policy.
-- Case-sensitive, unique within the subscription, and matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$`.
-- Every ID in `global.allow` must exist.
-- A permission binds to the node's full route definition, credentials included, not to its name. Renaming a node keeps its permission; copying the ID onto a different server does not.
+Subscription body:
 
-## GLOBAL allowlist
+```yaml
+proxy-groups:
+  - name: GLOBAL
+    type: select
+    include-all-proxies: true
+    filter: '\bLTE\b'
+    remnawave: { include-proxies: false }
+```
 
-- A present `global` section is default-deny: only listed IDs may carry GLOBAL traffic. `allow: []` forbids every node and removes Global mode.
-- Without `global`, Global mode is unrestricted, but the [`noglobal`](app-settings.md#restrictions) restriction still removes it.
-- A member from a remote proxy provider is denied unless its route definition matches a permitted inline node.
-- A group qualifies for GLOBAL only if all its possible members are permitted.
-- Every TCP and UDP dial is checked, including fallback, nested selection, health checks and controller changes.
-- A denied route never falls back to `DIRECT` or to an unapproved node.
+Manifest:
 
-## Android app exclusions
+```yaml
+policy:
+  global: listed
+```
 
-- `apps.android.exclude` is mandatory, unlike the recommended [`reclash-excludeapps`](app-settings.md#android-apps). It overrides apps the user took back, whitelist inclusions and disabled access control, in every routing mode.
-- Required entries are locked in Access control with the "Required by provider" tag.
-- They also close local proxy ports, so a local listener cannot bypass them ([`androidsecure`](app-settings.md#restrictions)).
-- An exclusion is not an Internet block: excluded apps use the direct connection and the real IP. Android lockdown mode can block them instead.
+Result:
 
-## Enforcement
-
-The Core reads the policy from the original profile, not from user scripts, and keeps the applied policy outside `config.yaml`. Controller reloads and config scripts cannot remove it. Changing the mode or policy closes existing connections.
-
-| Condition | Result |
+| Mode and node | Result |
 | --- | --- |
-| Not Android, or Android without VPN mode, and the policy has app exclusions | Refused: `provider policy requires Android VPN app exclusions`. |
-| The running VPN's app list differs from the required exclusions | Refused until restart: `provider app exclusions are not applied; restart the VPN`. The same after reattaching to a service with unknown options. |
-| A connection's application cannot be identified | Blocked: `provider policy could not identify this application`. |
-| An excluded app still captured by an old VPN session | Blocked: `provider policy requires this application to remain outside the VPN`. |
-| A GLOBAL connection through a node that is not allowed | Blocked. The app asks the user to select an allowed node or use Rule mode. |
+| Rule mode, any node, `Streaming` included | Works. |
+| Global, `Poland LTE` | Works. |
+| Global, `Russia LTE` | Works. |
+| Global, `Germany` | Blocked. The app asks the user to pick an allowed node or use Rule mode. |
+| Global, `DIRECT` | Blocked. A denied route never falls back to a direct connection. |
 
-The VPN app itself cannot be excluded.
+What to write:
 
-## Lifecycle
+| You want | `GLOBAL` group |
+| --- | --- |
+| Nodes that carry a marker in the name | `include-all-proxies: true` and `filter: '\bLTE\b'`. |
+| Everything except some nodes | `include-all-proxies: true` and `exclude-filter: Streaming`. |
+| An exact short list | Hand-listed `proxies`. A host the user lacks makes the config fail, see below. |
 
-- An unknown version or key, a malformed list, or an unknown or duplicate ID rejects the whole import. Automatic negotiation does not try another client preset.
-- A failed update leaves the saved subscription and its policy unchanged.
-- A successful update without `reclash-policy` withdraws the policy; stale metadata never keeps it.
-- Switching profiles applies the new profile's policy.
+- `filter` matches node names only. It narrows only `include-all-proxies` (or `include-all`) members, never explicit `proxies`.
+- A backtick separates alternatives. `(?i)` ignores case.
+- Prefer `\bLTE\b` to `lte`: the unanchored `lte` also matches `Malte`.
+- `exclude-filter` and `exclude-type` remove members from every group, explicit `proxies` included.
+- The marker must be in the node name. Remnawave host `tags` do not reach the mihomo config.
+- New matching nodes join by themselves, and a user whose tariff lacks some matching hosts still gets a config that loads. This suits large fleets.
+- Hand-listed `proxies` that name a host the user lacks make mihomo fail with `GLOBAL: 'Poland LTE' not found`. The profile update still succeeds and the failure appears only when the config is applied. With `global: listed` the profile is blocked and refuses all traffic.
 
-## Limitations
+What counts as listed:
 
-- Protects against accidental use in a cooperating ReClash client. It is not DRM and not a server-side guarantee: other clients ignore these fields.
-- Package exclusions do not cover the same service opened in a browser.
-- Version 1 binds IDs on inline `proxies` only.
+| Case | Result |
+| --- | --- |
+| A node in the body's `proxies`, reachable through `GLOBAL` | Allowed. |
+| A node that `GLOBAL` resolves to through `filter` | Allowed. |
+| The node is renamed | Stays allowed: permission follows the server, port and credentials, not the name. |
+| Another server takes an allowed node's name | Denied. |
+| A node from a `proxy-providers` source | Denied, unless its definition matches an allowed inline node exactly. |
+| `DIRECT` or `REJECT` listed in `GLOBAL` | Adds nothing. |
+| `filter` matches no node | The group resolves to `COMPATIBLE` (or its `empty-fallback`), and Global mode is removed. |
+| No `GLOBAL` group, or it reaches no inline node | Global mode is removed, same as `global: off`. |
+
+> [!WARNING]
+> A panel can add nodes to your groups when it generates the body. Remnawave appends all hosts to the `proxies` of a group that lacks `remnawave: { include-proxies: false }` ([how](rollout.md#policy-in-the-mihomo-template)), which bypasses `filter`. Then everything is allowed, and the Subscription inspector shows `policy.global is listed, but GLOBAL reaches every inline node of the body, so the lock restricts nothing`. The warning is suppressed when the body has remote providers or a single route. Check the body the client actually receives.
+
+Global mode only. In Rule mode, ordinary groups and rules decide.
+
+## No Global
+
+```yaml
+policy:
+  global: off
+```
+
+The app hides Global mode and the Core refuses it. A profile in Global mode switches to Rule. The body needs nothing.
+
+## Apps that must stay outside the VPN
+
+Subscription body:
+
+```yaml
+tun:
+  exclude-package: [com.example.bank, com.example.gov]
+```
+
+Manifest:
+
+```yaml
+policy:
+  apps: required
+```
+
+| Behavior | `recommended` (default) | `required` |
+| --- | --- | --- |
+| Source of the list | `tun.exclude-package` and `apps.exclude` | `tun.exclude-package` only |
+| User can take an app back | Yes | No: locked, tagged "Required by provider" |
+| Whitelist mode, or Access control off | The user's mode decides | Still excluded |
+| Local proxy ports on Android | Open | Closed |
+| Desktop | Ignored | Ignored |
+| Android without VPN mode | Ignored | **The profile refuses to connect** |
+
+`apps: required` works only on Android, in VPN mode; desktop ignores it.
+
+Excluded apps use the direct connection and the real IP. An exclusion is not a block: to block them, use Android lockdown mode. The VPN app itself cannot be excluded.
+
+Errors the user can see:
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| `provider policy requires Android VPN app exclusions` | Android without VPN mode | Use Android VPN mode. |
+| `provider app exclusions are not applied; restart the VPN` | The running VPN started with a different list | Restart the VPN. |
+| `provider policy could not identify this application` | The connection's app is unknown | The connection stays blocked. |
+| `provider policy requires this application to remain outside the VPN` | A listed app is still captured by an old VPN session | Restart the VPN. |
+
+## No local proxy ports
+
+```yaml
+policy:
+  local-ports: closed
+```
+
+Android only. Closes the mixed, HTTP, SOCKS, redir and TProxy ports, makes the web dashboard unavailable, and sends the app's own requests directly. `apps: required` turns this on as well.
+
+## Locked dashboard
+
+```yaml
+policy:
+  dashboard: locked
+```
+
+Removes editing on both dashboards. The layout you set in [`widgets`](manifest.md#widgets) stays.
+
+## When a lock applies
+
+| Event | Result |
+| --- | --- |
+| A new valid manifest omits a key | That lock is withdrawn with the next update. |
+| A `policy` value is invalid | The whole section is withdrawn; the [inspector](rollout.md#subscription-inspector) shows a warning. |
+| The manifest fetch fails | The last valid copy keeps its locks. |
+| The subscription update fails | Nothing changes. |
+| The response no longer has `reclash-config`, or the manifest was never fetched | No locks. The body's rules work as plain mihomo config. |
+| The user switches profile | The new profile's policy applies. |
+| The mode or the lock changes | Open connections are closed. |
+
+Scripts, overrides and controller reloads cannot remove a lock: the Core derives it from the original profile file and keeps it outside `config.yaml`.
+
+## Limits
+
+- This protects a cooperating client, not your network. A client that does not read the manifest honors only the body's rules, and a modified one can ignore both. Enforce what must never happen on the server.
+- Excluding a package does not cover the same service opened in a browser.

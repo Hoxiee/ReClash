@@ -26,16 +26,16 @@ void main() {
         }),
         receivedAt: DateTime(2026),
         staleFields: const ['update.intervalMinutes'],
-        warnings: const ['reclash-hideurl: not a boolean'],
+        warnings: const ['hide-url: not a boolean'],
       ),
     );
 
-    expect(find.text('reclash-subscriptiontype'), findsOneWidget);
+    expect(find.text('provider.type'), findsOneWidget);
     expect(find.text('dev'), findsOneWidget);
-    expect(find.text('reclash-autoupdateinterval'), findsOneWidget);
+    expect(find.text('profile-update-interval'), findsOneWidget);
     expect(find.text('hint · stale'), findsOneWidget);
     expect(find.text('autorun, minimize'), findsOneWidget);
-    expect(find.text('reclash-hideurl: not a boolean'), findsOneWidget);
+    expect(find.text('hide-url: not a boolean'), findsOneWidget);
   });
 
   testWidgets('a field outside the registry shows its path untagged', (

@@ -1,6 +1,7 @@
 import 'dart:io';
 
-const _usage = 'Usage: dart run tool/rcx.dart lint <profile-or-bundle.yaml>...';
+const _usage =
+    'Usage: dart run tool/rcx.dart lint <profile-scenario-or-manifest.yaml>...';
 
 Future<void> main(List<String> arguments) async {
   if (arguments.length < 2 || arguments.first != 'lint') {

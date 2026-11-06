@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -58,11 +61,11 @@ power-labels:
   });
 
   group('size and syntax', () {
-    test('rejects over 256 KiB measured in UTF-8 bytes', () {
-      final ascii = doc('# ${'a' * (256 * 1024)}\n');
+    test('rejects over 512 KiB measured in UTF-8 bytes', () {
+      final ascii = doc('# ${'a' * providerConfigSizeLimit}\n');
       expect(parse(ascii).config, isNull);
-      final multibyte = doc('# ${'я' * (128 * 1024)}\n');
-      expect(multibyte.length, lessThan(256 * 1024));
+      final multibyte = doc('# ${'я' * (providerConfigSizeLimit ~/ 2)}\n');
+      expect(multibyte.length, lessThan(providerConfigSizeLimit));
       expect(parse(multibyte).config, isNull);
       expect(parse(doc('# ${'a' * 1000}\n')).config, isNotNull);
     });
@@ -460,6 +463,152 @@ widgets: [CurrentOutbound, serviceStatus]
       );
       expect(withdrawn.proxiesStyleProps.type, base.proxiesStyleProps.type);
       expect(withdrawn.themeProps.pureBlack, base.themeProps.pureBlack);
+    });
+  });
+
+  group('manifest fields', () {
+    Map<String, Object?> schemaSection(String name) {
+      final schema =
+          jsonDecode(File('provider-config.schema.json').readAsStringSync())
+              as Map<String, Object?>;
+      final properties = schema['properties']! as Map<String, Object?>;
+      return properties[name]! as Map<String, Object?>;
+    }
+
+    Map<String, Object?> schemaProperties(String name) =>
+        schemaSection(name)['properties']! as Map<String, Object?>;
+
+    test('the schema lists the settings and policy the parser accepts', () {
+      expect(schemaProperties('settings').keys.toSet(), {
+        ...providerSettingKeys.keys,
+      });
+      final policy = schemaProperties('policy');
+      expect(policy.keys.toSet(), providerPolicyValues.keys.toSet());
+      for (final MapEntry(:key, :value) in providerPolicyValues.entries) {
+        expect(
+          (policy[key]! as Map<String, Object?>)['enum'],
+          unorderedEquals(value.keys),
+          reason: key,
+        );
+      }
+    });
+
+    test('a manifest with every field section parses without warnings', () {
+      final result = parse('''
+version: 1
+provider:
+  name: {ru: Провайдер, en: Provider}
+  logo: https://a.example/logo.png
+  logo-dark: https://a.example/logo-dark.png
+  support-url: https://a.example/support
+  web-url: https://a.example
+  type: promo
+  hide-url: true
+  server-group: Auto
+  announce: {text: Hello, url: 'https://a.example/news'}
+  notice: {text: Maintenance, url: 'https://a.example/status'}
+  renew: {url: 'https://a.example/renew', days: 30}
+  top-up: {url: 'https://a.example/top-up', percent: 20}
+reminders: {expire-days: [7, 3], traffic-percent: [90, 80]}
+settings:
+  minimize-on-exit: true
+  launch-at-login: false
+policy: {global: listed, apps: required, local-ports: closed, dashboard: locked}
+apps:
+  exclude: [com.example.one]
+  include: [com.example.two]
+  routing: bypass
+transport:
+  fallback-hosts: [one.example.test, 'two.example.test:8443']
+  new-domain: new.example.test
+support:
+  keys: ['ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik']
+  upload-url: https://a.example/upload
+''', 'ru');
+      expect(result.warnings, isEmpty);
+      expect(result.config!.fields, {
+        'provider.name': 'Провайдер',
+        'provider.logo': 'https://a.example/logo.png',
+        'provider.logoDark': 'https://a.example/logo-dark.png',
+        'provider.supportUrl': 'https://a.example/support',
+        'provider.webUrl': 'https://a.example',
+        'subscription.type': 'promo',
+        'presentation.hideUrl': true,
+        'presentation.serverGroup': 'Auto',
+        'provider.announce': 'Hello',
+        'provider.announceUrl': 'https://a.example/news',
+        'provider.notice': 'Maintenance',
+        'provider.noticeUrl': 'https://a.example/status',
+        'provider.buyPlanUrl': 'https://a.example/renew',
+        'provider.buyPlanDays': 30,
+        'provider.buyTrafficUrl': 'https://a.example/top-up',
+        'provider.buyTrafficPercent': 20,
+        'reminder.expireDays': [3, 7],
+        'reminder.trafficPercent': [80, 90],
+        'settings.flags': {'minimize': true, 'autorun': false},
+        'settings.restrictions': [
+          'lockglobal',
+          'lockapps',
+          'androidsecure',
+          'denywidgets',
+        ],
+        'apps.exclude': ['com.example.one'],
+        'apps.include': ['com.example.two'],
+        'apps.routing': ['bypass'],
+        'transport.fallbackHosts': [
+          'one.example.test',
+          'two.example.test:8443',
+        ],
+        'transport.newDomain': ['new.example.test'],
+        'support.keys': ['ed25519:O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik'],
+        'support.uploadUrl': 'https://a.example/upload',
+      });
+    });
+
+    test('a policy value outside its enum withdraws the policy', () {
+      final result = parse(doc('policy: {global: nope, apps: required}'));
+      expect(result.config!.fields, isEmpty);
+      expect(
+        result.warnings,
+        contains('Invalid policy section: global has no value nope'),
+      );
+    });
+
+    test('a single-value field takes a string and rejects a list', () {
+      final result = parse(
+        doc('''
+transport:
+  new-domain: [a.example]
+  fallback-hosts: [b.example]
+'''),
+      );
+      expect(result.config!.fields, isEmpty);
+      expect(
+        result.warnings,
+        contains('Invalid transport section: transport.new-domain'),
+      );
+      final listed = parse(doc('transport: {fallback-hosts: b.example}'));
+      expect(listed.config!.fields, isEmpty);
+    });
+
+    test('the https default port is accepted and normalized away', () {
+      final result = parse(
+        doc('transport: {fallback-hosts: ["b.example:443", "c.example:8443"]}'),
+      );
+      expect(result.warnings, isEmpty);
+      expect(result.config!.fields, {
+        'transport.fallbackHosts': ['b.example', 'c.example:8443'],
+      });
+    });
+
+    test('a misspelled setting is an unknown key', () {
+      final result = parse(
+        doc('settings: {closeconnections: true, capture-logs: true}'),
+      );
+      expect(result.warnings, ['Unknown key closeconnections in settings']);
+      expect(result.config!.fields, {
+        'settings.flags': {'openlogs': true},
+      });
     });
   });
 }

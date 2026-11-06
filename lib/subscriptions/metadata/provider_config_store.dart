@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 
+import '../transport/header_policy.dart';
 import '../transport/transport.dart';
 import 'provider_config.dart';
 
@@ -67,22 +68,40 @@ class ProviderConfigDelivery {
     this.replacement,
     this.withdrawn = false,
     this.warnings = const [],
+    this.config,
   });
 
   final StoredProviderConfig? replacement;
   final bool withdrawn;
   final List<String> warnings;
 
+  /// The manifest in force after this update: the fetched copy, else the
+  /// stored one a failed fetch kept; null when there is none.
+  final ProviderConfig? config;
+
   /// Never throws; the result undoes the change if the commit rolls back.
+  /// The Core reads `routing` from the profile's routing file, which holds
+  /// the whole manifest source while the manifest has that section.
   Future<Future<void> Function()> commit(int profileId) async {
     if (replacement == null && !withdrawn) return () async {};
     try {
       final file = await _storedFile(profileId);
+      final routing = File(
+        await appPath.getProfileRoutingPath(profileId.toString()),
+      );
       final previous = await file.exists() ? await file.readAsString() : null;
+      final previousRouting = await routing.exists()
+          ? await routing.readAsString()
+          : null;
       await _replace(file, _encode(replacement));
+      await _replace(
+        routing,
+        config?.routing == null ? null : replacement?.source,
+      );
       return () async {
         try {
           await _replace(file, previous);
+          await _replace(routing, previousRouting);
         } on Object catch (error) {
           _logStoreFailure(error);
         }
@@ -116,6 +135,8 @@ class ProviderConfigDelivery {
 }
 
 /// Never throws: every failure keeps the stored copy and becomes a warning.
+/// Headers follow the subscription's own rule for another origin, so the
+/// device ID never leaves it.
 Future<ProviderConfigDelivery> fetchProviderConfig({
   required int profileId,
   required String? url,
@@ -123,6 +144,8 @@ Future<ProviderConfigDelivery> fetchProviderConfig({
   required Duration budget,
   required SubscriptionCancellation cancellation,
   required String locale,
+  required Uri subscription,
+  Map<String, String> headers = const {},
 }) async {
   if (url == null) return const ProviderConfigDelivery(withdrawn: true);
   final stored = await readStoredProviderConfig(profileId);
@@ -143,7 +166,10 @@ Future<ProviderConfigDelivery> fetchProviderConfig({
     final response = await transport.fetchCapped(
       uri,
       limit: providerConfigSizeLimit,
-      headers: {HttpHeaders.ifNoneMatchHeader: ?etag},
+      headers: {
+        ...redirectSubscriptionHeaders(headers, subscription, uri),
+        HttpHeaders.ifNoneMatchHeader: ?etag,
+      },
       timeout: budget,
       cancellation: cancellation,
     );
@@ -161,6 +187,7 @@ Future<ProviderConfigDelivery> fetchProviderConfig({
           etag: _usableEtag(response.headers['etag']?.singleOrNull),
         ),
         warnings: warnings,
+        config: parsed.config,
       );
     }
   } on SubscriptionException catch (error) {
@@ -170,13 +197,13 @@ Future<ProviderConfigDelivery> fetchProviderConfig({
   } on Object catch (_) {
     warn(SubscriptionFailure.invalid.name);
   }
+  ProviderConfig? kept;
   if (stored != null) {
-    (await parseProviderConfigOffThread(
-      stored.source,
-      locale,
-    )).warnings.forEach(warn);
+    final parsed = await parseProviderConfigOffThread(stored.source, locale);
+    parsed.warnings.forEach(warn);
+    kept = parsed.config;
   }
-  return ProviderConfigDelivery(warnings: warnings);
+  return ProviderConfigDelivery(warnings: warnings, config: kept);
 }
 
 /// An unsendable validator would make every later request fail validation.

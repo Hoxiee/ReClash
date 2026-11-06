@@ -17,8 +17,8 @@ import (
 
 const usage = `usage: reclash-fix <command> [flags]
 
-  keygen [-out key.txt]            new key; prints header line and kid
-  header -key key.txt              print the reclash-support-key header line
+  keygen [-out key.txt]            new key; prints the public key and kid
+  header -key key.txt              print the public key for the manifest's support.keys
   sign -key key.txt -report RC-XXXX-XXXX [-ttl 48h] <action>...
                                    print a link (ttl <= 168h)
   verify -header 'ed25519:...' <link>
@@ -71,7 +71,7 @@ func run(args []string, out, errw io.Writer) error {
 			return err
 		}
 		pub := priv.Public().(ed25519.PublicKey)
-		fmt.Fprintf(out, "reclash-support-key: %s\nkid: %s\n", headerValue(pub), keyID(pub))
+		fmt.Fprintf(out, "support.keys value: %s\nkid: %s\n", headerValue(pub), keyID(pub))
 		return nil
 	case "header":
 		path := fs.String("key", "", "private key file")
@@ -82,7 +82,7 @@ func run(args []string, out, errw io.Writer) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "reclash-support-key: %s\n", headerValue(priv.Public().(ed25519.PublicKey)))
+		fmt.Fprintf(out, "%s\n", headerValue(priv.Public().(ed25519.PublicKey)))
 		return nil
 	case "sign":
 		path := fs.String("key", "", "private key file")

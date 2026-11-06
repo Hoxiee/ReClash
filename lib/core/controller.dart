@@ -11,6 +11,7 @@ import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/speed_test.dart';
+import 'package:reclash/subscriptions/metadata/provider_policy.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -263,6 +264,17 @@ class CoreController {
     await file.safeWriteAsBytes(data);
     try {
       return await validateConfig(path);
+    } finally {
+      await file.safeDelete();
+    }
+  }
+
+  Future<ProviderGlobalNodes> getProviderGlobalNodes(List<int> data) async {
+    final path = await appPath.tempFilePath;
+    final file = File(path);
+    await file.safeWriteAsBytes(data);
+    try {
+      return await _withCoreInput(path, _interface.getProviderGlobalNodes);
     } finally {
       await file.safeDelete();
     }

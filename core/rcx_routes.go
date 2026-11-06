@@ -34,7 +34,7 @@ func parseRouted(raw *config.RawConfig, routes []rcx.Route, key string) (*config
 	dropped := map[string]bool{}
 	for {
 		trial := injectRoutes(raw, routes, dropped, applied.Problems)
-		cfg, err := config.ParseRawConfig(trial.raw)
+		cfg, err := parseRawConfig(trial.raw)
 		if err == nil {
 			applied.Groups = trial.groups
 			return withPlatformLimits(cfg), applied, nil
@@ -49,7 +49,7 @@ func parseRouted(raw *config.RawConfig, routes []rcx.Route, key string) (*config
 					applied.Problems[route.Name] = routeInvalid(route.Name, err.Error())
 				}
 			}
-			cfg, plainErr := config.ParseRawConfig(cloneRaw(raw))
+			cfg, plainErr := parseRawConfig(cloneRaw(raw))
 			if plainErr != nil {
 				return nil, applied, plainErr
 			}

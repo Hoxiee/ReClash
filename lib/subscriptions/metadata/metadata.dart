@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 
 import '../../common/telegram_link.dart';
@@ -143,11 +141,17 @@ Object? normalizeSubscriptionValue(SubscriptionFieldType type, Object? value) {
   return switch (type) {
     SubscriptionFieldType.hosts ||
     SubscriptionFieldType.tokens ||
+    SubscriptionFieldType.policy ||
     SubscriptionFieldType.packages ||
     SubscriptionFieldType.keys when value is List =>
       value.every((v) => v is String) ? List<String>.from(value) : null,
     SubscriptionFieldType.numbers when value is List =>
       value.every((v) => v is int) ? List<int>.from(value) : null,
+    SubscriptionFieldType.flags when value is Map =>
+      value.keys.every((k) => k is String) &&
+              value.values.every((v) => v is bool)
+          ? Map<String, bool>.from(value)
+          : null,
     _ => value,
   };
 }
@@ -157,7 +161,7 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
   switch (field.type) {
     case SubscriptionFieldType.text:
       return value is String &&
-          utf8.encode(value).length <= field.limit &&
+          value.runes.length <= field.limit &&
           !value.runes.any(
             (c) => (c < 32 && !(field.multiline && c == 10)) || c == 127,
           );
@@ -176,6 +180,7 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
           value.length <= field.limit &&
           value.every((v) => v is String && subscriptionAuthority(v) == v);
     case SubscriptionFieldType.tokens:
+    case SubscriptionFieldType.policy:
       return value is List &&
           value.length <= field.limit &&
           value.every((v) => v is String && _token.hasMatch(v));
@@ -195,6 +200,12 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
       return value is List &&
           value.length <= field.limit &&
           value.every((v) => v is String && _supportKey.hasMatch(v));
+    case SubscriptionFieldType.flags:
+      return value is Map &&
+          value.length <= field.limit &&
+          value.entries.every(
+            (e) => e.key is String && _token.hasMatch(e.key) && e.value is bool,
+          );
   }
 }
 
@@ -234,7 +245,8 @@ String? subscriptionAuthority(String value) {
   final colon = trimmed.indexOf(':');
   final host = colon == -1 ? trimmed : trimmed.substring(0, colon);
   if (uri.host != host.toLowerCase()) return null;
-  if (colon == -1) return uri.host;
+  // Uri drops the https default port, so `:443` has no port to read back.
+  if (colon == -1 || trimmed.endsWith(':443')) return uri.host;
   if (!uri.hasPort || uri.port <= 0 || uri.port > 65535) return null;
   return '${uri.host}:${uri.port}';
 }

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/reclash/reclash/rcx-profile.schema.json",
   "title": "ReClash routing profile",
-  "description": "One RCX routing profile. A routing bundle (see $defs.bundle) carries several. Keep it in sync with core/rcx/profile.go; core/rcx/schema_test.go checks the key sets.",
+  "description": "One RCX routing profile. A provider manifest carries several under its routing section. Keep it in sync with core/rcx/profile.go; core/rcx/schema_test.go checks the key sets.",
   "$ref": "#/$defs/profile",
   "$defs": {
     "condition": {
@@ -341,33 +341,6 @@
           "additionalProperties": { "$ref": "#/$defs/scenarioLayer" }
         },
         "l10n": { "$ref": "#/$defs/profile/properties/l10n" }
-      }
-    },
-    "bundle": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Routing bundle served at the reclash-routing URL, or shared by export (kind: bundle): at most 256 KiB, binds to groups by name.",
-      "required": ["profiles"],
-      "properties": {
-        "rcx": { "type": "integer", "maximum": 1 },
-        "kind": { "const": "bundle", "description": "Marks a shared scenario or profile with what it needs; the first scenario, else the first profile, is the main item." },
-        "title": { "type": "string" },
-        "profiles": {
-          "type": "object",
-          "propertyNames": { "$ref": "#/$defs/name" },
-          "additionalProperties": { "$ref": "#/$defs/profile" }
-        },
-        "groups": {
-          "type": "object",
-          "description": "Keyed by proxy-group name.",
-          "additionalProperties": { "$ref": "#/$defs/binding" }
-        },
-        "scenarios": {
-          "type": "object",
-          "propertyNames": { "$ref": "#/$defs/name" },
-          "additionalProperties": { "$ref": "#/$defs/scenario" }
-        },
-        "scenario": { "type": "string", "description": "Name of the default scenario in scenarios." }
       }
     }
   }

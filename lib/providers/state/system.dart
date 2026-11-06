@@ -238,6 +238,8 @@ SharedState sharedState(Ref ref) {
       noGlobal: ref
           .watch(providerRestrictionsProvider)
           .contains(ProviderRestriction.noGlobal),
+      lockGlobal: ref.watch(providerPolicyProvider)?.lockGlobal,
+      lockApps: ref.watch(providerPolicyProvider)?.lockApps,
       vpnEnabled: ref.watch(vpnSettingProvider).enable,
       excludedApps: ref.watch(providerRequiredAppsProvider).toList()..sort(),
     ),

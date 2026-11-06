@@ -126,31 +126,32 @@ groups:
 
 Закрепление всё равно важнее `to`. Если в конфиге нет `Balancer`, группа сообщает `fixed.missing` и сохраняет свой элемент.
 
-## Пакет маршрутизации провайдера
+## Маршрутизация провайдера
 
-Провайдер раздаёт профиль и сценарий по умолчанию через поле `reclash-routing`.
+Провайдер раздаёт профиль и сценарий по умолчанию в секции `routing` своего манифеста.
 
-```yaml title="routing.yaml"
-profiles:
-  fast-de:
-    rcx: 1
-    title: Fast Germany
-    prefer:
-      - { label: Germany, when: 'country = DE' }
-      - { label: Any, when: 'not dead', last-resort: true }
-groups:
-  Proxy: { profiles: [provider/fast-de, builtin/stable], default: provider/fast-de }
-scenarios:
-  work:
-    rcx: 1
-    title: Work
-    groups:
-      $main: { profile: provider/fast-de }
-    routes:
-      - name: Intranet
-        match: [DOMAIN-SUFFIX,corp.example]
-        to: DIRECT
-scenario: provider/work
+```yaml title="reclash.yaml"
+routing:
+  profiles:
+    fast-de:
+      rcx: 1
+      title: Fast Germany
+      prefer:
+        - { label: Germany, when: 'country = DE' }
+        - { label: Any, when: 'not dead', last-resort: true }
+  bindings:
+    Proxy: { profiles: [provider/fast-de, builtin/stable], default: provider/fast-de }
+  scenarios:
+    work:
+      rcx: 1
+      title: Work
+      groups:
+        $main: { profile: provider/fast-de }
+      routes:
+        - name: Intranet
+          match: [DOMAIN-SUFFIX,corp.example]
+          to: DIRECT
+  scenario: provider/work
 ```
 
 Здесь ничто не обращается к узлам, поэтому согласие не нужно; см.

@@ -18,7 +18,7 @@ import (
 
 // What makes a profile large stays in the Core; the overlay the host sends
 // back replaces every other section.
-var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules", "rcx-profiles", "rcx-scenarios", "rcx-scenario", "reclash-policy"}
+var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules"}
 
 func handleGetProfileBase(path string) (*ProfileBase, error) {
 	defer scheduleLoadMemoryRelease()
@@ -102,7 +102,7 @@ func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, err
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := config.ParseRawConfig(raw)
+	cfg, err := parseRawConfig(raw)
 	if err != nil {
 		return nil, err
 	}

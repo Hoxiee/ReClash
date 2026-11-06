@@ -12,3 +12,12 @@ ProviderHints presentedHints(Map<String, Object?> sections) => ProviderHints(
     'en',
   ).config,
 );
+
+/// The snapshot metadata a manifest with these sections yields.
+SubscriptionMetadata manifestMetadata(Map<String, Object?> sections) =>
+    SubscriptionMetadata(
+      parseProviderConfig(
+        jsonEncode({'version': 1, ...sections}),
+        'en',
+      ).config!.fields,
+    );

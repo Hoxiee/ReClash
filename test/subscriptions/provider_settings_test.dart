@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/provider_config.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 
@@ -19,15 +21,24 @@ ProviderSettingsInput _input(Map<String, List<String>> headers) =>
 
 void main() {
   group('header decoding', () {
-    test('aliases, scales and suffixes', () {
+    test('standard headers fill the fields and scale the interval', () {
       final metadata = readSubscriptionMetadata({
         'profile-update-interval': ['12'],
         'support-url': ['https://support.example.test'],
-        'reclash-buyplan': ['https://buy.example.test/plan,7'],
-        'reclash-buytraffic': ['https://buy.example.test/gb,80'],
+        'profile-title': ['Plan'],
       }).metadata;
       expect(metadata.count('update.intervalMinutes'), 720);
       expect(metadata.text('provider.supportUrl'), isNotNull);
+      expect(metadata.text('account.title'), 'Plan');
+    });
+
+    test('manifest buy links carry their suffixes', () {
+      final metadata = manifestMetadata({
+        'provider': {
+          'renew': {'url': 'https://buy.example.test/plan', 'days': 7},
+          'top-up': {'url': 'https://buy.example.test/gb', 'percent': 80},
+        },
+      });
       expect(
         metadata.text('provider.buyPlanUrl'),
         'https://buy.example.test/plan',
@@ -36,50 +47,74 @@ void main() {
       expect(metadata.count('provider.buyTrafficPercent'), 80);
     });
 
-    test('an out-of-range suffix is dropped with the value kept', () {
-      final result = readSubscriptionMetadata({
-        'reclash-buytraffic': ['https://buy.example.test/gb,500'],
-      });
-      expect(result.metadata.text('provider.buyTrafficUrl'), isNotNull);
-      expect(result.metadata.count('provider.buyTrafficPercent'), isNull);
+    test('an out-of-range suffix withdraws the provider section', () {
+      final result = parseProviderConfig(
+        jsonEncode({
+          'version': 1,
+          'provider': {
+            'name': 'Acme',
+            'top-up': {'url': 'https://buy.example.test/gb', 'percent': 500},
+          },
+        }),
+        'en',
+      );
+      expect(result.config?.fields, isEmpty);
       expect(result.warnings, isNotEmpty);
     });
 
-    test('one malformed package drops only itself', () {
+    test('one malformed package withdraws the apps section', () {
+      final result = parseProviderConfig(
+        jsonEncode({
+          'version': 1,
+          'apps': {
+            'exclude': ['com.bank.app', 'not a package', 'ru.gov.app'],
+          },
+        }),
+        'en',
+      );
+      expect(result.config?.fields.containsKey('apps.exclude'), isFalse);
+      expect(result.warnings, isNotEmpty);
+    });
+
+    test('other reclash headers are unsupported and decode nothing', () {
       final result = readSubscriptionMetadata({
-        'reclash-excludeapps': ['com.bank.app, not a package ,ru.gov.app'],
+        'reclash-notice': ['Maintenance'],
+        'reclash-settings': ['autorun'],
+        'flclashx-hideurl': ['true'],
       });
-      expect(result.metadata.strings('apps.exclude'), [
-        'com.bank.app',
-        'ru.gov.app',
-      ]);
+      expect(result.metadata.fields, isEmpty);
       expect(
         result.warnings,
-        contains('Invalid package in reclash-excludeapps'),
+        containsAll([
+          'Unsupported provider field: reclash-notice',
+          'Unsupported provider field: reclash-settings',
+        ]),
       );
     });
 
-    test('FlClashX names reach the same fields only under its preset', () {
-      final headers = {
-        'flclashx-hideurl': ['true'],
-        'flclashx-special': ['noglobal'],
+    test('the manifest config header needs an HTTPS response', () {
+      const headers = {
+        'reclash-config': ['https://cdn.example.test/reclash.yaml'],
       };
-      expect(readSubscriptionMetadata(headers).metadata.fields, isEmpty);
-      final hints = ProviderHints(
-        readSubscriptionMetadata(
-          headers,
-          clientPreset: SubscriptionClientPreset.flClashX,
-        ).metadata,
+      expect(
+        readSubscriptionMetadata(headers).warnings,
+        contains('Provider field needs an HTTPS response: reclash-config'),
       );
-      expect(hints.metadata.flag('presentation.hideUrl'), isTrue);
-      expect(hints.restrictions, {ProviderRestriction.noGlobal});
+      expect(readSubscriptionMetadata(headers, secure: true).warnings, isEmpty);
     });
 
-    test('config package lists join the header lists', () {
-      final merged = withConfigPackages(
-        readSubscriptionMetadata({
-          'reclash-excludeapps': ['com.one.app'],
-        }),
+    test('config package lists join the manifest lists', () {
+      final merged = withManifest(
+        readSubscriptionMetadata(const {}),
+        parseProviderConfig(
+          jsonEncode({
+            'version': 1,
+            'apps': {
+              'exclude': ['com.one.app'],
+            },
+          }),
+          'en',
+        ).config,
         excluded: ['com.two.app', 'com.one.app'],
         included: const [],
       );
@@ -189,36 +224,52 @@ void main() {
     });
 
     test('domestic routing names the region optionally', () {
-      expect(
-        _hints({
-          'reclash-approuting': ['domestic'],
-        }).domesticApps,
-        (enabled: true, region: null),
+      ProviderHints routing(String value) => ProviderHints(
+        manifestMetadata({
+          'apps': {'routing': value},
+        }),
       );
-      expect(
-        _hints({
-          'reclash-approuting': ['domestic:ru'],
-        }).domesticApps,
-        (enabled: true, region: 'RU'),
-      );
+      expect(routing('domestic').domesticApps, (enabled: true, region: null));
+      expect(routing('domestic:ru').domesticApps, (
+        enabled: true,
+        region: 'RU',
+      ));
       expect(_hints({}).domesticApps.enabled, isFalse);
     });
 
-    test('settings are null when the header is absent', () {
+    test('settings are null without a section and touch only listed keys', () {
       expect(_hints({}).settings, isNull);
-      final settings = _hints({
-        'reclash-settings': ['autorun,minimize'],
-      }).settings!;
+      final settings = ProviderHints(
+        manifestMetadata({
+          'settings': {'launch-at-login': true, 'minimize-on-exit': false},
+        }),
+      ).settings!;
       expect(settings[ProviderSettingFlag.autorun], isTrue);
-      expect(settings[ProviderSettingFlag.openlogs], isFalse);
+      expect(settings[ProviderSettingFlag.minimize], isFalse);
+      expect(settings.containsKey(ProviderSettingFlag.openlogs), isFalse);
+    });
+
+    test('a non-boolean setting withdraws the whole section', () {
+      expect(
+        manifestMetadata({
+          'settings': {'launch-at-login': true, 'capture-logs': 'yes'},
+        }).fields,
+        isEmpty,
+      );
     });
 
     test('an announcement needs text and keeps only a safe link', () {
       expect(_hints({}).announcement, isNull);
-      final announcement = _hints({
-        'announce': ['Maintenance tonight'],
-        'reclash-announceurl': ['https://status.example.test'],
-      }).announcement!;
+      final announcement = ProviderHints(
+        manifestMetadata({
+          'provider': {
+            'announce': {
+              'text': 'Maintenance tonight',
+              'url': 'https://status.example.test',
+            },
+          },
+        }),
+      ).announcement!;
       expect(announcement.text, 'Maintenance tonight');
       expect(announcement.link?.host, 'status.example.test');
     });
@@ -228,60 +279,75 @@ void main() {
     test(
       'notice and announcement decode independently and survive storage',
       () {
-        final result = readSubscriptionMetadata({
-          'announce': ['Plan description'],
-          'reclash-announceurl': ['https://example.test/plan'],
-          'reclash-notice': ['Maintenance tonight'],
-          'reclash-noticeurl': ['https://example.test/status'],
-        });
-        final hints = ProviderHints(
-          SubscriptionMetadata.fromJson(result.metadata.toJson()),
+        final result = SubscriptionMetadata.fromJson(
+          manifestMetadata({
+            'provider': {
+              'announce': {
+                'text': 'Plan description',
+                'url': 'https://example.test/plan',
+              },
+              'notice': {
+                'text': 'Maintenance tonight',
+                'url': 'https://example.test/status',
+              },
+            },
+          }).toJson(),
         );
+        final hints = ProviderHints(result);
         expect(hints.announcement?.text, 'Plan description');
         expect(hints.announcement?.link?.path, '/plan');
         expect(hints.notice?.text, 'Maintenance tonight');
         expect(hints.notice?.link?.path, '/status');
-        expect(
-          encodeSubscriptionMetadata(result.metadata)['reclash-notice'],
-          'Maintenance tonight',
-        );
       },
     );
 
-    test('notice accepts body metadata and HTTP takes precedence', () {
-      final result = readSubscriptionMetadata(
-        {
-          'reclash-notice': ['HTTP notice'],
-        },
-        body:
-            '#reclash-notice: Body notice\n'
-            '#reclash-noticeurl: https://example.test/status\n',
+    test('the announce header is the fallback and the manifest wins', () {
+      final headers = readSubscriptionMetadata({
+        'announce': ['Header plan'],
+      });
+      expect(ProviderHints(headers.metadata).announcement?.text, 'Header plan');
+      final merged = withManifest(
+        headers,
+        parseProviderConfig(
+          jsonEncode({
+            'version': 1,
+            'provider': {
+              'announce': {'text': 'Manifest plan'},
+              'notice': {'text': 'Manifest notice'},
+            },
+          }),
+          'en',
+        ).config,
+        excluded: const [],
+        included: const [],
       );
-      final hints = ProviderHints(result.metadata);
-      expect(hints.notice?.text, 'HTTP notice');
-      expect(hints.notice?.link?.path, '/status');
-      expect(hints.announcement, isNull);
+      final hints = ProviderHints(merged.metadata);
+      expect(hints.announcement?.text, 'Manifest plan');
+      expect(hints.notice?.text, 'Manifest notice');
     });
 
-    test('notice needs text and drops unsafe links', () {
+    test('notice needs text and an unsafe link withdraws it', () {
+      Map<String, Object?> notice(Map<String, Object?> value) => {
+        'provider': {'notice': value},
+      };
       expect(
-        _hints({
-          'reclash-noticeurl': ['https://example.test'],
-        }).notice,
+        ProviderHints(
+          manifestMetadata(notice({'url': 'https://example.test'})),
+        ).notice,
         isNull,
       );
       expect(
-        _hints({
-          'reclash-notice': ['   '],
-        }).notice,
+        ProviderHints(manifestMetadata(notice({'text': '   '}))).notice,
         isNull,
       );
-      final notice = _hints({
-        'reclash-notice': ['Maintenance'],
-        'reclash-noticeurl': ['javascript:alert(1)'],
-      }).notice;
-      expect(notice?.text, 'Maintenance');
-      expect(notice?.link, isNull);
+      expect(
+        ProviderHints(
+          manifestMetadata(
+            notice({'text': 'Maintenance', 'url': 'javascript:alert(1)'}),
+          ),
+        ).notice,
+        isNull,
+      );
     });
   });
 

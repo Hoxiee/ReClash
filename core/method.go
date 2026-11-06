@@ -202,6 +202,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	startLogMethod:                 acknowledged(handleStartLog),
 	stopLogMethod:                  acknowledged(handleStopLog),
 	validateConfigMethod:           withMessage(handleValidateConfig),
+	getProviderGlobalNodesMethod:   withFallible(handleGetProviderGlobalNodes),
 	decryptConfigMethod:            withFallible(handleDecryptConfig),
 	getConfigMethod:                withFallible(handleGetConfig),
 	getProfileBaseMethod:           withFallible(handleGetProfileBase),
