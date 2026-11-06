@@ -1,8 +1,8 @@
 # App settings
 
-Settings, layout, restrictions and Android app lists a subscription can set, and how they yield to the user.
+Appearance, settings flags, restrictions and Android app lists a subscription can set, and how they yield to the user.
 
-Value syntax follows [Value formats](headers.md#value-formats). Hints come from the current profile. The [hosted config](config.md) can set view, power button, wallpaper and widgets too, and wins over these headers.
+Value syntax follows [Value formats](headers.md#value-formats). Hints come from the current profile. Appearance comes only from the [hosted config](config.md); no header sets it.
 
 ## Ownership
 
@@ -10,72 +10,11 @@ Value syntax follows [Value formats](headers.md#value-formats). Hints come from 
 - A changed setting stops following the provider; its tag offers "Return to provider".
 - "Return settings to provider" in application settings resets every setting, the user's overrides of general, DNS and TUN options, and changes to provider apps.
 - When the current profile stops providing a value (for example, after switching profiles), a setting still following the provider returns to the user's previous value.
-- Omitting a header withdraws its value; the setting returns to the user's value ([Metadata lifetime](README.md#metadata-lifetime)).
+- Omitting a header, or a config section, withdraws its value; the setting returns to the user's value ([Metadata lifetime](README.md#metadata-lifetime)).
 
 ## Appearance
 
-### View
-
-`reclash-view` sets app and proxy-page appearance as `pairs`, at most 32. Unknown keys and values are ignored.
-
-| Key | Values |
-| --- | --- |
-| `proxies.type` | `tab`, `list` |
-| `proxies.sort` | `none`, `delay`, `name` |
-| `proxies.layout` | `loose`, `standard`, `tight` |
-| `proxies.icon` | `filled`, `plain`, `hidden` |
-| `proxies.card` | `loose`, `standard`, `compact`, `oneline` |
-| `app.navbar` | `floating`, `docked` |
-| `app.tabs` | `slide`, `fade` |
-| `app.glass` | `none`, `standard`, `ultra` |
-| `app.color` | `RRGGBB` or `AARRGGBB`, optional `#` |
-| `app.colordark` | Same as `app.color`. Replaces it in the dark theme; ignored without `app.color`. |
-| `app.style` | `vivid`, `tinted`, `soft`, `monochrome` |
-| `app.black` | `true`, `false` |
-
-`app.glass` is the requested quality. Sustained rendering overload can lower the effective quality for the current session without changing the saved setting or its provider ownership. The notification offers to restore and keep the requested quality for the rest of the session.
-
-```http
-reclash-view: proxies.type:list;proxies.sort:delay;app.color:#3F6FD8;app.style:tinted
-```
-
-### Power button
-
-`reclash-powerbutton` styles the running power button of the simple dashboard as `pairs`, at most 8. Users have no setting for it.
-
-| Key | Values | Default |
-| --- | --- | --- |
-| `shape` | One shape, a comma-separated pool, or `random` | `cookie` |
-| `type` | `solid`, `tonal`, `outline` | `solid` |
-
-Shapes: `cookie`, `circle`, `scallop`, `sunny`, `flower`, `clover`, `burst`, `puffy`, `puffyDiamond`, `clover8Leaf`, `cookie4Sided`, `cookie6Sided`, `verySunny`, `square`, `diamond`, `pentagon`, `gem`, `pixelCircle`, `softBoom`, `boom`, `sharpBurst`.
-
-- Names are case-insensitive. Unknown shapes are ignored; duplicates add no chance. No known shape falls back to `cookie`.
-- `random` means every shape, and only as the whole value.
-- A pool picks one shape uniformly. The pick holds for the app session, until the profile or valid shapes change.
-
-```http
-reclash-powerbutton: shape:puffy,puffyDiamond,clover8Leaf;type:outline
-```
-
-### Widgets
-
-`reclash-widgets` sets the dashboard cards as `tokens`, at most 32, in display order.
-
-Tokens: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (desktop), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`.
-
-- Tokens are case-insensitive. Unknown tokens are ignored; with no known token, the dashboard is unchanged.
-- `currentOutbound` is added first when missing.
-- The simple dashboard uses the listed `outboundMode`, `serviceStatus` and `health`; with none listed, it is unchanged.
-- `reclash-announce` is not a widget: its card shows above the widgets whenever the header is set, and cannot be listed, moved or removed.
-
-### Background
-
-`reclash-background` sets a wallpaper as `url[,opacity]`, opacity 1–100, default 8. The image is downloaded once per URL and cached.
-
-```http
-reclash-background: https://cdn.example.net/wallpaper.webp,12
-```
+View, power button, wallpaper and widgets are set in the [hosted config](config.md#sections) named by `reclash-config`. Their values follow the ownership rules above.
 
 ## Settings flags
 

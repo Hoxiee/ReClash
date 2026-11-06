@@ -4,8 +4,7 @@ const subscriptionHeadersLimit = 64 * 1024;
 const subscriptionWireLimit = 16 * 1024 * 1024;
 const subscriptionPayloadLimit = 32 * 1024 * 1024;
 
-/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers], [pairs]
-/// and [keys] the field's `limit` counts entries, not bytes.
+/// For [SubscriptionFieldType.tokens], [packages], [hosts], [numbers] and [keys] the field's `limit` counts entries, not bytes.
 enum SubscriptionFieldType {
   text,
   url,
@@ -13,7 +12,6 @@ enum SubscriptionFieldType {
   boolean,
   hosts,
   tokens,
-  pairs,
   packages,
   numbers,
   keys,
@@ -87,7 +85,6 @@ class SubscriptionField {
       SubscriptionFieldType.boolean => 'boolean',
       SubscriptionFieldType.hosts => 'comma-separated-authorities',
       SubscriptionFieldType.tokens => 'comma-separated-tokens',
-      SubscriptionFieldType.pairs => 'semicolon-separated-pairs',
       SubscriptionFieldType.packages => 'comma-separated-packages',
       SubscriptionFieldType.numbers => 'comma-separated-decimals',
       SubscriptionFieldType.keys => 'comma-separated-ed25519-keys',
@@ -243,43 +240,11 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'panel',
   ),
   SubscriptionField(
-    'presentation.widgets',
-    'reclash-widgets',
-    SubscriptionFieldType.tokens,
-    limit: 32,
-    trust: SubscriptionTrust.hint,
-    consumer: 'appearance',
-  ),
-  SubscriptionField(
     'presentation.config',
     'reclash-config',
     SubscriptionFieldType.url,
     trust: SubscriptionTrust.hint,
     secure: true,
-    consumer: 'appearance',
-  ),
-  SubscriptionField(
-    'presentation.background',
-    'reclash-background',
-    SubscriptionFieldType.url,
-    suffix: SubscriptionSuffix('presentation.backgroundOpacity'),
-    trust: SubscriptionTrust.hint,
-    consumer: 'appearance',
-  ),
-  SubscriptionField(
-    'presentation.view',
-    'reclash-view',
-    SubscriptionFieldType.pairs,
-    limit: 32,
-    trust: SubscriptionTrust.hint,
-    consumer: 'appearance',
-  ),
-  SubscriptionField(
-    'presentation.powerButton',
-    'reclash-powerbutton',
-    SubscriptionFieldType.pairs,
-    limit: 8,
-    trust: SubscriptionTrust.hint,
     consumer: 'appearance',
   ),
   SubscriptionField(

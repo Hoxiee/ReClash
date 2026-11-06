@@ -22,7 +22,7 @@ void main() {
         metadata: const SubscriptionMetadata({
           'subscription.type': 'dev',
           'update.intervalMinutes': 60,
-          'presentation.widgets': ['traffic', 'expire'],
+          'settings.flags': ['autorun', 'minimize'],
         }),
         receivedAt: DateTime(2026),
         staleFields: const ['update.intervalMinutes'],
@@ -34,7 +34,7 @@ void main() {
     expect(find.text('dev'), findsOneWidget);
     expect(find.text('reclash-autoupdateinterval'), findsOneWidget);
     expect(find.text('hint · stale'), findsOneWidget);
-    expect(find.text('traffic, expire'), findsOneWidget);
+    expect(find.text('autorun, minimize'), findsOneWidget);
     expect(find.text('reclash-hideurl: not a boolean'), findsOneWidget);
   });
 

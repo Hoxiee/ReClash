@@ -11,8 +11,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/providers/wallpaper.dart';
-import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
+import '../helpers/provider_presentation.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:reclash/ui/wallpaper_image.dart';
 
@@ -65,11 +64,9 @@ void main() {
         overrides: [
           wallpaperStoreProvider.overrideWithValue(store),
           providerHintsProvider.overrideWithValue(
-            ProviderHints(
-              readSubscriptionMetadata({
-                'reclash-background': ['$url,22'],
-              }).metadata,
-            ),
+            presentedHints({
+              'wallpaper': {'url': url, 'opacity': 22},
+            }),
           ),
         ],
       );

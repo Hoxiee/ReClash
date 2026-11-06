@@ -104,7 +104,7 @@ power-labels:
 
 ### Precedence
 
-Valid `view`, `power-button`, `wallpaper` and `widgets` sections win over `reclash-view`, `reclash-powerbutton`, `reclash-background` and `reclash-widgets`. Ownership follows [Ownership](app-settings.md#ownership): values are tagged "From provider" and yield to the user.
+The `view`, `power-button`, `wallpaper` and `widgets` sections are the only source of appearance; no header sets it. An invalid section is ignored with a warning. Ownership follows [Ownership](app-settings.md#ownership): values are tagged "From provider" and yield to the user.
 
 ### Localized text
 
@@ -124,7 +124,7 @@ cards:
 
 ### View
 
-`view` takes the groups `proxies` and `app`. Values are those of [View](app-settings.md#view); the dashed key `color-dark` is `app.colordark`.
+`view` takes the groups `proxies` and `app`. Unknown keys and values are ignored.
 
 | Key | Values |
 | --- | --- |
@@ -141,16 +141,22 @@ cards:
 | `app.style` | `vivid`, `tinted`, `soft`, `monochrome` |
 | `app.black` | Boolean |
 
+`app.glass` is the requested quality. Sustained rendering overload can lower the effective quality for the current session without changing the saved setting or its provider ownership. The notification offers to restore and keep the requested quality for the rest of the session.
+
 ### Power button
 
-`power-button` is [Power button](app-settings.md#power-button).
+`power-button` styles the running power button of the simple dashboard. Users have no setting for it.
 
 | Key | Values | Default |
 | --- | --- | --- |
-| `shape` | One shape name or a list of names | `cookie` |
+| `shape` | One shape name, a list of names, or `random` | `cookie` |
 | `type` | `solid`, `tonal`, `outline` | `solid` |
 
-A list is a pool: one shape is picked for the app session, as in the header.
+Shapes: `cookie`, `circle`, `scallop`, `sunny`, `flower`, `clover`, `burst`, `puffy`, `puffyDiamond`, `clover8Leaf`, `cookie4Sided`, `cookie6Sided`, `verySunny`, `square`, `diamond`, `pentagon`, `gem`, `pixelCircle`, `softBoom`, `boom`, `sharpBurst`.
+
+- Names are case-insensitive. Unknown shapes are ignored; duplicates add no chance. No known shape falls back to `cookie`.
+- `random` means every shape, and only as the whole value.
+- A list is a pool: one shape is picked uniformly and holds for the app session, until the profile or valid shapes change.
 
 ### Wallpaper
 
@@ -159,9 +165,18 @@ A list is a pool: one shape is picked for the app session, as in the header.
 | `url` | `https` image URL. Required: without it the section is invalid. | — |
 | `opacity` | Integer 1–100 | 8 |
 
+The image is downloaded once per URL and cached.
+
 ### Widgets
 
-`widgets` is a list of the tokens of [Widgets](app-settings.md#widgets), in display order.
+`widgets` is a list of dashboard cards in display order.
+
+Tokens: `currentOutbound`, `health`, `networkSpeed`, `outboundMode`, `vpnButton` (Android), `networkTakeover` (desktop), `serviceStatus`, `profiles`, `proxyGroups`, `connectionStats`, `intranetIp`, `memoryInfo`.
+
+- Tokens are case-insensitive. Unknown tokens are ignored; with no known token, the dashboard is unchanged.
+- `currentOutbound` is added first when missing.
+- The simple dashboard uses the listed `outboundMode`, `serviceStatus` and `health`; with none listed, it is unchanged.
+- `reclash-announce` is not a widget: its card shows above the widgets whenever the header is set, and cannot be listed, moved or removed.
 
 ### Cards
 

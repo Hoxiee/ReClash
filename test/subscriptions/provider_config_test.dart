@@ -5,7 +5,6 @@ import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/provider_cards.dart';
 import 'package:reclash/subscriptions/metadata/provider_config.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:yaml/yaml.dart';
 
@@ -55,10 +54,7 @@ power-labels:
     expect(config.powerLabels['off']!.single.title, 'Disconnected');
     expect(config.powerLabels['on']![0].hint, 'Привет');
     expect(config.powerLabels['on']![1].title, 'Подключено');
-    expect(config.overrides['presentation.widgets'], [
-      'health',
-      'servicestatus',
-    ]);
+    expect(config.widgets, ['health', 'servicestatus']);
   });
 
   group('size and syntax', () {
@@ -320,18 +316,10 @@ cards:
   });
 
   group('presentation sections', () {
-    ProviderHints hints(String body, [Map<String, List<String>>? headers]) =>
-        ProviderHints(
-          readSubscriptionMetadata(headers ?? const {}).metadata,
-          config: parse(doc(body)).config,
-        );
-
-    const headers = {
-      'reclash-view': ['proxies.type:tab;app.black:false'],
-      'reclash-powerbutton': ['shape:gem;type:tonal'],
-      'reclash-background': ['https://h.example/bg.png,30'],
-      'reclash-widgets': ['health'],
-    };
+    ProviderHints hints(String body) => ProviderHints(
+      const SubscriptionMetadata(),
+      config: parse(doc(body)).config,
+    );
 
     test('view app colors set the light and dark primary', () {
       final result = parseProviderConfig('''
@@ -350,7 +338,7 @@ view:
       expect(view.primaryColorDark, 0xFF88AAFF);
     });
 
-    test('each valid section overrides its header', () {
+    test('each valid section reaches its hint', () {
       final result = hints('''
 view:
   proxies: {type: List, sort: delay}
@@ -358,7 +346,7 @@ view:
 power-button: {shape: [Puffy, gem], type: outline}
 wallpaper: {url: 'https://cdn.example.net/bg.webp', opacity: 12}
 widgets: [CurrentOutbound, serviceStatus]
-''', headers);
+''');
       expect(result.view.proxiesType, ProxiesType.list);
       expect(result.view.proxiesSort, ProxiesSortType.delay);
       expect(result.view.floatingNavigationBar, isTrue);
@@ -377,7 +365,7 @@ widgets: [CurrentOutbound, serviceStatus]
       ]);
     });
 
-    test('a single shape string and random resolve like the header', () {
+    test('a single shape string and random resolve', () {
       expect(hints('power-button: {shape: gem}').powerButton.shapes, [
         ProviderPowerShape.gem,
       ]);
@@ -387,24 +375,22 @@ widgets: [CurrentOutbound, serviceStatus]
       );
     });
 
-    test('an absent section keeps the header', () {
-      final result = hints('cards: []', headers);
-      expect(result.view.proxiesType, ProxiesType.tab);
-      expect(result.powerButton.type, ProviderPowerType.tonal);
-      expect(result.background!.opacity, 0.3);
-      expect(result.widgets, [DashboardWidget.health]);
-    });
+    test('an absent or invalid section leaves its hint empty', () {
+      final absent = hints('cards: []');
+      expect(absent.view.proxiesType, isNull);
+      expect(absent.powerButton, defaultProviderPowerButtonHint);
+      expect(absent.background, isNull);
+      expect(absent.widgets, isNull);
 
-    test('an invalid section warns and keeps the header', () {
       const body =
           'view: 1\npower-button: [a]\nwallpaper: {opacity: 5}\n'
           'widgets: [health, 3]';
       expect(parse(doc(body)).warnings, hasLength(4));
-      final result = hints(body, headers);
-      expect(result.view.proxiesType, ProxiesType.tab);
-      expect(result.powerButton.type, ProviderPowerType.tonal);
-      expect(result.background!.url.host, 'h.example');
-      expect(result.widgets, [DashboardWidget.health]);
+      final invalid = hints(body);
+      expect(invalid.view.proxiesType, isNull);
+      expect(invalid.powerButton, defaultProviderPowerButtonHint);
+      expect(invalid.background, isNull);
+      expect(invalid.widgets, isNull);
       expect(parse(doc('wallpaper: {url: "http://a.example/x"}')).warnings, [
         'Invalid wallpaper section',
       ]);

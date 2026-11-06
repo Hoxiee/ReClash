@@ -7,6 +7,8 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 
+import '../helpers/provider_presentation.dart';
+
 final _base = Config.realFromJson(null);
 
 ProviderHints _hints(Map<String, List<String>> headers) =>
@@ -23,7 +25,6 @@ void main() {
         'support-url': ['https://support.example.test'],
         'reclash-buyplan': ['https://buy.example.test/plan,7'],
         'reclash-buytraffic': ['https://buy.example.test/gb,80'],
-        'reclash-background': ['https://img.example.test/bg.png,15'],
       }).metadata;
       expect(metadata.count('update.intervalMinutes'), 720);
       expect(metadata.text('provider.supportUrl'), isNotNull);
@@ -33,7 +34,6 @@ void main() {
       );
       expect(metadata.count('provider.buyPlanDays'), 7);
       expect(metadata.count('provider.buyTrafficPercent'), 80);
-      expect(metadata.count('presentation.backgroundOpacity'), 15);
     });
 
     test('an out-of-range suffix is dropped with the value kept', () {
@@ -61,7 +61,7 @@ void main() {
 
     test('FlClashX names reach the same fields only under its preset', () {
       final headers = {
-        'flclashx-widgets': ['profiles'],
+        'flclashx-hideurl': ['true'],
         'flclashx-special': ['noglobal'],
       };
       expect(readSubscriptionMetadata(headers).metadata.fields, isEmpty);
@@ -71,7 +71,7 @@ void main() {
           clientPreset: SubscriptionClientPreset.flClashX,
         ).metadata,
       );
-      expect(hints.widgets, [DashboardWidget.profiles]);
+      expect(hints.metadata.flag('presentation.hideUrl'), isTrue);
       expect(hints.restrictions, {ProviderRestriction.noGlobal});
     });
 
@@ -92,10 +92,12 @@ void main() {
 
   group('hints', () {
     test('view pairs ignore unknown keys and values', () {
-      final view = _hints({
-        'reclash-view': [
-          'proxies.type:list;proxies.sort:bogus;app.navbar:floating;unknown:x;app.color:#ff8800',
-        ],
+      final view = presentedHints({
+        'view': {
+          'proxies': {'type': 'list', 'sort': 'bogus'},
+          'app': {'navbar': 'floating', 'color': '#ff8800'},
+          'unknown': {'x': 'y'},
+        },
       }).view;
       expect(view.proxiesType, ProxiesType.list);
       expect(view.proxiesSort, isNull);
@@ -106,25 +108,23 @@ void main() {
 
     test('power button pairs fall back to the default per key', () {
       expect(_hints({}).powerButton, defaultProviderPowerButtonHint);
-      final flower = _hints({
-        'reclash-powerbutton': ['shape:flower;type:outline'],
+      final flower = presentedHints({
+        'power-button': {'shape': 'flower', 'type': 'outline'},
       }).powerButton;
       expect(flower.shapes, [ProviderPowerShape.flower]);
       expect(flower.type, ProviderPowerType.outline);
-      final unknown = _hints({
-        'reclash-powerbutton': ['shape:bogus;type:tonal;unknown:x'],
+      final unknown = presentedHints({
+        'power-button': {'shape': 'bogus', 'type': 'tonal', 'unknown': 'x'},
       }).powerButton;
       expect(unknown.shapes, [ProviderPowerShape.cookie]);
       expect(unknown.type, ProviderPowerType.tonal);
     });
 
-    test('all power button shapes accept case-insensitive header names', () {
+    test('all power button shapes accept case-insensitive names', () {
       expect(ProviderPowerShape.values, hasLength(21));
       for (final shape in ProviderPowerShape.values) {
-        final hint = _hints({
-          'reclash-powerbutton': [
-            'shape:${shape.name.toUpperCase()};type:bogus',
-          ],
+        final hint = presentedHints({
+          'power-button': {'shape': shape.name.toUpperCase(), 'type': 'bogus'},
         }).powerButton;
         expect(hint.shapes, [shape]);
         expect(hint.type, ProviderPowerType.solid);
@@ -132,8 +132,8 @@ void main() {
     });
 
     test('random offers every concrete power button shape', () {
-      final hint = _hints({
-        'reclash-powerbutton': [' SHAPE : RaNdOm ; TYPE : OUTLINE '],
+      final hint = presentedHints({
+        'power-button': {'SHAPE': ' RaNdOm ', 'TYPE': 'OUTLINE'},
       }).powerButton;
       expect(hint.shapes, ProviderPowerShape.values);
       expect(hint.type, ProviderPowerType.outline);
@@ -141,10 +141,17 @@ void main() {
     });
 
     test('power button lists ignore unknown names and duplicate weights', () {
-      final hint = _hints({
-        'reclash-powerbutton': [
-          'shape:PuffyDiamond, cookie, unknown, COOKIE, ,clover8Leaf;type:tonal',
-        ],
+      final hint = presentedHints({
+        'power-button': {
+          'shape': [
+            'PuffyDiamond',
+            'cookie',
+            'unknown',
+            'COOKIE',
+            'clover8Leaf',
+          ],
+          'type': 'tonal',
+        },
       }).powerButton;
       expect(hint.shapes, [
         ProviderPowerShape.cookie,
@@ -157,8 +164,8 @@ void main() {
 
     test('an empty or unknown power button list keeps the default shape', () {
       for (final value in ['', ', ,', 'bogus,unknown', 'random,bogus']) {
-        final hint = _hints({
-          'reclash-powerbutton': ['shape:$value;type:outline'],
+        final hint = presentedHints({
+          'power-button': {'shape': value, 'type': 'outline'},
         }).powerButton;
         expect(hint.shapes, [ProviderPowerShape.cookie]);
         expect(hint.type, ProviderPowerType.outline);
@@ -166,67 +173,16 @@ void main() {
     });
 
     test('power button pools retain only the listed concrete shapes', () {
-      final hint = _hints({
-        'reclash-powerbutton': ['shape:random,puffy,puffy'],
+      final hint = presentedHints({
+        'power-button': {'shape': 'random,puffy,puffy'},
       }).powerButton;
       expect(hint.shapes, [ProviderPowerShape.puffy]);
     });
 
-    test('power button lists survive metadata storage', () {
-      final metadata = readSubscriptionMetadata({
-        'reclash-powerbutton': [
-          'shape:pixelCircle,sharpBurst,softBoom;type:outline',
-        ],
-      }).metadata;
-      final stored = SubscriptionMetadata.fromJson(metadata.toJson());
-      final hint = ProviderHints(stored).powerButton;
-      expect(hint.shapes, [
-        ProviderPowerShape.pixelCircle,
-        ProviderPowerShape.softBoom,
-        ProviderPowerShape.sharpBurst,
-      ]);
-      expect(hint.type, ProviderPowerType.outline);
-    });
-
-    test('shape lists do not relax other pair values', () {
-      for (final headers in [
-        {
-          'reclash-view': ['proxies.type:list,tab'],
-        },
-        {
-          'reclash-powerbutton': ['shape:cookie;type:solid,tonal'],
-        },
-        {
-          'reclash-powerbutton': ['shape:cookie;unknown:one,two'],
-        },
-      ]) {
-        final result = readSubscriptionMetadata(headers);
-        expect(result.metadata.fields, isEmpty);
-        expect(result.warnings, isNotEmpty);
-      }
-    });
-
-    test('stored shape lists reject controls and retain token size limits', () {
-      for (final value in [
-        'cookie,flower\n',
-        'cookie,flower\r',
-        'cookie,flower\t',
-        'cookie,/flower',
-        List.filled(65, 'a').join(),
-        List.filled(1500, 'cookie').join(','),
-      ]) {
-        final metadata = SubscriptionMetadata({
-          'presentation.powerButton': {'shape': value, 'type': 'tonal'},
-        });
-        final stored = SubscriptionMetadata.fromJson(metadata.toJson());
-        expect(stored.pairs('presentation.powerButton'), isEmpty);
-      }
-    });
-
     test('an explicit pool may include every supported shape', () {
       final names = ProviderPowerShape.values.map((shape) => shape.name);
-      final hint = _hints({
-        'reclash-powerbutton': ['shape:${names.join(',')};type:tonal'],
+      final hint = presentedHints({
+        'power-button': {'shape': names.toList(), 'type': 'tonal'},
       }).powerButton;
       expect(hint.shapes, ProviderPowerShape.values);
       expect(hint.type, ProviderPowerType.tonal);
@@ -330,37 +286,43 @@ void main() {
   });
 
   group('settings engine', () {
-    const view = {
-      'reclash-view': ['proxies.type:list;app.black:true'],
-    };
+    final view = presentedHints({
+      'view': {
+        'proxies': {'type': 'list'},
+        'app': {'black': true},
+      },
+    });
 
     test('a dark colour needs the colour and leaves with it', () {
-      ProviderSettingsInput withView(String pairs) => _input({
-        'reclash-view': [pairs],
-      });
+      ProviderSettingsInput withView(Map<String, Object?> app) =>
+          ProviderSettingsInput(
+            presentedHints({
+              'view': {'app': app},
+            }),
+          );
       final alone = applyProviderSettings(
         _base,
-        withView('app.colordark:#eeddcc'),
+        withView({'color-dark': '#eeddcc'}),
       );
       expect(alone.themeProps.primaryColorDark, isNull);
 
       final both = applyProviderSettings(
         _base,
-        withView('app.color:#112233;app.colordark:#eeddcc'),
+        withView({'color': '#112233', 'color-dark': '#eeddcc'}),
       );
       expect(both.themeProps.primaryColorDark, 0xFFEEDDCC);
       expect(isProviderManaged(both, 'app.colordark'), isTrue);
 
       final withdrawn = applyProviderSettings(
         both,
-        withView('app.color:#112233'),
+        withView({'color': '#112233'}),
       );
       expect(withdrawn.themeProps.primaryColorDark, isNull);
       expect(withdrawn.themeProps.primaryColor, 0xFF112233);
     });
 
     test('applies a provided value and remembers the user baseline', () {
-      final config = applyProviderSettings(_base, _input(view));
+      final config = applyProviderSettings(_base, ProviderSettingsInput(view));
       expect(config.proxiesStyleProps.type, ProxiesType.list);
       expect(config.themeProps.pureBlack, isTrue);
       expect(config.providerSettings.applied.keys, contains('proxies.type'));
@@ -372,37 +334,43 @@ void main() {
     });
 
     test('a user change is kept and reported as released', () {
-      final applied = applyProviderSettings(_base, _input(view));
+      final applied = applyProviderSettings(_base, ProviderSettingsInput(view));
       final changed = applied.copyWith(
         proxiesStyleProps: applied.proxiesStyleProps.copyWith(
           type: ProxiesType.tab,
         ),
       );
-      final after = applyProviderSettings(changed, _input(view));
+      final after = applyProviderSettings(changed, ProviderSettingsInput(view));
       expect(after.proxiesStyleProps.type, ProxiesType.tab);
       expect(after.providerSettings.userOwned, contains('proxies.type'));
       expect(isProviderManaged(after, 'proxies.type'), isFalse);
-      expect(isProviderReleased(after, _input(view), 'proxies.type'), isTrue);
+      expect(
+        isProviderReleased(after, ProviderSettingsInput(view), 'proxies.type'),
+        isTrue,
+      );
       expect(after.themeProps.pureBlack, isTrue);
     });
 
     test('returning hands a released setting back', () {
-      final applied = applyProviderSettings(_base, _input(view));
+      final applied = applyProviderSettings(_base, ProviderSettingsInput(view));
       final changed = applyProviderSettings(
         applied.copyWith(
           proxiesStyleProps: applied.proxiesStyleProps.copyWith(
             type: ProxiesType.tab,
           ),
         ),
-        _input(view),
+        ProviderSettingsInput(view),
       );
-      final returned = returnProviderSettings(changed, _input(view));
+      final returned = returnProviderSettings(
+        changed,
+        ProviderSettingsInput(view),
+      );
       expect(returned.proxiesStyleProps.type, ProxiesType.list);
       expect(returned.providerSettings.userOwned, isEmpty);
     });
 
     test('returning all also returns changes before the next sync', () {
-      final input = _input(view);
+      final input = ProviderSettingsInput(view);
       final applied = applyProviderSettings(_base, input);
       final changed = applied.copyWith(
         proxiesStyleProps: applied.proxiesStyleProps.copyWith(
@@ -421,7 +389,7 @@ void main() {
     });
 
     test('returning one fresh change keeps other settings released', () {
-      final input = _input(view);
+      final input = ProviderSettingsInput(view);
       final applied = applyProviderSettings(_base, input);
       final changed = applied.copyWith(
         proxiesStyleProps: applied.proxiesStyleProps.copyWith(
@@ -443,7 +411,7 @@ void main() {
     });
 
     test('withdrawing after returning restores the latest user value', () {
-      final input = _input(view);
+      final input = ProviderSettingsInput(view);
       final applied = applyProviderSettings(_base, input);
       final changed = applied.copyWith(
         proxiesStyleProps: applied.proxiesStyleProps.copyWith(
@@ -510,7 +478,7 @@ void main() {
     });
 
     test('returning one setting leaves core and app-list overrides alone', () {
-      final input = _input(view);
+      final input = ProviderSettingsInput(view);
       final applied = applyProviderSettings(_base, input);
       final patch = applied.patchClashConfig.copyWith(
         generalOverrideKeys: {GeneralOverrideKey.ipv6},
@@ -543,14 +511,14 @@ void main() {
     });
 
     test('withdrawing a header restores what the user had', () {
-      final applied = applyProviderSettings(_base, _input(view));
+      final applied = applyProviderSettings(_base, ProviderSettingsInput(view));
       final withdrawn = applyProviderSettings(applied, _input(const {}));
       expect(withdrawn.proxiesStyleProps.type, _base.proxiesStyleProps.type);
       expect(withdrawn.providerSettings.applied, isEmpty);
     });
 
     test('withdrawing keeps a value the user changed meanwhile', () {
-      final applied = applyProviderSettings(_base, _input(view));
+      final applied = applyProviderSettings(_base, ProviderSettingsInput(view));
       final changed = applied.copyWith(
         proxiesStyleProps: applied.proxiesStyleProps.copyWith(
           type: ProxiesType.tab,
@@ -562,8 +530,8 @@ void main() {
 
     test('a pending background leaves its setting untouched', () {
       final input = ProviderSettingsInput(
-        _hints({
-          'reclash-background': ['https://img.example.test/bg.png'],
+        presentedHints({
+          'wallpaper': {'url': 'https://img.example.test/bg.png'},
         }),
         backgroundPending: true,
       );
@@ -576,24 +544,26 @@ void main() {
 
     test('the announcement token is ignored as unknown', () {
       expect(
-        _hints({
-          'reclash-widgets': ['announcement'],
+        presentedHints({
+          'widgets': ['announcement'],
         }).widgets,
         isNull,
       );
       final config = applyProviderSettings(
         _base,
-        _input({
-          'reclash-widgets': ['announcement'],
-        }),
+        ProviderSettingsInput(
+          presentedHints({
+            'widgets': ['announcement'],
+          }),
+        ),
       );
       expect(
         config.appSettingProps.dashboardWidgets,
         _base.appSettingProps.dashboardWidgets,
       );
       expect(
-        _hints({
-          'reclash-widgets': ['announcement,profiles'],
+        presentedHints({
+          'widgets': ['announcement', 'profiles'],
         }).widgets,
         [DashboardWidget.profiles],
       );
@@ -602,9 +572,11 @@ void main() {
     test('widgets keep the current outbound card', () {
       final config = applyProviderSettings(
         _base,
-        _input({
-          'reclash-widgets': ['profiles'],
-        }),
+        ProviderSettingsInput(
+          presentedHints({
+            'widgets': ['profiles'],
+          }),
+        ),
       );
       expect(
         config.appSettingProps.dashboardWidgets,

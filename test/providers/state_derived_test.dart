@@ -11,8 +11,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/notification.dart';
-import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
+import '../helpers/provider_presentation.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/views/navigation.dart';
@@ -787,11 +786,11 @@ void main() {
         overrides: [
           profilesProvider.overrideWith(TestProfiles.new),
           providerHintsProvider.overrideWithValue(
-            ProviderHints(
-              readSubscriptionMetadata({
-                'reclash-view': ['app.color:#112233;app.colordark:#eeddcc'],
-              }).metadata,
-            ),
+            presentedHints({
+              'view': {
+                'app': {'color': '#112233', 'color-dark': '#eeddcc'},
+              },
+            }),
           ),
         ],
       );

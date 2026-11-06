@@ -12,8 +12,7 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/provider_settings.dart';
-import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
+import '../helpers/provider_presentation.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:reclash/widgets/provider_setting.dart';
 
@@ -80,11 +79,12 @@ void main() {
 
   void setProviderSettings({bool released = true}) {
     providerInput = ProviderSettingsInput(
-      ProviderHints(
-        readSubscriptionMetadata({
-          'reclash-view': ['proxies.type:list;app.black:true'],
-        }).metadata,
-      ),
+      presentedHints({
+        'view': {
+          'proxies': {'type': 'list'},
+          'app': {'black': true},
+        },
+      }),
     );
     container.invalidate(providerSettingsInputProvider);
     final applied = applyProviderSettings(

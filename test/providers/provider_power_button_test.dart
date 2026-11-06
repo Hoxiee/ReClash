@@ -6,15 +6,18 @@ import 'package:mocktail/mocktail.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
+import '../helpers/provider_presentation.dart';
 
 class _MockRandom extends Mock implements Random {}
 
-ProviderHints _hints(String? header) => ProviderHints(
-  readSubscriptionMetadata({
-    if (header != null) 'reclash-powerbutton': [header],
-  }).metadata,
-);
+/// [pairs] reads like `shape:cookie,flower;type:solid`.
+ProviderHints _hints(String? pairs) => presentedHints({
+  if (pairs != null)
+    'power-button': {
+      for (final pair in pairs.split(';'))
+        pair.split(':').first: pair.split(':').last,
+    },
+});
 
 class _Harness {
   _Harness(String? header) : hints = _hints(header) {

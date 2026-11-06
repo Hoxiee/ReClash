@@ -49,8 +49,8 @@ enum ProviderPowerShape {
 /// container tone, or as a bare outline.
 enum ProviderPowerType { solid, tonal, outline }
 
-/// What `reclash-powerbutton` asks of the power button; only a provider sets
-/// it, and a missing or unknown key leaves the default.
+/// What the config's `power-button` asks of the power button; only a
+/// provider sets it, and a missing or unknown key leaves the default.
 typedef ProviderPowerButton = ({
   ProviderPowerShape shape,
   ProviderPowerType type,
@@ -71,7 +71,7 @@ const defaultProviderPowerButtonHint = (
   type: ProviderPowerType.solid,
 );
 
-/// The `reclash-view` keys ReClash has a setting for, and what each holds.
+/// The config's `view` keys ReClash has a setting for, and what each holds.
 class ProviderView {
   const ProviderView({
     this.proxiesType,
@@ -147,7 +147,7 @@ class ProviderBackground {
 
   final Uri url;
 
-  /// 0–1; `reclash-background` without a number shows the image at 8 %.
+  /// 0–1; a `wallpaper` without `opacity` shows the image at 8 %.
   final double opacity;
 }
 
@@ -175,26 +175,17 @@ class ProviderHints {
 
   final SubscriptionMetadata metadata;
 
-  /// The validated hosted file; its sections win over the headers.
+  /// The validated hosted file; the only source of presentation.
   final ProviderConfig? config;
 
   /// The profile names a hosted file that has not been read yet, so its
   /// absence from [config] says nothing about what the provider asks for.
   final bool configPending;
 
-  /// The headers with the hosted file's valid presentation sections laid over.
-  SubscriptionMetadata get _presented {
-    final overrides = config?.overrides;
-    return overrides == null || overrides.isEmpty
-        ? metadata
-        : SubscriptionMetadata({...metadata.fields, ...overrides});
-  }
-
-  ProviderView get view =>
-      ProviderView.fromPairs(_presented.pairs('presentation.view'));
+  ProviderView get view => ProviderView.fromPairs(config?.view ?? const {});
 
   ProviderPowerButtonHint get powerButton {
-    final pairs = _presented.pairs('presentation.powerButton');
+    final pairs = config?.powerButton ?? const <String, String>{};
     final shape = pairs['shape']?.trim().toLowerCase();
     final names = shape?.split(',').map((name) => name.trim()).toSet();
     final shapes = shape == 'random'
@@ -218,9 +209,8 @@ class ProviderHints {
   /// Null when the provider sends no list or no name it lists is known, so
   /// the user's dashboard stays as it is.
   List<DashboardWidget>? get widgets {
-    final names = _presented.strings('presentation.widgets');
     final widgets = [
-      for (final name in names)
+      for (final name in config?.widgets ?? const <String>[])
         ?DashboardWidget.values
             .where((widget) => widget.name.toLowerCase() == name)
             .firstOrNull,
@@ -244,12 +234,11 @@ class ProviderHints {
   ProviderPowerLabels get powerLabels => config?.powerLabels ?? const {};
 
   ProviderBackground? get background {
-    final presented = _presented;
-    final raw = presented.text('presentation.background');
-    final url = raw == null ? null : safeSubscriptionLink(raw);
-    if (url == null) return null;
-    final opacity = presented.count('presentation.backgroundOpacity') ?? 8;
-    return ProviderBackground(url, opacity / 100);
+    final wallpaper = config?.wallpaper;
+    final url = wallpaper == null ? null : Uri.tryParse(wallpaper.url);
+    return url == null
+        ? null
+        : ProviderBackground(url, wallpaper!.opacity / 100);
   }
 
   /// Null when the provider does not send `reclash-settings`.

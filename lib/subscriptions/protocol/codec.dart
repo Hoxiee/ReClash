@@ -28,10 +28,6 @@ Map<String, String> encodeSubscriptionMetadata(SubscriptionMetadata metadata) =>
             SubscriptionFieldType.packages ||
             SubscriptionFieldType.numbers ||
             SubscriptionFieldType.keys => (value as List).join(','),
-            SubscriptionFieldType.pairs => [
-              for (final MapEntry(:key, :value) in (value as Map).entries)
-                '$key:$value',
-            ].join(';'),
             SubscriptionFieldType.text => _encodeText(value as String),
             SubscriptionFieldType.url => switch (field.suffix) {
               final suffix? when metadata.count(suffix.path) != null =>
@@ -192,7 +188,6 @@ SubscriptionMetadata _decodeFields(
         ).map((v) => v.toLowerCase()).toSet().toList(),
         SubscriptionFieldType.packages => _decodePackages(raw, name, warnings),
         SubscriptionFieldType.numbers => _decodeNumbers(raw),
-        SubscriptionFieldType.pairs => _decodePairs(raw),
         SubscriptionFieldType.keys => _split(raw, ',').toSet().toList(),
       };
     } on FormatException {
@@ -251,18 +246,6 @@ List<int>? _decodeNumbers(String raw) {
     numbers.add(number);
   }
   return numbers.toList()..sort();
-}
-
-Map<String, String>? _decodePairs(String raw) {
-  final pairs = <String, String>{};
-  for (final item in _split(raw, ';')) {
-    final colon = item.indexOf(':');
-    if (colon <= 0) continue;
-    final key = item.substring(0, colon).trim().toLowerCase();
-    final value = item.substring(colon + 1).trim().toLowerCase();
-    if (key.isNotEmpty && value.isNotEmpty) pairs[key] = value;
-  }
-  return pairs;
 }
 
 String _decodeText(String value) {

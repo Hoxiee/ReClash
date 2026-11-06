@@ -33,7 +33,7 @@
 | Уровень | Действие | Примеры |
 | --- | --- | --- |
 | `display` | Показывается пользователю. Поведение не меняет. | `reclash-servicename`, `reclash-announce`, `reclash-hideurl` |
-| `hint` | Меняет поведение в заданных рамках. | `reclash-autoupdateinterval`, `reclash-view`, `reclash-excludeapps` |
+| `hint` | Меняет поведение в заданных рамках. | `reclash-autoupdateinterval`, `reclash-settings`, `reclash-excludeapps` |
 
 Реестр также определяет уровень `consent`, который пока не использует ни одно поле. Большинство подсказок уступает изменениям пользователя ([«Владение»](app-settings.md#ownership)). Только [`reclash-restrictions`](app-settings.md#restrictions) и [обязательная политика безопасности](policy.md) задают ограничения, которые пользователь не может снять.
 

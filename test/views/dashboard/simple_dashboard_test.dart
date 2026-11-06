@@ -96,8 +96,19 @@ final _removeWidget = RegExp('^Remove ');
 int _expiresIn(Duration duration) =>
     DateTime.now().add(duration).millisecondsSinceEpoch ~/ 1000;
 
-ProviderHints _hints(Map<String, Object?> fields) =>
-    ProviderHints(SubscriptionMetadata(fields));
+ProviderHints _hints(Map<String, Object?> fields) {
+  final widgets = fields['widgets'];
+  return ProviderHints(
+    SubscriptionMetadata({...fields}..remove('widgets')),
+    config: widgets == null
+        ? null
+        : ProviderConfig(
+            cards: const [],
+            powerLabels: const {},
+            widgets: List<String>.from(widgets as List),
+          ),
+  );
+}
 
 Profile _subscription({
   Map<String, Object?> fields = const {},
@@ -895,11 +906,7 @@ void main() {
     test('maps only the names with a simple counterpart, in hint order', () {
       expect(
         _hints({
-          'presentation.widgets': [
-            'servicestatus',
-            'networkspeed',
-            'outboundmode',
-          ],
+          'widgets': ['servicestatus', 'networkspeed', 'outboundmode'],
         }).simpleWidgets,
         [SimpleDashboardWidget.services, SimpleDashboardWidget.outboundMode],
       );
@@ -908,7 +915,7 @@ void main() {
     test('is null when no listed name has a simple counterpart', () {
       expect(
         _hints({
-          'presentation.widgets': ['networkspeed', 'profiles'],
+          'widgets': ['networkspeed', 'profiles'],
         }).simpleWidgets,
         isNull,
       );
@@ -919,7 +926,7 @@ void main() {
       final config = applyProviderSettings(
         base,
         input({
-          'presentation.widgets': ['servicestatus', 'outboundmode'],
+          'widgets': ['servicestatus', 'outboundmode'],
         }),
       );
       expect(config.appSettingProps.simpleDashboardWidgets, [
@@ -933,7 +940,7 @@ void main() {
       final config = applyProviderSettings(
         base,
         input({
-          'presentation.widgets': ['networkspeed'],
+          'widgets': ['networkspeed'],
         }),
       );
       expect(
@@ -948,7 +955,7 @@ void main() {
 
     test('a user edit keeps the list and releases it from the provider', () {
       final hint = input({
-        'presentation.widgets': ['servicestatus', 'outboundmode'],
+        'widgets': ['servicestatus', 'outboundmode'],
       });
       final applied = applyProviderSettings(base, hint);
       final edited = applied.copyWith(
@@ -974,7 +981,7 @@ void main() {
       final applied = applyProviderSettings(
         base,
         input({
-          'presentation.widgets': ['servicestatus'],
+          'widgets': ['servicestatus'],
         }),
       );
       final withdrawn = applyProviderSettings(applied, input({}));
@@ -990,7 +997,7 @@ void main() {
   ) async {
     useContainer(
       hints: _hints({
-        'presentation.widgets': ['servicestatus', 'networkspeed'],
+        'widgets': ['servicestatus', 'networkspeed'],
       }),
     );
     container.read(providerSettingsSyncProvider);
@@ -1008,7 +1015,7 @@ void main() {
   ) async {
     useContainer(
       hints: _hints({
-        'presentation.widgets': ['servicestatus'],
+        'widgets': ['servicestatus'],
         'settings.restrictions': ['denywidgets'],
       }),
     );

@@ -40,12 +40,6 @@ class SubscriptionMetadata {
       : const [];
   List<String> strings(String path) => list(path).whereType<String>().toList();
   List<int> numbers(String path) => list(path).whereType<int>().toList();
-  Map<String, String> pairs(String path) => fields[path] is Map
-      ? {
-          for (final MapEntry(:key, :value) in (fields[path] as Map).entries)
-            if (key is String && value is String) key: value,
-        }
-      : const {};
 
   String? get name => text('provider.name');
   String? get accountTitle => text('account.title');
@@ -142,15 +136,7 @@ final _token = RegExp(r'^[a-z0-9._:#-]{1,64}$');
 /// The unpadded base64url of exactly 32 bytes: its last character carries
 /// four zero bits.
 final _supportKey = RegExp(r'^ed25519:[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$');
-final _invalidPowerShapeCharacter = RegExp(r'[^a-z0-9._:#, -]');
 final _package = RegExp(r'^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$');
-
-bool _validPowerShapeList(String value) =>
-    value.length <= subscriptionHeaderLimit &&
-    !_invalidPowerShapeCharacter.hasMatch(value) &&
-    value
-        .split(',')
-        .every((name) => name.trim().isEmpty || _token.hasMatch(name.trim()));
 
 /// Gives a decoded JSON value the element types the decoder produces.
 Object? normalizeSubscriptionValue(SubscriptionFieldType type, Object? value) {
@@ -162,10 +148,6 @@ Object? normalizeSubscriptionValue(SubscriptionFieldType type, Object? value) {
       value.every((v) => v is String) ? List<String>.from(value) : null,
     SubscriptionFieldType.numbers when value is List =>
       value.every((v) => v is int) ? List<int>.from(value) : null,
-    SubscriptionFieldType.pairs when value is Map =>
-      value.entries.every((e) => e.key is String && e.value is String)
-          ? Map<String, String>.from(value)
-          : null,
     _ => value,
   };
 }
@@ -213,18 +195,6 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
       return value is List &&
           value.length <= field.limit &&
           value.every((v) => v is String && _supportKey.hasMatch(v));
-    case SubscriptionFieldType.pairs:
-      return value is Map &&
-          value.length <= field.limit &&
-          value.entries.every(
-            (e) =>
-                e.key is String &&
-                e.value is String &&
-                _token.hasMatch(e.key as String) &&
-                (field.path == 'presentation.powerButton' && e.key == 'shape'
-                    ? _validPowerShapeList(e.value as String)
-                    : _token.hasMatch(e.value as String)),
-          );
   }
 }
 

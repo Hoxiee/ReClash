@@ -16,14 +16,24 @@ class ProviderConfig {
   const ProviderConfig({
     required this.cards,
     required this.powerLabels,
-    this.overrides = const {},
+    this.view = const {},
+    this.powerButton = const {},
+    this.wallpaper,
+    this.widgets,
   });
 
   final List<ProviderCard> cards;
   final ProviderPowerLabels powerLabels;
 
-  /// Valid presentation sections as the header fields they replace.
-  final Map<String, Object?> overrides;
+  /// Flat `group.key` pairs of the valid `view` entries, lowercased.
+  final Map<String, String> view;
+
+  /// The valid `shape` and `type` entries of `power-button`, lowercased.
+  final Map<String, String> powerButton;
+  final ({String url, int opacity})? wallpaper;
+
+  /// Lowercased widget names in display order, null without a valid section.
+  final List<String>? widgets;
 }
 
 typedef ProviderConfigResult = ({
@@ -61,15 +71,41 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
       throw const _Rejected('Unsupported config version');
     }
     final tags = _tags(locale);
-    final overrides = <String, Object?>{};
+    var view = const <String, String>{};
+    var powerButton = const <String, String>{};
+    ({String url, int opacity})? wallpaper;
+    List<String>? widgets;
     var cards = const <ProviderCard>[];
     var labels = const <String, List<ProviderPowerLabel>>{};
     for (final MapEntry(:key, :value) in plain.entries) {
       switch (key) {
         case 'version':
           break;
-        case 'view' || 'power-button' || 'wallpaper' || 'widgets':
-          overrides.addAll(_section(key, value, warnings));
+        case 'view':
+          if (value is Map<String, Object?>) {
+            view = _view(value, warnings);
+          } else {
+            warnings.add('Invalid view section');
+          }
+        case 'power-button':
+          if (value is Map<String, Object?>) {
+            powerButton = _powerButton(value, warnings);
+          } else {
+            warnings.add('Invalid power-button section');
+          }
+        case 'wallpaper':
+          wallpaper = value is Map<String, Object?>
+              ? _wallpaper(value, warnings)
+              : null;
+          if (wallpaper == null) warnings.add('Invalid wallpaper section');
+        case 'widgets':
+          if (value is List && value.every((name) => name is String)) {
+            widgets = [
+              for (final name in value) (name! as String).trim().toLowerCase(),
+            ];
+          } else {
+            warnings.add('Invalid widgets section');
+          }
         case 'cards':
           final parsed = parseProviderCards(_localizedTexts(value, tags));
           cards = parsed.cards;
@@ -86,7 +122,10 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
       config: ProviderConfig(
         cards: cards,
         powerLabels: labels,
-        overrides: Map.unmodifiable(overrides),
+        view: Map.unmodifiable(view),
+        powerButton: Map.unmodifiable(powerButton),
+        wallpaper: wallpaper,
+        widgets: widgets == null ? null : List.unmodifiable(widgets),
       ),
       warnings: List.unmodifiable(warnings),
     );
@@ -209,40 +248,6 @@ const _viewKeys = {
 };
 const _wallpaperDefaultOpacity = 8;
 
-/// A valid section as the header fields it replaces; an invalid one warns
-/// and yields nothing, so the header stays in effect.
-Map<String, Object?> _section(
-  String key,
-  Object? value,
-  List<String> warnings,
-) {
-  switch (key) {
-    case 'view':
-      if (value is Map<String, Object?>) {
-        return {'presentation.view': _view(value, warnings)};
-      }
-    case 'power-button':
-      if (value is Map<String, Object?>) {
-        return {'presentation.powerButton': _powerButton(value, warnings)};
-      }
-    case 'wallpaper':
-      if (value is Map<String, Object?>) {
-        final fields = _wallpaper(value, warnings);
-        if (fields != null) return fields;
-      }
-    case 'widgets':
-      if (value is List && value.every((name) => name is String)) {
-        return {
-          'presentation.widgets': [
-            for (final name in value) (name! as String).trim().toLowerCase(),
-          ],
-        };
-      }
-  }
-  warnings.add('Invalid $key section');
-  return const {};
-}
-
 Map<String, String> _view(Map<String, Object?> view, List<String> warnings) {
   final pairs = <String, String>{};
   for (final group in view.entries) {
@@ -298,7 +303,7 @@ Map<String, String> _powerButton(
   return pairs;
 }
 
-Map<String, Object?>? _wallpaper(
+({String url, int opacity})? _wallpaper(
   Map<String, Object?> wallpaper,
   List<String> warnings,
 ) {
@@ -316,10 +321,5 @@ Map<String, Object?>? _wallpaper(
   if (wallpaper.containsKey('opacity') && !valid) {
     warnings.add('Invalid opacity in wallpaper');
   }
-  return {
-    'presentation.background': url,
-    'presentation.backgroundOpacity': valid
-        ? opacity
-        : _wallpaperDefaultOpacity,
-  };
+  return (url: url, opacity: valid ? opacity : _wallpaperDefaultOpacity);
 }

@@ -31,10 +31,6 @@
 | `routing.bundleUrl` | `reclash-routing` | url | hint | routing |  |
 | `presentation.hideUrl` | `reclash-hideurl` | boolean | display | panel | 别名 `hide-url` |
 | `presentation.serverGroup` | `reclash-serverinfo` | text | display | panel |  |
-| `presentation.widgets` | `reclash-widgets` | tokens | hint | appearance |  |
-| `presentation.background` | `reclash-background` | url | hint | appearance | 后缀 `presentation.backgroundOpacity`，范围 1–100 |
-| `presentation.view` | `reclash-view` | pairs | hint | appearance |  |
-| `presentation.powerButton` | `reclash-powerbutton` | pairs | hint | appearance |  |
 | `reminder.expireDays` | `reclash-expiredays` | numbers | hint | reminder |  |
 | `reminder.trafficPercent` | `reclash-trafficpercent` | numbers | hint | reminder |  |
 | `settings.flags` | `reclash-settings` | tokens | hint | settings |  |

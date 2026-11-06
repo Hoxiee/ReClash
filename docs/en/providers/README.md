@@ -33,7 +33,7 @@ The update is rejected, and the saved profile stays unchanged, when the body is 
 | Level | Effect | Examples |
 | --- | --- | --- |
 | `display` | Shown to the user. No behavior change. | `reclash-servicename`, `reclash-announce`, `reclash-hideurl` |
-| `hint` | Changes behavior within fixed bounds. | `reclash-autoupdateinterval`, `reclash-view`, `reclash-excludeapps` |
+| `hint` | Changes behavior within fixed bounds. | `reclash-autoupdateinterval`, `reclash-settings`, `reclash-excludeapps` |
 
 The registry also defines `consent`, which no field uses yet. Most hints yield to user changes ([Ownership](app-settings.md#ownership)). Only [`reclash-restrictions`](app-settings.md#restrictions) and the [required safety policy](policy.md) set limits the user cannot lift.
 
