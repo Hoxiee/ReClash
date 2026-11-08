@@ -303,6 +303,7 @@ class _AdaptiveSheetHomeState extends State<_AdaptiveSheetHome> {
         ModalRoute.isCurrentOf(context) == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) => widget.onCross());
     }
-    return widget.child;
+    // A sheet is not under the page's floating dock, which sits behind it.
+    return BottomInsetScope(inset: 0, child: widget.child);
   }
 }
