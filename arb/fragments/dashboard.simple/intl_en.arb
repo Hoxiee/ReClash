@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "Home",
   "simpleDashboardWidgets": "Widgets",
-  "simpleDashboardDetailed": "Detailed dashboard",
-  "simpleDashboardSimple": "Simple dashboard",
   "simpleDashboardEditWidgets": "Edit widgets",
   "dashboardStyle": "Dashboard",
   "dashboardStyleSimple": "Simple",

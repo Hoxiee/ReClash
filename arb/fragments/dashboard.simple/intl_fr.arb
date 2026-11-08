@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "Accueil",
   "simpleDashboardWidgets": "Widgets",
-  "simpleDashboardDetailed": "Tableau de bord détaillé",
-  "simpleDashboardSimple": "Tableau de bord simple",
   "simpleDashboardEditWidgets": "Modifier les widgets",
   "dashboardStyle": "Tableau de bord",
   "dashboardStyleSimple": "Simple",

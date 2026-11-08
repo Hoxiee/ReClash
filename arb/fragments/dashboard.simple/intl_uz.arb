@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "Bosh sahifa",
   "simpleDashboardWidgets": "Vidjetlar",
-  "simpleDashboardDetailed": "Batafsil boshqaruv paneli",
-  "simpleDashboardSimple": "Oddiy boshqaruv paneli",
   "simpleDashboardEditWidgets": "Vidjetlarni tahrirlash",
   "dashboardStyle": "Boshqaruv paneli",
   "dashboardStyleSimple": "Oddiy",

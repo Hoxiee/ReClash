@@ -47,12 +47,6 @@ class DashboardPage extends ConsumerWidget {
   }
 }
 
-void setDashboardStyle(WidgetRef ref, DashboardStyle style) {
-  ref
-      .read(appSettingProvider.notifier)
-      .update((state) => state.copyWith(dashboardStyle: style));
-}
-
 /// One big button and a few plain widgets: two pages of a pager on a phone,
 /// two columns side by side on a desktop.
 class SimpleDashboardView extends ConsumerStatefulWidget {
@@ -120,11 +114,6 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     final announcement = ref.watch(
       providerAnnouncementProvider.select((card) => card != null),
     );
-    final detailed = IconButtonData(
-      glyph: AppGlyphs.sliders,
-      tooltip: appLocalizations.simpleDashboardDetailed,
-      onPressed: () => setDashboardStyle(ref, DashboardStyle.detailed),
-    );
     final edit = IconButtonData(
       glyph: AppGlyphs.edit,
       tooltip: appLocalizations.simpleDashboardEditWidgets,
@@ -151,12 +140,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
               onPressed: () => _setEditing(false),
             )
           : null,
-      iconActions: [
-        if (!editing && _page == 0) detailed,
-        if (!editing && _page == 1 && editable) edit,
-        if (!editing && desktop && editable) edit,
-        if (!editing && desktop) detailed,
-      ].take(desktop ? 2 : 1).toList(),
+      iconActions: [if (!editing && editable && (desktop || _page == 1)) edit],
       body: LayoutBuilder(
         builder: (context, constraints) {
           final room = constraints.biggest / scale;

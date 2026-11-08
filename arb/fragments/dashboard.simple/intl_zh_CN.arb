@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "首页",
   "simpleDashboardWidgets": "小组件",
-  "simpleDashboardDetailed": "详细仪表盘",
-  "simpleDashboardSimple": "简单仪表盘",
   "simpleDashboardEditWidgets": "编辑小组件",
   "dashboardStyle": "仪表盘",
   "dashboardStyleSimple": "简单",

@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "홈",
   "simpleDashboardWidgets": "위젯",
-  "simpleDashboardDetailed": "상세 대시보드",
-  "simpleDashboardSimple": "간단한 대시보드",
   "simpleDashboardEditWidgets": "위젯 편집",
   "dashboardStyle": "대시보드",
   "dashboardStyleSimple": "간단",

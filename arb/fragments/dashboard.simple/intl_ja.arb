@@ -1,8 +1,6 @@
 {
   "simpleDashboardHome": "ホーム",
   "simpleDashboardWidgets": "ウィジェット",
-  "simpleDashboardDetailed": "詳細ダッシュボード",
-  "simpleDashboardSimple": "シンプルダッシュボード",
   "simpleDashboardEditWidgets": "ウィジェットを編集",
   "dashboardStyle": "ダッシュボード",
   "dashboardStyleSimple": "シンプル",

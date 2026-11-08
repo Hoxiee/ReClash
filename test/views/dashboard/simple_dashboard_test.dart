@@ -490,7 +490,6 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Widgets'), findsOneWidget);
-    expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
     expect(find.byTooltip('Edit widgets'), findsNothing);
   });
 
@@ -526,22 +525,6 @@ void main() {
     );
   });
 
-  testWidgets('Detailed dashboard on Home switches the style back', (
-    tester,
-  ) async {
-    chooseSimple();
-    await pumpPage(tester);
-
-    await tester.tap(find.byTooltip('Detailed dashboard'));
-    await settle(tester);
-
-    expect(
-      container.read(appSettingProvider).dashboardStyle,
-      DashboardStyle.detailed,
-    );
-    expect(find.byType(DashboardView), findsOneWidget);
-  });
-
   testWidgets('tapping the Widgets title moves the pager to the widget list', (
     tester,
   ) async {
@@ -556,7 +539,6 @@ void main() {
       inInclusiveRange(0, _phone.width),
     );
     expect(find.byTooltip('Edit widgets'), findsOneWidget);
-    expect(find.byTooltip('Detailed dashboard'), findsNothing);
   });
 
   group('swipe pager', () {
@@ -585,7 +567,7 @@ void main() {
       expect(pagerAt(tester), 1);
 
       await swipe(tester, find.byType(SimpleWidgetList), 200);
-      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(find.byTooltip('Edit widgets'), findsNothing);
       expect(pagerAt(tester), 0);
     });
 
@@ -601,7 +583,7 @@ void main() {
       await gesture.up();
       await settle(tester);
 
-      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(find.byTooltip('Edit widgets'), findsNothing);
       expect(pagerAt(tester), 0);
     });
 
@@ -611,7 +593,7 @@ void main() {
 
       await swipe(tester, find.byType(PowerButton), -250);
 
-      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(find.byTooltip('Edit widgets'), findsNothing);
       expect(pagerAt(tester), 0);
     });
   });
@@ -752,7 +734,6 @@ void main() {
       );
       expect(find.byTooltip('Start'), findsOneWidget);
       expect(find.byTooltip('Edit widgets'), findsOneWidget);
-      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
     },
   );
 
