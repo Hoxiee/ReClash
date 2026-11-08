@@ -308,7 +308,8 @@ final _byId = {
 const _equality = DeepCollectionEquality();
 
 /// A setting the provider set and the user has not changed since. A setting
-/// the user changes stops following the provider until handed back.
+/// the user changes stops following the provider until handed back, whether
+/// the provider still sets it, dropped it, or the profile changed.
 Config applyProviderSettings(Config config, ProviderSettingsInput input) {
   final state = config.providerSettings;
   final applied = {...state.applied};
@@ -325,6 +326,8 @@ Config applyProviderSettings(Config config, ProviderSettingsInput input) {
     if (provided == null) {
       if (following && baseline.containsKey(id)) {
         next = setting.write(next, baseline[id]);
+      } else if (tracked && !following) {
+        owned.add(id);
       }
       applied.remove(id);
       baseline.remove(id);

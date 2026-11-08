@@ -594,6 +594,23 @@ void main() {
       expect(withdrawn.proxiesStyleProps.type, ProxiesType.tab);
     });
 
+    test('a user value outlives a profile without it and a later update', () {
+      final applied = applyProviderSettings(_base, ProviderSettingsInput(view));
+      final changed = applied.copyWith(
+        proxiesStyleProps: applied.proxiesStyleProps.copyWith(
+          type: ProxiesType.tab,
+        ),
+      );
+      final other = applyProviderSettings(changed, _input(const {}));
+      expect(other.providerSettings.userOwned, contains('proxies.type'));
+      final back = applyProviderSettings(other, ProviderSettingsInput(view));
+      expect(back.proxiesStyleProps.type, ProxiesType.tab);
+      expect(
+        isProviderReleased(back, ProviderSettingsInput(view), 'proxies.type'),
+        isTrue,
+      );
+    });
+
     test('a pending background leaves its setting untouched', () {
       final input = ProviderSettingsInput(
         presentedHints({
