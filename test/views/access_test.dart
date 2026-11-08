@@ -98,14 +98,19 @@ void main() {
   late ProviderContainer container;
   late _TestSystemAction systemAction;
   late Set<String> requiredApps;
+  late Set<String> providedApps;
 
   setUp(() {
     systemAction = _TestSystemAction();
     requiredApps = {};
+    providedApps = {};
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
         providerRequiredAppsProvider.overrideWith((_) => requiredApps),
+        providerAppsProvider.overrideWith(
+          (_) async => ProviderApps(excluded: providedApps),
+        ),
         systemActionProvider.overrideWith(() => systemAction),
       ],
     );
@@ -416,6 +421,31 @@ void main() {
       expect(smartSelectButton(), findsOneWidget);
       expect(find.text(l10n.accessControlSelectedCount(0)), findsNothing);
 
+      await teardownView(tester);
+    });
+
+    testWidgets('a provider app the user took out offers a tag to hand it '
+        'back', (tester) async {
+      providedApps = {'com.example.browser'};
+      seedAccessControl(
+        const AccessControlProps(
+          enable: true,
+          rejectReleased: ['com.example.browser'],
+        ),
+      );
+      await pumpAccessView(tester);
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations.current;
+      expect(find.text(l10n.providerSettingManaged), findsNothing);
+
+      await tester.tap(find.text(l10n.providerSettingReturn));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(accessControlStateProvider).rejectReleased,
+        isEmpty,
+      );
+      expect(find.text(l10n.providerSettingReturn), findsNothing);
+      expect(find.text(l10n.providerSettingManaged), findsOneWidget);
       await teardownView(tester);
     });
 

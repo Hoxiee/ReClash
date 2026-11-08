@@ -469,6 +469,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     required List<Package> packages,
     required Set<String> selected,
     required Set<String> provided,
+    required Set<String> released,
     required Set<String> requiredApps,
     required bool isSearching,
   }) {
@@ -504,6 +505,8 @@ class _AccessViewState extends ConsumerState<AccessView>
                   package: package,
                   value: selected.contains(package.packageName),
                   fromProvider: provided.contains(package.packageName),
+                  released: released.contains(package.packageName),
+                  onReturn: () => _handleSelected(package.packageName),
                   requiredByProvider: requiredApps.contains(
                     package.packageName,
                   ),
@@ -620,6 +623,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                     packages: viewPackages,
                     selected: valueList.toSet(),
                     provided: provided,
+                    released: accessControl.currentReleased.toSet(),
                     requiredApps: requiredApps,
                     isSearching: query.isNotEmpty,
                   ),
@@ -720,7 +724,11 @@ class PackageListItem extends StatelessWidget {
   final Package package;
   final bool value;
   final bool fromProvider;
+
+  /// The user took this provider app out of the provider's choice.
+  final bool released;
   final bool requiredByProvider;
+  final VoidCallback? onReturn;
   final void Function(bool?)? onChanged;
 
   const PackageListItem({
@@ -728,7 +736,9 @@ class PackageListItem extends StatelessWidget {
     required this.package,
     required this.value,
     this.fromProvider = false,
+    this.released = false,
     this.requiredByProvider = false,
+    this.onReturn,
     required this.onChanged,
   });
 
@@ -756,6 +766,8 @@ class PackageListItem extends StatelessWidget {
               message: context.appLocalizations.providerPolicyAppsNotice,
               child: const ProviderTag(requiredByProvider: true),
             )
+          else if (fromProvider && released && onReturn != null)
+            ProviderReturnTag(onPressed: onReturn!)
           else if (fromProvider)
             const ProviderTag(),
         ],
