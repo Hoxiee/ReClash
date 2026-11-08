@@ -24,7 +24,6 @@
   "promoConverted": "{name}: サブスクリプションが有効になりました",
   "providerPolicyRequired": "プロバイダーの必須設定",
   "providerPolicyAppsNotice": "このサブスクリプションでは、必須の除外アプリはすべてのモードで VPN を経由しません。直接接続と実際の IP アドレスが使用される場合があります。",
-  "providerPolicyVpnRequired": "このサブスクリプションには Android VPN のアプリ除外が必要です。Android の VPN モードを使うか、別のサブスクリプションを選んでください。",
   "providerPolicyRestartRequired": "プロバイダーの必須アプリ除外が変更されました。このサブスクリプションを使う前に VPN を再起動してください。",
   "providerPolicyGlobalDenied": "このノードはプロバイダーによりグローバルモードで許可されていません。許可されたノードを選ぶか、ルールモードを使ってください。"
 }

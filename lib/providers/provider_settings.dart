@@ -155,8 +155,13 @@ final providerPolicyProvider = Provider<ProviderPolicy?>(
   ),
 );
 
+/// Only the Android VPN can exclude apps; elsewhere the tunnel starts without
+/// them rather than not at all.
 final providerRequiredAppsProvider = Provider<Set<String>>(
-  (ref) => ref.watch(providerPolicyProvider)?.requiredExcludedApps ?? const {},
+  (ref) =>
+      system.isAndroid && ref.watch(vpnSettingProvider.select((s) => s.enable))
+      ? ref.watch(providerPolicyProvider)?.requiredExcludedApps ?? const {}
+      : const {},
 );
 
 /// The tunnel modes the user may pick; a provider can take Global away.

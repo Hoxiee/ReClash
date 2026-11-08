@@ -122,9 +122,9 @@ policy:
 | Whitelist mode, or Access control off | The user's mode decides | Still excluded |
 | Local proxy ports on Android | Open | Closed |
 | Desktop | Ignored | Ignored |
-| Android without VPN mode | Ignored | **The profile refuses to connect** |
+| Android without VPN mode | Ignored | Ignored: the profile connects without exclusions |
 
-`apps: required` works only on Android, in VPN mode; desktop ignores it.
+`apps: required` works only on Android, in VPN mode; desktop and Android proxy mode ignore it and connect.
 
 Excluded apps use the direct connection and the real IP. An exclusion is not a block: to block them, use Android lockdown mode. The VPN app itself cannot be excluded.
 
@@ -132,7 +132,6 @@ Errors the user can see:
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `provider policy requires Android VPN app exclusions` | Android without VPN mode | Use Android VPN mode. |
 | `provider app exclusions are not applied; restart the VPN` | The running VPN started with a different list | Restart the VPN. |
 | `provider policy could not identify this application` | The connection's app is unknown | The connection stays blocked. |
 | `provider policy requires this application to remain outside the VPN` | A listed app is still captured by an old VPN session | Restart the VPN. |

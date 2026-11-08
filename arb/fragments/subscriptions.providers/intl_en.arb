@@ -67,7 +67,6 @@
   },
   "providerPolicyRequired": "Required by provider",
   "providerPolicyAppsNotice": "This subscription keeps required apps outside the VPN in every mode. They may use your direct connection and real IP.",
-  "providerPolicyVpnRequired": "This subscription requires Android VPN app exclusions. Use Android VPN mode or choose another subscription.",
   "providerPolicyRestartRequired": "The provider's required app exclusions changed. Restart the VPN before using this subscription.",
   "providerPolicyGlobalDenied": "The provider does not allow this node in Global mode. Select an allowed node or use Rule mode."
 }

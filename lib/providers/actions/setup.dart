@@ -395,11 +395,6 @@ class SetupAction extends _$SetupAction {
 
   Future<bool> _setListening(_RunRequest request) async {
     final running = request.running;
-    if (running &&
-        ref.read(providerRequiredAppsProvider).isNotEmpty &&
-        (!system.isAndroid || !ref.read(vpnSettingProvider).enable)) {
-      throw MessageException(currentAppLocalizations.providerPolicyVpnRequired);
-    }
     final vpnOptions = await ref.read(vpnOptionsProvider.future);
     if (!ref.mounted || !_isCurrent(request)) return true;
     final answered = await setCoreRunning(running);
@@ -1195,8 +1190,6 @@ class SetupAction extends _$SetupAction {
           throw MessageException(
             message.contains('provider app exclusions are not applied')
                 ? currentAppLocalizations.providerPolicyRestartRequired
-                : message.contains('requires Android VPN app exclusions')
-                ? currentAppLocalizations.providerPolicyVpnRequired
                 : message,
           );
         }

@@ -267,8 +267,9 @@ func TestProviderAppsRequireAppliedAndroidOptions(t *testing.T) {
 		t.Fatal("local proxy bypassed native exclusions")
 	}
 	noVPN := false
-	if _, err := loadProviderPolicy(&SetupParams{PolicyPath: &source, LockApps: &lockApps, VPNEnabled: &noVPN, ExcludedApps: params.ExcludedApps}); err == nil {
-		t.Fatal("Android without VPN mode connected under required apps")
+	proxyOnly, err := loadProviderPolicy(&SetupParams{PolicyPath: &source, LockApps: &lockApps, VPNEnabled: &noVPN})
+	if err != nil || len(proxyOnly.Apps) != 0 || proxyOnly.enforced() {
+		t.Fatalf("Android without VPN mode did not connect: %+v, %v", proxyOnly, err)
 	}
 	providerPolicyAndroid = false
 	desktop, err := loadProviderPolicy(&SetupParams{PolicyPath: &source, LockApps: &lockApps, VPNEnabled: &noVPN})

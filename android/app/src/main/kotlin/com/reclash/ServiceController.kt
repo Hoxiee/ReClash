@@ -72,9 +72,6 @@ object ServiceController {
     }
 
     suspend fun start(options: VpnOptions): Boolean = lock.withLock {
-        require(options.enable || options.requiredExcludedApps.isNullOrEmpty()) {
-            "Provider app exclusions require VPN mode"
-        }
         ServiceConfig.updateVpnOptions(options)
         val nextIntent = if (options.enable) {
             VpnService::class.intent

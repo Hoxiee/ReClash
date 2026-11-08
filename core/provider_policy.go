@@ -236,10 +236,10 @@ func loadProviderPolicy(params *SetupParams) (*providerPolicy, error) {
 	if params.NoGlobal != nil {
 		policy.NoGlobal = *params.NoGlobal
 	}
+	if params.VPNEnabled == nil || !*params.VPNEnabled {
+		policy.Apps = nil
+	}
 	if len(policy.Apps) != 0 {
-		if params.VPNEnabled == nil || !*params.VPNEnabled {
-			return nil, errors.New("provider policy requires Android VPN app exclusions")
-		}
 		for _, app := range policy.Apps {
 			if !slices.Contains(params.ExcludedApps, app) {
 				return nil, errors.New("provider app exclusions are not applied; restart the VPN")
