@@ -53,10 +53,14 @@ class BatteryExemptionRemedy implements Remedy {
 }
 
 class UpdateSubscriptionRemedy implements Remedy {
-  const UpdateSubscriptionRemedy(this._update);
+  const UpdateSubscriptionRemedy(this._update, {int? Function()? current})
+    : _current = current;
 
   /// Throws or returns false when the update did not land.
   final Future<bool> Function(int profileId) _update;
+
+  /// The profile a plan updates when no finding names one.
+  final int? Function()? _current;
 
   @override
   String get id => 'profile.update';
@@ -75,7 +79,7 @@ class UpdateSubscriptionRemedy implements Remedy {
 
   @override
   Future<void> apply(RemedyRequest request) async {
-    final profileId = request.finding?.args['profileId'];
+    final profileId = request.finding?.args['profileId'] ?? _current?.call();
     if (profileId is! int) {
       throw StateError('no profile to update');
     }

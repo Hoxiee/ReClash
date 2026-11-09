@@ -38,6 +38,8 @@ String findingTitle(AppLocalizations l, Finding finding) =>
         finding.args['port'] as int? ?? 0,
       ),
       'doctorDeadDnsTitle' => l.doctorDeadDnsTitle,
+      'doctorProfileRevokedTitle' => l.doctorProfileRevokedTitle,
+      'doctorProfileNoServersTitle' => l.doctorProfileNoServersTitle,
       _ => finding.titleKey,
     };
 
@@ -64,6 +66,10 @@ String findingDetail(AppLocalizations l, Finding finding) {
       args['host'] as String? ?? '',
     ),
     'doctorCaptivePortalDetail' => l.doctorCaptivePortalDetail,
+    'doctorProfileRevokedDetail' => l.doctorProfileRevokedDetail(
+      args['status'] as int? ?? 0,
+    ),
+    'doctorProfileNoServersDetail' => l.doctorProfileNoServersDetail,
     'doctorHostsServerDetail' => l.doctorHostsServerDetail(
       args['domain'] as String? ?? '',
       args['count'] as int? ?? 0,

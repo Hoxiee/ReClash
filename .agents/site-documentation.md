@@ -19,6 +19,7 @@ change, state briefly why the existing documentation remains accurate; do not fa
 | Provider header names, types, aliases or tokens | The application registry and `provider_standard.g.json` | `../reclash-site/shared/provider/standard.json`; review the guide, reference, builder and mocks |
 | Provider hosted YAML config | `provider-config.schema.json`, `lib/subscriptions/metadata/provider_config.dart` and its parser tests | `../reclash-site/public/schemas/provider-config.schema.json` |
 | RCX schema | `rcx-profile.schema.json` | `../reclash-site/public/schemas/rcx-profile.schema.json` |
+| Builder runtime: manifest parser or widgets the preview renders | `site_preview/`, `lib/subscriptions/metadata/provider_config.dart` and the `*_view.dart` widgets | `dart run tool/site_preview.dart --out ../reclash-site/public/runtime` (`kernel.js` is tracked there; `preview/` is git-ignored) |
 | Setup, downloads and general client behavior | Application code and its tests | The corresponding localized Nuxt page and site metadata |
 
 Provider policy is a versioned inline YAML contract, not a new provider HTTP header. Do not add a competing header

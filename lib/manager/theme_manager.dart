@@ -8,7 +8,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/ui/app_theme.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -17,26 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/state.dart';
-
-const _pageTransitionsTheme = PageTransitionsTheme(
-  builders: <TargetPlatform, PageTransitionsBuilder>{
-    TargetPlatform.android: commonSharedXPageTransitions,
-    TargetPlatform.windows: commonSharedXPageTransitions,
-    TargetPlatform.linux: commonSharedXPageTransitions,
-    TargetPlatform.macOS: commonSharedXPageTransitions,
-  },
-);
-
-const _actionIconTheme = ActionIconThemeData(
-  backButtonIconBuilder: _backButtonIcon,
-  closeButtonIconBuilder: _closeButtonIcon,
-);
-
-Widget _backButtonIcon(BuildContext context) =>
-    GlyphIcon(AppGlyphs.backFor(Theme.of(context).platform));
-
-Widget _closeButtonIcon(BuildContext context) =>
-    const GlyphIcon(AppGlyphs.close);
 
 /// A rebuilt ThemeData never equals the last, and ThemeCrossFade fades on that.
 final _appThemes = <Brightness, ({Object inputs, ThemeData theme})>{};
@@ -63,22 +43,12 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   ) when cached == inputs) {
     return theme;
   }
-  final theme = ThemeData(
-    useMaterial3: true,
-    pageTransitionsTheme: _pageTransitionsTheme,
-    actionIconTheme: _actionIconTheme,
+  final theme = buildAppTheme(
+    brightness: brightness,
     colorScheme: colorScheme,
     fontFamily: fontFamily,
-    fontFamilyFallback: appFontFamilyFallback(
-      platform: defaultTargetPlatform,
-      locales: locales,
-      fontFamily: fontFamily,
-    ),
-    extensions: [
-      if (brightness == Brightness.dark)
-        ElevatedColorScheme(colorScheme.elevated),
-    ],
-  ).withAppShapes.withAppSurfaces.withAppTypography.withAppTooltips;
+    locales: locales,
+  );
   _appThemes[brightness] = (inputs: inputs, theme: theme);
   return theme;
 }

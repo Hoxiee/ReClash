@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "ReClash 的系统代理在应用外被关闭，因此应用会绕过 ReClash。",
   "doctorFixConfirm": "修复…",
   "coreErrorNotices": "内核错误通知",
-  "coreErrorNoticesDesc": "关闭后，连接被关闭等内核错误不再弹出提示，日志中仍会保留。"
+  "coreErrorNoticesDesc": "关闭后，连接被关闭等内核错误不再弹出提示，日志中仍会保留。",
+  "doctorProfileRevokedTitle": "订阅链接已失效",
+  "doctorProfileRevokedDetail": "服务商拒绝了该订阅链接（HTTP {status}）。请向服务商索取新的链接。",
+  "doctorProfileNoServersTitle": "配置中没有服务器",
+  "doctorProfileNoServersDetail": "订阅已加载，但其中没有服务器。请稍后更新，或联系服务商。"
 }

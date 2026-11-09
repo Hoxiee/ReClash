@@ -45,6 +45,19 @@ class System {
 
   bool get isTV => _isTV;
 
+  SupportPlatform get supportPlatform {
+    if (isWindows) {
+      return SupportPlatform.Windows;
+    } else if (isMacOS) {
+      return SupportPlatform.MacOS;
+    } else if (isLinux) {
+      return SupportPlatform.Linux;
+    } else if (isAndroid) {
+      return SupportPlatform.Android;
+    }
+    throw UnsupportedError('Unsupported platform: $_os');
+  }
+
   Future<int> init() async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
     _isTV = switch (deviceInfo) {

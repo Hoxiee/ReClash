@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "El proxy del sistema de ReClash se desactivó fuera de la app, así que las apps no pasan por ReClash.",
   "doctorFixConfirm": "Corregir…",
   "coreErrorNotices": "Avisos de errores del núcleo",
-  "coreErrorNoticesDesc": "Al desactivarlo, los errores del núcleo, como conexiones cerradas, dejan de mostrarse como avisos. Siguen apareciendo en los registros."
+  "coreErrorNoticesDesc": "Al desactivarlo, los errores del núcleo, como conexiones cerradas, dejan de mostrarse como avisos. Siguen apareciendo en los registros.",
+  "doctorProfileRevokedTitle": "El enlace de suscripción ya no funciona",
+  "doctorProfileRevokedDetail": "El proveedor rechazó el enlace de suscripción (HTTP {status}). Pide un enlace nuevo a tu proveedor.",
+  "doctorProfileNoServersTitle": "El perfil no tiene servidores",
+  "doctorProfileNoServersDetail": "La suscripción se cargó, pero no contiene servidores. Actualízala más tarde o contacta con tu proveedor."
 }

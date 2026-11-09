@@ -1,0 +1,20 @@
+name: reclash_site_preview
+description: Website builder kernel and live preview built from ReClash sources.
+publish_to: 'none'
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: any
+  intl: any
+  material_ui: any
+  reclash:
+    path: ..
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

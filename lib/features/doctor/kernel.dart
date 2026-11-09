@@ -59,7 +59,9 @@ abstract interface class DiagnosticKernel {
   /// Never runs a foreign remedy, whatever the plan lists.
   Future<PlanOutcome> heal(HealPlan plan);
 
-  /// The latest path of any scope, running or finished.
+  /// The latest path of any scope but [PathScope.verify], running or
+  /// finished: a verify run is three steps and would hide the full chain the
+  /// path card shows.
   PathResult? get path;
 
   Stream<PathResult> get pathUpdates;
@@ -120,10 +122,12 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
     required ConfigAccess config,
     Iterable<Remedy> remedies = const [],
     PathChecks? pathChecks,
+    PathChecks? verifyChecks,
     Object? Function()? pathIntent,
     DateTime Function()? clock,
   }) : _engine = engine,
        _pathChecks = pathChecks,
+       _verifyChecks = verifyChecks,
        _pathIntent = pathIntent,
        _scheduler = scheduler,
        _journal = journal,
@@ -140,6 +144,7 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
   final Map<String, Remedy> _remedies;
   final DateTime Function() _clock;
   final PathChecks? _pathChecks;
+  final PathChecks? _verifyChecks;
   final Object? Function()? _pathIntent;
 
   final _snapshots = StreamController<DiagnosticSnapshot>.broadcast(sync: true);
@@ -509,8 +514,11 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
     }
 
     publish(result);
+    final checks = scope == PathScope.verify
+        ? _verifyChecks ?? _pathChecks
+        : _pathChecks;
     for (final step in scope.steps) {
-      final check = _pathChecks?.call(step);
+      final check = checks?.call(step);
       if (check == null) {
         publish(
           result.withStep(PathStepResult(step, status: PathStepStatus.skipped)),
@@ -552,6 +560,7 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
 
   void _publishPath(PathResult path) {
     _paths[path.scope] = path;
+    if (path.scope == PathScope.verify) return;
     _path = path;
     _pathUpdates.add(path);
   }

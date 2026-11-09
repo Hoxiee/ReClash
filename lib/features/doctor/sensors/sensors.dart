@@ -2,6 +2,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 
+import '../account/fetch.dart';
 import '../environment/scanner.dart';
 import '../kernel.dart';
 import '../snapshot.dart';
@@ -20,6 +21,7 @@ const List<Sensor> defaultSensors = [
   modeSensor,
   batteryOptimizationSensor,
   subscriptionSensor,
+  profileUpdateSensor,
   deviceSensor,
   routingSensor,
   environmentSensor,
@@ -60,9 +62,25 @@ void subscriptionSensor(Ref ref, FactSink sink) {
         expiresAt: info.expireDate,
         used: info.upload + info.download,
         total: info.total,
+        fetchedAt: profile.lastUpdateDate,
       );
     }),
     (_, subscription) => sink.put(Facts.subscription, subscription),
     fireImmediately: true,
   );
+}
+
+void profileUpdateSensor(Ref ref, FactSink sink) {
+  void put() {
+    final id = ref.read(currentProfileIdProvider);
+    sink.put(
+      Facts.profileUpdate,
+      id == null ? null : ref.read(profileUpdateResultsProvider)[id],
+    );
+  }
+
+  ref
+    ..listen(currentProfileIdProvider, (_, _) => put())
+    ..listen(profileUpdateResultsProvider, (_, _) => put());
+  put();
 }

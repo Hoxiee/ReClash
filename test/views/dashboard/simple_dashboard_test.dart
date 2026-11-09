@@ -10,10 +10,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/features/doctor/environment/scanner.dart';
 import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/network_cost.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/providers.dart';
+import 'package:reclash/features/doctor/supervisor/network.dart';
 import 'package:reclash/features/traffic_forecast/forecast.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -148,6 +150,15 @@ void main() {
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
         environmentReaderProvider.overrideWithValue(null),
+        accountStandingProvider.overrideWithBuild(
+          (_, _) => const AccountStanding(),
+        ),
+        networkSnapshotProvider.overrideWithBuild(
+          (_, _) => const NetworkCostSnapshot(
+            cost: NetworkCost.unmetered,
+            identity: 'wifi',
+          ),
+        ),
         providerHintsProvider.overrideWithValue(hints),
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
         if (profile != null) currentProfileProvider.overrideWithValue(profile),
@@ -421,6 +432,12 @@ void main() {
           ),
           simplestDashboardRevealProvider.overrideWith(
             () => SimplestDashboardReveal(_FixedRandom(dice)),
+          ),
+          networkSnapshotProvider.overrideWithBuild(
+            (_, _) => const NetworkCostSnapshot(
+              cost: NetworkCost.unmetered,
+              identity: 'wifi',
+            ),
           ),
         ],
       );
@@ -732,7 +749,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byTooltip('Start'), findsOneWidget);
+      expect(find.byTooltip('Add subscription'), findsOneWidget);
       expect(find.byTooltip('Edit widgets'), findsOneWidget);
     },
   );
@@ -1184,6 +1201,11 @@ void main() {
         profile: _subscription(
           info: const SubscriptionInfo(total: 10 * _gb, expire: 0),
         ),
+        overrides: [
+          connectionHealthProvider.overrideWithBuild(
+            (_, _) => const ConnectionHealth(phase: ConnectionPhase.verified),
+          ),
+        ],
       );
       container
           .read(profilesProvider.notifier)

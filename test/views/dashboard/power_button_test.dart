@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
+import 'package:reclash/widgets/icon.dart';
 
 import '../../helpers/test_app.dart';
 
@@ -21,6 +22,7 @@ Widget _app({
         link: link,
         size: 152,
         logo: '',
+        images: const AppProviderImages(),
         tooltip: 'Toggle tunnel',
         onPressed: enabled ? onPressed ?? () {} : null,
         look: (shape: shape, type: type),

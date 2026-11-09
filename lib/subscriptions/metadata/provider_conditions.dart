@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:reclash/common/package.dart';
+import 'package:reclash/common/app_version.dart';
 import 'package:reclash/subscriptions/notification/record.dart';
 
 const providerPlatforms = {'android', 'windows', 'macos', 'linux'};

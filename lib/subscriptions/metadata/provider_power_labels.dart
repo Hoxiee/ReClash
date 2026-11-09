@@ -1,6 +1,15 @@
 const providerPowerLabelTitleLimit = 64;
 const providerPowerLabelHintLimit = 96;
-const providerPowerLabelStates = ['off', 'connecting', 'on', 'paused'];
+const providerPowerLabelStates = [
+  'off',
+  'connecting',
+  'on',
+  'paused',
+  'expired',
+  'exhausted',
+  'ending',
+  'grace',
+];
 
 class ProviderPowerLabel {
   const ProviderPowerLabel(this.title, [this.hint]);

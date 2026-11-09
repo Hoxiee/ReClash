@@ -12,6 +12,7 @@ import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
+import 'package:reclash/widgets/announcement_card_view.dart';
 
 class AnnouncementCard extends ConsumerWidget {
   const AnnouncementCard({super.key, this.expandable = false});
@@ -194,8 +195,7 @@ Future<void> _openAnnouncement(
   await route.completed;
 }
 
-/// The announcement laid open on top of the simple dashboard's widgets, in
-/// full: it never folds into a preview.
+/// The current profile's announcement, see [OpenAnnouncementCardView].
 class OpenAnnouncementCard extends ConsumerWidget {
   const OpenAnnouncementCard({super.key});
 
@@ -203,32 +203,9 @@ class OpenAnnouncementCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final announcement = ref.watch(providerAnnouncementProvider);
     if (announcement == null) return const SizedBox.shrink();
-    final l = context.appLocalizations;
-    return DashboardCard(
-      semanticLabel: l.providerAnnouncement,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 8,
-        children: [
-          DashboardCardHeader(
-            glyph: AppGlyphs.megaphone,
-            title: l.providerAnnouncement,
-            trailing: [
-              if (announcement.link case final link?)
-                Transform.translate(
-                  offset: const Offset(8, 0),
-                  child: DashboardIconButton(
-                    glyph: AppGlyphs.openExternal,
-                    tooltip: l.providerAnnouncementOpen,
-                    onPressed: () =>
-                        unawaited(dialogs.openUrl(link.toString())),
-                  ),
-                ),
-            ],
-          ),
-          Text(announcement.text, style: AppTextStyle.subheadline.of(context)),
-        ],
-      ),
+    return OpenAnnouncementCardView(
+      announcement: announcement,
+      onOpenLink: (link) => unawaited(dialogs.openUrl(link.toString())),
     );
   }
 }
@@ -386,10 +363,9 @@ class NoticeCard extends ConsumerWidget {
     if (card == null) return const SizedBox.shrink();
     final (:announcement, :id) = card;
     final l = context.appLocalizations;
-    return CommonCard(
+    return NoticeCardView(
       key: const ValueKey('provider-notice-card'),
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      shape: AppShape.xl,
+      announcement: announcement,
       onPressed: () => unawaited(
         announcement.link == null
             ? dialogs.showMessage(
@@ -400,42 +376,7 @@ class NoticeCard extends ConsumerWidget {
               )
             : dialogs.openUrl(announcement.link.toString()),
       ),
-      child: Row(
-        spacing: 12,
-        children: [
-          GlyphIcon(
-            AppGlyphs.info,
-            size: 26,
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4,
-              children: [
-                Text(
-                  l.providerNotice,
-                  style: AppTextStyle.headline.of(context),
-                ),
-                Text(
-                  announcement.text,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.footnote
-                      .of(context)
-                      .copyWith(color: context.colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            tooltip: l.close,
-            icon: const GlyphIcon(AppGlyphs.close, size: 18),
-            onPressed: () =>
-                ref.read(dismissedNoticesProvider.notifier).dismiss(id),
-          ),
-        ],
-      ),
+      onDismiss: () => ref.read(dismissedNoticesProvider.notifier).dismiss(id),
     );
   }
 }

@@ -29,7 +29,12 @@ enum PathScope {
     PathStep.dns,
     PathStep.server,
     PathStep.internet,
-  ]);
+  ]),
+
+  /// The supervisor's quick check: server and internet through the main
+  /// group's selected node, since the rule route may send the test URL
+  /// direct and pass while the node is dead.
+  verify([PathStep.tunnel, PathStep.server, PathStep.internet]);
 
   const PathScope(this.steps);
 
@@ -87,6 +92,7 @@ final class PathCheck {
     required this.run,
     this.ttl = Duration.zero,
     this.intent,
+    this.key,
   });
 
   final CheckCost cost;
@@ -94,8 +100,12 @@ final class PathCheck {
   final Object? intent;
   final Future<StepCheck> Function(ProbeToken token) run;
 
+  /// Set when the step measures something else than its full-path namesake,
+  /// so the two never share a cached result.
+  final String? key;
+
   ProbeRequest<StepCheck> request(PathStep step, {bool force = false}) {
-    final key = pathStepKey(step);
+    final key = this.key ?? pathStepKey(step);
     return ProbeRequest(
       key: key,
       cost: cost,

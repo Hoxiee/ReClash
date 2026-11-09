@@ -120,6 +120,21 @@ class Preferences {
     await store?.setStringList('doctor.fixLinkNonces', nonces);
   }
 
+  Future<String?> getDoctorAccount() async {
+    try {
+      final store = await _store.value;
+      return store?.getString('doctor.account');
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> saveDoctorAccount(String memo) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    await store?.setString('doctor.account', memo);
+  }
+
   Future<int?> getOwnProxyPort() async {
     try {
       final store = await _store.value;

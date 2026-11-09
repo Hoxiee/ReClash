@@ -585,7 +585,7 @@ cards:
 
 ### Power labels
 
-`power-labels` replaces the text under the power button. States: `off`, `connecting`, `on`, `paused`. Each state takes one of:
+`power-labels` replaces the title under the power button. States: `off`, `connecting`, `on`, `paused`, and for the plan: `expired` (the plan ended, connected or not), `exhausted` (the traffic ran out), `ending` (the plan nears its end by the `reminder` thresholds), `grace` (connected on a plan that ended). Problems the app found itself, such as no network or a broken connection, always keep the app's own title. Each state takes one of:
 
 - a string or a locale map,
 - `{title, hint}`, where each part may be a locale map,
@@ -598,7 +598,7 @@ cards:
 
 Entries outside the limits are dropped; a state with none left uses the localized label.
 
-Placeholders: `{daysLeft}`, `{trafficLeft}`, `{server}`. A placeholder without a value makes the whole entry fall back to the localized label. A `hint` on `on` is not shown: the live connection line stays there. Labels never change semantics, color or shape.
+Placeholders: `{daysLeft}`, `{trafficLeft}`, `{server}`. A placeholder without a value makes the whole entry fall back to the localized label. A `hint` is shown only where the button offers no action under the title: not on `on`, where the live connection line stays, and not beside a Renew or Top up button. Labels never change semantics, color or shape.
 
 ```yaml
 power-labels:

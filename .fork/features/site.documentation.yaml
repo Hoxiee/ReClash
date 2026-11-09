@@ -6,9 +6,11 @@ must:
   repository: The public website is the independent sibling ../reclash-site repository, exposed locally by the site symlink; application setup and checks never deploy it or silently advance its working branch.
   documentation: Public behavior changes update the affected website documentation in the same task. All documentation prose and its navigation manifest have one application source (docs/) and a verifiable website snapshot; provider exports and schemas stay identical.
   presentation: Documentation reuses the website's Markdown compiler, typed components, local search, localized routes and visual language rather than introducing a parallel engine.
-watch: ['site', 'site/**', .gitmodules, Makefile, '.agents/site-documentation.md', tool/build_site.sh, tool/site_docs.mjs, test/tool/site_docs_test.mjs, '.github/workflows/site-docs.yaml', 'docs/**', provider_standard.g.json, provider-policy.schema.json, provider-config.schema.json, rcx-profile.schema.json]
+  builder: The website builder validates with the app's own manifest parser compiled to JS and previews the app's own widget views in a lazily created same-origin Flutter web iframe; the site never re-implements validation or app UI, and the preview fetches nothing from other origins.
+watch: ['site', 'site/**', .gitmodules, Makefile, '.agents/site-documentation.md', tool/build_site.sh, tool/site_docs.mjs, test/tool/site_docs_test.mjs, 'site_preview/**', tool/site_preview.dart, test/lint/site_preview_imports_test.dart, '.github/workflows/site-docs.yaml', 'docs/**', provider_standard.g.json, provider-policy.schema.json, provider-config.schema.json, rcx-profile.schema.json]
 checks:
   site-docs: [repository, documentation]
   site-docs-tooling: [repository, documentation]
   site-build: [presentation]
-  site-browser: [presentation]
+  site-browser: [presentation, builder]
+  site-preview-imports: [builder]

@@ -16,6 +16,8 @@ checks:
     argv: [npm, --prefix, ../reclash-site, run, check]
   site-browser:
     argv: [npm, --prefix, ../reclash-site, run, 'test:e2e']
+  site-preview-imports:
+    argv: [flutter, test, test/lint/site_preview_imports_test.dart]
   fork-atlas-model:
     argv: [node, --test, tool/fork_atlas/test/model_test.mjs]
   fork-atlas-server:

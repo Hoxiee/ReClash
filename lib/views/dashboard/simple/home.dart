@@ -1,24 +1,32 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/providers.dart';
+import 'package:reclash/features/power/attention.dart';
+import 'package:reclash/features/power/face.dart';
+import 'package:reclash/features/power/providers.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/metadata/provider_conditions.dart';
 import 'package:reclash/subscriptions/metadata/provider_power_labels.dart';
 import 'package:reclash/subscriptions/notification/record.dart';
-import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/style.dart';
+import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
 import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/views/doctor/doctor.dart';
+import 'package:reclash/widgets/icon.dart';
 
+import 'home_view.dart';
 import 'location_card.dart';
-import 'power_button.dart';
+import 'power_account_sheet.dart';
 import 'subscription_card.dart';
+
+export 'home_view.dart' show powerTooltip;
 
 /// The button, what it did and what is left to spend, under a pending app
 /// update; on a phone also where traffic leaves.
@@ -37,7 +45,7 @@ class SimpleHome extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         padding: padding,
-        child: _FillHero(
+        child: FillHero(
           viewport: constraints.maxHeight - padding.vertical,
           minHero: SimplePower.heightOf(minSize),
           above: hasUpdate ? const UpdateCard() : null,
@@ -57,95 +65,6 @@ class SimpleHome extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Lays [above] and [below] out at their own height; the hero gets the rest
-/// of the viewport, never less than [minHero].
-class _FillHero extends MultiChildRenderObjectWidget {
-  _FillHero({
-    required this.viewport,
-    required this.minHero,
-    required Widget hero,
-    required Widget below,
-    Widget? above,
-  }) : super(children: [hero, below, ?above]);
-
-  final double viewport;
-  final double minHero;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderFillHero(viewport: viewport, minHero: minHero);
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderFillHero renderObject) {
-    renderObject
-      ..viewport = viewport
-      ..minHero = minHero;
-  }
-}
-
-const _aboveGap = 16.0;
-
-class _FillHeroParentData extends ContainerBoxParentData<RenderBox> {}
-
-class _RenderFillHero extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, _FillHeroParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _FillHeroParentData> {
-  _RenderFillHero({required double viewport, required double minHero})
-    : _viewport = viewport,
-      _minHero = minHero;
-
-  double _viewport;
-  set viewport(double value) {
-    if (value == _viewport) return;
-    _viewport = value;
-    markNeedsLayout();
-  }
-
-  double _minHero;
-  set minHero(double value) {
-    if (value == _minHero) return;
-    _minHero = value;
-    markNeedsLayout();
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _FillHeroParentData) {
-      child.parentData = _FillHeroParentData();
-    }
-  }
-
-  @override
-  void performLayout() {
-    final width = constraints.maxWidth;
-    final hero = firstChild!;
-    final below = childAfter(hero)!;
-    final above = childAfter(below);
-    var top = 0.0;
-    if (above != null) {
-      above.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
-      top = above.size.height + _aboveGap;
-    }
-    below.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
-    final heroHeight = math.max(_minHero, _viewport - top - below.size.height);
-    hero.layout(BoxConstraints.tight(Size(width, heroHeight)));
-    (hero.parentData! as BoxParentData).offset = Offset(0, top);
-    (below.parentData! as BoxParentData).offset = Offset(0, top + heroHeight);
-    size = constraints.constrain(
-      Size(width, top + heroHeight + below.size.height),
-    );
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) =>
-      defaultPaint(context, offset);
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
-      defaultHitTestChildren(result, position: position);
 }
 
 /// Asks for a run and shows the request: a start reads as connecting for at
@@ -222,17 +141,8 @@ class _PowerRequestState extends ConsumerState<PowerRequest> {
   }
 }
 
-String powerTooltip(BuildContext context, PowerLink link) {
-  final appLocalizations = context.appLocalizations;
-  return switch (link) {
-    PowerLink.paused => appLocalizations.onDemandResume,
-    PowerLink.on || PowerLink.connecting => appLocalizations.stop,
-    PowerLink.off => appLocalizations.start,
-  };
-}
-
-/// The power button over its status.
-class SimplePower extends ConsumerWidget {
+/// The power button over its status, both drawn from the power face.
+class SimplePower extends ConsumerStatefulWidget {
   const SimplePower({super.key, required this.minSize, required this.maxSize});
 
   /// The button grows with its room between these, the status always under
@@ -240,11 +150,95 @@ class SimplePower extends ConsumerWidget {
   final double minSize;
   final double maxSize;
 
-  static double heightOf(double size) =>
-      PowerButton.extentOf(size) + _statusHeight;
+  static double heightOf(double size) => SimplePowerView.heightOf(size);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SimplePower> createState() => _SimplePowerState();
+}
+
+class _SimplePowerState extends ConsumerState<SimplePower> {
+  /// How long a fix that leaves the app keeps the start it was asked for.
+  static const _startIntentFor = Duration(minutes: 10);
+
+  DateTime? _startWhenClear;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(powerFaceProvider, (_, face) => _continueStart(face));
+  }
+
+  /// Starts once the fix cleared what kept the button from starting, unless
+  /// the run state moved first.
+  void _continueStart(PowerFace face) {
+    final since = _startWhenClear;
+    if (since == null) return;
+    if (face.link != PowerLink.off ||
+        DateTime.now().difference(since) > _startIntentFor) {
+      _startWhenClear = null;
+      return;
+    }
+    switch (face.state) {
+      case PowerFaceState.off ||
+          PowerFaceState.ending ||
+          PowerFaceState.expired ||
+          PowerFaceState.exhausted:
+        _startWhenClear = null;
+        unawaited(ref.read(commonActionProvider.notifier).setRunning(true));
+      default:
+    }
+  }
+
+  Future<void> _remedy(String remedyId, PowerFace face) async {
+    if (face.link == PowerLink.off) _startWhenClear = DateTime.now();
+    await ref.read(diagnosticKernelProvider).apply(remedyId);
+  }
+
+  Future<void> _act(
+    PowerAction action,
+    PowerFace face,
+    VoidCallback? toggle,
+  ) async {
+    switch (action) {
+      case PowerAction.start || PowerAction.stop || PowerAction.resume:
+        _startWhenClear = null;
+        toggle?.call();
+      case PowerAction.addProfile:
+        showProfilesSheet(context);
+      case PowerAction.accountSheet:
+        await showPowerAccountSheet(context);
+      case PowerAction.causeSheet:
+        await showDoctorSheet(context, cause: face.cause);
+      case PowerAction.renew || PowerAction.topUp || PowerAction.support:
+        final metadata = ref
+            .read(currentProfileProvider)
+            ?.subscriptionSnapshot
+            ?.metadata;
+        final url = metadata == null ? null : accountLinkUrl(metadata, action);
+        if (url != null) await dialogs.openUrl(url.toString());
+      case PowerAction.updateProfile:
+        final profile = ref.read(currentProfileProvider);
+        if (profile == null) return;
+        await ref
+            .read(profilesActionProvider.notifier)
+            .updateProfile(profile, showLoading: true);
+      case PowerAction.grantVpn:
+        await _remedy('device.requestVpnPermission', face);
+      case PowerAction.openVpnSettings:
+        await _remedy('device.openVpnSettings', face);
+      case PowerAction.openDateSettings:
+        await _remedy('device.openDateSettings', face);
+      case PowerAction.openPortal:
+        await _remedy('network.openCaptivePortal', face);
+      case PowerAction.ruleMode:
+        await ref.read(diagnosticKernelProvider).apply('config.ruleMode');
+      case PowerAction.repair:
+        await ref.read(connectionSupervisorProvider).repair();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dark = context.colorScheme.brightness == Brightness.dark;
     final logo = ref.watch(
       currentProfileProvider.select(
@@ -253,114 +247,45 @@ class SimplePower extends ConsumerWidget {
       ),
     );
     final look = ref.watch(providerPowerButtonProvider);
+    final inputs = ref.watch(powerInputsProvider);
     return PowerRequest(
-      builder: (context, link, toggle) => LayoutBuilder(
-        builder: (context, constraints) {
-          final room = math.min(
-            constraints.maxHeight - _statusHeight,
-            constraints.maxWidth,
-          );
-          final size = (room / PowerButton.extentOf(1)).clamp(minSize, maxSize);
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PowerButton(
-                  link: link,
-                  size: size,
-                  logo: logo,
-                  look: look,
-                  tooltip: powerTooltip(context, link),
-                  onPressed: toggle,
-                ),
-                const SizedBox(height: 20),
-                _StatusText(link: link, hasProfile: toggle != null),
-              ],
-            ),
-          );
-        },
-      ),
+      builder: (context, link, toggle) {
+        final face = resolvePowerFace(inputs.withLink(link));
+        void act(PowerAction action) => unawaited(_act(action, face, toggle));
+        return SimplePowerView(
+          minSize: widget.minSize,
+          maxSize: widget.maxSize,
+          face: face,
+          onPressed: switch (face.tap) {
+            final tap? => () => act(tap),
+            null => null,
+          },
+          logo: logo,
+          images: const AppProviderImages(),
+          look: look,
+          status: _StatusText(face: face, onFix: act),
+        );
+      },
     );
   }
 }
 
-/// The status title and hint under the button, with the gap above them.
-const _statusHeight = 90.0;
-
 class _StatusText extends ConsumerWidget {
-  const _StatusText({required this.link, required this.hasProfile});
+  const _StatusText({required this.face, required this.onFix});
 
-  final PowerLink link;
-  final bool hasProfile;
+  final PowerFace face;
+  final ValueChanged<PowerAction> onFix;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final secondary = AppTextStyle.subheadline
-        .of(context)
-        .copyWith(color: context.colorScheme.onSurfaceVariant);
-    final (title, hint) = switch (link) {
-      _ when !hasProfile => (
-        appLocalizations.simpleStatusNoProfile,
-        appLocalizations.simpleStatusNoProfileHint,
-      ),
-      PowerLink.off => (
-        appLocalizations.simpleStatusOff,
-        appLocalizations.simpleStatusOffHint,
-      ),
-      PowerLink.connecting => (
-        appLocalizations.simpleStatusConnecting,
-        appLocalizations.simpleStatusConnectingHint,
-      ),
-      PowerLink.paused => (
-        appLocalizations.simpleStatusPaused,
-        _pausedHint(context, ref),
-      ),
-      PowerLink.on => (appLocalizations.simpleStatusOn, null),
-    };
-    final custom = hasProfile ? _customLabel(ref) : null;
-    final shownTitle = custom?.title ?? title;
-    final shownHint = custom == null
-        ? hint
-        : custom.hint ??
-              switch (link) {
-                PowerLink.paused => _pausedHint(context, ref),
-                _ => null,
-              };
-    final showLive = hasProfile && link == PowerLink.on;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 6,
-      children: [
-        Semantics(
-          label: custom == null ? null : '$title. ${custom.title}',
-          excludeSemantics: custom != null,
-          child: Text(
-            shownTitle,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyle.title1.of(context, emphasized: true),
-          ),
-        ),
-        SizedBox(
-          height: 24,
-          child: Center(
-            child: showLive
-                ? const FittedBox(fit: BoxFit.scaleDown, child: _LiveLine())
-                : shownHint == null
-                ? null
-                : Text(
-                    shownHint,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: secondary,
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => PowerStatusView(
+    face: face,
+    custom: _customLabel(ref),
+    pausedHint: face.link == PowerLink.paused
+        ? _pausedHint(context, ref)
+        : null,
+    live: const _LiveLine(),
+    onFix: onFix,
+  );
 
   String _pausedHint(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
@@ -370,10 +295,12 @@ class _StatusText extends ConsumerWidget {
     };
   }
 
-  /// The provider's label for the real state, null when it has none or a
+  /// The provider's label for the face, null when it has none or a
   /// placeholder has no value.
   ProviderPowerLabel? _customLabel(WidgetRef ref) {
-    final label = ref.watch(providerPowerLabelProvider)[link.name];
+    final state = powerLabelState(face);
+    if (state == null) return null;
+    final label = ref.watch(providerPowerLabelProvider)[state];
     if (label == null) return null;
     final info = ref.watch(
       currentProfileProvider.select((profile) => profile?.subscriptionInfo),
@@ -405,39 +332,13 @@ class _LiveLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = context.colorScheme;
-    final colors = DashboardColors.of(context);
-    final runTime = ref.watch(runTimeProvider);
     final traffic = ref.watch(
       trafficsProvider.select((state) => state.list.safeLast(const Traffic())),
     );
-    final caption = AppTextStyle.subheadline
-        .of(context)
-        .toTabular
-        .copyWith(color: colorScheme.onSurfaceVariant);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 6,
-      children: [
-        DecoratedBox(
-          decoration: ShapeDecoration(color: colors.ok, shape: AppShape.circle),
-          child: const SizedBox.square(dimension: 8),
-        ),
-        Text(
-          getTimeText(runTime),
-          style: caption.copyWith(color: colorScheme.onSurface),
-        ),
-        const SizedBox(width: 6),
-        GlyphIcon(AppGlyphs.arrowDown, size: 16, color: colorScheme.primary),
-        Text('${dashboardTraffic(traffic.down)}/s', style: caption),
-        const SizedBox(width: 2),
-        GlyphIcon(
-          AppGlyphs.arrowUp,
-          size: 16,
-          color: colorScheme.onSurfaceVariant,
-        ),
-        Text('${dashboardTraffic(traffic.up)}/s', style: caption),
-      ],
+    return PowerLiveLineView(
+      time: getTimeText(ref.watch(runTimeProvider)),
+      down: traffic.down,
+      up: traffic.up,
     );
   }
 }

@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "Le proxy système de ReClash a été désactivé en dehors de l’app, donc les apps contournent ReClash.",
   "doctorFixConfirm": "Corriger…",
   "coreErrorNotices": "Notifications d’erreurs du noyau",
-  "coreErrorNoticesDesc": "Désactivé, les erreurs du noyau, comme les connexions fermées, n’apparaissent plus en notification. Elles restent visibles dans les journaux."
+  "coreErrorNoticesDesc": "Désactivé, les erreurs du noyau, comme les connexions fermées, n’apparaissent plus en notification. Elles restent visibles dans les journaux.",
+  "doctorProfileRevokedTitle": "Le lien d’abonnement ne fonctionne plus",
+  "doctorProfileRevokedDetail": "Le fournisseur a refusé le lien d’abonnement (HTTP {status}). Obtenez un nouveau lien auprès de votre fournisseur.",
+  "doctorProfileNoServersTitle": "Le profil ne contient aucun serveur",
+  "doctorProfileNoServersDetail": "L’abonnement a été chargé, mais il ne contient aucun serveur. Mettez-le à jour plus tard ou contactez votre fournisseur."
 }

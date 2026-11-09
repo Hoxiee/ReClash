@@ -1,22 +1,44 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
+import 'package:reclash/features/power/face.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
-import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/ui/ui.dart';
+import 'package:reclash/widgets/provider_image.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// What the button shows; [paused] is a run the on-demand rules hold.
-enum PowerLink { off, connecting, on, paused }
+export 'package:reclash/features/power/face.dart' show PowerLink, PowerTone;
+
+/// The verdict glyph on the rim; [tone] picks its fill.
+@immutable
+class PowerBadge {
+  const PowerBadge(this.glyph, this.tone);
+
+  final Glyph glyph;
+  final PowerTone tone;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PowerBadge && other.glyph == glyph && other.tone == tone;
+
+  @override
+  int get hashCode => Object.hash(glyph, tone);
+}
 
 const _morphDuration = Duration(milliseconds: 450);
 const _stateDuration = Duration(milliseconds: 150);
 const _haloPeriod = Duration(seconds: 24);
 
 const _connectingProgress = 0.45;
+
+/// A badge that comes with the morph to running waits for it to land.
+const _badgeDelay = Duration(milliseconds: 570);
+const _badgeDuration = Duration(milliseconds: 250);
 
 const _haloSize = 1.34;
 const _plateSize = 0.54;
@@ -103,10 +125,21 @@ class PowerButton extends StatefulWidget {
     required this.link,
     required this.size,
     required this.logo,
+    required this.images,
     required this.tooltip,
     required this.onPressed,
     this.look = defaultProviderPowerButton,
+    this.tone = PowerTone.normal,
+    this.badge,
+    this.spin = false,
   });
+
+  final PowerTone tone;
+  final PowerBadge? badge;
+
+  /// The app is repairing a running tunnel: the halo spins around the full
+  /// shape.
+  final bool spin;
 
   final PowerLink link;
   final double size;
@@ -116,6 +149,7 @@ class PowerButton extends StatefulWidget {
 
   /// The provider's logo URL or data URI; empty draws the power glyph.
   final String logo;
+  final ProviderImages images;
   final String tooltip;
 
   /// Null disables the button.
@@ -173,12 +207,16 @@ class _PowerButtonState extends State<PowerButton>
         );
       }
       _syncHalo();
+    } else if (oldWidget.spin != widget.spin) {
+      _syncHalo();
     }
   }
 
   void _syncHalo() {
     final spinning =
-        widget.link == PowerLink.on || widget.link == PowerLink.connecting;
+        widget.link == PowerLink.on ||
+        widget.link == PowerLink.connecting ||
+        widget.spin;
     if (spinning && !context.disableAnimations) {
       if (!_halo.isAnimating) unawaited(_halo.repeat());
     } else {
@@ -211,13 +249,22 @@ class _PowerButtonState extends State<PowerButton>
     final enabled = widget.onPressed != null;
     final shape = widget.look.shape;
     final type = widget.look.type;
-    final tonal = link == PowerLink.on && type == ProviderPowerType.tonal;
-    final hollow = link == PowerLink.on && type == ProviderPowerType.outline;
+    // Chroma means traffic flows: a running tunnel that carries nothing
+    // keeps the provider's shape in grey, whatever the theme's hue.
+    final stalled =
+        link == PowerLink.on &&
+        (widget.tone == PowerTone.failure || widget.tone == PowerTone.quiet);
+    final tonal =
+        link == PowerLink.on && !stalled && type == ProviderPowerType.tonal;
+    final hollow =
+        link == PowerLink.on && !stalled && type == ProviderPowerType.outline;
     final fill = switch (link) {
       PowerLink.off => colors.tone,
       PowerLink.connecting || PowerLink.paused => colorScheme.primaryContainer,
       PowerLink.on =>
-        tonal
+        stalled
+            ? colors.tone
+            : tonal
             ? colorScheme.primaryContainer
             : hollow
             ? Colors.transparent
@@ -228,7 +275,9 @@ class _PowerButtonState extends State<PowerButton>
       PowerLink.connecting ||
       PowerLink.paused => colorScheme.onPrimaryContainer,
       PowerLink.on =>
-        tonal
+        stalled
+            ? colorScheme.onSurface
+            : tonal
             ? colorScheme.onPrimaryContainer
             : hollow
             ? colorScheme.primary
@@ -254,7 +303,7 @@ class _PowerButtonState extends State<PowerButton>
                 shape: shape,
                 progress: progress,
                 color: glass || hollow ? null : color,
-                shadow: link == PowerLink.off
+                shadow: link == PowerLink.off || stalled
                     ? Colors.black.withValues(alpha: 0.25)
                     : colorScheme.primary.withValues(alpha: 0.3),
                 ring: _focused
@@ -282,7 +331,14 @@ class _PowerButtonState extends State<PowerButton>
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          _Halo(link: link, shape: shape, size: size, turns: _halo),
+          _Halo(
+            link: link,
+            shape: shape,
+            size: size,
+            turns: _halo,
+            tone: widget.tone,
+            spin: widget.spin,
+          ),
           Tooltip(
             message: widget.tooltip,
             child: Semantics(
@@ -313,12 +369,27 @@ class _PowerButtonState extends State<PowerButton>
                         _LogoPlate(
                           size: size * _plateSize,
                           logo: widget.logo,
+                          images: widget.images,
                           muted: link == PowerLink.off,
                           raised: link == PowerLink.on,
                         ),
                       ],
                     ),
                   ),
+                ),
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: Offset(size * 0.33, size * 0.33),
+            child: IgnorePointer(
+              child: ExcludeSemantics(
+                child: _BadgeSlot(
+                  badge: widget.badge,
+                  size: size * 0.24,
+                  delay: _morphController.isAnimating
+                      ? _badgeDelay
+                      : Duration.zero,
                 ),
               ),
             ),
@@ -335,8 +406,12 @@ class _Halo extends StatelessWidget {
     required this.shape,
     required this.size,
     required this.turns,
+    required this.tone,
+    required this.spin,
   });
 
+  final PowerTone tone;
+  final bool spin;
   final PowerLink link;
   final ProviderPowerShape shape;
   final double size;
@@ -347,10 +422,14 @@ class _Halo extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final colors = DashboardColors.of(context);
     final halo = size * _haloSize;
-    final Widget child = switch (link) {
+    final Widget child = switch (spin ? PowerLink.connecting : link) {
       PowerLink.off => ShapeBadge(
         shape: MaterialShapes.circle,
-        color: colors.card,
+        color: switch (tone) {
+          PowerTone.problem => colors.warnContainer,
+          PowerTone.failure => colorScheme.errorContainer,
+          _ => colors.card,
+        },
         size: size * 1.16,
       ),
       PowerLink.connecting => CustomPaint(
@@ -367,9 +446,11 @@ class _Halo extends StatelessWidget {
           final silhouette = _silhouettes[shape]!;
           final rotation =
               0.12 + turns.value * 2 * math.pi / silhouette.symmetry;
-          final tint = link == PowerLink.on
-              ? colorScheme.primary
-              : colorScheme.onSurfaceVariant;
+          final tint = link != PowerLink.on || tone == PowerTone.quiet
+              ? colorScheme.onSurfaceVariant
+              : tone == PowerTone.failure
+              ? colorScheme.error
+              : colorScheme.primary;
           return Stack(
             alignment: Alignment.center,
             children: [
@@ -393,7 +474,13 @@ class _Halo extends StatelessWidget {
     return AnimatedSwitcher(
       duration: context.motionDuration(_morphDuration),
       child: KeyedSubtree(
-        key: ValueKey(link == PowerLink.paused ? PowerLink.on : link),
+        key: ValueKey(
+          spin
+              ? PowerLink.connecting
+              : link == PowerLink.paused
+              ? PowerLink.on
+              : link,
+        ),
         child: child,
       ),
     );
@@ -436,12 +523,14 @@ class _LogoPlate extends StatelessWidget {
   const _LogoPlate({
     required this.size,
     required this.logo,
+    required this.images,
     required this.muted,
     required this.raised,
   });
 
   final double size;
   final String logo;
+  final ProviderImages images;
   final bool muted;
   final bool raised;
 
@@ -458,7 +547,7 @@ class _LogoPlate extends StatelessWidget {
       dimension: mark,
       child: IconTheme.merge(
         data: IconThemeData(size: mark),
-        child: CommonTargetIcon(src: logo, fallback: fallback),
+        child: images.logo(logo, fallback: fallback),
       ),
     );
     if (muted && logo.isNotEmpty) {
@@ -569,4 +658,107 @@ class _BodyClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(_BodyClipper oldClipper) =>
       oldClipper.shape != shape || oldClipper.progress != progress;
+}
+
+/// Pops the badge in and out; one that arrives with a morph waits [delay] so
+/// it lands on the finished shape.
+class _BadgeSlot extends StatefulWidget {
+  const _BadgeSlot({
+    required this.badge,
+    required this.size,
+    required this.delay,
+  });
+
+  final PowerBadge? badge;
+  final double size;
+  final Duration delay;
+
+  @override
+  State<_BadgeSlot> createState() => _BadgeSlotState();
+}
+
+class _BadgeSlotState extends State<_BadgeSlot> {
+  late PowerBadge? _shown = widget.badge;
+  Timer? _pending;
+
+  @override
+  void didUpdateWidget(_BadgeSlot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.badge == oldWidget.badge) return;
+    _pending?.cancel();
+    final delay = context.disableAnimations || widget.badge == null
+        ? Duration.zero
+        : widget.delay;
+    if (delay == Duration.zero) {
+      _show(widget.badge);
+    } else {
+      _pending = Timer(delay, () => _show(widget.badge));
+    }
+  }
+
+  void _show(PowerBadge? badge) {
+    if (!mounted || badge == _shown) return;
+    if (badge?.tone == PowerTone.normal) {
+      unawaited(HapticFeedback.lightImpact());
+    }
+    setState(() => _shown = badge);
+  }
+
+  @override
+  void dispose() {
+    _pending?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = _shown;
+    return AnimatedSwitcher(
+      duration: context.motionDuration(_badgeDuration),
+      switchInCurve: Curves.easeOutBack,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) =>
+          ScaleTransition(scale: animation, child: child),
+      child: shown == null
+          ? SizedBox.square(key: const ValueKey(0), dimension: widget.size)
+          : _RimBadge(key: ValueKey(shown), badge: shown, size: widget.size),
+    );
+  }
+}
+
+class _RimBadge extends StatelessWidget {
+  const _RimBadge({super.key, required this.badge, required this.size});
+
+  final PowerBadge badge;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final colors = DashboardColors.of(context);
+    final (fill, ink) = switch (badge.tone) {
+      PowerTone.normal => (colors.ok, colors.card),
+      PowerTone.attention || PowerTone.problem => (colors.warn, colors.card),
+      PowerTone.failure => (colorScheme.error, colorScheme.onError),
+      PowerTone.quiet => (colors.tone2, colorScheme.onSurfaceVariant),
+    };
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: fill,
+        shape: AppShape.circle.copyWith(
+          side: BorderSide(
+            color: colors.page,
+            width: 3,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+        ),
+      ),
+      child: SizedBox.square(
+        dimension: size,
+        child: Center(
+          child: GlyphIcon(badge.glyph, size: size * 0.6, color: ink),
+        ),
+      ),
+    );
+  }
 }

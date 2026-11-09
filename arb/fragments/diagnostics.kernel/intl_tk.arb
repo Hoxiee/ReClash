@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "ReClash-yň ulgam proksisi programmadan daşarda öçürildi, şonuň üçin programmalar ReClash-dan aýlanyp geçýär.",
   "doctorFixConfirm": "Düzet…",
   "coreErrorNotices": "Ýadro säwlikleri barada habarlar",
-  "coreErrorNoticesDesc": "Öçürilende ýapylan birikmeler ýaly ýadro säwlikleri gapma-gapdal habar bolup görkezilmeýär. Olar žurnalda galýar."
+  "coreErrorNoticesDesc": "Öçürilende ýapylan birikmeler ýaly ýadro säwlikleri gapma-gapdal habar bolup görkezilmeýär. Olar žurnalda galýar.",
+  "doctorProfileRevokedTitle": "Abunalyk baglanyşygy işlemeýär",
+  "doctorProfileRevokedDetail": "Üpjün edijisi abunalyk baglanyşygyny kabul etmedi (HTTP {status}). Üpjün edijiden täze baglanyşyk alyň.",
+  "doctorProfileNoServersTitle": "Profilde serwer ýok",
+  "doctorProfileNoServersDetail": "Abunalyk ýüklendi, emma onda serwer ýok. Soňrak täzeläň ýa-da üpjün edijiňiz bilen habarlaşyň."
 }

@@ -1,52 +1,19 @@
-import 'package:reclash/enum/enum.dart';
+import 'package:reclash/common/number_text.dart';
 import 'package:reclash/models/common.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart' show NumberFormat;
 import 'package:material_ui/material_ui.dart';
 
-/// Pinned to English so every locale reads K and M, never 万 or тыс.
-final _compactFormat = NumberFormat.compact(locale: 'en');
+export 'package:reclash/common/number_text.dart';
 
 extension NumExt on num {
-  String get compact => _compactFormat.format(this);
-
-  String fixed({int decimals = 2}) {
-    String formatted = toStringAsFixed(decimals);
-    if (formatted.contains('.')) {
-      formatted = formatted.replaceAll(RegExp(r'0*$'), '');
-      if (formatted.endsWith('.')) {
-        formatted = formatted.substring(0, formatted.length - 1);
-      }
-    }
-    return formatted;
-  }
-
   TrafficShow get traffic {
-    const units = TrafficUnit.values;
-    var size = toDouble();
-    var unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return TrafficShow(
-      value: size.fixed(decimals: 1),
-      unit: units[unitIndex].name,
-    );
+    final (:value, :unit) = trafficParts;
+    return TrafficShow(value: value, unit: unit);
   }
 
   TrafficShow get shortTraffic {
-    const units = TrafficUnit.values;
-    var size = toDouble();
-    var unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return TrafficShow(
-      value: size.toStringAsFixed(0),
-      unit: ' ${units[unitIndex].name}',
-    );
+    final (:size, :unit) = trafficScale;
+    return TrafficShow(value: size.toStringAsFixed(0), unit: ' ${unit.name}');
   }
 }
 

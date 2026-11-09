@@ -1328,7 +1328,10 @@ class _LiquidGlassLayer extends Layer {
     if (outline case final outline?) {
       builder.pushClipPath(outline);
     } else {
-      builder.pushClipRSuperellipse(corners.toRSuperellipse(rect));
+      builder.pushClipRSuperellipse(
+        corners.toRSuperellipse(rect),
+        clipBehavior: Clip.antiAlias,
+      );
     }
     builder.addPicture(Offset.zero, _frost!);
     builder.pop();

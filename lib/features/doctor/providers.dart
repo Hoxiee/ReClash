@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/network_cost.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
 
+import 'account/guard.dart';
+import 'account/standing.dart';
 import 'environment/healer.dart';
 import 'environment/scanner.dart';
 import 'finding.dart';
@@ -16,11 +20,21 @@ import 'path.dart';
 import 'probes/clock.dart';
 import 'probes/path.dart';
 import 'probes/scheduler.dart';
+import 'probes/verify.dart';
+import 'remedies/best_node.dart';
 import 'remedies/catalog.dart';
+import 'remedies/connection.dart';
 import 'remedies/environment.dart';
 import 'remedies/remedy.dart';
 import 'rules/rules.dart';
 import 'sensors/sensors.dart';
+import 'supervisor/health.dart';
+import 'supervisor/network.dart';
+import 'supervisor/supervisor.dart';
+
+export 'account/standing.dart';
+export 'supervisor/health.dart';
+export 'supervisor/network.dart' show networkOnlineProvider;
 
 class PreferencesIncidentStore implements IncidentStore {
   const PreferencesIncidentStore();
@@ -43,6 +57,16 @@ class _RefConfigAccess implements ConfigAccess {
 
   @override
   void write(Config config) => writeConfig(_ref, config);
+}
+
+class PreferencesAccountStore implements AccountStore {
+  const PreferencesAccountStore();
+
+  @override
+  Future<String?> load() => preferences.getDoctorAccount();
+
+  @override
+  Future<void> save(String memo) => preferences.saveDoctorAccount(memo);
 }
 
 final incidentStoreProvider = Provider<IncidentStore>(
@@ -75,6 +99,34 @@ List<Remedy> _environmentRemedies(Ref ref) {
   ];
 }
 
+List<Remedy> _connectionRemedies(Ref ref) {
+  Future<void> setRunning(bool running) =>
+      ref.read(commonActionProvider.notifier).setRunning(running);
+  return [
+    ConnectionRemedy(ConnectionRemedy.bestNode, () => selectBestNode(ref)),
+    ConnectionRemedy(ConnectionRemedy.resetConnections, () async {
+      final core = ref.read(coreHandlerProvider);
+      if (!await core.clearDnsCache()) throw StateError('DNS flush failed');
+      await core.closeConnections();
+    }),
+    ConnectionRemedy(ConnectionRemedy.restartCore, () async {
+      final restarted = await ref
+          .read(coreActionProvider.notifier)
+          .restartCore(silence: true);
+      if (!restarted) throw StateError('the Core did not restart');
+    }),
+    ConnectionRemedy(
+      ConnectionRemedy.reconnect,
+      () => ref.read(setupActionProvider.notifier).restartVpn(),
+    ),
+    ConnectionRemedy(ConnectionRemedy.stopForAccount, () => setRunning(false)),
+    ConnectionRemedy(
+      ConnectionRemedy.resumeAfterRenewal,
+      () => setRunning(true),
+    ),
+  ];
+}
+
 final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
   return [
     RuleModeRemedy(ref.read(setupActionProvider.notifier).changeMode),
@@ -88,7 +140,8 @@ final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
           .read(profilesActionProvider.notifier)
           .updateProfile(profile);
       return updated != null;
-    }),
+    }, current: () => ref.read(currentProfileIdProvider)),
+    ..._connectionRemedies(ref),
     ..._environmentRemedies(ref),
     if (doctorPlugin case final plugin?) ...[
       VpnPermissionRemedy(plugin.requestVpnPermission),
@@ -121,6 +174,7 @@ final Provider<DiagnosticKernel> diagnosticKernelProvider = Provider((ref) {
     config: _RefConfigAccess(ref),
     remedies: ref.read(diagnosticRemediesProvider),
     pathChecks: (step) => pathCheck(ref, kernel, step),
+    verifyChecks: (step) => verifyCheck(ref, kernel, step),
     pathIntent: () => pathIntent(ref),
   );
   for (final sensor in defaultSensors) {
@@ -142,6 +196,96 @@ final environmentHealerProvider = Provider<EnvironmentHealer>((ref) {
 
 final environmentHealNoticesProvider = StreamProvider<HealNotice>(
   (ref) => ref.watch(environmentHealerProvider).notices,
+);
+
+bool _tunnelRunning(Ref ref) =>
+    ref.read(isStartProvider) &&
+    ref.read(coreStatusProvider) == CoreStatus.connected &&
+    !ref.read(suspendProvider);
+
+final connectionSupervisorProvider = Provider<ConnectionSupervisor>((ref) {
+  final supervisor = ConnectionSupervisor(
+    kernel: ref.watch(diagnosticKernelProvider),
+    autoHeal: () => ref.read(appSettingProvider).autoHeal,
+    selectedNode: () {
+      final group = mainGroup(ref);
+      if (group == null) return null;
+      return ref.read(selectedMapProvider)[group] ??
+          ref.read(groupsProvider).getGroup(group)?.now;
+    },
+  )..start();
+  void sync() => supervisor.setRunning(_tunnelRunning(ref));
+  ref
+    ..listen(appVisibleProvider, (_, visible) {
+      supervisor.setVisible(visible);
+    }, fireImmediately: true)
+    ..listen(networkSnapshotProvider, (previous, next) {
+      if (next == null) return;
+      supervisor.setNetwork(
+        online: next.cost != NetworkCost.offline,
+        changed: previous != null && previous.identity != next.identity,
+      );
+    }, fireImmediately: true)
+    ..listen(isStartProvider, (_, _) => sync())
+    ..listen(coreStatusProvider, (_, _) => sync())
+    ..listen(suspendProvider, (_, _) => sync())
+    ..onDispose(supervisor.dispose);
+  sync();
+  return supervisor;
+});
+
+final connectionHealthProvider =
+    NotifierProvider<ConnectionHealthState, ConnectionHealth>(
+      ConnectionHealthState.new,
+    );
+
+class ConnectionHealthState extends Notifier<ConnectionHealth> {
+  @override
+  ConnectionHealth build() {
+    final supervisor = ref.watch(connectionSupervisorProvider);
+    final subscription = supervisor.updates.listen((health) => state = health);
+    ref.onDispose(subscription.cancel);
+    return supervisor.health;
+  }
+}
+
+final accountGuardProvider = Provider<AccountGuard>((ref) {
+  final kernel = ref.watch(diagnosticKernelProvider);
+  final guard = AccountGuard(
+    kernel: kernel,
+    health: ref.watch(connectionSupervisorProvider).updates,
+    store: const PreferencesAccountStore(),
+    reevaluate: kernel is DoctorKernel ? kernel.refresh : null,
+  );
+  ref
+    ..listen(isStartProvider, (_, running) {
+      guard.setRunning(running);
+    }, fireImmediately: true)
+    ..listen(appVisibleProvider, (_, visible) {
+      guard.setVisible(visible);
+    }, fireImmediately: true)
+    ..onDispose(guard.dispose);
+  unawaited(guard.start());
+  return guard;
+});
+
+final accountStandingProvider =
+    NotifierProvider<AccountStandingState, AccountStanding>(
+      AccountStandingState.new,
+    );
+
+class AccountStandingState extends Notifier<AccountStanding> {
+  @override
+  AccountStanding build() {
+    final guard = ref.watch(accountGuardProvider);
+    final subscription = guard.updates.listen((standing) => state = standing);
+    ref.onDispose(subscription.cancel);
+    return guard.standing;
+  }
+}
+
+final accountNoticesProvider = StreamProvider<AccountNotice>(
+  (ref) => ref.watch(accountGuardProvider).notices,
 );
 
 final findingsProvider = StreamProvider<List<Finding>>((ref) async* {

@@ -275,5 +275,16 @@
     "description": "Button for a fix that changes another program's settings; the ellipsis signals that a confirmation follows."
   },
   "coreErrorNotices": "Core error notices",
-  "coreErrorNoticesDesc": "Turning this off stops error pop-ups from the core, such as closed connections. Errors still appear in the logs."
+  "coreErrorNoticesDesc": "Turning this off stops error pop-ups from the core, such as closed connections. Errors still appear in the logs.",
+  "doctorProfileRevokedTitle": "Subscription link no longer works",
+  "doctorProfileRevokedDetail": "The provider refused the subscription link (HTTP {status}). Get a new link from your provider.",
+  "@doctorProfileRevokedDetail": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "doctorProfileNoServersTitle": "The profile has no servers",
+  "doctorProfileNoServersDetail": "The subscription loaded but contains no servers. Update it later or contact your provider."
 }

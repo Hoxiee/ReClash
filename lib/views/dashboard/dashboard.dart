@@ -49,7 +49,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
-    final platform = widget.platform ?? SupportPlatform.currentPlatform;
+    final platform = widget.platform ?? system.supportPlatform;
     final viewSize = ref.watch(viewSizeProvider);
     final sideWidth = ref.watch(sideWidthProvider);
     final scale = math.max(1.0, MediaQuery.textScalerOf(context).scale(1));

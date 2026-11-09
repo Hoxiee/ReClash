@@ -19,6 +19,8 @@ const List<Rule> defaultRules = [
   telegramProxyRule,
   batteryOptimizationRule,
   subscriptionRule,
+  profileRevokedRule,
+  profileNoServersRule,
   directModeRule,
   vpnPermissionRule,
   otherVpnRule,

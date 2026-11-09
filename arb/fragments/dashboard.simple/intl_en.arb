@@ -326,5 +326,98 @@
   "simplestOffNote": "Auto-renews forever",
   "simplestConnectingNote": "Keep your wallet open",
   "simplestOnNote": "Non-refundable",
-  "simplestPausedNote": "Back soon"
+  "simplestPausedNote": "Back soon",
+  "powerTitleExpired": "Subscription ended",
+  "powerTitleExhausted": "Out of traffic",
+  "powerTitleRevoked": "Subscription disabled",
+  "powerTitleNoServers": "No servers",
+  "powerTitleVpnTaken": "Another VPN is in the way",
+  "powerTitleVpnDenied": "Permission needed",
+  "powerTitlePortal": "Wi‑Fi wants a login",
+  "powerTitleOffline": "No network",
+  "powerTitleClock": "Wrong time",
+  "powerTitleRecovering": "Restoring connection",
+  "powerTitleBroken": "No connection",
+  "powerTitleDirect": "Direct",
+  "powerHintVerifying": "Checking the internet",
+  "powerHintSearching": "Looking for a working server",
+  "powerHintOffline": "Check Wi‑Fi or mobile data",
+  "powerHintWaitingNetwork": "We'll connect when the internet is back",
+  "powerHintCheckingAccount": "Checking the subscription…",
+  "powerStepBestNode": "Switching to “{node}”",
+  "@powerStepBestNode": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "powerStepUpdateProfile": "Updating the subscription",
+  "powerStepResetConnections": "Resetting connections",
+  "powerStepRestart": "Restarting",
+  "powerEndingDays": "{days, plural, =0{Last day} =1{1 day left} other{{days} days left}}",
+  "@powerEndingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "powerEndingTraffic": "{traffic} left",
+  "@powerEndingTraffic": {
+    "placeholders": {
+      "traffic": {
+        "type": "String"
+      }
+    }
+  },
+  "powerFixRenew": "Renew",
+  "powerFixTopUp": "Top up",
+  "powerFixSupport": "Contact support",
+  "powerFixUpdateProfile": "Update subscription",
+  "powerFixGrantVpn": "Allow VPN",
+  "powerFixVpnSettings": "Open settings",
+  "powerFixDateSettings": "Set the time",
+  "powerFixPortal": "Sign in to network",
+  "powerFixRuleMode": "Turn on protection",
+  "powerFixRepair": "Fix",
+  "powerFixExplain": "What happened?",
+  "powerFixAddProfile": "Add subscription",
+  "powerTapDetails": "Show details",
+  "powerAccountExpiredOn": "Ended on {date}",
+  "@powerAccountExpiredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "powerAccountExhaustedUsed": "Used {used} of {total}",
+  "@powerAccountExhaustedUsed": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "powerAccountRevokedDetail": "The provider disabled this subscription.",
+  "powerAccountStopped": "The server no longer lets you in, so we turned the VPN off — the regular internet works.",
+  "powerAccountPaid": "I've already paid — update",
+  "powerAccountPaidHint": "We'll check the subscription and connect",
+  "powerAccountSwitch": "Switch to “{name}”",
+  "@powerAccountSwitch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "powerAccountConnectAnyway": "Connect anyway",
+  "powerAccountStillEnded": "The subscription isn't renewed yet",
+  "powerNoticeStoppedExpired": "VPN is off: the subscription ended. The regular internet works.",
+  "powerNoticeStoppedExhausted": "VPN is off: out of traffic. The regular internet works.",
+  "powerNoticeResumed": "Subscription renewed — connecting"
 }

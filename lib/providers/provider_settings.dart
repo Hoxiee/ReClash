@@ -245,27 +245,6 @@ final providerCardsEnvironmentProvider = Provider<ProviderCardsEnvironment>(
   ),
 );
 
-String _actionKey(ProviderAction? action) => action == null
-    ? ''
-    : '${action.kind.name}:${action.url ?? action.text ?? action.app?.name}';
-
-String _cardContent(ProviderCard card) => switch (card) {
-  ProviderNote() =>
-    '${card.level.name}\n${card.text}\n${_actionKey(card.action)}',
-  ProviderBanner() =>
-    '${card.layout.name}\n${card.title}\n${card.text}\n${card.image}\n'
-        '${card.imageDark}\n${card.countdown}\n${card.button?.label}\n'
-        '${_actionKey(card.button?.action)}\n${_actionKey(card.action)}',
-  ProviderActions() => [
-    for (final item in card.items)
-      '${item.icon}|${item.label}|${_actionKey(item.action)}',
-  ].join('\n'),
-};
-
-/// Identifies a card's exact content, so a changed card shows again.
-String providerCardDismissId(ProviderCard card) =>
-    md5.convert(utf8.encode('${card.id}\n${_cardContent(card)}')).toString();
-
 /// The current profile's cards whose conditions hold now, in file order.
 /// One timer re-evaluates at the nearest condition or countdown boundary.
 final providerCardsProvider = Provider<List<ProviderCard>>((ref) {
@@ -298,7 +277,6 @@ final providerCardsProvider = Provider<List<ProviderCard>>((ref) {
     used: info == null ? 0 : info.upload + info.download,
     usageStale: stale,
   );
-  final seconds = now.millisecondsSinceEpoch ~/ 1000;
   final timer = nearestFutureBoundary(now, [
     for (final card in cards) ...card.boundaries,
   ]);
@@ -309,16 +287,7 @@ final providerCardsProvider = Provider<List<ProviderCard>>((ref) {
     );
     ref.onDispose(handle.cancel);
   }
-  return [
-    for (final card in cards)
-      if (card.when.holds(snapshot) &&
-          !(card is ProviderBanner &&
-              card.countdown != null &&
-              card.countdown! <= seconds) &&
-          !(card.dismissible &&
-              dismissed.contains(providerCardDismissId(card))))
-        card,
-  ];
+  return visibleProviderCards(cards, snapshot, dismissed);
 });
 
 /// The proxy the subscription's named group currently routes through.

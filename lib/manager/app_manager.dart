@@ -16,6 +16,7 @@ import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/doctor/account_notices.dart';
 import 'package:reclash/views/doctor/heal_notices.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/catalog.dart';
@@ -55,7 +56,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ref.listenManual(providerSettingsSyncProvider, (_, _) {});
     ref.listenManual(diagnosticKernelProvider, (_, _) {});
     ref.listenManual(environmentHealerProvider, (_, _) {});
+    ref.listenManual(connectionSupervisorProvider, (_, _) {});
+    ref.listenManual(accountGuardProvider, (_, _) {});
     listenHealNotices(ref);
+    listenAccountNotices(ref);
     startPassiveRecording(ref);
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {

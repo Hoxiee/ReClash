@@ -450,6 +450,16 @@ class ProfilesAction extends _$ProfilesAction {
         'profile': profile.id,
         'ok': true,
       });
+      ref
+          .read(profileUpdateResultsProvider.notifier)
+          .record(
+            ProfileUpdateFact(
+              profileId: profile.id,
+              at: DateTime.now(),
+              servers:
+                  prepared.summary.nodes + prepared.summary.remoteProviders,
+            ),
+          );
       return updated;
     } on SubscriptionUpdateCancelled {
       return null;
@@ -461,6 +471,9 @@ class ProfilesAction extends _$ProfilesAction {
         'ok': false,
         'error': error.toString(),
       });
+      ref
+          .read(profileUpdateResultsProvider.notifier)
+          .record(profileUpdateFailed(profile.id, error, at: DateTime.now()));
       rethrow;
     } finally {
       if (identical(_profileUpdateCancellations[profile.id], cancellation)) {

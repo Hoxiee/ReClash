@@ -393,4 +393,43 @@ void main() {
       expect(FailureCause.fromWire('bogus'), FailureCause.unknown);
     });
   });
+
+  group('profile update rules', () {
+    DiagnosticSnapshot updated(ProfileUpdateFact fact) =>
+        _snapshot().withFact(Facts.profileUpdate, Fact(fact, at: _now));
+
+    test('a gone subscription link is revoked', () {
+      final finding = profileRevokedRule(
+        updated(ProfileUpdateFact(profileId: 7, at: _now, status: 410)),
+      )!;
+      expect(finding.id, 'profile.revoked');
+      expect(finding.severity, CheckSeverity.critical);
+      expect(finding.cause, FailureCause.authRejected);
+      expect(finding.args, {'profileId': 7, 'status': 410});
+      expect(finding.remedyIds, ['profile.update']);
+    });
+
+    test('a server error is not a revoked link', () {
+      expect(
+        profileRevokedRule(
+          updated(ProfileUpdateFact(profileId: 7, at: _now, status: 502)),
+        ),
+        isNull,
+      );
+    });
+
+    test('a profile that loaded without servers is critical', () {
+      final finding = profileNoServersRule(
+        updated(ProfileUpdateFact(profileId: 7, at: _now, servers: 0)),
+      )!;
+      expect(finding.id, 'profile.noServers');
+      expect(finding.cause, FailureCause.profileInvalid);
+      expect(
+        profileNoServersRule(
+          updated(ProfileUpdateFact(profileId: 7, at: _now, servers: 12)),
+        ),
+        isNull,
+      );
+    });
+  });
 }

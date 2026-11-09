@@ -61,7 +61,7 @@ class UpdateSheet extends ConsumerWidget {
     final update = ref.watch(appUpdateActionProvider);
     final action = ref.read(appUpdateActionProvider.notifier);
     final l = context.appLocalizations;
-    final platform = this.platform ?? SupportPlatform.currentPlatform;
+    final platform = this.platform ?? system.supportPlatform;
     final currentVersion = globalState.packageInfo.version;
     final release = update.phase == UpdatePhase.offered ? update.release : null;
     final (primary, secondary) = _actions(context, update, action);

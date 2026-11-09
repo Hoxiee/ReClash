@@ -1,4 +1,4 @@
-import 'package:reclash/common/common.dart';
+import 'package:reclash/common/number_text.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 import 'package:material_ui/material_ui.dart';
@@ -125,8 +125,8 @@ String dashboardCount(int count) =>
     count < 100000 ? _groupedFormat.format(count) : count.compact;
 
 String dashboardTraffic(num bytes) {
-  final show = bytes.traffic;
-  return '${show.value} ${show.unit}';
+  final (:value, :unit) = bytes.trafficParts;
+  return '$value $unit';
 }
 
 /// The dashboard's text roles; every figure reads in tabular digits.

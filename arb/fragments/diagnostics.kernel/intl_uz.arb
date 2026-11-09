@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "ReClash tizim proksisi ilovadan tashqarida o‘chirildi, shuning uchun ilovalar ReClash’ni chetlab o‘tmoqda.",
   "doctorFixConfirm": "Tuzatish…",
   "coreErrorNotices": "Yadro xatolari haqida bildirishnomalar",
-  "coreErrorNoticesDesc": "Oʻchirilsa, yopilgan ulanishlar kabi yadro xatolari qalqib chiquvchi xabar sifatida koʻrsatilmaydi. Ular jurnalda qoladi."
+  "coreErrorNoticesDesc": "Oʻchirilsa, yopilgan ulanishlar kabi yadro xatolari qalqib chiquvchi xabar sifatida koʻrsatilmaydi. Ular jurnalda qoladi.",
+  "doctorProfileRevokedTitle": "Obuna havolasi endi ishlamaydi",
+  "doctorProfileRevokedDetail": "Provayder obuna havolasini rad etdi (HTTP {status}). Provayderdan yangi havola oling.",
+  "doctorProfileNoServersTitle": "Profilda serverlar yoʻq",
+  "doctorProfileNoServersDetail": "Obuna yuklandi, lekin unda serverlar yoʻq. Keyinroq yangilang yoki provayderga murojaat qiling."
 }

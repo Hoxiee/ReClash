@@ -1,9 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
-
-import 'package:reclash/common/context.dart';
-import 'package:reclash/common/system.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/surface.dart';
@@ -11,25 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-enum SupportPlatform {
-  Windows,
-  MacOS,
-  Linux,
-  Android;
-
-  static SupportPlatform get currentPlatform {
-    if (system.isWindows) {
-      return SupportPlatform.Windows;
-    } else if (system.isMacOS) {
-      return SupportPlatform.MacOS;
-    } else if (Platform.isLinux) {
-      return SupportPlatform.Linux;
-    } else if (system.isAndroid) {
-      return SupportPlatform.Android;
-    }
-    throw UnsupportedError('Unsupported platform: ${Platform.operatingSystem}');
-  }
-}
+enum SupportPlatform { Windows, MacOS, Linux, Android }
 
 const desktopPlatforms = [
   SupportPlatform.Linux,
@@ -688,7 +667,7 @@ extension RuleActionExt on RuleAction {
   ].contains(this);
 
   String getDesc(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
+    final appLocalizations = AppLocalizations.of(context);
     return switch (this) {
       RuleAction.DOMAIN => appLocalizations.ruleActionDomainDesc,
       RuleAction.DOMAIN_SUFFIX => appLocalizations.ruleActionDomainSuffixDesc,
@@ -843,7 +822,7 @@ enum RulePayloadError { network, numberRange, dscpRange }
 
 extension RulePayloadErrorExt on RulePayloadError {
   String getMessage(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
+    final appLocalizations = AppLocalizations.of(context);
     return switch (this) {
       RulePayloadError.network => appLocalizations.invalidNetworkContent,
       RulePayloadError.numberRange => appLocalizations.invalidRangeContent,

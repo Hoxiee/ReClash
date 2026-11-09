@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import 'metadata.dart';
 import 'provider_conditions.dart';
 
@@ -416,3 +418,44 @@ ProviderAction? _action(Map json) {
 
 bool _bounded(String value, int bytes) =>
     value.isNotEmpty && utf8.encode(value).length <= bytes;
+
+String _actionKey(ProviderAction? action) => action == null
+    ? ''
+    : '${action.kind.name}:${action.url ?? action.text ?? action.app?.name}';
+
+String _cardContent(ProviderCard card) => switch (card) {
+  ProviderNote() =>
+    '${card.level.name}\n${card.text}\n${_actionKey(card.action)}',
+  ProviderBanner() =>
+    '${card.layout.name}\n${card.title}\n${card.text}\n${card.image}\n'
+        '${card.imageDark}\n${card.countdown}\n${card.button?.label}\n'
+        '${_actionKey(card.button?.action)}\n${_actionKey(card.action)}',
+  ProviderActions() => [
+    for (final item in card.items)
+      '${item.icon}|${item.label}|${_actionKey(item.action)}',
+  ].join('\n'),
+};
+
+/// Identifies a card's exact content, so a changed card shows again.
+String providerCardDismissId(ProviderCard card) =>
+    md5.convert(utf8.encode('${card.id}\n${_cardContent(card)}')).toString();
+
+/// The [cards] whose conditions hold in [snapshot], minus expired countdowns
+/// and the ones the user dismissed.
+List<ProviderCard> visibleProviderCards(
+  List<ProviderCard> cards,
+  ProviderConditionSnapshot snapshot,
+  Set<String> dismissed,
+) {
+  final seconds = snapshot.now.millisecondsSinceEpoch ~/ 1000;
+  return [
+    for (final card in cards)
+      if (card.when.holds(snapshot) &&
+          !(card is ProviderBanner &&
+              card.countdown != null &&
+              card.countdown! <= seconds) &&
+          !(card.dismissible &&
+              dismissed.contains(providerCardDismissId(card))))
+        card,
+  ];
+}

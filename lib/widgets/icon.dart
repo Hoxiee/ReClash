@@ -6,6 +6,7 @@ import 'package:reclash/plugins/app.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/widgets/provider_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -71,6 +72,20 @@ Uint8List? _decodeIcon(String src) {
     return _decodedIcons[src];
   }
   return _decodedIcons[src] = src.getBase64;
+}
+
+class AppProviderImages implements ProviderImages {
+  const AppProviderImages();
+
+  @override
+  Widget logo(String src, {Widget? fallback}) =>
+      CommonTargetIcon(src: src, fallback: fallback);
+
+  @override
+  Future<ImageProvider?> picture(Uri url) async {
+    final bytes = await loadProviderImage(url.toString());
+    return bytes == null ? null : MemoryImage(bytes);
+  }
 }
 
 class CommonTargetIcon extends StatelessWidget {

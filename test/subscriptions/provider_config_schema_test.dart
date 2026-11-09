@@ -87,7 +87,9 @@ void main() {
   });
 
   test('icons match the glyphs the app draws', () {
-    final source = File('lib/widgets/provider_cards.dart').readAsStringSync();
+    final source = File(
+      'lib/widgets/provider_cards_view.dart',
+    ).readAsStringSync();
     final start = source.indexOf('Glyph _glyphOf');
     final glyphs = source.substring(start, source.indexOf('};', start));
     final icons = {

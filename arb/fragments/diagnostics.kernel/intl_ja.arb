@@ -109,5 +109,9 @@
   "doctorProxyOffDetail": "ReClash のシステムプロキシがアプリの外でオフにされたため、アプリは ReClash を経由しません。",
   "doctorFixConfirm": "修正…",
   "coreErrorNotices": "コアのエラー通知",
-  "coreErrorNoticesDesc": "オフにすると、接続の切断などコアのエラーがポップアップ表示されなくなります。ログには引き続き記録されます。"
+  "coreErrorNoticesDesc": "オフにすると、接続の切断などコアのエラーがポップアップ表示されなくなります。ログには引き続き記録されます。",
+  "doctorProfileRevokedTitle": "サブスクリプションのリンクが使えなくなりました",
+  "doctorProfileRevokedDetail": "プロバイダーがサブスクリプションのリンクを拒否しました（HTTP {status}）。プロバイダーから新しいリンクを入手してください。",
+  "doctorProfileNoServersTitle": "プロファイルにサーバーがありません",
+  "doctorProfileNoServersDetail": "サブスクリプションは読み込まれましたが、サーバーが含まれていません。後で更新するか、プロバイダーに問い合わせてください。"
 }

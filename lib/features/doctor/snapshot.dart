@@ -42,6 +42,7 @@ final class SubscriptionFact {
     this.expiresAt,
     this.used = 0,
     this.total = 0,
+    this.fetchedAt,
   });
 
   final int profileId;
@@ -49,16 +50,58 @@ final class SubscriptionFact {
   final int used;
   final int total;
 
+  /// The last successful fetch these figures came from.
+  final DateTime? fetchedAt;
+
   @override
   bool operator ==(Object other) =>
       other is SubscriptionFact &&
       other.profileId == profileId &&
       other.expiresAt == expiresAt &&
       other.used == used &&
-      other.total == total;
+      other.total == total &&
+      other.fetchedAt == fetchedAt;
 
   @override
-  int get hashCode => Object.hash(profileId, expiresAt, used, total);
+  int get hashCode => Object.hash(profileId, expiresAt, used, total, fetchedAt);
+}
+
+/// The last subscription fetch of a profile, successful or not.
+@immutable
+final class ProfileUpdateFact {
+  const ProfileUpdateFact({
+    required this.profileId,
+    required this.at,
+    this.status,
+    this.error,
+    this.servers,
+  });
+
+  final int profileId;
+  final DateTime at;
+
+  /// The HTTP status the subscription URL refused with.
+  final int? status;
+
+  /// The failure class; null when the fetch landed.
+  final String? error;
+
+  /// Nodes and proxy providers the fetched profile carries; null on failure.
+  final int? servers;
+
+  bool get ok => error == null;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProfileUpdateFact &&
+      other.profileId == profileId &&
+      other.at == at &&
+      other.status == status &&
+      other.error == error &&
+      other.servers == servers;
+
+  @override
+  int get hashCode => Object.hash(profileId, at, status, error, servers);
 }
 
 abstract final class Facts {
@@ -72,6 +115,9 @@ abstract final class Facts {
   static const clockSkew = FactKey<Duration>('device.clockSkew');
   static const telegramProxyFailure = FactKey<String>('telegram.proxyFailure');
   static const subscription = FactKey<SubscriptionFact>('profile.subscription');
+  static const profileUpdate = FactKey<ProfileUpdateFact>(
+    'profile.updateResult',
+  );
   static const vpnPermission = FactKey<VpnPermission>('device.vpnPermission');
   static const otherVpn = FactKey<bool>('device.otherVpn');
 

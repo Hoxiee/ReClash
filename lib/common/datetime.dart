@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-
-import 'context.dart';
+import 'package:reclash/l10n/l10n.dart';
 
 extension DateTimeExtension on DateTime {
   bool get isBeforeNow {
@@ -15,7 +14,7 @@ extension DateTimeExtension on DateTime {
   }
 
   String getLastUpdateTimeDesc(BuildContext context, {bool compact = false}) {
-    final appLocalizations = context.appLocalizations;
+    final appLocalizations = AppLocalizations.of(context);
     if (year <= 1970) {
       return appLocalizations.unknown;
     }
