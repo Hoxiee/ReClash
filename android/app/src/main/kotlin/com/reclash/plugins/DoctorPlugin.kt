@@ -276,6 +276,7 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
             "vpnPermission" to vpnPermission(),
             "otherVpn" to otherVpn,
             "alwaysOnVpnApp" to alwaysOnVpnApp(),
+            "packageName" to context.packageName,
             "privateDns" to when {
                 dns == null -> null
                 host != null -> "strict"

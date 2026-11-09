@@ -113,5 +113,7 @@
   "doctorProfileRevokedTitle": "订阅链接已失效",
   "doctorProfileRevokedDetail": "服务商拒绝了该订阅链接（HTTP {status}）。请向服务商索取新的链接。",
   "doctorProfileNoServersTitle": "配置中没有服务器",
-  "doctorProfileNoServersDetail": "订阅已加载，但其中没有服务器。请稍后更新，或联系服务商。"
+  "doctorProfileNoServersDetail": "订阅已加载，但其中没有服务器。请稍后更新，或联系服务商。",
+  "powerSmartButton": "智能电源按钮",
+  "powerSmartButtonDescription": "智能电源按钮仅在连接验证后才显示“已保护”，会修复连接，并在套餐结束时停止隧道。关闭后，按钮只负责启动和停止。"
 }

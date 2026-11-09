@@ -111,6 +111,38 @@ Path _morphPath(ProviderPowerShape shape, double progress) => _morphOf(
 double _morphTurn(ProviderPowerShape shape, double progress) =>
     progress * 2 * math.pi / _silhouettes[shape]!.symmetry;
 
+/// The share of the rim's distance from the centre the badge sits at.
+const _badgeReach = 0.93;
+
+/// Where the morph's rim crosses the bottom-right diagonal, from the centre.
+Offset _rimOffset(ProviderPowerShape shape, double progress, double size) {
+  const samples = 96;
+  final turn = _morphTurn(shape, progress);
+  final aim = Offset.fromDirection(math.pi / 4 - turn);
+  final rim = _morphPath(shape, progress).computeMetrics().first;
+  const centre = Offset(0.5, 0.5);
+  Offset at(int i) =>
+      rim.getTangentForOffset(rim.length * i / samples)!.position - centre;
+  var hit = Offset(aim.dx, aim.dy) * 0.5;
+  var from = at(0);
+  for (var i = 1; i <= samples; i++) {
+    final to = at(i);
+    final before = aim.dx * from.dy - aim.dy * from.dx;
+    final after = aim.dx * to.dy - aim.dy * to.dx;
+    if (before * after <= 0 &&
+        before != after &&
+        aim.dx * from.dx + aim.dy * from.dy > 0) {
+      hit = Offset.lerp(from, to, before / (before - after))!;
+      break;
+    }
+    from = to;
+  }
+  final cos = math.cos(turn);
+  final sin = math.sin(turn);
+  return Offset(hit.dx * cos - hit.dy * sin, hit.dx * sin + hit.dy * cos) *
+      (size * _badgeReach);
+}
+
 const _greyscale = ColorFilter.matrix([
   0.33, 0.59, 0.11, 0, 0, //
   0.33, 0.59, 0.11, 0, 0,
@@ -373,23 +405,31 @@ class _PowerButtonState extends State<PowerButton>
                           muted: link == PowerLink.off,
                           raised: link == PowerLink.on,
                         ),
+                        AnimatedBuilder(
+                          animation: _morphController,
+                          child: IgnorePointer(
+                            child: ExcludeSemantics(
+                              child: _BadgeSlot(
+                                badge: widget.badge,
+                                size: size * 0.24,
+                                delay: _morphController.isAnimating
+                                    ? _badgeDelay
+                                    : Duration.zero,
+                              ),
+                            ),
+                          ),
+                          builder: (_, child) => Transform.translate(
+                            offset: _rimOffset(
+                              shape,
+                              _morphController.value,
+                              size,
+                            ),
+                            child: child,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            ),
-          ),
-          Transform.translate(
-            offset: Offset(size * 0.33, size * 0.33),
-            child: IgnorePointer(
-              child: ExcludeSemantics(
-                child: _BadgeSlot(
-                  badge: widget.badge,
-                  size: size * 0.24,
-                  delay: _morphController.isAnimating
-                      ? _badgeDelay
-                      : Duration.zero,
                 ),
               ),
             ),

@@ -113,5 +113,7 @@
   "doctorProfileRevokedTitle": "Obuna havolasi endi ishlamaydi",
   "doctorProfileRevokedDetail": "Provayder obuna havolasini rad etdi (HTTP {status}). Provayderdan yangi havola oling.",
   "doctorProfileNoServersTitle": "Profilda serverlar yoʻq",
-  "doctorProfileNoServersDetail": "Obuna yuklandi, lekin unda serverlar yoʻq. Keyinroq yangilang yoki provayderga murojaat qiling."
+  "doctorProfileNoServersDetail": "Obuna yuklandi, lekin unda serverlar yoʻq. Keyinroq yangilang yoki provayderga murojaat qiling.",
+  "powerSmartButton": "Aqlli yoqish tugmasi",
+  "powerSmartButtonDescription": "Aqlli yoqish tugmasi «Himoyalangan» holatini faqat ulanish tekshirilgandan keyin ko‘rsatadi, ulanishni tuzatadi va tarif tugaganda tunnelni to‘xtatadi. O‘chirilsa, faqat yoqadi va o‘chiradi."
 }

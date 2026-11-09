@@ -4,12 +4,29 @@ part of '../state.dart';
 GroupsState currentGroupsState(Ref ref) {
   final mode = ref.watch(effectiveModeProvider);
   final groups = ref.watch(groupsProvider);
-  final shown = switch (mode) {
-    Mode.direct => const <Group>[],
-    Mode.global => groups,
-    Mode.rule => groups.where((item) => item.hidden == false),
-  };
-  return GroupsState(value: shown.map(_withoutSelection).toList());
+  return GroupsState(
+    value: shownGroups(mode, groups).map(_withoutSelection).toList(),
+  );
+}
+
+Iterable<Group> shownGroups(Mode mode, Iterable<Group> groups) =>
+    switch (mode) {
+      Mode.direct => const <Group>[],
+      Mode.global => groups,
+      Mode.rule => groups.where((item) => item.hidden == false),
+    };
+
+/// The group a subscription names for its servers, else the first shown one;
+/// the dashboard selects in it and the connection check dials it.
+Group? pickMainGroup(Iterable<Group> shown, String? serverGroup) {
+  if (serverGroup != null) {
+    final wanted = serverGroup.toLowerCase();
+    final named = shown
+        .where((group) => group.name.toLowerCase() == wanted)
+        .firstOrNull;
+    if (named != null) return named;
+  }
+  return shown.firstOrNull;
 }
 
 Group _withoutSelection(Group group) {

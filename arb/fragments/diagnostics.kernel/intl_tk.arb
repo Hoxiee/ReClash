@@ -113,5 +113,7 @@
   "doctorProfileRevokedTitle": "Abunalyk baglanyşygy işlemeýär",
   "doctorProfileRevokedDetail": "Üpjün edijisi abunalyk baglanyşygyny kabul etmedi (HTTP {status}). Üpjün edijiden täze baglanyşyk alyň.",
   "doctorProfileNoServersTitle": "Profilde serwer ýok",
-  "doctorProfileNoServersDetail": "Abunalyk ýüklendi, emma onda serwer ýok. Soňrak täzeläň ýa-da üpjün edijiňiz bilen habarlaşyň."
+  "doctorProfileNoServersDetail": "Abunalyk ýüklendi, emma onda serwer ýok. Soňrak täzeläň ýa-da üpjün edijiňiz bilen habarlaşyň.",
+  "powerSmartButton": "Akylly güýç düwmesi",
+  "powerSmartButtonDescription": "Akylly güýç düwmesi «Gorag astynda» ýagdaýyny diňe birikme barlanandan soň görkezýär, birikmäni düzedýär we tarif gutarandan soň tuneli duruzýar. Öçürilende diňe işe goýberýär we duruzýar."
 }

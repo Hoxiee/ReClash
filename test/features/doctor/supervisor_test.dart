@@ -187,6 +187,32 @@ void main() {
       expect(rig.health.phase, ConnectionPhase.verified);
     });
 
+    _test('a dead node picked while verified is not protected', (rig) {
+      rig.connect();
+      expect(rig.health.phase, ConnectionPhase.verified);
+      rig
+        ..fail()
+        ..supervisor.selectionChanged();
+      expect(rig.health.phase, ConnectionPhase.connecting);
+      rig.settle();
+      expect(rig.health.phase, isNot(ConnectionPhase.verified));
+      expect(rig.applied, [
+        ConnectionRemedy.bestNode,
+        'profile.update',
+        ConnectionRemedy.resetConnections,
+      ]);
+      expect(rig.health.phase, ConnectionPhase.broken);
+    });
+
+    _test('a live node picked while verified stays verified', (rig) {
+      rig
+        ..connect()
+        ..supervisor.selectionChanged();
+      rig.settle();
+      expect(rig.health.phase, ConnectionPhase.verified);
+      expect(rig.applied, isEmpty);
+    });
+
     _test('stopping returns to idle', (rig) {
       rig
         ..connect()

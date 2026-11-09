@@ -193,6 +193,21 @@ class ConnectionSupervisor {
     await _check();
   }
 
+  /// The user moved the main group to another node: what was verified for the
+  /// old one says nothing about it, so it is verified again as a fresh connect.
+  void selectionChanged() {
+    if (!_running || _restarting || _connecting || _climb != null) return;
+    _epoch++;
+    _plan++;
+    _cancelTimers();
+    _firstFailureAt = null;
+    _cause = null;
+    _connecting = true;
+    _connectStarted = false;
+    _emit(const ConnectionHealth(phase: ConnectionPhase.connecting));
+    _trigger();
+  }
+
   /// The full ladder from the face; true when a check passed after a step.
   Future<bool> repair() async {
     if (!_running) return false;

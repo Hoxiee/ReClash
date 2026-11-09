@@ -1,18 +1,30 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/account/fetch.dart';
+import 'package:reclash/features/doctor/kernel.dart';
+import 'package:reclash/features/doctor/path.dart';
+import 'package:reclash/features/doctor/probes/scheduler.dart';
 import 'package:reclash/features/doctor/probes/verify.dart';
 import 'package:reclash/features/doctor/remedies/best_node.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
+
+import '../../helpers/test_profiles.dart';
 
 const _groups = [
   Group(type: GroupType.Selector, name: 'Hidden', hidden: true),
-  Group(type: GroupType.Selector, name: 'Proxy'),
-  Group(type: GroupType.URLTest, name: 'Auto'),
+  Group(type: GroupType.Selector, name: 'Proxy', hidden: false),
+  Group(type: GroupType.URLTest, name: 'Auto', hidden: false),
 ];
 
+class _NoKernel extends Mock implements DiagnosticKernel {}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('resolveMainGroup', () {
     test('direct mode has no main group', () {
       expect(
@@ -31,39 +43,66 @@ void main() {
 
     test('the provider hint wins in any case', () {
       expect(
-        resolveMainGroup(
-          mode: Mode.rule,
-          groups: _groups,
-          serverGroup: 'auto',
-          currentGroup: 'Proxy',
-        ),
+        resolveMainGroup(mode: Mode.rule, groups: _groups, serverGroup: 'auto'),
         'Auto',
       );
     });
 
-    test('an unknown hint falls back to the group the user opened', () {
+    test('an unknown hint falls back to the first shown group', () {
       expect(
         resolveMainGroup(
           mode: Mode.rule,
           groups: _groups,
           serverGroup: 'Missing',
-          currentGroup: 'Auto',
         ),
-        'Auto',
+        'Proxy',
       );
     });
 
-    test('otherwise the first shown group carries the traffic', () {
+    test('a hidden group is never the main group', () {
       expect(
         resolveMainGroup(
           mode: Mode.rule,
           groups: _groups,
-          currentGroup: 'Gone',
+          serverGroup: 'Hidden',
         ),
         'Proxy',
       );
       expect(resolveMainGroup(mode: Mode.rule, groups: const []), isNull);
     });
+
+    test('the dashboard picks the same group', () {
+      for (final hint in [null, 'auto', 'Missing', 'Hidden']) {
+        expect(
+          resolveMainGroup(mode: Mode.rule, groups: _groups, serverGroup: hint),
+          pickMainGroup(shownGroups(Mode.rule, _groups), hint)?.name,
+        );
+      }
+    });
+  });
+
+  group('verifyCheck', () {
+    test(
+      'stays inconclusive without a main group instead of dialling',
+      () async {
+        final container = ProviderContainer(
+          overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+        );
+        addTearDown(container.dispose);
+        final checks = container.read(
+          Provider((ref) {
+            return [
+              for (final step in [PathStep.server, PathStep.internet])
+                verifyCheck(ref, _NoKernel(), step)!,
+            ];
+          }),
+        );
+        for (final check in checks) {
+          final result = await check.run(ProbeToken());
+          expect(result.status, PathStepStatus.unknown);
+        }
+      },
+    );
   });
 
   group('fastestNode', () {

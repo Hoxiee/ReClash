@@ -26,7 +26,11 @@ final class DeviceDoctorState {
         map['vpnPermission'] as String? ?? VpnPermission.notAsked.name,
       ),
       otherVpn: map['otherVpn'] == true,
-      alwaysOnVpnApp: map['alwaysOnVpnApp'] as String?,
+      alwaysOnVpnApp: switch (map['alwaysOnVpnApp']) {
+        final String app when app == map['packageName'] => null,
+        final String app => app,
+        _ => null,
+      },
       privateDns: switch (map['privateDns']) {
         final String name => PrivateDnsMode.values.asNameMap()[name],
         _ => null,
@@ -44,7 +48,8 @@ final class DeviceDoctorState {
   final bool otherVpn;
 
   /// The always-on VPN package, empty when none is set and null when the
-  /// system does not let the app read it.
+  /// system does not let the app read it or this very app holds it. Native
+  /// reports its own package name, which differs between build flavors.
   final String? alwaysOnVpnApp;
 
   /// Of the underlying network; null before Android 9.

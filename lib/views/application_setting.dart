@@ -111,6 +111,11 @@ class ApplicationSettings {
       page: ToolPage.application,
       title: (l) => l.doctorAutoHeal,
     ),
+    SettingSpec(
+      id: 'application.smartPowerButton',
+      page: ToolPage.application,
+      title: (l) => l.powerSmartButton,
+    ),
   ];
 
   static SettingSpec spec(String id) => all.firstWhere((item) => item.id == id);
@@ -229,6 +234,11 @@ class ApplicationSettingView extends ConsumerWidget {
         update: (s, v) => s.copyWith(autoHeal: v),
       ),
       _toggle(
+        id: 'application.smartPowerButton',
+        select: (s) => s.smartPowerButton,
+        update: (s, v) => s.copyWith(smartPowerButton: v),
+      ),
+      _toggle(
         id: 'application.openLogs',
         select: (s) => s.openLogs,
         update: (s, v) => s.copyWith(openLogs: v),
@@ -305,6 +315,7 @@ class ApplicationSettingView extends ConsumerWidget {
                 items: diagnostics,
                 footer: [
                   l.doctorAutoHealDescription,
+                  l.powerSmartButtonDescription,
                   l.logcatDesc,
                   l.coreErrorNoticesDesc,
                 ].join('\n'),

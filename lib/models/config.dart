@@ -345,6 +345,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool preventDuplicateProfiles,
     @Default(true) bool autoCheckActiveServices,
     @Default(true) bool autoHeal,
+    @Default(true) bool smartPowerButton,
     @Default(false) bool autoCheckAllServices,
     @Default(true) bool serviceCheckOnlyWhenConnected,
     @Default([]) List<String> serviceOrder,

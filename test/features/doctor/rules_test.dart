@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/constant.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/cause.dart';
 import 'package:reclash/features/doctor/finding.dart';
@@ -279,10 +278,8 @@ void main() {
       expect(finding.titleKey, 'doctorAlwaysOnOffTitle');
     });
 
-    test('stays silent when the system hides the setting or ReClash holds '
-        'it', () {
+    test('stays silent when the system hides the setting', () {
       expect(alwaysOnVpnRule(_snapshot()), isNull);
-      expect(alwaysOnVpnRule(withAlwaysOn(packageName)), isNull);
     });
   });
 

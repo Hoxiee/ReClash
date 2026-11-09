@@ -473,4 +473,29 @@ void main() {
 
     expect(find.text('Russia'), findsOneWidget);
   });
+
+  testWidgets('the smart power button switch flips the setting', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: ApplicationSettingView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).smartPowerButton, isTrue);
+
+    final row = find.text('Smart power button');
+    await tester.ensureVisible(row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+
+    expect(container.read(appSettingProvider).smartPowerButton, isFalse);
+  });
 }

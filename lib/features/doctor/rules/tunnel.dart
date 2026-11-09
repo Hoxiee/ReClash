@@ -1,4 +1,3 @@
-import 'package:reclash/common/constant.dart';
 import 'package:reclash/plugins/doctor.dart';
 
 import '../cause.dart';
@@ -37,7 +36,7 @@ Finding? otherVpnRule(DiagnosticSnapshot snapshot) {
 /// always-on app at all is only a missed safety net.
 Finding? alwaysOnVpnRule(DiagnosticSnapshot snapshot) {
   final app = snapshot.valueOf(Facts.alwaysOnVpnApp);
-  if (app == null || app == packageName) return null;
+  if (app == null) return null;
   final other = app.isNotEmpty;
   return Finding(
     id: 'tunnel.alwaysOn',

@@ -12,13 +12,12 @@ import 'scheduler.dart';
 const _verifyTimeout = Duration(seconds: 8);
 
 /// The group whose selection carries the user's traffic: none in direct mode,
-/// `GLOBAL` in global mode, and in rule mode the provider's server group, the
-/// group the user last opened, or the first shown group, in that order.
+/// `GLOBAL` in global mode, and in rule mode the group the simple dashboard
+/// selects in ([pickMainGroup]).
 String? resolveMainGroup({
   required Mode mode,
   required List<Group> groups,
   String? serverGroup,
-  String? currentGroup,
 }) {
   switch (mode) {
     case Mode.direct:
@@ -26,36 +25,32 @@ String? resolveMainGroup({
     case Mode.global:
       return 'GLOBAL';
     case Mode.rule:
-      if (serverGroup != null) {
-        final wanted = serverGroup.toLowerCase();
-        final hinted = groups
-            .where((group) => group.name.toLowerCase() == wanted)
-            .firstOrNull;
-        if (hinted != null) return hinted.name;
-      }
-      if (currentGroup != null && groups.any((g) => g.name == currentGroup)) {
-        return currentGroup;
-      }
-      return groups.where((group) => group.hidden != true).firstOrNull?.name ??
-          groups.firstOrNull?.name;
+      return pickMainGroup(shownGroups(mode, groups), serverGroup)?.name;
   }
 }
 
-String? mainGroup(Ref ref) => resolveMainGroup(
-  mode: ref.read(effectiveModeProvider),
-  groups: ref.read(groupsProvider),
-  serverGroup: ref.read(providerHintsProvider)?.serverGroup,
-  currentGroup: ref.read(currentProfileProvider)?.currentGroupName,
+final mainGroupProvider = Provider<String?>(
+  (ref) => resolveMainGroup(
+    mode: ref.watch(effectiveModeProvider),
+    groups: ref.watch(groupsProvider),
+    serverGroup: ref.watch(
+      providerHintsProvider.select((hints) => hints?.serverGroup),
+    ),
+  ),
 );
+
+String? mainGroup(Ref ref) => ref.read(mainGroupProvider);
 
 FailureCause _causeOf(String? wire) =>
     FailureCause.fromWire(wire) ?? FailureCause.unknown;
 
 /// The [PathScope.verify] checks: the tunnel as the full path sees it, then
 /// reach and `generate_204` dialled through [mainGroup], which the Core
-/// resolves to the group's current node.
+/// resolves to the group's current node. Without a group the dial would follow
+/// the rules and could pass DIRECT, so those steps stay inconclusive.
 PathCheck? verifyCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
-  final group = mainGroup(ref) ?? '';
+  final main = mainGroup(ref);
+  final group = main ?? '';
   final intent = (pathIntent(ref), group);
   final timeout = _verifyTimeout.inMilliseconds;
   String url() => ref.read(patchClashConfigProvider).testUrl;
@@ -66,6 +61,7 @@ PathCheck? verifyCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
       cost: CheckCost.network,
       intent: intent,
       run: (_) async {
+        if (main == null) return const StepCheck.unknown();
         final ReachResult? reach;
         try {
           reach = await ref
@@ -88,6 +84,7 @@ PathCheck? verifyCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
       cost: CheckCost.network,
       intent: intent,
       run: (_) async {
+        if (main == null) return const StepCheck.unknown();
         final ProbeResult? probe;
         try {
           probe = await ref

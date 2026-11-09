@@ -113,5 +113,7 @@
   "doctorProfileRevokedTitle": "El enlace de suscripción ya no funciona",
   "doctorProfileRevokedDetail": "El proveedor rechazó el enlace de suscripción (HTTP {status}). Pide un enlace nuevo a tu proveedor.",
   "doctorProfileNoServersTitle": "El perfil no tiene servidores",
-  "doctorProfileNoServersDetail": "La suscripción se cargó, pero no contiene servidores. Actualízala más tarde o contacta con tu proveedor."
+  "doctorProfileNoServersDetail": "La suscripción se cargó, pero no contiene servidores. Actualízala más tarde o contacta con tu proveedor.",
+  "powerSmartButton": "Botón de encendido inteligente",
+  "powerSmartButtonDescription": "El botón de encendido inteligente muestra Protegido solo tras verificar la conexión, la repara y detiene el túnel cuando termina el plan. Desactivado, solo inicia y detiene."
 }

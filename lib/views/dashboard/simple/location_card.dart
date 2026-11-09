@@ -13,17 +13,6 @@ import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/proxy_groups.dart';
 
-/// The group the subscription names for its servers, else the first one.
-Group? _mainGroup(List<Group> groups, String? serverGroup) {
-  if (serverGroup != null) {
-    final named = groups
-        .where((group) => group.name.toLowerCase() == serverGroup.toLowerCase())
-        .firstOrNull;
-    if (named != null) return named;
-  }
-  return groups.firstOrNull;
-}
-
 /// Where traffic leaves, with the next best exits one tap away, so changing
 /// country never needs the proxies page.
 class LocationCard extends ConsumerStatefulWidget {
@@ -56,7 +45,7 @@ class _LocationCardState extends ConsumerState<LocationCard> {
     );
     final group = ref.watch(
       visibleGroupsStateProvider.select(
-        (state) => _mainGroup(state.value, serverGroup),
+        (state) => pickMainGroup(state.value, serverGroup),
       ),
     );
     final isStart = ref.watch(isStartProvider);

@@ -203,16 +203,25 @@ bool _tunnelRunning(Ref ref) =>
     ref.read(coreStatusProvider) == CoreStatus.connected &&
     !ref.read(suspendProvider);
 
+/// The main group and the node it points at; either moving means what was
+/// verified no longer describes the path.
+final _mainSelectionProvider = Provider<(String?, String?)>((ref) {
+  final group = ref.watch(mainGroupProvider);
+  if (group == null) return (null, null);
+  final node =
+      ref.watch(selectedMapProvider)[group] ??
+      ref.watch(groupsProvider).getGroup(group)?.now;
+  return (group, node);
+});
+
 final connectionSupervisorProvider = Provider<ConnectionSupervisor>((ref) {
   final supervisor = ConnectionSupervisor(
     kernel: ref.watch(diagnosticKernelProvider),
-    autoHeal: () => ref.read(appSettingProvider).autoHeal,
-    selectedNode: () {
-      final group = mainGroup(ref);
-      if (group == null) return null;
-      return ref.read(selectedMapProvider)[group] ??
-          ref.read(groupsProvider).getGroup(group)?.now;
+    autoHeal: () {
+      final setting = ref.read(appSettingProvider);
+      return setting.autoHeal && setting.smartPowerButton;
     },
+    selectedNode: () => ref.read(_mainSelectionProvider).$2,
   )..start();
   void sync() => supervisor.setRunning(_tunnelRunning(ref));
   ref
@@ -229,6 +238,7 @@ final connectionSupervisorProvider = Provider<ConnectionSupervisor>((ref) {
     ..listen(isStartProvider, (_, _) => sync())
     ..listen(coreStatusProvider, (_, _) => sync())
     ..listen(suspendProvider, (_, _) => sync())
+    ..listen(_mainSelectionProvider, (_, _) => supervisor.selectionChanged())
     ..onDispose(supervisor.dispose);
   sync();
   return supervisor;
@@ -251,10 +261,14 @@ class ConnectionHealthState extends Notifier<ConnectionHealth> {
 
 final accountGuardProvider = Provider<AccountGuard>((ref) {
   final kernel = ref.watch(diagnosticKernelProvider);
+  final enabled = ref.watch(
+    appSettingProvider.select((setting) => setting.smartPowerButton),
+  );
+  const store = PreferencesAccountStore();
   final guard = AccountGuard(
     kernel: kernel,
     health: ref.watch(connectionSupervisorProvider).updates,
-    store: const PreferencesAccountStore(),
+    store: store,
     reevaluate: kernel is DoctorKernel ? kernel.refresh : null,
   );
   ref
@@ -265,7 +279,11 @@ final accountGuardProvider = Provider<AccountGuard>((ref) {
       guard.setVisible(visible);
     }, fireImmediately: true)
     ..onDispose(guard.dispose);
-  unawaited(guard.start());
+  if (enabled) {
+    unawaited(guard.start());
+  } else {
+    unawaited(store.save(const AccountMemo().encode()));
+  }
   return guard;
 });
 

@@ -113,5 +113,7 @@
   "doctorProfileRevokedTitle": "サブスクリプションのリンクが使えなくなりました",
   "doctorProfileRevokedDetail": "プロバイダーがサブスクリプションのリンクを拒否しました（HTTP {status}）。プロバイダーから新しいリンクを入手してください。",
   "doctorProfileNoServersTitle": "プロファイルにサーバーがありません",
-  "doctorProfileNoServersDetail": "サブスクリプションは読み込まれましたが、サーバーが含まれていません。後で更新するか、プロバイダーに問い合わせてください。"
+  "doctorProfileNoServersDetail": "サブスクリプションは読み込まれましたが、サーバーが含まれていません。後で更新するか、プロバイダーに問い合わせてください。",
+  "powerSmartButton": "スマート電源ボタン",
+  "powerSmartButtonDescription": "スマート電源ボタンは、接続を確認してからのみ「保護中」と表示し、接続を修復し、プランの終了時にトンネルを停止します。オフにすると、開始と停止のみを行います。"
 }

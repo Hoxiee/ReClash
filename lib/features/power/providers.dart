@@ -52,9 +52,13 @@ final powerInputsProvider = Provider<PowerInputs>((ref) {
   );
 });
 
-final powerFaceProvider = Provider<PowerFace>(
-  (ref) => resolvePowerFace(ref.watch(powerInputsProvider)),
-);
+final powerFaceProvider = Provider<PowerFace>((ref) {
+  final inputs = ref.watch(powerInputsProvider);
+  final smart = ref.watch(
+    appSettingProvider.select((setting) => setting.smartPowerButton),
+  );
+  return smart ? resolvePowerFace(inputs) : PowerFace.plain(inputs.link);
+});
 
 /// The face already offers renewing or topping up, so the subscription card
 /// keeps its own buttons back.

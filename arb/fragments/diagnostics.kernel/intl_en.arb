@@ -286,5 +286,7 @@
     }
   },
   "doctorProfileNoServersTitle": "The profile has no servers",
-  "doctorProfileNoServersDetail": "The subscription loaded but contains no servers. Update it later or contact your provider."
+  "doctorProfileNoServersDetail": "The subscription loaded but contains no servers. Update it later or contact your provider.",
+  "powerSmartButton": "Smart power button",
+  "powerSmartButtonDescription": "Smart power button shows Protected only after the connection is verified, repairs it, and stops the tunnel when the plan ends. When off, the button only starts and stops."
 }
