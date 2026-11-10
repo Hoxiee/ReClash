@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "L’abonnement n’est pas encore renouvelé",
   "powerNoticeStoppedExpired": "VPN désactivé : l’abonnement est terminé. Internet normal fonctionne.",
   "powerNoticeStoppedExhausted": "VPN désactivé : trafic épuisé. Internet normal fonctionne.",
-  "powerNoticeResumed": "Abonnement renouvelé — connexion"
+  "powerNoticeResumed": "Abonnement renouvelé — connexion",
+  "powerFixSwitchServer": "Autre serveur"
 }

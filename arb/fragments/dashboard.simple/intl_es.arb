@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "La suscripción aún no se ha renovado",
   "powerNoticeStoppedExpired": "VPN desactivada: la suscripción terminó. El internet normal funciona.",
   "powerNoticeStoppedExhausted": "VPN desactivada: se acabó el tráfico. El internet normal funciona.",
-  "powerNoticeResumed": "Suscripción renovada — conectando"
+  "powerNoticeResumed": "Suscripción renovada — conectando",
+  "powerFixSwitchServer": "Otro servidor"
 }

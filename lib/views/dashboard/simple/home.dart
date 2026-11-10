@@ -234,6 +234,8 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
         await ref.read(diagnosticKernelProvider).apply('config.ruleMode');
       case PowerAction.repair:
         await ref.read(connectionSupervisorProvider).repair();
+      case PowerAction.switchServer:
+        await ref.read(connectionSupervisorProvider).switchServer();
     }
   }
 

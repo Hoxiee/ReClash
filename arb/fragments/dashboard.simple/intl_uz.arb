@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "Obuna hali yangilanmagan",
   "powerNoticeStoppedExpired": "VPN oʻchdi: obuna tugadi. Oddiy internet ishlaydi.",
   "powerNoticeStoppedExhausted": "VPN oʻchdi: trafik tugadi. Oddiy internet ishlaydi.",
-  "powerNoticeResumed": "Obuna yangilandi — ulanmoqda"
+  "powerNoticeResumed": "Obuna yangilandi — ulanmoqda",
+  "powerFixSwitchServer": "Boshqa server"
 }

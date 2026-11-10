@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "订阅尚未续订",
   "powerNoticeStoppedExpired": "VPN 已关闭：订阅已结束。普通网络仍可使用。",
   "powerNoticeStoppedExhausted": "VPN 已关闭：流量已用完。普通网络仍可使用。",
-  "powerNoticeResumed": "订阅已续订，正在连接"
+  "powerNoticeResumed": "订阅已续订，正在连接",
+  "powerFixSwitchServer": "换个服务器"
 }

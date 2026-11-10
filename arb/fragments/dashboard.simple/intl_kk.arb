@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "Жазылым әлі ұзартылмаған",
   "powerNoticeStoppedExpired": "VPN өшірілді: жазылым аяқталды. Әдеттегі интернет жұмыс істейді.",
   "powerNoticeStoppedExhausted": "VPN өшірілді: трафик таусылды. Әдеттегі интернет жұмыс істейді.",
-  "powerNoticeResumed": "Жазылым ұзартылды — қосылуда"
+  "powerNoticeResumed": "Жазылым ұзартылды — қосылуда",
+  "powerFixSwitchServer": "Басқа сервер"
 }

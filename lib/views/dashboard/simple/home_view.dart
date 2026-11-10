@@ -211,8 +211,7 @@ String? _hint(AppLocalizations l, PowerFace face, String? pausedHint) =>
       PowerFaceState.noProfile => l.simpleStatusNoProfileHint,
       PowerFaceState.off => l.simpleStatusOffHint,
       PowerFaceState.starting => l.simpleStatusConnectingHint,
-      PowerFaceState.verifying =>
-        face.searching ? l.powerHintSearching : l.powerHintVerifying,
+      PowerFaceState.verifying => l.powerHintVerifying,
       PowerFaceState.paused => pausedHint,
       PowerFaceState.offline => l.powerHintOffline,
       PowerFaceState.waitingNetwork => l.powerHintWaitingNetwork,
@@ -240,6 +239,7 @@ String _verb(AppLocalizations l, PowerAction action) => switch (action) {
   PowerAction.openPortal => l.powerFixPortal,
   PowerAction.ruleMode => l.powerFixRuleMode,
   PowerAction.repair => l.powerFixRepair,
+  PowerAction.switchServer => l.powerFixSwitchServer,
   PowerAction.causeSheet || PowerAction.accountSheet => l.powerFixExplain,
   PowerAction.addProfile => l.powerFixAddProfile,
   PowerAction.start => l.start,
@@ -342,25 +342,35 @@ class PowerStatusView extends StatelessWidget {
     final shownTitle = custom?.title ?? title;
     final fix = face.checking ? null : face.fix;
     final hint = custom?.hint ?? _hint(appLocalizations, face, pausedHint);
-    final Widget? second = switch (fix) {
-      final fix? => PowerPillView(
-        prefix: _pillPrefix(appLocalizations, fix),
-        label: _pillLabel(appLocalizations, fix),
-        tone: face.tone,
-        glyph: switch (fix) {
-          PowerAction.addProfile => AppGlyphs.add,
-          PowerAction.ruleMode => AppGlyphs.vpn,
-          PowerAction.repair => AppGlyphs.wrench,
-          PowerAction.causeSheet => AppGlyphs.info,
-          _ => null,
-        },
-        external: switch (fix) {
-          PowerAction.renew || PowerAction.topUp || PowerAction.support => true,
-          _ => false,
-        },
-        filled: fix == PowerAction.addProfile,
-        onPressed: onFix == null ? null : () => onFix!(fix),
+    Widget pill(PowerAction fix) => PowerPillView(
+      prefix: _pillPrefix(appLocalizations, fix),
+      label: _pillLabel(appLocalizations, fix),
+      tone: face.tone,
+      glyph: switch (fix) {
+        PowerAction.addProfile => AppGlyphs.add,
+        PowerAction.ruleMode => AppGlyphs.vpn,
+        PowerAction.repair => AppGlyphs.wrench,
+        PowerAction.switchServer => AppGlyphs.swap,
+        PowerAction.causeSheet => AppGlyphs.info,
+        _ => null,
+      },
+      external: switch (fix) {
+        PowerAction.renew || PowerAction.topUp || PowerAction.support => true,
+        _ => false,
+      },
+      filled: fix == PowerAction.addProfile,
+      onPressed: onFix == null ? null : () => onFix!(fix),
+    );
+    final Widget? second = switch ((fix, face.secondFix)) {
+      (final fix?, final secondFix?) => Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          Flexible(child: pill(fix)),
+          pill(secondFix),
+        ],
       ),
+      (final fix?, _) => pill(fix),
       _ when face.state == PowerFaceState.on => FittedBox(
         fit: BoxFit.scaleDown,
         child: live,

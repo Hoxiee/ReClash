@@ -46,10 +46,13 @@ const _ladder = {
   HealStep.restartTunnel: ConnectionRemedy.reconnect,
 };
 
-const _autoSteps = [
-  HealStep.bestNode,
+const _autoSteps = [HealStep.updateProfile, HealStep.resetConnections];
+
+const _repairSteps = [
   HealStep.updateProfile,
   HealStep.resetConnections,
+  HealStep.restartCore,
+  HealStep.restartTunnel,
 ];
 
 /// Owns [ConnectionHealth] for the running tunnel: verifies on the triggers
@@ -209,14 +212,20 @@ class ConnectionSupervisor {
   }
 
   /// The full ladder from the face; true when a check passed after a step.
-  Future<bool> repair() async {
+  Future<bool> repair() => _climbOnTap(_repairSteps, repair: true);
+
+  /// Moves the main group to its fastest live node. Only the user's tap does
+  /// this: the node they chose is never changed behind their back.
+  Future<bool> switchServer() =>
+      _climbOnTap(const [HealStep.bestNode], repair: false);
+
+  Future<bool> _climbOnTap(List<HealStep> steps, {required bool repair}) async {
     if (!_running) return false;
     final plan = ++_plan;
     await _climb;
     if (plan != _plan || !_running) return false;
-    _connecting = false;
-    _connectTimer?.cancel();
-    return _runLadder(HealStep.values, plan: plan, manual: true);
+    _endConnect();
+    return _runLadder(steps, plan: plan, repair: repair);
   }
 
   void _onFindings(List<Finding> findings) {
@@ -295,28 +304,26 @@ class ConnectionSupervisor {
     unawaited(_connect(epoch));
   }
 
+  /// A failed first check is confirmed like any other break.
   Future<void> _connect(int epoch) async {
-    final first = await _verify();
+    var result = await _verify();
     if (epoch != _epoch) return;
-    if (first.verdict == VerifyVerdict.pass) return _pass();
+    if (result.verdict == VerifyVerdict.fail && _connecting) {
+      _cause = result.cause;
+      await Future<void>.delayed(confirmGap);
+      if (epoch != _epoch || !_connecting) return;
+      result = await _verify();
+      if (epoch != _epoch) return;
+    }
+    if (result.verdict == VerifyVerdict.pass) return _pass();
     if (!_connecting) return;
-    if (first.verdict == VerifyVerdict.unknown) {
-      _endConnect();
+    _endConnect();
+    if (result.verdict == VerifyVerdict.unknown) {
       _emit(_checked(ConnectionPhase.unknown));
       _scheduleGrace();
       return;
     }
-    _cause = first.cause;
-    _step = HealStep.bestNode;
-    _stepDetail = null;
-    final plan = ++_plan;
-    _emit(_checked(ConnectionPhase.connecting, searching: true));
-    final healed = await _runStep(HealStep.bestNode, plan, searching: true);
-    if (epoch != _epoch || plan != _plan) return;
-    if (healed) return _pass();
-    final wasConnecting = _connecting;
-    _endConnect();
-    if (wasConnecting) _broken(_cause, from: 1);
+    _broken(result.cause);
   }
 
   void _endConnect() {
@@ -393,8 +400,7 @@ class ConnectionSupervisor {
     _scheduleGrace();
   }
 
-  /// [from] skips the rungs the connect phase already tried.
-  void _broken(FailureCause? cause, {int from = 0}) {
+  void _broken(FailureCause? cause) {
     _confirmTimer?.cancel();
     _firstFailureAt = null;
     _cause = cause;
@@ -402,22 +408,23 @@ class ConnectionSupervisor {
     if (_visible) unawaited(_kernel.runPath().then((_) {}, onError: (_) {}));
     if (!_autoHeal() || _climb != null) return;
     final plan = ++_plan;
-    unawaited(_runLadder(_autoSteps.sublist(from), plan: plan, manual: false));
+    unawaited(_runLadder(_autoSteps, plan: plan, repair: false));
   }
 
+  /// [repair] reports a ladder that ended without a pass on the face.
   Future<bool> _runLadder(
     List<HealStep> steps, {
     required int plan,
-    required bool manual,
+    required bool repair,
   }) {
-    final climb = _ladderOf(steps, plan, manual);
+    final climb = _ladderOf(steps, plan, repair);
     _climb = climb;
     return climb.whenComplete(() {
       if (identical(_climb, climb)) _climb = null;
     });
   }
 
-  Future<bool> _ladderOf(List<HealStep> steps, int plan, bool manual) async {
+  Future<bool> _ladderOf(List<HealStep> steps, int plan, bool repair) async {
     final epoch = _epoch;
     _recoveringShown = false;
     _recoveringTimer?.cancel();
@@ -438,7 +445,7 @@ class ConnectionSupervisor {
       if (plan == _plan && epoch == _epoch) {
         _step = null;
         _stepDetail = null;
-        _emit(_checked(ConnectionPhase.broken, repairFailed: manual));
+        _emit(_checked(ConnectionPhase.broken, repairFailed: repair));
       }
       return false;
     } finally {
@@ -450,11 +457,7 @@ class ConnectionSupervisor {
   }
 
   /// Applies one rung and verifies; true when the check passed.
-  Future<bool> _runStep(
-    HealStep step,
-    int plan, {
-    bool searching = false,
-  }) async {
+  Future<bool> _runStep(HealStep step, int plan) async {
     _step = step;
     _stepDetail = null;
     if (_recoveringShown) _emitRecovering();
@@ -466,11 +469,7 @@ class ConnectionSupervisor {
       if (plan != _plan) return false;
       if (step == HealStep.bestNode && outcome.status != RemedyStatus.failed) {
         _stepDetail = _selectedNode?.call();
-        if (searching) {
-          _emit(_checked(ConnectionPhase.connecting, searching: true));
-        } else if (_recoveringShown) {
-          _emitRecovering();
-        }
+        if (_recoveringShown) _emitRecovering();
       }
     } finally {
       if (restarts) {
@@ -497,18 +496,10 @@ class ConnectionSupervisor {
 
   ConnectionHealth _checked(
     ConnectionPhase phase, {
-    bool searching = false,
     bool repairFailed = false,
   }) => ConnectionHealth(
     phase: phase,
-    cause:
-        phase == ConnectionPhase.broken ||
-            phase == ConnectionPhase.connecting && searching
-        ? _cause
-        : null,
-    step: searching ? _step : null,
-    stepDetail: searching ? _stepDetail : null,
-    searching: searching,
+    cause: phase == ConnectionPhase.broken ? _cause : null,
     repairFailed: repairFailed,
     checkedAt: _lastCheckAt,
   );

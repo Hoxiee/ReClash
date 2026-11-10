@@ -675,6 +675,18 @@ void main() {
       );
     });
 
+    test('only a plain broken connection offers another server', () {
+      PowerAction? secondFix(FailureCause cause) => resolvePowerFace(
+        _inputs(
+          link: PowerLink.on,
+          health: ConnectionHealth(phase: ConnectionPhase.broken, cause: cause),
+        ),
+      ).secondFix;
+      expect(secondFix(FailureCause.timeout), PowerAction.switchServer);
+      expect(secondFix(FailureCause.clockSkew), isNull);
+      expect(secondFix(FailureCause.captivePortal), isNull);
+    });
+
     test('direct mode asks for the rule mode and keeps the verified check', () {
       for (final phase in [ConnectionPhase.idle, ConnectionPhase.verified]) {
         _expectFace(

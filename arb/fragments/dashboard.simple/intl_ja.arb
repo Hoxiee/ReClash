@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "サブスクリプションはまだ更新されていません",
   "powerNoticeStoppedExpired": "VPNをオフにしました：サブスクリプションが終了しました。通常のインターネットは使えます。",
   "powerNoticeStoppedExhausted": "VPNをオフにしました：データ量を使い切りました。通常のインターネットは使えます。",
-  "powerNoticeResumed": "サブスクリプションを更新しました — 接続中"
+  "powerNoticeResumed": "サブスクリプションを更新しました — 接続中",
+  "powerFixSwitchServer": "別のサーバー"
 }

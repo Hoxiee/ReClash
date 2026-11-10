@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "Abunalyk heniz uzaldylmady",
   "powerNoticeStoppedExpired": "VPN öçdi: abunalyk gutardy. Adaty internet işleýär.",
   "powerNoticeStoppedExhausted": "VPN öçdi: trafik gutardy. Adaty internet işleýär.",
-  "powerNoticeResumed": "Abunalyk uzaldyldy — birikdirilýär"
+  "powerNoticeResumed": "Abunalyk uzaldyldy — birikdirilýär",
+  "powerFixSwitchServer": "Başga serwer"
 }

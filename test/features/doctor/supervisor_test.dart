@@ -133,35 +133,42 @@ void main() {
       expect(rig.applied, isEmpty);
     });
 
-    _test('a failed check silently searches for the best node', (rig) {
-      rig
-        ..fail()
-        ..onRemedy[ConnectionRemedy.bestNode] = rig.pass
-        ..connect();
-      expect(rig.applied, [ConnectionRemedy.bestNode]);
-      expect(
-        rig.phases.where((health) => health.searching).last.stepDetail,
-        'Tokyo 2',
-      );
-      expect(rig.health.phase, ConnectionPhase.verified);
-    });
-
-    _test('a failed check and a failed best node break the connection', (rig) {
+    _test('a failed connect is confirmed and never moves the node', (rig) {
       rig
         ..fail(FailureCause.authRejected)
         ..connect();
-      expect(
-        rig.phases.any((health) => health.phase == ConnectionPhase.broken),
-        isTrue,
-      );
+      expect(rig.health.phase, ConnectionPhase.connecting);
+      rig.run(const Duration(seconds: 3));
+      expect(rig.checks, greaterThanOrEqualTo(2));
       expect(rig.applied, [
-        ConnectionRemedy.bestNode,
         'profile.update',
         ConnectionRemedy.resetConnections,
       ]);
       expect(rig.health.phase, ConnectionPhase.broken);
       expect(rig.health.cause, FailureCause.authRejected);
       expect(rig.health.repairFailed, isFalse);
+    });
+
+    _test('without auto-heal a failed connect only offers repair', (rig) {
+      rig
+        ..fail(FailureCause.authRejected)
+        ..connect()
+        ..run(const Duration(seconds: 3));
+      expect(rig.checks, 2);
+      expect(rig.applied, isEmpty);
+      expect(rig.health.phase, ConnectionPhase.broken);
+      expect(rig.health.cause, FailureCause.authRejected);
+    }, autoHeal: false);
+
+    _test('a connect that recovers on its own verifies', (rig) {
+      rig
+        ..fail()
+        ..connect();
+      rig
+        ..pass()
+        ..run(const Duration(seconds: 3));
+      expect(rig.applied, isEmpty);
+      expect(rig.health.phase, ConnectionPhase.verified);
     });
 
     _test('the budget ends a check that never answers', (rig) {
@@ -194,10 +201,8 @@ void main() {
         ..fail()
         ..supervisor.selectionChanged();
       expect(rig.health.phase, ConnectionPhase.connecting);
-      rig.settle();
-      expect(rig.health.phase, isNot(ConnectionPhase.verified));
+      rig.run(const Duration(seconds: 3));
       expect(rig.applied, [
-        ConnectionRemedy.bestNode,
         'profile.update',
         ConnectionRemedy.resetConnections,
       ]);
@@ -329,7 +334,7 @@ void main() {
         ..remedyTime = const Duration(seconds: 1)
         ..fail()
         ..connect()
-        ..run(const Duration(seconds: 1));
+        ..run(const Duration(seconds: 3));
       expect(rig.health.phase, ConnectionPhase.broken);
       rig.run(const Duration(milliseconds: 900));
       expect(rig.health.phase, ConnectionPhase.recovering);
@@ -344,7 +349,7 @@ void main() {
         ..fail()
         ..onRemedy['profile.update'] = rig.pass
         ..connect()
-        ..run(const Duration(seconds: 1));
+        ..run(const Duration(seconds: 4));
       expect(rig.health.phase, ConnectionPhase.verified);
       expect(
         rig.phases.any((health) => health.phase == ConnectionPhase.recovering),
@@ -355,20 +360,48 @@ void main() {
     _test('repair climbs the whole ladder and reports its failure', (rig) {
       rig
         ..fail()
-        ..connect();
+        ..connect()
+        ..run(const Duration(seconds: 3));
       expect(rig.health.phase, ConnectionPhase.broken);
       rig.applied.clear();
       bool? healed;
       unawaited(rig.supervisor.repair().then((value) => healed = value));
       rig.run(const Duration(seconds: 1));
       expect(healed, isFalse);
-      expect(rig.applied, _ladderIds);
+      expect(rig.applied, _ladderIds.skip(1));
       expect(rig.health.phase, ConnectionPhase.broken);
       expect(rig.health.repairFailed, isTrue);
       rig.pass();
       unawaited(rig.supervisor.recheck());
       rig.settle();
       expect(rig.health.phase, ConnectionPhase.verified);
+      expect(rig.health.repairFailed, isFalse);
+    }, autoHeal: false);
+
+    _test('only a tap switches the server', (rig) {
+      rig
+        ..fail()
+        ..connect()
+        ..run(const Duration(seconds: 3));
+      expect(rig.applied, isEmpty);
+      rig.onRemedy[ConnectionRemedy.bestNode] = rig.pass;
+      bool? healed;
+      unawaited(rig.supervisor.switchServer().then((value) => healed = value));
+      rig.settle();
+      expect(healed, isTrue);
+      expect(rig.applied, [ConnectionRemedy.bestNode]);
+      expect(rig.health.phase, ConnectionPhase.verified);
+    }, autoHeal: false);
+
+    _test('a failed server switch keeps repair on offer', (rig) {
+      rig
+        ..fail()
+        ..connect()
+        ..run(const Duration(seconds: 3));
+      unawaited(rig.supervisor.switchServer());
+      rig.settle();
+      expect(rig.applied, [ConnectionRemedy.bestNode]);
+      expect(rig.health.phase, ConnectionPhase.broken);
       expect(rig.health.repairFailed, isFalse);
     }, autoHeal: false);
 

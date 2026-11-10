@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "Подписка всё ещё не продлена",
   "powerNoticeStoppedExpired": "VPN выключен: подписка закончилась. Обычный интернет работает.",
   "powerNoticeStoppedExhausted": "VPN выключен: трафик закончился. Обычный интернет работает.",
-  "powerNoticeResumed": "Подписка продлена — подключаем"
+  "powerNoticeResumed": "Подписка продлена — подключаем",
+  "powerFixSwitchServer": "Другой сервер"
 }

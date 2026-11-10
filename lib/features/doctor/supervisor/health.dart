@@ -9,7 +9,7 @@ enum ConnectionPhase {
   idle,
 
   /// From the tunnel coming up until the first passed check, within the
-  /// connect budget; a silent switch to the best live node included.
+  /// connect budget.
   connecting,
 
   verified,
@@ -26,7 +26,8 @@ enum ConnectionPhase {
   waitingNetwork,
 }
 
-/// The healing ladder in climbing order; the first three run automatically.
+/// The healing steps. [bestNode] runs only on the user's tap; the rest climb
+/// in this order, the first two automatically.
 enum HealStep {
   bestNode,
   updateProfile,
@@ -42,7 +43,6 @@ final class ConnectionHealth {
     this.cause,
     this.step,
     this.stepDetail,
-    this.searching = false,
     this.repairFailed = false,
     this.checkedAt,
   });
@@ -59,9 +59,6 @@ final class ConnectionHealth {
   /// Data for the step's line, such as the node switched to.
   final String? stepDetail;
 
-  /// The connect phase is moving to another node after a failed check.
-  final bool searching;
-
   /// The full ladder from the face ended without a passing check.
   final bool repairFailed;
 
@@ -74,20 +71,12 @@ final class ConnectionHealth {
       other.cause == cause &&
       other.step == step &&
       other.stepDetail == stepDetail &&
-      other.searching == searching &&
       other.repairFailed == repairFailed &&
       other.checkedAt == checkedAt;
 
   @override
-  int get hashCode => Object.hash(
-    phase,
-    cause,
-    step,
-    stepDetail,
-    searching,
-    repairFailed,
-    checkedAt,
-  );
+  int get hashCode =>
+      Object.hash(phase, cause, step, stepDetail, repairFailed, checkedAt);
 
   @override
   String toString() => 'ConnectionHealth(${phase.name}, ${cause?.id})';

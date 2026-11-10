@@ -231,5 +231,6 @@
   "powerAccountStillEnded": "구독이 아직 갱신되지 않았어요",
   "powerNoticeStoppedExpired": "VPN이 꺼졌어요: 구독이 종료됐어요. 일반 인터넷은 사용할 수 있어요.",
   "powerNoticeStoppedExhausted": "VPN이 꺼졌어요: 트래픽을 모두 사용했어요. 일반 인터넷은 사용할 수 있어요.",
-  "powerNoticeResumed": "구독이 갱신됨 — 연결 중"
+  "powerNoticeResumed": "구독이 갱신됨 — 연결 중",
+  "powerFixSwitchServer": "다른 서버"
 }

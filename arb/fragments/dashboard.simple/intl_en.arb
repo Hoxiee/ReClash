@@ -419,5 +419,9 @@
   "powerAccountStillEnded": "The subscription isn't renewed yet",
   "powerNoticeStoppedExpired": "VPN is off: the subscription ended. The regular internet works.",
   "powerNoticeStoppedExhausted": "VPN is off: out of traffic. The regular internet works.",
-  "powerNoticeResumed": "Subscription renewed — connecting"
+  "powerNoticeResumed": "Subscription renewed — connecting",
+  "powerFixSwitchServer": "Other server",
+  "@powerFixSwitchServer": {
+    "description": "Pill beside Fix on a broken connection: moves the main group to its fastest live server."
+  }
 }

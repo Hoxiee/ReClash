@@ -27,6 +27,7 @@ enum PowerAction {
   openPortal,
   ruleMode,
   repair,
+  switchServer,
 }
 
 enum PowerFaceState {
@@ -168,12 +169,12 @@ final class PowerFace {
     required this.tap,
     this.tone = PowerTone.normal,
     this.fix,
+    this.secondFix,
     this.verified = false,
     this.cause,
     this.attention,
     this.step,
     this.stepDetail,
-    this.searching = false,
     this.checking = false,
   });
 
@@ -203,13 +204,15 @@ final class PowerFace {
   /// The pill; null leaves the second row to text or the live line.
   final PowerAction? fix;
 
+  /// A pill beside [fix] for a choice the app never makes on its own.
+  final PowerAction? secondFix;
+
   /// The connection answered through the tunnel: the check badge.
   final bool verified;
   final FailureCause? cause;
   final AccountAttention? attention;
   final HealStep? step;
   final String? stepDetail;
-  final bool searching;
 
   /// A stale expired or exhausted reading is being refreshed.
   final bool checking;
@@ -224,12 +227,12 @@ final class PowerFace {
       other.tone == tone &&
       other.tap == tap &&
       other.fix == fix &&
+      other.secondFix == secondFix &&
       other.verified == verified &&
       other.cause == cause &&
       other.attention == attention &&
       other.step == step &&
       other.stepDetail == stepDetail &&
-      other.searching == searching &&
       other.checking == checking;
 
   @override
@@ -239,12 +242,12 @@ final class PowerFace {
     tone,
     tap,
     fix,
+    secondFix,
     verified,
     cause,
     attention,
     step,
     stepDetail,
-    searching,
     checking,
   );
 
@@ -441,6 +444,7 @@ PowerFace _running(PowerInputs inputs) {
     PowerTone tone, {
     PowerLink link = PowerLink.on,
     PowerAction? fix,
+    PowerAction? secondFix,
     FailureCause? cause,
     bool verified = false,
     AccountAttention? attention,
@@ -450,12 +454,12 @@ PowerFace _running(PowerInputs inputs) {
     tone: tone,
     tap: PowerAction.stop,
     fix: fix,
+    secondFix: secondFix,
     verified: verified,
     cause: cause,
     attention: attention,
     step: health.step,
     stepDetail: health.stepDetail,
-    searching: health.searching,
   );
 
   if (inputs.online == false ||
@@ -503,6 +507,7 @@ PowerFace _running(PowerInputs inputs) {
           fix: health.repairFailed
               ? PowerAction.causeSheet
               : PowerAction.repair,
+          secondFix: PowerAction.switchServer,
           cause: cause,
         ),
       };
