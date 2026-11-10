@@ -80,6 +80,12 @@ List<Remedy> _environmentRemedies(Ref ref) {
         ref.read(patchClashConfigProvider.notifier).update(change),
   );
   final queue = systemProxyQueue;
+  Future<bool> rescanAfter(Future<bool> change) async {
+    final result = await change;
+    await ref.read(environmentScannerProvider).rescan();
+    return result;
+  }
+
   return [
     IgnoreSystemHostsRemedy(config),
     ResetOverridesRemedy(config),
@@ -92,9 +98,11 @@ List<Remedy> _environmentRemedies(Ref ref) {
       ),
     ],
     if (queue != null) ...[
-      ClearOwnProxyRemedy((port) => queue.clear(ownPort: port)),
-      ClearProxyRemedy(queue.clear),
-      ReapplyProxyRemedy(() => queue.apply(ref.read(proxyStateProvider))),
+      ClearOwnProxyRemedy((port) => rescanAfter(queue.clear(ownPort: port))),
+      ClearProxyRemedy(() => rescanAfter(queue.clear())),
+      ReapplyProxyRemedy(
+        () => rescanAfter(queue.apply(ref.read(proxyStateProvider))),
+      ),
     ],
   ];
 }
@@ -180,6 +188,12 @@ final Provider<DiagnosticKernel> diagnosticKernelProvider = Provider((ref) {
   for (final sensor in defaultSensors) {
     sensor(ref, kernel);
   }
+  ref.listen(appVisibleProvider, (previous, visible) {
+    if (previous != false || !visible) return;
+    if (kernel.findings.any((f) => f.id == 'device.clockSkew')) {
+      unawaited(probeClockSkew(ref, force: true).then((_) {}, onError: (_) {}));
+    }
+  });
   ref.onDispose(kernel.dispose);
   return kernel;
 });

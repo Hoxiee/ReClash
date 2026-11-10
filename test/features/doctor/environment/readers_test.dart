@@ -63,6 +63,16 @@ void main() {
     expect(fact.routedThroughOurs, isFalse);
   });
 
+  test('matches our adapter name case-insensitively', () {
+    final fact = buildTunnels(
+      adapters: const [AdapterInfo(name: 'reclash', description: 'Wintun')],
+      routes: const [],
+      ours: 'ReClash',
+    );
+    expect(fact.ours?.name, 'reclash');
+    expect(fact.foreign, isEmpty);
+  });
+
   test('routedThroughOurs follows the longest-prefix route', () {
     final routes = [
       RouteEntry(

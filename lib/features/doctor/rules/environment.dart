@@ -62,7 +62,12 @@ Finding? hostsServicesRule(DiagnosticSnapshot snapshot) {
     titleKey: 'doctorHostsServicesTitle',
     detailKey: 'doctorHostsServicesDetail',
     args: {'domains': domains.take(3).join(', '), 'count': domains.length},
-    remedyIds: _hostsRemedies(useSystemHosts, ignorable: true),
+    // Under TUN apps resolve through the OS hosts, so ignoring them in the
+    // Core cannot clear this.
+    remedyIds: _hostsRemedies(
+      useSystemHosts,
+      ignorable: snapshot.valueOf(Facts.tunEnabled) != true,
+    ),
   );
 }
 
@@ -172,6 +177,13 @@ Finding? deadProxyRule(DiagnosticSnapshot snapshot) {
       status == CoreStatus.connecting) {
     return null;
   }
+  // A connected Core may report before its listener accepts; a real bind
+  // failure on the port is portTakenRule's finding.
+  if (status == CoreStatus.connected &&
+      isLoopbackHost(proxy.host) &&
+      port == snapshot.valueOf(Facts.mixedPort)) {
+    return null;
+  }
   final ours =
       isLoopbackHost(proxy.host) &&
       port == snapshot.valueOf(Facts.ownProxyPort);
@@ -183,6 +195,7 @@ Finding? deadProxyRule(DiagnosticSnapshot snapshot) {
       Facts.systemProxy.id,
       Facts.coreStatus.id,
       Facts.ownProxyPort.id,
+      Facts.mixedPort.id,
     ],
     titleKey: 'doctorDeadProxyTitle',
     detailKey: 'doctorDeadProxyDetail',

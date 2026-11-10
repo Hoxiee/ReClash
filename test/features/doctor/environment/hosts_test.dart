@@ -41,6 +41,35 @@ void main() {
     expect(fact.entries.single.blackhole, isFalse);
   });
 
+  test('never records system loopback names', () {
+    const domains = RelevantDomains(subscription: {'localhost'});
+    expect(
+      parseHosts('h', '127.0.0.1 localhost\n::1 localhost\n', domains).entries,
+      isEmpty,
+    );
+    expect(
+      parseHosts(
+        'h',
+        '1.2.3.4 foo.localhost Localhost. ip6-loopback localhost.localdomain',
+        const RelevantDomains(
+          subscription: {'foo.localhost', 'localhost.localdomain'},
+        ),
+      ).entries,
+      isEmpty,
+    );
+  });
+
+  test('still records a redirected subscription host', () {
+    final fact = parseHosts(
+      'h',
+      '127.0.0.1 sub.example.com\n',
+      const RelevantDomains(subscription: {'sub.example.com'}),
+    );
+    expect(fact.entries.map((e) => (e.domain, e.role)), [
+      ('sub.example.com', DomainRole.subscription),
+    ]);
+  });
+
   test('caps and trims markers', () {
     final text = [
       for (var i = 0; i < 80; i++) '   # marker $i ${'x' * 200}',

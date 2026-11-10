@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
@@ -40,6 +42,13 @@ const serviceDomains = {
   'notion.so',
 };
 
+bool _isLoopbackName(String name) =>
+    name == 'localhost' ||
+    name.endsWith('.localhost') ||
+    name == 'localhost.localdomain' ||
+    name == 'ip6-localhost' ||
+    name == 'ip6-loopback';
+
 @immutable
 final class RelevantDomains {
   const RelevantDomains({
@@ -53,10 +62,12 @@ final class RelevantDomains {
   final Set<String> services;
 
   /// The role of [domain] or of the closest parent listed; ReClash's own
-  /// domains win over services.
+  /// domains win over services. System loopback names have none: the OS
+  /// defines them, so a `hosts` line for them is not an override.
   DomainRole? roleOf(String domain) {
     var name = domain.trim().toLowerCase();
     if (name.endsWith('.')) name = name.substring(0, name.length - 1);
+    if (_isLoopbackName(name)) return null;
     while (name.isNotEmpty) {
       if (subscription.contains(name)) return DomainRole.subscription;
       if (test.contains(name)) return DomainRole.test;
@@ -83,25 +94,29 @@ final class RelevantDomains {
   );
 }
 
+/// The lowercase host of [url] when it is a name; an IP literal cannot be
+/// redirected by `hosts`.
+String? _nameHost(String url) {
+  final host = url.webUri?.host;
+  if (host == null || host.isEmpty || InternetAddress.tryParse(host) != null) {
+    return null;
+  }
+  return host.toLowerCase();
+}
+
 final relevantDomainsProvider = Provider<RelevantDomains>((ref) {
   final testUrl = ref.watch(
     patchClashConfigProvider.select((config) => config.testUrl),
   );
   final subscription = ref.watch(
     profilesProvider.select(
-      (profiles) => {
-        for (final profile in profiles)
-          if (profile.url.webUri?.host case final host? when host.isNotEmpty)
-            host.toLowerCase(),
-      },
+      (profiles) => {for (final profile in profiles) ?_nameHost(profile.url)},
     ),
   );
   return RelevantDomains(
     subscription: subscription,
     test: {
-      for (final url in [testUrl, defaultTestUrl])
-        if (url.webUri?.host case final host? when host.isNotEmpty)
-          host.toLowerCase(),
+      for (final url in [testUrl, defaultTestUrl]) ?_nameHost(url),
     },
   );
 });

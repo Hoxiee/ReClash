@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:reclash/common/proxy.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
@@ -44,9 +45,10 @@ final class ScanInputs {
 }
 
 typedef TcpProbe = Future<bool> Function(String host, int port);
-typedef DnsProbe = Future<bool> Function(String server);
+typedef DnsProbe = Future<bool> Function(String server, Duration timeout);
 
 const scanDebounce = Duration(milliseconds: 500);
+const _dnsRetryTimeout = Duration(seconds: 2);
 
 /// Exact by Core pid when both pids are known; otherwise our Core runs as
 /// `ReClashCore`, and a hidden name counts as ours only while connected.
@@ -252,13 +254,17 @@ final class DesktopEnvironmentScanner implements EnvironmentScanner {
     );
   }
 
+  /// A cold local resolver can miss the first short window.
+  Future<bool> _answers(String server) async =>
+      await dns(server, probeTimeout) || await dns(server, _dnsRetryTimeout);
+
   Future<void> _scanDns() async {
     final fact = await _guard(() async {
       final servers = await reader.dnsServers();
       if (servers == null) return null;
       var dead = servers.isNotEmpty && servers.every(isLoopbackHost);
       if (dead) {
-        final answers = await Future.wait(servers.map(dns));
+        final answers = await Future.wait(servers.map(_answers));
         dead = !answers.contains(true);
       }
       return SystemDnsFact(servers: servers, deadLoopback: dead);
@@ -343,8 +349,37 @@ void environmentSensor(Ref ref, FactSink sink) {
     (_, _) => unawaited(scanner.rescan()),
   );
   ref.listen(
+    proxyStateProvider.select((state) => (state.isStart, state.systemProxy)),
+    (_, _) => unawaited(scanner.rescan()),
+  );
+  ref.listen(
     relevantDomainsProvider,
     (_, _) => unawaited(scanner.refilterHosts()),
   );
+  final queue = systemProxyQueue;
+  if (queue != null) {
+    final subscription = queue.ownPorts.listen(
+      (_) => unawaited(scanner.rescan()),
+    );
+    ref.onDispose(subscription.cancel);
+  }
+  _watchHosts(ref, reader.hostsPath, scanner);
   unawaited(scanner.rescan());
+}
+
+/// Editors replace the file atomically, so the directory is watched.
+void _watchHosts(Ref ref, String hostsPath, EnvironmentScanner scanner) {
+  try {
+    final name = File(hostsPath).uri.pathSegments.last;
+    final subscription = Directory(File(hostsPath).parent.path).watch().listen((
+      event,
+    ) {
+      if (event.path.split(Platform.pathSeparator).last == name) {
+        unawaited(scanner.rescan());
+      }
+    }, onError: (_) {});
+    ref.onDispose(subscription.cancel);
+  } on Object {
+    return;
+  }
 }

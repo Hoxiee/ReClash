@@ -16,7 +16,7 @@ Future<bool> tcpReachable(String host, int port) async {
 }
 
 /// Whether [server] answers an `example.com` A query over UDP.
-Future<bool> dnsAnswers(String server) async {
+Future<bool> dnsAnswers(String server, Duration timeout) async {
   final address = InternetAddress.tryParse(server);
   if (address == null) return false;
   RawDatagramSocket? socket;
@@ -40,10 +40,7 @@ Future<bool> dnsAnswers(String server) async {
       }
     });
     socket.send(_query, address, 53);
-    final answered = await done.future.timeout(
-      probeTimeout,
-      onTimeout: () => false,
-    );
+    final answered = await done.future.timeout(timeout, onTimeout: () => false);
     await subscription.cancel();
     return answered;
   } on Object {

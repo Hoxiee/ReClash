@@ -155,6 +155,14 @@ void main() {
       expect(finding.remedyIds, ['system.openHosts']);
     });
 
+    test('offers no ignore remedy under TUN', () {
+      final finding = hostsServicesRule(
+        _with({Facts.hosts: services, Facts.tunEnabled: true}),
+      )!;
+
+      expect(finding.remedyIds, ['system.openHosts']);
+    });
+
     test('is silent without the hosts fact', () {
       expect(hostsServicesRule(_with({})), isNull);
     });
@@ -370,6 +378,34 @@ void main() {
       expect(
         deadProxyRule(_with({...facts(), Facts.ownProxyPort: 7891}))!.remedyIds,
         ['proxy.clear'],
+      );
+    });
+
+    test('stays silent for the live mixed-port listener while connected', () {
+      expect(
+        deadProxyRule(
+          _with({
+            ...facts(status: CoreStatus.connected),
+            Facts.mixedPort: 7890,
+          }),
+        ),
+        isNull,
+      );
+    });
+
+    test('still raises when disconnected or on a foreign port', () {
+      expect(
+        deadProxyRule(_with({...facts(), Facts.mixedPort: 7890})),
+        isNotNull,
+      );
+      expect(
+        deadProxyRule(
+          _with({
+            ...facts(status: CoreStatus.connected),
+            Facts.mixedPort: 7891,
+          }),
+        ),
+        isNotNull,
       );
     });
 

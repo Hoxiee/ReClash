@@ -140,6 +140,15 @@ bool isForeignRemedy(WidgetRef ref, String remedyId) => ref
     .read(diagnosticRemediesProvider)
     .any((r) => r.id == remedyId && r.reach == RemedyReach.foreign);
 
+/// A system or guided remedy only hands the user a screen, so the finding is
+/// still raised when it is verified; that is not a failure.
+bool outcomeDidntHelp(FixKind? kind, RemedyOutcome outcome) =>
+    switch (outcome.status) {
+      RemedyStatus.failed => true,
+      RemedyStatus.notFixed => kind != FixKind.system && kind != FixKind.guided,
+      _ => false,
+    };
+
 /// Applies [remedyId] and says how it went; an undoable fix offers Undo.
 Future<RemedyOutcome> applyRemedy(
   BuildContext context,
@@ -172,6 +181,9 @@ Future<RemedyOutcome> applyRemedy(
             : null,
       );
     case RemedyStatus.notFixed || RemedyStatus.failed:
+      if (!outcomeDidntHelp(ref.read(remedyKindsProvider)[remedyId], outcome)) {
+        break;
+      }
       context.showNotifier(l.doctorDidntHelp, level: MessageLevel.warning);
     default:
   }
@@ -217,9 +229,7 @@ class _FindingFixButtonState extends ConsumerState<FindingFixButton> {
     setState(() => _busy = true);
     try {
       final outcome = await applyRemedy(context, ref, widget.remedyId);
-      _failed =
-          outcome.status == RemedyStatus.notFixed ||
-          outcome.status == RemedyStatus.failed;
+      _failed = outcomeDidntHelp(widget.kind, outcome);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

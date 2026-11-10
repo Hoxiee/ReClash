@@ -76,7 +76,7 @@ DesktopEnvironmentScanner _scanner(
   inputs: () => inputs,
   domains: () => domains,
   tcp: (_, _) async => true,
-  dns: (_) async => false,
+  dns: (_, _) async => false,
 );
 
 void main() {
@@ -155,6 +155,33 @@ void main() {
     });
   });
 
+  test('a loopback resolver that misses the short window gets a retry', () {
+    fakeAsync((async) {
+      final sink = _Sink();
+      final timeouts = <Duration>[];
+      final scanner = DesktopEnvironmentScanner(
+        reader: _Reader(),
+        sink: sink,
+        inputs: () => const ScanInputs(),
+        domains: () => const RelevantDomains(),
+        tcp: (_, _) async => true,
+        dns: (_, timeout) async {
+          timeouts.add(timeout);
+          return timeout > const Duration(seconds: 1);
+        },
+      );
+      scanner.rescan();
+      async.elapse(const Duration(seconds: 1));
+      async.flushMicrotasks();
+      expect(timeouts, hasLength(2));
+      expect(
+        sink.values['network.systemDns'],
+        const SystemDnsFact(servers: ['127.0.0.1'], deadLoopback: false),
+      );
+      scanner.dispose();
+    });
+  });
+
   test('a hidden owner is ours only while the Core is connected', () {
     fakeAsync((async) {
       final reader = _Reader()..owners = {7890: const PortOwner()};
@@ -166,7 +193,7 @@ void main() {
         inputs: () => ScanInputs(mixedPort: 7890, coreConnected: connected),
         domains: () => const RelevantDomains(),
         tcp: (_, _) async => true,
-        dns: (_) async => true,
+        dns: (_, _) async => true,
       );
       scanner.rescan();
       async.elapse(const Duration(seconds: 1));
@@ -243,7 +270,7 @@ void main() {
         inputs: () => const ScanInputs(),
         domains: () => domains,
         tcp: (_, _) async => true,
-        dns: (_) async => true,
+        dns: (_, _) async => true,
       );
       scanner.rescan();
       async.elapse(const Duration(seconds: 1));

@@ -190,6 +190,27 @@ void main() {
     }
   });
 
+  test('a system remedy that leaves the finding raised did not fail', () {
+    RemedyOutcome outcome(RemedyStatus status) =>
+        RemedyOutcome(remedyId: 'x', status: status);
+    expect(
+      outcomeDidntHelp(FixKind.system, outcome(RemedyStatus.notFixed)),
+      isFalse,
+    );
+    expect(
+      outcomeDidntHelp(FixKind.guided, outcome(RemedyStatus.notFixed)),
+      isFalse,
+    );
+    expect(
+      outcomeDidntHelp(FixKind.auto, outcome(RemedyStatus.notFixed)),
+      isTrue,
+    );
+    expect(
+      outcomeDidntHelp(FixKind.system, outcome(RemedyStatus.failed)),
+      isTrue,
+    );
+  });
+
   group('foreign remedies', () {
     final foreign = _finding(
       'env.interceptor',

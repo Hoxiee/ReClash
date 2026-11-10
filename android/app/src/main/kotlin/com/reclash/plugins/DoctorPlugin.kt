@@ -284,10 +284,10 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
                 else -> "off"
             },
             "privateDnsHost" to host,
-            "captivePortal" to networks.any { (_, caps) ->
-                !caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) &&
-                    caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
-            },
+            "captivePortal" to (
+                networks.firstOrNull { it.first == underlying }?.second
+                    ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL) == true
+                ),
         )
     }
 

@@ -345,9 +345,9 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
   };
 }
 
+/// A restricted or unavailable answer still came from the service, and a bot
+/// check on a datacenter exit returns one to a probe that a browser passes.
 const _blockingServiceStatuses = {
-  ServiceProbeStatus.unavailable,
-  ServiceProbeStatus.restricted,
   ServiceProbeStatus.disallowedIsp,
   ServiceProbeStatus.blocked,
   ServiceProbeStatus.unsupportedRegion,

@@ -99,8 +99,9 @@ TunnelsFact buildTunnels({
 }) {
   TunnelAdapter? own;
   final foreign = <TunnelAdapter>[];
+  final oursLower = ours?.toLowerCase();
   for (final adapter in adapters) {
-    final isOurs = ours != null && adapter.name == ours;
+    final isOurs = oursLower != null && adapter.name.toLowerCase() == oursLower;
     final kind =
         classifyTunnel(adapter.name, adapter.description) ??
         (isOurs ? TunnelKind.other : null);
