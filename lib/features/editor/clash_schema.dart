@@ -345,6 +345,7 @@ const _proxyTypes = [
   'sudoku',
   'masque',
   'trusttunnel',
+  'extension',
   'openvpn',
   'tailscale',
   'zerotier',
@@ -1192,6 +1193,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'min-streams': _str,
     'max-streams': _str,
   },
+  'extension': {'extension': _str, 'link': _str, 'udp': _bool, ..._dial},
   'openvpn': {
     ..._server,
     'udp': _bool,

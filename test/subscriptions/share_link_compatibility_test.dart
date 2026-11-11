@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/constant.dart' as common;
 import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/imports/routing/skipped_node.dart';
 import 'package:reclash/subscriptions/imports/subscription/subscription_links.dart';
 import 'package:yaml/yaml.dart';
 
@@ -522,6 +523,53 @@ void main() {
       final result = _import(base64.encode(utf8.encode(source)));
       expect(result.summary.nodes, 2);
       expect(_proxies(result)[1]['type'], 'trusttunnel');
+    });
+  });
+
+  group('extension links', () {
+    const flux = 'openflux://v1/q1YqS8xNVbJSUHJLzMlPLskszs9TUkhJTVKqBQA';
+
+    test('imports an OpenFlux line as an extension node', () {
+      final result = _import(flux);
+      expect(result.summary.nodes, 1);
+      expect(result.summary.hasLosses, isFalse);
+      expect(_proxies(result).single, {
+        'name': 'OpenFlux 1',
+        'type': 'extension',
+        'extension': 'openflux',
+        'link': flux,
+      });
+    });
+
+    test('names the node from the fragment and matches the scheme loosely', () {
+      final proxy = _proxies(_import('OpenFlux://v1/abc#My%20Flux')).single;
+      expect(proxy['name'], 'My Flux');
+      expect(proxy['link'], 'openflux://v1/abc#My%20Flux');
+    });
+
+    test('numbers unnamed lines per extension', () {
+      final names = _proxies(
+        _import('$flux\n$flux\n'),
+      ).map((p) => p['name']).toList();
+      expect(names, ['OpenFlux 1', 'OpenFlux 2']);
+    });
+
+    test('unknown schemes are still skipped as protocols', () {
+      const link = 'qwdtt://v1/abc';
+      expect(tryConvertShareLinks(link), isNull);
+      final skipped = probeUnsupportedShareLinks(link);
+      expect(skipped, hasLength(1));
+      expect(skipped.single.reason, SkippedNodeReason.protocol);
+    });
+
+    test('keeps native nodes beside extension nodes without skips', () {
+      final result = tryConvertShareLinks('$_vless\n$flux')!;
+      expect(result.skipped, isEmpty);
+      expect(result.hasOtherLosses, isFalse);
+      expect(probeUnsupportedShareLinks('$_vless\n$flux'), isEmpty);
+      expect(probeUnsupportedShareLinks(flux), isEmpty);
+      final types = _proxies(_import('$_vless\n$flux')).map((p) => p['type']);
+      expect(types, ['vless', 'extension']);
     });
   });
 }

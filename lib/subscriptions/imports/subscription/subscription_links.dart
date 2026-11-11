@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import '../config/amnezia_config.dart';
 import '../routing/skipped_node.dart';
 import '../transport/xhttp.dart';
+import 'extension_catalog.dart';
 
 const shareLinkSchemes = [
   'vmess',
@@ -62,7 +63,11 @@ class ShareLinksResult implements LossyConversion {
   final bool hasOtherLosses;
 }
 
-bool _isLinkLine(String line) => shareLinkSchemes.contains(_nodeScheme(line));
+bool _isLinkLine(String line) {
+  final scheme = _nodeScheme(line);
+  return shareLinkSchemes.contains(scheme) ||
+      extensionForScheme(scheme) != null;
+}
 
 String? _nodeScheme(String line) =>
     _linkScheme.firstMatch(line)?.group(1)?.toLowerCase();
@@ -100,6 +105,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
   final seen = {...reservedProxyNames};
+  final extensionCounts = <String, int>{};
   var hasOtherLosses = false;
 
   void addProxy(Map<String, Object?> proxy) {
@@ -148,7 +154,15 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
         final parsed = scheme == 'amneziawg' || scheme == 'awg'
             ? [?_parseAmneziaWgLink(normalized)]
             : _parseUri(normalized, onLoss: () => hasOtherLosses = true);
-        if (parsed.isEmpty) {
+        final extension = parsed.isEmpty ? extensionForScheme(scheme) : null;
+        if (extension != null) {
+          final count = extensionCounts.update(
+            extension.id,
+            (n) => n + 1,
+            ifAbsent: () => 1,
+          );
+          addProxy(extensionNode(extension, normalized, count));
+        } else if (parsed.isEmpty) {
           skip(normalized, scheme);
         } else {
           parsed.forEach(addProxy);
