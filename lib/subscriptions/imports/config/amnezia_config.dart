@@ -234,6 +234,45 @@ String _normalizeKey(String value) {
   return base64.encode(bytes);
 }
 
+String? awgConfFromLinkParams({
+  required String privateKey,
+  required String server,
+  required int port,
+  required Map<String, String> params,
+}) {
+  final lower = {
+    for (final entry in params.entries) entry.key.toLowerCase(): entry.value,
+  };
+  final fields = <String, String>{
+    'Address': lower['address'] ?? '',
+    'DNS': lower['dns'] ?? '',
+    'MTU': lower['mtu'] ?? '',
+    for (final key in _awgConfKeys)
+      if (lower[key.toLowerCase()] != null) key: lower[key.toLowerCase()]!,
+  };
+  final peer = <String, String>{
+    'PublicKey': lower['publickey'] ?? lower['public-key'] ?? '',
+    'PresharedKey': lower['presharedkey'] ?? lower['psk'] ?? '',
+    'AllowedIPs': lower['allowedips'] ?? '',
+    'PersistentKeepalive': lower['keepalive'] ?? '',
+    'Endpoint': server.contains(':') ? '[$server]:$port' : '$server:$port',
+  };
+  final newline = RegExp(r'[\r\n]');
+  if ([privateKey, ...fields.values, ...peer.values].any(newline.hasMatch)) {
+    return null;
+  }
+  final buffer = StringBuffer('[Interface]\n')
+    ..writeln('PrivateKey = $privateKey');
+  fields.forEach((key, value) {
+    if (value.isNotEmpty) buffer.writeln('$key = $value');
+  });
+  buffer.writeln('[Peer]');
+  peer.forEach((key, value) {
+    if (value.isNotEmpty) buffer.writeln('$key = $value');
+  });
+  return buffer.toString();
+}
+
 (List<Map<String, Object?>>, List<SkippedNode>) parseVpnLink(String payload) {
   final bytes = _tryBase64Bytes(payload);
   if (bytes == null) return (const [], const []);
@@ -274,7 +313,7 @@ String _normalizeKey(String value) {
           'awg',
         ].contains(containerName);
     Map<String, Object?>? protocolConfig;
-    for (final key in const ['amnezia-awg', 'wireguard']) {
+    for (final key in const ['amnezia-awg', 'wireguard', 'awg']) {
       if (entry[key] is Map<String, Object?>) {
         protocolConfig = entry[key]! as Map<String, Object?>;
       }

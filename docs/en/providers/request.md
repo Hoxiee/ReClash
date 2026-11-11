@@ -50,7 +50,7 @@ A preset changes only request headers, never the device ID.
 
 ReClash detects the body format locally. Native Clash YAML is kept as-is; share-link lists, Xray JSON (one configuration or an array), sing-box JSON, WireGuard and supported Amnezia containers are converted to Clash YAML before Core validation.
 
-Share-link lists accept plain text, Base64 and Base64url. Supported schemes include `mierus`, `socks5h`, `hysteria2+realm` and `hy2+realm`; Mieru links can define several port/protocol pairs. Unrecognized or malformed node links in a recognized list are reported as skipped.
+Share-link lists accept plain text, Base64 and Base64url. Supported schemes include `mierus`, `tt` (TrustTunnel), `socks5h`, `hysteria2+realm` and `hy2+realm`; Mieru links can define several port/protocol pairs. A TrustTunnel link that sets anti-DPI, a client random prefix or several addresses imports with a loss warning, because the Core cannot express those fields. Unrecognized or malformed node links in a recognized list are reported as skipped.
 
 VLESS XHTTP conversion preserves supported `extra` options, including headers, padding, connection reuse and a separate download connection. Unsupported or malformed extra options are reported as conversion losses. Foreign DNS, inbound and other unconverted configuration sections are also reported, including for every configuration in an Xray array. Losses require approval or an already accepted import policy for that source; an unapproved update leaves the saved profile unchanged.
 

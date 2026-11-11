@@ -2,6 +2,8 @@ library;
 
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import '../config/amnezia_config.dart';
 import '../routing/skipped_node.dart';
 import '../transport/xhttp.dart';
@@ -23,6 +25,7 @@ const shareLinkSchemes = [
   'socks5',
   'socks5h',
   'mierus',
+  'tt',
   'wireguard',
   'wg',
   'amneziawg',
@@ -218,6 +221,7 @@ List<Map<String, Object?>> _parseUri(
   required void Function() onLoss,
 }) {
   if (uri.startsWith('mierus://')) return _parseMieru(uri, onLoss: onLoss);
+  if (uri.startsWith('tt://')) return [?_parseTrustTunnel(uri, onLoss: onLoss)];
   final proxy = switch (_nodeScheme(uri)) {
     'vmess' => _parseVmess(uri),
     'vless' => _parseVless(uri, onLoss: onLoss),
@@ -418,13 +422,24 @@ Map<String, Object?>? _parseAmneziaWgLink(String uri) {
   final hashIdx = noScheme.indexOf('#');
   final fragment = hashIdx >= 0 ? noScheme.substring(hashIdx + 1) : '';
   final body = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
+  final decoded = fragment.length > 1 ? _tryDecodeFragment(fragment) : null;
+  final displayName = decoded == null || decoded.isEmpty ? null : decoded;
+  if (body.contains('@')) {
+    final parts = _splitUserinfoUri(uri);
+    if (parts == null) return null;
+    final conf = awgConfFromLinkParams(
+      privateKey: parts.$1,
+      server: parts.$2,
+      port: parts.$3,
+      params: parts.$4,
+    );
+    return conf == null
+        ? null
+        : parseAwgConf(conf, name: displayName ?? parts.$5);
+  }
   final conf = tryBase64Decode(body);
   if (conf == null) return null;
-  final decoded = fragment.length > 1 ? _tryDecodeFragment(fragment) : null;
-  return parseAwgConf(
-    conf,
-    name: decoded == null || decoded.isEmpty ? null : decoded,
-  );
+  return parseAwgConf(conf, name: displayName);
 }
 
 Map<String, Object?>? _parseVmess(String uri) {
@@ -859,6 +874,143 @@ Map<String, Object?>? _parseAnytls(String uri) {
   return proxy;
 }
 
+const _ttHostname = 0x01;
+const _ttAddress = 0x02;
+const _ttCustomSni = 0x03;
+const _ttUsername = 0x05;
+const _ttPassword = 0x06;
+const _ttSkipVerification = 0x07;
+const _ttCertificate = 0x08;
+const _ttUpstreamProtocol = 0x09;
+const _ttAntiDpi = 0x0A;
+const _ttClientRandomPrefix = 0x0B;
+const _ttName = 0x0C;
+
+Map<String, Object?>? _parseTrustTunnel(
+  String uri, {
+  required void Function() onLoss,
+}) {
+  final hashIdx = uri.indexOf('#');
+  final fragment = hashIdx >= 0 ? _displayName(uri.substring(hashIdx + 1)) : '';
+  final body = hashIdx >= 0 ? uri.substring(0, hashIdx) : uri;
+  if (!body.startsWith('tt://?')) return null;
+  final fields = _readTrustTunnelFields(body.substring('tt://?'.length));
+  if (fields == null) return null;
+
+  String text(int tag) {
+    final value = fields[tag]?.first;
+    return value == null ? '' : utf8.decode(value, allowMalformed: true);
+  }
+
+  bool flag(int tag) => fields[tag]?.first.any((b) => b != 0) ?? false;
+
+  final username = text(_ttUsername);
+  final password = text(_ttPassword);
+  if (username.isEmpty || password.isEmpty) return null;
+
+  final hostname = text(_ttHostname);
+  final addresses = fields[_ttAddress] ?? const [];
+  var server = hostname;
+  var port = 443;
+  if (addresses.isNotEmpty) {
+    final split = splitHostPort(
+      utf8.decode(addresses.first, allowMalformed: true),
+    );
+    if (split == null) return null;
+    (server, port) = split;
+  }
+  if (server.isEmpty) return null;
+  if (addresses.length > 1) onLoss();
+
+  final name = text(_ttName);
+  final proxy = <String, Object?>{
+    'name': name.isNotEmpty
+        ? name
+        : fragment.isNotEmpty
+        ? fragment
+        : hostname.isNotEmpty
+        ? hostname
+        : server,
+    'type': 'trusttunnel',
+    'server': server,
+    'port': port,
+    'username': username,
+    'password': password,
+    'udp': true,
+  };
+  final sni = text(_ttCustomSni).isNotEmpty ? text(_ttCustomSni) : hostname;
+  if (sni.isNotEmpty) proxy['sni'] = sni;
+  final skipVerification = flag(_ttSkipVerification);
+  if (skipVerification) proxy['skip-cert-verify'] = true;
+  final chain = fields[_ttCertificate]?.first;
+  if (chain != null && !skipVerification) {
+    final der = _firstDerCertificate(chain);
+    if (der == null) {
+      onLoss();
+    } else {
+      proxy['fingerprint'] = sha256.convert(der).toString();
+    }
+  }
+  final upstream = fields[_ttUpstreamProtocol]?.first;
+  if (upstream != null && upstream.length == 1 && upstream.first == 2) {
+    proxy['quic'] = true;
+  }
+  if (flag(_ttAntiDpi) || fields.containsKey(_ttClientRandomPrefix)) onLoss();
+  return proxy;
+}
+
+Map<int, List<List<int>>>? _readTrustTunnelFields(String payload) {
+  final List<int> bytes;
+  try {
+    bytes = base64Url.decode(base64Url.normalize(payload));
+  } on FormatException {
+    return null;
+  }
+  final fields = <int, List<List<int>>>{};
+  var offset = 0;
+
+  int? readVarint() {
+    if (offset >= bytes.length) return null;
+    final size = 1 << (bytes[offset] >> 6);
+    if (offset + size > bytes.length) return null;
+    var value = bytes[offset] & 0x3f;
+    for (var i = 1; i < size; i++) {
+      value = (value << 8) | bytes[offset + i];
+    }
+    offset += size;
+    return value;
+  }
+
+  while (offset < bytes.length) {
+    final tag = readVarint();
+    final length = tag == null ? null : readVarint();
+    if (length == null || offset + length > bytes.length) return null;
+    fields
+        .putIfAbsent(tag!, () => [])
+        .add(bytes.sublist(offset, offset + length));
+    offset += length;
+  }
+  return fields;
+}
+
+List<int>? _firstDerCertificate(List<int> chain) {
+  if (chain.length < 2 || chain[0] != 0x30) return null;
+  var length = chain[1];
+  var header = 2;
+  if (length & 0x80 != 0) {
+    final count = length & 0x7f;
+    if (count == 0 || count > 4 || chain.length < 2 + count) return null;
+    length = 0;
+    for (var i = 0; i < count; i++) {
+      length = (length << 8) | chain[2 + i];
+    }
+    header += count;
+  }
+  return header + length > chain.length
+      ? null
+      : chain.sublist(0, header + length);
+}
+
 Map<String, Object?>? _parseHysteria1(String uri) {
   const schemeEnd = 'hysteria://'.length;
   final noScheme = uri.substring(schemeEnd);
@@ -951,7 +1103,11 @@ _splitUserinfoUri(String uri, {bool requireUserinfo = true}) {
       ? ''
       : _decodeComponent(hostPort.substring(0, atIdx));
   if (userinfo.isEmpty && requireUserinfo) return null;
-  final split = splitHostPort(hostPort.substring(atIdx + 1));
+  final authority = hostPort.substring(atIdx + 1);
+  final slashIdx = authority.indexOf('/');
+  final split = splitHostPort(
+    slashIdx >= 0 ? authority.substring(0, slashIdx) : authority,
+  );
   if (split == null) return null;
   final (server, port) = split;
   return (userinfo, server, port, params, name.isEmpty ? server : name);

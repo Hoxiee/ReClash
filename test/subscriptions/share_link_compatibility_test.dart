@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/constant.dart' as common;
 import 'package:reclash/subscriptions/imports/import.dart';
@@ -16,6 +17,35 @@ SubscriptionImportResult _import(String input) =>
 List<YamlMap> _proxies(SubscriptionImportResult result) =>
     ((loadYaml(utf8.decode(result.bytes)) as YamlMap)['proxies'] as YamlList)
         .cast<YamlMap>();
+
+List<int> _varint(int value) {
+  if (value < 0x40) return [value];
+  if (value < 0x4000) return [0x40 | (value >> 8), value & 0xff];
+  return [
+    0x80 | (value >> 24),
+    (value >> 16) & 0xff,
+    (value >> 8) & 0xff,
+    value & 0xff,
+  ];
+}
+
+List<int> _tlv(int tag, Object value) {
+  final bytes = value is String ? utf8.encode(value) : value as List<int>;
+  return [..._varint(tag), ..._varint(bytes.length), ...bytes];
+}
+
+String _ttLink(List<List<int>> entries, {String fragment = ''}) =>
+    'tt://?${base64Url.encode(entries.expand((e) => e).toList()).replaceAll('=', '')}$fragment';
+
+List<List<int>> _ttBase({List<List<int>> extra = const []}) => [
+  _tlv(0, [2]),
+  _tlv(1, 'tt.example'),
+  _tlv(2, '203.0.113.7:8443'),
+  _tlv(5, 'user'),
+  _tlv(6, 'pass'),
+  _tlv(0x7f, 'unknown'),
+  ...extra,
+];
 
 void main() {
   test('Xray and URI imports share XHTTP options and loss reporting', () {
@@ -287,6 +317,211 @@ void main() {
         expect(result.summary.hasLosses, isTrue, reason: extra);
         expect(result.summary.hasOtherLosses, isTrue, reason: extra);
       }
+    });
+  });
+
+  group('share link authority path', () {
+    test('ignores a trailing slash before the query', () {
+      final result = _import(
+        'anytls://secret@edge.example:8443/?sni=edge.example#Any\n'
+        'trojan://secret@edge.example:443/path?sni=edge.example#Tro',
+      );
+      final proxies = _proxies(result);
+      expect(proxies, hasLength(2));
+      expect(proxies[0]['type'], 'anytls');
+      expect(proxies[0]['server'], 'edge.example');
+      expect(proxies[0]['port'], 8443);
+      expect(proxies[1]['port'], 443);
+    });
+  });
+
+  group('AmneziaWG links', () {
+    test('imports a URI-style link with AWG 2.x fields', () {
+      final result = _import(
+        'amneziawg://abcKEY%3D@edge.example:51820'
+        '?address=10.0.0.2%2F32&dns=1.1.1.1%2C+8.8.8.8&h1=10-20&h2=30-40'
+        '&i1=%3Cb+0x1603%3E&jc=6&jmax=50&jmin=10&keepalive=25&mtu=1420'
+        '&presharedkey=pskKEY&publickey=pubKEY&s1=57&s2=29#Awg',
+      );
+      final proxy = _proxies(result).single;
+      expect(proxy['name'], 'Awg');
+      expect(proxy['type'], 'wireguard');
+      expect(proxy['server'], 'edge.example');
+      expect(proxy['port'], 51820);
+      expect(proxy['private-key'], 'abcKEY=');
+      expect(proxy['persistent-keepalive'], 25);
+      final option = proxy['amnezia-wg-option'] as YamlMap;
+      expect(option['h1'], '10-20');
+      expect(option['i1'], '<b 0x1603>');
+      expect(option['jc'], 6);
+      expect(option['s2'], 29);
+    });
+
+    test('drops a link without a host', () {
+      final result = _import('amneziawg://key@:51820?address=10.0.0.2');
+      expect(result.summary.nodes, 0);
+    });
+  });
+
+  group('AmneziaVPN vpn:// containers', () {
+    test('imports an awg container with last_config fields', () {
+      final lastConfig = jsonEncode({
+        'H1': '10-20',
+        'I1': '<b 0x1603>',
+        'Jc': '6',
+        'Jmax': '50',
+        'Jmin': '10',
+        'S1': '57',
+        'client_ip': '10.0.0.2/32',
+        'client_priv_key': 'privKEY',
+        'hostName': 'edge.example',
+        'port': 51820,
+        'psk_key': 'pskKEY',
+        'server_pub_key': 'pubKEY',
+      });
+      final share = jsonEncode({
+        'containers': [
+          {
+            'container': 'amnezia-awg',
+            'awg': {'last_config': lastConfig},
+          },
+        ],
+        'description': 'Edge',
+        'hostName': 'edge.example',
+      });
+      final result = _import(
+        'vpn://${base64Url.encode(utf8.encode(share)).replaceAll('=', '')}',
+      );
+      final proxy = _proxies(result).single;
+      expect(proxy['name'], 'Edge');
+      expect(proxy['server'], 'edge.example');
+      expect(proxy['port'], 51820);
+      expect((proxy['amnezia-wg-option'] as YamlMap)['h1'], '10-20');
+    });
+  });
+
+  group('TrustTunnel links', () {
+    test('imports an h2 link', () {
+      final result = _import(_ttLink(_ttBase(extra: [_tlv(0x0c, 'Edge 🚀')])));
+      expect(result.summary.hasLosses, isFalse);
+      expect(_proxies(result).single, {
+        'name': 'Edge 🚀',
+        'type': 'trusttunnel',
+        'server': '203.0.113.7',
+        'port': 8443,
+        'username': 'user',
+        'password': 'pass',
+        'udp': true,
+        'sni': 'tt.example',
+      });
+    });
+
+    test('uses HTTP/3, custom SNI and the fragment name', () {
+      final result = _import(
+        _ttLink([
+          ..._ttBase(
+            extra: [
+              _tlv(3, 'front.example'),
+              _tlv(9, [2]),
+            ],
+          ),
+        ], fragment: '#Frag'),
+      );
+      final proxy = _proxies(result).single;
+      expect(proxy['name'], 'Frag');
+      expect(proxy['quic'], isTrue);
+      expect(proxy['sni'], 'front.example');
+    });
+
+    test('falls back to the hostname and port 443', () {
+      final proxy = _proxies(
+        _import(
+          _ttLink([_tlv(1, 'tt.example'), _tlv(5, 'user'), _tlv(6, 'pass')]),
+        ),
+      ).single;
+      expect(proxy['name'], 'tt.example');
+      expect(proxy['server'], 'tt.example');
+      expect(proxy['port'], 443);
+    });
+
+    test('strips IPv6 brackets and reads two-byte varint lengths', () {
+      final longName = 'n' * 100;
+      final proxy = _proxies(
+        _import(
+          _ttLink(
+            _ttBase(extra: [_tlv(0x0c, longName)])
+              ..[2] = _tlv(2, '[2001:db8::1]:443'),
+          ),
+        ),
+      ).single;
+      expect(proxy['server'], '2001:db8::1');
+      expect(proxy['name'], longName);
+    });
+
+    test('honors skip_verification', () {
+      final proxy = _proxies(
+        _import(
+          _ttLink(
+            _ttBase(
+              extra: [
+                _tlv(7, [1]),
+              ],
+            ),
+          ),
+        ),
+      ).single;
+      expect(proxy['skip-cert-verify'], isTrue);
+    });
+
+    test('pins the first certificate of the chain', () {
+      final first = [0x30, 0x03, 1, 2, 3];
+      final result = _import(
+        _ttLink(
+          _ttBase(
+            extra: [
+              _tlv(8, [...first, 0x30, 0x01, 9]),
+            ],
+          ),
+        ),
+      );
+      expect(result.summary.hasLosses, isFalse);
+      expect(
+        _proxies(result).single['fingerprint'],
+        sha256.convert(first).toString(),
+      );
+    });
+
+    test('reports extra addresses and unsupported obfuscation', () {
+      for (final extra in [
+        [_tlv(2, '203.0.113.8:8443')],
+        [_tlv(0x0b, '548e85a3/ffffffff')],
+        [
+          _tlv(0x0a, [1]),
+        ],
+      ]) {
+        final result = _import(_ttLink(_ttBase(extra: extra)));
+        expect(result.summary.nodes, 1);
+        expect(result.summary.hasLosses, isTrue);
+      }
+    });
+
+    test('skips truncated and credential-less links', () {
+      final full = _ttLink(_ttBase());
+      for (final link in [
+        full.substring(0, full.length - 6),
+        _ttLink([_tlv(1, 'tt.example')]),
+        'tt://?!!!',
+      ]) {
+        expect(tryConvertShareLinks(link), isNull);
+        expect(probeUnsupportedShareLinks(link), hasLength(1));
+      }
+    });
+
+    test('imports from a base64 subscription beside other links', () {
+      final source = '$_vless\n${_ttLink(_ttBase())}';
+      final result = _import(base64.encode(utf8.encode(source)));
+      expect(result.summary.nodes, 2);
+      expect(_proxies(result)[1]['type'], 'trusttunnel');
     });
   });
 }
