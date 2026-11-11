@@ -1,6 +1,7 @@
 package core
 
 import (
+	"core/extensions"
 	"os"
 	"runtime"
 	"time"
@@ -11,25 +12,27 @@ import (
 )
 
 type CoreInfo struct {
-	Version          string     `json:"version"`
-	GoVersion        string     `json:"goVersion"`
-	Platform         string     `json:"platform"`
-	Architecture     string     `json:"architecture"`
-	BuildTime        *time.Time `json:"buildTime"`
-	Tags             []string   `json:"tags"`
-	WorkingDirectory string     `json:"workingDirectory"`
-	ExecutablePath   string     `json:"executablePath"`
-	TunActive        bool       `json:"tunActive"`
+	Version           string     `json:"version"`
+	GoVersion         string     `json:"goVersion"`
+	Platform          string     `json:"platform"`
+	Architecture      string     `json:"architecture"`
+	BuildTime         *time.Time `json:"buildTime"`
+	Tags              []string   `json:"tags"`
+	WorkingDirectory  string     `json:"workingDirectory"`
+	ExecutablePath    string     `json:"executablePath"`
+	TunActive         bool       `json:"tunActive"`
+	ExtensionProtocol []int      `json:"extensionProtocol"`
 }
 
 func handleGetCoreInfo() CoreInfo {
 	info := CoreInfo{
-		Version:      constant.Version,
-		GoVersion:    runtime.Version(),
-		Platform:     runtime.GOOS,
-		Architecture: runtime.GOARCH,
-		BuildTime:    coreBuildTime(constant.BuildTime),
-		Tags:         append([]string{}, features.Tags()...),
+		Version:           constant.Version,
+		GoVersion:         runtime.Version(),
+		Platform:          runtime.GOOS,
+		Architecture:      runtime.GOARCH,
+		BuildTime:         coreBuildTime(constant.BuildTime),
+		Tags:              append([]string{}, features.Tags()...),
+		ExtensionProtocol: append([]int{}, extensions.SupportedProtocols...),
 	}
 	if !features.Android {
 		info.ExecutablePath, _ = os.Executable()

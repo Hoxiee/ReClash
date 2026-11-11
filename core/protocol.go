@@ -69,6 +69,7 @@ const (
 	getTelegramProxyMethod         CoreMethod = "getTelegramProxy"
 	telegramProxySelfTestMethod    CoreMethod = "telegramProxySelfTest"
 	telegramProxyResetMethod       CoreMethod = "telegramProxyResetConnections"
+	getExtensionsMethod            CoreMethod = "getExtensions"
 	updateDnsMethod                CoreMethod = "updateDns"
 	crashMethod                    CoreMethod = "crash"
 	setupConfigMethod              CoreMethod = "setupConfig"

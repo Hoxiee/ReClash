@@ -1,6 +1,7 @@
 package core
 
 import (
+	"core/extensions"
 	"encoding/json"
 	"os"
 	"reflect"
@@ -28,6 +29,9 @@ func TestCoreInfoUsesRunningBinaryMetadata(t *testing.T) {
 	}
 	if features.Android && info.ExecutablePath != "" {
 		t.Fatal("Android must not report the host process as the Core executable")
+	}
+	if !reflect.DeepEqual(info.ExtensionProtocol, extensions.SupportedProtocols) {
+		t.Fatalf("unexpected extension protocols: %v", info.ExtensionProtocol)
 	}
 	if methodHandlers[getCoreInfoMethod] == nil {
 		t.Fatal("getCoreInfo is not registered")

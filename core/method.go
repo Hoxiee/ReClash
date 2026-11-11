@@ -180,6 +180,7 @@ func acknowledged(run func()) methodHandler {
 func shutdownCore() bool {
 	stopTelegramProxy()
 	result := handleShutdown()
+	extensionManager.StopAll()
 	cancelSubscriptionFetches()
 	cancelSpeedTests()
 	return result
@@ -198,6 +199,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	getTelegramProxyMethod:         withoutArguments(handleGetTelegramProxy),
 	telegramProxySelfTestMethod:    withArguments(handleTelegramProxySelfTest),
 	telegramProxyResetMethod:       acknowledged(resetTelegramProxyConnections),
+	getExtensionsMethod:            withoutArguments(handleGetExtensions),
 	getMemoryStatsMethod:           withoutArguments(handleGetMemoryStats),
 	startLogMethod:                 acknowledged(handleStartLog),
 	stopLogMethod:                  acknowledged(handleStopLog),

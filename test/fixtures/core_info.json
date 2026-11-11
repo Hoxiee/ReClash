@@ -7,5 +7,6 @@
   "tags": ["with_gvisor"],
   "workingDirectory": "/home/reclash/.config",
   "executablePath": "/usr/bin/ReClashCore",
-  "tunActive": false
+  "tunActive": false,
+  "extensionProtocol": [1]
 }

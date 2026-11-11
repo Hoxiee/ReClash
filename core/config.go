@@ -237,6 +237,7 @@ func applyConfig(params *SetupParams) error {
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()
 	rcxApplyConfig(params.Rcx, load.subscription, load.routes)
+	extensionManager.Applied()
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	scheduleLoadMemoryRelease()

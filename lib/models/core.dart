@@ -451,6 +451,7 @@ abstract class CoreInfo with _$CoreInfo {
     @Default('') String workingDirectory,
     @Default('') String executablePath,
     @Default(false) bool tunActive,
+    @Default(<int>[]) List<int> extensionProtocol,
   }) = _CoreInfo;
 
   factory CoreInfo.fromJson(Map<String, Object?> json) =>

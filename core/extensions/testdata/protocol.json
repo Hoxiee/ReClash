@@ -1,0 +1,42 @@
+{
+  "protocol": 1,
+  "manifest": {
+    "id": "openflux",
+    "version": "0.1.0",
+    "protocol": [1],
+    "schemes": ["openflux"],
+    "executable": "openflux-ext",
+    "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+  },
+  "run": {
+    "argv": ["run"],
+    "request": {
+      "protocol": 1,
+      "link": "openflux://v1/eyJ0ZXN0Ijp0cnVlfQ",
+      "listen": "127.0.0.1:0",
+      "egress": {"socks5": "127.0.0.1:41234", "username": "e-7f3a", "password": "c2VjcmV0LWVncmVzcw"},
+      "dataDir": "/home/reclash/.config/extensions/openflux/data/5f2b1c0d9e8a7b6c",
+      "logLevel": "info"
+    },
+    "events": [
+      {"event": "ready", "socks5": "127.0.0.1:53111", "username": "x-91c2", "password": "c2VjcmV0LWZyb250", "udp": true},
+      {"event": "status", "state": "degraded", "message": "carrier reconnecting"},
+      {"event": "status", "state": "ok"},
+      {"event": "fatal", "message": "link: unsupported version 2"}
+    ]
+  },
+  "describe": {
+    "argv": ["describe"],
+    "request": {"links": ["openflux://v1/eyJ0ZXN0Ijp0cnVlfQ", "openflux://v1/broken"]},
+    "response": {
+      "nodes": [
+        {"name": "Finland", "server": "203.0.113.10", "udp": false, "error": ""},
+        {"name": "", "server": "", "udp": false, "error": "link: invalid base64"}
+      ]
+    }
+  },
+  "version": {
+    "argv": ["version"],
+    "response": {"id": "openflux", "version": "0.1.0", "protocol": [1]}
+  }
+}
