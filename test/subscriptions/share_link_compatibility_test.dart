@@ -554,8 +554,16 @@ void main() {
       expect(names, ['OpenFlux 1', 'OpenFlux 2']);
     });
 
+    test('imports a qWDTT line as its own extension', () {
+      const link = 'qwdtt://config?peer=203.0.113.9&port=56000&pass=x';
+      final proxy = _proxies(_import('$flux\n$link')).last;
+      expect(proxy['name'], 'qWDTT 1');
+      expect(proxy['extension'], 'qwdtt');
+      expect(proxy['link'], link);
+    });
+
     test('unknown schemes are still skipped as protocols', () {
-      const link = 'qwdtt://v1/abc';
+      const link = 'nosuchproto://v1/abc';
       expect(tryConvertShareLinks(link), isNull);
       final skipped = probeUnsupportedShareLinks(link);
       expect(skipped, hasLength(1));

@@ -14,6 +14,7 @@ class ExtensionEntry {
 
 const bundledExtensions = [
   ExtensionEntry(id: 'openflux', name: 'OpenFlux', schemes: ['openflux']),
+  ExtensionEntry(id: 'qwdtt', name: 'qWDTT', schemes: ['qwdtt']),
 ];
 
 ExtensionEntry? extensionForScheme(String? scheme) {
