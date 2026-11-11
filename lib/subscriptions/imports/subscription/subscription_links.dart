@@ -286,6 +286,8 @@ List<Map<String, Object?>> _parseMieru(
       onLoss();
       continue;
     }
+    final mtu = params['mtu']?.firstOrNull;
+    if (protocol == 'UDP' && mtu != null && mtu != '1400') onLoss();
     proxies.add({
       'name': '$baseName:$port/$protocol',
       'type': 'mieru',

@@ -132,6 +132,18 @@ void main() {
     expect(result.summary.hasLosses, isTrue);
   });
 
+  test('reports a Mieru UDP MTU the Core cannot express as a loss', () {
+    for (final (mtu, lossy) in [('1400', false), ('1280', true)]) {
+      final result = _import(
+        'mierus://user:pass@203.0.113.7?port=443&protocol=UDP&mtu=$mtu#Mesh',
+      );
+      final proxy = _proxies(result).single;
+      expect(proxy, containsPair('transport', 'UDP'));
+      expect(proxy, containsPair('server', '203.0.113.7'));
+      expect(result.summary.hasLosses, lossy);
+    }
+  });
+
   test('recognizes uppercase schemes and SOCKS5H credentials', () {
     final auth = base64.encode(utf8.encode('user:pass'));
     final result = _import('SOCKS5H://$auth@proxy.example:1080#Proxy');
