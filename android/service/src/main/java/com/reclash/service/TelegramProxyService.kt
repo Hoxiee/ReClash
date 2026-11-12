@@ -8,7 +8,11 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.PowerManager
+import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
@@ -96,13 +100,56 @@ object TelegramProxy {
 }
 
 class TelegramProxyService : Service() {
+    private val handler = Handler(Looper.getMainLooper())
+    private var wakeLock: PowerManager.WakeLock? = null
     private var lastNetwork: Network? = null
+    private var lastResetAt = 0L
+    private val resetRunnable = Runnable {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastResetAt < RESET_THROTTLE_MS) return@Runnable
+        lastResetAt = now
+        TelegramProxy.resetConnections()
+    }
+    private val renewWakeLock = object : Runnable {
+        override fun run() {
+            acquireWakeLock()
+            handler.postDelayed(this, WAKE_LOCK_RENEW_MS)
+        }
+    }
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             val changed = lastNetwork != null && lastNetwork != network
             lastNetwork = network
-            if (changed) TelegramProxy.resetConnections()
+            if (changed) scheduleReset()
         }
+
+        override fun onLost(network: Network) {
+            if (lastNetwork != network) return
+            lastNetwork = null
+            scheduleReset()
+        }
+    }
+
+    private fun scheduleReset() {
+        handler.removeCallbacks(resetRunnable)
+        handler.postDelayed(resetRunnable, RESET_DEBOUNCE_MS)
+    }
+
+    private fun acquireWakeLock() {
+        val lock = wakeLock
+            ?: getSystemService(PowerManager::class.java)
+                ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "reclash:telegram-proxy")
+                ?.also {
+                    it.setReferenceCounted(false)
+                    wakeLock = it
+                }
+        lock?.acquire(WAKE_LOCK_TIMEOUT_MS)
+    }
+
+    private fun releaseWakeLock() {
+        handler.removeCallbacks(renewWakeLock)
+        wakeLock?.takeIf { it.isHeld }?.release()
+        wakeLock = null
     }
 
     override fun onBind(intent: Intent): IBinder? = null
@@ -116,6 +163,8 @@ class TelegramProxyService : Service() {
     override fun onDestroy() {
         TelegramProxy.serviceRunning = false
         getSystemService(ConnectivityManager::class.java)?.unregisterNetworkCallback(networkCallback)
+        handler.removeCallbacks(resetRunnable)
+        releaseWakeLock()
         super.onDestroy()
     }
 
@@ -125,14 +174,18 @@ class TelegramProxyService : Service() {
         startForeground(buildNotification(params), GlobalState.TELEGRAM_PROXY_NOTIFICATION_ID)
         if (intent?.action == ACTION_STOP) {
             TelegramProxy.stopFromNotification()
+            releaseWakeLock()
             stopSelf()
             return START_NOT_STICKY
         }
         if (params == null) {
+            releaseWakeLock()
             stopSelf()
             return START_NOT_STICKY
         }
         TelegramProxy.invoke(params)
+        handler.removeCallbacks(renewWakeLock)
+        renewWakeLock.run()
         return START_STICKY
     }
 
@@ -168,13 +221,25 @@ class TelegramProxyService : Service() {
 
     private companion object {
         const val ACTION_STOP = "com.reclash.service.TELEGRAM_PROXY_STOP"
+        const val WAKE_LOCK_TIMEOUT_MS = 30 * 60 * 1000L
+        const val WAKE_LOCK_RENEW_MS = 25 * 60 * 1000L
+        const val RESET_DEBOUNCE_MS = 1_000L
+        const val RESET_THROTTLE_MS = 3_000L
     }
 }
 
 class TelegramProxyBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        if (intent.action !in BOOT_ACTIONS) return
         if (TelegramProxy.desiredParams == null || !TelegramProxy.autostart) return
         ContextCompat.startForegroundService(context, Intent(context, TelegramProxyService::class.java))
+    }
+
+    private companion object {
+        val BOOT_ACTIONS = setOf(
+            Intent.ACTION_BOOT_COMPLETED,
+            "android.intent.action.QUICKBOOT_POWERON",
+            "com.htc.intent.action.QUICKBOOT_POWERON",
+        )
     }
 }
