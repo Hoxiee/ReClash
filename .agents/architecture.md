@@ -462,6 +462,14 @@ v0.9.0 kept `include-all-proxies` in their stored `definition`, and it takes eff
 Desktop RPC accepts both a single event object and batched event lists. Android and desktop listener dispatch isolate
 listener exceptions so one faulty observer does not prevent the remaining events/listeners from running.
 
+## Protocol Extensions
+
+Protocols mihomo lacks run as separate executables (`type: extension` nodes carrying the original share link):
+`core/extensions/` owns the outbound, supervisor, egress and local install; the Dart side is only the import catalog
+`lib/subscriptions/imports/subscription/extension_catalog.dart`, whose `name` is also the type label nodes show.
+Wrappers live in the sibling `../reclash-extensions` repository; adding a protocol follows its
+`docs/adding-a-protocol.md`, the contract is `project/_new/design/extensions/SPEC.md`.
+
 ## User-Facing Core And Delay Feedback
 
 `CoreStatusButton` in `lib/views/dashboard/widgets/core_status_button.dart` is the desktop dashboard's status/restart
