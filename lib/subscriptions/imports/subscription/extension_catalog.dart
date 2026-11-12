@@ -5,18 +5,46 @@ class ExtensionEntry {
     required this.id,
     required this.name,
     required this.schemes,
+    this.nameOf,
   });
 
   final String id;
   final String name;
   final List<String> schemes;
+  final String Function(String link)? nameOf;
 }
 
 const bundledExtensions = [
   ExtensionEntry(id: 'openflux', name: 'OpenFlux', schemes: ['openflux']),
   ExtensionEntry(id: 'qwdtt', name: 'qWDTT', schemes: ['qwdtt']),
   ExtensionEntry(id: 'naive', name: 'NaiveProxy', schemes: ['naive+https']),
+  ExtensionEntry(
+    id: 'olcrtc',
+    name: 'olcRTC',
+    schemes: ['olcrtc'],
+    nameOf: _olcrtcName,
+  ),
 ];
+
+/// olcRTC carries the key in the fragment; the name follows it after `$`.
+String _olcrtcName(String link) {
+  final hash = link.indexOf('#');
+  final dollar = hash < 0 ? -1 : link.indexOf(r'$', hash);
+  return dollar < 0 ? '' : _decodeName(link.substring(dollar + 1));
+}
+
+String _fragmentName(String link) {
+  final hash = link.indexOf('#');
+  return hash < 0 ? '' : _decodeName(link.substring(hash + 1));
+}
+
+String _decodeName(String value) {
+  try {
+    return Uri.decodeComponent(value).trim();
+  } on ArgumentError {
+    return value.trim();
+  }
+}
 
 /// The protocol a node shows as its type: an extension node names the
 /// protocol it runs instead of the generic `extension` type.
@@ -42,15 +70,7 @@ Map<String, Object?> extensionNode(
   String link,
   int count,
 ) {
-  final hash = link.indexOf('#');
-  var name = '';
-  if (hash >= 0) {
-    try {
-      name = Uri.decodeComponent(link.substring(hash + 1)).trim();
-    } on ArgumentError {
-      name = link.substring(hash + 1).trim();
-    }
-  }
+  final name = (extension.nameOf ?? _fragmentName)(link);
   return {
     'name': name.isEmpty ? '${extension.name} $count' : name,
     'type': 'extension',

@@ -583,11 +583,21 @@ void main() {
       expect(proxy['link'], link);
     });
 
+    test('names an olcRTC node after its comment, never its key', () {
+      const key =
+          '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
+      const room = 'olcrtc://telemost?vp8channel<vp8-fps=30>@12345#$key';
+      final proxies = _proxies(_import('$room\n$room\$Office%20A'));
+      expect(proxies.map((p) => p['name']), ['olcRTC 1', 'Office A']);
+      expect(proxies.first['extension'], 'olcrtc');
+      expect(proxies.first['link'], room);
+    });
+
     test('labels an extension node with its protocol', () {
       Proxy node(String? extension) =>
           Proxy(name: 'n', type: 'Extension', extension: extension);
       expect(node('openflux').typeLabel, 'OpenFlux');
-      expect(node('olcrtc').typeLabel, 'olcrtc');
+      expect(node('csqtt').typeLabel, 'csqtt');
       expect(node(null).typeLabel, 'Extension');
       expect(node('qwdtt').searchFields, contains('qWDTT'));
       final custom = CustomProxy.fromDefinition(_proxies(_import(flux)).single);
