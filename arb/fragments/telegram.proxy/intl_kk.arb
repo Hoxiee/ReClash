@@ -26,10 +26,13 @@
   "telegramProxyPort": "Порт",
   "telegramProxyInvalidPort": "1024-тен 65535-ке дейінгі портты енгізіңіз",
   "telegramProxyEndpoints": "Telegram веб-мекенжайлары",
-  "telegramProxyAdvancedFooter": "Портты өзгерткеннен кейін проксиді Telegram-ға қайта қосу керек. Мекенжайлар бос қалса, ішкі мекенжайлар пайдаланылады.",
+  "telegramProxyAdvancedFooter": "Портты өзгерткеннен кейін проксиді Telegram-ға қайта қосу керек. Тізімдер бос қалса, ішкі мекенжайлар мен Cloudflare домендері пайдаланылады.",
   "telegramProxyNotificationTitle": "Telegram проксиі іске қосулы",
   "telegramProxyNotificationStop": "Тоқтату",
   "doctorTelegramProxyTitle": "Telegram проксиі жұмыс істемейді",
   "doctorTelegramProxyDetail": "Прокси арқылы сынақ қосылымы сәтсіз аяқталды: {error}",
-  "telegramProxyOutboundOff": "Профильді пайдаланбау"
+  "telegramProxyOutboundOff": "Профильді пайдаланбау",
+  "telegramProxyRouteCloudflare": "Cloudflare арқылы",
+  "telegramProxyRouteTcp": "Тікелей TCP",
+  "telegramProxyCfDomains": "Өз Cloudflare домендері"
 }

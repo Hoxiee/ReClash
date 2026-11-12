@@ -26,10 +26,13 @@
   "telegramProxyPort": "포트",
   "telegramProxyInvalidPort": "1024에서 65535 사이의 포트를 입력하세요",
   "telegramProxyEndpoints": "Telegram 웹 주소",
-  "telegramProxyAdvancedFooter": "포트를 바꾼 후에는 Telegram에 프록시를 다시 추가해야 합니다. 주소를 비워 두면 내장 주소를 사용합니다.",
+  "telegramProxyAdvancedFooter": "포트를 바꾼 후에는 Telegram에 프록시를 다시 추가해야 합니다. 목록을 비워 두면 내장 주소와 Cloudflare 도메인을 사용합니다.",
   "telegramProxyNotificationTitle": "Telegram 프록시가 실행 중입니다",
   "telegramProxyNotificationStop": "중지",
   "doctorTelegramProxyTitle": "Telegram 프록시가 작동하지 않습니다",
   "doctorTelegramProxyDetail": "프록시를 통한 테스트 연결에 실패했습니다: {error}",
-  "telegramProxyOutboundOff": "프로필 사용 안 함"
+  "telegramProxyOutboundOff": "프로필 사용 안 함",
+  "telegramProxyRouteCloudflare": "Cloudflare 경유",
+  "telegramProxyRouteTcp": "직접 TCP",
+  "telegramProxyCfDomains": "내 Cloudflare 도메인"
 }

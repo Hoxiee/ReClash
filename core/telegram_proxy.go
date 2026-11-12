@@ -26,6 +26,7 @@ type TelegramProxyParams struct {
 	Port      int      `json:"port"`
 	Secret    string   `json:"secret"`
 	Endpoints []string `json:"endpoints"`
+	CFDomains []string `json:"cfDomains"`
 	Outbound  string   `json:"outbound"`
 }
 
@@ -79,6 +80,7 @@ func applyTelegramProxy(params TelegramProxyParams, seq uint64) TelegramProxySta
 	}
 	if p.relay != nil && p.listenPort == params.Port && p.secret == params.Secret {
 		p.relay.SetEndpoints(params.Endpoints)
+		p.relay.SetCFDomains(params.CFDomains)
 		if p.outbound != params.Outbound {
 			p.outbound = params.Outbound
 			p.relay.SetOutbound(dialTelegramOutbound(params.Outbound))
@@ -90,6 +92,7 @@ func applyTelegramProxy(params TelegramProxyParams, seq uint64) TelegramProxySta
 		Listen:    net.JoinHostPort("127.0.0.1", strconv.Itoa(params.Port)),
 		Secret:    secret,
 		Endpoints: params.Endpoints,
+		CFDomains: params.CFDomains,
 		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, address)
 		},

@@ -43,9 +43,22 @@ type fakeTelegram struct {
 	pingFirst  bool
 	pongs      atomic.Int32
 	accepted   atomic.Int32
+	finished   atomic.Int32
+	conns      []net.Conn
 }
 
 func newFakeTelegram(t *testing.T, names ...string) *fakeTelegram {
+	t.Helper()
+	return startFake(t, false, names...)
+}
+
+// newPlainFakeTelegram speaks the same protocol without TLS, like Telegram's port 80.
+func newPlainFakeTelegram(t *testing.T) *fakeTelegram {
+	t.Helper()
+	return startFake(t, true)
+}
+
+func startFake(t *testing.T, plain bool, names ...string) *fakeTelegram {
 	t.Helper()
 	if len(names) == 0 {
 		names = []string{"kws2.web.telegram.org", "kws2-1.web.telegram.org", "kws4.web.telegram.org", "kws4-1.web.telegram.org"}
@@ -66,10 +79,15 @@ func newFakeTelegram(t *testing.T, names ...string) *fakeTelegram {
 	parsed, _ := x509.ParseCertificate(der)
 	pool := x509.NewCertPool()
 	pool.AddCert(parsed)
-	listener, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{
-		Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key}},
-		NextProtos:   []string{"http/1.1"},
-	})
+	var listener net.Listener
+	if plain {
+		listener, err = net.Listen("tcp", "127.0.0.1:0")
+	} else {
+		listener, err = tls.Listen("tcp", "127.0.0.1:0", &tls.Config{
+			Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key}},
+			NextProtos:   []string{"http/1.1"},
+		})
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,6 +100,9 @@ func newFakeTelegram(t *testing.T, names ...string) *fakeTelegram {
 				return
 			}
 			f.accepted.Add(1)
+			f.mu.Lock()
+			f.conns = append(f.conns, conn)
+			f.mu.Unlock()
 			go f.serve(conn)
 		}
 	}()
@@ -138,6 +159,7 @@ func serverFrame(opcode byte, payload []byte) []byte {
 }
 
 func (f *fakeTelegram) serve(conn net.Conn) {
+	defer f.finished.Add(1)
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
 	request, err := http.ReadRequest(reader)
@@ -211,10 +233,27 @@ func (f *fakeTelegram) seenHosts() []string {
 	return append([]string(nil), f.hosts...)
 }
 
+// loopbackOnly keeps a test off the network: Telegram's and Cloudflare's addresses fail at once.
+func loopbackOnly(ctx context.Context, network, address string) (net.Conn, error) {
+	if host, _, err := net.SplitHostPort(address); err != nil || host != "127.0.0.1" {
+		return nil, errors.New("unreachable")
+	}
+	return (&net.Dialer{}).DialContext(ctx, network, address)
+}
+
 func startRelay(t *testing.T, config Config) *Relay {
 	t.Helper()
 	config.Listen = "127.0.0.1:0"
 	config.Secret = testSecret
+	if config.Dial == nil {
+		config.Dial = loopbackOnly
+	}
+	if config.CFFetch == nil {
+		config.CFFetch = func(context.Context) (string, error) { return "", errors.New("offline") }
+	}
+	if config.poolSize == 0 {
+		config.poolSize = -1
+	}
 	if config.holdUnavailable == 0 {
 		config.holdUnavailable = -1
 	}
@@ -354,7 +393,13 @@ func TestRelayCountsWhileTheConnectionIsOpen(t *testing.T) {
 	if _, err := io.ReadFull(conn, make([]byte, len(packet))); err != nil {
 		t.Fatal(err)
 	}
+	// The client can read the reply before the relay adds it to the counters.
+	deadline := time.Now().Add(2 * time.Second)
 	status := dcStatus(relay, 4)
+	for status.BytesDown != uint64(len(packet)) && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+		status = dcStatus(relay, 4)
+	}
 	if status.Active != 1 || status.BytesDown != uint64(len(packet)) || status.BytesUp != uint64(len(packet)) {
 		t.Fatalf("status %+v", status)
 	}
@@ -464,7 +509,7 @@ func TestRemembersAFailedRouteAndFailsAtOnce(t *testing.T) {
 		t.Fatal("expected a failure")
 	}
 	first := dials.Load()
-	if first != dialAttempts {
+	if first < dialAttempts {
 		t.Fatalf("dials %d", first)
 	}
 	started := time.Now()
@@ -497,6 +542,7 @@ func TestUnavailableClientIsHeldUntilARouteAppears(t *testing.T) {
 		TLS:             server.tls(),
 		holdUnavailable: 200 * time.Millisecond,
 	})
+	_ = selfTest(t, relay, 1)
 	started := time.Now()
 	if err := selfTest(t, relay, 1); err == nil {
 		t.Fatal("dc 1 answered")
@@ -513,6 +559,7 @@ func TestUnavailableClientIsHeldUntilARouteAppears(t *testing.T) {
 	finished := make(chan struct{})
 	go func() {
 		defer close(finished)
+		_ = selfTest(t, relay, 1)
 		_ = selfTest(t, relay, 1)
 	}()
 	for {
@@ -534,10 +581,9 @@ func TestUnavailableClientIsHeldUntilARouteAppears(t *testing.T) {
 	}
 }
 
-func TestNoOutboundIsUnavailableWithoutRetryCost(t *testing.T) {
-	server := newFakeTelegram(t)
-	relay := startRelay(t, Config{Endpoints: []string{server.address()}, TLS: server.tls()})
-	for _, index := range []int16{1, -5, 3} {
+func TestNoRouteIsUnavailableWithoutRetryCost(t *testing.T) {
+	relay := startRelay(t, Config{Endpoints: []string{closedAddress(t)}})
+	for _, index := range []int16{1, -5, 3, 1, -5, 3} {
 		started := time.Now()
 		if err := selfTest(t, relay, index); err == nil {
 			t.Fatalf("dc %d answered", index)
@@ -546,14 +592,8 @@ func TestNoOutboundIsUnavailableWithoutRetryCost(t *testing.T) {
 			t.Fatalf("dc %d took %s", index, elapsed)
 		}
 	}
-	if status := dcStatus(relay, 5); status.Route != RouteUnavailable || status.FastFails != 1 {
+	if status := dcStatus(relay, 5); status.Route != RouteUnavailable || status.Failures != 1 || status.FastFails != 1 {
 		t.Fatalf("dc 5 status %+v", status)
-	}
-	if server.accepted.Load() != 0 {
-		t.Fatal("touched WebSocket for a DC that has none")
-	}
-	if err := selfTest(t, relay, 2); err != nil {
-		t.Fatalf("dc 2 slowed by dc 5: %v", err)
 	}
 }
 
@@ -740,5 +780,143 @@ func TestStatusNeverCarriesTheSecret(t *testing.T) {
 	defer mu.Unlock()
 	if bytes.Contains(logged.Bytes(), testSecret) {
 		t.Fatal("secret in the log")
+	}
+}
+
+// routeDial sends chosen addresses to local fakes and refuses everything else.
+func routeDial(routes map[string]string) DialFunc {
+	return func(ctx context.Context, network, address string) (net.Conn, error) {
+		if target, ok := routes[address]; ok {
+			return (&net.Dialer{}).DialContext(ctx, network, target)
+		}
+		return nil, errors.New("unreachable")
+	}
+}
+
+func TestChainFallsBackToPlainWebSocketAndRemembersIt(t *testing.T) {
+	broken := newFakeTelegram(t)
+	plain := newPlainFakeTelegram(t)
+	relay := startRelay(t, Config{
+		Endpoints: []string{broken.address()},
+		Dial:      routeDial(map[string]string{broken.address(): broken.address(), "127.0.0.1:80": plain.address()}),
+	})
+	if err := selfTest(t, relay, 2); err != nil {
+		t.Fatal(err)
+	}
+	if status := dcStatus(relay, 2); status.Route != RouteWebSocket || status.Connects != 1 {
+		t.Fatalf("status %+v", status)
+	}
+	if hosts := plain.seenHosts(); len(hosts) != 1 || hosts[0] != "kws2.web.telegram.org" {
+		t.Fatalf("plain hosts %v", hosts)
+	}
+	tried := broken.accepted.Load()
+	if err := selfTest(t, relay, 2); err != nil {
+		t.Fatal(err)
+	}
+	if broken.accepted.Load() != tried {
+		t.Fatal("the remembered route was not tried first")
+	}
+}
+
+func TestChainOrderAndFallbackToTCP(t *testing.T) {
+	var mu sync.Mutex
+	var dialled []string
+	echo := outboundEcho(t, nil)
+	relay := startRelay(t, Config{
+		Endpoints: []string{"192.0.2.1"},
+		CFDomains: []string{"a.example.co.uk"},
+		Dial: func(ctx context.Context, _, address string) (net.Conn, error) {
+			mu.Lock()
+			dialled = append(dialled, address)
+			mu.Unlock()
+			if address == "149.154.171.5:443" {
+				return echo(ctx, address)
+			}
+			return nil, errors.New("unreachable")
+		},
+	})
+	if err := selfTest(t, relay, 5); err != nil {
+		t.Fatal(err)
+	}
+	if status := dcStatus(relay, 5); status.Route != RouteTCP {
+		t.Fatalf("status %+v", status)
+	}
+	first := func(address string) int { return slicesIndex(dialled, address) }
+	last := func(address string) int { return slicesLastIndex(dialled, address) }
+	cf := max(last("kws5.a.example.co.uk:443"), last("kws5.a.example.co.uk:80"))
+	order := []int{first("192.0.2.1:443"), first("149.154.171.5:443"), first("192.0.2.1:80"), first("149.154.171.5:80")}
+	for i, at := range order {
+		if at < 0 || i > 0 && at <= order[i-1] {
+			t.Fatalf("direct order %v in %v", order, dialled)
+		}
+	}
+	if first("kws5.a.example.co.uk:443") <= order[3] || first("kws5.a.example.co.uk:80") <= order[3] {
+		t.Fatalf("cloudflare before ws: %v", dialled)
+	}
+	if last("149.154.171.5:80") <= cf || last("149.154.171.5:443") <= last("149.154.171.5:80") {
+		t.Fatalf("tcp order: %v", dialled)
+	}
+}
+
+func slicesIndex(list []string, value string) int {
+	for i, v := range list {
+		if v == value {
+			return i
+		}
+	}
+	return -1
+}
+
+func slicesLastIndex(list []string, value string) int {
+	for i := len(list) - 1; i >= 0; i-- {
+		if list[i] == value {
+			return i
+		}
+	}
+	return -1
+}
+
+func TestCloudflareStepNamesTheKwsHostUnderTheBase(t *testing.T) {
+	server := newFakeTelegram(t, "kws4.own.example.co.uk", "kws2.own.example.co.uk")
+	routes := map[string]string{
+		"kws4.own.example.co.uk:443": server.address(),
+		"kws2.own.example.co.uk:443": server.address(),
+	}
+	relay := startRelay(t, Config{
+		Endpoints: []string{closedAddress(t)},
+		CFDomains: []string{"own.example.co.uk"},
+		TLS:       server.tls(),
+		Dial:      routeDial(routes),
+	})
+	for _, index := range []int16{-4, 203} {
+		if err := selfTest(t, relay, index); err != nil {
+			t.Fatalf("dc %d: %v", index, err)
+		}
+	}
+	hosts := server.seenHosts()
+	if len(hosts) != 2 || hosts[0] != "kws4.own.example.co.uk" || hosts[1] != "kws2.own.example.co.uk" {
+		t.Fatalf("hosts %v", hosts)
+	}
+	if status := dcStatus(relay, 4); status.Route != RouteCloudflare {
+		t.Fatalf("status %+v", status)
+	}
+	if got := relay.cf.ordered()[0]; got != "own.example.co.uk" {
+		t.Fatalf("first base %s", got)
+	}
+}
+
+func TestChainOrderStartsAtTheStickyStep(t *testing.T) {
+	got := chainOrder(stepCloudflare, true)
+	want := []step{stepCloudflare, stepWSS, stepWS, stepTCP, stepOutbound}
+	if len(got) != len(want) {
+		t.Fatalf("%v", got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("%v", got)
+		}
+	}
+	if fresh := chainOrder(0, false); fresh[0] != stepWSS || len(fresh) != int(stepCount) {
+		t.Fatalf("%v", fresh)
 	}
 }

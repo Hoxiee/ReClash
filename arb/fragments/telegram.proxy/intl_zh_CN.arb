@@ -26,10 +26,13 @@
   "telegramProxyPort": "端口",
   "telegramProxyInvalidPort": "请输入 1024 到 65535 之间的端口",
   "telegramProxyEndpoints": "Telegram 网络地址",
-  "telegramProxyAdvancedFooter": "更改端口后，需要在 Telegram 中重新添加代理。网络地址留空时使用内置地址。",
+  "telegramProxyAdvancedFooter": "更改端口后，需要在 Telegram 中重新添加代理。列表留空时使用内置地址和 Cloudflare 域名。",
   "telegramProxyNotificationTitle": "Telegram 代理正在运行",
   "telegramProxyNotificationStop": "停止",
   "doctorTelegramProxyTitle": "Telegram 代理无法工作",
   "doctorTelegramProxyDetail": "通过代理的测试连接失败：{error}",
-  "telegramProxyOutboundOff": "不使用配置"
+  "telegramProxyOutboundOff": "不使用配置",
+  "telegramProxyRouteCloudflare": "经由 Cloudflare",
+  "telegramProxyRouteTcp": "直连 TCP",
+  "telegramProxyCfDomains": "自定义 Cloudflare 域名"
 }

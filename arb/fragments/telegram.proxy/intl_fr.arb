@@ -26,10 +26,13 @@
   "telegramProxyPort": "Port",
   "telegramProxyInvalidPort": "Saisir un port entre 1024 et 65535",
   "telegramProxyEndpoints": "Adresses web de Telegram",
-  "telegramProxyAdvancedFooter": "Après avoir changé le port, il faut ajouter à nouveau le proxy dans Telegram. Laisser les adresses vides permet d’utiliser celles intégrées.",
+  "telegramProxyAdvancedFooter": "Après avoir changé le port, il faut ajouter à nouveau le proxy dans Telegram. Laisser les listes vides permet d’utiliser les adresses intégrées et les domaines Cloudflare.",
   "telegramProxyNotificationTitle": "Le proxy Telegram est en cours d’exécution",
   "telegramProxyNotificationStop": "Arrêter",
   "doctorTelegramProxyTitle": "Le proxy Telegram ne fonctionne pas",
   "doctorTelegramProxyDetail": "Échec d'une connexion de test via le proxy : {error}",
-  "telegramProxyOutboundOff": "Ne pas utiliser le profil"
+  "telegramProxyOutboundOff": "Ne pas utiliser le profil",
+  "telegramProxyRouteCloudflare": "Via Cloudflare",
+  "telegramProxyRouteTcp": "TCP direct",
+  "telegramProxyCfDomains": "Mes domaines Cloudflare"
 }

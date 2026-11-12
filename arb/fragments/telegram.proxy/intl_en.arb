@@ -61,7 +61,7 @@
   "telegramProxyPort": "Port",
   "telegramProxyInvalidPort": "Enter a port from 1024 to 65535",
   "telegramProxyEndpoints": "Telegram web addresses",
-  "telegramProxyAdvancedFooter": "After changing the port, add the proxy to Telegram again. Leave the addresses empty to use the built-in one.",
+  "telegramProxyAdvancedFooter": "After changing the port, add the proxy to Telegram again. Leave the lists empty to use the built-in addresses and Cloudflare domains.",
   "telegramProxyNotificationTitle": "Telegram proxy is running",
   "telegramProxyNotificationStop": "Stop",
   "doctorTelegramProxyTitle": "Telegram proxy is not working",
@@ -73,5 +73,8 @@
       }
     }
   },
-  "telegramProxyOutboundOff": "Don't use the profile"
+  "telegramProxyOutboundOff": "Don't use the profile",
+  "telegramProxyRouteCloudflare": "Via Cloudflare",
+  "telegramProxyRouteTcp": "Direct TCP",
+  "telegramProxyCfDomains": "Own Cloudflare domains"
 }

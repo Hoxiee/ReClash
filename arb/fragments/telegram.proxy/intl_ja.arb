@@ -26,10 +26,13 @@
   "telegramProxyPort": "ポート",
   "telegramProxyInvalidPort": "1024 から 65535 までのポートを入力してください",
   "telegramProxyEndpoints": "Telegram の Web アドレス",
-  "telegramProxyAdvancedFooter": "ポートを変更したら、Telegram でプロキシを追加し直してください。アドレスを空欄にすると、組み込みのアドレスが使われます。",
+  "telegramProxyAdvancedFooter": "ポートを変更したら、Telegram でプロキシを追加し直してください。リストを空欄にすると、組み込みのアドレスと Cloudflare ドメインが使われます。",
   "telegramProxyNotificationTitle": "Telegram プロキシが実行中です",
   "telegramProxyNotificationStop": "停止",
   "doctorTelegramProxyTitle": "Telegram プロキシが動作していません",
   "doctorTelegramProxyDetail": "プロキシ経由のテスト接続に失敗しました: {error}",
-  "telegramProxyOutboundOff": "プロファイルを使用しない"
+  "telegramProxyOutboundOff": "プロファイルを使用しない",
+  "telegramProxyRouteCloudflare": "Cloudflare 経由",
+  "telegramProxyRouteTcp": "ダイレクト TCP",
+  "telegramProxyCfDomains": "独自の Cloudflare ドメイン"
 }

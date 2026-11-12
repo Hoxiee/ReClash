@@ -558,6 +558,7 @@ abstract class TelegramProxyProps with _$TelegramProxyProps {
     @Default(defaultTelegramProxyPort) int port,
     @Default('') String secret,
     @Default([]) List<String> endpoints,
+    @Default([]) List<String> cfDomains,
     @Default('') String outbound,
     @Default(false) bool autostart,
   }) = _TelegramProxyProps;

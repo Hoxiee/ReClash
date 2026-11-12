@@ -20,6 +20,9 @@ const (
 	// A half-open trial holds the route closed for other connections until it reports back.
 	backoffTrial = 15 * time.Second
 
+	socketKeepAlive = 30 * time.Second
+	socketBuffer    = 256 << 10
+
 	unmeasuredLatency  = 1000.0
 	failurePenalty     = 5000.0
 	latencySmoothing   = 0.3
@@ -67,6 +70,7 @@ func dialHedged(ctx context.Context, dial DialFunc, address string, attempts int
 			finished++
 			if r.err == nil {
 				go settle()
+				tuneSocket(r.conn)
 				return r.conn, r.try, nil
 			}
 			lastErr = r.err
@@ -91,6 +95,19 @@ func dialHedged(ctx context.Context, dial DialFunc, address string, attempts int
 			return nil, launched, lastErr
 		}
 	}
+}
+
+// tuneSocket is best effort: a dialer may wrap the connection in something that is not a TCPConn.
+func tuneSocket(conn net.Conn) {
+	tcp, ok := conn.(*net.TCPConn)
+	if !ok {
+		return
+	}
+	_ = tcp.SetNoDelay(true)
+	_ = tcp.SetKeepAlive(true)
+	_ = tcp.SetKeepAlivePeriod(socketKeepAlive)
+	_ = tcp.SetReadBuffer(socketBuffer)
+	_ = tcp.SetWriteBuffer(socketBuffer)
 }
 
 // backoff remembers that a route just failed. Inside the window callers fail at once; when it ends
@@ -189,6 +206,15 @@ func (s *endpointSet) candidates(now time.Time) []*endpoint {
 	return allowed
 }
 
+// ranked is candidates without consuming a backoff trial, for paths that do not report back.
+func (s *endpointSet) ranked() []*endpoint {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := slices.Clone(s.list)
+	slices.SortStableFunc(out, func(a, b *endpoint) int { return cmp.Compare(a.score(), b.score()) })
+	return out
+}
+
 func (s *endpointSet) reportSuccess(e *endpoint, latency time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -198,6 +224,16 @@ func (s *endpointSet) reportSuccess(e *endpoint, latency time.Duration) {
 	} else {
 		e.latency += (ms - e.latency) * latencySmoothing
 	}
+	e.consecutive = 0
+	e.successes++
+	e.lastError = ""
+	e.backoff.succeed()
+}
+
+// reportReused counts a connection that skipped the dial: there is no latency to measure.
+func (s *endpointSet) reportReused(e *endpoint) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	e.consecutive = 0
 	e.successes++
 	e.lastError = ""

@@ -30,11 +30,13 @@ TelegramProxyDc? mergeTelegramProxyDc(
     return null;
   }
   final connected = parts.where(
-    (item) => item.route == 'websocket' || item.route == 'outbound',
+    (item) => _connectedRoutes.contains(item.route),
   );
   final used = parts.where((item) => item.route != 'idle');
   return connected.firstOrNull ?? used.firstOrNull ?? parts.first;
 }
+
+const _connectedRoutes = {'websocket', 'cloudflare', 'tcp', 'outbound'};
 
 class TelegramProxyView extends ConsumerStatefulWidget {
   const TelegramProxyView({super.key});
@@ -140,11 +142,13 @@ class _TelegramProxyViewState extends ConsumerState<TelegramProxyView>
         : l.telegramProxyLatency(dc.connectMs);
     final route = switch (dc?.route) {
       'websocket' => l.telegramProxyRouteDirect,
+      'cloudflare' => l.telegramProxyRouteCloudflare,
+      'tcp' => l.telegramProxyRouteTcp,
       'outbound' => l.telegramProxyRouteOutbound(_state?.outboundName ?? ''),
       'unavailable' => l.telegramProxyRouteUnavailable,
       _ => l.telegramProxyRouteIdle,
     };
-    final connected = dc?.route == 'websocket' || dc?.route == 'outbound';
+    final connected = _connectedRoutes.contains(dc?.route);
     return connected && latency != null ? '$route · $latency' : route;
   }
 
@@ -270,6 +274,15 @@ class _TelegramProxyViewState extends ConsumerState<TelegramProxyView>
             itemValidator: validateHost,
             onChanged: (_, value) =>
                 _update((props) => props.copyWith(endpoints: value)),
+          ),
+          ConfigListEditItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.cfDomains,
+            ),
+            title: (l) => l.telegramProxyCfDomains,
+            itemValidator: validateHost,
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(cfDomains: value)),
           ),
         ],
       ],

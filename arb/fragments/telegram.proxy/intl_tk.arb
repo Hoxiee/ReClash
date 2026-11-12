@@ -26,10 +26,13 @@
   "telegramProxyPort": "Port",
   "telegramProxyInvalidPort": "1024-den 65535-e çenli port giriziň",
   "telegramProxyEndpoints": "Telegram web salgylary",
-  "telegramProxyAdvancedFooter": "Portuny üýtgedenden soň proksini Telegram-a täzeden goşmaly. Salgylar boş galsa, içki salgylar ulanylýar.",
+  "telegramProxyAdvancedFooter": "Portuny üýtgedenden soň proksini Telegram-a täzeden goşmaly. Sanawlar boş galsa, içki salgylar we Cloudflare domenleri ulanylýar.",
   "telegramProxyNotificationTitle": "Telegram proksi işleýär",
   "telegramProxyNotificationStop": "Bes et",
   "doctorTelegramProxyTitle": "Telegram proksisi işlänok",
   "doctorTelegramProxyDetail": "Proksi arkaly synag birikmesi başa barmady: {error}",
-  "telegramProxyOutboundOff": "Profili ulanmazlyk"
+  "telegramProxyOutboundOff": "Profili ulanmazlyk",
+  "telegramProxyRouteCloudflare": "Cloudflare arkaly",
+  "telegramProxyRouteTcp": "Göni TCP",
+  "telegramProxyCfDomains": "Öz Cloudflare domenleri"
 }

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -19,8 +18,7 @@ const (
 	maxClients          = 1024
 	copyBufferSize      = 32 << 10
 
-	connectBudget        = 15 * time.Second
-	endpointBudget       = 6 * time.Second
+	connectBudget        = 45 * time.Second
 	outboundBudget       = 10 * time.Second
 	reprobeInterval      = time.Minute
 	probeTimeout         = 10 * time.Second
@@ -49,9 +47,16 @@ type Config struct {
 	Dial      DialFunc
 	Outbound  OutboundFunc
 	TLS       *tls.Config
-	Logf      func(format string, args ...any)
+	// CFDomains are the user's own Cloudflare base domains, tried before the built-in list.
+	CFDomains []string
+	// CFFetch downloads the hosted domain list; nil means CFDomainsURL over plain HTTPS.
+	CFFetch CFFetchFunc
+	Logf    func(format string, args ...any)
 
 	holdUnavailable time.Duration
+	poolSize        int
+	poolMaxAge      time.Duration
+	clock           func() time.Time
 }
 
 // Route is how a DC is currently reached.
@@ -60,6 +65,8 @@ type Route string
 const (
 	RouteIdle        Route = "idle"
 	RouteWebSocket   Route = "websocket"
+	RouteCloudflare  Route = "cloudflare"
+	RouteTCP         Route = "tcp"
 	RouteOutbound    Route = "outbound"
 	RouteUnavailable Route = "unavailable"
 )
@@ -76,6 +83,7 @@ type DCStatus struct {
 	LastError   string `json:"lastError,omitempty"`
 	BytesUp     uint64 `json:"bytesUp"`
 	BytesDown   uint64 `json:"bytesDown"`
+	Pooled      int    `json:"pooled"`
 }
 
 type EndpointStatus struct {
@@ -113,8 +121,9 @@ type dcState struct {
 	connectMs   int64
 	lastConnect time.Time
 	lastError   string
-	ws          backoff
-	outbound    backoff
+	steps       [stepCount]backoff
+	sticky      step
+	hasSticky   bool
 }
 
 // Relay is one running proxy. Its lifetime is the caller's; it holds no global state.
@@ -122,6 +131,8 @@ type Relay struct {
 	config    Config
 	listener  net.Listener
 	endpoints *endpointSet
+	cf        cfList
+	pool      *wsPool
 	outbound  atomic.Pointer[OutboundFunc]
 	now       func() time.Time
 
@@ -175,8 +186,18 @@ func Start(config Config) (*Relay, error) {
 		held:      make(map[net.Conn]struct{}),
 		dcs:       make(map[int]*dcState),
 	}
+	if config.clock != nil {
+		r.now = config.clock
+	}
+	r.pool = newWSPool(r)
 	r.SetOutbound(config.Outbound)
+	r.cf.setUser(config.CFDomains)
+	if r.config.CFFetch == nil {
+		r.config.CFFetch = fetchCFDomains
+	}
 	r.wg.Go(r.acceptLoop)
+	r.wg.Go(r.cfRefreshLoop)
+	r.wg.Go(r.pool.run)
 	return r, nil
 }
 
@@ -220,6 +241,11 @@ func (r *Relay) SetEndpoints(addresses []string) {
 		addresses = DefaultEndpoints
 	}
 	r.endpoints.replace(normalizeEndpoints(addresses))
+	r.pool.drain()
+}
+
+func (r *Relay) SetCFDomains(domains []string) {
+	r.cf.setUser(domains)
 }
 
 // Stop ends the listener and every session.
@@ -247,12 +273,13 @@ func (r *Relay) ResetConnections() {
 	}
 	for _, state := range r.dcs {
 		state.mu.Lock()
-		state.ws.succeed()
-		state.outbound.succeed()
+		state.steps = [stepCount]backoff{}
+		state.hasSticky = false
 		state.mu.Unlock()
 	}
 	r.mu.Unlock()
 	r.endpoints.clearBackoff()
+	r.pool.drain()
 }
 
 func (r *Relay) acceptLoop() {
@@ -372,135 +399,6 @@ func (r *Relay) serve(client net.Conn) {
 	r.config.Logf("dc=%d media=%v tag=%08x route=%s connect=%dms", dest.dc, dest.media, tag, route, connectTime.Milliseconds())
 
 	r.pump(client, up, clientStreams, tag, dest, state, endpointUsed, started)
-}
-
-// connect tries WebSocket on DCs that have it, then the outbound. Remembered failures fail at once.
-func (r *Relay) connect(ctx context.Context, dest target, state *dcState) (upstream, Route, *endpoint, error) {
-	var firstErr error
-	if dest.overWebSocket() {
-		now := r.now()
-		state.mu.Lock()
-		allowed := state.ws.allow(now)
-		state.mu.Unlock()
-		if allowed {
-			up, used, err := r.connectWebSocket(ctx, dest)
-			state.mu.Lock()
-			if err == nil {
-				state.ws.succeed()
-			} else {
-				state.ws.fail(r.now(), backoffMax)
-			}
-			state.mu.Unlock()
-			if err == nil {
-				return up, RouteWebSocket, used, nil
-			}
-			firstErr = err
-		} else {
-			firstErr = errNoRoute
-		}
-	}
-	up, err := r.connectOutbound(ctx, dest, state)
-	if err == nil {
-		return up, RouteOutbound, nil, nil
-	}
-	if firstErr != nil && errors.Is(err, ErrNoOutbound) {
-		return nil, "", nil, firstErr
-	}
-	return nil, "", nil, err
-}
-
-func kwsHosts(dest target) []string {
-	main := "kws" + strconv.Itoa(dest.hostDC) + ".web.telegram.org"
-	if dest.media {
-		return []string{"kws" + strconv.Itoa(dest.hostDC) + "-1.web.telegram.org", main}
-	}
-	return []string{main}
-}
-
-func (r *Relay) connectWebSocket(ctx context.Context, dest target) (upstream, *endpoint, error) {
-	candidates := r.endpoints.candidates(r.now())
-	if len(candidates) == 0 {
-		return nil, nil, errNoRoute
-	}
-	var lastErr error
-	for i, e := range candidates {
-		ws, latency, err := r.dialEndpoint(ctx, e.address, kwsHosts(dest))
-		if err == nil {
-			r.endpoints.reportSuccess(e, latency)
-			if i > 0 {
-				r.config.Logf("failed over to endpoint %s", e.address)
-			}
-			return ws, e, nil
-		}
-		lastErr = err
-		r.endpoints.reportFailure(e, r.now(), err)
-		r.config.Logf("endpoint %s: %v", e.address, err)
-		r.reprobeSoon()
-		if ctx.Err() != nil {
-			break
-		}
-	}
-	return nil, nil, lastErr
-}
-
-// dialEndpoint opens TCP once and walks the hosts over fresh connections only when a host, rather
-// than the address, turned out to be the problem.
-func (r *Relay) dialEndpoint(ctx context.Context, address string, hosts []string) (*webSocket, time.Duration, error) {
-	ctx, cancel := context.WithTimeout(ctx, endpointBudget)
-	defer cancel()
-	started := r.now()
-	var lastErr error
-	for _, host := range hosts {
-		raw, tries, err := dialHedged(ctx, r.config.Dial, address, dialAttempts, dialStagger)
-		if err != nil {
-			return nil, 0, fmt.Errorf("tcp after %d tries: %w", tries, err)
-		}
-		ws, err := upgradeWebSocket(ctx, raw, host, r.config.TLS)
-		if err == nil {
-			return ws, r.now().Sub(started), nil
-		}
-		_ = raw.Close()
-		lastErr = err
-		var handshake *handshakeError
-		if !errors.As(err, &handshake) {
-			break
-		}
-	}
-	return nil, 0, lastErr
-}
-
-func (r *Relay) connectOutbound(ctx context.Context, dest target, state *dcState) (upstream, error) {
-	outbound := r.outbound.Load()
-	if outbound == nil {
-		return nil, ErrNoOutbound
-	}
-	now := r.now()
-	state.mu.Lock()
-	allowed := state.outbound.allow(now)
-	state.mu.Unlock()
-	if !allowed {
-		return nil, errNoRoute
-	}
-	ctx, cancel := context.WithTimeout(ctx, outboundBudget)
-	defer cancel()
-	var lastErr error
-	for _, address := range dcAddresses[dest.dc] {
-		conn, err := (*outbound)(ctx, address)
-		if err == nil {
-			state.mu.Lock()
-			state.outbound.succeed()
-			state.mu.Unlock()
-			return &tcpUpstream{conn: conn}, nil
-		}
-		lastErr = err
-		if errors.Is(err, ErrNoOutbound) {
-			return nil, err
-		}
-	}
-	state.mu.Lock()
-	state.outbound.fail(r.now(), backoffMax)
-	state.mu.Unlock()
-	return nil, lastErr
 }
 
 // pump re-encrypts both directions until either side ends.
@@ -641,6 +539,7 @@ func (r *Relay) Status() Status {
 		dc.Active = state.active.Load()
 		dc.BytesUp = state.bytesUp.Load()
 		dc.BytesDown = state.bytesDown.Load()
+		dc.Pooled = r.pool.count(numbers[i])
 		status.BytesUp += dc.BytesUp
 		status.BytesDown += dc.BytesDown
 		status.DCs = append(status.DCs, dc)

@@ -26,6 +26,7 @@ const (
 	opPing         = 0x9
 	opPong         = 0xa
 
+	wsPath               = "/apiws"
 	upstreamWriteTimeout = 30 * time.Second
 	flushThreshold       = 64 << 10
 )
@@ -193,21 +194,33 @@ func upgradeWebSocket(ctx context.Context, raw net.Conn, host string, base *tls.
 	if base != nil {
 		config = base.Clone()
 	}
-	config.ServerName = host
-	config.NextProtos = []string{"http/1.1"}
-	conn := tls.Client(raw, config)
+	return upgradeWebSocketPath(ctx, raw, host, wsPath, config)
+}
+
+// upgradeWebSocketPath upgrades raw to a WebSocket. A nil config sends it in the clear, which is
+// safe only because the MTProto stream inside is encrypted end to end; a non-nil config is always
+// verified against host.
+func upgradeWebSocketPath(ctx context.Context, raw net.Conn, host, path string, config *tls.Config) (*webSocket, error) {
+	var conn net.Conn = raw
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = raw.SetDeadline(deadline)
 	}
-	if err := conn.HandshakeContext(ctx); err != nil {
-		return nil, &handshakeError{fmt.Errorf("tls %s: %w", host, err)}
+	if config != nil {
+		config = config.Clone()
+		config.ServerName = host
+		config.NextProtos = []string{"http/1.1"}
+		tlsConn := tls.Client(raw, config)
+		if err := tlsConn.HandshakeContext(ctx); err != nil {
+			return nil, &handshakeError{fmt.Errorf("tls %s: %w", host, err)}
+		}
+		conn = tlsConn
 	}
 	var keyBytes [16]byte
 	if _, err := rand.Read(keyBytes[:]); err != nil {
 		return nil, err
 	}
 	key := base64.StdEncoding.EncodeToString(keyBytes[:])
-	request := "GET /apiws HTTP/1.1\r\nHost: " + host + "\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n" +
+	request := "GET " + path + " HTTP/1.1\r\nHost: " + host + "\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n" +
 		"Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: " + key + "\r\nSec-WebSocket-Protocol: binary\r\n\r\n"
 	if _, err := io.WriteString(conn, request); err != nil {
 		return nil, &handshakeError{fmt.Errorf("upgrade %s: %w", host, err)}

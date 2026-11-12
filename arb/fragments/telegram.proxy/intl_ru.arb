@@ -26,10 +26,13 @@
   "telegramProxyPort": "Порт",
   "telegramProxyInvalidPort": "Введите порт от 1024 до 65535",
   "telegramProxyEndpoints": "Веб-адреса Telegram",
-  "telegramProxyAdvancedFooter": "После смены порта добавьте прокси в Telegram заново. Если адреса не заполнены, используются встроенные.",
+  "telegramProxyAdvancedFooter": "После смены порта добавьте прокси в Telegram заново. Если списки не заполнены, используются встроенные адреса и домены Cloudflare.",
   "telegramProxyNotificationTitle": "Прокси Telegram работает",
   "telegramProxyNotificationStop": "Стоп",
   "doctorTelegramProxyTitle": "Прокси Telegram не работает",
   "doctorTelegramProxyDetail": "Пробное соединение через прокси не удалось: {error}",
-  "telegramProxyOutboundOff": "Не использовать профиль"
+  "telegramProxyOutboundOff": "Не использовать профиль",
+  "telegramProxyRouteCloudflare": "Через Cloudflare",
+  "telegramProxyRouteTcp": "Прямой TCP",
+  "telegramProxyCfDomains": "Свои домены Cloudflare"
 }
