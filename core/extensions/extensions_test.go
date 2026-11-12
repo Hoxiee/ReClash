@@ -542,6 +542,16 @@ func TestUnavailableExtensionStillParses(t *testing.T) {
 	}
 }
 
+func TestIDOfNamesTheServingExtension(t *testing.T) {
+	newManager(t, t.TempDir(), nil)
+	if got := IDOf(parseNode(t, map[string]any{"link": "fake://ok"})); got != "fake" {
+		t.Fatalf("IDOf(extension node) = %q", got)
+	}
+	if got := IDOf(nil); got != "" {
+		t.Fatalf("IDOf(nil) = %q", got)
+	}
+}
+
 func TestPrivilegedCoreRefuses(t *testing.T) {
 	home := t.TempDir()
 	install(t, home, installOptions{})

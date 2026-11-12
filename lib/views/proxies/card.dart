@@ -255,7 +255,7 @@ class _ProxyDesc extends ConsumerWidget {
           )
         : proxy.name;
     return EmojiText(
-      nodeName == proxy.name ? proxy.type : '${proxy.type}($nodeName)',
+      nodeName == proxy.name ? proxy.typeLabel : '${proxy.type}($nodeName)',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: style,
@@ -280,7 +280,7 @@ class _ProxyTypeText extends ConsumerWidget {
           )
         : proxy.name;
     final label = nodeName.isEmpty || nodeName == proxy.name
-        ? proxy.type
+        ? proxy.typeLabel
         : nodeName;
     return TooltipText(text: Text(label, maxLines: 1, style: style));
   }

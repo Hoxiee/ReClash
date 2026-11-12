@@ -388,7 +388,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
               for (final item
                   in ref.watch(customProxiesProvider).value ??
                       const <CustomProxy>[])
-                if (named.contains(item.name)) item.name: item.type,
+                if (named.contains(item.name)) item.name: item.typeLabel,
             };
             return SelectionSheet<String>(
               title: context.appLocalizations.splitStrategy,

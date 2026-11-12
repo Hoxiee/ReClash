@@ -1074,6 +1074,15 @@ func TestProxyViewKeepsWhatTheHostReads(t *testing.T) {
 	if fromProvider["provider-name"] != "subscription" {
 		t.Errorf("provider node view = %v, want its provider-name", fromProvider)
 	}
+	extensionNode, err := adapter.ParseProxy(map[string]any{
+		"name": "node-x", "type": "extension", "extension": "openflux", "link": "openflux://v1/x",
+	})
+	if err != nil {
+		t.Fatalf("parse extension node: %v", err)
+	}
+	if view := encode(extensionNode); view["extension"] != "openflux" || view["type"] != "Extension" {
+		t.Errorf("extension node view = %v, want its extension id", view)
+	}
 
 	members := []constant.Proxy{namedProxy("node-a"), namedProxy("node-b")}
 	pd, err := provider.NewCompatibleProvider(

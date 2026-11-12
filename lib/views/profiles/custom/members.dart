@@ -332,7 +332,7 @@ Map<String, String> _providerTypes(
 Map<String, String> _nodeTypes(WidgetRef ref) => {
   for (final proxy
       in ref.watch(customProxiesProvider).value ?? const <CustomProxy>[])
-    proxy.name: proxy.type,
+    proxy.name: proxy.typeLabel,
 };
 
 class ProxyGroupMembersSliver extends StatelessWidget {

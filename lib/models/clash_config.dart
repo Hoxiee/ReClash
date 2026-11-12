@@ -3,6 +3,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/core.dart';
 import 'package:reclash/models/rcx.dart';
+import 'package:reclash/subscriptions/imports/subscription/extension_catalog.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:yaml/yaml.dart';
 
@@ -229,13 +230,16 @@ abstract class Proxy with _$Proxy {
     required String type,
     String? now,
     @JsonKey(name: 'provider-name') String? providerName,
+    String? extension,
   }) = _Proxy;
 
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
 }
 
 extension ProxyExt on Proxy {
-  List<String> get searchFields => [name, type];
+  String get typeLabel => proxyTypeLabel(type, extension);
+
+  List<String> get searchFields => [name, type, ?extension, typeLabel];
 }
 
 /// The `type` values `adapter.ParseProxy` accepts, in its own order.
@@ -377,6 +381,9 @@ extension CustomProxyExt on CustomProxy {
 
   String get type => definition['type']?.toString() ?? '';
 
+  String get typeLabel =>
+      proxyTypeLabel(type, definition['extension']?.toString());
+
   String? get server => definition['server']?.toString();
 
   int? get port => switch (definition['port']) {
@@ -394,7 +401,7 @@ extension CustomProxyExt on CustomProxy {
     return port == null ? server : '$server:$port';
   }
 
-  List<String> get searchFields => [name, type, ?server];
+  List<String> get searchFields => [name, type, typeLabel, ?server];
 
   Set<String> get requiredKeys => switch (type) {
     'ss' => const {'server', 'port', 'password', 'cipher'},

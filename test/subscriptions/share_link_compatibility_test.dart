@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/constant.dart' as common;
+import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/imports/routing/skipped_node.dart';
 import 'package:reclash/subscriptions/imports/subscription/subscription_links.dart';
@@ -572,6 +573,17 @@ void main() {
       expect(proxy['name'], 'qWDTT 1');
       expect(proxy['extension'], 'qwdtt');
       expect(proxy['link'], link);
+    });
+
+    test('labels an extension node with its protocol', () {
+      Proxy node(String? extension) =>
+          Proxy(name: 'n', type: 'Extension', extension: extension);
+      expect(node('openflux').typeLabel, 'OpenFlux');
+      expect(node('olcrtc').typeLabel, 'olcrtc');
+      expect(node(null).typeLabel, 'Extension');
+      expect(node('qwdtt').searchFields, contains('qWDTT'));
+      final custom = CustomProxy.fromDefinition(_proxies(_import(flux)).single);
+      expect(custom.typeLabel, 'OpenFlux');
     });
 
     test('unknown schemes are still skipped as protocols', () {

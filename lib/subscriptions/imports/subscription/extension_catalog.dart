@@ -17,6 +17,16 @@ const bundledExtensions = [
   ExtensionEntry(id: 'qwdtt', name: 'qWDTT', schemes: ['qwdtt']),
 ];
 
+/// The protocol a node shows as its type: an extension node names the
+/// protocol it runs instead of the generic `extension` type.
+String proxyTypeLabel(String type, String? extension) {
+  if (extension == null || extension.isEmpty) return type;
+  for (final entry in bundledExtensions) {
+    if (entry.id == extension) return entry.name;
+  }
+  return extension;
+}
+
 ExtensionEntry? extensionForScheme(String? scheme) {
   if (scheme == null) return null;
   for (final entry in bundledExtensions) {

@@ -576,7 +576,11 @@ class _NodeItem extends ConsumerWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(proxy.type, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        proxy.typeLabel,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

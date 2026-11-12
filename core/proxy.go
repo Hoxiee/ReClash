@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"core/extensions"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
@@ -105,6 +107,7 @@ func proxyView(proxy constant.Proxy) any {
 		Name:         proxy.Name(),
 		Type:         proxy.Type().String(),
 		ProviderName: proxy.ProxyInfo().ProviderName,
+		Extension:    extensions.IDOf(proxy),
 	}
 	if !isProxyGroupType(proxy.Type()) {
 		return node

@@ -353,6 +353,7 @@ type nodeView struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	ProviderName string `json:"provider-name,omitempty"`
+	Extension    string `json:"extension,omitempty"`
 }
 
 type GeoUpdateStatus struct {

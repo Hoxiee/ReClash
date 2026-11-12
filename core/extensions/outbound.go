@@ -112,6 +112,14 @@ func (a *Adapter) ProxyInfo() C.ProxyInfo {
 	return info
 }
 
+// IDOf names the extension serving proxy, or "" when proxy is not an extension node.
+func IDOf(proxy C.Proxy) string {
+	if a, ok := unwrapAdapter(proxy); ok {
+		return a.id
+	}
+	return ""
+}
+
 // unwrapAdapter finds the Adapter inside a tunnel proxy. mihomo wraps parsed adapters in types of its own that
 // embed the wrapped one as an exported ProxyAdapter field but have no accessor for it.
 func unwrapAdapter(proxy C.Proxy) (*Adapter, bool) {

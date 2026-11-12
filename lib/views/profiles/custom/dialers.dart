@@ -35,7 +35,7 @@ class CustomProxyDialersView extends ConsumerWidget {
                 in ref.watch(customProxiesProvider).value ??
                     const <CustomProxy>[])
               if (named.contains(item.name) && !loops(item.name))
-                item.name: item.type,
+                item.name: item.typeLabel,
           };
           final groupTypes = {
             for (final group in groups)
