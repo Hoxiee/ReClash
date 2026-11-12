@@ -15,6 +15,7 @@ class ExtensionEntry {
 const bundledExtensions = [
   ExtensionEntry(id: 'openflux', name: 'OpenFlux', schemes: ['openflux']),
   ExtensionEntry(id: 'qwdtt', name: 'qWDTT', schemes: ['qwdtt']),
+  ExtensionEntry(id: 'naive', name: 'NaiveProxy', schemes: ['naive+https']),
 ];
 
 /// The protocol a node shows as its type: an extension node names the

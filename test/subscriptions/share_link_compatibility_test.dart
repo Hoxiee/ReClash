@@ -575,6 +575,14 @@ void main() {
       expect(proxy['link'], link);
     });
 
+    test('imports a naive+https line as the naive extension', () {
+      const link = 'naive+https://u:p@203.0.113.5:443#Edge';
+      final proxy = _proxies(_import('$flux\n$link')).last;
+      expect(proxy['name'], 'Edge');
+      expect(proxy['extension'], 'naive');
+      expect(proxy['link'], link);
+    });
+
     test('labels an extension node with its protocol', () {
       Proxy node(String? extension) =>
           Proxy(name: 'n', type: 'Extension', extension: extension);
