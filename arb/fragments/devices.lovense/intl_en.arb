@@ -1,0 +1,72 @@
+{
+  "lovense": "Lovense",
+  "lovenseAddress": "Lovense Remote address",
+  "lovenseFooter": "Pair your toys in Lovense Remote and turn on its LAN access. For Remote on this device, keep the default address. For a phone or another computer on the same local network, enter its local IP.",
+  "lovenseConnect": "Connect",
+  "lovenseDisconnect": "Disconnect",
+  "lovenseRefresh": "Refresh toys",
+  "lovenseConnected": "Connected to Lovense Remote",
+  "lovenseDisconnected": "Not connected",
+  "lovenseNoToys": "No toys found. Check Lovense Remote and refresh the list.",
+  "lovenseToyConnected": "Connected",
+  "lovenseToyDisconnected": "Disconnected",
+  "lovenseBattery": "battery {percent}%",
+  "@lovenseBattery": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "lovenseFunction": "Function",
+  "lovenseStrength": "Intensity",
+  "lovenseDuration": "Duration",
+  "lovenseSeconds": "{seconds} s",
+  "@lovenseSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "lovenseStroke": "Stroke range",
+  "lovenseStrokeHelp": "With Thrusting, the stroke range must be at least 20 wide.",
+  "lovenseStart": "Start",
+  "lovenseStop": "Stop",
+  "lovenseStopAll": "Stop all",
+  "lovenseSafety": "A command runs for 2–60 seconds and replaces the previous one. Leaving this page or sending the app to the background stops the toys it started.",
+  "lovenseCommandSent": "Command sent for {seconds} s",
+  "@lovenseCommandSent": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "lovenseStopSent": "Stop sent",
+  "lovenseStopFailed": "Stop was not confirmed. Check Lovense Remote; sent commands still end after their duration.",
+  "lovensePaused": "Controls are paused while the app is in the background",
+  "lovenseUnknownFunctions": "Lovense Remote does not report this toy's functions, so only Vibrate is offered.",
+  "lovenseNoFunctions": "No supported functions were recognized. Update Lovense Remote.",
+  "lovenseSaveFailed": "The address could not be saved. The connection still works.",
+  "lovenseInvalidAddress": "Enter a local IP, localhost or a local *.lovense.club address without credentials or parameters.",
+  "lovenseInvalidCommand": "Check the function, intensity and duration.",
+  "lovenseUnavailable": "Lovense Remote is unavailable. Check the address, its LAN access, the local network permission and the VPN.",
+  "lovenseTimeout": "Lovense Remote did not respond in time.",
+  "lovenseTlsError": "The Lovense Remote certificate could not be verified. Use a local *.lovense.club address for HTTPS.",
+  "lovenseInvalidResponse": "Lovense Remote returned an invalid response.",
+  "lovenseRemoteError": "Lovense Remote rejected the request (code {code}).",
+  "@lovenseRemoteError": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "lovenseError": "Lovense Remote error",
+  "lovenseDocumentation": "LAN API documentation",
+  "lovenseReactions": "Reactions",
+  "lovenseReactConnection": "React to connection",
+  "lovenseReactTraffic": "Follow traffic",
+  "lovenseReactionsFooter": "Off by default and only for this session. Connection: one short pulse when the VPN starts, two when you stop it, a long strong one when the connection is lost. Traffic: intensity follows the current speed from 10 KB/s to 10 MB/s and pauses while the app is in the background. Reactions keep running after you leave this page, never override a command you start here, and turn off with Stop all."
+}

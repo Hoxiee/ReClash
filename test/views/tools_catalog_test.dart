@@ -84,6 +84,16 @@ void main() {
     },
   );
 
+  test('Lovense is reachable only by its exact secret query', () async {
+    final l = await AppLocalizations.load(const Locale('en'));
+    final entry = buildToolCatalog(
+      l,
+      _environment(),
+    ).singleWhere((entry) => entry.id == 'page.lovense');
+    expect(entry.showInCatalog, isFalse);
+    expect(entry.secretQuery, 'lovense');
+  });
+
   test('catalogue groups follow the Alpha section order', () async {
     expect(ToolCategory.values, [
       ToolCategory.observation,

@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _reportCaptureRestoreLevelKey = 'report.captureRestoreLevel';
+const lovenseEndpointKey = 'lovense.endpoint';
 
 class Preferences {
   static Preferences? _instance;
@@ -133,6 +134,21 @@ class Preferences {
     final store = await _store.value;
     if (_preventWrites) return;
     await store?.setString('doctor.account', memo);
+  }
+
+  Future<String?> getLovenseEndpoint() async {
+    try {
+      final store = await _store.value;
+      return store?.getString(lovenseEndpointKey);
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<bool> saveLovenseEndpoint(String address) async {
+    final store = await _store.value;
+    if (_preventWrites || store == null) return false;
+    return store.setString(lovenseEndpointKey, address);
   }
 
   Future<int?> getOwnProxyPort() async {

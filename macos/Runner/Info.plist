@@ -61,6 +61,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>ReClash uses the local network to reach Lovense Remote on this network.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

@@ -225,11 +225,17 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
     final byId = {for (final entry in _entries) entry.id: entry};
     final matches = searching
         ? (_engine ??= ToolsSearch(
-            _entries.map((entry) => entry.document),
+            _entries
+                .where((entry) => entry.secretQuery == null)
+                .map((entry) => entry.document),
           )).search(session.query)
         : const <ToolSearchMatch>[];
+    final query = session.query.trim().toLowerCase();
     _results = searching
-        ? [for (final hit in matches) byId[hit.document.id]!]
+        ? [
+            ..._entries.where((entry) => entry.secretQuery == query),
+            for (final hit in matches) byId[hit.document.id]!,
+          ]
         : _entries
               .where((entry) => entry.showInCatalog && entry.route != null)
               .toList();

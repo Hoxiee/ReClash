@@ -35,6 +35,7 @@ class ToolEntry {
     this.unavailableReason,
     this.fallback,
     this.showInCatalog = true,
+    this.secretQuery,
   });
 
   final String id;
@@ -48,6 +49,8 @@ class ToolEntry {
   final String? unavailableReason;
   final ToolRoute? fallback;
   final bool showInCatalog;
+
+  final String? secretQuery;
 
   ToolSearchDocument get document =>
       ToolSearchDocument(id: id, title: title, path: path, keywords: keywords);
@@ -130,6 +133,7 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     bool available = true,
     bool root = true,
     List<String> keywords = const [],
+    String? secretQuery,
   }) {
     if (!available) return;
     pages.add(
@@ -145,7 +149,8 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
           for (final ancestor in page.ancestors)
             pages.firstWhere((entry) => entry.route?.page == ancestor).title,
         }.join(' › '),
-        showInCatalog: root,
+        showInCatalog: root && secretQuery == null,
+        secretQuery: secretQuery,
       ),
     );
   }
@@ -207,6 +212,13 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     ToolCategory.application,
     AppGlyphs.link,
     keywords: ['url', 'deep link', 'automation', 'ссылки', 'автоматизация'],
+  );
+  page(
+    ToolPage.lovense,
+    l.lovense,
+    ToolCategory.application,
+    AppGlyphs.devices,
+    secretQuery: 'lovense',
   );
   page(
     ToolPage.general,

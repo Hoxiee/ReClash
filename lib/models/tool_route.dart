@@ -8,6 +8,7 @@ enum ToolPage {
   dns,
   onDemand,
   telegram,
+  lovense,
   appRegion,
   notifications,
   userAgents,
