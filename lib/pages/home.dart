@@ -63,6 +63,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     return true;
   }
 
+  void _swipePage(bool forward) {
+    final items = ref.read(currentNavigationItemsStateProvider).value;
+    final current = shownPageLabelOf(ref.read(currentPageLabelProvider), items);
+    final target =
+        items.indexWhere((item) => item.label == current) + (forward ? 1 : -1);
+    if (target < 0 || target >= items.length) return;
+    ref.read(currentPageLabelProvider.notifier).toPage(items[target].label);
+  }
+
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handlePageShortcut);
@@ -89,18 +98,25 @@ class _HomePageState extends ConsumerState<HomePage> {
                         .watch(currentNavigationItemsStateProvider)
                         .value;
                     final isMobile = ref.watch(isMobileViewProvider);
-                    return _HomePageView(
-                      navigationItems: navigationItems,
-                      axis: isMobile ? Axis.horizontal : Axis.vertical,
-                      pageBuilder: (_, index) {
-                        final navigationItem = navigationItems[index];
-                        return _NavigationPage(
-                          key: ValueKey(navigationItem.label),
-                          item: navigationItem,
-                          isMobile: isMobile,
-                          view: navigationItem.builder(context),
-                        );
-                      },
+                    final pageSwipe = ref.watch(
+                      appSettingProvider.select((state) => state.pageSwipe),
+                    );
+                    return PageSwipe(
+                      enabled: isMobile && pageSwipe,
+                      onSwipe: _swipePage,
+                      child: _HomePageView(
+                        navigationItems: navigationItems,
+                        axis: isMobile ? Axis.horizontal : Axis.vertical,
+                        pageBuilder: (_, index) {
+                          final navigationItem = navigationItems[index];
+                          return _NavigationPage(
+                            key: ValueKey(navigationItem.label),
+                            item: navigationItem,
+                            isMobile: isMobile,
+                            view: navigationItem.builder(context),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),

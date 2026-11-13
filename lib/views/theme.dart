@@ -370,6 +370,13 @@ class _ThemeViewState extends ConsumerState<ThemeView>
           ),
           const SizedBox(height: 16),
           const _TabAnimationItem(),
+          AnimatedReveal(
+            visible: visible(SettingCondition.navigationBar),
+            child: const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: _PageSwipeItem(),
+            ),
+          ),
           const SizedBox(height: 16),
           const _LiquidGlassItem(),
           if (system.isMacOS || system.isWindows)
@@ -1974,6 +1981,37 @@ class _TabAnimationItem extends ConsumerWidget {
   }
 }
 
+class _PageSwipeItem extends ConsumerWidget {
+  const _PageSwipeItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final pageSwipe = ref.watch(
+      appSettingProvider.select((state) => state.pageSwipe),
+    );
+    return SettingTarget(
+      spec: themeToolSettings[16],
+      child: ListItem.toggle(
+        leading: const GlyphIcon(AppGlyphs.swap),
+        horizontalTitleGap: 12,
+        title: Text(
+          themeToolSettings[16].title(appLocalizations),
+          style: AppTextStyle.subheadline
+              .of(context, emphasized: true)
+              .copyWith(color: context.colorScheme.onSurfaceVariant),
+        ),
+        value: pageSwipe,
+        onChanged: (value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(pageSwipe: value));
+        },
+      ),
+    );
+  }
+}
+
 class _LiquidGlassItem extends ConsumerWidget {
   const _LiquidGlassItem();
 
@@ -2594,6 +2632,13 @@ final themeToolSettings = <SettingSpec>[
     title: (l) => l.sidebarWidth,
     keywords: ['sidebarWidth', 'sidebarWidthNarrow', 'sidebarWidthWide'],
     condition: SettingCondition.navigationSidebar,
+  ),
+  SettingSpec(
+    id: 'theme.pageSwipe',
+    page: ToolPage.theme,
+    title: (l) => l.pageSwipe,
+    keywords: ['pageSwipe', 'swipe'],
+    condition: SettingCondition.navigationBar,
   ),
   ...wallpaperToolSettings,
 ];

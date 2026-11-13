@@ -81,7 +81,8 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
   }
 
   /// A swipe turns the page once and never holds it between two: the pager
-  /// ignores the finger and flips on the gesture's distance or fling.
+  /// ignores the finger and flips on the gesture's distance or fling. Past
+  /// either end it goes on to the app's next page.
   void _endSwipe(DragEndDetails details) {
     final sign = Directionality.of(context) == TextDirection.rtl ? -1 : 1;
     final distance = _swipe * sign;
@@ -91,7 +92,12 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
         velocity * sign < -_swipeVelocity || distance <= -_swipeDistance;
     final back = velocity * sign > _swipeVelocity || distance >= _swipeDistance;
     if (forward == back) return;
-    _showPage((_page + (forward ? 1 : -1)).clamp(0, 1));
+    final page = _page + (forward ? 1 : -1);
+    if (page >= 0 && page <= 1) {
+      _showPage(page);
+    } else if (!_editing) {
+      PageSwipeNotification(forward: forward).dispatch(context);
+    }
   }
 
   @override

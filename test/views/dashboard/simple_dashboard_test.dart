@@ -31,6 +31,7 @@ import 'package:reclash/views/dashboard/simple/flag.dart';
 import 'package:reclash/views/dashboard/simple/home.dart';
 import 'package:reclash/views/dashboard/simple/location_card.dart';
 import 'package:reclash/views/dashboard/simple/mode_card.dart';
+import 'package:reclash/ui/page_swipe.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/simple/simple_dashboard.dart';
@@ -602,6 +603,43 @@ void main() {
 
       expect(find.byTooltip('Edit widgets'), findsNothing);
       expect(pagerAt(tester), 0);
+    });
+
+    testWidgets('a swipe past either end of the pager goes up a level', (
+      tester,
+    ) async {
+      chooseSimple();
+      await pumpPage(tester);
+      final bubbled = <bool>[];
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: NotificationListener<PageSwipeNotification>(
+              onNotification: (notification) {
+                bubbled.add(notification.forward);
+                return true;
+              },
+              child: const DashboardPage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.dragFrom(const Offset(200, 120), const Offset(200, 0));
+      await settle(tester);
+      expect(bubbled, [false]);
+      expect(pagerAt(tester), 0);
+
+      await tester.dragFrom(const Offset(200, 120), const Offset(-200, 0));
+      await settle(tester);
+      expect(pagerAt(tester), 1);
+      expect(bubbled, [false]);
+
+      await swipe(tester, find.byType(SimpleWidgetList), -200);
+      expect(bubbled, [false, true]);
+      expect(pagerAt(tester), 1);
     });
 
     testWidgets('dragging the power button swipes nothing', (tester) async {

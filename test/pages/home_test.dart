@@ -1068,6 +1068,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final enabled in [true, false]) {
+    testWidgets(
+      'a sideways swipe ${enabled ? 'steps through' : 'leaves'} the mobile pages',
+      (tester) async {
+        tester.view.physicalSize = const Size(500, 800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final container = ProviderContainer(
+          overrides: [
+            navigationItemsStateProvider.overrideWithValue(
+              NavigationItemsState(
+                value: [
+                  for (final (glyph, label) in [
+                    (AppGlyphs.dashboard, PageLabel.dashboard),
+                    (AppGlyphs.proxies, PageLabel.proxies),
+                    (AppGlyphs.profiles, PageLabel.profiles),
+                  ])
+                    NavigationItem(
+                      glyph: glyph,
+                      label: label,
+                      builder: (_) =>
+                          _InitRecorder(label: label, inits: <PageLabel>[]),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        globalState.container = container;
+        container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(pageSwipe: enabled));
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        Future<void> swipe(double dx) async {
+          await tester.fling(find.byType(HomePage), Offset(dx, 0), 1000);
+          await tester.pumpAndSettle();
+        }
+
+        PageLabel shown() => container.read(currentPageLabelProvider);
+
+        await swipe(200);
+        expect(shown(), PageLabel.dashboard);
+        await swipe(-200);
+        expect(shown(), enabled ? PageLabel.proxies : PageLabel.dashboard);
+        await swipe(-200);
+        await swipe(-200);
+        expect(shown(), enabled ? PageLabel.profiles : PageLabel.dashboard);
+        await swipe(200);
+        expect(shown(), enabled ? PageLabel.proxies : PageLabel.dashboard);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('an interrupted tab switch releases a non-kept page', (
     tester,
   ) async {

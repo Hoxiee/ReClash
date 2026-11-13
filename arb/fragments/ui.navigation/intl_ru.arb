@@ -3,5 +3,6 @@
   "selected": "Выбрано",
   "sidebarWidth": "Ширина боковой панели",
   "sidebarWidthNarrow": "Узкая",
-  "sidebarWidthWide": "Широкая"
+  "sidebarWidthWide": "Широкая",
+  "pageSwipe": "Свайп между страницами"
 }

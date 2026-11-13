@@ -46,6 +46,7 @@ export 'null_status.dart';
 export 'open_container.dart';
 export 'page_transition.dart';
 export 'page_background.dart';
+export 'page_swipe.dart';
 export 'page_viewport.dart';
 export 'paged_sheet.dart';
 export 'pop_scope.dart';

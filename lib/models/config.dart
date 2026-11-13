@@ -298,6 +298,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(TabAnimation.slide)
     @JsonKey(readValue: _readTabAnimation)
     TabAnimation tabAnimation,
+    @Default(true) bool pageSwipe,
     @Default(true) bool floatingNavigationBar,
     @Default(NavigationLayout.auto)
     @JsonKey(unknownEnumValue: NavigationLayout.auto)

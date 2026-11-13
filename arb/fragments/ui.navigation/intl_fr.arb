@@ -3,5 +3,6 @@
   "selected": "Sélectionné",
   "sidebarWidth": "Largeur de la barre latérale",
   "sidebarWidthNarrow": "Étroite",
-  "sidebarWidthWide": "Large"
+  "sidebarWidthWide": "Large",
+  "pageSwipe": "Balayer entre les pages"
 }

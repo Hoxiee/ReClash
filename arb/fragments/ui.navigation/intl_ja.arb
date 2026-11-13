@@ -3,5 +3,6 @@
   "selected": "選択済み",
   "sidebarWidth": "サイドバーの幅",
   "sidebarWidthNarrow": "狭い",
-  "sidebarWidthWide": "広い"
+  "sidebarWidthWide": "広い",
+  "pageSwipe": "スワイプでページ移動"
 }
