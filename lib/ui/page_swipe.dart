@@ -11,6 +11,21 @@ class PageSwipeNotification extends Notification {
   final bool forward;
 }
 
+/// Lets a subtree keep the sideways gestures that start inside it, such as the
+/// swipe back of a pushed route, away from the enclosing [PageSwipe].
+class PageSwipeScope extends InheritedWidget {
+  const PageSwipeScope._({required this.block, required super.child});
+
+  final ValueChanged<int> block;
+
+  static void blockPointer(BuildContext context, int pointer) {
+    context.getInheritedWidgetOfExactType<PageSwipeScope>()?.block(pointer);
+  }
+
+  @override
+  bool updateShouldNotify(PageSwipeScope oldWidget) => false;
+}
+
 /// Turns a sideways swipe into a step to the next or previous page, one level
 /// above whatever swipes inside it. A child takes the swipe first; it reaches
 /// [onSwipe] only when the child had no page left in that direction, as a
@@ -38,6 +53,15 @@ class PageSwipe extends StatefulWidget {
 class _PageSwipeState extends State<PageSwipe> {
   var _drag = 0.0;
   var _overscroll = 0.0;
+  final _blocked = <int>{};
+  var _pointer = -1;
+
+  bool get _isBlocked => _blocked.contains(_pointer);
+
+  void _onPointerDown(PointerDownEvent event) {
+    _blocked.removeWhere((pointer) => pointer != event.pointer);
+    _pointer = event.pointer;
+  }
 
   int get _sign => Directionality.of(context) == TextDirection.rtl ? -1 : 1;
 
@@ -45,6 +69,7 @@ class _PageSwipeState extends State<PageSwipe> {
     final distance = _drag * _sign;
     final velocity = (details.primaryVelocity ?? 0) * _sign;
     _drag = 0;
+    if (_isBlocked) return;
     final forward = velocity < -_swipeVelocity || distance <= -_swipeDistance;
     final back = velocity > _swipeVelocity || distance >= _swipeDistance;
     if (forward != back) widget.onSwipe(forward);
@@ -61,12 +86,15 @@ class _PageSwipeState extends State<PageSwipe> {
     } else if (notification is ScrollEndNotification) {
       final overscroll = _overscroll;
       _overscroll = 0;
-      if (overscroll.abs() >= _swipeDistance) widget.onSwipe(overscroll > 0);
+      if (overscroll.abs() >= _swipeDistance && !_isBlocked) {
+        widget.onSwipe(overscroll > 0);
+      }
     }
     return false;
   }
 
   bool _onPageSwipe(PageSwipeNotification notification) {
+    if (_isBlocked) return true;
     widget.onSwipe(notification.forward);
     return true;
   }
@@ -74,18 +102,25 @@ class _PageSwipeState extends State<PageSwipe> {
   @override
   Widget build(BuildContext context) {
     if (!widget.enabled) return widget.child;
-    return NotificationListener<PageSwipeNotification>(
-      onNotification: _onPageSwipe,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _onScroll,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onHorizontalDragStart: (_) => _drag = 0,
-          onHorizontalDragUpdate: (details) =>
-              _drag += details.primaryDelta ?? 0,
-          onHorizontalDragCancel: () => _drag = 0,
-          onHorizontalDragEnd: _endDrag,
-          child: widget.child,
+    return PageSwipeScope._(
+      block: _blocked.add,
+      child: NotificationListener<PageSwipeNotification>(
+        onNotification: _onPageSwipe,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _onScroll,
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: _onPointerDown,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragStart: (_) => _drag = 0,
+              onHorizontalDragUpdate: (details) =>
+                  _drag += details.primaryDelta ?? 0,
+              onHorizontalDragCancel: () => _drag = 0,
+              onHorizontalDragEnd: _endDrag,
+              child: widget.child,
+            ),
+          ),
         ),
       ),
     );

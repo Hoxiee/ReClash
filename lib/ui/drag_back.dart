@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import 'page_swipe.dart';
+
 const double _flingVelocity = 1.0;
 const Duration _settleDuration = Duration(milliseconds: 350);
 const double _dragEdge = 1e-6;
@@ -215,6 +217,9 @@ class _DragBackDetectorState extends State<_DragBackDetector> {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
+    if (widget.route.isCurrent && widget.route.canPop) {
+      PageSwipeScope.blockPointer(context, event.pointer);
+    }
     if (widget.route._canDragBack) {
       _recognizer
         ..towardEnd = _toLogical(1)
