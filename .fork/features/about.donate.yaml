@@ -1,0 +1,15 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+why: About offers a donation page whose methods follow the app region.
+must:
+  addresses: Donation links and wallet addresses live in the app source, never in hosted or remote configuration.
+  unconfigured: Release builds hide methods without a link or address and hide the About row when none is set.
+  region: Russia leads with Russian card rails; Iran and China lead with crypto; other regions lead with international cards. Every configured method stays reachable in every region.
+  network: Each wallet names its network and warns that coins sent over another network are lost.
+  localization: Donation messages are owned by the about.donate fragment and remain translated.
+watch: [lib/views/donate.dart, lib/views/about.dart, 'arb/fragments/about.donate/**', test/views/donate_test.dart]
+checks:
+  tests: [unconfigured, region, network]
+  localization: [localization]

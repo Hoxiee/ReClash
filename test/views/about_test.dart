@@ -3,6 +3,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/about.dart';
+import 'package:reclash/views/donate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -54,6 +55,16 @@ void main() {
       version: '0.0.0',
       buildNumber: '1',
     );
+  });
+
+  testWidgets('opens the donation page from its row', (tester) async {
+    await _pumpAbout(tester);
+    final l10n = AppLocalizations.current;
+
+    await tester.tap(find.text(l10n.donate));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DonateView), findsOneWidget);
   });
 
   testWidgets('identifies the maintainer and puts acknowledgments last', (

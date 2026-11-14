@@ -1343,6 +1343,26 @@ abstract final class AppGlyphs {
     ], closed: true),
   ]);
 
+  static const heart = Glyph([
+    GlyphPath(
+      'M12 20.2C6 16 3.2 12.6 3.2 9C3.2 6.3 5.2 4.3 7.8 4.3C9.6 4.3 11.1 5.3 '
+      '12 6.8C12.9 5.3 14.4 4.3 16.2 4.3C18.8 4.3 20.8 6.3 20.8 9C20.8 12.6 '
+      '18 16 12 20.2Z',
+    ),
+  ]);
+
+  static const card = Glyph([
+    GlyphBox(3, 5.5, 21, 18.5, 2.5),
+    GlyphPolyline([
+      GlyphVertex(3.2, 10),
+      GlyphVertex(20.8, 10),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(6.5, 14.8),
+      GlyphVertex(10, 14.8),
+    ], role: GlyphRole.detail),
+  ]);
+
   static const puzzle = Glyph([
     GlyphPath(
       'M3 10A2.2 2.2 0 0 1 5.2 7.8H7.94A2.6 2.6 0 1 1 11.26 7.8H14'

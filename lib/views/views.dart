@@ -6,6 +6,7 @@ export 'connection/requests.dart';
 export 'dashboard/dashboard.dart';
 export 'dashboard/simple/simple_dashboard.dart' show DashboardPage;
 export 'developer.dart';
+export 'donate.dart';
 export 'disclaimer.dart';
 export 'dns_queries.dart';
 export 'logs.dart';

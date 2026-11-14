@@ -7,6 +7,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/donate.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -123,6 +124,23 @@ class AboutView extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 8),
+          if (showsDonations)
+            generateSection(
+              items: [
+                ListItem(
+                  leading: _LinkBadge(
+                    glyph: AppGlyphs.heart,
+                    color: context.colorScheme.primary,
+                  ),
+                  title: Text(appLocalizations.donate),
+                  subtitle: Text(appLocalizations.donateDesc),
+                  trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                  onTap: () => unawaited(
+                    BaseNavigator.push<void>(context, const DonateView()),
+                  ),
+                ),
+              ],
+            ),
           generateSection(
             title: appLocalizations.maintainer,
             items: [
@@ -462,8 +480,9 @@ class _Pill extends StatelessWidget {
 
 class _LinkBadge extends StatelessWidget {
   final Glyph glyph;
+  final Color? color;
 
-  const _LinkBadge({required this.glyph});
+  const _LinkBadge({required this.glyph, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +498,7 @@ class _LinkBadge extends StatelessWidget {
           child: GlyphIcon(
             glyph,
             size: 20,
-            color: colorScheme.onSurfaceVariant,
+            color: color ?? colorScheme.onSurfaceVariant,
           ),
         ),
       ),

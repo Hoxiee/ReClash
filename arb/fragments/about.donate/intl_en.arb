@@ -1,0 +1,34 @@
+{
+  "donate": "Support the project",
+  "donateDesc": "Keep ReClash free and alive",
+  "donateHeroTitle": "ReClash is free",
+  "donateHeroBody": "No ads, no tracking, no paid tier. Donations pay for servers, test devices and the evenings that go into every release.",
+  "donateCards": "By card",
+  "donateCardsAbroad": "These services may decline cards issued in your region.",
+  "donateCrypto": "Crypto",
+  "donateCryptoFooter": "Works from any country, with no bank in between.",
+  "donateRecommended": "Best for your region",
+  "donateAction": "Donate",
+  "donateTributeDesc": "Card payment through Telegram",
+  "donateCloudTipsDesc": "Card or SBP, no sign-up",
+  "donateSponsorsDesc": "International cards, once or monthly",
+  "donateNotConfigured": "Not configured yet",
+  "donateNetworkWarning": "Send only {coin} over {network}. Coins sent over another network are lost.",
+  "@donateNetworkWarning": {
+    "placeholders": {
+      "coin": {
+        "type": "String"
+      },
+      "network": {
+        "type": "String"
+      }
+    }
+  },
+  "donateCopyAddress": "Copy address",
+  "donateWithoutMoney": "Without money",
+  "donateStar": "Star on GitHub",
+  "donateStarDesc": "Helps others find the project",
+  "donateReport": "Report a problem",
+  "donateReportDesc": "A good bug report is worth a donation",
+  "donateThanks": "Thank you. Every donation matters, however small."
+}
