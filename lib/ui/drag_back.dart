@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -218,13 +220,18 @@ class _DragBackDetectorState extends State<_DragBackDetector> {
 
   void _handlePointerDown(PointerDownEvent event) {
     if (widget.route.isCurrent && widget.route.canPop) {
-      PageSwipeScope.blockPointer(context, event.pointer);
+      PageSwipeScope.blockPointer(context, event.pointer, onBack: _maybePop);
     }
     if (widget.route._canDragBack) {
       _recognizer
         ..towardEnd = _toLogical(1)
         ..addPointer(event);
     }
+  }
+
+  void _maybePop() {
+    final route = widget.route;
+    if (mounted && route.isCurrent) unawaited(route.navigator!.maybePop());
   }
 
   void _handleDragStart(DragStartDetails details) {

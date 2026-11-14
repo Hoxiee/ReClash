@@ -14,16 +14,51 @@ class PageSwipeNotification extends Notification {
 /// Lets a subtree keep the sideways gestures that start inside it, such as the
 /// swipe back of a pushed route, away from the enclosing [PageSwipe].
 class PageSwipeScope extends InheritedWidget {
-  const PageSwipeScope._({required this.block, required super.child});
+  const PageSwipeScope._({required this.claim, required super.child});
 
-  final ValueChanged<int> block;
+  final void Function(int pointer, VoidCallback? onBack) claim;
 
-  static void blockPointer(BuildContext context, int pointer) {
-    context.getInheritedWidgetOfExactType<PageSwipeScope>()?.block(pointer);
+  /// [onBack] takes a swipe toward the previous page that still reaches the
+  /// [PageSwipe]: one an inner pager passed up from its first page, or any
+  /// swipe on a route whose drag back is off, as while it vetoes its pop,
+  /// holds a back layer or is still sliding in.
+  static void blockPointer(
+    BuildContext context,
+    int pointer, {
+    VoidCallback? onBack,
+  }) {
+    context.getInheritedWidgetOfExactType<PageSwipeScope>()?.claim(
+      pointer,
+      onBack,
+    );
   }
 
   @override
   bool updateShouldNotify(PageSwipeScope oldWidget) => false;
+}
+
+/// One step a [PageSwipe] took onto a page, from the side the swipe came.
+class PageSwipeArrival {
+  PageSwipeArrival({required this.forward});
+
+  /// True when the page was entered from the one before it, so an inner
+  /// pager starts on its first page; false starts it on its last.
+  final bool forward;
+}
+
+/// Hands the page a [PageSwipe] stepped onto the [PageSwipeArrival] that
+/// brought it in, so an inner pager continues the swipe from that side.
+class PageSwipeEntry extends InheritedWidget {
+  const PageSwipeEntry({super.key, this.arrival, required super.child});
+
+  final PageSwipeArrival? arrival;
+
+  static PageSwipeArrival? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PageSwipeEntry>()?.arrival;
+
+  @override
+  bool updateShouldNotify(PageSwipeEntry oldWidget) =>
+      !identical(arrival, oldWidget.arrival);
 }
 
 /// Turns a sideways swipe into a step to the next or previous page, one level
@@ -53,14 +88,25 @@ class PageSwipe extends StatefulWidget {
 class _PageSwipeState extends State<PageSwipe> {
   var _drag = 0.0;
   var _overscroll = 0.0;
-  final _blocked = <int>{};
+  final _claims = <int, VoidCallback?>{};
   var _pointer = -1;
 
-  bool get _isBlocked => _blocked.contains(_pointer);
+  bool get _isBlocked => _claims.containsKey(_pointer);
+
+  void _claim(int pointer, VoidCallback? onBack) => _claims[pointer] = onBack;
 
   void _onPointerDown(PointerDownEvent event) {
-    _blocked.removeWhere((pointer) => pointer != event.pointer);
+    _claims.removeWhere((pointer, _) => pointer != event.pointer);
     _pointer = event.pointer;
+  }
+
+  void _swipe(bool forward) {
+    if (!_isBlocked) {
+      widget.onSwipe(forward);
+    } else if (!forward) {
+      _claims[_pointer]?.call();
+    }
+    _claims.remove(_pointer);
   }
 
   int get _sign => Directionality.of(context) == TextDirection.rtl ? -1 : 1;
@@ -69,10 +115,9 @@ class _PageSwipeState extends State<PageSwipe> {
     final distance = _drag * _sign;
     final velocity = (details.primaryVelocity ?? 0) * _sign;
     _drag = 0;
-    if (_isBlocked) return;
     final forward = velocity < -_swipeVelocity || distance <= -_swipeDistance;
     final back = velocity > _swipeVelocity || distance >= _swipeDistance;
-    if (forward != back) widget.onSwipe(forward);
+    if (forward != back) _swipe(forward);
   }
 
   bool _onScroll(ScrollNotification notification) {
@@ -86,16 +131,13 @@ class _PageSwipeState extends State<PageSwipe> {
     } else if (notification is ScrollEndNotification) {
       final overscroll = _overscroll;
       _overscroll = 0;
-      if (overscroll.abs() >= _swipeDistance && !_isBlocked) {
-        widget.onSwipe(overscroll > 0);
-      }
+      if (overscroll.abs() >= _swipeDistance) _swipe(overscroll > 0);
     }
     return false;
   }
 
   bool _onPageSwipe(PageSwipeNotification notification) {
-    if (_isBlocked) return true;
-    widget.onSwipe(notification.forward);
+    _swipe(notification.forward);
     return true;
   }
 
@@ -103,7 +145,7 @@ class _PageSwipeState extends State<PageSwipe> {
   Widget build(BuildContext context) {
     if (!widget.enabled) return widget.child;
     return PageSwipeScope._(
-      block: _blocked.add,
+      claim: _claim,
       child: NotificationListener<PageSwipeNotification>(
         onNotification: _onPageSwipe,
         child: NotificationListener<ScrollNotification>(

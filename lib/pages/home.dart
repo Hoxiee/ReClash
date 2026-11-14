@@ -34,10 +34,18 @@ class _HomePageState extends ConsumerState<HomePage> {
     LogicalKeyboardKey.digit9,
   ];
 
+  PageSwipeArrival? _arrival;
+  PageLabel? _arrivalLabel;
+
   @override
   void initState() {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handlePageShortcut);
+    ref.listenManual(currentPageLabelProvider, (_, next) {
+      if (next == _arrivalLabel) return;
+      _arrival = null;
+      _arrivalLabel = null;
+    });
   }
 
   bool _handlePageShortcut(KeyEvent event) {
@@ -69,7 +77,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final target =
         items.indexWhere((item) => item.label == current) + (forward ? 1 : -1);
     if (target < 0 || target >= items.length) return;
-    ref.read(currentPageLabelProvider.notifier).toPage(items[target].label);
+    _arrival = PageSwipeArrival(forward: forward);
+    _arrivalLabel = items[target].label;
+    ref.read(currentPageLabelProvider.notifier).toPage(_arrivalLabel!);
   }
 
   @override
@@ -113,7 +123,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                             key: ValueKey(navigationItem.label),
                             item: navigationItem,
                             isMobile: isMobile,
-                            view: navigationItem.builder(context),
+                            view: PageSwipeEntry(
+                              arrival: navigationItem.label == _arrivalLabel
+                                  ? _arrival
+                                  : null,
+                              child: navigationItem.builder(context),
+                            ),
                           );
                         },
                       ),
@@ -543,31 +558,36 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       final page = Offstage(
         key: ValueKey(label),
         offstage: !shown,
-        child: Overlay.wrap(
-          child: PageViewport(
-            animation: _transition,
-            child: tools
-                ? TabContentMotion(
-                    extent: extent,
-                    animation: _transition,
-                    frame: frame,
-                    axis: widget.axis,
-                    child: dock == null
-                        ? content
-                        : NavigationDockScope(
-                            navigation: dock.navigation,
-                            floating: dock.floating,
-                            held: active == label,
-                            bottomPadding: dock.bottomPadding,
-                            child: content,
-                          ),
-                  )
-                : TabMotionTransition(
-                    animation: _transition,
-                    frame: frame,
-                    axis: widget.axis,
-                    child: content,
-                  ),
+        // A swipe or tap on a page being left would act on it, not on the
+        // page the user has already moved to.
+        child: IgnorePointer(
+          ignoring: label != active,
+          child: Overlay.wrap(
+            child: PageViewport(
+              animation: _transition,
+              child: tools
+                  ? TabContentMotion(
+                      extent: extent,
+                      animation: _transition,
+                      frame: frame,
+                      axis: widget.axis,
+                      child: dock == null
+                          ? content
+                          : NavigationDockScope(
+                              navigation: dock.navigation,
+                              floating: dock.floating,
+                              held: active == label,
+                              bottomPadding: dock.bottomPadding,
+                              child: content,
+                            ),
+                    )
+                  : TabMotionTransition(
+                      animation: _transition,
+                      frame: frame,
+                      axis: widget.axis,
+                      child: content,
+                    ),
+            ),
           ),
         ),
       );

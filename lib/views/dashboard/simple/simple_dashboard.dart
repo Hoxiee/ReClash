@@ -58,10 +58,39 @@ class SimpleDashboardView extends ConsumerStatefulWidget {
 }
 
 class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
-  final _pager = PageController();
+  late final PageController _pager;
+  var _started = false;
   var _page = 0;
+
+  /// Where the pager is headed, ahead of [_page] while it turns, so a swipe
+  /// made during the turn steps on from there.
+  var _target = 0;
   var _editing = false;
   var _swipe = 0.0;
+  PageSwipeArrival? _arrival;
+
+  /// A swipe that brings the dashboard in from the next app page goes on
+  /// with its last page, and one from the page before with its first.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final arrival = PageSwipeEntry.of(context);
+    final entered = arrival != null && !identical(arrival, _arrival);
+    _arrival = arrival;
+    final page = entered ? (arrival.forward ? 0 : 1) : _target;
+    if (!_started) {
+      _started = true;
+      _page = _target = page;
+      _pager = PageController(initialPage: page);
+    } else if (page != _target) {
+      _target = page;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _target == page && _pager.hasClients) {
+          _pager.jumpToPage(page);
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -73,6 +102,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
 
   void _showPage(int page) {
     if (!_pager.hasClients) return;
+    _target = page;
     _pager.animateToPage(
       page,
       duration: context.motionDuration(const Duration(milliseconds: 360)),
@@ -92,7 +122,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
         velocity * sign < -_swipeVelocity || distance <= -_swipeDistance;
     final back = velocity * sign > _swipeVelocity || distance >= _swipeDistance;
     if (forward == back) return;
-    final page = _page + (forward ? 1 : -1);
+    final page = _target + (forward ? 1 : -1);
     if (page >= 0 && page <= 1) {
       _showPage(page);
     } else if (!_editing) {

@@ -18,6 +18,7 @@ import 'package:reclash/features/doctor/providers.dart';
 import 'package:reclash/features/doctor/supervisor/network.dart';
 import 'package:reclash/features/traffic_forecast/forecast.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/pages/home.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
@@ -31,6 +32,7 @@ import 'package:reclash/views/dashboard/simple/flag.dart';
 import 'package:reclash/views/dashboard/simple/home.dart';
 import 'package:reclash/views/dashboard/simple/location_card.dart';
 import 'package:reclash/views/dashboard/simple/mode_card.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/page_swipe.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
@@ -640,6 +642,124 @@ void main() {
       await swipe(tester, find.byType(SimpleWidgetList), -200);
       expect(bubbled, [false, true]);
       expect(pagerAt(tester), 1);
+    });
+
+    group('in the home pager', () {
+      Future<void> pumpHome(WidgetTester tester, {bool keep = true}) async {
+        useContainer(
+          overrides: [
+            navigationItemsStateProvider.overrideWithValue(
+              NavigationItemsState(
+                value: [
+                  NavigationItem(
+                    glyph: AppGlyphs.dashboard,
+                    label: PageLabel.dashboard,
+                    keep: keep,
+                    builder: (_) => const DashboardPage(),
+                  ),
+                  for (final label in [PageLabel.proxies, PageLabel.profiles])
+                    NavigationItem(
+                      glyph: AppGlyphs.proxies,
+                      label: label,
+                      builder: (_) => Text('page:${label.name}'),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+        chooseSimple();
+        tester.view.physicalSize = _phone;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        container.read(viewSizeProvider.notifier).value = _phone;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+          ),
+        );
+        await settle(tester);
+      }
+
+      PageLabel shown() => container.read(currentPageLabelProvider);
+      double? innerAt(WidgetTester tester) => tester
+          .widget<PageView>(find.byType(PageView, skipOffstage: false))
+          .controller
+          ?.page;
+
+      Future<void> fling(WidgetTester tester, double dx) async {
+        await tester.flingFrom(const Offset(200, 150), Offset(dx, 0), 1000);
+        await settle(tester);
+      }
+
+      testWidgets('swipes chain through the inner pages both ways', (
+        tester,
+      ) async {
+        await pumpHome(tester);
+        final steps = <(PageLabel, double?)>[];
+        void record() => steps.add((
+          shown(),
+          shown() == PageLabel.dashboard ? innerAt(tester) : null,
+        ));
+        for (final dx in [-200.0, -200.0, -200.0, 200.0, 200.0, 200.0]) {
+          await fling(tester, dx);
+          record();
+        }
+        expect(steps, [
+          (PageLabel.dashboard, 1),
+          (PageLabel.proxies, null),
+          (PageLabel.profiles, null),
+          (PageLabel.proxies, null),
+          (PageLabel.dashboard, 1),
+          (PageLabel.dashboard, 0),
+        ]);
+        expect(tester.takeException(), isNull);
+      });
+
+      for (final keep in [true, false]) {
+        testWidgets('a swipe back into the dashboard lands on its last page '
+            'with keep=$keep', (tester) async {
+          await pumpHome(tester, keep: keep);
+          container
+              .read(currentPageLabelProvider.notifier)
+              .toPage(PageLabel.proxies);
+          await settle(tester);
+
+          await fling(tester, 200);
+          expect(shown(), PageLabel.dashboard);
+          expect(innerAt(tester), 1);
+
+          container
+              .read(currentPageLabelProvider.notifier)
+              .toPage(PageLabel.proxies);
+          await settle(tester);
+          container
+              .read(currentPageLabelProvider.notifier)
+              .toPage(PageLabel.dashboard);
+          await settle(tester);
+          expect(innerAt(tester), keep ? 1 : 0);
+        });
+      }
+
+      testWidgets('quick swipes each take one step', (tester) async {
+        await pumpHome(tester);
+        for (final dx in [-200.0, -200.0]) {
+          await tester.flingFrom(const Offset(200, 150), Offset(dx, 0), 1000);
+          await tester.pump(const Duration(milliseconds: 60));
+        }
+        await settle(tester);
+        expect(shown(), PageLabel.proxies);
+
+        for (final dx in [200.0, 200.0]) {
+          await tester.flingFrom(const Offset(200, 150), Offset(dx, 0), 1000);
+          await tester.pump(const Duration(milliseconds: 60));
+        }
+        await settle(tester);
+        expect(shown(), PageLabel.dashboard);
+        expect(innerAt(tester), 0);
+      });
     });
 
     testWidgets('dragging the power button swipes nothing', (tester) async {
