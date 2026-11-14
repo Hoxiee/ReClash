@@ -379,7 +379,6 @@ support:
 | `proxies.icon` | `filled`, `plain`, `hidden` |
 | `proxies.card` | `loose`, `standard`, `compact`, `oneline` |
 | `app.navbar` | `floating`, `docked` |
-| `app.tabs` | `slide`, `fade` |
 | `app.glass` | `none`, `standard`, `ultra` |
 | `app.color` | Quoted `RRGGBB` or `AARRGGBB`, optional `#` |
 | `app.color-dark` | Same as `app.color`. Replaces it in the dark theme; ignored without `app.color`. |

@@ -64,7 +64,6 @@ const providerSettingsBySpec = {
   'theme.themeColor': ['app.color', 'app.style'],
   'theme.pureBlackMode': ['app.black'],
   'theme.navigationBarStyle': ['app.navbar'],
-  'theme.tabAnimation': ['app.tabs'],
   'theme.liquidGlass': ['app.glass'],
   'theme.wallpaper.enabled': ['background'],
 };

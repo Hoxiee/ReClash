@@ -950,6 +950,7 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
+        tabAnimationProvider.overrideWithValue(TabAnimation.fade),
         navigationItemsStateProvider.overrideWithValue(
           NavigationItemsState(
             value: [
@@ -971,9 +972,6 @@ void main() {
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(viewSizeProvider.notifier).value = const Size(500, 800);
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -1145,6 +1143,7 @@ void main() {
     var disposed = false;
     final container = ProviderContainer(
       overrides: [
+        tabAnimationProvider.overrideWithValue(TabAnimation.fade),
         navigationItemsStateProvider.overrideWithValue(
           NavigationItemsState(
             value: [
@@ -1173,9 +1172,6 @@ void main() {
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(viewSizeProvider.notifier).value = const Size(500, 800);
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
 
     await tester.pumpWidget(
       UncontrolledProviderScope(

@@ -67,12 +67,6 @@
                 "docked"
               ]
             },
-            "tabs": {
-              "enum": [
-                "slide",
-                "fade"
-              ]
-            },
             "glass": {
               "enum": [
                 "none",

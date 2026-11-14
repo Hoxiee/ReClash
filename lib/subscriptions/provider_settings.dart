@@ -134,13 +134,6 @@ final providerSettingsCatalog = <ProviderSetting>[
         _app(config, (p) => p.copyWith(floatingNavigationBar: value)),
   ),
   _enum(
-    'app.tabs',
-    TabAnimation.values,
-    (view) => view.tabAnimation,
-    (config) => config.appSettingProps.tabAnimation,
-    (config, value) => _app(config, (p) => p.copyWith(tabAnimation: value)),
-  ),
-  _enum(
     'app.glass',
     LiquidGlassMode.values,
     (view) => view.liquidGlass,

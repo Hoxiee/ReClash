@@ -40,6 +40,18 @@ void main() {
 
   tearDown(() => container.dispose());
 
+  void useTabAnimation(TabAnimation animation) {
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        tabAnimationProvider.overrideWithValue(animation),
+      ],
+    );
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(1400, 2400);
+  }
+
   Finder destination(String label) => find.descendant(
     of: find.byType(GlyphSegmentedControl<int>),
     matching: find.byWidgetPredicate(
@@ -244,9 +256,7 @@ void main() {
       testWidgets('$animation swipes follow the finger and cancel or commit', (
         tester,
       ) async {
-        container
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(tabAnimation: animation));
+        useTabAnimation(animation);
         await pumpThemeView(tester, size: const Size(390, 844));
         final start = tester.getTopLeft(page('theme'));
         final gesture = await tester.startGesture(const Offset(195, 150));
@@ -524,9 +534,7 @@ void main() {
     for (final animation in TabAnimation.values) {
       testWidgets('$animation animates category changes and keeps the '
           'switcher stationary', (tester) async {
-        container
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(tabAnimation: animation));
+        useTabAnimation(animation);
         await pumpThemeView(tester, size: const Size(390, 844));
         Offset switcherEnd() =>
             tester.getTopRight(find.byType(GlyphSegmentedControl<int>));
@@ -557,9 +565,7 @@ void main() {
       testWidgets('$animation reverses without jumping or duplicating a page', (
         tester,
       ) async {
-        container
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(tabAnimation: animation));
+        useTabAnimation(animation);
         await pumpThemeView(tester, size: const Size(390, 844));
         final themeElement = tester.element(page('theme'));
         await tester.tap(destination('Background'));
@@ -594,9 +600,7 @@ void main() {
       testWidgets(
         '$animation rapid category changes honor the last selection',
         (tester) async {
-          container
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(tabAnimation: animation));
+          useTabAnimation(animation);
           await pumpThemeView(tester, size: const Size(390, 844));
           await tester.tap(destination('Background'));
           await tester.pump();
@@ -809,9 +813,7 @@ void main() {
     testWidgets('slide direction follows the reading direction', (
       tester,
     ) async {
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
+      useTabAnimation(TabAnimation.slide);
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -1386,7 +1388,6 @@ void main() {
                   : findsOneWidget,
             );
           }
-          expect(setting('theme.tabAnimation'), findsOneWidget);
           expect(setting('theme.liquidGlass'), findsOneWidget);
           expect(container.read(appSettingProvider).sidebarNarrow, isTrue);
           expect(
@@ -1458,20 +1459,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(readSetting().navigationLayout, NavigationLayout.auto);
       expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('picks a sliding or fading tab switch', (tester) async {
-      await pumpThemeView(tester, interface: true);
-
-      expect(readSetting().tabAnimation, TabAnimation.slide);
-
-      await tester.tap(find.text('Fade'));
-      await tester.pumpAndSettle();
-      expect(readSetting().tabAnimation, TabAnimation.fade);
-
-      await tester.tap(find.text('Slide'));
-      await tester.pumpAndSettle();
-      expect(readSetting().tabAnimation, TabAnimation.slide);
     });
 
     testWidgets('the preview switches to the destination tapped', (

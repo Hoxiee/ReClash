@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,6 +13,10 @@ class AppSetting extends _$AppSetting with AutoDisposeNotifierMixin {
     return const AppSettingProps();
   }
 }
+
+final tabAnimationProvider = Provider<TabAnimation>(
+  (ref) => system.isDesktop ? TabAnimation.fade : TabAnimation.slide,
+);
 
 @Riverpod(keepAlive: true)
 class WindowSetting extends _$WindowSetting with AutoDisposeNotifierMixin {

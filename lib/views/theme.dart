@@ -191,7 +191,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
         current: previous,
         value: _transition.value,
         forward: index > previous,
-        fade: ref.read(appSettingProvider).tabAnimation == TabAnimation.fade,
+        fade: ref.read(tabAnimationProvider) == TabAnimation.fade,
       );
     }
     _swipeTarget = null;
@@ -369,7 +369,6 @@ class _ThemeViewState extends ConsumerState<ThemeView>
             ),
           ),
           const SizedBox(height: 16),
-          const _TabAnimationItem(),
           AnimatedReveal(
             visible: visible(SettingCondition.navigationBar),
             child: const Padding(
@@ -1133,10 +1132,10 @@ class _ContrastItem extends ConsumerWidget {
       ),
     );
     return SettingTarget(
-      spec: themeToolSettings[10],
+      spec: themeToolSettings[9],
       child: PreviewChoiceGroup<ColorContrast>(
         info: Info(
-          label: themeToolSettings[10].title(appLocalizations),
+          label: themeToolSettings[9].title(appLocalizations),
           glyph: AppGlyphs.eye,
         ),
         value: contrast,
@@ -1219,13 +1218,13 @@ class _AppIconItem extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: SettingTarget(
-        spec: themeToolSettings[11],
+        spec: themeToolSettings[10],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             InfoHeader(
               info: Info(
-                label: themeToolSettings[11].title(appLocalizations),
+                label: themeToolSettings[10].title(appLocalizations),
                 glyph: AppGlyphs.iconTile,
               ),
             ),
@@ -1497,10 +1496,10 @@ class _NavigationLabelsItem extends ConsumerWidget {
     final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final colorScheme = context.colorScheme;
     return SettingTarget(
-      spec: themeToolSettings[12],
+      spec: themeToolSettings[11],
       child: PreviewChoiceGroup<NavigationLabels>(
         info: Info(
-          label: themeToolSettings[12].title(appLocalizations),
+          label: themeToolSettings[11].title(appLocalizations),
           glyph: AppGlyphs.textShort,
         ),
         value: labels,
@@ -1578,10 +1577,10 @@ class _TrayIconItem extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: SettingTarget(
-        spec: themeToolSettings[13],
+        spec: themeToolSettings[12],
         child: PreviewChoiceGroup<TrayIconStyle>(
           info: Info(
-            label: themeToolSettings[13].title(appLocalizations),
+            label: themeToolSettings[12].title(appLocalizations),
             glyph: AppGlyphs.status,
           ),
           value: style,
@@ -1661,13 +1660,13 @@ class _DashboardStyleItem extends ConsumerWidget {
       ),
     );
     return SettingTarget(
-      spec: themeToolSettings[14],
+      spec: themeToolSettings[13],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InfoHeader(
             info: Info(
-              label: themeToolSettings[14].title(appLocalizations),
+              label: themeToolSettings[13].title(appLocalizations),
               glyph: AppGlyphs.dashboard,
             ),
           ),
@@ -1827,10 +1826,10 @@ class _NavigationLayoutItem extends ConsumerWidget {
       simpleDashboard: simpleDashboard,
     );
     return SettingTarget(
-      spec: themeToolSettings[9],
+      spec: themeToolSettings[8],
       child: PreviewChoiceGroup<NavigationLayout>(
         info: Info(
-          label: themeToolSettings[9].title(appLocalizations),
+          label: themeToolSettings[8].title(appLocalizations),
           glyph: AppGlyphs.layers,
         ),
         value: layout,
@@ -1925,90 +1924,24 @@ class _NavigationBarItem extends ConsumerWidget {
   }
 }
 
-class _TabAnimationItem extends ConsumerWidget {
-  const _TabAnimationItem();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final tabAnimation = ref.watch(
-      appSettingProvider.select((state) => state.tabAnimation),
-    );
-    final floatingBar = ref.watch(_floatingBarProvider);
-    final liquidGlass = ref.watch(_liquidGlassProvider);
-    final simpleDashboard = ref.watch(_simpleDashboardProvider);
-    final colorScheme = context.colorScheme;
-    Widget switching(TabAnimation tabAnimation) => MiniScreenThumb(
-      screen: MiniScreen(
-        colorScheme: colorScheme,
-        floatingBar: floatingBar,
-        liquidGlass: liquidGlass,
-        simpleDashboard: simpleDashboard,
-        selected: 1,
-        previous: 0,
-        progress: 0.55,
-        tabAnimation: tabAnimation,
-      ),
-    );
-    return SettingTarget(
-      spec: themeToolSettings[4],
-      child: PreviewChoiceGroup<TabAnimation>(
-        info: Info(
-          label: themeToolSettings[4].title(appLocalizations),
-          glyph: AppGlyphs.motion,
-        ),
-        actions: [?providerSpecTag(ref, themeToolSettings[4])],
-        value: tabAnimation,
-        choices: [
-          PreviewChoice(
-            value: TabAnimation.slide,
-            label: appLocalizations.slide,
-            pictogram: switching(TabAnimation.slide),
-          ),
-          PreviewChoice(
-            value: TabAnimation.fade,
-            label: appLocalizations.fade,
-            pictogram: switching(TabAnimation.fade),
-          ),
-        ],
-        onChanged: (value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(tabAnimation: value));
-        },
-      ),
-    );
-  }
-}
-
-class _PageSwipeItem extends ConsumerWidget {
+class _PageSwipeItem extends StatelessWidget {
   const _PageSwipeItem();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final pageSwipe = ref.watch(
-      appSettingProvider.select((state) => state.pageSwipe),
-    );
-    return SettingTarget(
-      spec: themeToolSettings[16],
-      child: ListItem.toggle(
+  Widget build(BuildContext context) {
+    return generateGroup([
+      ConfigToggleItem(
+        setting: themeToolSettings[15],
+        selector: appSettingProvider.select((state) => state.pageSwipe),
+        title: (l) => l.pageSwipe,
         leading: const GlyphIcon(AppGlyphs.swap),
-        horizontalTitleGap: 12,
-        title: Text(
-          themeToolSettings[16].title(appLocalizations),
-          style: AppTextStyle.subheadline
-              .of(context, emphasized: true)
-              .copyWith(color: context.colorScheme.onSurfaceVariant),
-        ),
-        value: pageSwipe,
-        onChanged: (value) {
+        onChanged: (ref, value) {
           ref
               .read(appSettingProvider.notifier)
               .update((state) => state.copyWith(pageSwipe: value));
         },
       ),
-    );
+    ]);
   }
 }
 
@@ -2033,13 +1966,13 @@ class _LiquidGlassItem extends ConsumerWidget {
       ),
     );
     return SettingTarget(
-      spec: themeToolSettings[5],
+      spec: themeToolSettings[4],
       child: PreviewChoiceGroup<LiquidGlassMode>(
         info: Info(
           label: appLocalizations.liquidGlass,
           glyph: AppGlyphs.liquidGlass,
         ),
-        actions: [?providerSpecTag(ref, themeToolSettings[5])],
+        actions: [?providerSpecTag(ref, themeToolSettings[4])],
         value: mode,
         choices: [
           PreviewChoice(
@@ -2081,12 +2014,12 @@ class _SidebarBlurItem extends ConsumerWidget {
       themeSettingProvider.select((state) => state.sidebarBlur),
     );
     return SettingTarget(
-      spec: themeToolSettings[6],
+      spec: themeToolSettings[5],
       child: ListItem.toggle(
         leading: const GlyphIcon(AppGlyphs.blur),
         horizontalTitleGap: 12,
         title: Text(
-          themeToolSettings[6].title(appLocalizations),
+          themeToolSettings[5].title(appLocalizations),
           style: AppTextStyle.subheadline
               .of(context, emphasized: true)
               .copyWith(color: context.colorScheme.onSurfaceVariant),
@@ -2153,13 +2086,13 @@ class _FontFamilyItem extends ConsumerWidget {
       child: InkWell(customBorder: AppShape.lg, onTap: onTap, child: preview),
     );
     return SettingTarget(
-      spec: themeToolSettings[7],
+      spec: themeToolSettings[6],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InfoHeader(
             info: Info(
-              label: themeToolSettings[7].title(appLocalizations),
+              label: themeToolSettings[6].title(appLocalizations),
               glyph: AppGlyphs.font,
             ),
           ),
@@ -2221,7 +2154,7 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
     final divisions =
         ((maxTextScale - minTextScale) / _TextScaleFactorItem._step).round();
     return SettingTarget(
-      spec: themeToolSettings[8],
+      spec: themeToolSettings[7],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2555,12 +2488,6 @@ final themeToolSettings = <SettingSpec>[
     title: (l) => l.navigationBarStyle,
     keywords: ['navigationBarStyle'],
     condition: SettingCondition.navigationBar,
-  ),
-  SettingSpec(
-    id: 'theme.tabAnimation',
-    page: ToolPage.theme,
-    title: (l) => l.tabAnimation,
-    keywords: ['tabAnimation'],
   ),
   SettingSpec(
     id: 'theme.liquidGlass',

@@ -310,17 +310,13 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      appSettingProvider.select((state) => state.tabAnimation),
-      (_, _) => _select((_selected + 1) % MiniScreen.destinationCount),
-    );
   }
 
   Future<void> _select(int index) async {
     if (index == _selected) {
       return;
     }
-    final tabAnimation = ref.read(appSettingProvider).tabAnimation;
+    final tabAnimation = ref.read(tabAnimationProvider);
     final fade = tabAnimation == TabAnimation.fade;
     _slide.duration = fade ? fadeTabDuration : slideTabDuration;
     _slideCurve.curve = fade ? fadeTabCurve : slideTabCurve;
@@ -355,9 +351,7 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     final floatingBar = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
-    final tabAnimation = ref.watch(
-      appSettingProvider.select((state) => state.tabAnimation),
-    );
+    final tabAnimation = ref.watch(tabAnimationProvider);
     final labels = ref.watch(
       appSettingProvider.select((state) => state.navigationLabels),
     );

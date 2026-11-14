@@ -85,7 +85,6 @@ class ProviderView {
     this.proxiesIcon,
     this.proxiesCard,
     this.floatingNavigationBar,
-    this.tabAnimation,
     this.liquidGlass,
     this.primaryColor,
     this.primaryColorDark,
@@ -108,7 +107,6 @@ class ProviderView {
         'docked' => false,
         _ => null,
       },
-      tabAnimation: pick('app.tabs', TabAnimation.values),
       liquidGlass: pick('app.glass', LiquidGlassMode.values),
       primaryColor: _color(pairs['app.color']),
       primaryColorDark: _color(pairs['app.colordark']),
@@ -127,7 +125,6 @@ class ProviderView {
   final ProxiesIconStyle? proxiesIcon;
   final ProxyCardType? proxiesCard;
   final bool? floatingNavigationBar;
-  final TabAnimation? tabAnimation;
   final LiquidGlassMode? liquidGlass;
 
   /// An opaque ARGB value; a six-digit colour gets a full alpha.

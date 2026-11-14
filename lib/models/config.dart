@@ -223,17 +223,6 @@ Object? _readDashboardStyle(Map<dynamic, dynamic> json, String key) {
   return forgotten ? null : style;
 }
 
-Object? _readTabAnimation(Map<dynamic, dynamic> json, String key) {
-  if (json.containsKey(key)) {
-    return json[key];
-  }
-  return switch (json['isAnimateToPage']) {
-    true => TabAnimation.slide.name,
-    false => TabAnimation.fade.name,
-    _ => null,
-  };
-}
-
 UpdateChannel? updateChannelFromJson(Object? value) => switch (value) {
   'release' => UpdateChannel.release,
   'pre' => UpdateChannel.pre,
@@ -295,9 +284,6 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool coreErrorNotices,
     @Default(true) bool closeConnections,
     @Default(defaultDelayTestTimeout) int delayTestTimeout,
-    @Default(TabAnimation.slide)
-    @JsonKey(readValue: _readTabAnimation)
-    TabAnimation tabAnimation,
     @Default(true) bool pageSwipe,
     @Default(true) bool floatingNavigationBar,
     @Default(NavigationLayout.auto)

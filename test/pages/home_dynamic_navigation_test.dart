@@ -70,6 +70,7 @@ Future<_Harness> _mount(
   bool reducedMotion = false,
   bool withShortcutManager = false,
   Size size = const Size(500, 800),
+  TabAnimation? tabAnimation,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -86,6 +87,8 @@ Future<_Harness> _mount(
       ),
       currentPageLabelProvider.overrideWith(() => _SelectedPage(selected)),
       toolsSessionProvider.overrideWith(_ToolsSession.new),
+      if (tabAnimation != null)
+        tabAnimationProvider.overrideWithValue(tabAnimation),
     ],
   );
   addTearDown(container.dispose);
@@ -326,11 +329,8 @@ void main() {
     final harness = await _mount(
       tester,
       items: [dashboard, profiles, keptTools],
+      tabAnimation: TabAnimation.slide,
     );
-    harness.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
-    await tester.pump();
     await harness.show(PageLabel.tools);
     await tester.tap(find.text('increment'));
     await tester.pump();
@@ -381,12 +381,8 @@ void main() {
       tester,
       items: [dashboard, profiles, trackedTools],
       selected: PageLabel.dashboard,
+      tabAnimation: TabAnimation.fade,
     );
-
-    harness.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
-    await tester.pump();
     await harness.show(PageLabel.tools);
     expect(toolsInits, [PageLabel.tools.index]);
     await harness.show(PageLabel.dashboard);
@@ -419,12 +415,8 @@ void main() {
       tester,
       items: [dashboard, proxies, profiles, trackedTools],
       selected: PageLabel.dashboard,
+      tabAnimation: TabAnimation.slide,
     );
-
-    harness.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
-    await tester.pump();
     await harness.show(PageLabel.tools);
     await harness.show(PageLabel.dashboard);
     expect(toolsInits, [PageLabel.tools.index]);
@@ -516,11 +508,11 @@ void main() {
   testWidgets('enabling reduced motion settles the current page transition', (
     tester,
   ) async {
-    final harness = await _mount(tester, items: [dashboard, profiles, tools]);
-    harness.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
-    await tester.pump();
+    final harness = await _mount(
+      tester,
+      items: [dashboard, profiles, tools],
+      tabAnimation: TabAnimation.fade,
+    );
     harness.container
         .read(currentPageLabelProvider.notifier)
         .toPage(PageLabel.profiles);
@@ -592,11 +584,8 @@ void main() {
       tester,
       items: [dashboard, proxies, profiles],
       size: const Size(1200, 800),
+      tabAnimation: TabAnimation.slide,
     );
-    harness.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
-    await tester.pump();
     final rest = tester.getCenter(find.text('page:dashboard'));
     harness.container
         .read(currentPageLabelProvider.notifier)
@@ -623,11 +612,8 @@ void main() {
       final harness = await _mount(
         tester,
         items: [dashboard, proxies, profiles, tools],
+        tabAnimation: TabAnimation.slide,
       );
-      harness.container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
-      await tester.pump();
       final rest = tester.getCenter(find.text('page:dashboard'));
       final notifier = harness.container.read(
         currentPageLabelProvider.notifier,

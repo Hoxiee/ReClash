@@ -186,7 +186,7 @@ class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView>
         current: previous,
         value: _transition.value,
         forward: index > previous,
-        fade: ref.read(appSettingProvider).tabAnimation == TabAnimation.fade,
+        fade: ref.read(tabAnimationProvider) == TabAnimation.fade,
       );
     }
     _swipeTarget = null;

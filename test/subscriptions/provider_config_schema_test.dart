@@ -55,7 +55,6 @@ void main() {
     expect(viewEnum('proxies', 'layout'), names(ProxiesLayout.values));
     expect(viewEnum('proxies', 'icon'), names(ProxiesIconStyle.values));
     expect(viewEnum('proxies', 'card'), names(ProxyCardType.values));
-    expect(viewEnum('app', 'tabs'), names(TabAnimation.values));
     expect(viewEnum('app', 'glass'), names(LiquidGlassMode.values));
     expect(viewEnum('app', 'style'), names(ColorStyle.values));
     expect(

@@ -74,10 +74,7 @@ void main() {
               ids.contains('theme.navigationLabels'),
               layout != NavigationLayout.sidebar,
             );
-            expect(
-              ids,
-              containsAll(['theme.liquidGlass', 'theme.tabAnimation']),
-            );
+            expect(ids, contains('theme.liquidGlass'));
           }
         }
       }

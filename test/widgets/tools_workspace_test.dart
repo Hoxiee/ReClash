@@ -151,6 +151,7 @@ void main() {
     ScrollBehavior? scrollBehavior,
     List<Script> scripts = const [],
     List<Rule> rules = const [],
+    TabAnimation? tabAnimation,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -167,6 +168,8 @@ void main() {
         coreHandlerProvider.overrideWithValue(
           CoreController.scoped(_WorkspaceCore()),
         ),
+        if (tabAnimation != null)
+          tabAnimationProvider.overrideWithValue(tabAnimation),
         if (wallpaper)
           effectiveWallpaperImageProvider.overrideWithValue(
             RasterWallpaperSource(
@@ -492,10 +495,8 @@ void main() {
         home: true,
         wallpaper: true,
         safeArea: true,
+        tabAnimation: animation,
       );
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(tabAnimation: animation));
       await tester.pumpAndSettle();
       final rect = tester.getRect(find.byType(FloatingHeader));
       final origin = tester.getRect(find.text('origin content'));
@@ -595,14 +596,12 @@ void main() {
       tester,
       home: true,
       size: const Size(1400, 900),
+      tabAnimation: TabAnimation.slide,
     );
     container
         .read(appSettingProvider.notifier)
         .update(
-          (state) => state.copyWith(
-            navigationLayout: NavigationLayout.bar,
-            tabAnimation: TabAnimation.slide,
-          ),
+          (state) => state.copyWith(navigationLayout: NavigationLayout.bar),
         );
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pumpAndSettle();
@@ -635,10 +634,8 @@ void main() {
           home: true,
           wallpaper: true,
           size: const Size(1400, 900),
+          tabAnimation: animation,
         );
-        container
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(tabAnimation: animation));
         container
             .read(currentPageLabelProvider.notifier)
             .toPage(PageLabel.tools);
@@ -2452,11 +2449,8 @@ void main() {
       size: const Size(420, 860),
       home: true,
       wallpaper: true,
+      tabAnimation: TabAnimation.fade,
     );
-    // The opacity checks below hold only for the fade tab animation.
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
     container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
     await tester.pumpAndSettle();
     container

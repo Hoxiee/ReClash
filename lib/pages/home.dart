@@ -451,7 +451,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
         current: previous!,
         value: _transition.value,
         forward: to > from,
-        fade: ref.read(appSettingProvider).tabAnimation == TabAnimation.fade,
+        fade: ref.read(tabAnimationProvider) == TabAnimation.fade,
       );
     }
     _transition.stop();
