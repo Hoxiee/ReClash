@@ -66,13 +66,6 @@ String _journeyLabel(AppLocalizations l, SetupStep step) => switch (step) {
   _ => l.setupReceiptProfile,
 };
 
-Glyph _journeyGlyph(SetupStep step) => switch (step) {
-  SetupStep.coverage => AppGlyphs.vpn,
-  SetupStep.region => AppGlyphs.locate,
-  SetupStep.summary => AppGlyphs.check,
-  _ => AppGlyphs.profiles,
-};
-
 String _coverageLabel(AppLocalizations l, SetupCoverage coverage) =>
     switch (coverage) {
       SetupCoverage.tun => l.setupCoverageAll,
@@ -531,6 +524,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
       ),
     );
     final pageColor = SurfaceLevel.page.colorOf(context.colorScheme);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -556,7 +550,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                 final wide =
                     journey &&
                     constraints.maxWidth >= 940 &&
-                    constraints.maxHeight >= 560 * scale;
+                    constraints.maxHeight + keyboard >= 560 * scale;
                 final gutter = constraints.maxWidth >= 600 ? 24.0 : 16.0;
                 final frameWidth = wide ? 1040.0 : 640.0;
                 Widget framed(Widget child) => Align(
@@ -589,7 +583,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                         l,
                         locked,
                         unlocked: unlocked,
-                        control: journey && constraints.maxWidth >= 600,
                         stepBar: journey && constraints.maxWidth < 600,
                         canSkip: accepted && state.step != SetupStep.agreement,
                       ),
@@ -654,21 +647,12 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     AppLocalizations l,
     bool locked, {
     required int unlocked,
-    required bool control,
     required bool stepBar,
     required bool canSkip,
   }) {
     final index = _journeyIndex(state.step);
     final colors = context.colorScheme;
     final duration = context.motionDuration(commonDuration);
-    final segments = [
-      for (final step in _journey)
-        GlyphSegment(
-          value: step,
-          glyph: _journeyGlyph(step),
-          label: _journeyLabel(l, step),
-        ),
-    ];
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Column(
@@ -726,24 +710,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                       ),
                     ),
                   ],
-                ),
-              ),
-              _SideReveal(
-                visible: control,
-                alignment: AlignmentDirectional.centerEnd,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 12),
-                  child: GlyphSegmentedControl<SetupStep>(
-                    segments: segments,
-                    value: state.step,
-                    position: _position,
-                    onChanged: (step) {
-                      final target = _journey.indexOf(step);
-                      if (!locked && target != index && target < unlocked) {
-                        _goTo(step);
-                      }
-                    },
-                  ),
                 ),
               ),
               _SideReveal(

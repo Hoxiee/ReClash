@@ -1622,4 +1622,33 @@ void main() {
       expect(find.byType(SelectableText), findsNothing);
     });
   });
+
+  testWidgets('keyboard on a tablet keeps the link field focused and wide', (
+    tester,
+  ) async {
+    final harness = _harness(
+      step: SetupStep.profile,
+      acceptedDisclaimerVersion: disclaimerVersion,
+    );
+    addTearDown(harness.container.dispose);
+    await _pumpWizard(tester, harness.container, size: _desktop);
+    await _openImport(tester);
+    final receipt = find.byWidgetPredicate(
+      (widget) => widget.runtimeType.toString() == '_SetupReceipt',
+    );
+    final field = find.byType(TextField).first;
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+    final focus = FocusManager.instance.primaryFocus;
+    expect(focus?.hasPrimaryFocus, isTrue);
+    expect(receipt, findsOneWidget);
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 350);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+
+    expect(FocusManager.instance.primaryFocus, same(focus));
+    expect(focus?.hasPrimaryFocus, isTrue);
+    expect(receipt, findsOneWidget);
+  });
 }
