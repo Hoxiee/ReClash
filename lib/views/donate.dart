@@ -28,6 +28,8 @@ class CryptoWallet {
     required this.address,
   });
 
+  String get id => '$coin $network';
+
   bool get isConfigured => address.isNotEmpty;
 }
 
@@ -42,15 +44,32 @@ class DonationConfig {
   // it, debug builds show it as a placeholder so the layout can be checked.
   static const current = DonationConfig(
     links: {
-      DonationRail.tribute: '',
+      DonationRail.tribute:
+          'https://t.me/tribute/app?startapp=ep_7qtVRlHbQFPp9Q102lRpmDz6n9juUbUnYZsj4rdOjmQzInlH28',
       DonationRail.cloudTips: '',
       DonationRail.sponsors: '',
     },
     wallets: [
-      CryptoWallet(coin: 'USDT', network: 'TRC20', address: ''),
-      CryptoWallet(coin: 'TON', network: 'TON', address: ''),
-      CryptoWallet(coin: 'BTC', network: 'Bitcoin', address: ''),
-      CryptoWallet(coin: 'XMR', network: 'Monero', address: ''),
+      CryptoWallet(
+        coin: 'USDT',
+        network: 'TRC20',
+        address: 'TBoYpUerrafTykTTZpH1ALB7EPr3SAZ35q',
+      ),
+      CryptoWallet(
+        coin: 'USDT',
+        network: 'TON',
+        address: 'UQA3bMETqY5D04sdhH9RZOA9JOjAFMgwa91R_RYmVZoolMHy',
+      ),
+      CryptoWallet(
+        coin: 'TON',
+        network: 'TON',
+        address: 'UQBRPR6ljp4rtevQ4_9rXDsMCoNIJCpw96jbWJOVjOM2WxQF',
+      ),
+      CryptoWallet(
+        coin: 'BTC',
+        network: 'Bitcoin',
+        address: 'bc1q3xcrygxl487zdkvg40l9pp64dqua7aksp9z00m',
+      ),
     ],
   );
 
@@ -525,12 +544,20 @@ class _CryptoCard extends StatefulWidget {
 class _CryptoCardState extends State<_CryptoCard> {
   static const _wideLayout = 520.0;
 
-  late String _coin = widget.wallets.first.coin;
+  late String _id = widget.wallets.first.id;
 
   CryptoWallet get _wallet => widget.wallets.firstWhere(
-    (wallet) => wallet.coin == _coin,
+    (wallet) => wallet.id == _id,
     orElse: () => widget.wallets.first,
   );
+
+  List<String> get _coins =>
+      {for (final wallet in widget.wallets) wallet.coin}.toList();
+
+  List<CryptoWallet> _sameCoin(CryptoWallet wallet) => [
+    for (final other in widget.wallets)
+      if (other.coin == wallet.coin) other,
+  ];
 
   Future<void> _copy(CryptoWallet wallet) async {
     await Clipboard.setData(ClipboardData(text: wallet.address));
@@ -555,13 +582,24 @@ class _CryptoCardState extends State<_CryptoCard> {
         children: [
           if (recommendedIn != null)
             _RecommendedLabel(regionCode: recommendedIn),
-          if (widget.wallets.length > 1)
+          if (_coins.length > 1)
+            SegmentedControl<String>(
+              segments: [for (final coin in _coins) (coin, coin)],
+              value: wallet.coin,
+              onChanged: (coin) => setState(
+                () => _id = widget.wallets
+                    .firstWhere((wallet) => wallet.coin == coin)
+                    .id,
+              ),
+            ),
+          if (_sameCoin(wallet).length > 1)
             SegmentedControl<String>(
               segments: [
-                for (final wallet in widget.wallets) (wallet.coin, wallet.coin),
+                for (final other in _sameCoin(wallet))
+                  (other.id, other.network),
               ],
-              value: wallet.coin,
-              onChanged: (coin) => setState(() => _coin = coin),
+              value: wallet.id,
+              onChanged: (id) => setState(() => _id = id),
             ),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 260),
@@ -579,7 +617,7 @@ class _CryptoCardState extends State<_CryptoCard> {
               ),
             ),
             child: LayoutBuilder(
-              key: ValueKey(wallet.coin),
+              key: ValueKey(wallet.id),
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= _wideLayout;
                 final code = _WalletCode(
