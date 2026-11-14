@@ -353,6 +353,13 @@ class _ThemeViewState extends ConsumerState<ThemeView>
           const SizedBox(height: 16),
           const _NavigationLayoutItem(),
           AnimatedReveal(
+            visible: visible(SettingCondition.navigationBar),
+            child: const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: _PageSwipeItem(),
+            ),
+          ),
+          AnimatedReveal(
             visible: visible(SettingCondition.navigationSidebar),
             child: const _SidebarWidthItem(),
           ),
@@ -366,14 +373,6 @@ class _ThemeViewState extends ConsumerState<ThemeView>
                 SizedBox(height: 16),
                 _NavigationLabelsItem(),
               ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          AnimatedReveal(
-            visible: visible(SettingCondition.navigationBar),
-            child: const Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: _PageSwipeItem(),
             ),
           ),
           const SizedBox(height: 16),
@@ -1929,19 +1928,22 @@ class _PageSwipeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return generateGroup([
-      ConfigToggleItem(
-        setting: themeToolSettings[15],
-        selector: appSettingProvider.select((state) => state.pageSwipe),
-        title: (l) => l.pageSwipe,
-        leading: const GlyphIcon(AppGlyphs.swap),
-        onChanged: (ref, value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(pageSwipe: value));
-        },
-      ),
-    ]);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: generateGroup([
+        ConfigToggleItem(
+          setting: themeToolSettings[15],
+          selector: appSettingProvider.select((state) => state.pageSwipe),
+          title: (l) => l.pageSwipe,
+          leading: const GlyphIcon(AppGlyphs.swap),
+          onChanged: (ref, value) {
+            ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(pageSwipe: value));
+          },
+        ),
+      ]),
+    );
   }
 }
 
