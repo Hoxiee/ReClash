@@ -23,10 +23,17 @@ abstract interface class AppUpdateSource {
 }
 
 class AppUpdateRelease {
-  const AppUpdateRelease({required this.data, required this.source});
+  const AppUpdateRelease({
+    required this.data,
+    required this.source,
+    this.skipped = const [],
+  });
 
   final Map<String, dynamic> data;
   final AppUpdateSource source;
+
+  /// The releases between the installed version and this one, newest first.
+  final List<AppUpdateRelease> skipped;
 
   String get tag => data['tag_name'] as String;
   String? get body => data['body'] is String ? data['body'] as String : null;

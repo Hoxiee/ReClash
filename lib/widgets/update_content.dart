@@ -95,6 +95,8 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
             body: release.body,
             fullReleaseUrl: release.source.releasePage(release.tag).toString(),
           ),
+        if (release.skipped.isNotEmpty)
+          _SkippedVersions(releases: release.skipped, locale: locale),
         if (summary != null || widget.asset != null)
           generateGroup([
             Semantics(
@@ -139,6 +141,76 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
                 ),
               ),
             ]),
+        ],
+      ],
+    );
+  }
+}
+
+class _SkippedVersions extends StatefulWidget {
+  const _SkippedVersions({required this.releases, required this.locale});
+
+  final List<AppUpdateRelease> releases;
+  final String locale;
+
+  @override
+  State<_SkippedVersions> createState() => _SkippedVersionsState();
+}
+
+class _SkippedVersionsState extends State<_SkippedVersions> {
+  final _open = <String>{};
+
+  @override
+  void didUpdateWidget(_SkippedVersions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.releases != widget.releases) _open.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLocale = DateFormat.localeExists(widget.locale)
+        ? widget.locale
+        : 'en';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        ListHeader(title: context.appLocalizations.updateSkippedVersions),
+        for (final release in widget.releases) ...[
+          generateGroup([
+            Semantics(
+              button: true,
+              expanded: _open.contains(release.tag),
+              child: ListItem(
+                key: ValueKey('update-skipped-${release.tag}'),
+                title: Text(release.tag.replaceFirst(RegExp('^v'), '')),
+                subtitle: switch (DateTime.tryParse(
+                  release.data['published_at']?.toString() ?? '',
+                )) {
+                  final published? => Text(
+                    DateFormat.yMMMd(dateLocale).format(published.toLocal()),
+                  ),
+                  null => null,
+                },
+                trailing: GlyphIcon(
+                  _open.contains(release.tag)
+                      ? AppGlyphs.chevronUp
+                      : AppGlyphs.chevronDown,
+                  size: 18,
+                ),
+                onTap: () => setState(() {
+                  if (!_open.remove(release.tag)) _open.add(release.tag);
+                }),
+              ),
+            ),
+          ]),
+          if (_open.contains(release.tag))
+            ReleaseNotes(
+              body: release.body,
+              fullReleaseUrl: release.source
+                  .releasePage(release.tag)
+                  .toString(),
+            ),
         ],
       ],
     );

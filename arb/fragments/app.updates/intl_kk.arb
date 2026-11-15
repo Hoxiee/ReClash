@@ -75,5 +75,6 @@
   "changelogKnownIssues": "Белгілі мәселелер",
   "updateDesktopAutomatic": "Автоматты түрде жаңарту",
   "updateDesktopAutoDescription": "ReClash жаңартуларды фонда жүктеп, қолданба іске қосылғанда, жабылғанда немесе компьютер бос тұрғанда орнатады. Белсенді қосылым өздігінен қалпына келеді.",
-  "updateRestartNow": "Жаңарту үшін қайта іске қосу"
+  "updateRestartNow": "Жаңарту үшін қайта іске қосу",
+  "updateSkippedVersions": "Аралық нұсқалар"
 }

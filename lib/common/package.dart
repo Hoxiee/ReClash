@@ -23,33 +23,73 @@ bool isPrereleaseRelease({
   return tryParseAppVersion(tag)?.isPreRelease ?? false;
 }
 
+bool _eligibleUpdate(
+  Map<String, dynamic> release, {
+  required String installedVersion,
+  required UpdateChannel channel,
+}) {
+  if (release['draft'] == true) return false;
+  final tag = release['tag_name'];
+  if (tag is! String || tryParseAppVersion(tag) == null) return false;
+  if (compareVersions(tag, installedVersion) <= 0) return false;
+  return channel != UpdateChannel.release ||
+      !isPrereleaseRelease(
+        tag: tag,
+        flaggedPrerelease: release['prerelease'] == true,
+      );
+}
+
 Map<String, dynamic>? selectUpdateRelease(
   List<Map<String, dynamic>> releases, {
   required String installedVersion,
   required UpdateChannel channel,
 }) {
-  final installed = tryParseAppVersion(installedVersion);
-  if (installed == null) return null;
+  if (tryParseAppVersion(installedVersion) == null) return null;
   Map<String, dynamic>? best;
   for (final release in releases) {
-    if (release['draft'] == true) continue;
-    final tag = release['tag_name'];
-    if (tag is! String) continue;
-    final candidate = tryParseAppVersion(tag);
-    if (candidate == null ||
-        compareVersions(tag, installedVersion) <= 0 ||
-        (channel == UpdateChannel.release &&
-            isPrereleaseRelease(
-              tag: tag,
-              flaggedPrerelease: release['prerelease'] == true,
-            ))) {
+    if (!_eligibleUpdate(
+      release,
+      installedVersion: installedVersion,
+      channel: channel,
+    )) {
       continue;
     }
-    if (best == null || compareVersions(tag, best['tag_name'] as String) > 0) {
+    if (best == null ||
+        compareVersions(
+              release['tag_name'] as String,
+              best['tag_name'] as String,
+            ) >
+            0) {
       best = release;
     }
   }
   return best;
+}
+
+/// Releases the update skips over: newer than the installed version, older
+/// than [selected], newest first.
+List<Map<String, dynamic>> selectIntermediateReleases(
+  List<Map<String, dynamic>> releases, {
+  required String installedVersion,
+  required UpdateChannel channel,
+  required String selected,
+}) {
+  if (tryParseAppVersion(installedVersion) == null) return const [];
+  return releases
+      .where(
+        (release) =>
+            _eligibleUpdate(
+              release,
+              installedVersion: installedVersion,
+              channel: channel,
+            ) &&
+            compareVersions(release['tag_name'] as String, selected) < 0,
+      )
+      .toList()
+    ..sort(
+      (a, b) =>
+          compareVersions(b['tag_name'] as String, a['tag_name'] as String),
+    );
 }
 
 const releaseNotesBeginMarker = '<!-- reclash:changelog:begin -->';

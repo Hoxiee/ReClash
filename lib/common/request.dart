@@ -108,14 +108,26 @@ class Request {
     for (final source in updateSources) {
       try {
         final releases = await source.fetchReleases(channel: channel);
+        final installed = globalState.packageInfo.version;
         final selected = selectUpdateRelease(
           releases,
-          installedVersion: globalState.packageInfo.version,
+          installedVersion: installed,
           channel: channel,
         );
-        return selected == null
-            ? null
-            : AppUpdateRelease(data: selected, source: source);
+        if (selected == null) return null;
+        return AppUpdateRelease(
+          data: selected,
+          source: source,
+          skipped: [
+            for (final data in selectIntermediateReleases(
+              releases,
+              installedVersion: installed,
+              channel: channel,
+              selected: selected['tag_name'] as String,
+            ))
+              AppUpdateRelease(data: data, source: source),
+          ],
+        );
       } catch (error, stack) {
         lastError = error;
         lastStack = stack;

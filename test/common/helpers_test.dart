@@ -201,6 +201,25 @@ void main() {
         same(legacyTag),
       );
     });
+
+    test('selectIntermediateReleases lists skipped releases newest first', () {
+      final releases = [
+        {'tag_name': 'v0.1.0'},
+        {'tag_name': 'v0.3.0'},
+        {'tag_name': 'v0.2.0'},
+        {'tag_name': 'v0.4.0-pre.1', 'prerelease': true},
+        {'tag_name': 'v0.2.5', 'draft': true},
+        {'tag_name': 'v0.5.0'},
+      ];
+      List<String> tags(UpdateChannel channel) => selectIntermediateReleases(
+        releases,
+        installedVersion: '0.1.0',
+        channel: channel,
+        selected: 'v0.5.0',
+      ).map((release) => release['tag_name'] as String).toList();
+      expect(tags(UpdateChannel.release), ['v0.3.0', 'v0.2.0']);
+      expect(tags(UpdateChannel.pre), ['v0.4.0-pre.1', 'v0.3.0', 'v0.2.0']);
+    });
   });
 
   group('getViewMode', () {

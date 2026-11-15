@@ -75,5 +75,6 @@
   "changelogKnownIssues": "已知问题",
   "updateDesktopAutomatic": "自动更新",
   "updateDesktopAutoDescription": "ReClash 在后台下载更新，并在启动、退出或电脑空闲时安装。活动连接会自动恢复。",
-  "updateRestartNow": "重启以更新"
+  "updateRestartNow": "重启以更新",
+  "updateSkippedVersions": "中间版本"
 }
