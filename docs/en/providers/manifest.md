@@ -429,7 +429,7 @@ power-button:
 | `url` | `https` image URL. Required: without it the section is invalid. | — |
 | `opacity` | Integer 1–100 | 8 |
 
-The image is downloaded once per URL and cached.
+The image is downloaded once per URL and cached. The user can replace it with their own image but cannot turn it off: while the provider sets a background, it is the first tile in the gallery, and removing the user's active image brings the provider's back.
 
 ```yaml
 wallpaper:

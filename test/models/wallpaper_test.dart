@@ -89,6 +89,22 @@ void main() {
     expect(rejected.enabled, isFalse);
   });
 
+  test('a subscription background outside the library keeps its selection', () {
+    const library = [
+      '00000000000000000000000000000001.png',
+      '00000000000000000000000000000002.svg',
+    ];
+    const background = '00000000000000000000000000000003.png';
+    final wallpaper = WallpaperProps.safeFromJson({
+      'enabled': true,
+      'fileName': background,
+      'library': library,
+    });
+    expect(wallpaper.fileName, background);
+    expect(wallpaper.enabled, isTrue);
+    expect(wallpaper.library, library);
+  });
+
   test('malformed and out-of-range wallpaper values are sanitized', () {
     final wallpaper = WallpaperProps.safeFromJson({
       'enabled': true,

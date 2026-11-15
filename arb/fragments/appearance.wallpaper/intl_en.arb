@@ -45,5 +45,6 @@
   "navigationLayout": "Navigation",
   "navigationLayoutBar": "Tab bar",
   "navigationLayoutSidebar": "Sidebar",
-  "sidebarBlur": "Sidebar blur"
+  "sidebarBlur": "Sidebar blur",
+  "wallpaperProviderHint": "Your provider sets the background. Pick your own image to replace it."
 }

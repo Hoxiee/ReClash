@@ -45,5 +45,6 @@
   "navigationLayout": "ナビゲーション",
   "navigationLayoutBar": "タブバー",
   "navigationLayoutSidebar": "サイドバー",
-  "sidebarBlur": "サイドバーのぼかし"
+  "sidebarBlur": "サイドバーのぼかし",
+  "wallpaperProviderHint": "背景はプロバイダーが設定しています。自分の画像を選んで差し替えてください。"
 }

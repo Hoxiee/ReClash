@@ -45,5 +45,6 @@
   "navigationLayout": "Nawigasiýa",
   "navigationLayoutBar": "Bellikler paneli",
   "navigationLayoutSidebar": "Gapdal panel",
-  "sidebarBlur": "Gapdal paneliň bulaňňylamasy"
+  "sidebarBlur": "Gapdal paneliň bulaňňylamasy",
+  "wallpaperProviderHint": "Fony üpjün ediji belleýär. Ony çalyşmak üçin öz suratyňyzy saýlaň."
 }

@@ -30,6 +30,7 @@ class ProviderSetting {
     required this.read,
     required this.write,
     this.pending,
+    this.accepts,
   });
 
   final String id;
@@ -37,6 +38,10 @@ class ProviderSetting {
   final Object? Function(Config config) read;
   final Config Function(Config config, Object? value) write;
   final bool Function(ProviderSettingsInput input)? pending;
+
+  /// A value the user may replace the provider's with; any other value goes
+  /// back to the provider's instead of taking the setting over.
+  final bool Function(Object? value)? accepts;
 }
 
 ProviderSetting _enum<T extends Enum>(
@@ -223,22 +228,18 @@ final providerSettingsCatalog = <ProviderSetting>[
   ProviderSetting(
     'background',
     pending: (input) => input.backgroundPending,
+    accepts: (value) =>
+        value is Map &&
+        value['enabled'] == true &&
+        isWallpaperFileName(value['fileName']),
     provided: (input) =>
         switch ((input.backgroundFile, input.hints.background)) {
-          (final file?, final background?) => {
-            'enabled': true,
-            'fileName': file,
-            'opacity': background.opacity,
-          },
+          (final file?, _?) => {'enabled': true, 'fileName': file},
           _ => null,
         },
     read: (config) {
       final wallpaper = config.themeProps.wallpaper;
-      return {
-        'enabled': wallpaper.enabled,
-        'fileName': wallpaper.fileName,
-        'opacity': wallpaper.opacity,
-      };
+      return {'enabled': wallpaper.enabled, 'fileName': wallpaper.fileName};
     },
     write: (config, value) => value is Map
         ? _theme(
@@ -249,9 +250,23 @@ final providerSettingsCatalog = <ProviderSetting>[
                 fileName: isWallpaperFileName(value['fileName'])
                     ? value['fileName'] as String
                     : null,
-                opacity:
-                    (value['opacity'] as num?)?.toDouble() ??
-                    p.wallpaper.opacity,
+              ),
+            ),
+          )
+        : config,
+  ),
+  ProviderSetting(
+    'background.opacity',
+    pending: (input) => input.backgroundPending,
+    provided: (input) =>
+        input.backgroundFile == null ? null : input.hints.background?.opacity,
+    read: (config) => config.themeProps.wallpaper.opacity,
+    write: (config, value) => value is num
+        ? _theme(
+            config,
+            (p) => p.copyWith(
+              wallpaper: p.wallpaper.copyWith(
+                opacity: value.toDouble().clamp(0, 1),
               ),
             ),
           )
@@ -326,7 +341,9 @@ Config applyProviderSettings(Config config, ProviderSettingsInput input) {
       baseline.remove(id);
       continue;
     }
-    if (tracked && !following) {
+    if (!(setting.accepts?.call(current) ?? true)) {
+      owned.remove(id);
+    } else if (tracked && !following) {
       owned.add(id);
       applied.remove(id);
       baseline.remove(id);

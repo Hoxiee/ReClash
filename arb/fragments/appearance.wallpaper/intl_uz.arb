@@ -45,5 +45,6 @@
   "navigationLayout": "Navigatsiya",
   "navigationLayoutBar": "Varaqlar paneli",
   "navigationLayoutSidebar": "Yon panel",
-  "sidebarBlur": "Yon panelni xiralashtirish"
+  "sidebarBlur": "Yon panelni xiralashtirish",
+  "wallpaperProviderHint": "Fonni provayderingiz belgilaydi. Uni almashtirish uchun oʻzingizning rasmingizni tanlang."
 }

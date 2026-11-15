@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart';
 import 'package:reclash/common/wallpaper_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -159,5 +160,42 @@ void main() {
       isNull,
     );
     expect(await link.exists(), isTrue);
+  });
+
+  test('sweeps old unkept wallpapers and keeps every other file', () async {
+    final old = DateTime.now().subtract(const Duration(hours: 1));
+    const kept = '00000000000000000000000000000001.png';
+    const stale = '00000000000000000000000000000002.png';
+    const staleSvg = '00000000000000000000000000000003.svg';
+    const recent = '00000000000000000000000000000004.png';
+    const foreign = 'notes.txt';
+    const nearMiss = 'not-a-wallpaper.png';
+    for (final name in [kept, stale, staleSvg, foreign, nearMiss]) {
+      File('${root.path}/$name')
+        ..writeAsBytesSync(_png)
+        ..setLastModifiedSync(old);
+    }
+    File('${root.path}/$recent').writeAsBytesSync(_png);
+
+    await store.removeImagesExcept({
+      kept,
+    }, before: DateTime.now().subtract(const Duration(minutes: 10)));
+
+    expect(root.listSync().map((entity) => basename(entity.path)).toSet(), {
+      kept,
+      recent,
+      foreign,
+      nearMiss,
+    });
+  });
+
+  test('a sweep of a missing store directory does nothing', () async {
+    final missing = WallpaperStore(
+      directory: () async => Directory('${root.path}/missing'),
+    );
+    await expectLater(
+      missing.removeImagesExcept({}, before: DateTime.now()),
+      completes,
+    );
   });
 }

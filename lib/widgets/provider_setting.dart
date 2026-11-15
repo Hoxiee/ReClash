@@ -66,6 +66,7 @@ const providerSettingsBySpec = {
   'theme.navigationBarStyle': ['app.navbar'],
   'theme.liquidGlass': ['app.glass'],
   'theme.wallpaper.enabled': ['background'],
+  'theme.wallpaper.opacity': ['background.opacity'],
 };
 
 Widget? providerSpecTag(WidgetRef ref, SettingSpec spec) =>

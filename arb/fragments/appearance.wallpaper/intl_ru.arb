@@ -45,5 +45,6 @@
   "navigationLayout": "Навигация",
   "navigationLayoutBar": "Панель вкладок",
   "navigationLayoutSidebar": "Боковая панель",
-  "sidebarBlur": "Размытие боковой панели"
+  "sidebarBlur": "Размытие боковой панели",
+  "wallpaperProviderHint": "Фон задаёт ваш провайдер. Выберите своё изображение, чтобы заменить его."
 }

@@ -45,5 +45,6 @@
   "navigationLayout": "Навигация",
   "navigationLayoutBar": "Қойынды тақтасы",
   "navigationLayoutSidebar": "Бүйірлік панель",
-  "sidebarBlur": "Бүйірлік панельді бұлыңғырлау"
+  "sidebarBlur": "Бүйірлік панельді бұлыңғырлау",
+  "wallpaperProviderHint": "Фонды провайдеріңіз орнатады. Оны ауыстыру үшін өзіңіздің суретіңізді таңдаңыз."
 }

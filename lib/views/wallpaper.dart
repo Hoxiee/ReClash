@@ -3,6 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/state.dart';
@@ -40,6 +41,7 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
     final image = imageState.asData?.value;
     final busy = ref.watch(wallpaperActionProvider);
     final editable = selected != null && image != null && !busy;
+    final providerBackground = ref.watch(providerBackgroundFileProvider);
     const defaults = WallpaperProps();
     final framingChanged =
         wallpaper.fit != defaults.fit ||
@@ -76,7 +78,7 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
                   children: [
                     generateGroup([
                       _WallpaperControl(
-                        enabled: editable,
+                        enabled: editable && providerBackground == null,
                         child: ConfigToggleItem(
                           setting: wallpaperToolSettings[0],
                           selector: themeSettingProvider.select(
@@ -97,6 +99,8 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
                               image == null &&
                               !imageState.isLoading
                           ? l.wallpaperUnavailable
+                          : providerBackground != null
+                          ? l.wallpaperProviderHint
                           : l.wallpaperSelectHint,
                     ),
                   ],
@@ -403,6 +407,7 @@ class _WallpaperGallery extends ConsumerWidget {
       themeSettingProvider.select((theme) => theme.wallpaper.library),
     );
     final full = library.length >= maxWallpaperLibrary;
+    final providerBackground = ref.watch(providerBackgroundFileProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -414,12 +419,23 @@ class _WallpaperGallery extends ConsumerWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
+                if (providerBackground != null)
+                  SizedBox(
+                    width: width,
+                    child: _WallpaperTile(
+                      fileName: providerBackground,
+                      label: l.subscriptionProvider,
+                      onSelect: () => ref
+                          .read(providerSettingsActionProvider)
+                          .returnToProvider(const ['background']),
+                    ),
+                  ),
                 for (var index = 0; index < library.length; index++)
                   SizedBox(
                     width: width,
                     child: _WallpaperTile(
                       fileName: library[index],
-                      index: index,
+                      label: l.wallpaperImageLabel(index + 1),
                     ),
                   ),
                 if (!full)
@@ -497,15 +513,23 @@ class _AddWallpaperTile extends ConsumerWidget {
 }
 
 class _WallpaperTile extends ConsumerWidget {
-  const _WallpaperTile({required this.fileName, required this.index});
+  const _WallpaperTile({
+    required this.fileName,
+    required this.label,
+    this.onSelect,
+  });
 
   final String fileName;
-  final int index;
+  final String label;
+
+  /// Replaces selecting the image from the library; such a tile cannot be
+  /// removed.
+  final VoidCallback? onSelect;
 
   Future<void> _remove(BuildContext context, WidgetRef ref) async {
     final l = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
-      message: TextSpan(text: l.deleteTip(l.wallpaperImageLabel(index + 1))),
+      message: TextSpan(text: l.deleteTip(label)),
       destructive: true,
       confirmText: l.wallpaperRemove,
     );
@@ -518,7 +542,6 @@ class _WallpaperTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
-    final label = l.wallpaperImageLabel(index + 1);
     final selected = ref.watch(
       themeSettingProvider.select(
         (theme) => theme.wallpaper.fileName == fileName,
@@ -528,7 +551,7 @@ class _WallpaperTile extends ConsumerWidget {
     final thumbnail = ref.watch(wallpaperThumbnailProvider(fileName));
     final image = thumbnail.asData?.value;
     return ContextMenuRegion(
-      menuItems: busy
+      menuItems: busy || onSelect != null
           ? null
           : [
               CommonPopupMenuItem(
@@ -551,11 +574,12 @@ class _WallpaperTile extends ConsumerWidget {
             customBorder: AppShape.lg,
             onTap: busy || image == null
                 ? null
-                : () => globalState.safeRun(
-                    () => ref
-                        .read(wallpaperActionProvider.notifier)
-                        .selectImage(fileName),
-                  ),
+                : onSelect ??
+                      () => globalState.safeRun(
+                        () => ref
+                            .read(wallpaperActionProvider.notifier)
+                            .selectImage(fileName),
+                      ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

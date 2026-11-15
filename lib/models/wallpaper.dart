@@ -62,7 +62,13 @@ abstract class WallpaperProps with _$WallpaperProps {
 
     final library = sanitizeWallpaperLibrary(json['library']);
     final selected = json['fileName'];
-    final fileName = isWallpaperFileName(selected) && library.contains(selected)
+    final listed = json['library'];
+    // A file outside the library is the subscription's background; only an
+    // entry the library cap dropped loses its selection.
+    final fileName =
+        isWallpaperFileName(selected) &&
+            (library.contains(selected) ||
+                !(listed is Iterable && listed.contains(selected)))
         ? selected as String
         : null;
     return WallpaperProps(

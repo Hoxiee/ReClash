@@ -391,14 +391,65 @@ final providerSettingsSyncProvider = Provider<void>((ref) {
       }
     });
   }, fireImmediately: true);
-  ref.listen(providerSettingsInputProvider, (_, input) {
+  void apply(ProviderSettingsInput? input) {
     if (input == null) return;
     scheduleMicrotask(() {
       if (ref.mounted) {
         _write(ref, (config) => applyProviderSettings(config, input));
       }
     });
+  }
+
+  var sweeping = false;
+  Future<void> sweep(ProviderSettingsInput input) async {
+    if (sweeping) return;
+    sweeping = true;
+    try {
+      final wallpaper = ref.read(themeSettingProvider).wallpaper;
+      final state = ref.read(providerSettingsProvider);
+      final keep = {
+        ...wallpaper.library,
+        ?wallpaper.fileName,
+        if (input.hints.background != null) ?input.backgroundFile,
+        for (final values in [state.applied, state.userBaseline])
+          if (values['background'] case {'fileName': final String name}) name,
+      };
+      await ref
+          .read(wallpaperStoreProvider)
+          .removeImagesExcept(
+            keep,
+            before: DateTime.now().subtract(const Duration(minutes: 10)),
+          );
+    } on Object catch (error) {
+      commonPrint.log(
+        'Wallpaper cleanup failed: $error',
+        logLevel: LogLevel.warning,
+      );
+    } finally {
+      sweeping = false;
+    }
+  }
+
+  ref.listen(providerSettingsInputProvider, (_, input) {
+    apply(input);
+    if (input != null && !input.backgroundPending) {
+      scheduleMicrotask(() => unawaited(sweep(input)));
+    }
   }, fireImmediately: true);
+  ref.listen(
+    themeSettingProvider.select(
+      (theme) => theme.wallpaper.enabled && theme.wallpaper.fileName != null,
+    ),
+    (_, shown) {
+      if (!shown) apply(ref.read(providerSettingsInputProvider));
+    },
+  );
+});
+
+/// The subscription's background, once stored.
+final providerBackgroundFileProvider = Provider<String?>((ref) {
+  final input = ref.watch(providerSettingsInputProvider);
+  return input?.hints.background == null ? null : input?.backgroundFile;
 });
 
 final providerSettingsActionProvider = Provider<ProviderSettingsAction>(

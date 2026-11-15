@@ -113,6 +113,31 @@ class WallpaperStore {
     return readStoredImage(file);
   }
 
+  /// Files changed after [before] stay, since a restore copies its images in
+  /// before the settings that name them.
+  Future<void> removeImagesExcept(
+    Set<String> keep, {
+    required DateTime before,
+  }) async {
+    final dir = await directory();
+    if (!await dir.exists()) return;
+    await for (final entity in dir.list(followLinks: false)) {
+      final name = basename(entity.path);
+      if (entity is! File ||
+          !isWallpaperFileName(name) ||
+          keep.contains(name)) {
+        continue;
+      }
+      try {
+        if ((await entity.lastModified()).isBefore(before)) {
+          await entity.delete();
+        }
+      } on FileSystemException {
+        continue;
+      }
+    }
+  }
+
   Future<void> removeImage(String? fileName) async {
     if (!isWallpaperFileName(fileName)) return;
     final file = File(join((await directory()).path, fileName!));

@@ -45,5 +45,6 @@
   "navigationLayout": "Navigation",
   "navigationLayoutBar": "Barre d’onglets",
   "navigationLayoutSidebar": "Barre latérale",
-  "sidebarBlur": "Flou de la barre latérale"
+  "sidebarBlur": "Flou de la barre latérale",
+  "wallpaperProviderHint": "Votre fournisseur définit le fond. Choisissez votre propre image pour le remplacer."
 }

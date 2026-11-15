@@ -19,9 +19,29 @@ abstract class ProviderSettingsState with _$ProviderSettingsState {
   static ProviderSettingsState safeFromJson(Map<String, Object?>? json) {
     if (json == null) return const ProviderSettingsState();
     try {
-      return ProviderSettingsState.fromJson(json);
+      final state = ProviderSettingsState.fromJson(json);
+      return state.copyWith(
+        applied: _withoutBackgroundOpacity(state.applied),
+        userBaseline: _withoutBackgroundOpacity(state.userBaseline),
+      );
     } on Object {
       return const ProviderSettingsState();
     }
   }
 }
+
+/// The background's opacity became its own setting; a value saved together
+/// with the image would otherwise read as the user's change.
+Map<String, Object?> _withoutBackgroundOpacity(Map<String, Object?> values) =>
+    switch (values['background']) {
+      final Map<dynamic, dynamic> background
+          when background.containsKey('opacity') =>
+        {
+          ...values,
+          'background': {
+            for (final MapEntry(:key, :value) in background.entries)
+              if (key != 'opacity') key: value,
+          },
+        },
+      _ => values,
+    };

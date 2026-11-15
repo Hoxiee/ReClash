@@ -45,5 +45,6 @@
   "navigationLayout": "내비게이션",
   "navigationLayoutBar": "탭 바",
   "navigationLayoutSidebar": "사이드바",
-  "sidebarBlur": "사이드바 블러"
+  "sidebarBlur": "사이드바 블러",
+  "wallpaperProviderHint": "배경은 제공업체가 설정합니다. 직접 이미지를 선택해 교체하세요."
 }

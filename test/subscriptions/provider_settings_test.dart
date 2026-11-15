@@ -670,4 +670,129 @@ void main() {
       );
     });
   });
+
+  group('provider background', () {
+    const providerFile = 'fedcba9876543210fedcba9876543210.png';
+    const ownFile = '0123456789abcdef0123456789abcdef.png';
+    final input = ProviderSettingsInput(
+      presentedHints({
+        'wallpaper': {'url': 'https://img.example.test/bg.png', 'opacity': 22},
+      }),
+      backgroundFile: providerFile,
+    );
+
+    Config withWallpaper(
+      Config config,
+      WallpaperProps Function(WallpaperProps wallpaper) change,
+    ) => config.copyWith(
+      themeProps: config.themeProps.copyWith(
+        wallpaper: change(config.themeProps.wallpaper),
+      ),
+    );
+
+    test('a disabled background comes back from the provider', () {
+      final applied = applyProviderSettings(_base, input);
+      final disabled = withWallpaper(
+        applied,
+        (wallpaper) => wallpaper.copyWith(enabled: false),
+      );
+
+      final config = applyProviderSettings(disabled, input);
+
+      expect(config.themeProps.wallpaper.enabled, isTrue);
+      expect(config.themeProps.wallpaper.fileName, providerFile);
+      expect(config.providerSettings.userOwned, isNot(contains('background')));
+    });
+
+    test('a removed background comes back after an own image was chosen', () {
+      final applied = applyProviderSettings(_base, input);
+      final chosen = applyProviderSettings(
+        withWallpaper(
+          applied,
+          (wallpaper) => wallpaper.copyWith(
+            enabled: true,
+            fileName: ownFile,
+            library: [ownFile],
+          ),
+        ),
+        input,
+      );
+      expect(chosen.providerSettings.userOwned, contains('background'));
+      final removed = withWallpaper(
+        chosen,
+        (wallpaper) => wallpaper.copyWith(enabled: false, fileName: null),
+      );
+
+      final config = applyProviderSettings(removed, input);
+
+      expect(config.themeProps.wallpaper.enabled, isTrue);
+      expect(config.themeProps.wallpaper.fileName, providerFile);
+      expect(config.providerSettings.userOwned, isNot(contains('background')));
+    });
+
+    test('an own image chosen from the library survives a re-apply', () {
+      final applied = applyProviderSettings(_base, input);
+      final chosen = withWallpaper(
+        applied,
+        (wallpaper) => wallpaper.copyWith(
+          enabled: true,
+          fileName: ownFile,
+          library: [ownFile],
+        ),
+      );
+
+      final config = applyProviderSettings(chosen, input);
+
+      expect(config.themeProps.wallpaper.enabled, isTrue);
+      expect(config.themeProps.wallpaper.fileName, ownFile);
+      expect(config.providerSettings.userOwned, contains('background'));
+    });
+
+    test('a provider background survives a config round trip', () {
+      final applied = applyProviderSettings(_base, input);
+      final json =
+          jsonDecode(jsonEncode(applied.toJson())) as Map<String, Object?>;
+
+      final config = applyProviderSettings(Config.realFromJson(json), input);
+
+      expect(config.themeProps.wallpaper.enabled, isTrue);
+      expect(config.themeProps.wallpaper.fileName, providerFile);
+      expect(config.providerSettings.userOwned, isNot(contains('background')));
+    });
+
+    test('the provider opacity applies until the user changes it alone', () {
+      final applied = applyProviderSettings(_base, input);
+      expect(applied.themeProps.wallpaper.opacity, 0.22);
+
+      final tuned = applyProviderSettings(
+        withWallpaper(applied, (wallpaper) => wallpaper.copyWith(opacity: 0.6)),
+        input,
+      );
+
+      expect(tuned.providerSettings.userOwned, {'background.opacity'});
+      expect(isProviderManaged(tuned, 'background'), isTrue);
+      expect(tuned.themeProps.wallpaper.fileName, providerFile);
+      expect(tuned.themeProps.wallpaper.opacity, 0.6);
+    });
+
+    test('a new provider background file keeps the user opacity', () {
+      const newFile = 'a1b2c3d4e5f60718293a4b5c6d7e8f90.svg';
+      final tuned = applyProviderSettings(
+        withWallpaper(
+          applyProviderSettings(_base, input),
+          (wallpaper) => wallpaper.copyWith(opacity: 0.6),
+        ),
+        input,
+      );
+
+      final changed = applyProviderSettings(
+        tuned,
+        ProviderSettingsInput(input.hints, backgroundFile: newFile),
+      );
+
+      expect(changed.themeProps.wallpaper.fileName, newFile);
+      expect(changed.themeProps.wallpaper.opacity, 0.6);
+      expect(changed.providerSettings.userOwned, {'background.opacity'});
+    });
+  });
 }
