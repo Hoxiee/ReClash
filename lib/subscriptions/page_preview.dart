@@ -59,7 +59,7 @@ Future<SubscriptionPagePreview> previewSubscriptionPage(
   }
   var result = await Isolate.run(
     () => parseSubscriptionPage(
-      utf8.decode(response.bytes),
+      utf8.decode(response.bytes, allowMalformed: true),
       baseUri: response.uri,
     ),
   );
@@ -116,8 +116,9 @@ Future<SubscriptionPagePreview> previewSubscriptionPage(
   var logoIsSvg = false;
   if (logoUrl != null) {
     try {
-      final image = await transport.fetch(
+      final image = await transport.fetchCapped(
         Uri.parse(logoUrl),
+        limit: 512 * 1024,
         headers: {..._browserHeaders, 'Accept': 'image/*'},
         timeout: const Duration(seconds: 8),
         cancellation: cancellation,
