@@ -125,6 +125,12 @@ Color marks the one item that differs, never the structure around it.
 - `primaryContainer`, `secondaryContainer`, and `tertiaryContainer` are neither surface nor selection fills. Keep
   them out of cards, rows, marks, and navigation indicators. The code editor's completion popup is the one exception:
   it fills the highlighted suggestion with `primaryContainer` (`lib/features/editor/completion_popup.dart`).
+- **Provider brand** on the profiles wallet is the one hue allowed on whole cards. The active pass and the stack cards
+  of a subscription take the provider logo's dominant hue, or the monogram's when no logo was found, through
+  `BrandTint.surface`: the level's tone stays, only hue and a capped chroma change (pass 22 dark / 12 light, card
+  10 / 6), so text keeps the level's contrast and stays `onSurface`/`onSurfaceVariant`. The gauge, the remaining
+  ring, and the sync trace take `BrandTint.accent` at status text tones. Local and custom profiles, and a gray logo,
+  stay neutral. A danger state still takes `error` on text and marks, never on the fill.
 
 ## Borders That Stay
 
@@ -189,6 +195,7 @@ twice as much on the dark page as on the light one and carried the seed's tint.
   `ColorScheme.chromeSurface`, and `ThemeData.withAppSurfaces`, applied next to `withAppShapes` wherever the app
   builds its theme.
 - `lib/ui/color.dart`: `seededColorScheme`, the status palettes, and `delayColor`.
+- `lib/ui/brand.dart`: `BrandTint` and `BrandSurface`, the provider-brand exception above.
 - `lib/views/dashboard/style.dart`: `DashboardColors` maps `page`, `card`, `tone`, and `tone2` onto the levels and
   adds the dashboard's switch, series, and status colors.
 

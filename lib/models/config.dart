@@ -267,6 +267,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     )
     DashboardStyle dashboardStyle,
     @Default(false) bool simplestDashboardPinned,
+    @Default(ProfilesStyle.wallet)
+    @JsonKey(unknownEnumValue: ProfilesStyle.wallet)
+    ProfilesStyle profilesStyle,
     @Default(defaultSimpleDashboardWidgets)
     @JsonKey(fromJson: simpleDashboardWidgetsFromJson)
     List<SimpleDashboardWidget> simpleDashboardWidgets,

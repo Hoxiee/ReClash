@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'add.dart';
 import 'edit.dart';
 import 'preview.dart';
+import 'wallet/wallet.dart';
 
 const _infoGap = 4.0;
 
@@ -138,12 +139,21 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
                 ),
               ),
             ),
-            child: _ProfilesGrid(
-              profiles: state.profiles,
-              currentProfileId: state.currentProfileId,
-              spacing: spacing,
-              revealsSelected: !picker,
-            ),
+            child: switch (ref.watch(
+              appSettingProvider.select((state) => state.profilesStyle),
+            )) {
+              ProfilesStyle.wallet => ProfilesWallet(
+                profiles: state.profiles,
+                currentProfileId: state.currentProfileId,
+                spacing: spacing,
+              ),
+              ProfilesStyle.list => _ProfilesGrid(
+                profiles: state.profiles,
+                currentProfileId: state.currentProfileId,
+                spacing: spacing,
+                revealsSelected: !picker,
+              ),
+            },
           ),
         );
       },
@@ -389,7 +399,7 @@ class ProfileItem extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleExportFile(BuildContext context) async {
+  Future<void> exportFile(BuildContext context) async {
     final appLocalizations = context.appLocalizations;
     final res = await globalState.safeRun<bool>(() async {
       final mFile = await profile.file;
@@ -416,7 +426,7 @@ class ProfileItem extends ConsumerWidget {
     BaseNavigator.push(context, CustomProfileView(profileId: id));
   }
 
-  void _handleEdit(BuildContext context) {
+  void edit(BuildContext context) {
     if (profile.type == ProfileType.custom) {
       _handlePushCustomProfilePage(context, profile.id);
     } else {
@@ -424,7 +434,7 @@ class ProfileItem extends ConsumerWidget {
     }
   }
 
-  List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
+  List<CommonPopupMenuItem> menuItems(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
     final isCustom = profile.type == ProfileType.custom;
@@ -433,7 +443,7 @@ class ProfileItem extends ConsumerWidget {
       CommonPopupMenuItem(
         glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
-        onPressed: () => _handleEdit(context),
+        onPressed: () => edit(context),
       ),
       if (isCustom) ...[
         CommonPopupMenuItem(
@@ -511,7 +521,7 @@ class ProfileItem extends ConsumerWidget {
               glyph: AppGlyphs.export,
               label: appLocalizations.exportFile,
               onPressed: () {
-                _handleExportFile(context);
+                exportFile(context);
               },
             ),
           ],
@@ -544,7 +554,7 @@ class ProfileItem extends ConsumerWidget {
         ? null
         : promoRenewUrl(metadata!, promoExpire, now);
     return ContextMenuRegion(
-      menuItems: isUpdating ? null : _menuItems(context, ref),
+      menuItems: isUpdating ? null : menuItems(context, ref),
       child: CommonCard(
         enterActionsOnRight: true,
         radius: AppCorner.xl,

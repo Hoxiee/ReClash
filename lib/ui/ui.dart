@@ -1,6 +1,7 @@
 export 'activate_box.dart';
 export 'animated_entries.dart';
 export 'animated_visibility.dart';
+export 'brand.dart';
 export 'builder.dart';
 export 'button.dart';
 export 'card.dart';

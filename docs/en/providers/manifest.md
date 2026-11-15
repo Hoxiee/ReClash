@@ -223,7 +223,7 @@ cards:
 | Key | Type | Shown as |
 | --- | --- | --- |
 | `name` | text, 160 | Service name on the dashboard card and in the import dialog. |
-| `logo` | url | Logo on the simple dashboard. |
+| `logo` | url | Logo on the simple dashboard and the profile's card. |
 | `logo-dark` | url | Logo in the dark theme. Falls back to `logo`. |
 | `support-url` | url | Support action. Also accepts `https://t.me/…`, `https://telegram.me/…` and `tg://` links, such as `tg://resolve?domain=…`. |
 | `web-url` | url | Website action. |
@@ -675,6 +675,21 @@ The linter accepts a profile, a scenario, a document with `profiles` or `scenari
 
 > [!NOTE]
 > An image request exposes the user's IP address to the image host, and a per-user URL identifies the viewer. The client sends no telemetry of its own.
+
+### Profile logo
+
+The client picks the logo on the profile's card once, when the profile is added, and takes the first that works:
+
+1. `logo` and `logo-dark`.
+2. The logo the subscription page itself declares when opened in a browser: its `og:image`, its icon link, or the panel's branding logo.
+3. An icon from the `web-url` page, or from the subscription host's `https` root when `web-url` is not set: `apple-touch-icon` and `icon` links on that site, then `/apple-touch-icon.png`.
+4. The `og:image` of the Telegram page that `support-url` points to.
+5. A monogram of the profile name.
+
+- Logos are `https` only, at most 512 KiB, in a format the platform decodes or SVG. Site and Telegram icons smaller than 48 px are skipped.
+- Site icons come only from the page's own site, so no third-party icon service is asked. Telegram images come only from Telegram's hosts.
+- The logo and its dominant color are stored with the profile. Later updates do not open the provider's pages again; they only fetch `logo` and `logo-dark` again when their links change, so a provider changes its logo through the manifest. The color tints the card's background; text stays neutral. Local and custom profiles stay neutral.
+- These requests carry no device ID and no `Authorization`. The only cookie is a panel's own session cookie, sent back to that panel to read its branding.
 
 ## Boundaries
 

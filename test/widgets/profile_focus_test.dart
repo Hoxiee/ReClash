@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -57,6 +58,9 @@ Future<ProviderContainer> pumpProfiles(
       profilesProvider.overrideWith(() => TestProfiles(profiles)),
       currentProfileIdProvider.overrideWithBuild(
         (_, _) => currentProfileId ?? profiles.first.id,
+      ),
+      appSettingProvider.overrideWithBuild(
+        (_, _) => const AppSettingProps(profilesStyle: ProfilesStyle.list),
       ),
       ...overrides,
     ],

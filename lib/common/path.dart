@@ -155,6 +155,10 @@ class AppPath {
     return join(await profilesPath, '$fileName.provider-config.json');
   }
 
+  Future<String> getProfileBrandPath(String fileName) async {
+    return join(await profilesPath, '$fileName.brand.json');
+  }
+
   Future<String> getProvidersRootPath() async {
     final directory = await profilesPath;
     return join(directory, providersDirectoryName);

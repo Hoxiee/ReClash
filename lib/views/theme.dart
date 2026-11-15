@@ -1731,6 +1731,28 @@ class _DashboardStyleItem extends ConsumerWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: generateGroup([
+              ConfigToggleItem(
+                setting: themeToolSettings[_profilesStyleSpecIndex],
+                selector: appSettingProvider.select(
+                  (state) => state.profilesStyle == ProfilesStyle.wallet,
+                ),
+                title: (l) => l.profilesStyleWallet,
+                leading: const GlyphIcon(AppGlyphs.profiles),
+                onChanged: (ref, value) => ref
+                    .read(appSettingProvider.notifier)
+                    .update(
+                      (state) => state.copyWith(
+                        profilesStyle: value
+                            ? ProfilesStyle.wallet
+                            : ProfilesStyle.list,
+                      ),
+                    ),
+              ),
+            ]),
+          ),
         ],
       ),
     );
@@ -2570,4 +2592,14 @@ final themeToolSettings = <SettingSpec>[
     condition: SettingCondition.navigationBar,
   ),
   ...wallpaperToolSettings,
+  SettingSpec(
+    id: 'theme.profilesStyle',
+    page: ToolPage.theme,
+    title: (l) => l.profilesStyleWallet,
+    keywords: ['profilesStyleWallet', 'profiles'],
+  ),
 ];
+
+final _profilesStyleSpecIndex = themeToolSettings.indexWhere(
+  (setting) => setting.id == 'theme.profilesStyle',
+);

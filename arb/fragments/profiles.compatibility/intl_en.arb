@@ -134,5 +134,109 @@
         "type": "int"
       }
     }
+  },
+  "walletActive": "Active",
+  "walletLeft": "Left",
+  "walletOfTotal": "of {total}",
+  "@walletOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "walletUsed": "Used {amount}",
+  "@walletUsed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "walletAlmostOut": "Almost out",
+  "walletRenewToConnect": "Renew to connect again",
+  "walletEnded": "Ended",
+  "walletEndedAgo": "{count, plural, =0{Ended today} one{Ended {count} day ago} other{Ended {count} days ago}}",
+  "@walletEndedAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletDaysLeft": "{count, plural, one{{count} day left} other{{count} days left}}",
+  "@walletDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletUpdatedLabel": "updated",
+  "walletServersLabel": "{count, plural, one{server} other{servers}}",
+  "@walletServersLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletGroupsLabel": "{count, plural, one{group} other{groups}}",
+  "@walletGroupsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletSizeLabel": "size",
+  "walletLeftLabel": "left",
+  "walletUnlimited": "unlimited",
+  "walletExpired": "Expired",
+  "walletLocalFile": "Local file",
+  "walletCustomProfile": "Custom profile",
+  "walletInProfile": "In profile",
+  "walletUpdating": "Updating…",
+  "walletExtend": "Extend",
+  "walletOthers": "Others",
+  "walletProfilesCount": "{count, plural, one{{count} profile} other{{count} profiles}}",
+  "@walletProfilesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletShowMore": "{count, plural, one{{count} more · Show} other{{count} more · Show}}",
+  "@walletShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletRemaining": "{left} of {total} left",
+  "@walletRemaining": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "walletTrafficUnavailable": "Traffic unavailable",
+  "profilesStyleWallet": "New profiles view",
+  "@profilesStyleWallet": {
+    "description": "Settings switch under the home screen style: show profiles as the active pass with a stack of the others instead of the classic grid."
+  },
+  "walletEdit": "Edit",
+  "@walletEdit": {
+    "description": "Short action label on the active profile pass; fits a narrow tile."
+  },
+  "walletExport": "Export",
+  "@walletExport": {
+    "description": "Short action label on the active profile pass: export the profile file."
   }
 }

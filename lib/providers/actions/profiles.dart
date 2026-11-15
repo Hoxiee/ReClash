@@ -446,6 +446,7 @@ class ProfilesAction extends _$ProfilesAction {
           ),
         );
       }
+      _refreshBrand(updated);
       ref.read(passiveRecorderProvider).addEvent('profileUpdate', {
         'profile': profile.id,
         'ok': true,
@@ -1119,7 +1120,7 @@ class ProfilesAction extends _$ProfilesAction {
     if (cancellation?.cancelled == true) {
       throw const SubscriptionUpdateCancelled();
     }
-    return profile.commitPreparedUpdate(
+    final saved = await profile.commitPreparedUpdate(
       prepared,
       validate: (path, _) => _core.validateConfig(path),
       acceptLosses: true,
@@ -1128,7 +1129,21 @@ class ProfilesAction extends _$ProfilesAction {
       isCurrent: cancellation == null ? null : () => !cancellation.cancelled,
       onCommitted: onCommitted,
     );
+    _refreshBrand(saved);
+    return saved;
   }
+
+  void ensureBrand(Profile profile) => unawaited(
+    ref
+        .read(profileBrandActionProvider.notifier)
+        .ensure(profile, transport: _subscriptionTransport()),
+  );
+
+  void _refreshBrand(Profile saved) => unawaited(
+    ref
+        .read(profileBrandActionProvider.notifier)
+        .refresh(saved, transport: _subscriptionTransport()),
+  );
 
   Future<T> _withAgeSecretKey<T>(
     Profile profile,
@@ -1210,6 +1225,7 @@ class ProfilesAction extends _$ProfilesAction {
       await appPath.getProfileRoutingPath(profileId.toString()),
     ).safeDelete();
     await deleteStoredProviderConfig(profileId);
+    await ref.read(profileBrandActionProvider.notifier).forget(profileId);
     try {
       final error = await _core.clearEffect(profileId);
       if (error.isNotEmpty) {

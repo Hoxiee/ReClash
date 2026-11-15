@@ -503,6 +503,8 @@ enum DashboardWidget {
 
 enum DashboardStyle { simplest, simple, detailed }
 
+enum ProfilesStyle { wallet, list }
+
 enum SimpleDashboardWidget {
   health,
   traffic,
