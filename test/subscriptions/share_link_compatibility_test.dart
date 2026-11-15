@@ -575,6 +575,11 @@ void main() {
       expect(proxy['link'], link);
     });
 
+    test('names a qWDTT node from its name parameter', () {
+      const link = 'qwdtt://config?name=My+Node%20A&peer=203.0.113.9:56000';
+      expect(_proxies(_import(link)).single['name'], 'My Node A');
+    });
+
     test('imports a naive+https line as the naive extension', () {
       const link = 'naive+https://u:p@203.0.113.5:443#Edge';
       final proxy = _proxies(_import('$flux\n$link')).last;

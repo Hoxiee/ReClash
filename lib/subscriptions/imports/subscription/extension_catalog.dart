@@ -16,7 +16,12 @@ class ExtensionEntry {
 
 const bundledExtensions = [
   ExtensionEntry(id: 'openflux', name: 'OpenFlux', schemes: ['openflux']),
-  ExtensionEntry(id: 'qwdtt', name: 'qWDTT', schemes: ['qwdtt']),
+  ExtensionEntry(
+    id: 'qwdtt',
+    name: 'qWDTT',
+    schemes: ['qwdtt'],
+    nameOf: _qwdttName,
+  ),
   ExtensionEntry(id: 'naive', name: 'NaiveProxy', schemes: ['naive+https']),
   ExtensionEntry(
     id: 'olcrtc',
@@ -31,6 +36,22 @@ String _olcrtcName(String link) {
   final hash = link.indexOf('#');
   final dollar = hash < 0 ? -1 : link.indexOf(r'$', hash);
   return dollar < 0 ? '' : _decodeName(link.substring(dollar + 1));
+}
+
+/// qWDTT carries the name in the `name` query parameter, not the fragment.
+String _qwdttName(String link) {
+  final hash = link.indexOf('#');
+  final query = link.indexOf('?');
+  if (query >= 0 && (hash < 0 || query < hash)) {
+    final end = hash < 0 ? link.length : hash;
+    for (final pair in link.substring(query + 1, end).split('&')) {
+      if (pair.startsWith('name=')) {
+        final name = _decodeName(pair.substring(5).replaceAll('+', ' '));
+        if (name.isNotEmpty) return name;
+      }
+    }
+  }
+  return _fragmentName(link);
 }
 
 String _fragmentName(String link) {
