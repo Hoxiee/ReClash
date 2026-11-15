@@ -108,13 +108,31 @@ final class WindowsServiceInstaller {
 
 /// The wait lasts as long as the UAC prompt stays open, so it runs off the UI
 /// isolate.
-Future<int?> runWindowsElevated(String executable, String arguments) =>
-    Isolate.run(() => _runElevated(executable, arguments));
+Future<int?> runWindowsElevated(String executable, String arguments) {
+  final owner = _appWindowAddress();
+  return Isolate.run(() => _runElevated(executable, arguments, owner));
+}
 
 const _seeMaskNoCloseProcess = 0x00000040;
 const _seeMaskNoAsync = 0x00000100;
 
-int? _runElevated(String executable, String arguments) {
+// Without an owner window the consent prompt opens behind the app as a
+// flashing taskbar button, and the start times out waiting for it.
+int _appWindowAddress() => using((arena) {
+  final className = win32.PCWSTR(
+    'FLUTTER_RUNNER_WIN32_WINDOW'.toNativeUtf16(allocator: arena),
+  );
+  final windowPid = arena<Uint32>();
+  win32.HWND? window;
+  while (true) {
+    window = win32.FindWindowEx(null, window, className, null).value;
+    if (window.address == 0) return 0;
+    win32.GetWindowThreadProcessId(window, windowPid);
+    if (windowPid.value == pid) return window.address;
+  }
+});
+
+int? _runElevated(String executable, String arguments, int owner) {
   final initialized = win32.CoInitializeEx(
     win32.COINIT_APARTMENTTHREADED | win32.COINIT_DISABLE_OLE1DDE,
   );
@@ -124,6 +142,7 @@ int? _runElevated(String executable, String arguments) {
     info.ref
       ..cbSize = sizeOf<win32.SHELLEXECUTEINFO>()
       ..fMask = _seeMaskNoCloseProcess | _seeMaskNoAsync
+      ..hwnd = win32.HWND(Pointer.fromAddress(owner))
       ..lpVerb = win32.PWSTR('runas'.toNativeUtf16(allocator: arena))
       ..lpFile = win32.PWSTR(executable.toNativeUtf16(allocator: arena))
       ..lpParameters = win32.PWSTR(arguments.toNativeUtf16(allocator: arena))
