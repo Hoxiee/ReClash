@@ -93,6 +93,7 @@ Duration probeGuardDuration(ProbeParams params) => coreGuardFor(params.timeout);
 const serviceSweepBudgetFactor = 6;
 
 const coreConnectionWaitDuration = Duration(seconds: 10);
+const coreStartStepTimeout = Duration(seconds: 20);
 
 /// Keep at or below the Core's delay-test concurrency (`delayTestConcurrency`
 /// in core/delay.go).

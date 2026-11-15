@@ -235,7 +235,12 @@ class Bootstrap {
       return;
     }
     await _showCrashRecoveryTip();
-    await _container.read(coreActionProvider.notifier).startCore();
+    final coreAction = _container.read(coreActionProvider.notifier);
+    // Honor and HyperOS fail the first Core start after install, then pass.
+    if (!await coreAction.startCore() && system.isAndroid) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      await coreAction.startCore();
+    }
     if (!_bootDecision.isDegraded) {
       await _container.read(setupActionProvider.notifier).initStatus();
     }

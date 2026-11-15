@@ -70,7 +70,16 @@ class CoreLib extends CoreHandlerInterface {
     }
     await _shutdown();
     if (!_isCurrent(generation)) return _superseded(revision);
-    final initializationError = await _service?.init() ?? '';
+    final String initializationError;
+    try {
+      initializationError = await _step(
+        'init',
+        _service?.init() ?? Future.value(''),
+      );
+    } catch (_) {
+      if (_isCurrent(generation)) _resetConnection();
+      rethrow;
+    }
     if (initializationError.isNotEmpty) {
       if (_isCurrent(generation)) _resetConnection();
       throw StateError(initializationError);
@@ -78,13 +87,16 @@ class CoreLib extends CoreHandlerInterface {
     _initialized = true;
     try {
       if (!_isCurrent(generation)) return _superseded(revision);
-      await globalState.container.read(vpnOptionsProvider.future);
+      await _step(
+        'vpnOptions',
+        globalState.container.read(vpnOptionsProvider.future),
+      );
       if (!_isCurrent(generation)) return _superseded(revision);
-      final syncError =
-          await _service?.syncState(
-            globalState.container.read(sharedStateProvider),
-          ) ??
-          '';
+      final syncError = await _step(
+        'syncState',
+        _service?.syncState(globalState.container.read(sharedStateProvider)) ??
+            Future.value(''),
+      );
       if (syncError.isNotEmpty) throw StateError(syncError);
       if (!_isCurrent(generation)) return _superseded(revision);
       _connectedCompleter.complete(true);
@@ -97,6 +109,16 @@ class CoreLib extends CoreHandlerInterface {
       await _shutdown();
       rethrow;
     }
+  }
+
+  // A start step that never answers would otherwise leave every Core call
+  // waiting on a connection that no one is still making.
+  Future<T> _step<T>(String name, Future<T> step) {
+    return step.timeout(
+      coreStartStepTimeout,
+      onTimeout: () =>
+          throw TimeoutException('Android Core start stalled at $name'),
+    );
   }
 
   @override

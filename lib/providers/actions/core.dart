@@ -110,6 +110,7 @@ class CoreAction extends _$CoreAction {
       if (revision != _launchRevision || !ref.mounted) return false;
       return await _applyLifecycleResult(result, launchRevision: revision);
     } catch (error) {
+      commonPrint.log('Core start failed: $error', logLevel: LogLevel.warning);
       _core.revokePrivilegePrompt();
       if (revision != _launchRevision || !ref.mounted) return false;
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
