@@ -2,6 +2,65 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.6
+
+Telegram without a VPN, proxy chains, a power button that reports a verified connection, and silent desktop updates.
+
+### Breaking changes
+
+- **Provider settings**: provider headers and body keys for policy, appearance, power button labels, wallpaper and
+  widgets are no longer read. Providers move them into the hosted file named by the `reclash-config` header.
+
+### New
+
+- **Telegram without a VPN**: a local relay connects Telegram over WebSocket, independent of the VPN and the profile.
+  It reaches every data center through a chain of secure and fallback routes, and the route through the profile is
+  opt-in. On Android it runs in its own service that survives kills, reboots and network changes.
+- **Proxy chains**: build an entry, optional middle and exit chain and pick it in the main group. Chains are included in
+  backup and restore.
+- **Unmatched traffic goes DIRECT**: a profile option replaces its rules with a direct fallback, keeping only the rules
+  you added.
+- **Smart power button**: the simple dashboard shows "Protected" only after the connection is verified, heals a broken
+  connection step by step and offers another server. It locks only when the plan has ended and the connection fails,
+  and resumes after renewal. A setting restores the plain button.
+- **Desktop updates**: Windows, macOS and the Linux AppImage apply updates silently at launch, on quit or after idle
+  time. Windows now installs per user; the old machine-wide install is removed once with a UAC prompt.
+- **Skipped release notes**: the update sheet lists the notes of every release between the installed and the offered
+  version.
+- **New link formats**: import TrustTunnel links. On desktop, naive, OpenFlux, qWDTT and olcRTC links import as
+  extension nodes that show their protocol name and run through a matching installed protocol extension.
+- **Page swipe**: swipe between pages with the bottom bar, including nested pages. A setting turns it off.
+- **Donations**: a donation page in About with cards, Tribute and crypto wallets, ordered for your region.
+- **Provider widgets**: providers configure banners, action panels, notes, dark theme colors and power button labels,
+  including expired, exhausted, ending and grace states, through one hosted file.
+
+### Improved
+
+- **Tab transitions**: phones slide between pages and desktops fade; the transition setting is gone.
+- **Core**: updated to mihomo v1.19.34.
+- **Update sheet**: opens shorter and keeps its icon and buttons in place between stages.
+- **Dashboard**: the style switch moved off the home page into appearance settings.
+
+### Fixed
+
+- Imported subscriptions keep every node and report what the conversion lost.
+- AnyTLS and AmneziaWG links that were skipped now import, and an unsupported mieru UDP MTU is reported.
+- Connecting and auto-heal no longer switch the selected server behind your back.
+- Diagnostics no longer report problems that no fix can clear, and no longer refetch a subscription that was just
+  updated.
+- Providers that require app exclusions connect outside the Android VPN.
+- A setting you changed is kept when the provider stops sending it.
+- A provider app you released can be handed back from its row tag.
+- Sheets no longer hide content behind the floating navigation bar.
+- The setup wizard keeps its layout and focus while the keyboard is open on tablets.
+- Page swipes no longer leak into opened sub-pages.
+- Linux: animated elements no longer render corrupted.
+
+### Known issues
+
+- Desktop: protocol extensions are installed by hand; there is no in-app installer yet, so extension nodes stay
+  unavailable until one is installed.
+
 ## v0.1.0-pre.5
 
 Speed test runs inside the Core, and diagnostics can find and fix conflicts with other software.

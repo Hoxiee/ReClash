@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.6",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Telegram without a VPN and proxy chains",
+      "spotlight": {
+        "title": "Telegram without a VPN",
+        "description": "A local relay connects Telegram over WebSocket to every data center, with no VPN and no profile needed.",
+        "kind": "link"
+      },
+      "highlights": [
+        {
+          "title": "Proxy chains",
+          "description": "Build an entry, optional middle and exit chain and pick it in the main group.",
+          "kind": "link"
+        },
+        {
+          "title": "Smart power button",
+          "description": "\"Protected\" appears only after the connection is verified; a broken one heals step by step.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Silent desktop updates",
+          "description": "Updates apply at launch, on quit or after idle time. Windows now installs per user.",
+          "kind": "update",
+          "platforms": ["windows", "macos", "linux"]
+        },
+        {
+          "title": "Page swipe",
+          "description": "Swipe between pages with the bottom bar, including nested pages.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "New link formats",
+          "description": "Import TrustTunnel links; AnyTLS and AmneziaWG links that were skipped now import.",
+          "kind": "shield"
+        },
+        {
+          "title": "Fewer false alarms",
+          "description": "Connecting and diagnostics no longer switch your server or report problems no fix can clear.",
+          "kind": "shield"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Telegram без VPN и цепочки прокси",
+      "spotlight": {
+        "title": "Telegram без VPN",
+        "description": "Локальный ретранслятор подключает Telegram через WebSocket ко всем дата-центрам — без VPN и без профиля.",
+        "kind": "link"
+      },
+      "highlights": [
+        {
+          "title": "Цепочки прокси",
+          "description": "Соберите цепочку из входного, необязательного промежуточного и выходного узла и выберите её в главной группе.",
+          "kind": "link"
+        },
+        {
+          "title": "Умная кнопка питания",
+          "description": "«Защищено» появляется только после проверки соединения; сломанное чинится по шагам.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Тихие обновления на компьютере",
+          "description": "Обновления ставятся при запуске, выходе или в простое. В Windows установка теперь для пользователя.",
+          "kind": "update",
+          "platforms": ["windows", "macos", "linux"]
+        },
+        {
+          "title": "Свайп между страницами",
+          "description": "Листайте страницы свайпом при нижней панели, включая вложенные.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Новые форматы ссылок",
+          "description": "Импорт ссылок TrustTunnel; пропускавшиеся ссылки AnyTLS и AmneziaWG теперь импортируются.",
+          "kind": "shield"
+        },
+        {
+          "title": "Меньше ложных тревог",
+          "description": "Подключение и диагностика больше не меняют сервер сами и не сообщают о том, что нельзя исправить.",
+          "kind": "shield"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
