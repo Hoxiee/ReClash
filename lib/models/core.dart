@@ -20,6 +20,9 @@ abstract class SetupParams with _$SetupParams {
     @JsonKey(name: 'vpn-enabled', includeIfNull: false) bool? vpnEnabled,
     @JsonKey(name: 'excluded-apps', includeIfNull: false)
     List<String>? excludedApps,
+    @JsonKey(includeIfNull: false) List<ChainSpec>? chains,
+    @JsonKey(name: 'main-group-hint', includeIfNull: false)
+    String? mainGroupHint,
   }) = _SetupParams;
 
   factory SetupParams.fromJson(Map<String, dynamic> json) =>

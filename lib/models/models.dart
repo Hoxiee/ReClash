@@ -7,6 +7,7 @@ export 'core.dart';
 export 'ip_quality.dart';
 export 'profile.dart';
 export 'provider_settings.dart';
+export 'proxy_chain.dart';
 export 'rcx.dart';
 export 'references.dart';
 export 'state.dart';

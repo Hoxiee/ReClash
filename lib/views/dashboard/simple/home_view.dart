@@ -133,7 +133,9 @@ PowerBadge? powerBadge(PowerFace face) {
     PowerFaceState.accountLocked ||
     PowerFaceState.trafficLocked ||
     PowerFaceState.revoked => AppGlyphs.lock,
-    PowerFaceState.noServers || PowerFaceState.broken => AppGlyphs.error,
+    PowerFaceState.noServers ||
+    PowerFaceState.broken ||
+    PowerFaceState.brokenChain => AppGlyphs.error,
     PowerFaceState.vpnTaken => AppGlyphs.vpn,
     PowerFaceState.vpnDenied => AppGlyphs.key,
     PowerFaceState.portal || PowerFaceState.brokenPortal => AppGlyphs.wifi,
@@ -183,7 +185,7 @@ String powerTitle(AppLocalizations l, PowerFace face) => switch (face.state) {
   PowerFaceState.waitingNetwork => l.powerTitleOffline,
   PowerFaceState.clock || PowerFaceState.brokenClock => l.powerTitleClock,
   PowerFaceState.recovering => l.powerTitleRecovering,
-  PowerFaceState.broken => l.powerTitleBroken,
+  PowerFaceState.broken || PowerFaceState.brokenChain => l.powerTitleBroken,
   PowerFaceState.direct => l.powerTitleDirect,
   PowerFaceState.paused => l.simpleStatusPaused,
   PowerFaceState.off => l.simpleStatusOff,
@@ -215,6 +217,7 @@ String? _hint(AppLocalizations l, PowerFace face, String? pausedHint) =>
       PowerFaceState.paused => pausedHint,
       PowerFaceState.offline => l.powerHintOffline,
       PowerFaceState.waitingNetwork => l.powerHintWaitingNetwork,
+      PowerFaceState.brokenChain => l.powerHintBrokenChain,
       PowerFaceState.recovering => switch (face.step) {
         HealStep.bestNode when face.stepDetail != null => l.powerStepBestNode(
           face.stepDetail!,

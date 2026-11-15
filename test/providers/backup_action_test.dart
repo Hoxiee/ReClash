@@ -231,6 +231,36 @@ void main() {
       expect(workDirs(), isEmpty);
     });
 
+    test('proxy chains survive a backup round trip', () async {
+      const chain = ProxyChain(
+        id: 5,
+        profileId: 1,
+        name: 'Entry → Exit',
+        hops: ['Entry', 'Exit'],
+        targetGroup: 'Proxy',
+        fingerprints: [
+          HopFingerprint(type: 'vless', server: 'a.example', port: 443),
+          null,
+        ],
+        sortIndex: 2,
+        restorePick: 'Exit',
+      );
+      await testDatabase.profilesDao.putAll([
+        _profile(1, 'Backed up').toCompanion(0),
+      ]);
+      await testDatabase.proxyChainsDao.put(chain);
+      final archivePath = await backupToKept(actionOf(buildContainer()));
+
+      await testDatabase.delete(testDatabase.profiles).go();
+      expect(await testDatabase.proxyChainsDao.all().get(), isEmpty);
+      final restored = await actionOf(
+        buildContainer(),
+      ).restore(RestoreOption.onlyProfiles, (_) async => archivePath);
+
+      expect(restored, isTrue);
+      expect(await testDatabase.proxyChainsDao.query(1).get(), [chain]);
+    });
+
     test('removes the work directory when delivery fails', () async {
       final container = buildContainer();
 

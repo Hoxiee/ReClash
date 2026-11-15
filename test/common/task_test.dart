@@ -277,6 +277,14 @@ void main() {
         (loadYaml(blank.yaml) as YamlMap)['rules'].first,
         'DOMAIN-SUFFIX,added.example,Original',
       );
+
+      final addedOnly = await makeRealProfileTask(
+        state.copyWith(matchTarget: null, addedRulesOnly: true),
+      );
+      expect((loadYaml(addedOnly.yaml) as YamlMap)['rules'], [
+        'DOMAIN-SUFFIX,added.example,Original',
+        'MATCH,DIRECT',
+      ]);
     },
   );
 

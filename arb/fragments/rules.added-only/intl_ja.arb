@@ -1,0 +1,4 @@
+{
+  "unmatchedTraffic": "一致しないトラフィック",
+  "unmatchedTrafficDirectDesc": "追加したルールに一致するトラフィックだけがプロキシを通り、プロファイルのルールは使われません"
+}

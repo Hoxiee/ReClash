@@ -1,0 +1,4 @@
+{
+  "unmatchedTraffic": "일치하지 않는 트래픽",
+  "unmatchedTrafficDirectDesc": "추가한 규칙과 일치하는 트래픽만 프록시를 거치며 프로필 규칙은 건너뜁니다"
+}

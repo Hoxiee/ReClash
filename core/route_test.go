@@ -308,6 +308,47 @@ func TestProbeAnswersCarryTheExitsTheyReached(t *testing.T) {
 	}
 }
 
+func TestRoutedOutboundIpPrefersASourceThroughTheProxy(t *testing.T) {
+	recordRoutes(t)
+	group := selectorGroup(t, "Proxy", "node-a")
+	tunnel.UpdateProxies(map[string]constant.Proxy{"Proxy": group, "DIRECT": namedProxy("DIRECT")}, nil)
+	home := probeServer(t, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("ip=198.51.100.1"))
+	})
+	exit := probeServer(t, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("ip=203.0.113.7"))
+	})
+	homePort := home.URL[strings.LastIndex(home.URL, ":")+1:]
+	bypass, err := rules.ParseRule("DST-PORT", homePort, "DIRECT", nil, nil)
+	if err != nil {
+		t.Fatalf("ParseRule: %v", err)
+	}
+	match, err := rules.ParseRule("MATCH", "", "Proxy", nil, nil)
+	if err != nil {
+		t.Fatalf("ParseRule: %v", err)
+	}
+	tunnel.UpdateRules([]constant.Rule{bypass, match}, nil, nil)
+	previousMode := tunnel.Mode()
+	tunnel.SetMode(tunnel.Rule)
+	tunnel.OnRunning()
+	t.Cleanup(func() {
+		tunnel.OnSuspend()
+		tunnel.SetMode(previousMode)
+		tunnel.UpdateProxies(nil, nil)
+		tunnel.UpdateRules(nil, nil, nil)
+	})
+
+	answer := handleOutboundIp(&OutboundIpParams{Urls: []string{home.URL, exit.URL}, Timeout: 4000})
+	if answer.Url != exit.URL || !slices.Equal(answer.Chains, []string{"node-a", "Proxy"}) {
+		t.Errorf("answer = %s via %v, want %s via the proxy", answer.Url, answer.Chains, exit.URL)
+	}
+
+	alone := handleOutboundIp(&OutboundIpParams{Urls: []string{home.URL}, Timeout: 4000})
+	if alone.Url != home.URL || alone.Error != "" {
+		t.Errorf("answer = %+v, want the direct source when nothing else answers", alone)
+	}
+}
+
 func TestRouteCheckFollowsTheRulesToTheExit(t *testing.T) {
 	recordRoutes(t)
 	group := selectorGroup(t, "Proxy", "node-a", "node-b")

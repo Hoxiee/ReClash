@@ -78,6 +78,7 @@ PowerInputs _inputs({
   AccountAttention? attention,
   AccountLinks links = const AccountLinks(),
   bool direct = false,
+  bool brokenChain = false,
 }) => PowerInputs(
   link: link,
   hasProfile: hasProfile,
@@ -88,6 +89,7 @@ PowerInputs _inputs({
   attention: attention,
   links: links,
   direct: direct,
+  brokenChain: brokenChain,
 );
 
 void _expectFace(
@@ -517,6 +519,47 @@ void main() {
           tap: PowerAction.stop,
           fix: null,
         );
+      }
+    });
+
+    test('a selected broken chain offers another server', () {
+      _expectFace(
+        resolvePowerFace(
+          _inputs(
+            link: PowerLink.on,
+            brokenChain: true,
+            health: const ConnectionHealth(phase: ConnectionPhase.verified),
+          ),
+        ),
+        state: PowerFaceState.brokenChain,
+        link: PowerLink.on,
+        tone: PowerTone.failure,
+        tap: PowerAction.stop,
+        fix: PowerAction.switchServer,
+      );
+    });
+
+    test('a broken chain waits behind connecting, network and direct', () {
+      final cases = <(PowerInputs, PowerFaceState)>[
+        (
+          _inputs(
+            link: PowerLink.on,
+            brokenChain: true,
+            health: const ConnectionHealth(phase: ConnectionPhase.connecting),
+          ),
+          PowerFaceState.verifying,
+        ),
+        (
+          _inputs(link: PowerLink.on, brokenChain: true, online: false),
+          PowerFaceState.waitingNetwork,
+        ),
+        (
+          _inputs(link: PowerLink.on, brokenChain: true, direct: true),
+          PowerFaceState.direct,
+        ),
+      ];
+      for (final (inputs, state) in cases) {
+        expect(resolvePowerFace(inputs).state, state, reason: '$state');
       }
     });
 

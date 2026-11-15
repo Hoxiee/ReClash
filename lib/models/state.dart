@@ -8,6 +8,7 @@ import 'clash_config.dart';
 import 'common.dart';
 import 'core.dart';
 import 'profile.dart';
+import 'proxy_chain.dart';
 import 'notification.dart';
 
 part 'generated/state.freezed.dart';
@@ -231,6 +232,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default({}) Map<String, dynamic> injectedProxyProviders,
     @Default({}) Map<String, dynamic> injectedRuleProviders,
     String? matchTarget,
+    @Default(false) bool addedRulesOnly,
     @Default(false) bool safeMode,
     @Default('') String webDashboardDirectory,
   }) = _MakeRealProfileState;
@@ -248,6 +250,7 @@ abstract class MigrationData with _$MigrationData {
     @Default([]) List<ClashProvider> clashProviders,
     @Default([]) List<CustomProxy> customProxies,
     @Default([]) List<ProxyDialer> proxyDialers,
+    @Default([]) List<ProxyChain> proxyChains,
   }) = _MigrationData;
 }
 
@@ -268,5 +271,6 @@ abstract class SetupState with _$SetupState {
     @Default([]) List<CustomProxy> appProxies,
     @Default({}) Map<int, String> proxyDialers,
     String? matchTarget,
+    @Default(false) bool addedRulesOnly,
   }) = _SetupState;
 }

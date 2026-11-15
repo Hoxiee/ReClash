@@ -25,6 +25,7 @@ import (
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
+	"go.yaml.in/yaml/v3"
 )
 
 var (
@@ -164,9 +165,17 @@ func loadSetupConfig(params *SetupParams) (setupLoad, error) {
 	path := runningConfigPath()
 	var raw *config.RawConfig
 	var err error
-	if params.Base != nil {
-		raw, err = loadRawConfigWithBase(params.Base, path)
-	} else {
+	recordChains(nil, nil)
+	var prepare func(root *yaml.Node)
+	if len(params.Chains) > 0 {
+		prepare = func(root *yaml.Node) { applyChains(root, params.Chains, params.MainGroupHint) }
+	}
+	switch {
+	case params.Base != nil:
+		raw, err = loadRawConfigWithBase(params.Base, path, prepare)
+	case prepare != nil:
+		raw, err = loadRawConfigPrepared(path, prepare)
+	default:
 		raw, err = loadRawConfig(path)
 	}
 	if err != nil {

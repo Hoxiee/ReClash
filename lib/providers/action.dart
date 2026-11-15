@@ -31,6 +31,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/account/fetch.dart';
 import 'package:reclash/features/doctor/recorder/provider.dart';
 import 'package:reclash/features/doctor/snapshot.dart' show ProfileUpdateFact;
+import 'package:reclash/features/proxy_chains/reports.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/service.dart';

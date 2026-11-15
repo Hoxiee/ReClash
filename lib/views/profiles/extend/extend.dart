@@ -54,7 +54,12 @@ class _ExtendViewState extends ConsumerState<ExtendView> {
     final profileId = widget.profileId;
     final profile = ref.watch(
       profileProvider(profileId).select(
-        (state) => (state?.extendType, state?.scriptId, state?.matchTarget),
+        (state) => (
+          state?.extendType,
+          state?.scriptId,
+          state?.matchTarget,
+          state?.addedRulesOnly,
+        ),
       ),
     );
     final rules = ref.watch(profileRulesProvider(profileId)).value;

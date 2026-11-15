@@ -98,3 +98,27 @@ class IpQualityConverter extends TypeConverter<IpQuality, String> {
     return json.encode(value.toJson());
   }
 }
+
+class HopFingerprintsConverter
+    extends TypeConverter<List<HopFingerprint?>, String> {
+  const HopFingerprintsConverter();
+
+  @override
+  List<HopFingerprint?> fromSql(String fromDb) {
+    return decodeOrRestoreDefault(
+      'hop fingerprints',
+      () => [
+        for (final item in json.decode(fromDb) as List)
+          item == null
+              ? null
+              : HopFingerprint.fromJson(Map<String, Object?>.from(item)),
+      ],
+      () => [],
+    );
+  }
+
+  @override
+  String toSql(List<HopFingerprint?> value) {
+    return json.encode([for (final item in value) item?.toJson()]);
+  }
+}

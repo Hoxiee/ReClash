@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/providers.dart';
+import 'package:reclash/features/proxy_chains/providers.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 
@@ -49,6 +50,7 @@ final powerInputsProvider = Provider<PowerInputs>((ref) {
           ),
     links: accountLinks(metadata),
     direct: ref.watch(effectiveModeProvider) == Mode.direct,
+    brokenChain: ref.watch(selectedBrokenChainProvider) != null,
   );
 });
 

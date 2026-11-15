@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:drift/native.dart';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
@@ -9,6 +11,8 @@ import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/core/spill.dart';
+import 'package:reclash/database/database.dart';
+import 'package:reclash/features/proxy_chains/reports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -1642,6 +1646,74 @@ void main() {
         );
         await access.close(owner);
         verifyNever(() => core.setupConfig(any()));
+      },
+    );
+
+    test(
+      'enabled chains reach the Core and a chain change re-applies',
+      () async {
+        // Left in place: a memory database holds no file, and later applies
+        // of a real profile read their chains from it.
+        final chainsDatabase = Database(NativeDatabase.memory());
+        database = chainsDatabase;
+        final profile = Profile.normal(label: 'chains');
+        await chainsDatabase.profilesDao.putAll([profile.toCompanion()]);
+        const chain = ProxyChain(
+          id: 1,
+          profileId: 0,
+          name: 'A → B',
+          hops: ['A', 'B'],
+        );
+        await chainsDatabase.proxyChainsDao.put(
+          chain.copyWith(profileId: profile.id),
+        );
+        await chainsDatabase.proxyChainsDao.put(
+          chain.copyWith(id: 2, profileId: profile.id, enabled: false),
+        );
+        final core = _MockCoreHandlerInterface();
+        when(() => core.getProfileBase(any())).thenAnswer(
+          (_) async => const ProfileBase(config: {}, digest: 'chains'),
+        );
+        when(() => core.setupConfig(any())).thenAnswer((_) async => '');
+        when(() => core.getChainReport()).thenAnswer(
+          (_) async => const [
+            ChainReport(id: 1, group: 'A → B', status: ChainStatus.ok),
+          ],
+        );
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(() => TestProfiles([profile])),
+            currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+            setupStateProvider.overrideWith(
+              (_, _) => nullProfileSetupState.copyWith(profileId: profile.id),
+            ),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(SetupAction.new),
+            proxiesActionProvider.overrideWith(_NoopProxiesAction.new),
+            providersProvider.overrideWith(_NoopProviders.new),
+            providerPolicyProvider.overrideWithValue(null),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        globalState.container = scoped;
+        final setup = scoped.read(setupActionProvider.notifier);
+
+        expect(await setup.applyProfile(force: true), isTrue);
+        final params =
+            verify(() => core.setupConfig(captureAny())).captured.single
+                as SetupParams;
+        expect(params.chains, [chain.copyWith(profileId: profile.id).toSpec()]);
+        expect(scoped.read(chainReportsProvider)?.keys, [1]);
+
+        expect(await setup.applyProfile(), isTrue);
+        verifyNever(() => core.setupConfig(any()));
+
+        await chainsDatabase.proxyChainsDao.put(
+          chain.copyWith(id: 3, profileId: profile.id, hops: ['B', 'A']),
+        );
+        expect(await setup.inputsApplied(), isFalse);
+        expect(await setup.applyProfile(), isTrue);
+        verify(() => core.setupConfig(any())).called(1);
       },
     );
 

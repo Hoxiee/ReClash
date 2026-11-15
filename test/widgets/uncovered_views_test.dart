@@ -642,7 +642,13 @@ void main() {
     );
     await tester.pump();
     final l10n = AppLocalizations.current;
-    expect(find.text(l10n.followProfile), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.widgetWithText(MoreActionButton, l10n.matchTarget),
+        matching: find.text(l10n.followProfile),
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text(l10n.matchTarget));
     await tester.pumpAndSettle();
@@ -654,6 +660,13 @@ void main() {
     expect(find.byType(SelectionSheet<String>), findsNothing);
     expect(container.read(profilesProvider).first.matchTarget, 'HK');
     expect(find.text('HK'), findsOneWidget);
+
+    await tester.tap(find.text(l10n.unmatchedTraffic));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('DIRECT'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SelectionSheet<bool>), findsNothing);
+    expect(container.read(profilesProvider).first.addedRulesOnly, isTrue);
     expect(tester.takeException(), null);
   });
 

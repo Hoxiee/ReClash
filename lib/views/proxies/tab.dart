@@ -3,8 +3,11 @@ import 'dart:math';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/common.dart';
+import 'package:reclash/features/proxy_chains/proxy_chains.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/chains/band.dart';
+import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +30,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
   TabController? _tabController;
   final Map<String, ScrollController> _scrollControllers = {};
   int _columns = 1;
+  double _width = 0;
 
   @override
   void initState() {
@@ -83,16 +87,40 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       return;
     }
     final cardType = ref.read(proxiesTabStateProvider).proxyCardType;
-    final rowOffset = selectedRowOffset(
-      proxies: group.all,
-      selectedProxyName: ref.read(selectedProxyNameProvider(group.name)),
-      columns: _columns,
-      rowExtent: getRowExtent(cardType),
+    final rowOffset = _bandedRowOffset(
+      group,
+      ref.read(selectedProxyNameProvider(group.name)),
+      getRowExtent(cardType),
     );
     if (rowOffset == null) {
       return;
     }
     animateScrollTo(controller, rowOffset);
+  }
+
+  /// Mirrors [ProxyGroupView]: the hint card, then the chain band and its
+  /// labels above the servers.
+  double? _bandedRowOffset(Group group, String? selected, double rowExtent) {
+    final (chains: banded, :servers) = splitChainBand(
+      group.all,
+      ref.read(chainGeneratedNamesProvider).groups,
+    );
+    final top = ref.read(chainHintGroupProvider) == group.name
+        ? chainHintExtent(context, _width)
+        : 0.0;
+    double? rowOf(List<Proxy> proxies) => selectedRowOffset(
+      proxies: proxies,
+      selectedProxyName: selected,
+      columns: _columns,
+      rowExtent: rowExtent,
+    );
+    final chainRow = rowOf(banded);
+    if (chainRow != null) return top + chainBandLabelExtent + chainRow;
+    final serverRow = rowOf(servers);
+    if (serverRow == null) return null;
+    if (banded.isEmpty) return top + serverRow;
+    final bandRows = (banded.length / _columns).ceil();
+    return top + chainBandLabelExtent * 2 + bandRows * rowExtent + serverRow;
   }
 
   Future<void> delayTestCurrentGroup() async {
@@ -203,6 +231,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                           proxiesLayout,
                         );
                         _columns = columns;
+                        _width = max(width - 32, 0);
                         return TabBarView(
                           controller: controller,
                           children: [
@@ -252,36 +281,74 @@ class ProxyGroupView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxies = group.all;
+    final (chains: banded, :servers) = splitChainBand(
+      group.all,
+      ref.watch(chainGeneratedNamesProvider.select((names) => names.groups)),
+    );
+    final showHint = ref.watch(chainHintGroupProvider) == group.name;
+    final delegate = SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: columns,
+      mainAxisSpacing: proxyGridSpacing,
+      crossAxisSpacing: 8,
+      mainAxisExtent: getItemHeight(cardType),
+    );
+    SliverGrid grid(List<Proxy> proxies, {required bool chains}) => SliverGrid(
+      gridDelegate: delegate,
+      delegate: SliverChildBuilderDelegate(
+        (_, index) {
+          final proxy = proxies[index];
+          return chains
+              ? ChainTile(
+                  groupName: group.name,
+                  groupType: group.type,
+                  testUrl: group.testUrl,
+                  proxy: proxy,
+                  type: cardType,
+                )
+              : ProxyCard(
+                  testUrl: group.testUrl,
+                  groupType: group.type,
+                  type: cardType,
+                  proxy: proxy,
+                  groupName: group.name,
+                );
+        },
+        childCount: proxies.length,
+        addAutomaticKeepAlives: false,
+      ),
+    );
     return CommonScrollBar(
       controller: controller,
       thumbVisibility: true,
-      child: GridView.builder(
+      child: CustomScrollView(
         key: _getPageStorageKey(ref),
         controller: controller,
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 16 + context.bottomInset,
-        ),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: columns,
-          mainAxisSpacing: proxyGridSpacing,
-          crossAxisSpacing: 8,
-          mainAxisExtent: getItemHeight(cardType),
-        ),
-        itemCount: proxies.length,
-        addAutomaticKeepAlives: false,
-        itemBuilder: (_, index) {
-          final proxy = proxies[index];
-          return ProxyCard(
-            testUrl: group.testUrl,
-            groupType: group.type,
-            type: cardType,
-            proxy: proxy,
-            groupName: group.name,
-          );
-        },
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 16 + context.bottomInset,
+            ),
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                if (showHint) const SliverToBoxAdapter(child: ChainHintCard()),
+                if (banded.isNotEmpty) ...[
+                  const SliverToBoxAdapter(child: ChainBandLabel(chains: true)),
+                  grid(banded, chains: true),
+                  if (servers.isNotEmpty)
+                    const SliverPadding(
+                      padding: EdgeInsets.only(top: proxyGridSpacing),
+                      sliver: SliverToBoxAdapter(
+                        child: ChainBandLabel(chains: false),
+                      ),
+                    ),
+                ],
+                grid(servers, chains: false),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

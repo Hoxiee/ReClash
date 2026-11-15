@@ -229,7 +229,7 @@ cards:
 | `web-url` | url | Website action. |
 | `type` | text, 32 | Badge in the import dialog and profile list: `test`, `promo` or `dev`. Other values show none. |
 | `hide-url` | boolean | Masks the URL in the profile editor and import dialog. It does not make the URL secret. |
-| `server-group` | text, 256 | Proxy group whose selected node the simple dashboard shows. Matched case-insensitively. |
+| `server-group` | text, 256 | Proxy group whose selected node the simple dashboard shows; the user's proxy chains are offered in it too. Matched case-insensitively. |
 | `announce` | `{text, url}` | Description. `text` is multiline, 1024. Shown in the import dialog and in a dashboard card above the widgets that the user can neither move nor remove. `url` is the link on the card. |
 | `notice` | `{text, url}` | Dismissible dashboard notice. `text` is multiline, 1024. A dismissal is remembered for that exact text and link; a change shows it again. |
 | `renew` | `{url, days}` | Renew action, offered from `days` left (1–3650). |

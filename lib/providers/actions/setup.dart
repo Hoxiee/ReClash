@@ -116,6 +116,35 @@ class SetupAction extends _$SetupAction {
   SetupParams get _appliedParams =>
       _setupParams.copyWith(selectedMap: const {});
 
+  /// Enabled chains in their order; the hint is the input `pickMainGroup`
+  /// takes, which the Core resolves a chain's default target group with.
+  Future<SetupParams> _withChains(SetupParams params, int? profileId) async {
+    if (profileId == null) return params;
+    final chains = await database.proxyChainsDao.query(profileId).get();
+    final specs = [
+      for (final chain in chains)
+        if (chain.enabled) chain.toSpec(),
+    ];
+    if (specs.isEmpty) return params;
+    return params.copyWith(
+      chains: specs,
+      mainGroupHint: ref.read(providerHintsProvider)?.serverGroup,
+    );
+  }
+
+  /// The config.yaml md5 alone misses chains, which the Core adds to it.
+  String _md5WithChains(String md5, SetupParams params) {
+    final chains = params.chains;
+    if (md5.isEmpty || chains == null) return md5;
+    return '$md5${json.encode([chains, params.mainGroupHint])}'.toMd5();
+  }
+
+  Future<void> _refreshChainReports({bool onlyMissing = false}) async {
+    final reports = ref.read(chainReportsProvider.notifier);
+    if (onlyMissing && ref.read(chainReportsProvider) != null) return;
+    await reports.refresh();
+  }
+
   Future<bool> fullSetup() async {
     if (!ref.read(initProvider)) return true;
     ref.read(proxiesActionProvider.notifier).cancelDelayTests();
@@ -644,12 +673,18 @@ class SetupAction extends _$SetupAction {
     } catch (_) {
       return false;
     }
+    final SetupParams params;
+    try {
+      params = await _withChains(_appliedParams, profileId);
+    } catch (_) {
+      return false;
+    }
     return applied ==
         (
           setupState,
           _effectivePatchConfig(ref.read(patchClashConfigProvider)),
           ref.read(networkSettingProvider),
-          _appliedParams,
+          params,
         );
   }
 
@@ -802,6 +837,7 @@ class SetupAction extends _$SetupAction {
                 setupState.matchTarget?.trim().isNotEmpty == true
             ? setupState.matchTarget
             : lastMatchTarget(profileBase.base.matchRules),
+        addedRulesOnly: setupState.addedRulesOnly,
         safeMode: ref.read(safeModeProvider) || ref.read(sandboxProvider),
         webDashboardDirectory: webDashboardDirectory,
       ),
@@ -823,7 +859,7 @@ class SetupAction extends _$SetupAction {
       counts: (
         groups: res.counts.groups + base.proxyGroups,
         proxies: res.counts.proxies + base.proxies,
-        rules: res.counts.rules + base.rules,
+        rules: res.counts.rules + (setupState.addedRulesOnly ? 0 : base.rules),
       ),
       useSystemHosts: res.useSystemHosts,
       base: SetupBase(path: path, overlay: res.yaml),
@@ -1105,9 +1141,11 @@ class SetupAction extends _$SetupAction {
     final realPatchConfig = _effectivePatchConfig(patchConfig);
     final networkSetting = ref.read(networkSettingProvider);
     SetupState? setupState;
+    var appliedParams = _appliedParams;
     Future<BuiltProfile> buildProfile() async {
       final state = await ref.read(setupStateProvider(profile?.id).future);
       setupState = state;
+      appliedParams = await _withChains(appliedParams, profile?.id);
       return getProfile(setupState: state, patchConfig: realPatchConfig);
     }
 
@@ -1121,18 +1159,20 @@ class SetupAction extends _$SetupAction {
     final setupParams = _setupParams.copyWith(
       base: realProfile?.base,
       policyPath: sourcePath,
+      chains: appliedParams.chains,
+      mainGroupHint: appliedParams.mainGroupHint,
     );
     final inputs = switch (setupState) {
       final state? when !profileFailed => (
         state,
         realPatchConfig,
         networkSetting,
-        _appliedParams,
+        appliedParams,
       ),
       _ => null,
     };
     final yamlString = realProfile?.yaml ?? '';
-    final yamlMd5 = realProfile?.md5 ?? '';
+    final yamlMd5 = _md5WithChains(realProfile?.md5 ?? '', setupParams);
     if (!profileFailed &&
         yamlMd5 == globalState.lastConfigMd5 &&
         !force &&
@@ -1143,6 +1183,7 @@ class SetupAction extends _$SetupAction {
       _appliedUseSystemHosts.value = realProfile.useSystemHosts;
       await preloadInvoke?.call();
       _appliedWebDashboardDirectory = realProfile.webDashboardDirectory;
+      await _refreshChainReports(onlyMissing: true);
       return _SetupTaskResult.completed;
     }
     // Go answers a config it rejects by running its built-in default, which
@@ -1210,6 +1251,7 @@ class SetupAction extends _$SetupAction {
       if (system.isAndroid) {
         await preferences.saveAppliedConfigMd5(yamlMd5);
       }
+      await _refreshChainReports();
       await onUpdated?.call();
     }
 

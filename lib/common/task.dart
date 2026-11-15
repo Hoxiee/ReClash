@@ -374,7 +374,10 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
       } else {
         finalAddedRules = addedRules.map((e) => e.rawValue).toList();
       }
-      rules = [...finalAddedRules, ...rules];
+      rules = [
+        ...finalAddedRules,
+        ...data.addedRulesOnly ? const ['MATCH,DIRECT'] : rules,
+      ];
     }
   } else {
     rules = data.rules.map((item) => item.rawValue).toList();

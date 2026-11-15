@@ -551,6 +551,11 @@ class CoreController {
     return _interface.getProxyDefinition(name);
   }
 
+  Future<List<ChainReport>> getChainReport() => _interface.getChainReport();
+
+  Future<ChainInspection> inspectChain(InspectChainParams params) =>
+      _interface.inspectChain(params);
+
   Future<String> buildProfile(SetupBase base) async {
     return readSpilledText(await _interface.buildProfile(base));
   }

@@ -25,6 +25,9 @@ class Profiles extends Table {
 
   TextColumn get matchTarget => text().nullable()();
 
+  BoolColumn get addedRulesOnly =>
+      boolean().withDefault(const Constant(false))();
+
   IntColumn get autoUpdateDurationMillis => integer()();
 
   TextColumn get subscriptionInfo =>
@@ -225,6 +228,7 @@ extension RawProfilExt on RawProfile {
       extendType: extendType,
       scriptId: scriptId,
       matchTarget: matchTarget,
+      addedRulesOnly: addedRulesOnly,
       order: order,
       overrides: overrides ?? const ProfileOverrides(),
     );
@@ -251,6 +255,7 @@ extension ProfilesCompanionExt on Profile {
       extendType: extendType,
       scriptId: Value(scriptId),
       matchTarget: Value(matchTarget),
+      addedRulesOnly: Value(addedRulesOnly),
       order: Value(order ?? this.order),
       overrides: Value(overrides),
     );

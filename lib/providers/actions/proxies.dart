@@ -12,7 +12,7 @@ class _DelayTestTarget {
   final String key;
 }
 
-typedef _DelayTestBatch = ({List<Proxy> proxies, String? testUrl});
+typedef _DelayTestBatch = ({List<Proxy> proxies, String? testUrl, bool exact});
 
 class _DelayTestJob {
   _DelayTestJob(Iterable<String> keys, this.timeout) : held = keys.toSet();
@@ -217,7 +217,9 @@ class ProxiesAction extends _$ProxiesAction {
           ref.read(groupsProvider).isNotEmpty) {
         return;
       }
-      ref.read(groupsProvider.notifier).value = result.groups;
+      ref.read(groupsProvider.notifier).value = ref
+          .read(chainGeneratedNamesProvider)
+          .visibleGroups(result.groups);
       final lostPins = {
         for (final group in result.groups)
           if (group.type.isComputedSelected &&
@@ -430,18 +432,25 @@ class ProxiesAction extends _$ProxiesAction {
 
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) {
     return _runDelayTests([
-      (proxies: [proxy], testUrl: testUrl),
+      (proxies: [proxy], testUrl: testUrl, exact: false),
     ]);
   }
 
   Future<void> delayTest(List<Proxy> proxies, [String? testUrl]) async {
-    await _runDelayTests([(proxies: proxies, testUrl: testUrl)]);
+    await _runDelayTests([(proxies: proxies, testUrl: testUrl, exact: false)]);
     ref.read(sortNumProvider.notifier).add();
+  }
+
+  /// Tests every proxy under [testUrl], ignoring the URL of the group each
+  /// one resolves through, so their delays compare.
+  Future<void> delayTestAt(List<Proxy> proxies, String testUrl) {
+    return _runDelayTests([(proxies: proxies, testUrl: testUrl, exact: true)]);
   }
 
   Future<void> delayTestGroups(List<Group> groups) async {
     await _runDelayTests([
-      for (final group in groups) (proxies: group.all, testUrl: group.testUrl),
+      for (final group in groups)
+        (proxies: group.all, testUrl: group.testUrl, exact: false),
     ]);
     ref.read(sortNumProvider.notifier).add();
   }
@@ -491,7 +500,9 @@ class ProxiesAction extends _$ProxiesAction {
         if (state.proxyName.isEmpty) {
           continue;
         }
-        final currentTestUrl = state.testUrl.takeFirstValid([fallbackTestUrl]);
+        final currentTestUrl = batch.exact
+            ? fallbackTestUrl
+            : state.testUrl.takeFirstValid([fallbackTestUrl]);
         final key = delayTestKey(currentTestUrl, state.proxyName);
         if (!seen.add(key)) {
           continue;

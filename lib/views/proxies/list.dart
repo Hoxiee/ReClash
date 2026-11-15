@@ -5,9 +5,15 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/features/proxy_chains/proxy_chains.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/views/chains/band.dart';
+import 'package:reclash/views/chains/marks.dart';
+import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,6 +41,17 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
   int _columns = 1;
   int _groupColumns = 1;
   double _gap = 0;
+  Set<String> _chains = const {};
+  String? _hintGroup;
+  double _hintExtent = 0;
+
+  _GroupLayout _layoutOf(Group group, double rowExtent) => _GroupLayout.of(
+    group,
+    columns: _columns,
+    rowExtent: rowExtent,
+    chains: _chains,
+    hintExtent: group.name == _hintGroup ? _hintExtent : null,
+  );
 
   @override
   void initState() {
@@ -69,8 +86,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
       offsets.add(columnOffsets[column]);
       columnOffsets[column] += listHeaderHeight + _gap;
       if (state.currentUnfoldSet.contains(group.name)) {
-        final rowCount = (group.all.length + _columns - 1) ~/ _columns;
-        columnOffsets[column] += _rowsExtent(rowCount, rowExtent);
+        columnOffsets[column] += _layoutOf(group, rowExtent).extent;
       }
     }
     return GroupOffsets(state.groups, offsets);
@@ -138,20 +154,14 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
 
   void _scrollToGroupSelected(String groupName) {
     final cardType = ref.read(proxiesListStateProvider).proxyCardType;
-    final proxies = ref
-        .read(proxiesListStateProvider)
-        .groups
-        .getGroup(groupName)
-        ?.all;
-    if (proxies == null) {
+    final group = ref.read(proxiesListStateProvider).groups.getGroup(groupName);
+    if (group == null) {
       return;
     }
-    final rowOffset = selectedRowOffset(
-      proxies: proxies,
-      selectedProxyName: ref.read(selectedProxyNameProvider(groupName)),
-      columns: _columns,
-      rowExtent: getRowExtent(cardType),
-    );
+    final selected = ref.read(selectedProxyNameProvider(groupName));
+    final rowOffset = selected == null
+        ? null
+        : _layoutOf(group, getRowExtent(cardType)).offsetOf(selected);
     if (rowOffset == null) {
       return;
     }
@@ -170,6 +180,10 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
           proxiesListStateProvider.select((state) => state.proxyCardType),
         );
         ref.watch(themeSettingProvider.select((state) => state.textScale));
+        final chains = ref.watch(
+          chainGeneratedNamesProvider.select((names) => names.groups),
+        );
+        final hintGroup = ref.watch(chainHintGroupProvider);
         final viewMode = ref.watch(viewModeProvider);
         final proxiesLayout = ref.watch(
           proxiesStyleSettingProvider.select((state) => state.layout),
@@ -205,12 +219,22 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
               _columns = columns;
               _groupColumns = groupColumns;
               _gap = gap;
+              _chains = chains;
+              _hintGroup = hintGroup;
+              _hintExtent = hintGroup == null
+                  ? 0
+                  : chainHintExtent(
+                      context,
+                      max(groupWidth - _headerInset * 2, 0),
+                    );
               Widget buildGroup(Group group) => _GroupSliver(
                 key: _GroupSliverKey(group.name),
                 group: group,
                 columns: columns,
                 cardType: cardType,
                 gap: gap,
+                chains: chains,
+                hintExtent: group.name == hintGroup ? _hintExtent : null,
                 onChange: _handleChange,
                 onScrollToSelected: _scrollToGroupSelected,
               );
@@ -275,8 +299,84 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
   }
 }
 
-double _rowsExtent(int rowCount, double rowExtent) =>
-    rowCount == 0 ? 0 : rowCount * rowExtent + _lastRowGrowth;
+sealed class _BandRow {
+  const _BandRow();
+}
+
+final class _HintRow extends _BandRow {
+  const _HintRow();
+}
+
+final class _LabelRow extends _BandRow {
+  const _LabelRow({required this.chains});
+
+  final bool chains;
+}
+
+final class _CardsRow extends _BandRow {
+  const _CardsRow(this.proxies);
+
+  final List<Proxy> proxies;
+}
+
+/// A group's rows with their extents: chains on their own rows above the
+/// servers, and the first-contact card above them all.
+class _GroupLayout {
+  _GroupLayout._(this.rows, this.extents, {required this.uniform});
+
+  factory _GroupLayout.of(
+    Group group, {
+    required int columns,
+    required double rowExtent,
+    required Set<String> chains,
+    double? hintExtent,
+  }) {
+    final (chains: banded, :servers) = splitChainBand(group.all, chains);
+    final rows = <_BandRow>[];
+    final extents = <double>[];
+    void add(_BandRow row, double extent) {
+      rows.add(row);
+      extents.add(extent);
+    }
+
+    if (hintExtent != null) add(const _HintRow(), hintExtent);
+    if (banded.isNotEmpty) {
+      add(const _LabelRow(chains: true), chainBandLabelExtent);
+      for (final chunk in banded.chunks(columns)) {
+        add(_CardsRow(chunk), rowExtent);
+      }
+      if (servers.isNotEmpty) {
+        add(const _LabelRow(chains: false), chainBandLabelExtent);
+      }
+    }
+    for (final chunk in servers.chunks(columns)) {
+      add(_CardsRow(chunk), rowExtent);
+    }
+    return _GroupLayout._(
+      rows,
+      extents,
+      uniform: hintExtent == null && banded.isEmpty,
+    );
+  }
+
+  final List<_BandRow> rows;
+  final List<double> extents;
+  final bool uniform;
+
+  double get extent => extents.isEmpty ? 0 : extents.sum + _lastRowGrowth;
+
+  double? offsetOf(String proxyName) {
+    var offset = 0.0;
+    for (final (index, row) in rows.indexed) {
+      if (row is _CardsRow &&
+          row.proxies.any((proxy) => proxy.name == proxyName)) {
+        return offset;
+      }
+      offset += extents[index];
+    }
+    return null;
+  }
+}
 
 class _GroupSliverKey extends ValueKey<String> {
   const _GroupSliverKey(super.value);
@@ -292,6 +392,8 @@ class _GroupSliver extends ConsumerStatefulWidget {
     required this.columns,
     required this.cardType,
     required this.gap,
+    required this.chains,
+    required this.hintExtent,
     required this.onChange,
     required this.onScrollToSelected,
   });
@@ -300,6 +402,8 @@ class _GroupSliver extends ConsumerStatefulWidget {
   final int columns;
   final ProxyCardType cardType;
   final double gap;
+  final Set<String> chains;
+  final double? hintExtent;
   final void Function(String groupName) onChange;
   final void Function(String groupName) onScrollToSelected;
 
@@ -346,10 +450,32 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     super.didUpdateWidget(oldWidget);
     if (widget.group != oldWidget.group ||
         widget.columns != oldWidget.columns ||
-        widget.cardType != oldWidget.cardType) {
+        widget.cardType != oldWidget.cardType ||
+        !setEquals(widget.chains, oldWidget.chains) ||
+        widget.hintExtent != oldWidget.hintExtent) {
       _rows = null;
     }
   }
+
+  _GroupLayout _layoutOf(double rowExtent) => _GroupLayout.of(
+    widget.group,
+    columns: widget.columns,
+    rowExtent: rowExtent,
+    chains: widget.chains,
+    hintExtent: widget.hintExtent,
+  );
+
+  Widget _buildBandRow(BuildContext context, _BandRow row) => switch (row) {
+    _HintRow() => const Padding(
+      padding: EdgeInsets.symmetric(horizontal: _headerInset),
+      child: ChainHintCard(),
+    ),
+    _LabelRow(:final chains) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _headerInset),
+      child: ChainBandLabel(chains: chains),
+    ),
+    _CardsRow(:final proxies) => _buildRow(context, proxies),
+  };
 
   Widget _buildRow(BuildContext context, List<Proxy> proxies) {
     final group = widget.group;
@@ -360,14 +486,23 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
           (proxy) => Flexible(
             child: SizedBox(
               height: getItemHeight(cardType),
-              child: ProxyCard(
-                testUrl: group.testUrl,
-                type: cardType,
-                groupType: group.type,
-                key: ValueKey('$groupName.${proxy.name}'),
-                proxy: proxy,
-                groupName: groupName,
-              ),
+              child: widget.chains.contains(proxy.name)
+                  ? ChainTile(
+                      key: ValueKey('$groupName.${proxy.name}'),
+                      groupName: groupName,
+                      groupType: group.type,
+                      testUrl: group.testUrl,
+                      proxy: proxy,
+                      type: cardType,
+                    )
+                  : ProxyCard(
+                      testUrl: group.testUrl,
+                      type: cardType,
+                      groupType: group.type,
+                      key: ValueKey('$groupName.${proxy.name}'),
+                      proxy: proxy,
+                      groupName: groupName,
+                    ),
             ),
           ),
         )
@@ -387,19 +522,27 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
   }
 
   Widget _buildRows(double extent) {
-    final rows = widget.group.all.chunks(widget.columns).toList();
-    return SliverFixedExtentList(
-      itemExtent: extent,
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => _buildRow(context, rows[index]),
-        childCount: rows.length,
-        addAutomaticKeepAlives: false,
-      ),
+    final layout = _layoutOf(extent);
+    final rows = layout.rows;
+    final delegate = SliverChildBuilderDelegate(
+      (context, index) => _buildBandRow(context, rows[index]),
+      childCount: rows.length,
+      addAutomaticKeepAlives: false,
+    );
+    if (layout.uniform) {
+      return SliverFixedExtentList(itemExtent: extent, delegate: delegate);
+    }
+    final extents = layout.extents;
+    return SliverVariedExtentList(
+      itemExtentBuilder: (index, _) =>
+          index < extents.length ? extents[index] : null,
+      delegate: delegate,
     );
   }
 
   Widget _buildUnfoldingRows(double extent, ShapeDecoration decoration) {
-    final rows = widget.group.all.chunks(widget.columns).toList();
+    final layout = _layoutOf(extent);
+    final rows = layout.rows;
     final visible = min(
       rows.length.toDouble(),
       MediaQuery.sizeOf(context).height / extent,
@@ -418,8 +561,8 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
                 index: index,
                 visibleCount: visible,
                 child: SizedBox(
-                  height: extent,
-                  child: _buildRow(context, rows[index]),
+                  height: layout.extents[index],
+                  child: _buildBandRow(context, rows[index]),
                 ),
               ),
             if (count == rows.length) const SizedBox(height: _lastRowGrowth),
@@ -518,14 +661,12 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     bool isExpand,
     Widget Function({double floating, double lift}) buildHeader,
   ) {
-    final columns = widget.columns;
-    final rowCount = (widget.group.all.length + columns - 1) ~/ columns;
-    final rowsExtent = isExpand ? _rowsExtent(rowCount, _rowExtent) : 0.0;
+    final rowsExtent = isExpand ? _layoutOf(_rowExtent).extent : 0.0;
     final groupExtent =
         listHeaderHeight +
         (_controller.isDismissed
             ? 0.0
-            : _rowsExtent(rowCount, getRowExtent(widget.cardType)));
+            : _layoutOf(getRowExtent(widget.cardType)).extent);
     (double, double, double)? headerState;
     Widget? header;
     return SliverLayoutBuilder(
@@ -864,6 +1005,10 @@ class _SelectedProxyName extends ConsumerWidget {
     if (proxyName.isEmpty) {
       return const SizedBox.shrink();
     }
+    final chain = ref.watch(
+      chainOfGroupProvider(proxyName).select((entry) => entry?.chain),
+    );
+    final title = chain == null ? proxyName : chainTitle(chain);
     final control = ref.watch(
       rcxGroupProvider(groupName).select((state) => state?.control),
     );
@@ -875,7 +1020,7 @@ class _SelectedProxyName extends ConsumerWidget {
       _ => l.rcxModeAuto,
     };
     return EmojiText(
-      mode == null ? proxyName : '$mode · $proxyName',
+      mode == null ? title : '$mode · $title',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,

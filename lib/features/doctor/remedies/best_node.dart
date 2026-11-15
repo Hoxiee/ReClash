@@ -1,4 +1,5 @@
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/proxy_chains/providers.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod/riverpod.dart';
@@ -31,10 +32,11 @@ String? fastestNode(List<Proxy> candidates, int? Function(Proxy) delayOf) {
   return best;
 }
 
-/// Re-tests the main group's nodes. A Selector moves to the fastest live
-/// one; URLTest and Fallback pick from the fresh delays themselves.
+/// Re-tests the nodes of the group holding a selected broken chain, else of
+/// the main group. A Selector moves to the fastest live one; URLTest and
+/// Fallback pick from the fresh delays themselves.
 Future<void> selectBestNode(Ref ref) async {
-  final name = mainGroup(ref);
+  final name = ref.read(selectedBrokenChainProvider)?.target ?? mainGroup(ref);
   final group = name == null ? null : ref.read(groupsProvider).getGroup(name);
   if (group == null) throw StateError('no proxy group to test');
   await ref.read(proxiesActionProvider.notifier).delayTestGroups([group]);

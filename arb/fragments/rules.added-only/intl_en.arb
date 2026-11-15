@@ -1,0 +1,4 @@
+{
+  "unmatchedTraffic": "Unmatched traffic",
+  "unmatchedTrafficDirectDesc": "Only traffic matched by the added rules goes through a proxy; the profile's rules are skipped"
+}

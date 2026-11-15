@@ -116,6 +116,33 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'plugin-opts': {'mode': 'websocket'},
       },
       CoreMethod.getProxyDefinition => null,
+      CoreMethod.getChainReport => [
+        {
+          'id': 7,
+          'group': 'A → B',
+          'status': 'broken',
+          'issues': [
+            {
+              'hop': 0,
+              'code': 'missingHop',
+              'fingerprint': {'type': 'vless', 'server': 'a.test', 'port': 443},
+              'suggest': ['A2'],
+            },
+            {'hop': -1, 'code': 'fromTheFuture'},
+          ],
+          'members': {
+            'A → B ⟶ B': {'leaf': 'B', 'server': 'b.test', 'port': 8443},
+          },
+          'udp': 'lost',
+          'target': 'Proxy',
+        },
+      ],
+      CoreMethod.inspectChain => {
+        'issues': <Object>[],
+        'leaves': ['B'],
+        'udp': [true, false],
+        'blocked': {'Proxy': 'loop', 'C': 'somethingNew'},
+      },
       CoreMethod.buildProfile => '/home/responses/1.yaml',
       CoreMethod.getProfileBase => {
         'config': {'mode': 'rule', 'rule': null},
@@ -561,6 +588,84 @@ void main() {
     ]);
     expect(handler.calls[CoreMethod.buildProfile], base.toJson());
     expect(built, '/home/responses/1.yaml');
+  });
+
+  test('a chain report and inspection cross with exact names', () async {
+    final handler = _RecordingCoreHandler();
+
+    final reports = await handler.getChainReport();
+    final inspection = await handler.inspectChain(
+      const InspectChainParams(hops: ['A', 'B'], slot: 1),
+    );
+
+    expect(handler.calls[CoreMethod.inspectChain], {
+      'hops': ['A', 'B'],
+      'slot': 1,
+    });
+    final report = reports.single;
+    expect(report.status, ChainStatus.broken);
+    expect(report.udp, ChainUdp.lost);
+    expect(report.target, 'Proxy');
+    expect(report.members.values.single.leaf, 'B');
+    expect(report.issues.first.code, ChainIssueCode.missingHop);
+    expect(report.issues.first.fingerprint?.port, 443);
+    expect(report.issues.first.suggest, ['A2']);
+    expect(report.issues.last.code, ChainIssueCode.unknown);
+    expect(report.errors.map((issue) => issue.hop), [0]);
+    expect(inspection.leaves, ['B']);
+    expect(inspection.udp, [true, false]);
+    expect(inspection.blocked, {
+      'Proxy': ChainIssueCode.loop,
+      'C': ChainIssueCode.unknown,
+    });
+  });
+
+  test('setup params carry chains only when there are some', () {
+    const params = SetupParams(selectedMap: {}, testUrl: 'https://t.test');
+    final json =
+        jsonDecode(
+              jsonEncode(
+                params
+                    .copyWith(
+                      chains: [
+                        const ProxyChain(
+                          id: 3,
+                          profileId: 1,
+                          name: 'A → B',
+                          hops: ['A', 'B'],
+                          fingerprints: [
+                            HopFingerprint(
+                              type: 'ss',
+                              server: 'a.test',
+                              port: 1,
+                            ),
+                            null,
+                          ],
+                        ).toSpec(),
+                      ],
+                      mainGroupHint: 'Proxy',
+                    )
+                    .toJson(),
+              ),
+            )
+            as Map<String, Object?>;
+
+    expect(params.toJson().keys, isNot(contains('chains')));
+    expect(params.toJson().keys, isNot(contains('main-group-hint')));
+    expect(json['main-group-hint'], 'Proxy');
+    expect(json['chains'], [
+      {
+        'id': 3,
+        'name': 'A → B',
+        'hops': ['A', 'B'],
+        'offered': true,
+        'target-group': null,
+        'fingerprints': [
+          {'type': 'ss', 'server': 'a.test', 'port': 1},
+          null,
+        ],
+      },
+    ]);
   });
 
   test('a proxy definition crosses as a nested mapping or null', () async {

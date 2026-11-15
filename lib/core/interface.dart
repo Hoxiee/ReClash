@@ -80,6 +80,10 @@ mixin CoreInterface {
 
   Future<Map<String, dynamic>?> getProxyDefinition(String name);
 
+  Future<List<ChainReport>> getChainReport();
+
+  Future<ChainInspection> inspectChain(InspectChainParams params);
+
   Future<String> buildProfile(SetupBase base);
 
   Future<String> dumpRuleSet(String path);
@@ -488,6 +492,32 @@ abstract class CoreHandlerInterface with CoreInterface {
       method: CoreMethod.getProxyDefinition,
       arguments: name,
     );
+  }
+
+  @override
+  Future<List<ChainReport>> getChainReport() async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.getChainReport,
+    );
+    return [
+      for (final item in data ?? const [])
+        ChainReport.fromJson(Map<String, Object?>.from(item as Map)),
+    ];
+  }
+
+  @override
+  Future<ChainInspection> inspectChain(InspectChainParams params) async {
+    final result = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.inspectChain,
+      arguments: params.toJson(),
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned no chain inspection',
+      );
+    }
+    return ChainInspection.fromJson(result);
   }
 
   @override

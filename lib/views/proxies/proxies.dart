@@ -5,6 +5,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/views/chains/page.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -241,8 +242,18 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       resizeToAvoidBottomInset: false,
       primaryAction: primaryAction,
       searchActions: [?primaryAction],
-      actionGroupSize: _isTab && !picker ? 3 : 2,
+      actionGroupSize: picker
+          ? 2
+          : _isTab
+          ? 4
+          : 3,
       iconActions: [
+        if (!picker)
+          IconButtonData(
+            glyph: AppGlyphs.link,
+            onPressed: () => openChainsPage(context),
+            tooltip: context.appLocalizations.chainsTitle,
+          ),
         if (_isTab && !picker)
           IconButtonData(
             glyph: AppGlyphs.locate,

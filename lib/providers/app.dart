@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/recorder/provider.dart';
+import 'package:reclash/features/proxy_chains/reports.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
@@ -170,7 +171,14 @@ class Providers extends _$Providers with AutoDisposeNotifierMixin {
   }
 
   Future<void> syncProviders() async {
-    value = await ref.read(coreHandlerProvider).getExternalProviders();
+    final providers = await ref
+        .read(coreHandlerProvider)
+        .getExternalProviders();
+    final generated = ref.read(chainGeneratedNamesProvider);
+    value = [
+      for (final provider in providers)
+        if (!generated.isProvider(provider.name)) provider,
+    ];
   }
 }
 

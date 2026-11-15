@@ -209,6 +209,8 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	getConfigMethod:                withFallible(handleGetConfig),
 	getProfileBaseMethod:           withFallible(handleGetProfileBase),
 	getProfileOutboundsMethod:      withFallible(handleGetProfileOutbounds),
+	getChainReportMethod:           withoutArguments(handleGetChainReport),
+	inspectChainMethod:             withFallible(handleInspectChain),
 	getProxyDefinitionMethod:       withFallible(handleGetProxyDefinition),
 	buildProfileMethod:             withFallible(handleBuildProfile),
 	setupConfigMethod:              withMessage(handleSetupConfig),

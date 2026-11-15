@@ -8,6 +8,7 @@ import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/features/doctor/probes/scheduler.dart';
 import 'package:reclash/features/doctor/probes/verify.dart';
 import 'package:reclash/features/doctor/remedies/best_node.dart';
+import 'package:reclash/features/proxy_chains/proxy_chains.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
@@ -21,6 +22,15 @@ const _groups = [
 ];
 
 class _NoKernel extends Mock implements DiagnosticKernel {}
+
+class _RecordingProxiesAction extends ProxiesAction {
+  static final List<String> tested = [];
+
+  @override
+  Future<void> delayTestGroups(List<Group> groups) async {
+    tested.addAll(groups.map((group) => group.name));
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -116,6 +126,36 @@ void main() {
       final delays = {'DIRECT': 1, 'Slow': 300, 'Dead': -1, 'Fast': 80};
       expect(fastestNode(nodes, (proxy) => delays[proxy.name]), 'Fast');
       expect(fastestNode(nodes.take(1).toList(), (_) => 1), isNull);
+    });
+  });
+
+  group('selectBestNode', () {
+    test('re-tests the group holding a selected broken chain', () async {
+      final container = ProviderContainer(
+        overrides: [
+          mainGroupProvider.overrideWithValue('Proxy'),
+          selectedBrokenChainProvider.overrideWithValue(
+            const ChainReport(
+              id: 1,
+              group: 'A → B',
+              status: ChainStatus.broken,
+              target: 'Inner',
+            ),
+          ),
+          groupsProvider.overrideWithBuild(
+            (_, _) => const [
+              Group(type: GroupType.Selector, name: 'Proxy'),
+              Group(type: GroupType.Selector, name: 'Inner'),
+            ],
+          ),
+          proxiesActionProvider.overrideWith(_RecordingProxiesAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final run = FutureProvider((ref) => selectBestNode(ref));
+
+      await expectLater(container.read(run.future), throwsStateError);
+      expect(_RecordingProxiesAction.tested, ['Inner']);
     });
   });
 

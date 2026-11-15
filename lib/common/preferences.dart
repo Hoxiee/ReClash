@@ -75,6 +75,26 @@ class Preferences {
     await store?.setStringList('provider.notices', dismissed);
   }
 
+  Future<Set<int>> getChainsHintDismissed() async {
+    try {
+      final store = await _store.value;
+      return {
+        for (final id in store?.getStringList('chains.hintDismissed') ?? [])
+          ?int.tryParse(id),
+      };
+    } on Object {
+      return const {};
+    }
+  }
+
+  Future<void> saveChainsHintDismissed(Set<int> profileIds) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    await store?.setStringList('chains.hintDismissed', [
+      for (final id in profileIds) '$id',
+    ]);
+  }
+
   Future<List<String>> getSpeedTestHistory() async {
     final store = await _store.value;
     if (store == null) throw StateError('Preferences are unavailable');

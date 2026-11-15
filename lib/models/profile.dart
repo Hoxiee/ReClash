@@ -121,6 +121,7 @@ abstract class Profile with _$Profile {
     @Default(ExtendType.standard) ExtendType extendType,
     int? scriptId,
     String? matchTarget,
+    @Default(false) bool addedRulesOnly,
     int? order,
     @Default(ProfileOverrides())
     @JsonKey(fromJson: ProfileOverrides.safeFromJson)

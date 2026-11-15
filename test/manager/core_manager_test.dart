@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:drift/native.dart';
+import 'package:reclash/database/database.dart';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 
@@ -185,6 +188,9 @@ void main() {
       'core_manager_test',
     );
     await useAppPaths(profileSwitchTempDir);
+    // An apply reads the profile's chains; a file database never opens
+    // under the widget tester's fake clock.
+    database = Database(NativeDatabase.memory());
   });
 
   tearDownAll(() {

@@ -3,15 +3,22 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/proxy_chains/proxy_chains.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/outbound_ip.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/chains/editor.dart';
+import 'package:reclash/views/chains/issues.dart';
+import 'package:reclash/views/chains/marks.dart';
+import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/views/dashboard/simple/flag.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/proxy_groups.dart';
+import 'package:reclash/views/proxies/routing_country.dart';
 
 /// Where traffic leaves, with the next best exits one tap away, so changing
 /// country never needs the proxies page.
@@ -70,6 +77,15 @@ class _LocationCardState extends ConsumerState<LocationCard> {
         ),
       );
     }
+    if (ref.watch(chainOfGroupProvider(selected)) case final entry?) {
+      return _ChainCard(
+        entry: entry,
+        group: group,
+        live: live,
+        exit: exit,
+        onTap: () => showProxiesSheet(context, groupName: group.name),
+      );
+    }
     final rcxControl = ref.watch(
       rcxGroupProvider(group.name).select((status) => status?.control),
     );
@@ -102,6 +118,134 @@ class _LocationCardState extends ConsumerState<LocationCard> {
 
 const _flagSize = 56.0;
 
+/// The selected chain: where sites see you, or what broke and the fix.
+class _ChainCard extends ConsumerWidget {
+  const _ChainCard({
+    required this.entry,
+    required this.group,
+    required this.live,
+    required this.exit,
+    required this.onTap,
+  });
+
+  final ChainEntry entry;
+  final Group group;
+  final bool live;
+  final IpInfo? exit;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final chain = entry.chain;
+    final report = entry.report;
+    final measured = exit?.countryCode.toLowerCase() ?? '';
+    final exitCode = measured.isNotEmpty
+        ? measured
+        : hopCountry(ref, chain.exit);
+    final mark = RouteMark(
+      exit: exitCode,
+      entry: hopCountry(ref, chain.entry),
+      size: _chainMarkSize,
+      dimmed: !live,
+      broken: report.isBroken,
+    );
+    if (!report.isBroken) {
+      final delay = ref.watch(
+        delayProvider(proxyName: report.group, testUrl: group.testUrl),
+      );
+      final sites = exitCode == null
+          ? null
+          : l.chainsSitesSee(
+              nameWithoutFlag(rcxCountryName(context, exitCode.toUpperCase())),
+            );
+      return DashboardCard(
+        onTap: onTap,
+        padding: const EdgeInsets.all(16),
+        child: _Headline(
+          flag: mark,
+          title: chainTitle(chain),
+          subtitle: [?sites, ?exit?.ip].join(' · '),
+          trailing: _SignalBars(delay: delay, live: live),
+        ),
+      );
+    }
+    final issue = leadingIssue(report.errors);
+    final suggestion = issue?.suggest.firstOrNull;
+    final action = ref.read(proxyChainsActionProvider.notifier);
+    return DashboardCard(
+      onTap: () => showChainEditor(context, chain: chain),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 14,
+        children: [
+          _Headline(
+            flag: mark,
+            title: chainTitle(chain),
+            subtitle: issue == null
+                ? l.chainsNotWorking
+                : chainShortReason(
+                    l,
+                    issue,
+                    chain.hops,
+                    group: report.target ?? '',
+                  ),
+            subtitleColor: colorScheme.error,
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              if ((issue, suggestion) case (final issue?, final suggestion?))
+                Expanded(
+                  flex: 6,
+                  child: FilledButton(
+                    style: _compactButton,
+                    onPressed: () => globalState.safeRun(
+                      () => action.replaceHop(
+                        chain,
+                        issue.hop < 0 ? chain.hops.length - 1 : issue.hop,
+                        suggestion,
+                      ),
+                      silence: false,
+                    ),
+                    child: Text(
+                      l.chainsTakeNamed(serverTitle(suggestion)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              Expanded(
+                flex: 5,
+                child: suggestion == null
+                    ? FilledButton(
+                        style: _compactButton,
+                        onPressed: () => showChainEditor(context, chain: chain),
+                        child: Text(l.chainsFix, maxLines: 1),
+                      )
+                    : FilledButton.tonal(
+                        style: _compactButton,
+                        onPressed: () => showChainEditor(context, chain: chain),
+                        child: Text(l.chainsOtherServer, maxLines: 1),
+                      ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const _chainMarkSize = 52.0;
+
+final _compactButton = FilledButton.styleFrom(
+  padding: const EdgeInsets.symmetric(horizontal: 12),
+);
+
 class _Headline extends StatelessWidget {
   const _Headline({
     required this.flag,
@@ -110,6 +254,7 @@ class _Headline extends StatelessWidget {
     this.count = 0,
     this.automatic,
     this.trailing,
+    this.subtitleColor,
   });
 
   final Widget flag;
@@ -122,6 +267,7 @@ class _Headline extends StatelessWidget {
   /// The tooltip of the mark that the server is picked automatically.
   final String? automatic;
   final Widget? trailing;
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +312,7 @@ class _Headline extends StatelessWidget {
         ),
         Expanded(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 2,
             children: [
@@ -195,7 +342,10 @@ class _Headline extends StatelessWidget {
                 subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: DashboardText.label(context).toTabular,
+                style: DashboardText.label(
+                  context,
+                  color: subtitleColor,
+                ).toTabular,
               ),
             ],
           ),

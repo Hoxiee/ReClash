@@ -1,0 +1,4 @@
+{
+  "unmatchedTraffic": "未匹配流量",
+  "unmatchedTrafficDirectDesc": "仅匹配附加规则的流量走代理，配置文件的规则将被跳过"
+}

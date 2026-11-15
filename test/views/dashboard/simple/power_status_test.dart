@@ -222,6 +222,7 @@ void main() {
         (PowerFaceState.accountLocked, 'expired'),
         (PowerFaceState.verifying, 'connecting'),
         (PowerFaceState.broken, null),
+        (PowerFaceState.brokenChain, null),
       ];
       for (final (state, label) in cases) {
         final face = PowerFace(

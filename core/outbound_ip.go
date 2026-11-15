@@ -74,23 +74,39 @@ func handleOutboundIp(params *OutboundIpParams) *OutboundIpResult {
 
 	start()
 
+	// A rule can send one source around the proxy, and that source then reports
+	// the user's own address, so under the rules it answers only if no other can.
+	var direct *OutboundIpResult
 	stagger := time.NewTicker(outboundIpStagger)
 	defer stagger.Stop()
 	for inFlight > 0 {
 		select {
 		case answer := <-answers:
 			inFlight--
-			if answer != nil {
+			if answer != nil && (params.ProxyName != "" || !leftDirect(answer.Chains)) {
 				return answer
+			}
+			if direct == nil {
+				direct = answer
 			}
 			start()
 		case <-stagger.C:
 			start()
 		case <-ctx.Done():
+			if direct != nil {
+				return direct
+			}
 			return failure(probeErrorKind(ctx.Err()))
 		}
 	}
+	if direct != nil {
+		return direct
+	}
 	return failure(probeErrorFailed)
+}
+
+func leftDirect(chains []string) bool {
+	return len(chains) > 0 && chains[0] == "DIRECT"
 }
 
 var (

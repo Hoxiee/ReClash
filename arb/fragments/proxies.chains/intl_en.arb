@@ -1,0 +1,342 @@
+{
+  "chainsTitle": "Chains",
+  "chainsAll": "All chains",
+  "chainsServers": "Servers",
+  "chainsNew": "New chain",
+  "chainsBuild": "Build a chain",
+  "chainsHint": "Foreign servers won’t open? Connect through a Russian one.",
+  "chainsHintDismiss": "Don’t show",
+  "chainsEmpty": "Connect to one server and go online through another — sites see only the second.",
+  "chainsYou": "You",
+  "chainsYouPhone": "phone",
+  "chainsYouComputer": "computer",
+  "chainsEntry": "Entry",
+  "chainsExit": "Exit",
+  "chainsMiddle": "Middle",
+  "chainsInternet": "Internet",
+  "chainsSites": "Sites",
+  "chainsCaptionPick": "choose",
+  "chainsCaptionLater": "next",
+  "chainsCaptionEntry": "entry · {delay}",
+  "@chainsCaptionEntry": {
+    "placeholders": {
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsCaptionExit": "exit",
+  "chainsCaptionMiddle": "middle",
+  "chainsCaptionMissing": "not in subscription",
+  "chainsNoResponse": "no response",
+  "chainsPickEntryHint": "Entry is the server your device connects to.",
+  "chainsPickEntryHintRu": "In Russia, pick a Russian one.",
+  "chainsPickExitHint": "Exit is the server sites see.",
+  "chainsPickMiddleHint": "Middle is one more server between the entry and the exit. Slower, but harder to trace.",
+  "chainsSearchHint": "City, country or name",
+  "chainsGroupsSection": "Groups — the server is picked for you",
+  "chainsNearYou": "{country} — near you",
+  "@chainsNearYou": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsAbroad": "Abroad",
+  "chainsOtherCountries": "Other countries",
+  "chainsExitFooter": "{country} servers are below. An exit at home only makes sense with an entry abroad.",
+  "@chainsExitFooter": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsGroupFastest": "Fastest of {count}",
+  "@chainsGroupFastest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chainsGroupFallback": "First working of {count}",
+  "@chainsGroupFallback": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chainsGroupBalance": "In turn of {count}",
+  "@chainsGroupBalance": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chainsGroupManual": "Manual, of {count}",
+  "@chainsGroupManual": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chainsBlocked": "Won’t fit: {reason}",
+  "@chainsBlocked": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsBlockedLoop": "it is the server list itself",
+  "chainsBlockedUdp": "needs UDP, and “{entry}” doesn’t carry it",
+  "@chainsBlockedUdp": {
+    "placeholders": {
+      "entry": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsBlockedEmpty": "the group has no servers",
+  "chainsBlockedProvider": "its list is not supported in chains yet",
+  "chainsBlockedOther": "a chain can’t go through it",
+  "chainsAddMiddle": "Middle server",
+  "chainsRemoveMiddle": "Remove middle server",
+  "chainsOffered": "Show among servers",
+  "chainsOfferedFooter": "The chain appears in “{group}” next to regular servers. The server selected now stays selected.",
+  "@chainsOfferedFooter": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsDiscardTitle": "Discard the chain?",
+  "chainsDiscard": "Discard",
+  "chainsSimilar": "Similar servers",
+  "chainsSuggestSame": "Same address, new name?",
+  "chainsTake": "Take",
+  "chainsTakeNamed": "Take “{name}”",
+  "@chainsTakeNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsPickFromAll": "Choose from all servers",
+  "chainsDelete": "Delete chain",
+  "chainsDeleteConfirm": "Delete “{name}”?",
+  "@chainsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsFix": "Fix",
+  "chainsOtherServer": "Another server",
+  "chainsPickOther": "Choose another",
+  "chainsPickUdpEntry": "Pick an entry with UDP",
+  "chainsRoleEntry": "entry",
+  "chainsRoleExit": "exit",
+  "chainsRoleMiddle": "middle server",
+  "chainsIssueMissingTitle": "“{hop}” is no longer in the subscription",
+  "@chainsIssueMissingTitle": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueMissingBody": "The {role} disappeared after the subscription update, so the chain doesn’t work. We kept it — choose a new {role}.",
+  "@chainsIssueMissingBody": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueUnchainableTitle": "“{hop}” is not a server",
+  "@chainsIssueUnchainableTitle": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueUnchainableBody": "It is a rule, and a chain can’t be built through it.",
+  "chainsIssueLoopTitle": "The chain goes in a circle",
+  "chainsIssueLoopBody": "“{hop}” itself leads through “{group}”, and the chain sits there. Choose a specific server.",
+  "@chainsIssueLoopBody": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueEmptyTitle": "Group “{hop}” has no servers",
+  "@chainsIssueEmptyTitle": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueEmptyBody": "The exit is empty — the subscription hasn’t loaded yet or a filter removed everything.",
+  "chainsIssueUdpMissingTitle": "“{exit}” won’t work behind this entry",
+  "@chainsIssueUdpMissingTitle": {
+    "placeholders": {
+      "exit": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueUdpMissingBody": "It needs UDP, and the entry “{entry}” carries only TCP.",
+  "@chainsIssueUdpMissingBody": {
+    "placeholders": {
+      "entry": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueProviderTitle": "This exit isn’t available yet",
+  "chainsIssueProviderBody": "This group’s servers come from a separate list that chains don’t support yet. Choose a specific server.",
+  "chainsIssueUdpLostTitle": "Calls and games won’t pass through this chain",
+  "chainsIssueUdpLostBody": "The entry “{entry}” doesn’t carry UDP, which calls, games and some video need. Sites, messengers and YouTube will work.",
+  "@chainsIssueUdpLostBody": {
+    "placeholders": {
+      "entry": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueDialerTitle": "“{hop}” already had its own middle server",
+  "@chainsIssueDialerTitle": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueDialerBody": "It isn’t used inside the chain — traffic goes through “{previous}”.",
+  "@chainsIssueDialerBody": {
+    "placeholders": {
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueAutomaticTitle": "The chain can’t go into “{group}”",
+  "@chainsIssueAutomaticTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueAutomaticBody": "This list picks the server itself and would start using the chain without you.",
+  "chainsIssueAutomaticAction": "Put in “{group}”",
+  "@chainsIssueAutomaticAction": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueNameTitle": "The name “{name}” is taken",
+  "@chainsIssueNameTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsIssueNameBody": "Another server or group has this name. Give the chain a different one.",
+  "chainsIssueTargetTitle": "The chain’s group is gone",
+  "chainsIssueTargetBody": "The chain is shown in the main server list instead.",
+  "chainsIssueUnknownTitle": "Something is wrong with the chain",
+  "chainsIssueUnknownBody": "Check its servers.",
+  "chainsShortMissing": "“{hop}” left the subscription",
+  "@chainsShortMissing": {
+    "placeholders": {
+      "hop": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsShortUdp": "Calls and games won’t pass",
+  "chainsShortDialer": "Its own middle server is not used",
+  "chainsShortEmpty": "The exit is empty",
+  "chainsNotWorking": "not working",
+  "chainsRowDelays": "entry {entry} · path {path}",
+  "@chainsRowDelays": {
+    "placeholders": {
+      "entry": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsRowSelected": "Selected",
+  "chainsRowOff": "Off",
+  "chainsRowBroken": "Not working: {reason}",
+  "@chainsRowBroken": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsRowRulesOnly": "rules only",
+  "chainsProfileSection": "Profile {name}",
+  "@chainsProfileSection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsPageFooter": "Enabled chains sit in “{group}” next to regular servers. Touch and hold to reorder.",
+  "@chainsPageFooter": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsOpen": "Open chain",
+  "chainsTest": "Test",
+  "chainsHide": "Remove from servers",
+  "chainsDisable": "Turn off",
+  "chainsDuplicate": "Duplicate",
+  "chainsDisabledNotice": "Chain turned off — traffic goes through “{server}”",
+  "@chainsDisabledNotice": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "chainsSitesSee": "Sites see {country}",
+  "@chainsSitesSee": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "powerHintBrokenChain": "The chain all traffic goes through broke",
+  "chainsSimilarEntry": "Similar entries",
+  "chainsSimilarExit": "Similar exits"
+}

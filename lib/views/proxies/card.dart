@@ -49,6 +49,16 @@ class ProxyCard extends ConsumerWidget {
   final ProxyCardType type;
   final String? testUrl;
 
+  /// Stands in for the proxy's name.
+  final String? title;
+
+  /// Stands in for the proxy's type line.
+  final Widget? detail;
+
+  /// Stands in for the delay when the proxy can't work at all.
+  final String? failure;
+  final List<CommonPopupMenuItem> extraMenuItems;
+
   const ProxyCard({
     super.key,
     required this.groupName,
@@ -56,6 +66,10 @@ class ProxyCard extends ConsumerWidget {
     required this.proxy,
     required this.groupType,
     required this.type,
+    this.title,
+    this.detail,
+    this.failure,
+    this.extraMenuItems = const [],
   });
 
   Measure get measure => globalState.measure;
@@ -65,7 +79,7 @@ class ProxyCard extends ConsumerWidget {
       return SizedBox(
         height: measure.textHeight(AppTextStyle.subheadline) * 1,
         child: EmojiText(
-          proxy.name,
+          title ?? proxy.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyle.subheadline.of(context),
@@ -75,7 +89,7 @@ class ProxyCard extends ConsumerWidget {
       return SizedBox(
         height: measure.textHeight(AppTextStyle.subheadline) * 2,
         child: EmojiText(
-          proxy.name,
+          title ?? proxy.name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyle.subheadline.of(context),
@@ -127,6 +141,7 @@ class ProxyCard extends ConsumerWidget {
           label: appLocalizations.addToLocalProxies,
           onPressed: () => _handleAddToLocalProxies(ref),
         ),
+      ...extraMenuItems,
     ];
   }
 
@@ -135,11 +150,23 @@ class ProxyCard extends ConsumerWidget {
     final measure = globalState.measure;
     final isLoose = type == ProxyCardType.loose;
     final isOneline = type == ProxyCardType.oneline;
-    final delayText = _DelayText(
-      proxy: proxy,
-      testUrl: testUrl,
-      alignment: isLoose ? Alignment.centerLeft : Alignment.centerRight,
-    );
+    final failure = this.failure;
+    final Widget delayText = failure != null
+        ? Text(
+            failure,
+            maxLines: 1,
+            style: AppTextStyle.caption2
+                .of(context, emphasized: true)
+                .copyWith(
+                  overflow: TextOverflow.ellipsis,
+                  color: context.colorScheme.error,
+                ),
+          )
+        : _DelayText(
+            proxy: proxy,
+            testUrl: testUrl,
+            alignment: isLoose ? Alignment.centerLeft : Alignment.centerRight,
+          );
     final proxyNameText = _buildProxyNameText(context);
     final typeStyle = AppTextStyle.footnote
         .of(context)
@@ -153,7 +180,7 @@ class ProxyCard extends ConsumerWidget {
             children: [
               SizedBox(
                 height: measure.textHeight(AppTextStyle.footnote),
-                child: _ProxyDesc(proxy: proxy, style: typeStyle),
+                child: detail ?? _ProxyDesc(proxy: proxy, style: typeStyle),
               ),
               const SizedBox(height: 6),
               delayText,
@@ -167,9 +194,10 @@ class ProxyCard extends ConsumerWidget {
               children: [
                 Flexible(
                   flex: 1,
-                  child: _ProxyTypeText(proxy: proxy, style: typeStyle),
+                  child:
+                      detail ?? _ProxyTypeText(proxy: proxy, style: typeStyle),
                 ),
-                delayText,
+                if (failure != null) Flexible(child: delayText) else delayText,
               ],
             ),
           );

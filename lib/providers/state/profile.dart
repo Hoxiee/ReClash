@@ -122,6 +122,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
         profileType != ProfileType.custom && extendType == ExtendType.standard
         ? profile?.matchTarget
         : null,
+    addedRulesOnly: addedRules.isNotEmpty && profile?.addedRulesOnly == true,
   );
 }
 

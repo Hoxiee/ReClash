@@ -124,6 +124,7 @@ class BackupAction extends _$BackupAction {
           clashProviders: data.clashProviders,
           customProxies: data.customProxies,
           proxyDialers: data.proxyDialers,
+          proxyChains: data.proxyChains,
           isOverride: isOverride,
         );
         if (config == null) return;

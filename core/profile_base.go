@@ -98,7 +98,7 @@ func isMatchRule(rule string) bool {
 }
 
 func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, error) {
-	raw, err := loadRawConfigWithBase(base, configPath)
+	raw, err := loadRawConfigWithBase(base, configPath, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +109,42 @@ func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, err
 	return withPlatformLimits(cfg), nil
 }
 
-func loadRawConfigWithBase(base *SetupBase, configPath string) (*config.RawConfig, error) {
+func loadRawConfigWithBase(base *SetupBase, configPath string, prepare func(root *yaml.Node)) (*config.RawConfig, error) {
 	document, err := mergeProfileBase(base)
 	if err != nil {
 		return nil, err
 	}
+	if prepare != nil {
+		prepare(document.Content[0])
+	}
+	return decodeAndWriteConfig(document, configPath)
+}
+
+func loadRawConfigPrepared(configPath string, prepare func(root *yaml.Node)) (*config.RawConfig, error) {
+	root, err := readConfigMapping(configPath)
+	if err != nil {
+		return nil, err
+	}
+	prepare(root)
+	return decodeAndWriteConfig(&yaml.Node{Kind: yaml.DocumentNode, Content: []*yaml.Node{root}}, configPath)
+}
+
+func readConfigMapping(path string) (*yaml.Node, error) {
+	buf, err := readCoreFile(path)
+	if err != nil {
+		return nil, err
+	}
+	if buf, err = age.DecryptBytes(buf); err != nil {
+		return nil, fmt.Errorf("decrypt config error: %w", err)
+	}
+	var document yaml.Node
+	if err := yaml.Unmarshal(buf, &document); err != nil {
+		return nil, err
+	}
+	return documentMapping(&document)
+}
+
+func decodeAndWriteConfig(document *yaml.Node, configPath string) (*config.RawConfig, error) {
 	raw := config.DefaultRawConfig()
 	if err := document.Decode(raw); err != nil {
 		return nil, err
@@ -234,7 +265,7 @@ func appendRules(added, profile *yaml.Node) (*yaml.Node, error) {
 	if added == nil || isNull(added) || (added.Kind == yaml.SequenceNode && len(added.Content) == 0) {
 		return profile, nil
 	}
-	if isNull(profile) {
+	if isNull(profile) || endsWithMatch(added) {
 		return added, nil
 	}
 	if added.Kind != yaml.SequenceNode || profile.Kind != yaml.SequenceNode {
@@ -243,6 +274,15 @@ func appendRules(added, profile *yaml.Node) (*yaml.Node, error) {
 	content := make([]*yaml.Node, 0, len(added.Content)+len(profile.Content))
 	content = append(append(content, added.Content...), profile.Content...)
 	return &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq", Content: content}, nil
+}
+
+// Nothing after a MATCH is reachable, so the profile's rules are not parsed.
+func endsWithMatch(rules *yaml.Node) bool {
+	if rules.Kind != yaml.SequenceNode || len(rules.Content) == 0 {
+		return false
+	}
+	last := resolveAlias(rules.Content[len(rules.Content)-1])
+	return last.Kind == yaml.ScalarNode && isMatchRule(last.Value)
 }
 
 func resolveAlias(node *yaml.Node) *yaml.Node {

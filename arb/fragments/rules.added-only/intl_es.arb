@@ -1,0 +1,4 @@
+{
+  "unmatchedTraffic": "Tráfico sin coincidencia",
+  "unmatchedTrafficDirectDesc": "Solo el tráfico que coincide con las reglas añadidas pasa por un proxy; las reglas del perfil se omiten"
+}

@@ -22,6 +22,8 @@ enum CoreMethod {
   getProfileBase,
   getProfileOutbounds,
   getProxyDefinition,
+  getChainReport,
+  inspectChain,
   buildProfile,
   dumpRuleSet,
   compileRuleSet,

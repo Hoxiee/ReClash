@@ -52,6 +52,7 @@ enum PowerFaceState {
   brokenClock,
   brokenPortal,
   broken,
+  brokenChain,
   waitingNetwork,
   direct,
   grace,
@@ -132,6 +133,7 @@ final class PowerInputs {
     this.attention,
     this.links = const AccountLinks(),
     this.direct = false,
+    this.brokenChain = false,
   });
 
   final PowerLink link;
@@ -147,6 +149,7 @@ final class PowerInputs {
 
   /// The outbound mode sends everything around the tunnel.
   final bool direct;
+  final bool brokenChain;
 
   PowerInputs withLink(PowerLink link) => PowerInputs(
     link: link,
@@ -158,6 +161,7 @@ final class PowerInputs {
     attention: attention,
     links: links,
     direct: direct,
+    brokenChain: brokenChain,
   );
 }
 
@@ -468,6 +472,15 @@ PowerFace _running(PowerInputs inputs) {
       PowerFaceState.waitingNetwork,
       PowerTone.quiet,
       cause: FailureCause.noNetwork,
+    );
+  }
+  if (inputs.brokenChain &&
+      !inputs.direct &&
+      health.phase != ConnectionPhase.connecting) {
+    return face(
+      PowerFaceState.brokenChain,
+      PowerTone.failure,
+      fix: PowerAction.switchServer,
     );
   }
   switch (health.phase) {

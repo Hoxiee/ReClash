@@ -23,6 +23,7 @@ part 'groups.dart';
 part 'icons.dart';
 part 'ip_qualities.dart';
 part 'profiles.dart';
+part 'proxy_chains.dart';
 part 'rules.dart';
 part 'scripts.dart';
 part 'traffic_usage.dart';
@@ -41,6 +42,7 @@ part 'traffic_usage.dart';
     ProxyDialers,
     IpQualities,
     TrafficUsage,
+    ProxyChains,
   ],
   daos: [
     ProfilesDao,
@@ -54,13 +56,14 @@ part 'traffic_usage.dart';
     ProxyDialersDao,
     IpQualitiesDao,
     TrafficUsageDao,
+    ProxyChainsDao,
   ],
 )
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 25;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -146,6 +149,12 @@ class Database extends _$Database {
         }
         if (from < 23) {
           await _createTableIfMissing(m, trafficUsage);
+        }
+        if (from < 24) {
+          await _createTableIfMissing(m, proxyChains);
+        }
+        if (from < 25) {
+          await _addColumnIfMissing(m, profiles, profiles.addedRulesOnly);
         }
       }),
       beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
@@ -443,6 +452,7 @@ class Database extends _$Database {
     List<ClashProvider> clashProviders = const [],
     List<CustomProxy> customProxies = const [],
     List<ProxyDialer> proxyDialers = const [],
+    List<ProxyChain> proxyChains = const [],
     bool isOverride = false,
   }) async {
     if (profiles.isEmpty &&
@@ -452,7 +462,8 @@ class Database extends _$Database {
         proxyGroups.isEmpty &&
         clashProviders.isEmpty &&
         customProxies.isEmpty &&
-        proxyDialers.isEmpty) {
+        proxyDialers.isEmpty &&
+        proxyChains.isEmpty) {
       return;
     }
     await transaction(() async {
@@ -468,6 +479,7 @@ class Database extends _$Database {
           clashProvidersDao.setAllWithBatch(b, clashProviders);
           // Rewriting profiles or custom proxies cascades into these.
           proxyDialersDao.setAllWithBatch(b, proxyDialers);
+          proxyChainsDao.setAllWithBatch(b, proxyChains);
           return;
         }
         profilesDao.putAllWithBatch(
@@ -480,6 +492,7 @@ class Database extends _$Database {
         customProxiesDao.putAllWithBatch(b, customProxies);
         clashProvidersDao.putAllWithBatch(b, clashProviders);
         proxyDialersDao.putAllWithBatch(b, proxyDialers);
+        proxyChainsDao.putAllWithBatch(b, proxyChains);
       });
       await _purgeOrphans();
     });
@@ -507,6 +520,7 @@ class Database extends _$Database {
           t.profileId.isNotInQuery(profileIds) |
           t.proxyId.isNotInQuery(customProxyIds),
     );
+    await proxyChains.remove((t) => t.profileId.isNotInQuery(profileIds));
   }
 }
 

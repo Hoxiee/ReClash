@@ -181,6 +181,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           SliverToBoxAdapter(child: _MatchTargetItem(_profileId)),
+          SliverToBoxAdapter(child: _UnmatchedTrafficItem(_profileId)),
           SliverToBoxAdapter(
             child: MoreActionButton(
               label: appLocalizations.controlGlobalAddedRules,
@@ -278,6 +279,69 @@ class _MatchTargetItem extends ConsumerWidget {
                   ? context.colorScheme.error
                   : context.colorScheme.tertiary,
             ),
+      ),
+      onPressed: () {
+        _handleSelect(context, ref);
+      },
+    );
+  }
+}
+
+class _UnmatchedTrafficItem extends ConsumerWidget {
+  final int profileId;
+
+  const _UnmatchedTrafficItem(this.profileId);
+
+  static String _label(BuildContext context, bool addedRulesOnly) =>
+      addedRulesOnly
+      ? RuleTarget.DIRECT.value
+      : context.appLocalizations.followProfile;
+
+  Future<void> _handleSelect(BuildContext context, WidgetRef ref) async {
+    final res = await showSheet<bool>(
+      context: context,
+      builder: (context) => SelectionSheet<bool>(
+        title: context.appLocalizations.unmatchedTraffic,
+        sections: [
+          SelectionSection(
+            items: const [false, true],
+            subtitleBuilder: (context, item) => item
+                ? context.appLocalizations.unmatchedTrafficDirectDesc
+                : null,
+          ),
+        ],
+        labelBuilder: (item) => _label(context, item),
+        selectedOf: (ref) => ref.watch(
+          profileProvider(
+            profileId,
+          ).select((state) => state?.addedRulesOnly ?? false),
+        ),
+        onSelected: (item) => Navigator.of(context).pop(item),
+      ),
+    );
+    if (res == null) {
+      return;
+    }
+    ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
+      return state.copyWith(addedRulesOnly: res);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final addedRulesOnly = ref.watch(
+      profileProvider(
+        profileId,
+      ).select((state) => state?.addedRulesOnly ?? false),
+    );
+    return MoreActionButton(
+      label: context.appLocalizations.unmatchedTraffic,
+      trailing: Text(
+        _label(context, addedRulesOnly),
+        style: AppTextStyle.subheadline
+            .of(context)
+            .toJetBrainsMono
+            .copyWith(color: context.colorScheme.tertiary),
       ),
       onPressed: () {
         _handleSelect(context, ref);

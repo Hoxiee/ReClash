@@ -282,7 +282,12 @@ void main() {
     await pumpTabView(tester);
     await tester.pumpAndSettle();
     final tabs = tester.getRect(tabOf('B'));
-    final grid = tester.getRect(find.byType(GridView));
+    final grid = tester.getRect(
+      find.descendant(
+        of: find.byType(ProxyGroupView),
+        matching: find.byType(CustomScrollView),
+      ),
+    );
 
     expect(grid.top, tabs.bottom + 16);
     expect(tester.getRect(find.byType(ProxyCard).first).top, grid.top);
