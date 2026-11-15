@@ -151,7 +151,7 @@ In the app:
 | Old manifest values gone | The new valid copy lacks the section, or the response lacks `reclash-config`. Both withdraw the values. |
 | `Unsupported provider field` for a `reclash-*` header | Only `reclash-config` is read. Move the value into the manifest. |
 | Reminders stopped | Usage field stale, `Subscription-Userinfo` missing, `expire=0` or `total=0`. |
-| Update interval ignored | "Use provider update interval" is off in the profile editor (default). |
+| Update interval ignored | "Use provider update interval" is off in the profile editor. It is on by default; a saved user choice is preserved. |
 | Interval rejected | Below 5 or above 43200 minutes after conversion from hours. |
 | Setting no longer follows the provider | The user changed it. "Return to provider" restores it. |
 | Fallback hosts not tried | Subscription is `http`, the hosts are not yet in a stored manifest, or the failure was `401`, `403` or a device limit. |

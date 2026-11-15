@@ -6,7 +6,7 @@ import '../transport/header_policy.dart';
 class SubscriptionPreferences {
   const SubscriptionPreferences({
     this.headers = const {},
-    this.intervalOverride = true,
+    this.intervalOverride = false,
     this.trustedOrigins = const [],
     this.client = const SubscriptionClientSettings(),
   });
@@ -82,7 +82,7 @@ class SubscriptionPreferences {
     }
     return SubscriptionPreferences(
       headers: headers,
-      intervalOverride: json['intervalOverride'] as bool? ?? true,
+      intervalOverride: json['intervalOverride'] as bool? ?? false,
       trustedOrigins: trustedOrigins,
       client: SubscriptionClientSettings.safeFromJson(json['client']),
     );

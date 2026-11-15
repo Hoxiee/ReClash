@@ -65,6 +65,44 @@ void main() {
       );
     });
 
+    test('new URL profiles follow the provider update interval by default', () {
+      final profile = Profile.normal(url: 'https://example.test/sub');
+      expect(profile.subscriptionPreferences.intervalOverride, isFalse);
+    });
+
+    test('missing interval preferences follow the provider by default', () {
+      for (final json in [
+        null,
+        <String, Object?>{},
+        {'intervalOverride': null},
+      ]) {
+        expect(
+          SubscriptionPreferences.safeFromJson(json).intervalOverride,
+          isFalse,
+        );
+      }
+    });
+
+    test('stored provider interval choices survive a JSON round trip', () {
+      for (final intervalOverride in [true, false]) {
+        final profile = Profile.normal(url: 'https://example.test/sub')
+            .copyWith(
+              subscriptionPreferences: SubscriptionPreferences(
+                intervalOverride: intervalOverride,
+              ),
+            );
+        final restored = Profile.fromJson(
+          Map<String, Object?>.from(
+            jsonDecode(jsonEncode(profile.toJson())) as Map,
+          ),
+        );
+        expect(
+          restored.subscriptionPreferences.intervalOverride,
+          intervalOverride,
+        );
+      }
+    });
+
     test(
       'new URL profiles select Auto while old stored rows default native',
       () {
@@ -92,7 +130,7 @@ void main() {
           restored.subscriptionPreferences.client.preset,
           SubscriptionClientPreset.reclash,
         );
-        expect(restored.subscriptionPreferences.intervalOverride, isTrue);
+        expect(restored.subscriptionPreferences.intervalOverride, isFalse);
       },
     );
 

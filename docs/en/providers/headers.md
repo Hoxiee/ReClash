@@ -51,7 +51,7 @@ A name the user set is never replaced. `profile-title` names the account, not th
 
 ## Update interval
 
-`profile-update-interval` sets the update interval in hours. After conversion to minutes it must be 5–43200. It applies only while "Use provider update interval" is on in the profile editor, which is off by default. No manifest field sets it.
+`profile-update-interval` sets the update interval in hours. After conversion to minutes it must be 5–43200. It applies only while "Use provider update interval" is on in the profile editor, which is on by default. A saved user choice is preserved. No manifest field sets it.
 
 ## Aliases
 

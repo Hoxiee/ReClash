@@ -305,26 +305,34 @@ void main() {
     expect(saved.realLabel, profile.realLabel);
   });
 
-  test('provider interval only changes when the user permits the hint', () async {
-    const body =
-        'proxies:\n  - name: node\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n';
-    final profile = Profile.normal(url: 'https://subs.example.test/profile')
-        .copyWith(
-          autoUpdateDuration: const Duration(minutes: 17),
-          subscriptionPreferences: const SubscriptionPreferences(
-            intervalOverride: false,
-          ),
-        );
-    final updated = await profile.update(
-      defaultUserAgent: 'ReClash/test',
-      transport: _SubscriptionTransport(body, {
-        'profile-update-interval': ['31'],
-      }),
-      validate: (_, _) async => '',
-    );
+  for (final intervalOverride in [null, false, true]) {
+    test('provider interval honors an override of $intervalOverride', () async {
+      const body =
+          'proxies:\n  - name: node\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n';
+      final profile = Profile.normal(url: 'https://subs.example.test/profile')
+          .copyWith(
+            autoUpdateDuration: const Duration(minutes: 17),
+            subscriptionPreferences: intervalOverride == null
+                ? const SubscriptionPreferences()
+                : SubscriptionPreferences(intervalOverride: intervalOverride),
+          );
+      final updated = await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: _SubscriptionTransport(body, {
+          'profile-update-interval': ['31'],
+        }),
+        validate: (_, _) async => '',
+      );
 
-    expect(updated.autoUpdateDuration, const Duration(hours: 31));
-  });
+      expect(
+        updated.autoUpdateDuration,
+        intervalOverride == true
+            ? profile.autoUpdateDuration
+            : const Duration(hours: 31),
+      );
+      expect(updated.subscriptionPreferences, profile.subscriptionPreferences);
+    });
+  }
 
   test('lossy conversion requires explicit approval before writing', () async {
     const source =

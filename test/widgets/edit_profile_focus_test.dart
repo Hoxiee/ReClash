@@ -5,6 +5,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:reclash/views/profiles/edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -190,6 +191,84 @@ void main() {
     },
   );
 
+  testWidgets(
+    'provider interval is enabled by default with the shared switch',
+    (tester) async {
+      await pumpEditProfile(tester);
+      final providerSwitch = find.descendant(
+        of: find.byKey(const ValueKey(#providerInterval)),
+        matching: find.byType(CommonSwitch),
+      );
+      expect(tester.widget<CommonSwitch>(providerSwitch).value, isTrue);
+      expect(find.byType(Switch), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  for (final intervalOverride in [true, false]) {
+    for (final tapRow in [true, false]) {
+      testWidgets(
+        'provider interval ${tapRow ? 'row' : 'switch'} toggles and saves '
+        'an override of $intervalOverride without changing auto update',
+        (tester) async {
+          final profile = _urlProfile().copyWith(
+            subscriptionPreferences: SubscriptionPreferences(
+              intervalOverride: intervalOverride,
+            ),
+          );
+          await pumpEditProfile(
+            tester,
+            profile: profile,
+            overrides: [
+              profilesProvider.overrideWith(() => TestProfiles([profile])),
+            ],
+          );
+          final row = find.byKey(const ValueKey(#providerInterval));
+          final providerSwitch = find.descendant(
+            of: row,
+            matching: find.byType(CommonSwitch),
+          );
+          final autoUpdateSwitch = find.descendant(
+            of: find.byKey(const ValueKey(#autoUpdate)),
+            matching: find.byType(CommonSwitch),
+          );
+          expect(
+            tester.widget<CommonSwitch>(providerSwitch).value,
+            !intervalOverride,
+          );
+          await tester.ensureVisible(providerSwitch);
+          await tester.tap(
+            tapRow
+                ? find.descendant(
+                    of: row,
+                    matching: find.text(
+                      currentAppLocalizations.subscriptionUseProviderInterval,
+                    ),
+                  )
+                : providerSwitch,
+          );
+          await tester.pump();
+          expect(
+            tester.widget<CommonSwitch>(providerSwitch).value,
+            intervalOverride,
+          );
+          expect(tester.widget<CommonSwitch>(autoUpdateSwitch).value, isTrue);
+          await tester.tap(find.byTooltip('Save'));
+          await tester.pump();
+
+          final saved = globalState.container.read(profilesProvider).single;
+          expect(
+            saved.subscriptionPreferences.intervalOverride,
+            !intervalOverride,
+          );
+          expect(saved.autoUpdate, profile.autoUpdate);
+          expect(saved.autoUpdateDuration, profile.autoUpdateDuration);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   testWidgets('saving with auto update off ignores an emptied interval', (
     tester,
   ) async {
@@ -208,7 +287,12 @@ void main() {
     );
 
     await tester.enterText(interval, '');
-    await tester.tap(find.byType(CommonSwitch));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey(#autoUpdate)),
+        matching: find.byType(CommonSwitch),
+      ),
+    );
     await tester.pump();
     await tester.tap(find.byTooltip('Save'));
     await tester.pump();

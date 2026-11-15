@@ -998,7 +998,7 @@ void main() {
     expect(_columnsOf(raw, 'profiles'), contains('subscription_snapshot'));
     expect(_columnsOf(raw, 'clash_providers'), contains('request_headers'));
     expect(profile.subscriptionPreferences.client.preset.name, 'reclash');
-    expect(profile.subscriptionPreferences.intervalOverride, isTrue);
+    expect(profile.subscriptionPreferences.intervalOverride, isFalse);
     expect(profile.subscriptionSnapshot, isNull);
     expect(_hasTable(raw, 'ip_qualities'), isTrue);
     expect(await database.ipQualities.count.getSingle(), 0);

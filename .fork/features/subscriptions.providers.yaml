@@ -10,6 +10,7 @@ must:
   safe-import: Unknown and encrypted bytes pass through; conversions report every unsupported section and skipped node.
   staged-update: Invalid, empty, stale or superseded downloads never replace the saved profile file.
   portable-secrets: Device identity and consent stay outside portable profile backups.
+  provider-interval: Provider update interval hints apply by default; saved user choices remain unchanged, and a manual override keeps the local interval.
   provider-settings: A subscription's app settings apply by default and carry a provider tag; a user change takes the setting from the provider until it is handed back, and withdrawing a manifest section or key restores the user's value; the settings map touches only listed keys. Only application settings offer a confirmed bulk return of provider-managed app settings, app-wide DNS/TUN/general overrides and released provider apps, including changes made before the next sync; local values and manual app lists remain stored. Backgrounds reuse cached PNG or original SVG files; SVGs are never rasterized for storage or display.
   provider-apps: Recommended provider app lists add to the user's list in the same access-control mode; modes are never mixed and an app the user unticks stays released. Versioned required exclusions override releases, whitelist inclusions and disabled access control, remain visibly locked, disclose direct-IP use and require Android VPN enforcement; desktop ignores them.
   provider-policy: The guarantee is native mihomo config (a GLOBAL group and tun.exclude-package); the manifest policy values global=listed and apps=required make ReClash enforce it, and a missing manifest leaves only the native part. GLOBAL permissions follow the GLOBAL group's resolved members, filter included, with the Core as the only authority; they derive from the group's inline nodes and bind to original route definitions independently of scripts and controller reloads; actual TCP and UDP leaf dials and RCX candidates honor them. Stale native exclusions and unknown app identities fail closed, while desktop ignores required apps, never falling back to DIRECT.
@@ -23,8 +24,8 @@ watch: [provider-config.schema.json, 'core/provider_policy*.go', lib/subscriptio
 checks:
   subscription-foundation: [single-protocol, opt-in-identity, transport-safety, route-fallback, safe-import, provider-support]
   subscription-standard: [single-protocol]
-  profiles: [staged-update, portable-secrets]
-  provider-controls: [provider-settings, provider-apps, provider-hosts, provider-restrictions, provider-messages, provider-cards, provider-config, provider-policy]
+  profiles: [staged-update, portable-secrets, provider-interval]
+  provider-controls: [provider-settings, provider-apps, provider-hosts, provider-restrictions, provider-messages, provider-cards, provider-config, provider-policy, provider-interval]
   go-provider-policy: [provider-policy]
   android-notifications: [provider-apps]
 drop: Provider-triggered reports and telemetry are not implemented.

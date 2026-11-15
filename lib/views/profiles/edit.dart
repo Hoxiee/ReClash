@@ -746,7 +746,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                 _intervalOverride = !_intervalOverride;
                 _invalidateCompatibility();
               }),
-              trailing: Switch(
+              trailing: CommonSwitch(
                 value: !_intervalOverride,
                 onChanged: (value) => setState(() {
                   _intervalOverride = !value;

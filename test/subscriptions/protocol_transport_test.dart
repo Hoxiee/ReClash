@@ -400,7 +400,7 @@ void main() {
       'keeps custom headers and client settings but defaults old rows safely',
       () {
         final old = SubscriptionPreferences.safeFromJson(null);
-        expect(old.intervalOverride, isTrue);
+        expect(old.intervalOverride, isFalse);
         expect(old.headers, isEmpty);
         expect(old.client.preset.name, 'reclash');
 
