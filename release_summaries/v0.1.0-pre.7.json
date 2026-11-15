@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.7",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Profiles wallet and steadier diagnostics",
+      "spotlight": {
+        "title": "Profiles wallet",
+        "description": "Profiles show as a wallet with the provider logo and brand tint; the classic grid stays behind a toggle.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Provider background kept",
+          "description": "It survives a restart, and your own image only replaces it until you remove it.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Calmer diagnostics",
+          "description": "Permission checks no longer take the VPN slot, and the app that holds it is named.",
+          "kind": "shield",
+          "platforms": ["android"]
+        },
+        {
+          "title": "Smarter auto-heal",
+          "description": "The subscription is refreshed only for profile failures; timeouts reset connections right away.",
+          "kind": "shield"
+        },
+        {
+          "title": "Extension nodes",
+          "description": "Nodes wait for a restart or a free slot instead of failing the first attempt.",
+          "kind": "link"
+        },
+        {
+          "title": "Import and previews",
+          "description": "qWDTT links keep their node name; large logos and malformed text no longer break previews.",
+          "kind": "link"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Кошелёк профилей и более ровная диагностика",
+      "spotlight": {
+        "title": "Кошелёк профилей",
+        "description": "Профили показываются кошельком с логотипом провайдера и его цветом; прежняя сетка осталась за переключателем.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Фон провайдера сохраняется",
+          "description": "Он переживает перезапуск, а ваше изображение лишь заменяет его, пока вы его не уберёте.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Спокойнее диагностика",
+          "description": "Проверки разрешений больше не занимают слот VPN, а приложение, которое его держит, называется.",
+          "kind": "shield",
+          "platforms": ["android"]
+        },
+        {
+          "title": "Умнее автолечение",
+          "description": "Подписка обновляется только при сбоях профиля; таймауты сразу сбрасывают соединения.",
+          "kind": "shield"
+        },
+        {
+          "title": "Узлы расширений",
+          "description": "Узлы ждут перезапуска или свободного слота, а не падают с первой попытки.",
+          "kind": "link"
+        },
+        {
+          "title": "Импорт и превью",
+          "description": "Ссылки qWDTT сохраняют имя узла; большие логотипы и битый текст больше не ломают превью.",
+          "kind": "link"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
