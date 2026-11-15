@@ -202,10 +202,7 @@ void main() {
         ..supervisor.selectionChanged();
       expect(rig.health.phase, ConnectionPhase.connecting);
       rig.run(const Duration(seconds: 3));
-      expect(rig.applied, [
-        'profile.update',
-        ConnectionRemedy.resetConnections,
-      ]);
+      expect(rig.applied, [ConnectionRemedy.resetConnections]);
       expect(rig.health.phase, ConnectionPhase.broken);
     });
 
@@ -332,7 +329,7 @@ void main() {
     _test('recovering shows only once a plan runs past 800 ms', (rig) {
       rig
         ..remedyTime = const Duration(seconds: 1)
-        ..fail()
+        ..fail(FailureCause.authRejected)
         ..connect()
         ..run(const Duration(seconds: 3));
       expect(rig.health.phase, ConnectionPhase.broken);
@@ -346,7 +343,7 @@ void main() {
 
     _test('a quick step never shows recovering', (rig) {
       rig
-        ..fail()
+        ..fail(FailureCause.authRejected)
         ..onRemedy['profile.update'] = rig.pass
         ..connect()
         ..run(const Duration(seconds: 4));

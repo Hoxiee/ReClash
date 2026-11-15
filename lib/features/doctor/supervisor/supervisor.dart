@@ -49,6 +49,17 @@ const _ladder = {
 
 const _autoSteps = [HealStep.updateProfile, HealStep.resetConnections];
 
+/// Failures a stale profile explains: rotated credentials, a moved or removed
+/// server. A timeout or reset says nothing about the profile, so auto-heal
+/// leaves the subscription alone.
+const _staleProfileCauses = {
+  FailureCause.authRejected,
+  FailureCause.serverDns,
+  FailureCause.refused,
+  FailureCause.tlsHandshake,
+  FailureCause.profileInvalid,
+};
+
 const _repairSteps = [
   HealStep.updateProfile,
   HealStep.resetConnections,
@@ -464,7 +475,9 @@ class ConnectionSupervisor {
 
   /// Applies one rung and verifies; true when the check passed.
   Future<bool> _runStep(HealStep step, int plan, {required bool force}) async {
-    if (step == HealStep.updateProfile && !force && _profileIsFresh()) {
+    if (step == HealStep.updateProfile &&
+        !force &&
+        (_profileIsFresh() || !_staleProfileCauses.contains(_cause))) {
       return false;
     }
     _step = step;
