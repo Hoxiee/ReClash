@@ -306,11 +306,7 @@ double viewWidth(Ref ref) {
 ViewMode viewMode(Ref ref) {
   final layout = ref.watch(appSettingProvider).navigationLayout;
   final viewSize = ref.watch(viewSizeProvider);
-  return resolveViewMode(
-    viewSize,
-    layout,
-    tablet: system.isAndroid && !system.isTV && isTabletSize(viewSize),
-  );
+  return resolveViewMode(viewSize, layout);
 }
 
 @riverpod

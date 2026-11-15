@@ -21,30 +21,10 @@ void main() {
   test('the navigation layout overrides the view mode', () {
     const phone = Size(400, 800);
     const window = Size(1200, 800);
-    expect(
-      resolveViewMode(window, NavigationLayout.bar, tablet: false),
-      ViewMode.mobile,
-    );
-    expect(
-      resolveViewMode(phone, NavigationLayout.sidebar, tablet: false),
-      ViewMode.laptop,
-    );
-    expect(
-      resolveViewMode(window, NavigationLayout.sidebar, tablet: true),
-      ViewMode.desktop,
-    );
-    expect(
-      resolveViewMode(window, NavigationLayout.auto, tablet: false),
-      ViewMode.desktop,
-    );
-    expect(
-      resolveViewMode(window, NavigationLayout.auto, tablet: true),
-      ViewMode.mobile,
-    );
-  });
-
-  test('a tablet has a smallest side of at least 600', () {
-    expect(isTabletSize(Size(maxMobileWidth.toDouble(), 1000)), isTrue);
-    expect(isTabletSize(const Size(1000, 599)), isFalse);
+    expect(resolveViewMode(window, NavigationLayout.bar), ViewMode.mobile);
+    expect(resolveViewMode(phone, NavigationLayout.sidebar), ViewMode.laptop);
+    expect(resolveViewMode(window, NavigationLayout.sidebar), ViewMode.desktop);
+    expect(resolveViewMode(window, NavigationLayout.auto), ViewMode.desktop);
+    expect(resolveViewMode(phone, NavigationLayout.auto), ViewMode.mobile);
   });
 }

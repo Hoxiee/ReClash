@@ -49,22 +49,15 @@ int navigationGroupOf(PageLabel label) => switch (label) {
   PageLabel.tools => 3,
 };
 
-ViewMode resolveViewMode(
-  Size viewSize,
-  NavigationLayout layout, {
-  required bool tablet,
-}) {
+ViewMode resolveViewMode(Size viewSize, NavigationLayout layout) {
   final byWidth = getViewMode(viewSize.width);
   return switch (layout) {
     NavigationLayout.bar => ViewMode.mobile,
     NavigationLayout.sidebar =>
       byWidth == ViewMode.mobile ? ViewMode.laptop : byWidth,
-    NavigationLayout.auto => tablet ? ViewMode.mobile : byWidth,
+    NavigationLayout.auto => byWidth,
   };
 }
-
-/// Android's own tablet threshold, a smallest width of 600 dp.
-bool isTabletSize(Size viewSize) => viewSize.shortestSide >= maxMobileWidth;
 
 /// An expanded sidebar in the laptop range would leave the content narrower
 /// than the mobile layout one breakpoint below, so labels wait for desktop.
