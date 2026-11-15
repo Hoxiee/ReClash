@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 
+import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -37,6 +39,18 @@ Group _group(String name, int count) => Group(
 
 void main() {
   late ProviderContainer container;
+
+  // A file earlier in the same test bundle can leave a closed store behind,
+  // and a query against it never completes.
+  setUp(() {
+    final previous = db.database;
+    final memory = db.Database(NativeDatabase.memory());
+    db.database = memory;
+    addTearDown(() async {
+      db.database = previous;
+      await memory.close();
+    });
+  });
 
   Future<void> pumpList(
     WidgetTester tester, {

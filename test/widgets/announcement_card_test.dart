@@ -6,6 +6,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 
+import '../helpers/preferences.dart';
 import '../helpers/provider_presentation.dart';
 import '../helpers/test_app.dart';
 
@@ -38,6 +39,8 @@ Future<void> _pump(WidgetTester tester, ProviderContainer container) async {
 }
 
 void main() {
+  setUp(mockPreferences);
+
   testWidgets('desktop announcement expands and returns on close or scrim', (
     tester,
   ) async {
