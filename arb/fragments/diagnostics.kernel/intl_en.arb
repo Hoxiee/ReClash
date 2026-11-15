@@ -288,5 +288,14 @@
   "doctorProfileNoServersTitle": "The profile has no servers",
   "doctorProfileNoServersDetail": "The subscription loaded but contains no servers. Update it later or contact your provider.",
   "powerSmartButton": "Smart power button",
-  "powerSmartButtonDescription": "Smart power button shows Protected only after the connection is verified, repairs it, and stops the tunnel when the plan ends. When off, the button only starts and stops."
+  "powerSmartButtonDescription": "Smart power button shows Protected only after the connection is verified, repairs it, and stops the tunnel when the plan ends. When off, the button only starts and stops.",
+  "doctorVpnLostTitle": "Another app took the VPN",
+  "doctorVpnLostDetail": "Android stopped the tunnel because another app with VPN access claimed it, often a second copy of this app or another client merely checking its permission. Apps that can do this: {apps}. Close them or remove their VPN access, then connect again.",
+  "@doctorVpnLostDetail": {
+    "placeholders": {
+      "apps": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -232,5 +232,6 @@
   "powerNoticeStoppedExpired": "VPN öçdi: abunalyk gutardy. Adaty internet işleýär.",
   "powerNoticeStoppedExhausted": "VPN öçdi: trafik gutardy. Adaty internet işleýär.",
   "powerNoticeResumed": "Abunalyk uzaldyldy — birikdirilýär",
-  "powerFixSwitchServer": "Başga serwer"
+  "powerFixSwitchServer": "Başga serwer",
+  "powerTitleVpnLost": "VPN-i başga programma aldy"
 }

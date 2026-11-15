@@ -21,6 +21,7 @@ String findingTitle(AppLocalizations l, Finding finding) =>
       'doctorCauseTrafficExhausted' => l.doctorCauseTrafficExhausted,
       'doctorDirectModeTitle' => l.doctorDirectModeTitle,
       'doctorVpnRevokedTitle' => l.doctorVpnRevokedTitle,
+      'doctorVpnLostTitle' => l.doctorVpnLostTitle,
       'doctorCauseTunnelTaken' => l.doctorCauseTunnelTaken,
       'doctorAlwaysOnOtherTitle' => l.doctorAlwaysOnOtherTitle,
       'doctorAlwaysOnOffTitle' => l.doctorAlwaysOnOffTitle,
@@ -59,6 +60,9 @@ String findingDetail(AppLocalizations l, Finding finding) {
     'doctorSubscriptionDetail' => l.doctorSubscriptionDetail,
     'doctorDirectModeDetail' => l.doctorDirectModeDetail,
     'doctorVpnRevokedDetail' => l.doctorVpnRevokedDetail,
+    'doctorVpnLostDetail' => l.doctorVpnLostDetail(
+      args['apps'] as String? ?? '',
+    ),
     'doctorOtherVpnDetail' => l.doctorOtherVpnDetail,
     'doctorAlwaysOnOtherDetail' => l.doctorAlwaysOnOtherDetail,
     'doctorAlwaysOnOffDetail' => l.doctorAlwaysOnOffDetail,

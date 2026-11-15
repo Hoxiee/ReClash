@@ -115,5 +115,7 @@
   "doctorProfileNoServersTitle": "El perfil no tiene servidores",
   "doctorProfileNoServersDetail": "La suscripción se cargó, pero no contiene servidores. Actualízala más tarde o contacta con tu proveedor.",
   "powerSmartButton": "Botón de encendido inteligente",
-  "powerSmartButtonDescription": "El botón de encendido inteligente muestra Protegido solo tras verificar la conexión, la repara y detiene el túnel cuando termina el plan. Desactivado, solo inicia y detiene."
+  "powerSmartButtonDescription": "El botón de encendido inteligente muestra Protegido solo tras verificar la conexión, la repara y detiene el túnel cuando termina el plan. Desactivado, solo inicia y detiene.",
+  "doctorVpnLostTitle": "Otra app se quedó con la VPN",
+  "doctorVpnLostDetail": "Android detuvo el túnel porque otra app con acceso a VPN lo reclamó; a menudo es una segunda copia de esta app u otro cliente que solo comprueba su permiso. Apps que pueden hacerlo: {apps}. Ciérralas o quítales el acceso a VPN y vuelve a conectar."
 }

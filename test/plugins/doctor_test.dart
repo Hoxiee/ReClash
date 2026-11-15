@@ -22,4 +22,38 @@ void main() {
       expect(parse('com.reclash').alwaysOnVpnApp, 'com.reclash');
     });
   });
+
+  group('DeviceDoctorState.fromMap vpnLostTo', () {
+    DeviceDoctorState parse(Object? lost) => DeviceDoctorState.fromMap({
+      'vpnPermission': 'granted',
+      'vpnLostTo': lost,
+    });
+
+    test('keeps the apps in order', () {
+      expect(parse(['A', 'B']).vpnLostTo, ['A', 'B']);
+    });
+
+    test('is empty when the key is missing', () {
+      final state = DeviceDoctorState.fromMap({'vpnPermission': 'granted'});
+
+      expect(state.vpnLostTo, isEmpty);
+    });
+
+    test('drops entries that are not strings', () {
+      expect(parse(['A', 1, null, 'B']).vpnLostTo, ['A', 'B']);
+    });
+  });
+
+  group('DeviceDoctorState equality with vpnLostTo', () {
+    DeviceDoctorState withLost(List<String> apps) => DeviceDoctorState(
+      vpnPermission: VpnPermission.granted,
+      vpnLostTo: apps,
+    );
+
+    test('matches the same apps and differs when they change', () {
+      expect(withLost(['A']), withLost(['A']));
+      expect(withLost(['A']), isNot(withLost(['B'])));
+      expect(withLost(['A']), isNot(withLost(const [])));
+    });
+  });
 }

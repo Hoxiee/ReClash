@@ -115,5 +115,7 @@
   "doctorProfileNoServersTitle": "Profilda serverlar yoʻq",
   "doctorProfileNoServersDetail": "Obuna yuklandi, lekin unda serverlar yoʻq. Keyinroq yangilang yoki provayderga murojaat qiling.",
   "powerSmartButton": "Aqlli yoqish tugmasi",
-  "powerSmartButtonDescription": "Aqlli yoqish tugmasi «Himoyalangan» holatini faqat ulanish tekshirilgandan keyin ko‘rsatadi, ulanishni tuzatadi va tarif tugaganda tunnelni to‘xtatadi. O‘chirilsa, faqat yoqadi va o‘chiradi."
+  "powerSmartButtonDescription": "Aqlli yoqish tugmasi «Himoyalangan» holatini faqat ulanish tekshirilgandan keyin ko‘rsatadi, ulanishni tuzatadi va tarif tugaganda tunnelni to‘xtatadi. O‘chirilsa, faqat yoqadi va o‘chiradi.",
+  "doctorVpnLostTitle": "VPN’ni boshqa ilova olib qo‘ydi",
+  "doctorVpnLostDetail": "VPN ruxsati bor boshqa ilova tunnelni so‘ragani uchun Android uni to‘xtatdi; ko‘pincha bu shu ilovaning ikkinchi nusxasi yoki ruxsatini shunchaki tekshirayotgan boshqa mijoz bo‘ladi. Buni qila oladigan ilovalar: {apps}. Ularni yoping yoki VPN ruxsatini olib qo‘ying, so‘ng qayta ulaning."
 }

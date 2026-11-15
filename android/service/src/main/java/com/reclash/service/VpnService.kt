@@ -11,6 +11,7 @@ import androidx.core.content.getSystemService
 import com.reclash.common.AccessControlMode
 import com.reclash.common.GlobalState
 import com.reclash.common.R as CommonR
+import com.reclash.common.VpnTakeover
 import com.reclash.core.Core
 import com.reclash.service.models.CIDR
 import com.reclash.service.models.VpnOptions
@@ -120,6 +121,7 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     override fun onRevoke() {
+        VpnTakeover.recordRevoke()
         stop()
         notifyVpnRevoked()
     }
@@ -151,6 +153,7 @@ class VpnService : SystemVpnService(), ManagedService {
             establish()?.detachFd()
                 ?: error("VPN establishment was rejected by the system")
         }
+        VpnTakeover.clear()
         synchronized(tunLock) {
             tunRunning = true
             try {

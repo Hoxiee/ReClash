@@ -38,6 +38,7 @@ enum PowerFaceState {
   revoked,
   noServers,
   vpnTaken,
+  vpnLost,
   vpnDenied,
   portal,
   offline,
@@ -264,6 +265,7 @@ const noServersFinding = 'profile.noServers';
 const _subscriptionFinding = 'profile.subscription';
 const _vpnPermissionFinding = 'tunnel.vpnPermission';
 const _alwaysOnFinding = 'tunnel.alwaysOn';
+const _vpnLostFinding = 'tunnel.vpnLost';
 const _portalFinding = 'network.captivePortal';
 const _clockFinding = 'device.clockSkew';
 
@@ -374,6 +376,14 @@ PowerFace _stopped(PowerInputs inputs) {
       tap: PowerAction.causeSheet,
       fix: PowerAction.openVpnSettings,
       cause: taken.cause,
+    );
+  }
+  if (_critical(findings, _vpnLostFinding) case final lost?) {
+    return face(
+      PowerFaceState.vpnLost,
+      PowerTone.problem,
+      fix: PowerAction.causeSheet,
+      cause: lost.cause,
     );
   }
   if (_critical(findings, _vpnPermissionFinding) case final denied?) {

@@ -16,6 +16,10 @@ void deviceSensor(Ref ref, FactSink sink) {
     sink
       ..put(Facts.vpnPermission, device.vpnPermission)
       ..put(Facts.otherVpn, device.otherVpn)
+      ..put(
+        Facts.vpnLostTo,
+        device.vpnLostTo.isEmpty ? null : device.vpnLostTo.join(', '),
+      )
       ..put(Facts.alwaysOnVpnApp, device.alwaysOnVpnApp)
       ..put(Facts.privateDns, device.privateDns)
       ..put(Facts.privateDnsHost, device.privateDnsHost)

@@ -136,7 +136,7 @@ PowerBadge? powerBadge(PowerFace face) {
     PowerFaceState.noServers ||
     PowerFaceState.broken ||
     PowerFaceState.brokenChain => AppGlyphs.error,
-    PowerFaceState.vpnTaken => AppGlyphs.vpn,
+    PowerFaceState.vpnTaken || PowerFaceState.vpnLost => AppGlyphs.vpn,
     PowerFaceState.vpnDenied => AppGlyphs.key,
     PowerFaceState.portal || PowerFaceState.brokenPortal => AppGlyphs.wifi,
     PowerFaceState.offline ||
@@ -179,6 +179,7 @@ String powerTitle(AppLocalizations l, PowerFace face) => switch (face.state) {
   PowerFaceState.revoked => l.powerTitleRevoked,
   PowerFaceState.noServers => l.powerTitleNoServers,
   PowerFaceState.vpnTaken => l.powerTitleVpnTaken,
+  PowerFaceState.vpnLost => l.powerTitleVpnLost,
   PowerFaceState.vpnDenied => l.powerTitleVpnDenied,
   PowerFaceState.portal || PowerFaceState.brokenPortal => l.powerTitlePortal,
   PowerFaceState.offline ||

@@ -231,6 +231,30 @@ void main() {
     });
   });
 
+  group('vpnLostRule', () {
+    test('stays silent until the system reports a lost tunnel', () {
+      expect(vpnLostRule(_snapshot()), isNull);
+    });
+
+    test('names the apps that may hold the slot', () {
+      final finding = vpnLostRule(
+        _snapshot().withFact(
+          Facts.vpnLostTo,
+          Fact('ReClash Dev, FlClash', at: _now),
+        ),
+      )!;
+
+      expect(finding.id, 'tunnel.vpnLost');
+      expect(finding.severity, CheckSeverity.critical);
+      expect(finding.cause, FailureCause.tunnelTaken);
+      expect(finding.evidence, ['device.vpnLostTo']);
+      expect(finding.titleKey, 'doctorVpnLostTitle');
+      expect(finding.detailKey, 'doctorVpnLostDetail');
+      expect(finding.args['apps'], 'ReClash Dev, FlClash');
+      expect(finding.remedyIds, ['device.openVpnSettings']);
+    });
+  });
+
   group('otherVpnRule', () {
     test('is critical while another VPN owns the tunnel', () {
       final snapshot = _snapshot().withFact(
@@ -254,6 +278,14 @@ void main() {
 
       expect(otherVpnRule(snapshot), isNull);
       expect(otherVpnRule(_snapshot()), isNull);
+    });
+
+    test('yields to the lost tunnel finding when it is present', () {
+      final snapshot = _snapshot()
+          .withFact(Facts.otherVpn, Fact(true, at: _now))
+          .withFact(Facts.vpnLostTo, Fact('FlClash', at: _now));
+
+      expect(otherVpnRule(snapshot), isNull);
     });
   });
 

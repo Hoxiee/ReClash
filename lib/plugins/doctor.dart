@@ -14,6 +14,7 @@ final class DeviceDoctorState {
   const DeviceDoctorState({
     required this.vpnPermission,
     this.otherVpn = false,
+    this.vpnLostTo = const [],
     this.alwaysOnVpnApp,
     this.privateDns,
     this.privateDnsHost,
@@ -26,6 +27,7 @@ final class DeviceDoctorState {
         map['vpnPermission'] as String? ?? VpnPermission.notAsked.name,
       ),
       otherVpn: map['otherVpn'] == true,
+      vpnLostTo: [...?(map['vpnLostTo'] as List?)?.whereType<String>()],
       alwaysOnVpnApp: switch (map['alwaysOnVpnApp']) {
         final String app when app == map['packageName'] => null,
         final String app => app,
@@ -47,6 +49,10 @@ final class DeviceDoctorState {
   /// A VPN network another app owns is up.
   final bool otherVpn;
 
+  /// Set after the system revoked the tunnel this app ran: the owner of the
+  /// VPN that is up now, else every other app that can run one.
+  final List<String> vpnLostTo;
+
   /// The always-on VPN package, empty when none is set and null when the
   /// system does not let the app read it or this very app holds it. Native
   /// reports its own package name, which differs between build flavors.
@@ -62,6 +68,7 @@ final class DeviceDoctorState {
       other is DeviceDoctorState &&
       other.vpnPermission == vpnPermission &&
       other.otherVpn == otherVpn &&
+      listEquals(other.vpnLostTo, vpnLostTo) &&
       other.alwaysOnVpnApp == alwaysOnVpnApp &&
       other.privateDns == privateDns &&
       other.privateDnsHost == privateDnsHost &&
@@ -71,6 +78,7 @@ final class DeviceDoctorState {
   int get hashCode => Object.hash(
     vpnPermission,
     otherVpn,
+    Object.hashAll(vpnLostTo),
     alwaysOnVpnApp,
     privateDns,
     privateDnsHost,

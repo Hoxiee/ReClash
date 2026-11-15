@@ -50,6 +50,15 @@ const _alwaysOn = Finding(
   cause: FailureCause.tunnelTaken,
 );
 
+const _vpnLost = Finding(
+  id: 'tunnel.vpnLost',
+  severity: CheckSeverity.critical,
+  evidence: [],
+  titleKey: '',
+  detailKey: '',
+  cause: FailureCause.tunnelTaken,
+);
+
 const _vpnPermission = Finding(
   id: 'tunnel.vpnPermission',
   severity: CheckSeverity.critical,
@@ -283,6 +292,20 @@ void main() {
       );
     });
 
+    test('a lost tunnel offers the cause sheet and taps start again', () {
+      final face = resolvePowerFace(_inputs(findings: const [_vpnLost]));
+
+      _expectFace(
+        face,
+        state: PowerFaceState.vpnLost,
+        link: PowerLink.off,
+        tone: PowerTone.problem,
+        tap: PowerAction.start,
+        fix: PowerAction.causeSheet,
+      );
+      expect(face.cause, FailureCause.tunnelTaken);
+    });
+
     test('a denied VPN permission asks to grant it', () {
       _expectFace(
         resolvePowerFace(_inputs(findings: const [_vpnPermission])),
@@ -352,6 +375,16 @@ void main() {
         'always-on beats the VPN permission',
         _inputs(findings: const [_vpnPermission, _alwaysOn]),
         PowerFaceState.vpnTaken,
+      ),
+      (
+        'always-on beats a lost tunnel',
+        _inputs(findings: const [_vpnLost, _alwaysOn]),
+        PowerFaceState.vpnTaken,
+      ),
+      (
+        'a lost tunnel beats the VPN permission',
+        _inputs(findings: const [_vpnPermission, _vpnLost]),
+        PowerFaceState.vpnLost,
       ),
       (
         'a captive portal beats offline',

@@ -232,5 +232,6 @@
   "powerNoticeStoppedExpired": "VPN oʻchdi: obuna tugadi. Oddiy internet ishlaydi.",
   "powerNoticeStoppedExhausted": "VPN oʻchdi: trafik tugadi. Oddiy internet ishlaydi.",
   "powerNoticeResumed": "Obuna yangilandi — ulanmoqda",
-  "powerFixSwitchServer": "Boshqa server"
+  "powerFixSwitchServer": "Boshqa server",
+  "powerTitleVpnLost": "VPN’ni boshqa ilova oldi"
 }

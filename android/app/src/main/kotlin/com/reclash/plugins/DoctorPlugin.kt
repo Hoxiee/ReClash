@@ -1,6 +1,7 @@
 package com.reclash.plugins
 
 import android.app.Activity
+import android.app.AppOpsManager
 import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -19,6 +20,7 @@ import android.os.Process
 import android.provider.Settings
 import com.reclash.common.Components
 import com.reclash.common.PendingCallback
+import com.reclash.common.VpnTakeover
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -248,12 +250,71 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
         prefs.edit().putBoolean(KEY_VPN_GRANTED, true).apply()
     }
 
+    // Never VpnService.prepare here: for an app the user once allowed, it silently moves the
+    // system VPN slot to the caller and revokes whichever tunnel holds it, so a passive read
+    // from a background build kills the running VPN of another app on every network change.
     private fun vpnPermission(): String {
-        if (VpnService.prepare(context) == null) {
-            rememberGranted()
-            return "granted"
+        val remembered = prefs.getBoolean(KEY_VPN_GRANTED, false)
+        return when (vpnConsent()) {
+            true -> {
+                rememberGranted()
+                "granted"
+            }
+            false -> if (remembered) "revoked" else "notAsked"
+            null -> if (remembered) "granted" else "notAsked"
         }
-        return if (prefs.getBoolean(KEY_VPN_GRANTED, false)) "revoked" else "notAsked"
+    }
+
+    /** The consent the system checks before it lets this app take the slot; null when unreadable. */
+    private fun vpnConsent(): Boolean? = try {
+        val ops = context.getSystemService(AppOpsManager::class.java)
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ops.unsafeCheckOpNoThrow(OP_ACTIVATE_VPN, Process.myUid(), context.packageName)
+        } else {
+            @Suppress("DEPRECATION")
+            ops.checkOpNoThrow(OP_ACTIVATE_VPN, Process.myUid(), context.packageName)
+        }
+        mode == AppOpsManager.MODE_ALLOWED
+    } catch (_: IllegalArgumentException) {
+        null
+    } catch (_: SecurityException) {
+        null
+    }
+
+    /**
+     * The apps that may have taken the slot after the system revoked this app's tunnel: the
+     * owner of a VPN that is up now, else every other app that ships a VPN service.
+     */
+    @Suppress("DEPRECATION")
+    private fun vpnLostTo(networks: List<Pair<Network, NetworkCapabilities>>): List<String> {
+        if (!VpnTakeover.revoked) return emptyList()
+        val vpnOwners = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            networks.filter { (_, caps) -> caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) }
+                .map { (_, caps) -> caps.ownerUid }
+        } else {
+            emptyList()
+        }
+        if (Process.myUid() in vpnOwners) return emptyList()
+        val packageManager = context.packageManager
+        val owners = vpnOwners.flatMap { uid ->
+            packageManager.getPackagesForUid(uid)?.toList().orEmpty()
+        }
+        val candidates = owners.ifEmpty {
+            packageManager.queryIntentServices(Intent(VpnService.SERVICE_INTERFACE), 0)
+                .map { it.serviceInfo.packageName }
+        }
+        val ownLabel = context.applicationInfo.loadLabel(packageManager).toString()
+        return candidates.distinct()
+            .filter { it != context.packageName }
+            .map { name ->
+                val label = runCatching {
+                    packageManager.getApplicationLabel(
+                        packageManager.getApplicationInfo(name, 0),
+                    ).toString()
+                }.getOrDefault(name)
+                if (label == ownLabel) "$label ($name)" else label
+            }
+            .sorted()
     }
 
     private fun readState(): Map<String, Any?> {
@@ -275,6 +336,7 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
         return mapOf(
             "vpnPermission" to vpnPermission(),
             "otherVpn" to otherVpn,
+            "vpnLostTo" to vpnLostTo(networks),
             "alwaysOnVpnApp" to alwaysOnVpnApp(),
             "packageName" to context.packageName,
             "privateDns" to when {
@@ -351,5 +413,8 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
         const val PREFS = "doctor"
 
         const val KEY_VPN_GRANTED = "doctor.vpnGranted"
+
+        // AppOpsManager.OPSTR_ACTIVATE_VPN is hidden; the string itself is public in the op table.
+        const val OP_ACTIVATE_VPN = "android:activate_vpn"
     }
 }

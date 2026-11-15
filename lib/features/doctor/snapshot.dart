@@ -121,6 +121,10 @@ abstract final class Facts {
   static const vpnPermission = FactKey<VpnPermission>('device.vpnPermission');
   static const otherVpn = FactKey<bool>('device.otherVpn');
 
+  /// The apps that may hold the slot since the system revoked this app's
+  /// tunnel, joined for display; absent while nothing was taken.
+  static const vpnLostTo = FactKey<String>('device.vpnLostTo');
+
   /// Empty when no app is the always-on VPN.
   static const alwaysOnVpnApp = FactKey<String>('device.alwaysOnVpnApp');
   static const privateDns = FactKey<PrivateDnsMode>('device.privateDns');

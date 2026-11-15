@@ -19,8 +19,27 @@ Finding? vpnPermissionRule(DiagnosticSnapshot snapshot) {
   );
 }
 
+/// The system revoked the running tunnel, typically because another app with
+/// VPN consent asked for the slot, often a second copy or fork merely checking
+/// its permission. The apps are the suspects, not a proven culprit.
+Finding? vpnLostRule(DiagnosticSnapshot snapshot) {
+  final apps = snapshot.valueOf(Facts.vpnLostTo);
+  if (apps == null) return null;
+  return Finding(
+    id: 'tunnel.vpnLost',
+    severity: CheckSeverity.critical,
+    cause: FailureCause.tunnelTaken,
+    evidence: [Facts.vpnLostTo.id],
+    titleKey: 'doctorVpnLostTitle',
+    detailKey: 'doctorVpnLostDetail',
+    args: {'apps': apps},
+    remedyIds: const ['device.openVpnSettings'],
+  );
+}
+
 Finding? otherVpnRule(DiagnosticSnapshot snapshot) {
   if (snapshot.valueOf(Facts.otherVpn) != true) return null;
+  if (snapshot.valueOf(Facts.vpnLostTo) != null) return null;
   return Finding(
     id: 'tunnel.otherVpn',
     severity: CheckSeverity.critical,

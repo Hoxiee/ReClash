@@ -23,6 +23,7 @@ const List<Rule> defaultRules = [
   profileNoServersRule,
   directModeRule,
   vpnPermissionRule,
+  vpnLostRule,
   otherVpnRule,
   alwaysOnVpnRule,
   privateDnsRule,

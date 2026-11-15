@@ -423,5 +423,6 @@
   "powerFixSwitchServer": "Other server",
   "@powerFixSwitchServer": {
     "description": "Pill beside Fix on a broken connection: moves the main group to its fastest live server."
-  }
+  },
+  "powerTitleVpnLost": "Another app took the VPN"
 }

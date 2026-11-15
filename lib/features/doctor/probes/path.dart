@@ -252,6 +252,9 @@ PathCheck? pathCheck(Ref ref, DiagnosticKernel kernel, PathStep step) {
         if (_device(kernel, Facts.vpnPermission) == VpnPermission.revoked) {
           return const StepCheck.fail(FailureCause.tunnelDenied);
         }
+        if (_device(kernel, Facts.vpnLostTo) case final apps?) {
+          return StepCheck.fail(FailureCause.tunnelTaken, detail: apps);
+        }
         if (_device(kernel, Facts.otherVpn) == true) {
           return const StepCheck.fail(FailureCause.tunnelTaken);
         }

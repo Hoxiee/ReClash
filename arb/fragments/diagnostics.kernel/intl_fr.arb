@@ -115,5 +115,7 @@
   "doctorProfileNoServersTitle": "Le profil ne contient aucun serveur",
   "doctorProfileNoServersDetail": "L’abonnement a été chargé, mais il ne contient aucun serveur. Mettez-le à jour plus tard ou contactez votre fournisseur.",
   "powerSmartButton": "Bouton d’alimentation intelligent",
-  "powerSmartButtonDescription": "Le bouton d’alimentation intelligent affiche Protégé seulement après vérification de la connexion, la répare et arrête le tunnel à la fin de l’abonnement. Désactivé, il ne fait que démarrer et arrêter."
+  "powerSmartButtonDescription": "Le bouton d’alimentation intelligent affiche Protégé seulement après vérification de la connexion, la répare et arrête le tunnel à la fin de l’abonnement. Désactivé, il ne fait que démarrer et arrêter.",
+  "doctorVpnLostTitle": "Une autre application a pris le VPN",
+  "doctorVpnLostDetail": "Android a arrêté le tunnel parce qu’une autre application ayant accès au VPN l’a réclamé, souvent une deuxième copie de cette application ou un autre client qui vérifie simplement son autorisation. Applications qui peuvent le faire : {apps}. Fermez-les ou retirez-leur l’accès au VPN, puis reconnectez-vous."
 }
