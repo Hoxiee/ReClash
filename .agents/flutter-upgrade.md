@@ -45,6 +45,17 @@ Hotfix releases (3.47.x) carry only cherry-picks listed in the SDK's `CHANGELOG.
 - **Remove when:** a stable `FLUTTER_VERSION` fixes #193504. Before dropping the call, build with Impeller on that SDK
   and drag every window edge for a minute on a machine that reproduced the freeze; the window has to keep redrawing.
 
+## Impeller disabled on Linux
+
+- **Bug:** not filed upstream. On 3.47 the Linux Impeller backend corrupts oversized animated layers (seen on Arch
+  Linux), such as a page sliding in a transition.
+- **Workaround:** `my_application_activate` in `linux/runner/my_application.cc` calls
+  `fl_dart_project_set_enable_impeller(project, FALSE)` before the view is created, so every Linux build renders
+  with Skia. Release builds ignore `FLUTTER_ENGINE_SWITCHES`, so users cannot turn Impeller off themselves.
+- **Side effect:** Linux draws Liquid Glass through its Skia fallback; judge Linux visual reports against Skia.
+- **Remove when:** a stable `FLUTTER_VERSION` fixes it. Before dropping the call, build with Impeller on that SDK and
+  run the page transitions with a full-window page on Arch Linux; no layer may show corruption.
+
 ## Wrong-size back buffer on macOS
 
 - **Bug:** [flutter/flutter#185394](https://github.com/flutter/flutter/issues/185394). `removeSurfaceForSize:` in
