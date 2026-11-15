@@ -1,5 +1,5 @@
 // fakeext is the extension the supervisor tests build and run. Its link picks the behaviour: fake://ok,
-// fake://crash, fake://slow-ready, fake://fatal, fake://stubborn (ignores the stop request). A path after the mode
+// fake://crash, fake://crash-once, fake://slow-ready, fake://fatal, fake://stubborn (ignores the stop request). A path after the mode
 // only makes links distinct. It reaches targets only through the egress it is given.
 package main
 
@@ -84,6 +84,12 @@ func run() {
 	switch mode {
 	case "crash":
 		os.Exit(2)
+	case "crash-once":
+		marker := filepath.Join(request.DataDir, "crashed")
+		if _, err := os.Stat(marker); err != nil {
+			_ = os.WriteFile(marker, nil, 0o600)
+			os.Exit(2)
+		}
 	case "fatal":
 		emit(map[string]any{"event": "fatal", "message": "link: unsupported mode"})
 		os.Exit(1)

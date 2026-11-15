@@ -37,7 +37,12 @@ func (s nodeState) String() string {
 	}
 }
 
-var errStopped = errors.New("stopped")
+var (
+	errStopped = errors.New("stopped")
+	errFull    = errors.New("extension processes are already in use")
+)
+
+const slotPoll = 100 * time.Millisecond
 
 // node is one extension process slot: an extension id, a link and the egress options of the nodes using them.
 type node struct {
@@ -57,6 +62,7 @@ type node struct {
 	errAt   time.Time
 	crashes []time.Time
 	retry   *time.Timer
+	retryAt time.Time
 	idle    *time.Timer
 	active  int
 	lastUse time.Time
@@ -104,13 +110,15 @@ func (m *Manager) nodeLocked(a *Adapter) *node {
 }
 
 // acquire returns the ready process of a's node, starting it when nothing runs. A stop that lands while the
-// caller waits for the start wins: the caller gets an error rather than a new start.
+// caller waits for the start wins: the caller gets an error rather than a new start. A dial that arrives during
+// a backoff waits for the restart when its deadline reaches it; the dial that saw the crash gets its error.
 func (m *Manager) acquire(ctx context.Context, a *Adapter) (*process, error) {
 	if a.invalid != "" {
 		return nil, unavailable(a.id, a.invalid)
 	}
 	m.mu.Lock()
 	n := m.nodeLocked(a)
+	waited := false
 	for {
 		switch n.state {
 		case stateReady:
@@ -118,14 +126,66 @@ func (m *Manager) acquire(ctx context.Context, a *Adapter) (*process, error) {
 			p := n.proc
 			m.mu.Unlock()
 			return p, nil
-		case stateFailed, stateBackoff:
+		case stateFailed:
+			if len(n.crashes) >= m.cfg.CrashLimit && time.Since(n.errAt) >= m.cfg.CrashWindow {
+				m.resetLocked(n)
+				continue
+			}
 			err := unavailable(n.id, n.lastErr)
 			m.mu.Unlock()
 			return nil, err
+		case stateBackoff:
+			deadline, bounded := ctx.Deadline()
+			if waited || !bounded || deadline.Before(n.retryAt) {
+				err := unavailable(n.id, n.lastErr)
+				m.mu.Unlock()
+				return nil, err
+			}
+			n.lastUse = time.Now()
+			gen := n.gen
+			timer := time.NewTimer(time.Until(n.retryAt))
+			m.mu.Unlock()
+			select {
+			case <-timer.C:
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, fmt.Errorf("extension %s is restarting: %w", n.id, ctx.Err())
+			}
+			m.mu.Lock()
+			if n.removed {
+				m.mu.Unlock()
+				return nil, unavailable(n.id, errStopped.Error())
+			}
+			if n.gen == gen && n.state == stateBackoff {
+				if err := m.startLocked(n); err != nil {
+					m.mu.Unlock()
+					return nil, unavailable(n.id, err.Error())
+				}
+			}
 		case stateIdle:
-			if err := m.startLocked(n); err != nil {
+			err := m.startLocked(n)
+			if err == nil {
+				continue
+			}
+			if _, bounded := ctx.Deadline(); !bounded || !errors.Is(err, errFull) {
 				m.mu.Unlock()
 				return nil, unavailable(n.id, err.Error())
+			}
+			n.lastUse = time.Now()
+			m.mu.Unlock()
+			// A slot frees on any stop, exit or idle connection; a short poll avoids
+			// signalling from every one of those paths.
+			timer := time.NewTimer(slotPoll)
+			select {
+			case <-timer.C:
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, unavailable(n.id, err.Error())
+			}
+			m.mu.Lock()
+			if n.removed {
+				m.mu.Unlock()
+				return nil, unavailable(n.id, errStopped.Error())
 			}
 		case stateStarting:
 			n.lastUse = time.Now()
@@ -136,6 +196,7 @@ func (m *Manager) acquire(ctx context.Context, a *Adapter) (*process, error) {
 			case <-ctx.Done():
 				return nil, fmt.Errorf("extension %s is starting: %w", n.id, ctx.Err())
 			}
+			waited = true
 			m.mu.Lock()
 			if n.removed || n.state == stateIdle {
 				m.mu.Unlock()
@@ -171,7 +232,7 @@ func (m *Manager) evictLocked() bool {
 
 func (m *Manager) startLocked(n *node) error {
 	if m.liveLocked() >= m.cfg.MaxLive && !m.evictLocked() {
-		return fmt.Errorf("%d extension processes are already in use", m.cfg.MaxLive)
+		return fmt.Errorf("%d %w", m.cfg.MaxLive, errFull)
 	}
 	stopTimer(&n.retry)
 	stopTimer(&n.idle)
@@ -394,6 +455,7 @@ func (m *Manager) exited(n *node, p *process, waitErr error) {
 	}
 	n.state = stateBackoff
 	n.setError(reason + ", restarting")
+	n.retryAt = now.Add(delay)
 	gen := n.gen
 	n.retry = time.AfterFunc(delay, func() {
 		m.cfg.Spawn("extension retry "+n.tag, func() { m.retryStart(n, gen) })

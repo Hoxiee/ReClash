@@ -352,6 +352,41 @@ func TestCrashesBackOffAndFiveCrashesFailUntilApply(t *testing.T) {
 	}
 }
 
+func TestDialDuringBackoffWaitsForTheRestart(t *testing.T) {
+	home := t.TempDir()
+	install(t, home, installOptions{})
+	m, _ := newManager(t, home, func(c *Config) {
+		c.BackoffMin = 300 * time.Millisecond
+		c.BackoffMax = 300 * time.Millisecond
+	})
+	proxy := parseNode(t, map[string]any{"link": "fake://crash-once"})
+	_, err := proxy.DialContext(context.Background(), tcpMetadata(t, "127.0.0.1:1"))
+	if err == nil || !strings.Contains(err.Error(), "extension fake unavailable") {
+		t.Fatalf("first dial: %v", err)
+	}
+	if state, _ := stateOf(m, "fake://crash-once"); state != stateBackoff {
+		t.Fatalf("state %s", state)
+	}
+	short, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	started := time.Now()
+	if _, err := proxy.DialContext(short, tcpMetadata(t, "127.0.0.1:1")); err == nil {
+		t.Fatal("dial with a deadline before the retry succeeded")
+	}
+	if time.Since(started) > 50*time.Millisecond {
+		t.Fatal("dial with a deadline before the retry waited for it")
+	}
+	ctx, cancelLong := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelLong()
+	_, err = proxy.DialContext(ctx, tcpMetadata(t, "127.0.0.1:1"))
+	if err != nil && strings.Contains(err.Error(), "unavailable") {
+		t.Fatalf("dial during backoff: %v", err)
+	}
+	if state, _ := stateOf(m, "fake://crash-once"); state != stateReady {
+		t.Fatalf("state after the restart %s", state)
+	}
+}
+
 func TestFatalEventFailsWithoutRestart(t *testing.T) {
 	home := t.TempDir()
 	install(t, home, installOptions{})
@@ -499,16 +534,36 @@ func TestLeastRecentlyUsedIdleProcessIsEvicted(t *testing.T) {
 		!strings.Contains(err.Error(), "already in use") {
 		t.Fatalf("busy process evicted: %v", err)
 	}
-	conn.Close()
-	waitFor(t, "release", time.Second, func() bool {
-		n := nodeOf(m, "fake://ok/a")
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		return n.active == 0
-	})
-	dialEcho(t, second, address)
+	go func() {
+		time.Sleep(200 * time.Millisecond)
+		conn.Close()
+	}()
+	bounded, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	queued, err := second.DialContext(bounded, tcpMetadata(t, address))
+	if err != nil {
+		t.Fatalf("dial queued for a slot: %v", err)
+	}
+	queued.Close()
 	if state, _ := stateOf(m, "fake://ok/a"); state != stateIdle {
 		t.Fatalf("first node %s", state)
+	}
+}
+
+func TestCrashLimitedNodeRecoversAfterTheWindow(t *testing.T) {
+	home := t.TempDir()
+	install(t, home, installOptions{})
+	m, _ := newManager(t, home, func(c *Config) { c.CrashWindow = 500 * time.Millisecond })
+	proxy := parseNode(t, map[string]any{"link": "fake://crash"})
+	_, _ = proxy.DialContext(context.Background(), tcpMetadata(t, "127.0.0.1:1"))
+	waitFor(t, "failed after five crashes", 5*time.Second, func() bool {
+		state, _ := stateOf(m, "fake://crash")
+		return state == stateFailed
+	})
+	time.Sleep(600 * time.Millisecond)
+	_, _ = proxy.DialContext(context.Background(), tcpMetadata(t, "127.0.0.1:1"))
+	if n := nodeOf(m, "fake://crash"); len(n.crashes) == 5 {
+		t.Fatal("a crash-limited node stayed failed after the window")
 	}
 }
 
