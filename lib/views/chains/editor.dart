@@ -581,7 +581,19 @@ String _typeOf(WidgetRef ref, String name) {
   return '';
 }
 
-typedef _Candidate = ({String name, String? code, Proxy proxy, Group? group});
+typedef _Candidate = ({
+  String name,
+  String search,
+  String? code,
+  Proxy proxy,
+  Group? group,
+});
+
+typedef _Catalog = ({
+  List<_Candidate> groups,
+  List<_Candidate> leaves,
+  Map<String, int> counts,
+});
 
 class _HopPicker extends ConsumerStatefulWidget {
   const _HopPicker({
@@ -606,30 +618,22 @@ class _HopPicker extends ConsumerStatefulWidget {
 class _HopPickerState extends ConsumerState<_HopPicker> {
   String _query = '';
   String? _country;
+  _Catalog? _catalog;
+  List<Group>? _catalogGroups;
+  ChainGeneratedNames? _catalogNames;
+  Map<String, ChainIssueCode>? _catalogBlocked;
 
-  bool _matches(BuildContext context, _Candidate candidate) {
-    final query = _query.trim().toLowerCase();
-    if (_country != null && candidate.code != _country) return false;
-    if (query.isEmpty) return true;
-    if (candidate.name.toLowerCase().contains(query)) return true;
-    final code = candidate.code;
-    return code != null &&
-        rcxCountryName(
-          context,
-          code.toUpperCase(),
-        ).toLowerCase().contains(query);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final slot = widget.slot;
-    final names = ref.watch(chainGeneratedNamesProvider);
-    final groups = names.visibleGroups(ref.watch(groupsProvider));
-    final region = ref
-        .watch(appSettingProvider.select((setting) => setting.regionCode))
-        ?.toLowerCase();
+  /// Finding a server's country scans every country name, so the catalog is
+  /// rebuilt when the groups behind it change, never per keystroke.
+  _Catalog _catalogOf(List<Group> all, ChainGeneratedNames names) {
     final blocked = widget.blocked;
+    if (_catalog case final cached?
+        when identical(all, _catalogGroups) &&
+            identical(names, _catalogNames) &&
+            identical(blocked, _catalogBlocked)) {
+      return cached;
+    }
+    final groups = names.visibleGroups(all);
     bool usable(String name) =>
         !_builtins.contains(name) &&
         !names.groups.contains(name) &&
@@ -640,6 +644,7 @@ class _HopPickerState extends ConsumerState<_HopPicker> {
         if (group.hidden != true && usable(group.name))
           (
             name: group.name,
+            search: group.name.toLowerCase(),
             code: countryOfHopName(group.name),
             proxy: Proxy(name: group.name, type: group.type.name),
             group: group,
@@ -654,16 +659,36 @@ class _HopPickerState extends ConsumerState<_HopPicker> {
               seen.add(proxy.name))
             (
               name: proxy.name,
+              search: proxy.name.toLowerCase(),
               code: countryOfHopName(proxy.name),
               proxy: proxy,
               group: null,
             ),
     ];
-    final testUrl = ref.watch(chainMainGroupProvider)?.testUrl;
     final counts = <String, int>{};
     for (final leaf in leaves) {
       if (leaf.code case final code?) counts[code] = (counts[code] ?? 0) + 1;
     }
+    _catalogGroups = all;
+    _catalogNames = names;
+    _catalogBlocked = blocked;
+    return _catalog = (groups: groupCandidates, leaves: leaves, counts: counts);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final slot = widget.slot;
+    final catalog = _catalogOf(
+      ref.watch(groupsProvider),
+      ref.watch(chainGeneratedNamesProvider),
+    );
+    final region = ref
+        .watch(appSettingProvider.select((setting) => setting.regionCode))
+        ?.toLowerCase();
+    final blocked = widget.blocked;
+    final testUrl = ref.watch(chainMainGroupProvider)?.testUrl;
+    final counts = catalog.counts;
     final countries = counts.keys.toList()
       ..sort((a, b) {
         if (a == region || b == region) {
@@ -672,14 +697,23 @@ class _HopPickerState extends ConsumerState<_HopPicker> {
         }
         return counts[b]!.compareTo(counts[a]!);
       });
-    final shownGroups = [
-      for (final candidate in groupCandidates)
-        if (_matches(context, candidate)) candidate,
-    ];
-    final shown = [
-      for (final candidate in leaves)
-        if (_matches(context, candidate)) candidate,
-    ];
+    final query = _query.trim().toLowerCase();
+    final countryNames = <String, String>{};
+    bool matches(_Candidate candidate) {
+      final code = candidate.code;
+      if (_country != null && code != _country) return false;
+      if (query.isEmpty || candidate.search.contains(query)) return true;
+      return code != null &&
+          countryNames
+              .putIfAbsent(
+                code,
+                () => rcxCountryName(context, code.toUpperCase()).toLowerCase(),
+              )
+              .contains(query);
+    }
+
+    final shownGroups = catalog.groups.where(matches).toList();
+    final shown = catalog.leaves.where(matches).toList();
     final home = region == null
         ? const <_Candidate>[]
         : [
@@ -717,79 +751,89 @@ class _HopPickerState extends ConsumerState<_HopPicker> {
       ChainHopSlot.middle => l.chainsPickMiddleHint,
       ChainHopSlot.exit => l.chainsPickExitHint,
     };
-    final homeSection = home.isEmpty
-        ? null
-        : generateSection(
-            title: l.chainsNearYou(homeName),
-            items: home.map(row).toList(),
-          );
-    return ListView(
-      padding: EdgeInsets.fromLTRB(16, 4, 16, 24 + context.bottomInset),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            hint,
-            style: AppTextStyle.subheadline
-                .of(context)
-                .copyWith(color: context.colorScheme.onSurfaceVariant),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SearchField(
-          hintText: l.chainsSearchHint,
-          fill: context.raisedSurfaceLevel.colorOf(context.colorScheme),
-          onChanged: (value) => setState(() => _query = value),
-        ),
-        if (countries.length > 1) ...[
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+    final entries = <Widget Function()>[];
+    void section(String title, List<_Candidate> items) {
+      if (items.isEmpty) return;
+      entries.add(() => ListHeader(title: title));
+      for (final (index, candidate) in items.indexed) {
+        final position = ItemPosition.get(index, items.length);
+        entries.add(
+          () => ItemPositionProvider(position: position, child: row(candidate)),
+        );
+      }
+    }
+
+    section(l.chainsGroupsSection, shownGroups);
+    if (slot == ChainHopSlot.entry) {
+      section(l.chainsNearYou(homeName), home);
+      section(home.isEmpty ? l.chainsServers : l.chainsOtherCountries, abroad);
+    } else {
+      section(region == null ? l.chainsServers : l.chainsAbroad, abroad);
+      if (home.isNotEmpty && slot == ChainHopSlot.exit) {
+        entries.add(() => ListFooter(text: l.chainsExitFooter(homeName)));
+      }
+      section(l.chainsNearYou(homeName), home);
+    }
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final code in countries)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 6),
-                    child: _CountryChip(
-                      code: code,
-                      label:
-                          '${nameWithoutFlag(rcxCountryName(context, code.toUpperCase()))}'
-                          ' · ${counts[code]}',
-                      selected: _country == code,
-                      onPressed: () => setState(
-                        () => _country = _country == code ? null : code,
-                      ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    hint,
+                    style: AppTextStyle.subheadline
+                        .of(context)
+                        .copyWith(color: context.colorScheme.onSurfaceVariant),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SearchField(
+                  hintText: l.chainsSearchHint,
+                  fill: context.raisedSurfaceLevel.colorOf(context.colorScheme),
+                  onChanged: (value) => setState(() => _query = value),
+                ),
+                if (countries.length > 1) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 36,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: countries.length,
+                      itemBuilder: (context, index) {
+                        final code = countries[index];
+                        return Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 6),
+                          child: _CountryChip(
+                            code: code,
+                            label:
+                                '${nameWithoutFlag(rcxCountryName(context, code.toUpperCase()))}'
+                                ' · ${counts[code]}',
+                            selected: _country == code,
+                            onPressed: () => setState(
+                              () => _country = _country == code ? null : code,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
+                ],
               ],
             ),
           ),
-        ],
-        if (shownGroups.isNotEmpty)
-          generateSection(
-            title: l.chainsGroupsSection,
-            items: shownGroups.map(row).toList(),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 24 + context.bottomInset),
+          sliver: SliverList.builder(
+            itemCount: entries.length,
+            itemBuilder: (_, index) => entries[index](),
           ),
-        if (slot == ChainHopSlot.entry) ...[
-          ?homeSection,
-          if (abroad.isNotEmpty)
-            generateSection(
-              title: home.isEmpty ? l.chainsServers : l.chainsOtherCountries,
-              items: abroad.map(row).toList(),
-            ),
-        ] else ...[
-          if (abroad.isNotEmpty)
-            generateSection(
-              title: region == null ? l.chainsServers : l.chainsAbroad,
-              items: abroad.map(row).toList(),
-            ),
-          if (homeSection != null) ...[
-            if (slot == ChainHopSlot.exit)
-              ListFooter(text: l.chainsExitFooter(homeName)),
-            homeSection,
-          ],
-        ],
+        ),
       ],
     );
   }
