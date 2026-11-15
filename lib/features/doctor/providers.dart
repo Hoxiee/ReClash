@@ -135,20 +135,30 @@ List<Remedy> _connectionRemedies(Ref ref) {
   ];
 }
 
+/// The supervisor, the account guard and the user's taps each ask for the
+/// same fetch; callers arriving while one runs share it.
+Future<bool> Function(int) _singleFlight(Future<bool> Function(int) run) {
+  final flights = <int, Future<bool>>{};
+  return (id) => flights[id] ??= run(id).whenComplete(() => flights.remove(id));
+}
+
 final diagnosticRemediesProvider = Provider<List<Remedy>>((ref) {
   return [
     RuleModeRemedy(ref.read(setupActionProvider.notifier).changeMode),
     BatteryExemptionRemedy(
       ref.read(batteryOptimizationIgnoredProvider.notifier).request,
     ),
-    UpdateSubscriptionRemedy((profileId) async {
-      final profile = ref.read(profilesProvider).getProfile(profileId);
-      if (profile == null) return false;
-      final updated = await ref
-          .read(profilesActionProvider.notifier)
-          .updateProfile(profile);
-      return updated != null;
-    }, current: () => ref.read(currentProfileIdProvider)),
+    UpdateSubscriptionRemedy(
+      _singleFlight((profileId) async {
+        final profile = ref.read(profilesProvider).getProfile(profileId);
+        if (profile == null) return false;
+        final updated = await ref
+            .read(profilesActionProvider.notifier)
+            .updateProfile(profile);
+        return updated != null;
+      }),
+      current: () => ref.read(currentProfileIdProvider),
+    ),
     ..._connectionRemedies(ref),
     ..._environmentRemedies(ref),
     if (doctorPlugin case final plugin?) ...[

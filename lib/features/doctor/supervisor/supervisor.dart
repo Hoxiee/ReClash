@@ -9,6 +9,7 @@ import '../kernel.dart';
 import '../path.dart';
 import '../remedies/connection.dart';
 import '../remedies/remedy.dart';
+import '../snapshot.dart';
 import 'health.dart';
 
 enum VerifyVerdict { pass, fail, unknown }
@@ -71,6 +72,7 @@ class ConnectionSupervisor {
     this.resumeTtl = const Duration(minutes: 2),
     this.graceInterval = const Duration(minutes: 5),
     this.recoveringDelay = const Duration(milliseconds: 800),
+    this.profileFreshFor = const Duration(minutes: 10),
   }) : _kernel = kernel,
        _autoHeal = autoHeal,
        _selectedNode = selectedNode,
@@ -88,6 +90,10 @@ class ConnectionSupervisor {
   /// How often an expired plan that still works is checked while visible.
   final Duration graceInterval;
   final Duration recoveringDelay;
+
+  /// A subscription fetched this recently is not fetched again by the
+  /// automatic ladder: the same answer would only repeat.
+  final Duration profileFreshFor;
 
   final DiagnosticKernel _kernel;
   final bool Function() _autoHeal;
@@ -435,7 +441,7 @@ class ConnectionSupervisor {
     });
     try {
       for (final step in steps) {
-        final healed = await _runStep(step, plan);
+        final healed = await _runStep(step, plan, force: repair);
         if (plan != _plan || epoch != _epoch) return false;
         if (healed) {
           _pass();
@@ -457,7 +463,10 @@ class ConnectionSupervisor {
   }
 
   /// Applies one rung and verifies; true when the check passed.
-  Future<bool> _runStep(HealStep step, int plan) async {
+  Future<bool> _runStep(HealStep step, int plan, {required bool force}) async {
+    if (step == HealStep.updateProfile && !force && _profileIsFresh()) {
+      return false;
+    }
     _step = step;
     _stepDetail = null;
     if (_recoveringShown) _emitRecovering();
@@ -482,6 +491,12 @@ class ConnectionSupervisor {
     if (plan != _plan) return false;
     if (result.verdict == VerifyVerdict.fail) _cause = result.cause;
     return result.verdict == VerifyVerdict.pass;
+  }
+
+  bool _profileIsFresh() {
+    final fetchedAt = _kernel.snapshot.valueOf(Facts.subscription)?.fetchedAt;
+    return fetchedAt != null &&
+        _clock().difference(fetchedAt) < profileFreshFor;
   }
 
   void _emitRecovering() => _emit(
