@@ -34,6 +34,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Profile" "Release")
 endif()
 
+# GApplication single-instance and path_provider's data directory both derive
+# from this ID; a debug build must not forward to or share state with a release.
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(APPLICATION_ID "com.reclash.debug")
+endif()
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by

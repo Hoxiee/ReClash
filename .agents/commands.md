@@ -91,9 +91,10 @@ Use `flutter test`, not `dart test`, because models pull in Flutter types.
 A development build takes over the host exactly like a release: it creates the TUN device, sets the system proxy, on
 macOS rewrites the system DNS, registers itself as the login item, and on Windows and Linux starts its Core through the
 shared privileged Helper, which stops the Core an installed ReClash is running. Only the data directory is kept apart,
-and only for some builds: a macOS debug build is `com.reclash.debug` and an Android debug build `com.reclash.dev`,
-while profile and release builds, and every build on Windows and Linux, share the directory and preferences of the
-installed app. Safe mode keeps all of the host changes off and never opens the Core's listeners or external
+and only for some builds: a macOS and a Linux debug build are `com.reclash.debug` (the GApplication ID, so a running
+release is not activated in its place, and with it the data directory and lock) and an Android debug build
+`com.reclash.dev`, while profile and release builds, and every Windows build, share the directory and preferences of the
+installed app. A Linux debug build still shares the privileged Helper, the TUN device and the loopback ports. Safe mode keeps all of the host changes off and never opens the Core's listeners or external
 controller, so it does not compete with the installed app for the mixed, DNS, RESTful API and other loopback ports:
 
 ```bash
