@@ -7,7 +7,7 @@
 A multi-platform proxy client based on Clash Meta (mihomo) that picks the route for you.
 Simple to use, open source and ad-free.
 
-**English** · [简体中文](README_zh_CN.md)
+**English** · [简体中文](README_zh_CN.md) · [Русский](README_ru.md)
 
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)

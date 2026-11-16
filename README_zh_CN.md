@@ -7,7 +7,7 @@
 基于 Clash Meta（mihomo）内核、能替你选择线路的多平台代理客户端。
 简单易用，开源无广告。
 
-[English](README.md) · **简体中文**
+[English](README.md) · **简体中文** · [Русский](README_ru.md)
 
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)
