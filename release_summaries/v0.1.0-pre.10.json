@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.10",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Leak protection, per-profile favorites and a macOS fix",
+      "spotlight": {
+        "title": "macOS opens again",
+        "description": "The app is no longer rejected at launch on macOS.",
+        "kind": "shield",
+        "platforms": [
+          "macos"
+        ]
+      },
+      "highlights": [
+        {
+          "title": "Per-profile favorites",
+          "description": "Favorite proxies lead their groups in the app, the tray and the dashboard.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Fewer DNS leaks",
+          "description": "Strict routing is the default for TUN on Windows, and browser DoH can be blocked.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        },
+        {
+          "title": "Android kill switch status",
+          "description": "See whether always-on VPN and lockdown are active.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Provider DNS stays",
+          "description": "Profiles keep the DNS their provider sets unless you override it.",
+          "kind": "update"
+        },
+        {
+          "title": "Redesigned donate page",
+          "description": "The donate action comes first, and the crypto card is easier to copy from.",
+          "kind": "link"
+        },
+        {
+          "title": "Calmer Doctor",
+          "description": "It confirms the node with a delay test and fetches the subscription only when you tap the repair.",
+          "kind": "speed"
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Kill switch is read-only",
+          "description": "The status shows the system always-on VPN and lockdown settings. Change them in Android settings.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "macOS first launch",
+          "description": "The build is ad-hoc signed and not notarized, so macOS may warn when you open it for the first time.",
+          "kind": "shield",
+          "platforms": [
+            "macos"
+          ]
+        }
+      ]
+    },
+    "ru": {
+      "headline": "Защита от утечек, избранное в профиле и правка macOS",
+      "spotlight": {
+        "title": "macOS снова запускается",
+        "description": "Приложение больше не отклоняется при запуске на macOS.",
+        "kind": "shield",
+        "platforms": [
+          "macos"
+        ]
+      },
+      "highlights": [
+        {
+          "title": "Избранное в профиле",
+          "description": "Избранные прокси идут первыми в группах в приложении, трее и на дашборде.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Меньше утечек DNS",
+          "description": "Строгая маршрутизация — по умолчанию для TUN на Windows, а DoH в браузерах можно заблокировать.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        },
+        {
+          "title": "Статус kill switch на Android",
+          "description": "Видно, включены ли постоянный VPN и блокировка.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "DNS провайдера сохраняется",
+          "description": "Профили используют DNS провайдера, пока вы не переопределите его.",
+          "kind": "update"
+        },
+        {
+          "title": "Новая страница донатов",
+          "description": "Кнопка доната стоит первой, а карточку с криптой удобнее копировать.",
+          "kind": "link"
+        },
+        {
+          "title": "Спокойный доктор",
+          "description": "Он проверяет узел тестом задержки и загружает подписку только по нажатию на починку.",
+          "kind": "speed"
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Kill switch только для чтения",
+          "description": "Статус показывает системные настройки постоянного VPN и блокировки. Меняйте их в настройках Android.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Первый запуск на macOS",
+          "description": "Сборка подписана ad-hoc и не нотаризована, поэтому macOS может предупредить при первом открытии.",
+          "kind": "shield",
+          "platforms": [
+            "macos"
+          ]
+        }
+      ]
+    }
+  }
+}

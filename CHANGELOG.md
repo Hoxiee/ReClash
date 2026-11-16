@@ -2,6 +2,44 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.10
+
+Network leak protection, per-profile favorites and a macOS launch fix.
+
+### New
+
+- **Per-profile favorites**: mark proxies as favorites and they lead their groups in the app, the tray and the
+  dashboard. Each profile keeps its own set.
+- **Android kill switch status**: the app shows whether Android's always-on VPN and lockdown settings are active.
+- **Block browser DoH**: an opt-in setting that stops browsers from resolving names over their own DoH and bypassing
+  the app's DNS. Strict browser DoH stops resolving while it is on.
+
+### Improved
+
+- **TUN on Windows**: strict routing is now the default, which closes DNS leak paths. A profile can still override it.
+- **Wallet pass on desktop**: the active profile's pass has its own title, and its top lines up with the other
+  profiles.
+- **Donate page**: the donate action comes first and the crypto card is redesigned. The network is picked from the
+  coin's chips, tapping an address copies it with inline confirmation, and a link can be copied for sharing.
+- **Doctor**: it confirms the node with a delay test instead of guessing, and no longer fetches profiles by itself. The
+  subscription is fetched only when you tap the repair.
+
+### Fixed
+
+- The macOS app opens again instead of being rejected at launch.
+- Profiles keep the DNS their provider sets instead of regional servers, unless you override it. Regional overrides
+  you already have stay until DNS is restored to defaults.
+- A sandbox test profile no longer loses its own groups to a group it does not have.
+- Hotkey commands on desktop can be copied from their rows, as on the core page.
+- The sidebar blur toggle sits in a styled group like the rest of the theme settings.
+- Desktop self-update progress and failure messages no longer mention Android.
+
+### Known issues
+
+- The Android kill switch status only reflects the system's always-on VPN and lockdown settings. Change them in
+  Android settings, not in the app.
+- The macOS build is ad-hoc signed and not notarized, so macOS may warn when you open it for the first time.
+
 ## v0.1.0-pre.9
 
 ### New
