@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPN oʻchdi: trafik tugadi. Oddiy internet ishlaydi.",
   "powerNoticeResumed": "Obuna yangilandi — ulanmoqda",
   "powerFixSwitchServer": "Boshqa server",
-  "powerTitleVpnLost": "VPN’ni boshqa ilova oldi"
+  "powerTitleVpnLost": "VPN’ni boshqa ilova oldi",
+  "slotMachinePower": "Tugma o‘rniga slot-mashina",
+  "slotMachineSpin": "Aylantirish",
+  "slotMachineAlmost": "Sal qoldi!",
+  "slotMachineJackpot": "Jekpot!"
 }

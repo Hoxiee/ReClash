@@ -26,7 +26,7 @@ Widget _app({
         size: 152,
         logo: '',
         images: const AppProviderImages(),
-        tooltip: 'Toggle tunnel',
+        label: 'Toggle tunnel',
         onPressed: enabled ? onPressed ?? () {} : null,
         look: (shape: shape, type: type),
         badge: badge,

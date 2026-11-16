@@ -14,6 +14,7 @@ import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/widgets/provider_image.dart';
 
 import 'power_button.dart';
+import 'slot_machine.dart';
 
 /// Lays [above] and [below] out at their own height; the hero gets the rest
 /// of the viewport, never less than [minHero].
@@ -105,7 +106,7 @@ class RenderFillHero extends RenderBox
       defaultHitTestChildren(result, position: position);
 }
 
-String powerTooltip(BuildContext context, PowerLink link) {
+String powerStateLabel(BuildContext context, PowerLink link) {
   final appLocalizations = AppLocalizations.of(context);
   return switch (link) {
     PowerLink.paused => appLocalizations.onDemandResume,
@@ -114,7 +115,7 @@ String powerTooltip(BuildContext context, PowerLink link) {
   };
 }
 
-/// What a tap on the button does, for its tooltip and semantics hint.
+/// What a tap on the button does, for its semantics label.
 String powerTapLabel(BuildContext context, PowerFace face) {
   final appLocalizations = AppLocalizations.of(context);
   return switch (face.tap) {
@@ -124,7 +125,7 @@ String powerTapLabel(BuildContext context, PowerFace face) {
     PowerAction.updateProfile => appLocalizations.powerFixUpdateProfile,
     PowerAction.accountSheet ||
     PowerAction.causeSheet => appLocalizations.powerTapDetails,
-    _ => powerTooltip(context, face.link),
+    _ => powerStateLabel(context, face.link),
   };
 }
 
@@ -266,6 +267,7 @@ class SimplePowerView extends StatelessWidget {
     required this.images,
     required this.look,
     required this.status,
+    this.slotMachine = false,
   });
 
   /// The button grows with its room between these, the status always under
@@ -278,6 +280,7 @@ class SimplePowerView extends StatelessWidget {
   final ProviderImages images;
   final ProviderPowerButton look;
   final Widget status;
+  final bool slotMachine;
 
   static double heightOf(double size) =>
       PowerButton.extentOf(size) + _statusHeight;
@@ -294,18 +297,29 @@ class SimplePowerView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PowerButton(
-              link: face.link,
-              size: size,
-              logo: logo,
-              images: images,
-              look: look,
-              tone: face.tone,
-              badge: powerBadge(face),
-              spin: face.state == PowerFaceState.recovering,
-              tooltip: powerTapLabel(context, face),
-              onPressed: face.tap == null ? null : onPressed,
-            ),
+            if (slotMachine)
+              SlotMachine(
+                link: face.link,
+                size: PowerButton.extentOf(size),
+                spinToStart: face.tap == PowerAction.start,
+                label: face.tap == PowerAction.start
+                    ? AppLocalizations.of(context).slotMachineSpin
+                    : powerTapLabel(context, face),
+                onPressed: face.tap == null ? null : onPressed,
+              )
+            else
+              PowerButton(
+                link: face.link,
+                size: size,
+                logo: logo,
+                images: images,
+                look: look,
+                tone: face.tone,
+                badge: powerBadge(face),
+                spin: face.state == PowerFaceState.recovering,
+                label: powerTapLabel(context, face),
+                onPressed: face.tap == null ? null : onPressed,
+              ),
             const SizedBox(height: 20),
             status,
           ],

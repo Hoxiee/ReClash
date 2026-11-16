@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPN öçdi: trafik gutardy. Adaty internet işleýär.",
   "powerNoticeResumed": "Abunalyk uzaldyldy — birikdirilýär",
   "powerFixSwitchServer": "Başga serwer",
-  "powerTitleVpnLost": "VPN-i başga programma aldy"
+  "powerTitleVpnLost": "VPN-i başga programma aldy",
+  "slotMachinePower": "Düwmäniň ýerine slot-maşyn",
+  "slotMachineSpin": "Aýlamak",
+  "slotMachineAlmost": "Az galdy!",
+  "slotMachineJackpot": "Jekpot!"
 }

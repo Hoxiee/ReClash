@@ -26,7 +26,7 @@ import 'location_card.dart';
 import 'power_account_sheet.dart';
 import 'subscription_card.dart';
 
-export 'home_view.dart' show powerTooltip;
+export 'home_view.dart' show powerStateLabel;
 
 /// The button, what it did and what is left to spend, under a pending app
 /// update; on a phone also where traffic leaves.
@@ -250,6 +250,11 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
     );
     final look = ref.watch(providerPowerButtonProvider);
     final inputs = ref.watch(powerInputsProvider);
+    final slotMachine = ref.watch(
+      appSettingProvider.select(
+        (state) => state.slotMachineUnlocked && state.slotMachinePower,
+      ),
+    );
     return PowerRequest(
       builder: (context, link, toggle) {
         final face = resolvePowerFace(inputs.withLink(link));
@@ -265,6 +270,7 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
           logo: logo,
           images: const AppProviderImages(),
           look: look,
+          slotMachine: slotMachine,
           status: _StatusText(face: face, onFix: act),
         );
       },

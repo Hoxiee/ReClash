@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPN désactivé : trafic épuisé. Internet normal fonctionne.",
   "powerNoticeResumed": "Abonnement renouvelé — connexion",
   "powerFixSwitchServer": "Autre serveur",
-  "powerTitleVpnLost": "Une autre app a pris le VPN"
+  "powerTitleVpnLost": "Une autre app a pris le VPN",
+  "slotMachinePower": "Machine à sous au lieu du bouton",
+  "slotMachineSpin": "Lancer",
+  "slotMachineAlmost": "Presque !",
+  "slotMachineJackpot": "Jackpot !"
 }

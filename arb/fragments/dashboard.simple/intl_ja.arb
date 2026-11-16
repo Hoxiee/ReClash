@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPNをオフにしました：データ量を使い切りました。通常のインターネットは使えます。",
   "powerNoticeResumed": "サブスクリプションを更新しました — 接続中",
   "powerFixSwitchServer": "別のサーバー",
-  "powerTitleVpnLost": "別のアプリがVPNを奪取"
+  "powerTitleVpnLost": "別のアプリがVPNを奪取",
+  "slotMachinePower": "ボタンの代わりにスロット",
+  "slotMachineSpin": "回す",
+  "slotMachineAlmost": "惜しい！",
+  "slotMachineJackpot": "大当たり！"
 }

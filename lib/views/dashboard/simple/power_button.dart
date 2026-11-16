@@ -158,7 +158,7 @@ class PowerButton extends StatefulWidget {
     required this.size,
     required this.logo,
     required this.images,
-    required this.tooltip,
+    required this.label,
     required this.onPressed,
     this.look = defaultProviderPowerButton,
     this.tone = PowerTone.normal,
@@ -182,7 +182,7 @@ class PowerButton extends StatefulWidget {
   /// The provider's logo URL or data URI; empty draws the power glyph.
   final String logo;
   final ProviderImages images;
-  final String tooltip;
+  final String label;
 
   /// Null disables the button.
   final VoidCallback? onPressed;
@@ -371,64 +371,58 @@ class _PowerButtonState extends State<PowerButton>
             tone: widget.tone,
             spin: widget.spin,
           ),
-          Tooltip(
-            message: widget.tooltip,
-            child: Semantics(
-              button: true,
-              enabled: enabled,
-              label: widget.tooltip,
-              child: GestureDetector(
-                onHorizontalDragUpdate: (_) {},
-                onVerticalDragUpdate: (_) {},
-                child: InkResponse(
-                  onTap: widget.onPressed,
-                  onHover: (value) => setState(() => _hovered = value),
-                  onHighlightChanged: (value) =>
-                      setState(() => _pressed = value),
-                  onFocusChange: (value) => setState(() => _focused = value),
-                  overlayColor: const WidgetStatePropertyAll(
-                    Colors.transparent,
-                  ),
-                  splashFactory: NoSplash.splashFactory,
-                  customBorder: AppShape.circle,
-                  child: ElasticPress(
-                    enabled: enabled,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        body,
-                        _LogoPlate(
-                          size: size * _plateSize,
-                          logo: widget.logo,
-                          images: widget.images,
-                          muted: link == PowerLink.off,
-                          raised: link == PowerLink.on,
-                        ),
-                        AnimatedBuilder(
-                          animation: _morphController,
-                          child: IgnorePointer(
-                            child: ExcludeSemantics(
-                              child: _BadgeSlot(
-                                badge: widget.badge,
-                                size: size * 0.24,
-                                delay: _morphController.isAnimating
-                                    ? _badgeDelay
-                                    : Duration.zero,
-                              ),
+          Semantics(
+            button: true,
+            enabled: enabled,
+            label: widget.label,
+            child: GestureDetector(
+              onHorizontalDragUpdate: (_) {},
+              onVerticalDragUpdate: (_) {},
+              child: InkResponse(
+                onTap: widget.onPressed,
+                onHover: (value) => setState(() => _hovered = value),
+                onHighlightChanged: (value) => setState(() => _pressed = value),
+                onFocusChange: (value) => setState(() => _focused = value),
+                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+                splashFactory: NoSplash.splashFactory,
+                customBorder: AppShape.circle,
+                child: ElasticPress(
+                  enabled: enabled,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      body,
+                      _LogoPlate(
+                        size: size * _plateSize,
+                        logo: widget.logo,
+                        images: widget.images,
+                        muted: link == PowerLink.off,
+                        raised: link == PowerLink.on,
+                      ),
+                      AnimatedBuilder(
+                        animation: _morphController,
+                        child: IgnorePointer(
+                          child: ExcludeSemantics(
+                            child: _BadgeSlot(
+                              badge: widget.badge,
+                              size: size * 0.24,
+                              delay: _morphController.isAnimating
+                                  ? _badgeDelay
+                                  : Duration.zero,
                             ),
                           ),
-                          builder: (_, child) => Transform.translate(
-                            offset: _rimOffset(
-                              shape,
-                              _morphController.value,
-                              size,
-                            ),
-                            child: child,
-                          ),
                         ),
-                      ],
-                    ),
+                        builder: (_, child) => Transform.translate(
+                          offset: _rimOffset(
+                            shape,
+                            _morphController.value,
+                            size,
+                          ),
+                          child: child,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

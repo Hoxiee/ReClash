@@ -1629,6 +1629,9 @@ class _DashboardStyleItem extends ConsumerWidget {
       appSettingProvider.select((state) => state.simplestDashboardPinned),
     );
     final revealed = pinned || ref.watch(simplestDashboardRevealProvider);
+    final slotMachineUnlocked = ref.watch(
+      appSettingProvider.select((state) => state.slotMachineUnlocked),
+    );
     Widget tile(DashboardStyle value, String label) => _ChoiceTile(
       size: _screen * _scale,
       corner: AppCorner.md * _scale,
@@ -1751,6 +1754,20 @@ class _DashboardStyleItem extends ConsumerWidget {
                       ),
                     ),
               ),
+              if (slotMachineUnlocked)
+                ConfigToggleItem(
+                  setting: themeToolSettings[_slotMachineSpecIndex],
+                  selector: appSettingProvider.select(
+                    (state) => state.slotMachinePower,
+                  ),
+                  title: (l) => l.slotMachinePower,
+                  leading: const GlyphIcon(AppGlyphs.sparkle),
+                  onChanged: (ref, value) => ref
+                      .read(appSettingProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(slotMachinePower: value),
+                      ),
+                ),
             ]),
           ),
         ],
@@ -2486,6 +2503,9 @@ class _CustomColorPreview extends ConsumerWidget {
   }
 }
 
+/// Hidden until its secret search result is opened, then kept for good.
+const slotMachineSettingId = 'theme.slotMachine';
+
 final themeToolSettings = <SettingSpec>[
   SettingSpec(
     id: 'theme.themeMode',
@@ -2598,7 +2618,18 @@ final themeToolSettings = <SettingSpec>[
     title: (l) => l.profilesStyleWallet,
     keywords: ['profilesStyleWallet', 'profiles'],
   ),
+  SettingSpec(
+    id: slotMachineSettingId,
+    page: ToolPage.theme,
+    title: (l) => l.slotMachinePower,
+    keywords: ['slotMachinePower'],
+    condition: SettingCondition.contextual,
+  ),
 ];
+
+final _slotMachineSpecIndex = themeToolSettings.indexWhere(
+  (setting) => setting.id == slotMachineSettingId,
+);
 
 final _profilesStyleSpecIndex = themeToolSettings.indexWhere(
   (setting) => setting.id == 'theme.profilesStyle',

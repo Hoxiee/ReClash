@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPN 已关闭：流量已用完。普通网络仍可使用。",
   "powerNoticeResumed": "订阅已续订，正在连接",
   "powerFixSwitchServer": "换个服务器",
-  "powerTitleVpnLost": "VPN 被其他应用占用"
+  "powerTitleVpnLost": "VPN 被其他应用占用",
+  "slotMachinePower": "用老虎机代替按钮",
+  "slotMachineSpin": "转动",
+  "slotMachineAlmost": "差一点！",
+  "slotMachineJackpot": "大奖！"
 }

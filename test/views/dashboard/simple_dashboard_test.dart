@@ -907,7 +907,13 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byTooltip('Add subscription'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is PowerButton && widget.label == 'Add subscription',
+        ),
+        findsOneWidget,
+      );
       expect(find.byTooltip('Edit widgets'), findsOneWidget);
     },
   );

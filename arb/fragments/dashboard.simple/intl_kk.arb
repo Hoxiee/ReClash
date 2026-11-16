@@ -233,5 +233,9 @@
   "powerNoticeStoppedExhausted": "VPN өшірілді: трафик таусылды. Әдеттегі интернет жұмыс істейді.",
   "powerNoticeResumed": "Жазылым ұзартылды — қосылуда",
   "powerFixSwitchServer": "Басқа сервер",
-  "powerTitleVpnLost": "VPN-ді басқа қолданба алды"
+  "powerTitleVpnLost": "VPN-ді басқа қолданба алды",
+  "slotMachinePower": "Түйменің орнына слот-машина",
+  "slotMachineSpin": "Айналдыру",
+  "slotMachineAlmost": "Сәл ғана!",
+  "slotMachineJackpot": "Джекпот!"
 }

@@ -495,6 +495,22 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
       ),
     );
   }
+  final slotMachine = themeToolSettings.firstWhere(
+    (spec) => spec.id == slotMachineSettingId,
+  );
+  final theme = byPage[ToolPage.theme]!;
+  entries.add(
+    ToolEntry(
+      id: slotMachine.id,
+      title: slotMachine.title(l),
+      category: theme.category,
+      glyph: AppGlyphs.sparkle,
+      route: slotMachine.route,
+      path: '${toolCategoryLabel(theme.category, l)} › ${theme.title}',
+      showInCatalog: false,
+      secretQuery: '777',
+    ),
+  );
   for (final command in ToolCommand.values) {
     final title = switch (command) {
       ToolCommand.checkUpdates => l.checkUpdate,

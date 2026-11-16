@@ -7,6 +7,7 @@ import 'package:reclash/models/tools.dart';
 import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
+import 'package:reclash/views/theme.dart' show slotMachineSettingId;
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -89,6 +90,17 @@ void main() {
     ).singleWhere((entry) => entry.id == 'page.lovense');
     expect(entry.showInCatalog, isFalse);
     expect(entry.secretQuery, 'lovense');
+  });
+
+  test('the slot machine setting is reachable only by 777', () async {
+    final l = await AppLocalizations.load(const Locale('en'));
+    final catalog = buildToolCatalog(l, _environment());
+    final entry = catalog.singleWhere(
+      (entry) => entry.id == slotMachineSettingId,
+    );
+    expect(entry.showInCatalog, isFalse);
+    expect(entry.secretQuery, '777');
+    expect(entry.route?.settingId, slotMachineSettingId);
   });
 
   test('catalogue groups follow the Alpha section order', () async {

@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:reclash/providers/tool_commands.dart';
+import 'package:reclash/views/theme.dart' show slotMachineSettingId;
 import 'catalog.dart';
 import 'core.dart';
 
@@ -149,6 +150,11 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
   Future<void> _select(ToolEntry entry) async {
     if (_opening) return;
     _opening = true;
+    if (entry.id == slotMachineSettingId) {
+      ref
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(slotMachineUnlocked: true));
+    }
     try {
       await widget.onSelect(entry);
     } finally {

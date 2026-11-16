@@ -424,5 +424,21 @@
   "@powerFixSwitchServer": {
     "description": "Pill beside Fix on a broken connection: moves the main group to its fastest live server."
   },
-  "powerTitleVpnLost": "Another app took the VPN"
+  "powerTitleVpnLost": "Another app took the VPN",
+  "slotMachinePower": "Slot machine instead of the button",
+  "@slotMachinePower": {
+    "description": "Theme setting unlocked by searching 777: the simple dashboard power button becomes a slot machine that starts only on 777."
+  },
+  "slotMachineSpin": "Spin",
+  "@slotMachineSpin": {
+    "description": "Slot machine banner and tooltip: spin the reels to try for 777."
+  },
+  "slotMachineAlmost": "So close!",
+  "@slotMachineAlmost": {
+    "description": "Slot machine banner after two sevens and a miss."
+  },
+  "slotMachineJackpot": "Jackpot!",
+  "@slotMachineJackpot": {
+    "description": "Slot machine banner after 777 and while the connection runs."
+  }
 }

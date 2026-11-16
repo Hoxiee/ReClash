@@ -187,89 +187,86 @@ class _PayButtonState extends State<_PayButton>
         appLocalizations.simplestPausedNote,
       ),
     };
-    final tooltip = powerTooltip(context, link);
+    final spoken = powerStateLabel(context, link);
     final duration = context.motionDuration(_colorDuration);
-    return Tooltip(
-      message: tooltip,
-      child: Semantics(
-        button: true,
-        enabled: enabled,
-        label: tooltip,
-        excludeSemantics: true,
-        child: InkResponse(
-          onTap: enabled ? _onTap : null,
-          onFocusChange: (value) => setState(() => _focused = value),
-          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-          splashFactory: NoSplash.splashFactory,
-          customBorder: AppShape.full,
-          child: ElasticPress(
-            enabled: enabled,
-            child: AnimatedContainer(
-              duration: duration,
-              width: widget.width,
-              height: _height,
-              decoration: ShapeDecoration(
-                color: fill,
-                shape: AppShape.full.copyWith(
-                  side: _focused
-                      ? focusRingSide(colorScheme, standsOff: true)
-                      : BorderSide.none,
-                ),
-                shadows: [
-                  BoxShadow(
-                    color: _begging
-                        ? dashboardMoneyGreen.withValues(alpha: 0.35)
-                        : Colors.transparent,
-                    blurRadius: 28,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: spoken,
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: enabled ? _onTap : null,
+        onFocusChange: (value) => setState(() => _focused = value),
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
+        customBorder: AppShape.full,
+        child: ElasticPress(
+          enabled: enabled,
+          child: AnimatedContainer(
+            duration: duration,
+            width: widget.width,
+            height: _height,
+            decoration: ShapeDecoration(
+              color: fill,
+              shape: AppShape.full.copyWith(
+                side: _focused
+                    ? focusRingSide(colorScheme, standsOff: true)
+                    : BorderSide.none,
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRSuperellipse(
-                    borderRadius: AppRadius.full,
-                    child: CustomPaint(painter: _SheenPainter(_sheen)),
+              shadows: [
+                BoxShadow(
+                  color: _begging
+                      ? dashboardMoneyGreen.withValues(alpha: 0.35)
+                      : Colors.transparent,
+                  blurRadius: 28,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRSuperellipse(
+                  borderRadius: AppRadius.full,
+                  child: CustomPaint(painter: _SheenPainter(_sheen)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    child: AnimatedSwitcher(
-                      duration: duration,
-                      child: Column(
-                        key: ValueKey(link),
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 2,
-                        children: [
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                label,
-                                softWrap: false,
-                                style: AppTextStyle.title1
-                                    .of(context, emphasized: true)
-                                    .copyWith(color: ink),
-                              ),
+                  child: AnimatedSwitcher(
+                    duration: duration,
+                    child: Column(
+                      key: ValueKey(link),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 2,
+                      children: [
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              label,
+                              softWrap: false,
+                              style: AppTextStyle.title1
+                                  .of(context, emphasized: true)
+                                  .copyWith(color: ink),
                             ),
                           ),
-                          Text(
-                            note,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyle.footnote
-                                .of(context)
-                                .copyWith(color: ink.withValues(alpha: 0.88)),
-                          ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          note,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.footnote
+                              .of(context)
+                              .copyWith(color: ink.withValues(alpha: 0.88)),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

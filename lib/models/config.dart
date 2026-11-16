@@ -267,6 +267,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     )
     DashboardStyle dashboardStyle,
     @Default(false) bool simplestDashboardPinned,
+    @Default(false) bool slotMachineUnlocked,
+    @Default(false) bool slotMachinePower,
     @Default(ProfilesStyle.wallet)
     @JsonKey(unknownEnumValue: ProfilesStyle.wallet)
     ProfilesStyle profilesStyle,
