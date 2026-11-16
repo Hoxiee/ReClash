@@ -113,5 +113,6 @@
   "profilesStyleWallet": "新版配置文件视图",
   "walletEdit": "编辑",
   "walletExport": "导出",
-  "subscriptionClientDefault": "默认"
+  "subscriptionClientDefault": "默认",
+  "walletCurrent": "使用中"
 }

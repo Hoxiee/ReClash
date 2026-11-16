@@ -113,5 +113,6 @@
   "profilesStyleWallet": "Profilleriň täze görnüşi",
   "walletEdit": "Üýtget",
   "walletExport": "Eksport",
-  "subscriptionClientDefault": "Adaty"
+  "subscriptionClientDefault": "Adaty",
+  "walletCurrent": "Ulanylýar"
 }

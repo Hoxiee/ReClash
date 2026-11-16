@@ -113,5 +113,6 @@
   "profilesStyleWallet": "Nouvel affichage des profils",
   "walletEdit": "Modifier",
   "walletExport": "Exporter",
-  "subscriptionClientDefault": "Par défaut"
+  "subscriptionClientDefault": "Par défaut",
+  "walletCurrent": "Utilisé"
 }

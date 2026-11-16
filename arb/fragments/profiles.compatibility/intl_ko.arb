@@ -113,5 +113,6 @@
   "profilesStyleWallet": "새 프로필 보기",
   "walletEdit": "편집",
   "walletExport": "내보내기",
-  "subscriptionClientDefault": "기본값"
+  "subscriptionClientDefault": "기본값",
+  "walletCurrent": "사용 중"
 }

@@ -105,7 +105,7 @@ class _ProfilesWalletState extends ConsumerState<ProfilesWallet> {
     );
   }
 
-  Widget _header(BuildContext context, int count) {
+  Widget _header(BuildContext context, String title, {int? count}) {
     final appLocalizations = context.appLocalizations;
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
@@ -114,16 +114,14 @@ class _ProfilesWalletState extends ConsumerState<ProfilesWallet> {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: [
-          Text(
-            appLocalizations.walletOthers,
-            style: AppTextStyle.headline.of(context),
-          ),
-          Text(
-            appLocalizations.walletProfilesCount(count),
-            style: AppTextStyle.footnote
-                .of(context)
-                .copyWith(color: context.colorScheme.onSurfaceVariant),
-          ),
+          Text(title, style: AppTextStyle.headline.of(context)),
+          if (count != null)
+            Text(
+              appLocalizations.walletProfilesCount(count),
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: context.colorScheme.onSurfaceVariant),
+            ),
         ],
       ),
     );
@@ -133,7 +131,12 @@ class _ProfilesWalletState extends ConsumerState<ProfilesWallet> {
     final grid = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (others.isNotEmpty) _header(context, others.length),
+        if (others.isNotEmpty)
+          _header(
+            context,
+            context.appLocalizations.walletOthers,
+            count: others.length,
+          ),
         LayoutBuilder(
           builder: (_, constraints) {
             final columns =
@@ -168,7 +171,17 @@ class _ProfilesWalletState extends ConsumerState<ProfilesWallet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: widget.spacing * 2,
       children: [
-        if (pass != null) SizedBox(width: _passWidth, child: pass),
+        if (pass != null)
+          SizedBox(
+            width: _passWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _header(context, context.appLocalizations.walletCurrent),
+                pass,
+              ],
+            ),
+          ),
         Expanded(child: grid),
       ],
     );
@@ -185,7 +198,12 @@ class _ProfilesWalletState extends ConsumerState<ProfilesWallet> {
         ?pass,
         if (others.isNotEmpty) ...[
           SizedBox(height: pass == null ? 0 : 20),
-          if (pass != null) _header(context, others.length),
+          if (pass != null)
+            _header(
+              context,
+              appLocalizations.walletOthers,
+              count: others.length,
+            ),
           AnimatedSize(
             duration: context.motionDuration(commonDuration),
             curve: Curves.easeOutCubic,

@@ -113,5 +113,6 @@
   "profilesStyleWallet": "Новый вид профилей",
   "walletEdit": "Изменить",
   "walletExport": "Экспорт",
-  "subscriptionClientDefault": "По умолчанию"
+  "subscriptionClientDefault": "По умолчанию",
+  "walletCurrent": "Используемый"
 }

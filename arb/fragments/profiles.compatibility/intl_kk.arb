@@ -113,5 +113,6 @@
   "profilesStyleWallet": "Профильдердің жаңа көрінісі",
   "walletEdit": "Өзгерту",
   "walletExport": "Экспорт",
-  "subscriptionClientDefault": "Әдепкі"
+  "subscriptionClientDefault": "Әдепкі",
+  "walletCurrent": "Қолданыста"
 }

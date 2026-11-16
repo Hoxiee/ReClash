@@ -113,5 +113,6 @@
   "profilesStyleWallet": "Profillarning yangi ko‘rinishi",
   "walletEdit": "Tahrirlash",
   "walletExport": "Eksport",
-  "subscriptionClientDefault": "Standart"
+  "subscriptionClientDefault": "Standart",
+  "walletCurrent": "Ishlatilmoqda"
 }

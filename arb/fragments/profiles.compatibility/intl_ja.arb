@@ -113,5 +113,6 @@
   "profilesStyleWallet": "新しいプロファイル表示",
   "walletEdit": "編集",
   "walletExport": "エクスポート",
-  "subscriptionClientDefault": "デフォルト"
+  "subscriptionClientDefault": "デフォルト",
+  "walletCurrent": "使用中"
 }
