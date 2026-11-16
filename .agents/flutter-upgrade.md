@@ -45,30 +45,23 @@ Hotfix releases (3.47.x) carry only cherry-picks listed in the SDK's `CHANGELOG.
 - **Remove when:** a stable `FLUTTER_VERSION` fixes #193504. Before dropping the call, build with Impeller on that SDK
   and drag every window edge for a minute on a machine that reproduced the freeze; the window has to keep redrawing.
 
-## Impeller disabled on Linux
-
-- **Bug:** not filed upstream. On 3.47 the Linux Impeller backend corrupts oversized animated layers (seen on Arch
-  Linux), such as a page sliding in a transition.
-- **Workaround:** `my_application_activate` in `linux/runner/my_application.cc` calls
-  `fl_dart_project_set_enable_impeller(project, FALSE)` before the view is created, so every Linux build renders
-  with Skia. Release builds ignore `FLUTTER_ENGINE_SWITCHES`, so users cannot turn Impeller off themselves.
-- **Side effect:** Linux draws Liquid Glass through its Skia fallback; judge Linux visual reports against Skia.
-- **Remove when:** a stable `FLUTTER_VERSION` fixes it. Before dropping the call, build with Impeller on that SDK and
-  run the page transitions with a full-window page on Arch Linux; no layer may show corruption.
-
 ## Linux on NVIDIA blocks 3.50
 
-- **Bug:** not filed upstream. From 3.49, flutter/flutter#189476 composites the first layer with the shader when
+- **Bug:** flutter/flutter#195885. From 3.49, flutter/flutter#189476 composites the first layer with the shader when
   `glBlitFramebuffer` is unavailable, and `fl_opengl_manager.cc` always treats NVIDIA as unable to blit
   (flutter/flutter#152099). `composite_layer` in `fl_compositor_opengl.cc` sets the offset to `2 * x / width - 1`
   on a quad whose vertices already span -1..1. As a result, a layer at the origin lands on -2..0, and the window shows
   the top-right quarter of the frame in its bottom-left quarter, with black elsewhere. Seen on 3.50.0 with an
   RTX 4070 SUPER, with Skia and with Impeller, natively on Wayland and under XWayland.
+- **Fix upstream:** flutter/flutter#196083 on `main` (2026-11-07), with a stable cherry-pick in
+  flutter/flutter#196418. It is not in 3.50.0.
 - **Workaround:** `FLUTTER_VERSION` stays at 3.47.6, where the first layer is always blitted.
-- **Remove when:** a stable has fixed the offset or kept the blit for the first layer. Before raising
-  `FLUTTER_VERSION`, run a Linux build on an NVIDIA GPU and confirm that the frame fills the window at startup and
-  after a resize. That build is also the first chance to recheck "Impeller disabled on Linux" on the new
-  renderer.
+- **Side effect:** on 3.47.6, NVIDIA still blits from Impeller's multisample framebuffer, despite
+  flutter/flutter#152099. That is a suspected cause of the corrupted oversized animated layers seen there, such as a
+  full-window page sliding in a transition, but it is unconfirmed.
+- **Remove when:** a 3.50.x stable lists #196083 in its changelog. Before raising `FLUTTER_VERSION`, run a Linux
+  build on an NVIDIA GPU. Confirm that the frame fills the window at startup and after a resize, and that page
+  transitions show no corrupted layers.
 
 ## Wrong-size back buffer on macOS
 
