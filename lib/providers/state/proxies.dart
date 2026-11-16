@@ -4,8 +4,25 @@ part of '../state.dart';
 GroupsState currentGroupsState(Ref ref) {
   final mode = ref.watch(effectiveModeProvider);
   final groups = ref.watch(groupsProvider);
+  final favorites = ref.watch(favoriteSetProvider);
   return GroupsState(
-    value: shownGroups(mode, groups).map(_withoutSelection).toList(),
+    value: [
+      for (final group in shownGroups(mode, groups))
+        favoritesFirst(_withoutSelection(group), favorites),
+    ],
+  );
+}
+
+/// Keeps the core's order, its delay or name sort included, within each part.
+Group favoritesFirst(Group group, Set<String> favorites) {
+  if (favorites.isEmpty || !group.all.any((p) => favorites.contains(p.name))) {
+    return group;
+  }
+  return group.copyWith(
+    all: [
+      ...group.all.where((proxy) => favorites.contains(proxy.name)),
+      ...group.all.where((proxy) => !favorites.contains(proxy.name)),
+    ],
   );
 }
 
@@ -238,6 +255,13 @@ Set<String> unfoldSet(Ref ref) {
     currentProfileProvider.select((state) => state?.unfoldSet ?? {}),
   );
   return unfoldSet;
+}
+
+@riverpod
+Set<String> favoriteSet(Ref ref) {
+  return ref.watch(
+    currentProfileProvider.select((state) => state?.favoriteSet ?? const {}),
+  );
 }
 
 @riverpod

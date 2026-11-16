@@ -117,6 +117,7 @@ class ProxyCard extends ConsumerWidget {
     WidgetRef ref, {
     required bool inUse,
     required bool pinned,
+    required bool favorite,
     required bool addable,
   }) {
     final appLocalizations = context.appLocalizations;
@@ -135,6 +136,13 @@ class ProxyCard extends ConsumerWidget {
           checked: pinned,
           onPressed: () => _handleSelect(ref),
         ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.star,
+        label: appLocalizations.favorite,
+        checked: favorite,
+        onPressed: () =>
+            ref.read(proxiesActionProvider.notifier).toggleFavorite(proxy.name),
+      ),
       if (addable)
         CommonPopupMenuItem(
           glyph: AppGlyphs.listAdd,
@@ -213,6 +221,9 @@ class ProxyCard extends ConsumerWidget {
             ref.watch(
               proxyNameProvider(groupName).select((name) => name == proxy.name),
             );
+        final favorite = ref.watch(
+          favoriteSetProvider.select((set) => set.contains(proxy.name)),
+        );
         final isCustomProfile = ref.watch(
           currentProfileProvider.select(
             (profile) => profile?.type == ProfileType.custom,
@@ -224,6 +235,7 @@ class ProxyCard extends ConsumerWidget {
             ref,
             inUse: inUse,
             pinned: pinned,
+            favorite: favorite,
             addable: _isAddableToLocal(proxy, isCustomProfile: isCustomProfile),
           ),
           child: CommonCard(
@@ -249,6 +261,13 @@ class ProxyCard extends ConsumerWidget {
                     children: [
                       Expanded(child: proxyNameText),
                       if (isOneline) delayText,
+                      if (favorite)
+                        GlyphIcon(
+                          AppGlyphs.star,
+                          size: 16,
+                          fill: 1,
+                          color: context.colorScheme.primary,
+                        ),
                       if (pinned)
                         SelectionBadge.preferred(inUse: inUse)
                       else if (inUse)

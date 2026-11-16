@@ -337,6 +337,7 @@ extension ProfileReferences on Profile {
         null => null,
       },
       unfoldSet: {for (final name in unfoldSet) keyOf(name)},
+      favoriteSet: {for (final name in favoriteSet) names[name] ?? name},
     );
   }
 }

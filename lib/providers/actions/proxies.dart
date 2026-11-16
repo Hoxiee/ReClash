@@ -271,6 +271,21 @@ class ProxiesAction extends _$ProxiesAction {
         .put(currentProfile.copyWith(unfoldSet: value));
   }
 
+  void toggleFavorite(String proxyName) {
+    final currentProfile = ref.read(currentProfileProvider);
+    if (currentProfile == null) return;
+    final favorites = currentProfile.favoriteSet;
+    ref
+        .read(profilesProvider.notifier)
+        .put(
+          currentProfile.copyWith(
+            favoriteSet: favorites.contains(proxyName)
+                ? ({...favorites}..remove(proxyName))
+                : {...favorites, proxyName},
+          ),
+        );
+  }
+
   void setDelay(Delay delay) {
     _bufferedDelays.add(delay);
     _scheduleDelayFlush();

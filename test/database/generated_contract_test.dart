@@ -29,14 +29,15 @@ void main() {
       autoUpdate: true,
       selectedMap: const {'Select': 'DIRECT'},
       unfoldSet: const {'Select'},
+      favoriteSet: const {'DIRECT'},
       order: 3,
       overrides: const ProfileOverrides(
         dnsOverrideKeys: {DnsOverrideKey.nameserver},
       ),
     );
 
-    expect(profile.toColumns(true), hasLength(18));
-    expect(profile.toCompanion(true).toColumns(true), hasLength(18));
+    expect(profile.toColumns(true), hasLength(19));
+    expect(profile.toCompanion(true).toColumns(true), hasLength(19));
     expect(RawProfile.fromJson(profile.toJson()).toJson(), profile.toJson());
     expect(profile.copyWith(label: 'Next').label, 'Next');
     expect(
@@ -66,10 +67,11 @@ void main() {
       autoUpdate: false,
       selectedMap: {},
       unfoldSet: {},
+      favoriteSet: {},
     );
-    expect(emptyProfile.toColumns(true), hasLength(10));
-    expect(emptyProfile.toColumns(false), hasLength(20));
-    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(10));
+    expect(emptyProfile.toColumns(true), hasLength(11));
+    expect(emptyProfile.toColumns(false), hasLength(21));
+    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(11));
 
     final insertedProfile = ProfilesCompanion.insert(
       type: ProfileType.file,

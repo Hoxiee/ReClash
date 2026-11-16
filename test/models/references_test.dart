@@ -280,6 +280,7 @@ void main() {
       selectedMap: {'Auto': 'HK', 'Pool': 'HK', 'Old': 'US'},
       currentGroupName: 'Old',
       unfoldSet: {'Old', 'Auto'},
+      favoriteSet: {'HK', 'Old', 'US'},
     );
     const members = {
       'Auto': ['HK', 'Old'],
@@ -290,6 +291,7 @@ void main() {
     final proxy = profile.renamedPicks({'HK': 'HK2'}, members: members);
     expect(proxy.selectedMap, {'Auto': 'HK2', 'Pool': 'HK', 'Old': 'US'});
     expect(proxy.currentGroupName, 'Old');
+    expect(proxy.favoriteSet, {'HK2', 'Old', 'US'});
 
     final group = profile
         .copyWith(selectedMap: {'Auto': 'Old', 'Old': 'US'})
@@ -297,6 +299,7 @@ void main() {
     expect(group.selectedMap, {'Auto': 'New', 'New': 'US'});
     expect(group.currentGroupName, 'New');
     expect(group.unfoldSet, {'New', 'Auto'});
+    expect(group.favoriteSet, {'HK', 'New', 'US'});
   });
 
   test('a name is in use wherever one profile names it', () {

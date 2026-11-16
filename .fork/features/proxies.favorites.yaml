@@ -1,0 +1,12 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  toggle: Toggling a favorite adds or removes exactly that node on the current profile; the proxy card's long-press and context menu offer it.
+  order: Favorites lead every group they belong to, each part keeping the Core's order, delay and name sorts included.
+  persistence: Favorites persist per profile, an upgraded database starts each profile with none, and renames carry them along.
+watch: [lib/views/proxies/card.dart, lib/providers/state/proxies.dart, lib/providers/actions/proxies.dart, lib/models/profile.dart, lib/models/references.dart, lib/database/profiles.dart, lib/database/database.dart, 'arb/fragments/proxies.favorites/**', test/providers/proxies_action_test.dart, test/providers/state_derived_test.dart, test/database/migration_v1_to_v2_test.dart, test/models/references_test.dart]
+checks:
+  proxies-favorites: [toggle, order, persistence]
+drop: Upstream ships per-profile favorites that lead their groups.

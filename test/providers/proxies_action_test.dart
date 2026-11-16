@@ -1662,6 +1662,21 @@ void main() {
       expect(container.read(profilesProvider), isEmpty);
     });
 
+    test('toggleFavorite adds and removes a proxy on the current profile', () {
+      final profile = Profile.normal(label: 'p');
+      final container = buildContainer(profile: profile);
+
+      actionOf(container).toggleFavorite('HK-01');
+      actionOf(container).toggleFavorite('JP-01');
+      expect(container.read(profilesProvider).single.favoriteSet, {
+        'HK-01',
+        'JP-01',
+      });
+
+      actionOf(container).toggleFavorite('HK-01');
+      expect(container.read(profilesProvider).single.favoriteSet, {'JP-01'});
+    });
+
     test('updateCurrentUnfoldSet stores the set on the current profile', () {
       final profile = Profile.normal(label: 'p');
       final container = buildContainer(profile: profile);

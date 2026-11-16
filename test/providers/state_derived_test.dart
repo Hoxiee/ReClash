@@ -73,6 +73,47 @@ void main() {
     expect(container.read(currentGroupsStateProvider).value, isEmpty);
   });
 
+  test('favorites lead each group in their core order', () {
+    final profile = Profile.normal(
+      label: 'p',
+    ).copyWith(favoriteSet: {'C', 'A', 'Elsewhere'});
+    _profiles(container).put(profile);
+    container.read(currentProfileIdProvider.notifier).update((_) => profile.id);
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(mode: Mode.rule));
+    container
+        .read(groupsProvider.notifier)
+        .update(
+          (_) => [
+            const Group(
+              name: 'Proxy',
+              type: GroupType.Selector,
+              hidden: false,
+              all: [
+                Proxy(name: 'B', type: 'Direct'),
+                Proxy(name: 'C', type: 'Direct'),
+                Proxy(name: 'D', type: 'Direct'),
+                Proxy(name: 'A', type: 'Direct'),
+              ],
+            ),
+          ],
+        );
+
+    List<String> names() => container
+        .read(currentGroupsStateProvider)
+        .value
+        .single
+        .all
+        .map((proxy) => proxy.name)
+        .toList();
+
+    expect(names(), ['C', 'A', 'B', 'D']);
+
+    container.read(proxiesActionProvider.notifier).toggleFavorite('C');
+    expect(names(), ['A', 'B', 'C', 'D']);
+  });
+
   test('a GLOBAL group of the profile\'s own shows in rule mode', () {
     container
         .read(groupsProvider.notifier)

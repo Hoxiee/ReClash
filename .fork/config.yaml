@@ -110,6 +110,8 @@ checks:
     argv: [flutter, test, test/common/punycode_test.dart, test/features/tracker_info_idn_test.dart]
   proxies-groups:
     argv: [flutter, test, test/providers/proxies_action_test.dart, test/providers/setup_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
+  proxies-favorites:
+    argv: [flutter, test, test/providers/proxies_action_test.dart, test/providers/state_derived_test.dart, test/database/migration_v1_to_v2_test.dart, test/models/references_test.dart]
   routing-engine:
     argv: [go, -C, core, test, ./rcx, -run, ., -count=1]
   routing-ui:
