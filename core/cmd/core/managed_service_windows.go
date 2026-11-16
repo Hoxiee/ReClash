@@ -90,11 +90,17 @@ func lockWindowsOwnedHome(home, owner string) ([]windows.Handle, error) {
 		closeWindowsHandles(handles)
 		return nil, err
 	}
-	if actual != owner {
+	if !windowsHomeOwnerAllowed(actual, owner) {
 		closeWindowsHandles(handles)
 		return nil, errors.New("windows_home_owner_mismatch")
 	}
 	return handles, nil
+}
+
+// An elevated run of the app leaves its home owned by Administrators; like
+// SYSTEM, that owner is out of reach of the other accounts the check guards against.
+func windowsHomeOwnerAllowed(actual, owner string) bool {
+	return actual == owner || actual == "S-1-5-32-544" || actual == "S-1-5-18"
 }
 
 func prepareWindowsServiceStartup(args []string) (string, func(), error) {

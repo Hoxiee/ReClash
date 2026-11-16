@@ -124,13 +124,11 @@ func TestWindowsServiceHomeOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 	closeWindowsHandles(handles)
-	other := "S-1-5-18"
-	if owner == other {
-		other = "S-1-5-19"
-	}
-	if handles, err := lockWindowsOwnedHome(home, other); err == nil {
-		closeWindowsHandles(handles)
-		t.Fatal("accepted a home owned by another account")
+	if !windowsHomeOwnerAllowed(owner, "S-1-5-21-1-2-3-1001") {
+		if handles, err := lockWindowsOwnedHome(home, "S-1-5-21-1-2-3-1001"); err == nil {
+			closeWindowsHandles(handles)
+			t.Fatal("accepted a home owned by another account")
+		}
 	}
 	sibling := filepath.Join(home, "sibling")
 	if err := os.Mkdir(sibling, 0700); err != nil {
@@ -152,6 +150,20 @@ func TestWindowsServiceHomeOwner(t *testing.T) {
 		if handles, err := lockWindowsOwnedHome(path, owner); err == nil {
 			closeWindowsHandles(handles)
 			t.Fatalf("accepted %s as the managed home", path)
+		}
+	}
+}
+
+func TestWindowsServiceHomeOwnerAllowed(t *testing.T) {
+	const user = "S-1-5-21-1-2-3-1001"
+	for _, actual := range []string{user, "S-1-5-32-544", "S-1-5-18"} {
+		if !windowsHomeOwnerAllowed(actual, user) {
+			t.Fatalf("rejected a home owned by %s", actual)
+		}
+	}
+	for _, actual := range []string{"S-1-5-21-1-2-3-1002", "S-1-5-19", "S-1-5-32-545", "S-1-1-0"} {
+		if windowsHomeOwnerAllowed(actual, user) {
+			t.Fatalf("accepted a home owned by %s", actual)
 		}
 	}
 }
