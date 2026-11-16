@@ -34,6 +34,14 @@ void main() {
         ],
       );
     });
+
+    test('keeps a profile whose nodes the Core holds back', () {
+      final config = {
+        'rules': ['MATCH,Ember Select'],
+      };
+
+      expect(withSandboxNodes(config, keptNodes: 3), same(config));
+    });
   });
 
   test('a node keeps its latency between tests', () {

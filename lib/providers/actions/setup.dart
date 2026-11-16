@@ -805,7 +805,10 @@ class SetupAction extends _$SetupAction {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
     if (ref.read(sandboxProvider)) {
-      rawConfig = withSandboxNodes(rawConfig);
+      rawConfig = withSandboxNodes(
+        rawConfig,
+        keptNodes: profileBase?.base.proxies ?? 0,
+      );
     }
     final directory = await appPath.profilesPath;
     final webDashboardDirectory = await webDashboardServedDirectory(

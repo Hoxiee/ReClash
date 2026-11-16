@@ -119,10 +119,19 @@ const _sandboxNodes = [
 
 /// A test subscription may ship no nodes at all; it gets fictional ones so
 /// the proxy pages have something to show.
-Map<String, dynamic> withSandboxNodes(Map<String, dynamic> rawConfig) {
+///
+/// `keptNodes` counts the proxies the Core keeps out of `rawConfig`: a profile
+/// large enough for `getProfileBase` loses its proxies, groups and rules from
+/// the overlay, and injecting a sandbox group there would leave the profile's
+/// own rules routing to a group the merged config does not have.
+Map<String, dynamic> withSandboxNodes(
+  Map<String, dynamic> rawConfig, {
+  int keptNodes = 0,
+}) {
   final proxies = rawConfig['proxies'];
   final providers = rawConfig['proxy-providers'];
-  if ((proxies is List && proxies.isNotEmpty) ||
+  if (keptNodes > 0 ||
+      (proxies is List && proxies.isNotEmpty) ||
       (providers is Map && providers.isNotEmpty)) {
     return rawConfig;
   }
