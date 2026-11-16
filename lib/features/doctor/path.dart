@@ -31,10 +31,10 @@ enum PathScope {
     PathStep.internet,
   ]),
 
-  /// The supervisor's quick check: server and internet through the main
-  /// group's selected node, since the rule route may send the test URL
-  /// direct and pass while the node is dead.
-  verify([PathStep.tunnel, PathStep.server, PathStep.internet]);
+  /// The supervisor's quick check: one delay test through the main group's
+  /// selected node, since the rule route may send the test URL direct and
+  /// pass while the node is dead.
+  verify([PathStep.tunnel, PathStep.internet]);
 
   const PathScope(this.steps);
 

@@ -133,17 +133,14 @@ void main() {
       expect(rig.applied, isEmpty);
     });
 
-    _test('a failed connect is confirmed and never moves the node', (rig) {
+    _test('a failed connect is confirmed and only resets connections', (rig) {
       rig
         ..fail(FailureCause.authRejected)
         ..connect();
       expect(rig.health.phase, ConnectionPhase.connecting);
       rig.run(const Duration(seconds: 3));
       expect(rig.checks, greaterThanOrEqualTo(2));
-      expect(rig.applied, [
-        'profile.update',
-        ConnectionRemedy.resetConnections,
-      ]);
+      expect(rig.applied, [ConnectionRemedy.resetConnections]);
       expect(rig.health.phase, ConnectionPhase.broken);
       expect(rig.health.cause, FailureCause.authRejected);
       expect(rig.health.repairFailed, isFalse);
@@ -335,7 +332,7 @@ void main() {
       expect(rig.health.phase, ConnectionPhase.broken);
       rig.run(const Duration(milliseconds: 900));
       expect(rig.health.phase, ConnectionPhase.recovering);
-      expect(rig.health.step, HealStep.updateProfile);
+      expect(rig.health.step, HealStep.resetConnections);
       rig.onRemedy[ConnectionRemedy.resetConnections] = rig.pass;
       rig.run(const Duration(seconds: 3));
       expect(rig.health.phase, ConnectionPhase.verified);
@@ -344,7 +341,7 @@ void main() {
     _test('a quick step never shows recovering', (rig) {
       rig
         ..fail(FailureCause.authRejected)
-        ..onRemedy['profile.update'] = rig.pass
+        ..onRemedy[ConnectionRemedy.resetConnections] = rig.pass
         ..connect()
         ..run(const Duration(seconds: 4));
       expect(rig.health.phase, ConnectionPhase.verified);

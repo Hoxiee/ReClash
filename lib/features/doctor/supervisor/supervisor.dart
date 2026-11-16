@@ -9,7 +9,6 @@ import '../kernel.dart';
 import '../path.dart';
 import '../remedies/connection.dart';
 import '../remedies/remedy.dart';
-import '../snapshot.dart';
 import 'health.dart';
 
 enum VerifyVerdict { pass, fail, unknown }
@@ -47,18 +46,9 @@ const _ladder = {
   HealStep.restartTunnel: ConnectionRemedy.reconnect,
 };
 
-const _autoSteps = [HealStep.updateProfile, HealStep.resetConnections];
-
-/// Failures a stale profile explains: rotated credentials, a moved or removed
-/// server. A timeout or reset says nothing about the profile, so auto-heal
-/// leaves the subscription alone.
-const _staleProfileCauses = {
-  FailureCause.authRejected,
-  FailureCause.serverDns,
-  FailureCause.refused,
-  FailureCause.tlsHandshake,
-  FailureCause.profileInvalid,
-};
+/// Auto-heal never fetches the subscription: a fetch re-applies the profile
+/// and drops every connection, which costs more than the failure it guesses at.
+const _autoSteps = [HealStep.resetConnections];
 
 const _repairSteps = [
   HealStep.updateProfile,
@@ -83,7 +73,6 @@ class ConnectionSupervisor {
     this.resumeTtl = const Duration(minutes: 2),
     this.graceInterval = const Duration(minutes: 5),
     this.recoveringDelay = const Duration(milliseconds: 800),
-    this.profileFreshFor = const Duration(minutes: 10),
   }) : _kernel = kernel,
        _autoHeal = autoHeal,
        _selectedNode = selectedNode,
@@ -101,10 +90,6 @@ class ConnectionSupervisor {
   /// How often an expired plan that still works is checked while visible.
   final Duration graceInterval;
   final Duration recoveringDelay;
-
-  /// A subscription fetched this recently is not fetched again by the
-  /// automatic ladder: the same answer would only repeat.
-  final Duration profileFreshFor;
 
   final DiagnosticKernel _kernel;
   final bool Function() _autoHeal;
@@ -452,7 +437,7 @@ class ConnectionSupervisor {
     });
     try {
       for (final step in steps) {
-        final healed = await _runStep(step, plan, force: repair);
+        final healed = await _runStep(step, plan);
         if (plan != _plan || epoch != _epoch) return false;
         if (healed) {
           _pass();
@@ -474,12 +459,7 @@ class ConnectionSupervisor {
   }
 
   /// Applies one rung and verifies; true when the check passed.
-  Future<bool> _runStep(HealStep step, int plan, {required bool force}) async {
-    if (step == HealStep.updateProfile &&
-        !force &&
-        (_profileIsFresh() || !_staleProfileCauses.contains(_cause))) {
-      return false;
-    }
+  Future<bool> _runStep(HealStep step, int plan) async {
     _step = step;
     _stepDetail = null;
     if (_recoveringShown) _emitRecovering();
@@ -504,12 +484,6 @@ class ConnectionSupervisor {
     if (plan != _plan) return false;
     if (result.verdict == VerifyVerdict.fail) _cause = result.cause;
     return result.verdict == VerifyVerdict.pass;
-  }
-
-  bool _profileIsFresh() {
-    final fetchedAt = _kernel.snapshot.valueOf(Facts.subscription)?.fetchedAt;
-    return fetchedAt != null &&
-        _clock().difference(fetchedAt) < profileFreshFor;
   }
 
   void _emitRecovering() => _emit(

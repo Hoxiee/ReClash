@@ -99,18 +99,11 @@ void main() {
           overrides: [profilesProvider.overrideWith(TestProfiles.new)],
         );
         addTearDown(container.dispose);
-        final checks = container.read(
-          Provider((ref) {
-            return [
-              for (final step in [PathStep.server, PathStep.internet])
-                verifyCheck(ref, _NoKernel(), step)!,
-            ];
-          }),
+        final check = container.read(
+          Provider((ref) => verifyCheck(ref, _NoKernel(), PathStep.internet)!),
         );
-        for (final check in checks) {
-          final result = await check.run(ProbeToken());
-          expect(result.status, PathStepStatus.unknown);
-        }
+        final result = await check.run(ProbeToken());
+        expect(result.status, PathStepStatus.unknown);
       },
     );
   });
