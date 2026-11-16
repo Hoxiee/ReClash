@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.9",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "A Windows TUN fix and a provider link on the wallet pass",
+      "spotlight": {
+        "title": "TUN starts on Windows again",
+        "description": "A home folder owned by Administrators no longer stops the service Core from starting TUN.",
+        "kind": "shield",
+        "platforms": ["windows"]
+      },
+      "highlights": [
+        {
+          "title": "Open the provider page",
+          "description": "Tap the host under the active profile's name on the wallet pass to open the page the subscription serves.",
+          "kind": "link"
+        },
+        {
+          "title": "Default request client",
+          "description": "New profiles start on Default, which sends the app's main User-Agent; the separate ReClash entry is gone.",
+          "kind": "update"
+        },
+        {
+          "title": "Donate page",
+          "description": "The page is centred on desktop again.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Правка TUN на Windows и ссылка провайдера на карте профиля",
+      "spotlight": {
+        "title": "TUN на Windows снова запускается",
+        "description": "Папка данных, принадлежащая Administrators, больше не мешает службе Core поднять TUN.",
+        "kind": "shield",
+        "platforms": ["windows"]
+      },
+      "highlights": [
+        {
+          "title": "Страница провайдера",
+          "description": "Нажмите на хост под названием активного профиля на карте, чтобы открыть страницу, которую отдаёт подписка.",
+          "kind": "link"
+        },
+        {
+          "title": "Клиент Default",
+          "description": "Новые профили начинают с Default, который отправляет основной User-Agent приложения; отдельный ReClash убран.",
+          "kind": "update"
+        },
+        {
+          "title": "Страница донатов",
+          "description": "Страница снова выровнена по центру на десктопе.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}

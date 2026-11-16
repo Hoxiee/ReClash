@@ -2,6 +2,21 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.9
+
+### New
+
+- **Provider page from the wallet pass**: tap the host under the active profile's name to open the page the
+  subscription itself serves, such as a provider panel. It is hidden when the provider asks for it not to be shown,
+  and stays untappable when the stored address is not a plain web link.
+- **Default request client**: new profiles start on a client called Default, which sends the app's main User-Agent.
+  An existing profile keeps the client it was saved with, and the separate ReClash entry is gone.
+
+### Fixed
+
+- TUN starts again after an elevated run of the app left its home folder owned by Administrators (Windows).
+- The donate page no longer sits off-centre on desktop.
+
 ## v0.1.0-pre.8
 
 ### Improved
