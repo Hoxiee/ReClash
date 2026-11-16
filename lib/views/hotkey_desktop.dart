@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
-import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 
@@ -19,14 +20,6 @@ class HotkeyDesktopView extends ConsumerWidget {
         level: MessageLevel.success,
       );
     }
-  }
-
-  Widget _copyButton(BuildContext context, String? text) {
-    return IconButton.filledTonal(
-      tooltip: context.appLocalizations.copy,
-      onPressed: text == null ? null : () => _copy(context, text),
-      icon: const GlyphIcon(AppGlyphs.copy, fill: 1, size: 20),
-    ).withAppTooltip();
   }
 
   @override
@@ -52,16 +45,13 @@ class HotkeyDesktopView extends ConsumerWidget {
                   title: localizations.hotkeyDesktopCommands,
                   items: [
                     for (final action in HotAction.values)
-                      DecorationListItem(
-                        title: Text(action.label),
-                        subtitle: Text(
+                      DetailRow(
+                        title: action.label,
+                        value: Text(
                           action.desktopCommand(id),
                           style: codeStyle,
                         ),
-                        trailing: _copyButton(
-                          context,
-                          action.desktopCommand(id),
-                        ),
+                        copyText: action.desktopCommand(id),
                       ),
                   ],
                 ),
@@ -79,6 +69,14 @@ class HotkeyDesktopView extends ConsumerWidget {
                   items: [
                     for (final format in HotkeyExportFormat.values)
                       DecorationListItem(
+                        onPressed: format.includeDirective(directory) == null
+                            ? null
+                            : () => unawaited(
+                                _copy(
+                                  context,
+                                  format.includeDirective(directory)!,
+                                ),
+                              ),
                         title: Text(format.label),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,10 +103,6 @@ class HotkeyDesktopView extends ConsumerWidget {
                                     .copyWith(color: context.colorScheme.error),
                               ),
                           ],
-                        ),
-                        trailing: _copyButton(
-                          context,
-                          format.includeDirective(directory),
                         ),
                       ),
                   ],
