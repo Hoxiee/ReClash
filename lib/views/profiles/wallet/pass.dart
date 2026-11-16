@@ -116,6 +116,7 @@ class WalletPass extends ConsumerWidget {
                       style: style,
                       kind: metadata?.kind,
                       expired: facts.state == WalletState.expired,
+                      hideUrl: metadata?.hideUrl ?? false,
                     ),
                     const SizedBox(height: 22),
                     _Usage(
@@ -215,6 +216,7 @@ class _Header extends StatelessWidget {
     required this.style,
     required this.kind,
     required this.expired,
+    required this.hideUrl,
   });
 
   final Profile profile;
@@ -222,11 +224,16 @@ class _Header extends StatelessWidget {
   final SubscriptionKind? kind;
   final bool expired;
 
+  /// A provider that asks its link not to be shown also gets no host link.
+  final bool hideUrl;
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final host = profile.type == ProfileType.url
-        ? Uri.tryParse(profile.url)?.host ?? ''
+    final isUrl = profile.type == ProfileType.url;
+    final link = isUrl && !hideUrl ? safeSubscriptionLink(profile.url) : null;
+    final host = isUrl
+        ? link?.host ?? Uri.tryParse(profile.url)?.host ?? ''
         : switch (profile.type) {
             ProfileType.file => l.walletLocalFile,
             _ => l.walletCustomProfile,
@@ -256,14 +263,7 @@ class _Header extends StatelessWidget {
                   if (kind != null) WalletKindChip(kind: kind!),
                 ],
               ),
-              Text(
-                host,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyle.footnote
-                    .of(context)
-                    .copyWith(color: style.muted),
-              ),
+              _HostLink(link: link, host: host, style: style),
             ],
           ),
         ),
@@ -287,6 +287,56 @@ class _Header extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The subscription's host; tapping opens the page the link serves, which for
+/// a panel such as Remnawave is the account page itself.
+class _HostLink extends StatelessWidget {
+  const _HostLink({
+    required this.link,
+    required this.host,
+    required this.style,
+  });
+
+  final Uri? link;
+  final String host;
+  final _PassStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final link = this.link;
+    final text = Text(
+      host,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyle.footnote
+          .of(context)
+          .copyWith(color: link == null ? style.muted : style.scheme.primary),
+    );
+    if (link == null) return text;
+    return Tooltip(
+      message: '$link',
+      child: InkWell(
+        customBorder: AppShape.full,
+        onTap: () => unawaited(dialogs.openUrl('$link')),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Flexible(child: text),
+              GlyphIcon(
+                AppGlyphs.openExternal,
+                size: 13,
+                color: style.scheme.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
