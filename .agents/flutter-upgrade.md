@@ -56,6 +56,20 @@ Hotfix releases (3.47.x) carry only cherry-picks listed in the SDK's `CHANGELOG.
 - **Remove when:** a stable `FLUTTER_VERSION` fixes it. Before dropping the call, build with Impeller on that SDK and
   run the page transitions with a full-window page on Arch Linux; no layer may show corruption.
 
+## Linux on NVIDIA blocks 3.50
+
+- **Bug:** not filed upstream. From 3.49, flutter/flutter#189476 composites the first layer with the shader when
+  `glBlitFramebuffer` is unavailable, and `fl_opengl_manager.cc` always treats NVIDIA as unable to blit
+  (flutter/flutter#152099). `composite_layer` in `fl_compositor_opengl.cc` sets the offset to `2 * x / width - 1`
+  on a quad whose vertices already span -1..1. As a result, a layer at the origin lands on -2..0, and the window shows
+  the top-right quarter of the frame in its bottom-left quarter, with black elsewhere. Seen on 3.50.0 with an
+  RTX 4070 SUPER, with Skia and with Impeller, natively on Wayland and under XWayland.
+- **Workaround:** `FLUTTER_VERSION` stays at 3.47.6, where the first layer is always blitted.
+- **Remove when:** a stable has fixed the offset or kept the blit for the first layer. Before raising
+  `FLUTTER_VERSION`, run a Linux build on an NVIDIA GPU and confirm that the frame fills the window at startup and
+  after a resize. That build is also the first chance to recheck "Impeller disabled on Linux" on the new
+  renderer.
+
 ## Wrong-size back buffer on macOS
 
 - **Bug:** [flutter/flutter#185394](https://github.com/flutter/flutter/issues/185394). `removeSurfaceForSize:` in
