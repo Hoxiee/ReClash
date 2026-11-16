@@ -32,7 +32,6 @@
   "regionAppsChanged": "Hudud yoki ilova ro‘yxatlari o‘zgardi. Joriy sozlamalar bilan tanlovni takrorlang.",
   "regionRecommended": "Ushbu qurilma uchun tavsiya etiladi",
   "regionChangesTitle": "Nima o‘zgaradi",
-  "regionChangeDns": "DNS serverlari",
   "regionChangeMtu": "TUN MTU",
   "regionChangeServices": "Xizmat tekshiruvlari",
   "restoreDefaults": "Standart qiymatlarni tiklash",

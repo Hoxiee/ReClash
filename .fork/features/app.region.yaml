@@ -11,7 +11,7 @@ must:
   reversibility: Removing or switching the region does not duplicate rules or lose underlying user settings.
   android: Domestic app matching is country-specific, honors shared exclusions, and unknown regions match nothing.
   localization: All region labels, impact summaries, warnings, and apply actions are owned by region feature ARB fragments.
-  settings: Applying a region writes its DNS, MTU and bypass list into the regular settings shown by the editors; Restore defaults on Network and DNS returns them to the region's values.
+  settings: Applying a region writes its MTU and bypass list into the regular settings shown by the editors; Restore defaults on Network returns them to the region's values. Regions set no DNS, so profile DNS stays the provider's unless the user overrides it.
   services: Explicitly enabled and disabled checks survive region changes, including an empty enabled set.
   service-automation: Service checks include Telegram, Sberbank, Gosuslugi, VK, Kinopoisk and Yandex; persisted automation defaults to enabled services only, connected only, after three stable seconds, while manual checks remain independent.
   app-selection: Smart selection explains the regional VPN split and replacement of both manual lists before confirmation; its footbar action replaces the zero count while nonempty selections retain the count. Errors, empty matches, cancellation, changed inputs and disposal never replace lists. A subscription's `domestic` routing asks for none and only adds provider apps, tagged, without touching the user's lists.

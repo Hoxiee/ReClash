@@ -32,7 +32,6 @@
   "regionAppsChanged": "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
   "regionRecommended": "このデバイスにおすすめ",
   "regionChangesTitle": "変更される項目",
-  "regionChangeDns": "DNS サーバー",
   "regionChangeMtu": "TUN の MTU",
   "regionChangeServices": "サービス確認",
   "restoreDefaults": "デフォルトに戻す",

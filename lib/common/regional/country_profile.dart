@@ -1,20 +1,15 @@
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/clash_config.dart';
 
 const regionalDefaultTunMtu = 1500;
 
 class CountryProfile {
   const CountryProfile({
-    this.dns = defaultDns,
-    this.dnsOverrideKeys = const {},
     this.tunMtu = regionalDefaultTunMtu,
     this.bypassDomains = const [],
     this.defaultServiceIds = const [],
     this.directRules = const [],
   });
 
-  final Dns dns;
-  final Set<DnsOverrideKey> dnsOverrideKeys;
   final int tunMtu;
   final List<String> bypassDomains;
   final List<String> defaultServiceIds;
@@ -28,43 +23,6 @@ const otherCountryProfile = CountryProfile(
   defaultServiceIds: ['google', 'youtube', 'chatgpt', 'claude', 'netflix'],
 );
 
-const _regionalDnsOverrideKeys = {
-  DnsOverrideKey.defaultNameserver,
-  DnsOverrideKey.nameserver,
-  DnsOverrideKey.fallback,
-  DnsOverrideKey.proxyServerNameserver,
-  DnsOverrideKey.fallbackFilterGeoipCode,
-};
-
-const _russiaDns = Dns(
-  defaultNameserver: ['77.88.8.8', '77.88.8.1'],
-  nameserver: ['tls://77.88.8.8', 'tls://77.88.8.1'],
-  fallback: [
-    'https://dns.adguard-dns.com/dns-query',
-    'https://dns.quad9.net/dns-query',
-  ],
-  proxyServerNameserver: ['tls://77.88.8.8'],
-  fallbackFilter: FallbackFilter(geoipCode: 'RU'),
-);
-
-const _iranDns = Dns(
-  defaultNameserver: ['178.22.122.100', '185.51.200.2'],
-  nameserver: ['https://free.shecan.ir/dns-query'],
-  fallback: ['https://dns.quad9.net/dns-query'],
-  proxyServerNameserver: ['178.22.122.100'],
-  fallbackFilter: FallbackFilter(geoipCode: 'IR'),
-);
-
-const _egyptDns = Dns(
-  defaultNameserver: ['1.1.1.1', '8.8.8.8'],
-  nameserver: [
-    'https://cloudflare-dns.com/dns-query',
-    'https://dns.google/dns-query',
-  ],
-  proxyServerNameserver: ['https://cloudflare-dns.com/dns-query'],
-  fallbackFilter: FallbackFilter(geoipCode: 'EG'),
-);
-
 const _chinaBypassDomains = [
   '*zhihu.com',
   '*zhimg.com',
@@ -75,28 +33,20 @@ const _chinaBypassDomains = [
 
 const _profiles = <String, CountryProfile>{
   'CN': CountryProfile(
-    dns: defaultDns,
-    dnsOverrideKeys: _regionalDnsOverrideKeys,
     tunMtu: defaultTunMtu,
     bypassDomains: _chinaBypassDomains,
     defaultServiceIds: ['google', 'youtube', 'chatgpt', 'claude', 'bilibili'],
     directRules: ['GEOSITE,cn,DIRECT', 'GEOIP,CN,DIRECT,no-resolve'],
   ),
   'RU': CountryProfile(
-    dns: _russiaDns,
-    dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['youtube', 'discord', 'chatgpt', 'claude'],
     directRules: ['GEOSITE,category-ru,DIRECT', 'GEOIP,RU,DIRECT,no-resolve'],
   ),
   'IR': CountryProfile(
-    dns: _iranDns,
-    dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['youtube', 'chatgpt', 'claude'],
     directRules: ['GEOSITE,category-ir,DIRECT', 'GEOIP,IR,DIRECT,no-resolve'],
   ),
   'EG': CountryProfile(
-    dns: _egyptDns,
-    dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['google', 'youtube', 'chatgpt', 'claude'],
     directRules: ['GEOIP,EG,DIRECT,no-resolve'],
   ),

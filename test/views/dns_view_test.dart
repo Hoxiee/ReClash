@@ -1,5 +1,4 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
@@ -105,52 +104,14 @@ void main() {
         ),
       );
 
-  testWidgets(
-    'regional DNS shows as entries and Restore defaults brings it back',
-    (tester) async {
-      await pumpView(tester);
-      final l = currentAppLocalizations;
-      container.read(systemActionProvider.notifier).applyRegion('RU');
-      await tester.pumpAndSettle();
-      expect(
-        find.widgetWithText(ConfigListEditItem, 'Nameserver'),
-        findsOneWidget,
-      );
-      expect(config().dns.nameserver, ['tls://77.88.8.8', 'tls://77.88.8.1']);
-      expect(find.textContaining('Russia'), findsNothing);
-      expect(barButton(tester, l.restoreDefaults).onPressed, isNull);
-
-      container
-          .read(patchClashConfigProvider.notifier)
-          .update(
-            (state) => state.copyWith(
-              dns: state.dns.copyWith(
-                nameserver: ['https://manual.example/dns-query'],
-              ),
-              dnsOverrideKeys: {...state.dnsOverrideKeys, DnsOverrideKey.ipv6},
-            ),
-          );
-      await tester.pumpAndSettle();
-      container.read(systemActionProvider.notifier).applyRegion('IR');
-      await tester.pumpAndSettle();
-      expect(config().dns.nameserver, ['https://manual.example/dns-query']);
-      expect(config().dns.fallbackFilter.geoipCode, 'IR');
-
-      await tester.tap(find.byTooltip(l.restoreDefaults));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l.restore));
-      await tester.pumpAndSettle();
-      expect(config().dns.nameserver, ['https://free.shecan.ir/dns-query']);
-      expect(config().dnsOverrideKeys, regionDnsKeys('IR'));
-      expect(barButton(tester, l.restoreDefaults).onPressed, isNull);
-    },
-  );
-
-  testWidgets('Restore defaults clears every override without a region', (
+  testWidgets('a region adds no DNS and Restore defaults clears overrides', (
     tester,
   ) async {
     await pumpView(tester);
     final l = currentAppLocalizations;
+    container.read(systemActionProvider.notifier).applyRegion('RU');
+    await tester.pumpAndSettle();
+    expect(config().dnsOverrideKeys, isEmpty);
     setKeys({DnsOverrideKey.ipv6});
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip(l.restoreDefaults));

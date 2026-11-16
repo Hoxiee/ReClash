@@ -32,7 +32,6 @@
   "regionAppsChanged": "La région ou les listes ont changé. Relancez la sélection avec les réglages actuels.",
   "regionRecommended": "Recommandée pour cet appareil",
   "regionChangesTitle": "Ce qui change",
-  "regionChangeDns": "Serveurs DNS",
   "regionChangeMtu": "MTU TUN",
   "regionChangeServices": "Vérifications des services",
   "restoreDefaults": "Restaurer les valeurs par défaut",

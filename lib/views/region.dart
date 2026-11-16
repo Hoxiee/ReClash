@@ -54,12 +54,6 @@ List<(Glyph, String)> regionChanges(
   );
   final nextConfig = next.patchConfig;
   return [
-    if (nextConfig.dns != patchConfig.dns ||
-        !_equality.equals(
-          nextConfig.dnsOverrideKeys,
-          patchConfig.dnsOverrideKeys,
-        ))
-      (AppGlyphs.dns, l.regionChangeDns),
     if (!_equality.equals(next.bypassDomain, bypassDomain))
       (AppGlyphs.split, l.bypassDomain),
     if (nextConfig.tun.mtu != patchConfig.tun.mtu)

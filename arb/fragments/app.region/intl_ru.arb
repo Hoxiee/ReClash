@@ -32,7 +32,6 @@
   "regionAppsChanged": "Регион или списки приложений изменились. Повторите подбор для актуальных настроек.",
   "regionRecommended": "Рекомендуется для этого устройства",
   "regionChangesTitle": "Что изменится",
-  "regionChangeDns": "DNS-серверы",
   "regionChangeMtu": "MTU для TUN",
   "regionChangeServices": "Проверки сервисов",
   "restoreDefaults": "Восстановить по умолчанию",

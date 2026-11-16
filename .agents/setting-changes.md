@@ -159,10 +159,10 @@ Each path watches its own provider, so a single setting can take more than one o
 
 ## Regional Defaults
 
-`SystemAction.applyRegion` writes DNS, MTU, and the region bypass list into the ordinary settings (`PatchClashConfig`,
+`SystemAction.applyRegion` writes MTU and the region bypass list into the ordinary settings (`PatchClashConfig`,
 `NetworkProps.bypassDomain`), so editors show the real values. When the region changes, only values that match the
-previous region's defaults are replaced; manually changed ones stay. "Restore defaults" on the Network and DNS pages
-returns the current region's values. User profiles get the region's DNS from `regionCode` for keys they do not set.
+previous region's defaults are replaced; manually changed ones stay. "Restore defaults" on the Network page returns the
+current region's values; on the DNS page it clears every override. Regions set no DNS: it comes from the profile.
 Service checks remain a Flutter setting, and Android app selection is a separate action with confirmation.
 Auto-detection does not apply a region; the VPN restarts only through the existing confirmation in `VpnManager`.
 

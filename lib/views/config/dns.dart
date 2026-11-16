@@ -1,8 +1,6 @@
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/regional/regional_network.dart';
-import 'package:reclash/providers/config.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -162,12 +160,7 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns> {
   @override
   _DnsState? restoredOf(WidgetRef ref, _DnsState state) {
     if (target is! PatchOverrideTarget) return null;
-    final regionCode = ref.read(appSettingProvider).regionCode;
-    final cleared = withoutKeys(state, state.keys);
-    return (
-      model: withRegionDns(cleared.model, regionCode),
-      keys: regionDnsKeys(regionCode),
-    );
+    return withoutKeys(state, state.keys);
   }
 
   @override

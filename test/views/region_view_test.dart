@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/region_detection.dart';
-import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
@@ -123,7 +122,7 @@ void main() {
   ) async {
     await pumpRegionView(tester);
     await choose(tester, 'Russia');
-    expect(find.text('DNS servers'), findsOneWidget);
+    expect(find.text('DNS servers'), findsNothing);
     expect(find.text('TUN MTU'), findsOneWidget);
     expect(
       find.text('Values you changed yourself stay as they are.'),
@@ -134,8 +133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final patch = container.read(patchClashConfigProvider);
-    expect(patch.dns.nameserver, ['tls://77.88.8.8', 'tls://77.88.8.1']);
-    expect(patch.dnsOverrideKeys, regionDnsKeys('RU'));
+    expect(patch.dnsOverrideKeys, isEmpty);
     expect(patch.tun.mtu, regionalDefaultTunMtu);
     expect(
       container.read(networkSettingProvider).bypassDomain,

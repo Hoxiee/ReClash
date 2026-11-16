@@ -32,7 +32,6 @@
   "regionAppsChanged": "Аймақ немесе қолданба тізімдері өзгерді. Ағымдағы параметрлермен таңдауды қайталаңыз.",
   "regionRecommended": "Осы құрылғы үшін ұсынылады",
   "regionChangesTitle": "Не өзгереді",
-  "regionChangeDns": "DNS серверлері",
   "regionChangeMtu": "TUN MTU",
   "regionChangeServices": "Қызмет тексерістері",
   "restoreDefaults": "Әдепкі мәндерді қалпына келтіру",

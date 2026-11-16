@@ -32,7 +32,6 @@
   "regionAppsChanged": "地区或应用列表已更改。请根据当前设置重新选择。",
   "regionRecommended": "推荐用于此设备",
   "regionChangesTitle": "将要更改",
-  "regionChangeDns": "DNS 服务器",
   "regionChangeMtu": "TUN MTU",
   "regionChangeServices": "服务检查",
   "restoreDefaults": "恢复默认",

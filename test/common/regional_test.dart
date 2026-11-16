@@ -36,9 +36,6 @@ void main() {
         expect(shippedCountryCodes, {'RU', 'IR', 'CN', 'EG', 'OTHER'});
         expect(hasProfileForCode('ru'), isTrue);
         expect(hasProfileForCode('us'), isFalse);
-        expect(profileForCode('RU').dns.fallbackFilter.geoipCode, 'RU');
-        expect(profileForCode('IR').dns.fallbackFilter.geoipCode, 'IR');
-        expect(profileForCode('EG').dns.fallbackFilter.geoipCode, 'EG');
         expect(profileForCode('CN').bypassDomains, contains('*zhihu.com'));
         expect(profileForCode('CN').tunMtu, defaultTunMtu);
         expect(profileForCode('RU').tunMtu, regionalDefaultTunMtu);
@@ -53,7 +50,6 @@ void main() {
 
     test('unsupported regions receive only neutral defaults', () {
       final profile = profileForCode('US');
-      expect(profile.dns, defaultDns);
       expect(profile.tunMtu, regionalDefaultTunMtu);
       expect(profile.bypassDomains, isEmpty);
     });
@@ -72,15 +68,11 @@ void main() {
       bypassDomain: bypassDomain ?? regionBypassDomains(from),
     );
 
-    test('writes the region DNS, MTU and bypass list into settings', () {
+    test('writes the region MTU and bypass list but no DNS', () {
       final result = switchRegion(null, 'RU');
 
-      expect(result.patchConfig.dnsOverrideKeys, regionDnsKeys('RU'));
-      expect(result.patchConfig.dns.nameserver, [
-        'tls://77.88.8.8',
-        'tls://77.88.8.1',
-      ]);
-      expect(result.patchConfig.dns.fallbackFilter.geoipCode, 'RU');
+      expect(result.patchConfig.dns, const PatchClashConfig().dns);
+      expect(result.patchConfig.dnsOverrideKeys, isEmpty);
       expect(result.patchConfig.tun.mtu, regionalDefaultTunMtu);
       expect(result.patchConfig.tunOverride.mtu, regionalDefaultTunMtu);
       expect(result.patchConfig.tunOverrideKeys, {TunOverrideKey.mtu});
@@ -114,19 +106,12 @@ void main() {
         'https://user.example/dns-query',
       ]);
       expect(result.patchConfig.dns.fallbackFilter.geoipCode, 'US');
-      expect(result.patchConfig.dns.defaultNameserver, [
-        '77.88.8.8',
-        '77.88.8.1',
-      ]);
-      expect(
-        result.patchConfig.dnsOverrideKeys,
-        containsAll(base.dnsOverrideKeys),
-      );
+      expect(result.patchConfig.dnsOverrideKeys, base.dnsOverrideKeys);
       expect(result.patchConfig.tun.mtu, 1400);
       expect(result.bypassDomain, ['custom.example']);
     });
 
-    test('switching replaces only the previous region defaults', () {
+    test('switching regions leaves DNS overrides alone', () {
       final russia = switchRegion(null, 'RU');
       final edited = russia.patchConfig.copyWith(
         dns: russia.patchConfig.dns.copyWith(
@@ -141,14 +126,8 @@ void main() {
         bypassDomain: russia.bypassDomain,
       );
 
-      expect(egypt.patchConfig.dns.nameserver, [
-        'https://cloudflare-dns.com/dns-query',
-        'https://dns.google/dns-query',
-      ]);
-      expect(egypt.patchConfig.dns.fallbackFilter.geoipCode, 'EG');
-      expect(egypt.patchConfig.dns.fallback, [
-        'https://user.example/dns-query',
-      ]);
+      expect(egypt.patchConfig.dns, edited.dns);
+      expect(egypt.patchConfig.dnsOverrideKeys, edited.dnsOverrideKeys);
     });
 
     test('switching away and back never accumulates', () {
@@ -166,10 +145,7 @@ void main() {
           bypassDomain: current.bypassDomain,
         );
         from = code;
-        expect(current.patchConfig.dnsOverrideKeys, {
-          DnsOverrideKey.ipv6,
-          ...regionDnsKeys(code),
-        });
+        expect(current.patchConfig.dnsOverrideKeys, {DnsOverrideKey.ipv6});
         expect(current.bypassDomain, regionBypassDomains(code));
         expect(current.patchConfig.tun.mtu, regionTunMtu(code));
       }
@@ -250,13 +226,10 @@ void main() {
     ).patchConfig;
 
     test(
-      'writes regional DNS and desktop MTU into the final profile',
+      'keeps the provider DNS and writes desktop MTU into the final profile',
       () async {
         final patch = regional('RU');
-        final overrides = regionalProfileOverridesFor(
-          patchConfig: patch,
-          regionCode: 'RU',
-        );
+        final overrides = regionalProfileOverridesFor(patchConfig: patch);
         final result = await makeRealProfileTask(
           MakeRealProfileState(
             profilesPath: '/profiles',
@@ -279,11 +252,7 @@ void main() {
           ),
         );
         final config = loadYaml(result.yaml) as YamlMap;
-        expect(config['dns']['nameserver'], [
-          'tls://77.88.8.8',
-          'tls://77.88.8.1',
-        ]);
-        expect(config['dns']['fallback-filter']['geoip-code'], 'RU');
+        expect(config['dns']['nameserver'], ['1.1.1.1']);
         expect(config['tun']['mtu'], regionalDefaultTunMtu);
         expect(config['rules'], ['MATCH,DIRECT']);
       },
@@ -302,11 +271,10 @@ void main() {
       );
       final overrides = regionalProfileOverridesFor(
         patchConfig: regional('RU'),
-        regionCode: 'RU',
         customOverrides: own,
       );
-      expect(overrides.dns.nameserver, own.dns.nameserver);
-      expect(overrides.dns.defaultNameserver, ['77.88.8.8', '77.88.8.1']);
+      expect(overrides.dns, own.dns);
+      expect(overrides.dnsOverrideKeys, own.dnsOverrideKeys);
       expect(overrides.tun.mtu, 1400);
       expect(overrides.tun.routeExcludeAddress, ['10.0.0.0/8']);
       expect(overrides.ntpOverrideKeys, own.ntpOverrideKeys);
@@ -320,7 +288,6 @@ void main() {
       );
       final overrides = regionalProfileOverridesFor(
         patchConfig: const PatchClashConfig(),
-        regionCode: null,
         customOverrides: own,
       );
       expect(overrides.dnsOverrideKeys, own.dnsOverrideKeys);

@@ -1124,18 +1124,10 @@ void main() {
     container.read(systemActionProvider.notifier).applyRegion('RU');
 
     final patchConfig = container.read(patchClashConfigProvider);
-    expect(patchConfig.dns.defaultNameserver, ['77.88.8.8', '77.88.8.1']);
-    expect(patchConfig.dns.fallbackFilter.geoipCode, 'RU');
+    expect(patchConfig.dnsOverrideKeys, isEmpty);
     expect(container.read(setupPatchProvider), isNot(setupPatch));
     final setupState = await container.read(setupStateProvider(null).future);
-    expect(setupState.overrides.dns.nameserver, [
-      'tls://77.88.8.8',
-      'tls://77.88.8.1',
-    ]);
-    expect(
-      setupState.overrides.dnsOverrideKeys,
-      contains(DnsOverrideKey.fallbackFilterGeoipCode),
-    );
+    expect(setupState.overrides.dnsOverrideKeys, isEmpty);
     expect(setupState.overrides.tun.mtu, 1500);
     expect(
       (await container.read(vpnOptionsProvider.future)).effective.bypassDomain,
