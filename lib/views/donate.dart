@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -114,8 +113,6 @@ bool donationPrefersCrypto(String? regionCode) =>
 bool get showsDonations => kDebugMode || DonationConfig.current.hasAny;
 
 class DonateView extends ConsumerWidget {
-  static const _maxContentWidth = 680.0;
-
   final DonationConfig config;
   final bool includeUnconfigured;
 
@@ -174,29 +171,23 @@ class DonateView extends ConsumerWidget {
           );
     return CommonScaffold(
       title: appLocalizations.donate,
-      body: LayoutBuilder(
-        builder: (context, constraints) => ListView(
-          padding:
-              EdgeInsets.symmetric(
-                horizontal: math.max(
-                  16,
-                  (constraints.maxWidth - _maxContentWidth) / 2,
-                ),
-              ).copyWith(
-                top: context.contentTopPadding,
-                bottom: 32 + context.bottomInset,
-              ) +
-              context.bodyInsets,
-          children: [
-            const _DonateHero(),
-            ...(cryptoFirst ? [crypto, cards] : [cards, crypto]),
-            _Section(
-              title: appLocalizations.donateWithoutMoney,
-              child: const _FreeHelp(),
-            ),
-            const _Thanks(),
-          ].nonNulls.toList(),
-        ),
+      body: ListView(
+        // The Tools workspace already centers a page inside its own cap.
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16).copyWith(
+              top: context.contentTopPadding,
+              bottom: 32 + context.bottomInset,
+            ) +
+            context.bodyInsets,
+        children: [
+          const _DonateHero(),
+          ...(cryptoFirst ? [crypto, cards] : [cards, crypto]),
+          _Section(
+            title: appLocalizations.donateWithoutMoney,
+            child: const _FreeHelp(),
+          ),
+          const _Thanks(),
+        ].nonNulls.toList(),
       ),
     );
   }
