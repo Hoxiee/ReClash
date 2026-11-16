@@ -2050,29 +2050,20 @@ class _SidebarBlurItem extends ConsumerWidget {
     if (!system.isMacOS && !system.isWindows) {
       return const SizedBox.shrink();
     }
-    final appLocalizations = context.appLocalizations;
-    final sidebarBlur = ref.watch(
-      themeSettingProvider.select((state) => state.sidebarBlur),
-    );
-    return SettingTarget(
-      spec: themeToolSettings[5],
-      child: ListItem.toggle(
-        leading: const GlyphIcon(AppGlyphs.blur),
-        horizontalTitleGap: 12,
-        title: Text(
-          themeToolSettings[5].title(appLocalizations),
-          style: AppTextStyle.subheadline
-              .of(context, emphasized: true)
-              .copyWith(color: context.colorScheme.onSurfaceVariant),
-        ),
-        subtitle: Text(appLocalizations.sidebarBlurDesc),
-        value: sidebarBlur,
-        onChanged: (value) {
-          ref
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: generateGroup([
+        ConfigToggleItem(
+          setting: themeToolSettings[5],
+          selector: themeSettingProvider.select((state) => state.sidebarBlur),
+          title: themeToolSettings[5].title,
+          subtitle: (l) => l.sidebarBlurDesc,
+          leading: const GlyphIcon(AppGlyphs.blur),
+          onChanged: (ref, value) => ref
               .read(themeSettingProvider.notifier)
-              .update((state) => state.copyWith(sidebarBlur: value));
-        },
-      ),
+              .update((state) => state.copyWith(sidebarBlur: value)),
+        ),
+      ]),
     );
   }
 }

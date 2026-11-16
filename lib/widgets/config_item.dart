@@ -143,6 +143,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     required super.selector,
     required super.title,
     required super.onChanged,
+    super.subtitle,
     super.leading,
     super.setting,
     super.providerSettings,
