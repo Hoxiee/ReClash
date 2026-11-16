@@ -2018,6 +2018,9 @@ approval is not readiness. A root managed Core is the current backend; it receiv
 the authenticated owner's real UID/GID for generated-file ownership. Its sandbox denies execution/fork outside the
 fixed launch and confines data reads/writes, with only required system resources admitted. There is no setuid or
 osascript fallback; unsigned/ad-hoc builds fail closed for this backend.
+Runner keeps `ENABLE_HARDENED_RUNTIME = NO` because CI signs ad-hoc: hardened runtime enables library validation,
+which rejects the Team-ID-less Flutter frameworks and kills the app in dyld at launch. A signed pipeline turns it on
+together with a real `DEVELOPMENT_TEAM`.
 
 Every desktop manifest records the final Core hash; Linux also records final Helper hash and string protocol `9`.
 macOS recomputes the manifest after signing. Hashes attest consistency, not publisher provenance. Managed privileged

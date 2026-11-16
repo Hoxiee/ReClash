@@ -624,7 +624,7 @@
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
@@ -763,7 +763,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
@@ -787,7 +787,7 @@
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
