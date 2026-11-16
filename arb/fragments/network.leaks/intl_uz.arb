@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "Brauzer DoH’ini bloklash",
+  "blockBrowserDohDesc": "Brauzerlar nomlarni ReClash orqali aniqlashi va ularga domen qoidalari qoʻllanishi uchun taniqli DNS-over-HTTPS serverlariga ulanishlarni rad etadi. Faqat oʻzining xavfsiz DNSidan foydalanishga sozlangan brauzer nomlarni aniqlay olmaydi.",
+  "killSwitch": "Kill switch",
+  "killSwitchOn": "Yoqilgan",
+  "killSwitchAlwaysOn": "Faqat doimiy VPN",
+  "killSwitchOff": "O'chirilgan",
+  "killSwitchDesc": "Android kill switch ReClash tunneli o'chiq paytida barcha trafikni bloklaydi. Tizim VPN sozlamalarida ReClash uchun «Doimiy VPN» va «VPN'siz ulanishlarni bloklash» opsiyalarini yoqing."
+}

@@ -567,6 +567,7 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(true) bool bypassPrivateRoute,
     @Default(true) bool autoSetSystemDns,
     @Default(false) bool appendSystemDns,
+    @Default(false) bool blockBrowserDoh,
     @Default(defaultAuthenticationProps) AuthenticationProps authentication,
   }) = _NetworkProps;
 

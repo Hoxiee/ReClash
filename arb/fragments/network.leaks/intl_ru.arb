@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "Блокировать DoH браузера",
+  "blockBrowserDohDesc": "Отклоняет подключения к известным серверам DNS-over-HTTPS, чтобы браузеры разрешали имена через ReClash и к ним применялись правила по доменам. Браузер, настроенный только на собственный защищённый DNS, перестанет разрешать имена.",
+  "killSwitch": "Kill switch",
+  "killSwitchOn": "Включён",
+  "killSwitchAlwaysOn": "Только постоянная VPN",
+  "killSwitchOff": "Выключен",
+  "killSwitchDesc": "Kill switch Android блокирует весь трафик, пока туннель ReClash не работает. Включите «Постоянная VPN» и «Блокировать подключения без VPN» для ReClash в системных настройках VPN."
+}

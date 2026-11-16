@@ -338,6 +338,7 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
             "otherVpn" to otherVpn,
             "vpnLostTo" to vpnLostTo(networks),
             "alwaysOnVpnApp" to alwaysOnVpnApp(),
+            "killSwitch" to killSwitch(),
             "packageName" to context.packageName,
             "privateDns" to when {
                 dns == null -> null
@@ -377,6 +378,19 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
 
     private fun alwaysOnVpnApp(): String? = try {
         Settings.Secure.getString(context.contentResolver, "always_on_vpn_app") ?: ""
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun killSwitch(): String? = try {
+        val resolver = context.contentResolver
+        if (Settings.Secure.getString(resolver, "always_on_vpn_app") != context.packageName) {
+            "off"
+        } else if (Settings.Secure.getInt(resolver, "always_on_vpn_lockdown", 0) == 1) {
+            "on"
+        } else {
+            "alwaysOn"
+        }
     } catch (_: Exception) {
         null
     }

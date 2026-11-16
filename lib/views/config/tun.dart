@@ -168,7 +168,9 @@ class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
   NullStatusIllustration get illustration => NullStatusIllustration.tun;
 
   @override
-  ProfileTun get defaults => defaultProfileTun;
+  ProfileTun get defaults => isWindows
+      ? defaultProfileTun.copyWith(strictRoute: true)
+      : defaultProfileTun;
 
   @override
   String label(TunOverrideKey key, AppLocalizations l) => key.label(l);

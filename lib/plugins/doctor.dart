@@ -6,6 +6,8 @@ enum VpnPermission { granted, revoked, notAsked }
 
 enum PrivateDnsMode { off, opportunistic, strict }
 
+enum KillSwitchState { on, alwaysOn, off }
+
 enum DoctorSettings { vpn, privateDns, dateTime, captivePortal }
 
 /// What Android tells about the tunnel and the network beneath it.
@@ -16,6 +18,7 @@ final class DeviceDoctorState {
     this.otherVpn = false,
     this.vpnLostTo = const [],
     this.alwaysOnVpnApp,
+    this.killSwitch,
     this.privateDns,
     this.privateDnsHost,
     this.captivePortal = false,
@@ -31,6 +34,10 @@ final class DeviceDoctorState {
       alwaysOnVpnApp: switch (map['alwaysOnVpnApp']) {
         final String app when app == map['packageName'] => null,
         final String app => app,
+        _ => null,
+      },
+      killSwitch: switch (map['killSwitch']) {
+        final String name => KillSwitchState.values.asNameMap()[name],
         _ => null,
       },
       privateDns: switch (map['privateDns']) {
@@ -58,6 +65,10 @@ final class DeviceDoctorState {
   /// reports its own package name, which differs between build flavors.
   final String? alwaysOnVpnApp;
 
+  /// Android's always-on VPN with "Block connections without VPN" held by
+  /// this app; null when the system does not let the app read it.
+  final KillSwitchState? killSwitch;
+
   /// Of the underlying network; null before Android 9.
   final PrivateDnsMode? privateDns;
   final String? privateDnsHost;
@@ -70,6 +81,7 @@ final class DeviceDoctorState {
       other.otherVpn == otherVpn &&
       listEquals(other.vpnLostTo, vpnLostTo) &&
       other.alwaysOnVpnApp == alwaysOnVpnApp &&
+      other.killSwitch == killSwitch &&
       other.privateDns == privateDns &&
       other.privateDnsHost == privateDnsHost &&
       other.captivePortal == captivePortal;
@@ -80,6 +92,7 @@ final class DeviceDoctorState {
     otherVpn,
     Object.hashAll(vpnLostTo),
     alwaysOnVpnApp,
+    killSwitch,
     privateDns,
     privateDnsHost,
     captivePortal,

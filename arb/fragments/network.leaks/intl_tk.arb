@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "Brauzeriň DoH-ny petlemek",
+  "blockBrowserDohDesc": "Brauzerler atlary ReClash arkaly çözsün we olara domen düzgünleri ulanylsyn diýip, belli DNS-over-HTTPS serwerlerine birikmeleri ret edýär. Diňe öz howpsuz DNS-ini ulanmaga sazlanan brauzer atlary çözmeýär.",
+  "killSwitch": "Kill switch",
+  "killSwitchOn": "Açyk",
+  "killSwitchAlwaysOn": "Diňe hemişe açyk",
+  "killSwitchOff": "Ýapyk",
+  "killSwitchDesc": "Android-iň kill switch-i ReClash tuneli ýapylan wagty ähli trafigi petleýär. Ulgam VPN sazlamalarynda ReClash üçin «Hemişe açyk VPN» we «VPN-siz birikmeleri petle» opsiýalaryny açyň."
+}

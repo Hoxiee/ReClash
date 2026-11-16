@@ -288,6 +288,36 @@ void main() {
     },
   );
 
+  test('makeRealProfileTask rejects browser DoH ahead of every rule', () async {
+    const state = MakeRealProfileState(
+      profilesPath: '/profiles',
+      profileId: 7,
+      rawConfig: {
+        'proxies': [],
+        'rules': ['DOMAIN-SUFFIX,dns.google,Proxy', 'MATCH,DIRECT'],
+      },
+      realPatchConfig: PatchClashConfig(),
+      appendSystemDns: false,
+      proxyGroups: [],
+      rules: [],
+      addedRules: [],
+      defaultUA: 'ReClash-Test',
+    );
+
+    final off = await makeRealProfileTask(state);
+    final on = await makeRealProfileTask(state.copyWith(blockBrowserDoh: true));
+
+    expect((loadYaml(off.yaml) as YamlMap)['rules'], [
+      'DOMAIN-SUFFIX,dns.google,Proxy',
+      'MATCH,DIRECT',
+    ]);
+    expect((loadYaml(on.yaml) as YamlMap)['rules'], [
+      for (final host in browserDohHosts) 'DOMAIN-SUFFIX,$host,REJECT',
+      'DOMAIN-SUFFIX,dns.google,Proxy',
+      'MATCH,DIRECT',
+    ]);
+  });
+
   // The core re-reads these two keys out of the generated config on every
   // profile apply and adopts whatever it finds, so a subscription that ships
   // them would otherwise decide whether GEO databases auto-update — including

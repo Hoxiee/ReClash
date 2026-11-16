@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "Block browser DoH",
+  "blockBrowserDohDesc": "Rejects connections to well-known DNS-over-HTTPS servers so browsers resolve through ReClash and domain rules apply to them. A browser set to use only its own secure DNS stops resolving.",
+  "killSwitch": "Kill switch",
+  "killSwitchOn": "On",
+  "killSwitchAlwaysOn": "Always-on only",
+  "killSwitchOff": "Off",
+  "killSwitchDesc": "Android's kill switch blocks all traffic while the ReClash tunnel is down. Turn on Always-on VPN and Block connections without VPN for ReClash in the system VPN settings."
+}

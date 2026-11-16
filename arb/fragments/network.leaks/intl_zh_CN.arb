@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "拦截浏览器 DoH",
+  "blockBrowserDohDesc": "拒绝连接知名的 DNS-over-HTTPS 服务器，使浏览器通过 ReClash 解析域名并受域名规则约束。若浏览器被设置为只使用自带的安全 DNS，将无法解析域名。",
+  "killSwitch": "断网保护",
+  "killSwitchOn": "已开启",
+  "killSwitchAlwaysOn": "仅始终开启",
+  "killSwitchOff": "已关闭",
+  "killSwitchDesc": "Android 的断网保护会在 ReClash 隧道中断时阻止所有流量。请在系统 VPN 设置中为 ReClash 开启“始终开启的 VPN”和“屏蔽未使用 VPN 的连接”。"
+}

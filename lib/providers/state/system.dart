@@ -37,7 +37,12 @@ UpdateParams updateParams(Ref ref) {
 }
 
 @riverpod
-({PatchClashConfig patchConfig, bool appendSystemDns, bool bypassPrivateRoute})
+({
+  PatchClashConfig patchConfig,
+  bool appendSystemDns,
+  bool bypassPrivateRoute,
+  bool blockBrowserDoh,
+})
 setupPatch(Ref ref) {
   return (
     patchConfig: _providerPatchConfig(ref).setupOnly,
@@ -50,6 +55,9 @@ setupPatch(Ref ref) {
         ref.watch(
           networkSettingProvider.select((state) => state.bypassPrivateRoute),
         ),
+    blockBrowserDoh: ref.watch(
+      networkSettingProvider.select((state) => state.blockBrowserDoh),
+    ),
   );
 }
 

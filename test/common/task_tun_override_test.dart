@@ -21,6 +21,7 @@ Future<YamlMap> _tunOf({
   required Map<String, dynamic> rawConfig,
   ProfileOverrides overrides = _overrides,
   bool bypassPrivateRoute = false,
+  bool strictRoute = false,
 }) async {
   final result = await makeRealProfileTask(
     MakeRealProfileState(
@@ -30,6 +31,7 @@ Future<YamlMap> _tunOf({
       realPatchConfig: const PatchClashConfig(),
       overrides: overrides,
       bypassPrivateRoute: bypassPrivateRoute,
+      strictRoute: strictRoute,
       appendSystemDns: false,
       proxyGroups: const [],
       rules: const [],
@@ -85,6 +87,32 @@ void main() {
 
     expect(tun['dns-hijack'], defaultDnsHijack);
     expect(picked['dns-hijack'], ['tcp://any:53']);
+  });
+
+  test('routes strictly over the profile unless a key is picked', () async {
+    const profileLoose = {
+      'tun': {'strict-route': false},
+    };
+    final tun = await _tunOf(
+      rawConfig: profileLoose,
+      overrides: const ProfileOverrides(),
+      strictRoute: true,
+    );
+    final picked = await _tunOf(
+      rawConfig: profileLoose,
+      overrides: const ProfileOverrides(
+        tunOverrideKeys: {TunOverrideKey.strictRoute},
+      ),
+      strictRoute: true,
+    );
+    final elsewhere = await _tunOf(
+      rawConfig: {},
+      overrides: const ProfileOverrides(),
+    );
+
+    expect(tun['strict-route'], true);
+    expect(picked['strict-route'], false);
+    expect(elsewhere.containsKey('strict-route'), isFalse);
   });
 
   test(

@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "브라우저 DoH 차단",
+  "blockBrowserDohDesc": "잘 알려진 DNS-over-HTTPS 서버로의 연결을 거부하여 브라우저가 ReClash를 통해 이름을 확인하고 도메인 규칙이 적용되게 합니다. 자체 보안 DNS만 사용하도록 설정된 브라우저는 이름 확인이 되지 않습니다.",
+  "killSwitch": "킬 스위치",
+  "killSwitchOn": "켜짐",
+  "killSwitchAlwaysOn": "상시 켜짐만",
+  "killSwitchOff": "꺼짐",
+  "killSwitchDesc": "Android의 킬 스위치는 ReClash 터널이 끊긴 동안 모든 트래픽을 차단합니다. 시스템 VPN 설정에서 ReClash의 '상시 VPN'과 'VPN 없는 연결 차단'을 켜세요."
+}

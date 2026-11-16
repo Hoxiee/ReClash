@@ -775,6 +775,7 @@ class SetupAction extends _$SetupAction {
         (state) => (
           appendSystemDns: state.appendSystemDns,
           bypassPrivateRoute: state.bypassPrivateRoute,
+          blockBrowserDoh: state.blockBrowserDoh,
           authentication: state.authentication,
         ),
       ),
@@ -827,6 +828,10 @@ class SetupAction extends _$SetupAction {
         realPatchConfig: patchConfig,
         overrides: setupState.overrides,
         bypassPrivateRoute: networkSetting.bypassPrivateRoute,
+        blockBrowserDoh: networkSetting.blockBrowserDoh,
+        // Windows multihomed resolution asks every interface's resolver at
+        // once, past the TUN routes, unless strict-route blocks the others.
+        strictRoute: system.isWindows,
         keepEmptyDnsOverrides: setupState.profileType != ProfileType.custom,
         appendSystemDns: appendSystemDns,
         addedRules: setupState.addedRules,

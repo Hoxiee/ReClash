@@ -56,4 +56,16 @@ void main() {
       expect(withLost(['A']), isNot(withLost(const [])));
     });
   });
+  test('reads the kill switch and drops an unknown value', () {
+    KillSwitchState? parse(Object? value) => DeviceDoctorState.fromMap({
+      'vpnPermission': 'granted',
+      'killSwitch': value,
+    }).killSwitch;
+
+    expect(parse('on'), KillSwitchState.on);
+    expect(parse('alwaysOn'), KillSwitchState.alwaysOn);
+    expect(parse('off'), KillSwitchState.off);
+    expect(parse('lockdown'), isNull);
+    expect(parse(null), isNull);
+  });
 }

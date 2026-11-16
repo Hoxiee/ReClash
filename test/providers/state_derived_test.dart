@@ -1063,6 +1063,12 @@ void main() {
       container.read(setupPatchProvider),
       system.isDesktop ? isNot(withSystemDns) : withSystemDns,
     );
+    final withPrivateRoute = container.read(setupPatchProvider);
+
+    container
+        .read(networkSettingProvider.notifier)
+        .update((state) => state.copyWith(blockBrowserDoh: true));
+    expect(container.read(setupPatchProvider), isNot(withPrivateRoute));
   });
 
   test('an applied region reaches the generated profile and VPN', () async {

@@ -226,6 +226,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
   final tun = {
     if (rawConfig['tun'] is Map) ...rawConfig['tun'] as Map,
     'dns-hijack': defaultDnsHijack,
+    if (data.strictRoute) 'strict-route': true,
     ...overrides.tun.overrideJson(overrides.tunOverrideKeys),
     ...realPatchConfig.tun.coreJson,
     'auto-detect-interface': true,
@@ -387,7 +388,11 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
         .map((item) => item.definition)
         .toList();
   }
-  rawConfig['rules'] = rules;
+  rawConfig['rules'] = [
+    if (data.blockBrowserDoh)
+      for (final host in browserDohHosts) 'DOMAIN-SUFFIX,$host,REJECT',
+    ...rules,
+  ];
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
   return (
     yaml: yaml,

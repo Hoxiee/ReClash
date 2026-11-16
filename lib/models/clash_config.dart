@@ -59,6 +59,20 @@ const congestionControllers = [
 const defaultDnsHijack = ['any:53'];
 const defaultTunUdpTimeout = 300;
 
+const browserDohHosts = [
+  'dns.google',
+  'cloudflare-dns.com',
+  'one.one.one.one',
+  'dns.quad9.net',
+  'doh.opendns.com',
+  'dns.nextdns.io',
+  'dns.adguard-dns.com',
+  'doh.cleanbrowsing.org',
+  'doh.mullvad.net',
+  'dns.controld.com',
+  'doh.dns.sb',
+];
+
 const privateRouteAddress = [
   '0.0.0.0/8',
   '10.0.0.0/8',

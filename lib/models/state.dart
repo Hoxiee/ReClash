@@ -220,6 +220,8 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required PatchClashConfig realPatchConfig,
     @Default(ProfileOverrides()) ProfileOverrides overrides,
     @Default(false) bool bypassPrivateRoute,
+    @Default(false) bool strictRoute,
+    @Default(false) bool blockBrowserDoh,
 
     /// Set for a subscription, whose own DNS values an emptied entry replaces.
     @Default(false) bool keepEmptyDnsOverrides,

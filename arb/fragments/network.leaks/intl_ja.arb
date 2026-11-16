@@ -1,0 +1,9 @@
+{
+  "blockBrowserDoh": "ブラウザの DoH をブロック",
+  "blockBrowserDohDesc": "よく知られた DNS-over-HTTPS サーバーへの接続を拒否し、ブラウザが ReClash 経由で名前解決してドメインルールが適用されるようにします。独自のセキュア DNS のみを使う設定のブラウザは名前解決できなくなります。",
+  "killSwitch": "キルスイッチ",
+  "killSwitchOn": "オン",
+  "killSwitchAlwaysOn": "常時接続のみ",
+  "killSwitchOff": "オフ",
+  "killSwitchDesc": "AndroidのキルスイッチはReClashのトンネルが切れている間、すべての通信をブロックします。システムのVPN設定でReClashの「常時接続VPN」と「VPNなしの接続をブロック」をオンにしてください。"
+}

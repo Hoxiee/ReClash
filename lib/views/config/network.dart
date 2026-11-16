@@ -10,6 +10,8 @@ import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/features/doctor/sensors/device.dart';
+import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/override.dart';
@@ -265,6 +267,50 @@ class BypassPrivateRouteItem extends ConsumerWidget {
         title: networkToolSettings[10].title,
         select: (state) => state.bypassPrivateRoute,
         update: (state, value) => state.copyWith(bypassPrivateRoute: value),
+      ),
+    );
+  }
+}
+
+class BlockBrowserDohItem extends ConsumerWidget {
+  const BlockBrowserDohItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return SettingTarget(
+      spec: networkToolSettings[20],
+      child: _networkToggle(
+        title: networkToolSettings[20].title,
+        select: (state) => state.blockBrowserDoh,
+        update: (state, value) => state.copyWith(blockBrowserDoh: value),
+      ),
+    );
+  }
+}
+
+class KillSwitchItem extends ConsumerWidget {
+  const KillSwitchItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final state = ref.watch(
+      deviceDoctorStateProvider.select((state) => state.value?.killSwitch),
+    );
+    return SettingTarget(
+      spec: networkToolSettings[21],
+      child: ListItem(
+        title: Text(networkToolSettings[21].title(l)),
+        trailing: switch (state) {
+          KillSwitchState.on => Text(l.killSwitchOn),
+          KillSwitchState.alwaysOn => Text(l.killSwitchAlwaysOn),
+          KillSwitchState.off => Text(l.killSwitchOff),
+          null => null,
+        },
+        onTap: () {
+          final opened = doctorPlugin?.openSettings(DoctorSettings.vpn);
+          if (opened != null) unawaited(opened);
+        },
       ),
     );
   }
@@ -546,6 +592,7 @@ List<Widget> networkOptionsItems({
     if (isDesktop) const TUNItem(),
     if (isMacOS) const AutoSetSystemDnsItem(),
     const TunStackItem(),
+    const BlockBrowserDohItem(),
     // mihomo's DefaultSocketHook ignores interface-name on Android
     // (core/lib.go installHooks, vendored dialer.go), so these rows only
     // apply on desktop.
@@ -574,6 +621,7 @@ class VpnSections extends ConsumerWidget {
         generateAnimatedSection(
           title: 'VPN',
           items: const [
+            KillSwitchItem(),
             VpnSystemProxyItem(),
             BypassDomainItem(),
             AllowBypassItem(),
@@ -581,6 +629,7 @@ class VpnSections extends ConsumerWidget {
             DNSHijackingItem(),
           ],
           footer: [
+            appLocalizations.killSwitchDesc,
             if (authenticationEnable)
               appLocalizations.authenticationSystemProxyDesc,
             appLocalizations.bypassDomainDesc,
@@ -626,6 +675,7 @@ class NetworkOptionsSection extends ConsumerWidget {
         appLocalizations.tunDesc,
         if (isCustomInterfaceName) appLocalizations.interfaceNameDesc,
       ],
+      appLocalizations.blockBrowserDohDesc,
     ];
     return generateAnimatedSection(
       title: appLocalizations.options,
@@ -863,5 +913,18 @@ final networkToolSettings = <SettingSpec>[
     title: (l) => l.routingMark,
     keywords: ['routingMark'],
     condition: SettingCondition.linux,
+  ),
+  SettingSpec(
+    id: 'network.blockBrowserDoh',
+    page: ToolPage.network,
+    title: (l) => l.blockBrowserDoh,
+    keywords: ['blockBrowserDoh', 'DoH'],
+  ),
+  SettingSpec(
+    id: 'network.killSwitch',
+    page: ToolPage.network,
+    title: (l) => l.killSwitch,
+    keywords: ['killSwitch', 'always-on', 'lockdown'],
+    condition: SettingCondition.android,
   ),
 ];
