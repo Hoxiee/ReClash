@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.8",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Liquid Glass on Linux and a sidebar on tablets",
+      "spotlight": {
+        "title": "Liquid Glass on Linux",
+        "description": "Glass surfaces render with the full Liquid Glass effect again.",
+        "kind": "wallpaper"
+      },
+      "highlights": [
+        {
+          "title": "Sidebar on tablets",
+          "description": "Automatic layout shows the sidebar on tablets; the bar stays if you pick it in settings.",
+          "kind": "dashboard",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Provider update interval",
+          "description": "New profiles follow the interval set by the provider, with a switch that matches the rest of the app.",
+          "kind": "update"
+        },
+        {
+          "title": "Service setup",
+          "description": "The install prompt opens on top of the app.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Liquid Glass на Linux и боковая панель на планшетах",
+      "spotlight": {
+        "title": "Liquid Glass на Linux",
+        "description": "Стеклянные поверхности снова отображаются с полноценным эффектом Liquid Glass.",
+        "kind": "wallpaper"
+      },
+      "highlights": [
+        {
+          "title": "Боковая панель на планшетах",
+          "description": "В автоматической раскладке на планшетах снова боковая панель; нижняя остаётся, если выбрать её в настройках.",
+          "kind": "dashboard",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Интервал провайдера",
+          "description": "Новые профили обновляются с интервалом провайдера, а переключатель выглядит как остальные в приложении.",
+          "kind": "update"
+        },
+        {
+          "title": "Установка службы",
+          "description": "Запрос на установку открывается поверх приложения.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  }
+}

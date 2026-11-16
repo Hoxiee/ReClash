@@ -2,6 +2,19 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.8
+
+### Improved
+
+- **Provider update interval**: new profiles follow the update interval set by the provider, and its switch in profile
+  settings matches the rest of the app.
+
+### Fixed
+
+- Liquid Glass surfaces render with the full glass effect again (Linux).
+- Tablets show the sidebar in automatic layout; picking the bar in the layout setting still keeps the bar (Android).
+- The service install prompt opens on top of the app (Windows).
+
 ## v0.1.0-pre.7
 
 Profiles as a wallet with provider logos, plus fixes to diagnostics, wallpapers and extension nodes.
