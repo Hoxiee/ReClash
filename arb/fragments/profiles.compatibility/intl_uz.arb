@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "Trafik mavjud emas",
   "profilesStyleWallet": "Profillarning yangi ko‘rinishi",
   "walletEdit": "Tahrirlash",
-  "walletExport": "Eksport"
+  "walletExport": "Eksport",
+  "subscriptionClientDefault": "Standart"
 }

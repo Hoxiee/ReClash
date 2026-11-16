@@ -10,7 +10,7 @@ void main() {
       );
       expect(
         const SubscriptionClientSettings.forNewProfile().preset,
-        SubscriptionClientPreset.auto,
+        SubscriptionClientPreset.reclash,
       );
     });
 
@@ -38,7 +38,7 @@ void main() {
     test('copyWith changes one client setting at a time', () {
       const settings = SubscriptionClientSettings.forNewProfile();
       final updated = settings.copyWith(customUserAgent: 'ExampleClient/2.4');
-      expect(updated.preset, SubscriptionClientPreset.auto);
+      expect(updated.preset, SubscriptionClientPreset.reclash);
       expect(updated.customUserAgent, 'ExampleClient/2.4');
     });
 

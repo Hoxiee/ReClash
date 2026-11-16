@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "无法获取流量",
   "profilesStyleWallet": "新版配置文件视图",
   "walletEdit": "编辑",
-  "walletExport": "导出"
+  "walletExport": "导出",
+  "subscriptionClientDefault": "默认"
 }

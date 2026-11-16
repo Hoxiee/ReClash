@@ -104,12 +104,12 @@ void main() {
     });
 
     test(
-      'new URL profiles select Auto while old stored rows default native',
+      'new URL profiles and old stored rows both default to the native client',
       () {
         final created = Profile.normal(url: 'https://example.test/sub');
         expect(
           created.subscriptionPreferences.client.preset,
-          SubscriptionClientPreset.auto,
+          SubscriptionClientPreset.reclash,
         );
 
         final old = Map<String, Object?>.from(

@@ -238,5 +238,6 @@
   "walletExport": "Export",
   "@walletExport": {
     "description": "Short action label on the active profile pass: export the profile file."
-  }
+  },
+  "subscriptionClientDefault": "Default"
 }

@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "Трафик недоступен",
   "profilesStyleWallet": "Новый вид профилей",
   "walletEdit": "Изменить",
-  "walletExport": "Экспорт"
+  "walletExport": "Экспорт",
+  "subscriptionClientDefault": "По умолчанию"
 }

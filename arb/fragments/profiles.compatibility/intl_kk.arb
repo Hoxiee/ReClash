@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "Трафик қолжетімсіз",
   "profilesStyleWallet": "Профильдердің жаңа көрінісі",
   "walletEdit": "Өзгерту",
-  "walletExport": "Экспорт"
+  "walletExport": "Экспорт",
+  "subscriptionClientDefault": "Әдепкі"
 }

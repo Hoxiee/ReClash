@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "트래픽을 가져올 수 없음",
   "profilesStyleWallet": "새 프로필 보기",
   "walletEdit": "편집",
-  "walletExport": "내보내기"
+  "walletExport": "내보내기",
+  "subscriptionClientDefault": "기본값"
 }

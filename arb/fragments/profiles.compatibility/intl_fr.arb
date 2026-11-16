@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "Trafic indisponible",
   "profilesStyleWallet": "Nouvel affichage des profils",
   "walletEdit": "Modifier",
-  "walletExport": "Exporter"
+  "walletExport": "Exporter",
+  "subscriptionClientDefault": "Par défaut"
 }

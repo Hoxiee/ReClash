@@ -47,6 +47,15 @@ class _NegotiationTransport extends SubscriptionTransport {
   }
 }
 
+Profile _autoProfile() =>
+    Profile.normal(url: 'https://subs.example.test/profile').copyWith(
+      subscriptionPreferences: const SubscriptionPreferences(
+        client: SubscriptionClientSettings(
+          preset: SubscriptionClientPreset.auto,
+        ),
+      ),
+    );
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -63,7 +72,7 @@ void main() {
     '{"outbounds":[{"type":"mystery","server":"example.test"}]}',
   ]) {
     test('Auto negotiates a foreign HTTP 200 payload: $body', () async {
-      final profile = Profile.normal(url: 'https://subs.example.test/profile');
+      final profile = _autoProfile();
       final transport = _NegotiationTransport([body, _nativeConfig]);
       var validations = 0;
 
@@ -122,7 +131,7 @@ void main() {
   });
 
   test('Auto bounds requests to unique clients', () async {
-    final profile = Profile.normal(url: 'https://subs.example.test/profile');
+    final profile = _autoProfile();
     final transport = _NegotiationTransport(
       List.filled(maxAutomaticSubscriptionAttempts, 'foreign format'),
     );

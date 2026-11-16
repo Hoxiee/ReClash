@@ -852,7 +852,7 @@ void main() {
     });
 
     testWidgets(
-      'subscription import forwards Auto and a fixed request client',
+      'subscription import forwards the default and a fixed request client',
       (tester) async {
         final imports = _PendingProfilesAction();
         final harness = _harness(
@@ -864,14 +864,17 @@ void main() {
         await _pumpWizard(tester, harness.container, size: _desktop);
         await _expandRequestOptions(tester);
         expect(
-          find.text(currentAppLocalizations.subscriptionClientAuto),
+          find.text(currentAppLocalizations.subscriptionClientDefault),
           findsOneWidget,
         );
 
         await _startLinkImport(tester, 'https://example.test/auto');
         expect(imports.requests, hasLength(1));
         final automatic = imports.requests.single;
-        expect(automatic.clientSettings?.preset, SubscriptionClientPreset.auto);
+        expect(
+          automatic.clientSettings?.preset,
+          SubscriptionClientPreset.reclash,
+        );
         expect(automatic.select, isFalse);
         expect(automatic.reviewContext?.mounted, isTrue);
         expect(automatic.cancellation?.cancelled, isFalse);

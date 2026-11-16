@@ -3,8 +3,8 @@ import 'dart:io';
 import 'import_policy.dart';
 
 enum SubscriptionClientPreset {
-  auto,
   reclash,
+  auto,
   flClashX,
   clashMeta,
   clash,
@@ -106,7 +106,7 @@ class SubscriptionClientSettings {
   });
 
   const SubscriptionClientSettings.forNewProfile()
-    : preset = SubscriptionClientPreset.auto,
+    : preset = SubscriptionClientPreset.reclash,
       customUserAgent = '',
       importPolicy = const SubscriptionImportPolicy(),
       sendDeviceIdentity = null;

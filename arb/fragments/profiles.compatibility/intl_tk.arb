@@ -112,5 +112,6 @@
   "walletTrafficUnavailable": "Trafik elýeterli däl",
   "profilesStyleWallet": "Profilleriň täze görnüşi",
   "walletEdit": "Üýtget",
-  "walletExport": "Eksport"
+  "walletExport": "Eksport",
+  "subscriptionClientDefault": "Adaty"
 }

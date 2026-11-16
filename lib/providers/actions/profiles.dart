@@ -693,10 +693,7 @@ class ProfilesAction extends _$ProfilesAction {
       try {
         final chosenSettings =
             clientSettings ?? const SubscriptionClientSettings.forNewProfile();
-        final settings =
-            clientSettings == null &&
-                chosenSettings.preset == SubscriptionClientPreset.auto &&
-                source.preset != null
+        final settings = clientSettings == null && source.preset != null
             ? chosenSettings.copyWith(preset: source.preset)
             : chosenSettings;
         final draft = _linkSourceDraft(

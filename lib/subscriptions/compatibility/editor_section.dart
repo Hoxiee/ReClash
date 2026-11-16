@@ -178,8 +178,9 @@ class _ClientGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final presets = [
+      SubscriptionClientPreset.reclash,
       SubscriptionClientPreset.auto,
-      ...subscriptionClientPresetOrder,
+      ...subscriptionClientPresetOrder.skip(1),
       SubscriptionClientPreset.custom,
     ];
     return LayoutBuilder(

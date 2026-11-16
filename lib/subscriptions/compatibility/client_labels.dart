@@ -9,7 +9,7 @@ extension SubscriptionClientPresetLabel on SubscriptionClientPreset {
     final l10n = currentAppLocalizations;
     return switch (this) {
       SubscriptionClientPreset.auto => l10n.subscriptionClientAuto,
-      SubscriptionClientPreset.reclash => l10n.subscriptionClientReclash,
+      SubscriptionClientPreset.reclash => l10n.subscriptionClientDefault,
       SubscriptionClientPreset.flClashX => 'FlClashX',
       SubscriptionClientPreset.clashMeta => l10n.subscriptionClientClashMeta,
       SubscriptionClientPreset.clash => l10n.subscriptionClientClash,
