@@ -1692,7 +1692,8 @@ Desktop artifact integrity:
 Build configuration defaults live in `plugins/setup/setup_hooks/lib/src/options.dart` and can be overridden via the root
 `build_config.yaml`.
 
-`core_version` in `build_config.yaml` is the mihomo release tag the `core/mihomo` fork is based on. Upstream injects
+`core_version` in `build_config.yaml` is the mihomo release tag the `core/mihomo` fork is based on, and
+`plugins/setup/setup_hooks/test/build_config_test.dart` fails when a submodule bump leaves it behind. Upstream injects
 its version only from its own CI, so the fork alone reports the placeholder `1.10.0` in `/version` and in protocol
 user agents; `GoBuilder` passes the value as `-X github.com/metacubex/mihomo/constant.Version=...` for every build,
 local and CI alike. Bump it whenever the submodule moves onto a new upstream release.
