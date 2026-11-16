@@ -1,8 +1,8 @@
 {
   "donate": "Support the project",
   "donateDesc": "Keep ReClash free and alive",
-  "donateHeroTitle": "ReClash is free",
-  "donateHeroBody": "No ads, no tracking, no paid tier. Donations pay for servers, test devices and the evenings that go into every release.",
+  "donateHeroTitle": "ReClash is free and stays free",
+  "donateHeroBody": "Donations pay for servers, test devices and the evenings that go into every release.",
   "donateCards": "By card",
   "donateCardsAbroad": "These services may decline cards issued in your region.",
   "donateCrypto": "Crypto",
@@ -30,5 +30,11 @@
   "donateStarDesc": "Helps others find the project",
   "donateReport": "Report a problem",
   "donateReportDesc": "A good bug report is worth a donation",
-  "donateThanks": "Thank you. Every donation matters, however small."
+  "donateThanks": "Thank you. Every donation matters, however small.",
+  "donatePromiseNoAds": "No ads",
+  "donatePromiseNoTracking": "No tracking",
+  "donatePromiseOpenSource": "Open source",
+  "donateCopied": "Copied",
+  "donateShare": "Tell a friend",
+  "donateShareDesc": "Copies a link to the project"
 }

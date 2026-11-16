@@ -1,8 +1,8 @@
 {
   "donate": "Taslamany goldamak",
   "donateDesc": "ReClash mugt we işjeň galsyn",
-  "donateHeroTitle": "ReClash mugt",
-  "donateHeroBody": "Mahabatsyz, yzarlamasyz we tölegli mümkinçiliksiz. Haýyr-sahawat serwerlere, synag enjamlaryna we her goýberilişe gidýän wagta sarp edilýär.",
+  "donateHeroTitle": "ReClash mugt we şeýle-de galar",
+  "donateHeroBody": "Haýyr-sahawat serwerlere, synag enjamlaryna we her goýberilişe gidýän wagta sarp edilýär.",
   "donateCards": "Kart bilen",
   "donateCardsAbroad": "Bu hyzmatlar siziň sebitiňizde berlen kartlary kabul etmän biler.",
   "donateCrypto": "Kriptowalýuta",
@@ -20,5 +20,11 @@
   "donateStarDesc": "Beýlekilere taslamany tapmaga kömek edýär",
   "donateReport": "Mesele barada habar bermek",
   "donateReportDesc": "Gowy ýalňyşlyk hasabaty haýyr-sahawata barabar",
-  "donateThanks": "Sag boluň. Her bir haýyr-sahawat, hatda iň kiçisi hem möhüm."
+  "donateThanks": "Sag boluň. Her bir haýyr-sahawat, hatda iň kiçisi hem möhüm.",
+  "donatePromiseNoAds": "Mahabatsyz",
+  "donatePromiseNoTracking": "Yzarlamasyz",
+  "donatePromiseOpenSource": "Açyk kod",
+  "donateCopied": "Göçürildi",
+  "donateShare": "Dostlaryňa aýt",
+  "donateShareDesc": "Taslama salgysyny göçürýär"
 }

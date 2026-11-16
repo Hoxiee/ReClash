@@ -1,8 +1,8 @@
 {
   "donate": "프로젝트 후원",
   "donateDesc": "ReClash가 무료로 계속될 수 있도록",
-  "donateHeroTitle": "ReClash는 무료입니다",
-  "donateHeroBody": "광고도, 추적도, 유료 기능도 없습니다. 후원금은 서버, 테스트 기기, 그리고 매 릴리스에 들어가는 시간에 쓰입니다.",
+  "donateHeroTitle": "ReClash는 무료이고 앞으로도 무료입니다",
+  "donateHeroBody": "후원금은 서버, 테스트 기기, 그리고 매 릴리스에 들어가는 시간에 쓰입니다.",
   "donateCards": "카드",
   "donateCardsAbroad": "이 서비스에서는 해당 지역에서 발급된 카드가 거절될 수 있습니다.",
   "donateCrypto": "암호화폐",
@@ -20,5 +20,11 @@
   "donateStarDesc": "다른 사람들이 프로젝트를 찾는 데 도움이 됩니다",
   "donateReport": "문제 신고",
   "donateReportDesc": "좋은 버그 리포트는 후원만큼 가치 있습니다",
-  "donateThanks": "감사합니다. 아무리 작은 후원이라도 소중합니다."
+  "donateThanks": "감사합니다. 아무리 작은 후원이라도 소중합니다.",
+  "donatePromiseNoAds": "광고 없음",
+  "donatePromiseNoTracking": "추적 없음",
+  "donatePromiseOpenSource": "오픈 소스",
+  "donateCopied": "복사됨",
+  "donateShare": "친구에게 알리기",
+  "donateShareDesc": "프로젝트 링크를 복사합니다"
 }

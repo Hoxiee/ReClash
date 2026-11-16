@@ -1,8 +1,8 @@
 {
   "donate": "支持项目",
   "donateDesc": "让 ReClash 保持免费并持续更新",
-  "donateHeroTitle": "ReClash 是免费的",
-  "donateHeroBody": "没有广告、没有追踪、没有付费功能。捐赠用于服务器、测试设备，以及每个版本背后投入的时间。",
+  "donateHeroTitle": "ReClash 免费，并将一直免费",
+  "donateHeroBody": "捐赠用于服务器、测试设备，以及每个版本背后投入的时间。",
   "donateCards": "银行卡",
   "donateCardsAbroad": "这些服务可能不接受您所在地区发行的银行卡。",
   "donateCrypto": "加密货币",
@@ -20,5 +20,11 @@
   "donateStarDesc": "帮助更多人发现这个项目",
   "donateReport": "报告问题",
   "donateReportDesc": "一份好的问题报告抵得上一次捐赠",
-  "donateThanks": "谢谢。每一份捐赠都很重要，无论多少。"
+  "donateThanks": "谢谢。每一份捐赠都很重要，无论多少。",
+  "donatePromiseNoAds": "无广告",
+  "donatePromiseNoTracking": "无跟踪",
+  "donatePromiseOpenSource": "开源",
+  "donateCopied": "已复制",
+  "donateShare": "推荐给朋友",
+  "donateShareDesc": "复制项目链接"
 }

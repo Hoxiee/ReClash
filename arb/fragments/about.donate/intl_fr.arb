@@ -1,8 +1,8 @@
 {
   "donate": "Soutenir le projet",
   "donateDesc": "Gardez ReClash gratuit et vivant",
-  "donateHeroTitle": "ReClash est gratuit",
-  "donateHeroBody": "Sans publicité, sans pistage, sans version payante. Les dons financent les serveurs, les appareils de test et les soirées passées sur chaque version.",
+  "donateHeroTitle": "ReClash est gratuit et le restera",
+  "donateHeroBody": "Les dons financent les serveurs, les appareils de test et les soirées passées sur chaque version.",
   "donateCards": "Par carte",
   "donateCardsAbroad": "Ces services peuvent refuser les cartes émises dans votre région.",
   "donateCrypto": "Crypto",
@@ -20,5 +20,11 @@
   "donateStarDesc": "Aide les autres à trouver le projet",
   "donateReport": "Signaler un problème",
   "donateReportDesc": "Un bon rapport de bug vaut un don",
-  "donateThanks": "Merci. Chaque don compte, même le plus petit."
+  "donateThanks": "Merci. Chaque don compte, même le plus petit.",
+  "donatePromiseNoAds": "Sans publicité",
+  "donatePromiseNoTracking": "Sans pistage",
+  "donatePromiseOpenSource": "Code ouvert",
+  "donateCopied": "Copié",
+  "donateShare": "En parler à un ami",
+  "donateShareDesc": "Copie un lien vers le projet"
 }

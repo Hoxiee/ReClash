@@ -1,8 +1,8 @@
 {
   "donate": "Loyihani qo‘llab-quvvatlash",
   "donateDesc": "ReClash bepul va tirik qolishi uchun",
-  "donateHeroTitle": "ReClash bepul",
-  "donateHeroBody": "Reklamasiz, kuzatuvsiz va pullik imkoniyatlarsiz. Xayriyalar serverlar, sinov qurilmalari va har bir relizga ketadigan vaqtga sarflanadi.",
+  "donateHeroTitle": "ReClash bepul va shunday qoladi",
+  "donateHeroBody": "Xayriyalar serverlar, sinov qurilmalari va har bir relizga ketadigan vaqtga sarflanadi.",
   "donateCards": "Karta orqali",
   "donateCardsAbroad": "Bu xizmatlar mintaqangizda chiqarilgan kartalarni qabul qilmasligi mumkin.",
   "donateCrypto": "Kriptovalyuta",
@@ -20,5 +20,11 @@
   "donateStarDesc": "Boshqalarga loyihani topishga yordam beradi",
   "donateReport": "Muammo haqida xabar berish",
   "donateReportDesc": "Yaxshi xato hisoboti xayriyaga teng",
-  "donateThanks": "Rahmat. Har bir xayriya, hatto eng kichigi ham muhim."
+  "donateThanks": "Rahmat. Har bir xayriya, hatto eng kichigi ham muhim.",
+  "donatePromiseNoAds": "Reklamasiz",
+  "donatePromiseNoTracking": "Kuzatuvsiz",
+  "donatePromiseOpenSource": "Ochiq kod",
+  "donateCopied": "Nusxa olindi",
+  "donateShare": "Do'stlarga aytish",
+  "donateShareDesc": "Loyiha havolasini nusxalaydi"
 }

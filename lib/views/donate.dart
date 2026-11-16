@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -136,6 +137,8 @@ class DonateView extends ConsumerWidget {
       includeUnconfigured: includeUnconfigured,
     );
     final cryptoFirst = donationPrefersCrypto(regionCode) || rails.isEmpty;
+    final featured = cryptoFirst ? null : rails.first;
+    final otherRails = rails.skip(featured == null ? 0 : 1).toList();
     final crypto = wallets.isEmpty
         ? null
         : _Section(
@@ -146,28 +149,15 @@ class DonateView extends ConsumerWidget {
               recommendedIn: cryptoFirst ? regionCode : null,
             ),
           );
-    final cards = rails.isEmpty
+    final cards = otherRails.isEmpty
         ? null
         : _Section(
             title: appLocalizations.donateCards,
             footer: cryptoFirst ? appLocalizations.donateCardsAbroad : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 12,
-              children: [
-                if (!cryptoFirst)
-                  _FeaturedRail(
-                    rail: rails.first,
-                    url: config.links[rails.first] ?? '',
-                    regionCode: regionCode,
-                  ),
-                if (rails.length > (cryptoFirst ? 0 : 1))
-                  generateGroup([
-                    for (final rail in rails.skip(cryptoFirst ? 0 : 1))
-                      _RailItem(rail: rail, url: config.links[rail] ?? ''),
-                  ]),
-              ],
-            ),
+            child: generateGroup([
+              for (final rail in otherRails)
+                _RailItem(rail: rail, url: config.links[rail] ?? ''),
+            ]),
           );
     return CommonScaffold(
       title: appLocalizations.donate,
@@ -180,7 +170,15 @@ class DonateView extends ConsumerWidget {
             ) +
             context.bodyInsets,
         children: [
-          const _DonateHero(),
+          _DonateHero(
+            action: featured == null
+                ? null
+                : _HeroAction(
+                    rail: featured,
+                    url: config.links[featured] ?? '',
+                    regionCode: regionCode,
+                  ),
+          ),
           ...(cryptoFirst ? [crypto, cards] : [cards, crypto]),
           _Section(
             title: appLocalizations.donateWithoutMoney,
@@ -215,35 +213,155 @@ class _Section extends StatelessWidget {
 }
 
 class _DonateHero extends StatelessWidget {
-  const _DonateHero();
+  final Widget? action;
+
+  const _DonateHero({required this.action});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
+    final action = this.action;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
       child: Column(
         children: [
           const _BeatingHeart(),
-          const SizedBox(height: 2),
-          Text(
-            appLocalizations.donateHeroTitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyle.title2.of(context, emphasized: true),
-          ),
-          const SizedBox(height: 10),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(
-              appLocalizations.donateHeroBody,
-              textAlign: TextAlign.center,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: colorScheme.onSurfaceVariant, height: 1.5),
+            child: Column(
+              children: [
+                Text(
+                  appLocalizations.donateHeroTitle,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.title1.of(context, emphasized: true),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  appLocalizations.donateHeroBody,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 6,
+            runSpacing: 8,
+            children: [
+              _Promise(
+                glyph: AppGlyphs.block,
+                label: appLocalizations.donatePromiseNoAds,
+              ),
+              _Promise(
+                glyph: AppGlyphs.eyeOff,
+                label: appLocalizations.donatePromiseNoTracking,
+              ),
+              _Promise(
+                glyph: AppGlyphs.code,
+                label: appLocalizations.donatePromiseOpenSource,
+              ),
+            ],
+          ),
+          if (action != null) ...[const SizedBox(height: 28), action],
         ],
+      ),
+    );
+  }
+}
+
+class _HeroAction extends StatelessWidget {
+  final DonationRail rail;
+  final String url;
+  final String? regionCode;
+
+  const _HeroAction({
+    required this.rail,
+    required this.url,
+    required this.regionCode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final appLocalizations = context.appLocalizations;
+    final style = AppTextStyle.footnote
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FilledButton.icon(
+            onPressed: url.isEmpty
+                ? null
+                : () => unawaited(dialogs.openUrl(url)),
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
+            icon: const GlyphIcon(AppGlyphs.heart, fill: 1),
+            label: Text(appLocalizations.donateAction),
+          ),
+          const SizedBox(height: 12),
+          Center(child: _RecommendedLabel(regionCode: regionCode)),
+          const SizedBox(height: 2),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: rail.title,
+                  style: AppTextStyle.footnote
+                      .of(context, emphasized: true)
+                      .copyWith(color: colorScheme.onSurface),
+                ),
+                TextSpan(
+                  text:
+                      ' · ${url.isEmpty ? appLocalizations.donateNotConfigured : rail.description(appLocalizations)}',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            style: style,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Promise extends StatelessWidget {
+  final Glyph glyph;
+  final String label;
+
+  const _Promise({required this.glyph, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: context.raisedSurfaceLevel.colorOf(colorScheme),
+        shape: AppShape.full,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 5,
+          children: [
+            GlyphIcon(glyph, size: 15, color: colorScheme.onSurfaceVariant),
+            Text(
+              label,
+              style: AppTextStyle.caption1.of(context, emphasized: true),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -257,14 +375,23 @@ class _BeatingHeart extends StatefulWidget {
 }
 
 class _BeatingHeartState extends State<_BeatingHeart>
-    with SingleTickerProviderStateMixin {
-  static const _size = 96.0;
-  static const _glow = 148.0;
+    with TickerProviderStateMixin {
+  static const _heart = 84.0;
+  static const _glow = 220.0;
+  static const _height = 176.0;
+  static const _sparks = 7;
 
   late final _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1400),
   );
+
+  late final _burst = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+
+  var _burstSeed = 0;
 
   late final Animation<double> _scale = TweenSequence([
     TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.14), weight: 12),
@@ -293,52 +420,100 @@ class _BeatingHeartState extends State<_BeatingHeart>
     }
   }
 
+  void _tap() {
+    unawaited(_beat());
+    setState(() => _burstSeed++);
+    unawaited(_burst.forward(from: 0));
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _burst.dispose();
     super.dispose();
+  }
+
+  Widget _spark(int index, Color color) {
+    final random = math.Random(_burstSeed * _sparks + index);
+    final drift = (random.nextDouble() * 2 - 1) * 56;
+    final rise = 56 + random.nextDouble() * 40;
+    final size = 12 + random.nextDouble() * 10;
+    final delay = index / _sparks * 0.3;
+    return AnimatedBuilder(
+      animation: _burst,
+      builder: (context, child) {
+        final t = ((_burst.value - delay) / (1 - delay)).clamp(0.0, 1.0);
+        if (t == 0 || t == 1) return const SizedBox.shrink();
+        final travel = Curves.easeOutCubic.transform(t);
+        return Opacity(
+          opacity: t < 0.15 ? t / 0.15 : 1 - Curves.easeIn.transform(t),
+          child: Transform.translate(
+            offset: Offset(drift * travel, -rise * travel),
+            child: Transform.scale(scale: 0.6 + 0.4 * travel, child: child),
+          ),
+        );
+      },
+      child: GlyphIcon(AppGlyphs.heart, size: size, fill: 1, color: color),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return GestureDetector(
-      onTap: MediaQuery.disableAnimationsOf(context) ? null : _beat,
-      child: SizedBox.square(
-        dimension: _glow,
+      onTap: MediaQuery.disableAnimationsOf(context) ? null : _tap,
+      child: SizedBox(
+        width: _glow,
+        height: _height,
         child: Stack(
           alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    colorScheme.primary.withValues(alpha: 0.3),
-                    colorScheme.primary.withValues(alpha: 0),
-                  ],
-                ),
-              ),
-              child: const SizedBox.square(dimension: _glow),
-            ),
             ScaleTransition(
               scale: _scale,
               child: DecoratedBox(
-                decoration: ShapeDecoration(
-                  color: context.raisedSurfaceLevel.colorOf(colorScheme),
-                  shape: AppShape.all(AppCorner.fit(_size)),
-                ),
-                child: SizedBox.square(
-                  dimension: _size,
-                  child: Center(
-                    child: GlyphIcon(
-                      AppGlyphs.heart,
-                      size: 48,
-                      fill: 1,
-                      color: colorScheme.primary,
-                    ),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      colorScheme.primary.withValues(alpha: 0.32),
+                      colorScheme.primary.withValues(alpha: 0.1),
+                      colorScheme.primary.withValues(alpha: 0),
+                    ],
+                    stops: const [0, 0.45, 1],
                   ),
                 ),
+                child: const SizedBox.square(dimension: _glow),
+              ),
+            ),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final wave = (_controller.value / 0.6).clamp(0.0, 1.0);
+                if (wave == 0 || wave == 1) return const SizedBox.shrink();
+                final spread = Curves.easeOutCubic.transform(wave);
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.primary.withValues(
+                      alpha: 0.22 * (1 - wave),
+                    ),
+                  ),
+                  child: SizedBox.square(
+                    dimension: _heart + (_glow - _heart) * spread,
+                  ),
+                );
+              },
+            ),
+            for (var i = 0; i < _sparks; i++)
+              _spark(i, i.isEven ? colorScheme.primary : colorScheme.tertiary),
+            ScaleTransition(
+              scale: _scale,
+              child: GlyphIcon(
+                AppGlyphs.heart,
+                size: _heart,
+                fill: 1,
+                color: colorScheme.primary,
               ),
             ),
           ],
@@ -369,11 +544,11 @@ extension on DonationRail {
 }
 
 class _GlyphWell extends StatelessWidget {
-  final Glyph glyph;
-  final double size;
-  final Color? color;
+  static const _size = 40.0;
 
-  const _GlyphWell({required this.glyph, this.size = 40, this.color});
+  final Glyph glyph;
+
+  const _GlyphWell({required this.glyph});
 
   @override
   Widget build(BuildContext context) {
@@ -381,85 +556,17 @@ class _GlyphWell extends StatelessWidget {
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: context.raisedSurfaceLevel.colorOf(colorScheme),
-        shape: AppShape.all(AppCorner.fit(size)),
+        shape: AppShape.all(AppCorner.fit(_size)),
       ),
       child: SizedBox.square(
-        dimension: size,
+        dimension: _size,
         child: Center(
           child: GlyphIcon(
             glyph,
-            size: size / 2,
-            color: color ?? colorScheme.onSurfaceVariant,
+            size: _size / 2,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _FeaturedRail extends StatelessWidget {
-  final DonationRail rail;
-  final String url;
-  final String? regionCode;
-
-  const _FeaturedRail({
-    required this.rail,
-    required this.url,
-    required this.regionCode,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final appLocalizations = context.appLocalizations;
-    final onPressed = url.isEmpty
-        ? null
-        : () => unawaited(dialogs.openUrl(url));
-    return CommonCard(
-      shape: AppShape.xl,
-      padding: const EdgeInsets.all(16),
-      onPressed: onPressed,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 16,
-        children: [
-          Row(
-            spacing: 14,
-            children: [
-              _GlyphWell(
-                glyph: rail.glyph,
-                size: 52,
-                color: colorScheme.primary,
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    _RecommendedLabel(regionCode: regionCode),
-                    Text(
-                      rail.title,
-                      style: AppTextStyle.title3.of(context, emphasized: true),
-                    ),
-                    Text(
-                      url.isEmpty
-                          ? appLocalizations.donateNotConfigured
-                          : rail.description(appLocalizations),
-                      style: AppTextStyle.footnote
-                          .of(context)
-                          .copyWith(color: colorScheme.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          FilledButton.icon(
-            onPressed: onPressed,
-            icon: const GlyphIcon(AppGlyphs.heart, fill: 1),
-            label: Text(appLocalizations.donateAction),
-          ),
-        ],
       ),
     );
   }
@@ -534,8 +641,11 @@ class _CryptoCard extends StatefulWidget {
 
 class _CryptoCardState extends State<_CryptoCard> {
   static const _wideLayout = 520.0;
+  static const _copiedHold = Duration(seconds: 2);
 
   late String _id = widget.wallets.first.id;
+  String? _copiedId;
+  Timer? _copiedTimer;
 
   CryptoWallet get _wallet => widget.wallets.firstWhere(
     (wallet) => wallet.id == _id,
@@ -552,18 +662,25 @@ class _CryptoCardState extends State<_CryptoCard> {
 
   Future<void> _copy(CryptoWallet wallet) async {
     await Clipboard.setData(ClipboardData(text: wallet.address));
-    if (mounted) {
-      context.showNotifier(
-        context.appLocalizations.copySuccess,
-        level: MessageLevel.success,
-      );
-    }
+    if (!mounted) return;
+    _copiedTimer?.cancel();
+    _copiedTimer = Timer(_copiedHold, () {
+      if (mounted) setState(() => _copiedId = null);
+    });
+    setState(() => _copiedId = wallet.id);
+  }
+
+  @override
+  void dispose() {
+    _copiedTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final wallet = _wallet;
     final recommendedIn = widget.recommendedIn;
+    final onCopy = wallet.isConfigured ? () => unawaited(_copy(wallet)) : null;
     return CommonCard(
       shape: AppShape.xl,
       padding: const EdgeInsets.all(16),
@@ -583,58 +700,60 @@ class _CryptoCardState extends State<_CryptoCard> {
                     .id,
               ),
             ),
-          if (_sameCoin(wallet).length > 1)
-            SegmentedControl<String>(
-              segments: [
-                for (final other in _sameCoin(wallet))
-                  (other.id, other.network),
-              ],
-              value: wallet.id,
-              onChanged: (id) => setState(() => _id = id),
-            ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            layoutBuilder: (current, previous) => Stack(
-              alignment: Alignment.topCenter,
-              children: [...previous, ?current],
-            ),
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween(begin: 0.96, end: 1.0).animate(animation),
-                child: child,
-              ),
-            ),
-            child: LayoutBuilder(
-              key: ValueKey(wallet.id),
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= _wideLayout;
-                final code = _WalletCode(
-                  wallet: wallet,
-                  size: wide ? 168 : 200,
-                );
-                final details = _WalletDetails(
-                  wallet: wallet,
-                  wide: wide,
-                  onCopy: wallet.isConfigured ? () => _copy(wallet) : null,
-                );
-                return wide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 20,
-                        children: [
-                          code,
-                          Expanded(child: details),
-                        ],
-                      )
-                    : Column(spacing: 16, children: [code, details]);
-              },
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= _wideLayout;
+              final code = _Swap(
+                id: wallet.id,
+                child: _WalletCode(wallet: wallet, size: wide ? 176 : 184),
+              );
+              final details = _WalletDetails(
+                wallet: wallet,
+                networks: _sameCoin(wallet),
+                wide: wide,
+                copied: _copiedId == wallet.id,
+                onCopy: onCopy,
+                onNetwork: (id) => setState(() => _id = id),
+              );
+              return wide
+                  ? Row(
+                      spacing: 20,
+                      children: [
+                        code,
+                        Expanded(child: details),
+                      ],
+                    )
+                  : Column(spacing: 16, children: [code, details]);
+            },
           ),
         ],
       ),
+    );
+  }
+}
+
+class _Swap extends StatelessWidget {
+  final Object id;
+  final Widget child;
+
+  const _Swap({required this.id, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 240),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (current, previous) =>
+          Stack(alignment: Alignment.center, children: [...previous, ?current]),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.96, end: 1.0).animate(animation),
+          child: child,
+        ),
+      ),
+      child: KeyedSubtree(key: ValueKey(id), child: child),
     );
   }
 }
@@ -675,114 +794,223 @@ class _WalletCode extends StatelessWidget {
 
 class _WalletDetails extends StatelessWidget {
   final CryptoWallet wallet;
+  final List<CryptoWallet> networks;
   final bool wide;
+  final bool copied;
   final VoidCallback? onCopy;
+  final ValueChanged<String> onNetwork;
 
   const _WalletDetails({
     required this.wallet,
+    required this.networks,
     required this.wide,
+    required this.copied,
     required this.onCopy,
+    required this.onNetwork,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
-    final align = wide ? CrossAxisAlignment.start : CrossAxisAlignment.center;
-    final textAlign = wide ? TextAlign.start : TextAlign.center;
+    final alignment = wide
+        ? AlignmentDirectional.centerStart
+        : Alignment.center;
     return Column(
-      crossAxisAlignment: align,
-      spacing: 10,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 10,
-          children: [
-            Text(
-              wallet.coin,
-              style: AppTextStyle.title3.of(context, emphasized: true),
-            ),
-            _NetworkChip(network: wallet.network),
-          ],
-        ),
-        DecoratedBox(
-          decoration: ShapeDecoration(
-            color: context.raisedSurfaceLevel.colorOf(colorScheme),
-            shape: AppShape.md,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: wallet.isConfigured
-                ? SelectableText(
-                    wallet.address,
-                    textAlign: textAlign,
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(
-                          fontFamily: FontFamily.jetBrainsMono.value,
-                          color: colorScheme.onSurface,
-                          height: 1.45,
-                        ),
-                  )
-                : Text(
-                    appLocalizations.donateNotConfigured,
-                    textAlign: textAlign,
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-          ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
-          children: [
-            GlyphIcon(AppGlyphs.warning, size: 18, color: colorScheme.warning),
-            Flexible(
-              child: Text(
-                appLocalizations.donateNetworkWarning(
+        Align(
+          alignment: alignment,
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 2),
+                child: Text(
                   wallet.coin,
-                  wallet.network,
+                  style: AppTextStyle.title3.of(context, emphasized: true),
                 ),
-                style: AppTextStyle.footnote
-                    .of(context)
-                    .copyWith(color: colorScheme.onSurface),
               ),
-            ),
-          ],
+              for (final network in networks)
+                _NetworkChip(
+                  network: network.network,
+                  selected: network.id == wallet.id,
+                  onTap: networks.length > 1
+                      ? () => onNetwork(network.id)
+                      : null,
+                ),
+            ],
+          ),
         ),
-        TonalButton(
-          glyph: AppGlyphs.copy,
-          label: appLocalizations.donateCopyAddress,
-          onPressed: onCopy,
+        _Swap(
+          id: wallet.id,
+          child: _AddressField(
+            wallet: wallet,
+            centered: !wide,
+            copied: copied,
+            onCopy: onCopy,
+          ),
+        ),
+        _NetworkWarning(
+          text: appLocalizations.donateNetworkWarning(
+            wallet.coin,
+            wallet.network,
+          ),
+        ),
+        Align(
+          alignment: alignment,
+          child: TonalButton(
+            glyph: copied ? AppGlyphs.check : AppGlyphs.copy,
+            label: copied
+                ? appLocalizations.donateCopied
+                : appLocalizations.donateCopyAddress,
+            onPressed: onCopy,
+          ),
         ),
       ],
     );
   }
 }
 
-class _NetworkChip extends StatelessWidget {
-  final String network;
+class _AddressField extends StatelessWidget {
+  final CryptoWallet wallet;
+  final bool centered;
+  final bool copied;
+  final VoidCallback? onCopy;
 
-  const _NetworkChip({required this.network});
+  const _AddressField({
+    required this.wallet,
+    required this.centered,
+    required this.copied,
+    required this.onCopy,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.warningContainer,
-        shape: AppShape.full,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-        child: Text(
-          network,
-          style: AppTextStyle.caption1
-              .of(context, emphasized: true)
-              .copyWith(color: colorScheme.onWarningContainer),
+    final configured = wallet.isConfigured;
+    return Material(
+      color: context.raisedSurfaceLevel.colorOf(colorScheme),
+      shape: AppShape.md,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onCopy,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+          child: Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: Text(
+                  configured
+                      ? wallet.address
+                      : context.appLocalizations.donateNotConfigured,
+                  textAlign: centered ? TextAlign.center : TextAlign.start,
+                  style: configured
+                      ? AppTextStyle.footnote
+                            .of(context)
+                            .copyWith(
+                              fontFamily: FontFamily.jetBrainsMono.value,
+                              color: colorScheme.onSurface,
+                              height: 1.45,
+                            )
+                      : AppTextStyle.footnote
+                            .of(context)
+                            .copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+              if (configured)
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: GlyphIcon(
+                    copied ? AppGlyphs.check : AppGlyphs.copy,
+                    key: ValueKey(copied),
+                    size: 18,
+                    color: copied
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _NetworkChip extends StatelessWidget {
+  final String network;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const _NetworkChip({
+    required this.network,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Semantics(
+      selected: selected,
+      button: onTap != null,
+      child: Material(
+        color: selected
+            ? colorScheme.warningContainer
+            : context.raisedSurfaceLevel.colorOf(colorScheme),
+        shape: AppShape.full,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            child: Text(
+              network,
+              style: AppTextStyle.caption1
+                  .of(context, emphasized: true)
+                  .copyWith(
+                    color: selected
+                        ? colorScheme.onWarningContainer
+                        : colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NetworkWarning extends StatelessWidget {
+  final String text;
+
+  const _NetworkWarning({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
+        children: [
+          GlyphIcon(AppGlyphs.warning, size: 18, color: colorScheme.warning),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -791,98 +1019,47 @@ class _NetworkChip extends StatelessWidget {
 class _FreeHelp extends StatelessWidget {
   const _FreeHelp();
 
-  static const _minTileWidth = 150.0;
-  static const _gap = 12.0;
+  Future<void> _copyLink(BuildContext context) async {
+    await Clipboard.setData(
+      const ClipboardData(text: 'https://github.com/$repository'),
+    );
+    if (context.mounted) {
+      context.showNotifier(
+        context.appLocalizations.copySuccess,
+        level: MessageLevel.success,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final tiles = [
-      _FreeHelpTile(
-        glyph: AppGlyphs.star,
-        title: appLocalizations.donateStar,
-        subtitle: appLocalizations.donateStarDesc,
-        url: 'https://github.com/$repository',
+    return generateGroup([
+      ListItem(
+        leading: const _GlyphWell(glyph: AppGlyphs.star),
+        title: Text(appLocalizations.donateStar),
+        subtitle: Text(appLocalizations.donateStarDesc),
+        trailing: const GlyphIcon(AppGlyphs.openExternal),
+        onTap: () =>
+            unawaited(dialogs.openUrl('https://github.com/$repository')),
       ),
-      _FreeHelpTile(
-        glyph: AppGlyphs.compose,
-        title: appLocalizations.donateReport,
-        subtitle: appLocalizations.donateReportDesc,
-        url: 'https://github.com/$repository/issues/new/choose',
+      ListItem(
+        leading: const _GlyphWell(glyph: AppGlyphs.compose),
+        title: Text(appLocalizations.donateReport),
+        subtitle: Text(appLocalizations.donateReportDesc),
+        trailing: const GlyphIcon(AppGlyphs.openExternal),
+        onTap: () => unawaited(
+          dialogs.openUrl('https://github.com/$repository/issues/new/choose'),
+        ),
       ),
-    ];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
-        if (constraints.maxWidth < _minTileWidth * textScale * 2 + _gap) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: _gap,
-            children: tiles,
-          );
-        }
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: _gap,
-            children: [for (final tile in tiles) Expanded(child: tile)],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FreeHelpTile extends StatelessWidget {
-  final Glyph glyph;
-  final String title;
-  final String subtitle;
-  final String url;
-
-  const _FreeHelpTile({
-    required this.glyph,
-    required this.title,
-    required this.subtitle,
-    required this.url,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return CommonCard(
-      shape: AppShape.lg,
-      padding: const EdgeInsets.all(14),
-      onPressed: () => unawaited(dialogs.openUrl(url)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _GlyphWell(glyph: glyph, size: 36),
-              GlyphIcon(
-                AppGlyphs.openExternal,
-                size: 16,
-                fill: 1,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: AppTextStyle.subheadline.of(context, emphasized: true),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: AppTextStyle.caption1
-                .of(context)
-                .copyWith(color: colorScheme.onSurfaceVariant),
-          ),
-        ],
+      ListItem(
+        leading: const _GlyphWell(glyph: AppGlyphs.megaphone),
+        title: Text(appLocalizations.donateShare),
+        subtitle: Text(appLocalizations.donateShareDesc),
+        trailing: const GlyphIcon(AppGlyphs.copy),
+        onTap: () => unawaited(_copyLink(context)),
       ),
-    );
+    ]);
   }
 }
 

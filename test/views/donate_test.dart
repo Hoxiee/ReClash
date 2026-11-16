@@ -85,7 +85,7 @@ void main() {
       l10n.donateWithoutMoney,
     ]);
     expect(find.text(l10n.donateRecommended), findsOneWidget);
-    expect(find.text('Tribute'), findsOneWidget);
+    expect(find.textContaining('Tribute'), findsOneWidget);
     expect(find.text(l10n.donateAction), findsOneWidget);
     expect(find.text('GitHub Sponsors'), findsOneWidget);
     expect(find.text('CloudTips'), findsNothing);
@@ -154,5 +154,9 @@ void main() {
     await tester.tap(find.text(l10n.donateCopyAddress));
     await tester.pump();
     expect(copied, 'UQTon');
+    expect(find.text(l10n.donateCopied), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text(l10n.donateCopyAddress), findsOneWidget);
   });
 }
