@@ -98,29 +98,29 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     animateScrollTo(controller, rowOffset);
   }
 
-  /// Mirrors [ProxyGroupView]: the hint card, then the chain band and its
-  /// labels above the servers.
+  /// Mirrors [ProxyGroupView]: the hint card, then each band under its label.
   double? _bandedRowOffset(Group group, String? selected, double rowExtent) {
-    final (chains: banded, :servers) = splitChainBand(
+    final bands = splitProxyBands(
       group.all,
-      ref.read(chainGeneratedNamesProvider).groups,
+      chains: ref.read(chainGeneratedNamesProvider).groups,
+      favorites: ref.read(favoriteSetProvider),
     );
-    final top = ref.read(chainHintGroupProvider) == group.name
+    final labelled = proxyBandsLabelled(bands);
+    var offset = ref.read(chainHintGroupProvider) == group.name
         ? chainHintExtent(context, _width)
         : 0.0;
-    double? rowOf(List<Proxy> proxies) => selectedRowOffset(
-      proxies: proxies,
-      selectedProxyName: selected,
-      columns: _columns,
-      rowExtent: rowExtent,
-    );
-    final chainRow = rowOf(banded);
-    if (chainRow != null) return top + chainBandLabelExtent + chainRow;
-    final serverRow = rowOf(servers);
-    if (serverRow == null) return null;
-    if (banded.isEmpty) return top + serverRow;
-    final bandRows = (banded.length / _columns).ceil();
-    return top + chainBandLabelExtent * 2 + bandRows * rowExtent + serverRow;
+    for (final (band: _, :proxies) in bands) {
+      if (labelled) offset += proxyBandLabelExtent;
+      final row = selectedRowOffset(
+        proxies: proxies,
+        selectedProxyName: selected,
+        columns: _columns,
+        rowExtent: rowExtent,
+      );
+      if (row != null) return offset + row;
+      offset += (proxies.length / _columns).ceil() * rowExtent;
+    }
+    return null;
   }
 
   Future<void> delayTestCurrentGroup() async {
@@ -281,10 +281,15 @@ class ProxyGroupView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (chains: banded, :servers) = splitChainBand(
-      group.all,
-      ref.watch(chainGeneratedNamesProvider.select((names) => names.groups)),
+    final chains = ref.watch(
+      chainGeneratedNamesProvider.select((names) => names.groups),
     );
+    final bands = splitProxyBands(
+      group.all,
+      chains: chains,
+      favorites: ref.watch(favoriteSetProvider),
+    );
+    final labelled = proxyBandsLabelled(bands);
     final showHint = ref.watch(chainHintGroupProvider) == group.name;
     final delegate = SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: columns,
@@ -292,12 +297,12 @@ class ProxyGroupView extends ConsumerWidget {
       crossAxisSpacing: 8,
       mainAxisExtent: getItemHeight(cardType),
     );
-    SliverGrid grid(List<Proxy> proxies, {required bool chains}) => SliverGrid(
+    SliverGrid grid(List<Proxy> proxies) => SliverGrid(
       gridDelegate: delegate,
       delegate: SliverChildBuilderDelegate(
         (_, index) {
           final proxy = proxies[index];
-          return chains
+          return chains.contains(proxy.name)
               ? ChainTile(
                   groupName: group.name,
                   groupType: group.type,
@@ -333,18 +338,18 @@ class ProxyGroupView extends ConsumerWidget {
             sliver: SliverMainAxisGroup(
               slivers: [
                 if (showHint) const SliverToBoxAdapter(child: ChainHintCard()),
-                if (banded.isNotEmpty) ...[
-                  const SliverToBoxAdapter(child: ChainBandLabel(chains: true)),
-                  grid(banded, chains: true),
-                  if (servers.isNotEmpty)
-                    const SliverPadding(
-                      padding: EdgeInsets.only(top: proxyGridSpacing),
+                for (final (index, (:band, :proxies)) in bands.indexed) ...[
+                  if (labelled)
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        top: index == 0 ? 0 : proxyGridSpacing,
+                      ),
                       sliver: SliverToBoxAdapter(
-                        child: ChainBandLabel(chains: false),
+                        child: ProxyBandLabel(band: band),
                       ),
                     ),
+                  grid(proxies),
                 ],
-                grid(servers, chains: false),
               ],
             ),
           ),

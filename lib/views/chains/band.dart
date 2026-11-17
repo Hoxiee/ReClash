@@ -22,28 +22,49 @@ import 'marks.dart';
 import 'page.dart';
 import 'state.dart';
 
-const chainBandLabelExtent = 32.0;
+const proxyBandLabelExtent = 32.0;
 
-/// [all] split into the chain band, in [chains], and the servers under it.
-({List<Proxy> chains, List<Proxy> servers}) splitChainBand(
-  List<Proxy> all,
-  Set<String> chains,
-) {
-  if (chains.isEmpty) return (chains: const [], servers: all);
-  final band = all.where((proxy) => chains.contains(proxy.name)).toList();
-  if (band.isEmpty) return (chains: const [], servers: all);
-  return (
-    chains: band,
-    servers: all.where((proxy) => !chains.contains(proxy.name)).toList(),
-  );
+enum ProxyBand { favorites, chains, servers }
+
+typedef ProxyBandSlice = ({ProxyBand band, List<Proxy> proxies});
+
+/// [all] split into favorites, chains and the servers under them, in that
+/// order and without empty bands; a favorite chain stays among favorites.
+List<ProxyBandSlice> splitProxyBands(
+  List<Proxy> all, {
+  required Set<String> chains,
+  required Set<String> favorites,
+}) {
+  if (all.isEmpty) return const [];
+  if (chains.isEmpty && favorites.isEmpty) {
+    return [(band: ProxyBand.servers, proxies: all)];
+  }
+  final bands = <ProxyBand, List<Proxy>>{};
+  for (final proxy in all) {
+    final band = favorites.contains(proxy.name)
+        ? ProxyBand.favorites
+        : chains.contains(proxy.name)
+        ? ProxyBand.chains
+        : ProxyBand.servers;
+    (bands[band] ??= []).add(proxy);
+  }
+  return [
+    for (final band in ProxyBand.values)
+      if (bands[band] case final proxies?) (band: band, proxies: proxies),
+  ];
 }
 
-/// A label over the chains or the servers of a group, with the way to every
-/// chain beside the first.
-class ChainBandLabel extends StatelessWidget {
-  const ChainBandLabel({super.key, required this.chains});
+/// A group that is only servers needs no label over them.
+bool proxyBandsLabelled(List<ProxyBandSlice> bands) =>
+    bands.length > 1 ||
+    (bands.isNotEmpty && bands.first.band != ProxyBand.servers);
 
-  final bool chains;
+/// A label over one band of a group, with the way to every chain beside the
+/// chains.
+class ProxyBandLabel extends StatelessWidget {
+  const ProxyBandLabel({super.key, required this.band});
+
+  final ProxyBand band;
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +73,17 @@ class ChainBandLabel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: SizedBox(
-        height: chainBandLabelExtent - 4,
+        height: proxyBandLabelExtent - 4,
         child: Row(
           children: [
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                chains ? l.chainsTitle : l.chainsServers,
+                switch (band) {
+                  ProxyBand.favorites => l.favorites,
+                  ProxyBand.chains => l.chainsTitle,
+                  ProxyBand.servers => l.chainsServers,
+                },
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyle.footnote
@@ -66,7 +91,7 @@ class ChainBandLabel extends StatelessWidget {
                     .copyWith(color: colorScheme.onSurfaceVariant),
               ),
             ),
-            if (chains)
+            if (band == ProxyBand.chains)
               TextButton(
                 onPressed: () => openChainsPage(context),
                 style: TextButton.styleFrom(

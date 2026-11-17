@@ -42,6 +42,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
   int _groupColumns = 1;
   double _gap = 0;
   Set<String> _chains = const {};
+  Set<String> _favorites = const {};
   String? _hintGroup;
   double _hintExtent = 0;
 
@@ -50,6 +51,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     columns: _columns,
     rowExtent: rowExtent,
     chains: _chains,
+    favorites: _favorites,
     hintExtent: group.name == _hintGroup ? _hintExtent : null,
   );
 
@@ -183,6 +185,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
         final chains = ref.watch(
           chainGeneratedNamesProvider.select((names) => names.groups),
         );
+        final favorites = ref.watch(favoriteSetProvider);
         final hintGroup = ref.watch(chainHintGroupProvider);
         final viewMode = ref.watch(viewModeProvider);
         final proxiesLayout = ref.watch(
@@ -220,6 +223,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
               _groupColumns = groupColumns;
               _gap = gap;
               _chains = chains;
+              _favorites = favorites;
               _hintGroup = hintGroup;
               _hintExtent = hintGroup == null
                   ? 0
@@ -234,6 +238,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
                 cardType: cardType,
                 gap: gap,
                 chains: chains,
+                favorites: favorites,
                 hintExtent: group.name == hintGroup ? _hintExtent : null,
                 onChange: _handleChange,
                 onScrollToSelected: _scrollToGroupSelected,
@@ -308,9 +313,9 @@ final class _HintRow extends _BandRow {
 }
 
 final class _LabelRow extends _BandRow {
-  const _LabelRow({required this.chains});
+  const _LabelRow(this.band);
 
-  final bool chains;
+  final ProxyBand band;
 }
 
 final class _CardsRow extends _BandRow {
@@ -319,8 +324,8 @@ final class _CardsRow extends _BandRow {
   final List<Proxy> proxies;
 }
 
-/// A group's rows with their extents: chains on their own rows above the
-/// servers, and the first-contact card above them all.
+/// A group's rows with their extents: favorites, then chains, on their own
+/// rows above the servers, and the first-contact card above them all.
 class _GroupLayout {
   _GroupLayout._(this.rows, this.extents, {required this.uniform});
 
@@ -329,9 +334,15 @@ class _GroupLayout {
     required int columns,
     required double rowExtent,
     required Set<String> chains,
+    required Set<String> favorites,
     double? hintExtent,
   }) {
-    final (chains: banded, :servers) = splitChainBand(group.all, chains);
+    final bands = splitProxyBands(
+      group.all,
+      chains: chains,
+      favorites: favorites,
+    );
+    final labelled = proxyBandsLabelled(bands);
     final rows = <_BandRow>[];
     final extents = <double>[];
     void add(_BandRow row, double extent) {
@@ -340,22 +351,16 @@ class _GroupLayout {
     }
 
     if (hintExtent != null) add(const _HintRow(), hintExtent);
-    if (banded.isNotEmpty) {
-      add(const _LabelRow(chains: true), chainBandLabelExtent);
-      for (final chunk in banded.chunks(columns)) {
+    for (final (:band, :proxies) in bands) {
+      if (labelled) add(_LabelRow(band), proxyBandLabelExtent);
+      for (final chunk in proxies.chunks(columns)) {
         add(_CardsRow(chunk), rowExtent);
       }
-      if (servers.isNotEmpty) {
-        add(const _LabelRow(chains: false), chainBandLabelExtent);
-      }
-    }
-    for (final chunk in servers.chunks(columns)) {
-      add(_CardsRow(chunk), rowExtent);
     }
     return _GroupLayout._(
       rows,
       extents,
-      uniform: hintExtent == null && banded.isEmpty,
+      uniform: hintExtent == null && !labelled,
     );
   }
 
@@ -393,6 +398,7 @@ class _GroupSliver extends ConsumerStatefulWidget {
     required this.cardType,
     required this.gap,
     required this.chains,
+    required this.favorites,
     required this.hintExtent,
     required this.onChange,
     required this.onScrollToSelected,
@@ -403,6 +409,7 @@ class _GroupSliver extends ConsumerStatefulWidget {
   final ProxyCardType cardType;
   final double gap;
   final Set<String> chains;
+  final Set<String> favorites;
   final double? hintExtent;
   final void Function(String groupName) onChange;
   final void Function(String groupName) onScrollToSelected;
@@ -452,6 +459,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
         widget.columns != oldWidget.columns ||
         widget.cardType != oldWidget.cardType ||
         !setEquals(widget.chains, oldWidget.chains) ||
+        !setEquals(widget.favorites, oldWidget.favorites) ||
         widget.hintExtent != oldWidget.hintExtent) {
       _rows = null;
     }
@@ -462,6 +470,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     columns: widget.columns,
     rowExtent: rowExtent,
     chains: widget.chains,
+    favorites: widget.favorites,
     hintExtent: widget.hintExtent,
   );
 
@@ -470,9 +479,9 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
       padding: EdgeInsets.symmetric(horizontal: _headerInset),
       child: ChainHintCard(),
     ),
-    _LabelRow(:final chains) => Padding(
+    _LabelRow(:final band) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: _headerInset),
-      child: ChainBandLabel(chains: chains),
+      child: ProxyBandLabel(band: band),
     ),
     _CardsRow(:final proxies) => _buildRow(context, proxies),
   };
