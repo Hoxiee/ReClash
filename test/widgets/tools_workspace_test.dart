@@ -1713,15 +1713,10 @@ void main() {
 
   testWidgets('auto routing opens inside the Tools workspace', (tester) async {
     final container = await pumpTools(tester, size: const Size(1800, 1000));
-    container
-        .read(toolsSessionProvider.notifier)
-        .open(const ToolRoute(ToolPage.advanced));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(currentAppLocalizations.rcxTitle));
+    await tester.tap(find.text(currentAppLocalizations.rcxTitle).first);
     await tester.pumpAndSettle();
 
     expect(container.read(toolsSessionProvider).path, [
-      const ToolRoute(ToolPage.advanced),
       const ToolRoute(ToolPage.routing),
     ]);
     expect(
@@ -1756,9 +1751,7 @@ void main() {
     final title = tester.widget<NavigationTitle>(
       find.descendant(of: editor, matching: find.byType(NavigationTitle)),
     );
-    final routing =
-        '${currentAppLocalizations.advancedConfig} › '
-        '${currentAppLocalizations.rcxTitle}';
+    final routing = currentAppLocalizations.rcxTitle;
     expect(title.previous, routing);
     expect(title.title, startsWith('$routing › '));
     final pane = tester.getRect(
@@ -1795,9 +1788,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final routing =
-          '${currentAppLocalizations.advancedConfig} › '
-          '${currentAppLocalizations.rcxTitle}';
+      final routing = currentAppLocalizations.rcxTitle;
       final host = tester.state<ToolsViewState>(find.byType(ToolsView));
       if (size.width < 960) {
         expect(find.byType(NavigationTitle), findsNothing);
@@ -1811,7 +1802,7 @@ void main() {
         );
         expect(title.previous, '$routing › Group');
         expect(title.title, '$routing › Group › Profile');
-        title.onSelect!(2);
+        title.onSelect!(1);
         await tester.pumpAndSettle();
         expect(find.text('profile body'), findsNothing);
         expect(find.text('group body'), findsOneWidget);
@@ -1821,7 +1812,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('group body'), findsNothing);
         expect(container.read(toolsSessionProvider).path, [
-          const ToolRoute(ToolPage.advanced),
+          const ToolRoute(ToolPage.routing),
         ]);
       }
       expect(tester.takeException(), isNull);

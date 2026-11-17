@@ -41,7 +41,7 @@ OutboundModeChoices watchOutboundModeChoices(WidgetRef ref) {
 }
 
 String _labelOf(BuildContext context, Mode? mode) =>
-    mode?.label ?? context.appLocalizations.rcxModeAuto;
+    mode?.label ?? context.appLocalizations.rcxModeScenario;
 
 void changeOutboundMode(WidgetRef ref, Mode? mode, Mode? selected) {
   if (mode == selected) return;

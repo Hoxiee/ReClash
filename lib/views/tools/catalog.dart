@@ -242,6 +242,13 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     AppGlyphs.wrench,
   );
   page(
+    ToolPage.routing,
+    l.rcxTitle,
+    ToolCategory.configuration,
+    AppGlyphs.shuffle,
+    keywords: [l.rcxScenarios, l.rcxGroupProfiles, l.rcxHubRoutes],
+  );
+  page(
     ToolPage.network,
     l.network,
     ToolCategory.configuration,
@@ -342,13 +349,6 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     l.script,
     ToolCategory.configuration,
     AppGlyphs.code,
-    root: false,
-  );
-  page(
-    ToolPage.routing,
-    l.rcxTitle,
-    ToolCategory.configuration,
-    AppGlyphs.shuffle,
     root: false,
   );
   page(

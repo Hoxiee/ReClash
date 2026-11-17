@@ -403,20 +403,33 @@ List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
     ),
 ];
 
-/// The active scenario of the subscription, edited in place: the first
-/// change to a built-in or provider scenario makes the user's own copy and
-/// runs it instead.
-class RoutingRoutesTab extends ConsumerStatefulWidget {
-  const RoutingRoutesTab({super.key, this.route, this.onRouteShown});
+/// The active scenario of the subscription between [leading] and
+/// [trailing], edited in place: the first change to a built-in or provider
+/// scenario makes the user's own copy and runs it instead.
+class RunningScenarioList extends ConsumerStatefulWidget {
+  const RunningScenarioList({
+    super.key,
+    this.leading = const [],
+    this.trailing = const [],
+    this.route,
+    this.onRouteShown,
+    this.routeLine,
+  });
 
+  final List<Widget> leading;
+  final List<Widget> trailing;
   final String? route;
   final VoidCallback? onRouteShown;
 
+  /// Where a route's traffic goes now, when its group reports it.
+  final String? Function(String route)? routeLine;
+
   @override
-  ConsumerState<RoutingRoutesTab> createState() => _RoutingRoutesTabState();
+  ConsumerState<RunningScenarioList> createState() =>
+      _RunningScenarioListState();
 }
 
-class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
+class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
     with _ScenarioDocument {
   late final ScrollController _controller = sheetScrollController(context);
   String? _id;
@@ -531,18 +544,6 @@ class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
     unawaited(action.saveProfile(own, saved.copyWith(text: text)));
   }
 
-  Future<void> _start() async {
-    final name = rcxFreeProfileName(
-      ref.read(rcxProfilesProvider),
-      context.appLocalizations.rcxNewScenario,
-    );
-    await action.saveProfile(
-      name,
-      const RcxUserProfile(text: _blankScenario, kind: 'scenario'),
-    );
-    await action.setScenario('user/$name');
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
@@ -552,17 +553,6 @@ class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
       return NullStatus(
         label: l.rcxHubNeedsCore,
         illustration: NullStatusIllustration.proxies,
-      );
-    }
-    if (_loaded && _id == null) {
-      return NullStatus(
-        label: l.rcxHubRoutesOff,
-        description: l.rcxHubRoutesOffHint,
-        illustration: NullStatusIllustration.rules,
-        action: FilledButton(
-          onPressed: () => unawaited(_start()),
-          child: Text(l.rcxHubStartScenario),
-        ),
       );
     }
     final errors = lint?.errors ?? const <RcxIssue>[];
@@ -577,12 +567,14 @@ class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
           ) +
           context.bodyInsets,
       children: [
-        ErrorBanner(
-          message: placed.isEmpty
-              ? null
-              : rcxIssueText(l, placed.first, line: false),
-        ),
-        if (lint?.scenario != null)
+        ...widget.leading,
+        if (_id != null)
+          ErrorBanner(
+            message: placed.isEmpty
+                ? null
+                : rcxIssueText(l, placed.first, line: false),
+          ),
+        if (_id != null && lint?.scenario != null)
           ScenarioSections(
             scenario: scenario,
             errors: errors,
@@ -596,8 +588,10 @@ class _RoutingRoutesTabState extends ConsumerState<RoutingRoutesTab>
                 ? status.scenario?.routes ?? const []
                 : const [],
             tunnelMode: status.tunnelMode,
+            routeLine: widget.routeLine,
           ),
-        if (lint != null) ..._lintSections(l, lint),
+        if (_id != null && lint != null) ..._lintSections(l, lint),
+        ...widget.trailing,
       ],
     );
   }
@@ -626,6 +620,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
     this.tunnelMode = '',
     this.openRoute,
     this.onRouteOpened,
+    this.routeLine,
   });
 
   final Map<String, Object?> scenario;
@@ -643,6 +638,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
   /// A route to open in its editor once, as the sections first show it.
   final String? openRoute;
   final VoidCallback? onRouteOpened;
+  final String? Function(String route)? routeLine;
 
   static const _placedRoots = ['routes', 'groups', 'title'];
 
@@ -930,7 +926,13 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
                 switch ((problem, warning)) {
                   (final problem?, _) => rcxReasonText(l, problem),
                   (_, final warning?) => warning,
-                  _ => rcxProgramSummary(l, route, profileTitle: _profileTitle),
+                  _ =>
+                    widget.routeLine?.call(name) ??
+                        rcxProgramSummary(
+                          l,
+                          route,
+                          profileTitle: _profileTitle,
+                        ),
                 },
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

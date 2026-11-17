@@ -4,7 +4,7 @@ The per-group sheet in Proxies: status, control, pool, behaviour, explanation, h
 
 ## Sections
 
-Open the sheet from the auto routing action of a select group in **Proxies**, or from a group row in the hub.
+Open the sheet from the auto routing action of a select group in **Proxies**, or from a group row in [Auto routing](hub.md).
 
 | Section | Content |
 | --- | --- |
@@ -13,13 +13,13 @@ Open the sheet from the auto routing action of a select group in **Proxies**, or
 | Status | Server, reason, forecast, exit country, tier, network kind, latency. **Change server** cools the current server for 15 minutes and switches; unavailable in Manual. |
 | **Control** | **Auto**, **Pinned** or **Manual**; see [Control](#control). |
 | **Choose from** | One-tap pools; see [Choose from](#choose-from). Hidden when held on one member. |
-| **Behaviour** | Profile opens the chooser (**Built-in**, **From provider**, **Mine**); also **Server order** and **Group settings**. A driving scenario adds the footer "The scenario «{scenario}» drives this group now." |
+| **Behaviour** | The behaviour row opens the chooser (**Built-in**, **From provider**, **Mine**); also **Server order** and **Group settings**. A driving scenario adds the footer "The scenario «{scenario}» drives this group now." |
 | **Why this server** | "{count} servers compared"; expands to the top 8 ranking rows. |
 | **History** | Newest journal entry; expands to the last 20. |
-| **Auto routing settings** | Opens the hub. |
-| **Made by a route** or **Turn off auto routing for this group** | A route group links to **Edit the route**. Otherwise, for a group with the user's own binding, removes it; the group keeps its server. |
+| **Auto routing settings** | Opens [Auto routing](hub.md). |
+| **Made by a route** or **Turn off auto routing for this group** | A route group links to **Edit the route**, which opens Auto routing. Otherwise, for a group with the user's own binding, removes it; the group keeps its server. |
 
-Without a binding, the group shows **With auto routing on** (the profile it would get, server count) and **Turn on auto routing**, which adds a user binding with the default profile.
+Without a binding, the group shows **With auto routing on** (the behaviour it would get, server count) and **Turn on auto routing**, which adds a user binding with the default behaviour.
 
 > [!NOTE]
 > **Screenshot `group-sheet-auto`** — Auto group: status, Control, Choose from, Behaviour
@@ -66,17 +66,17 @@ A user chip's context menu deletes it.
 
 | Row | Edits |
 | --- | --- |
-| Profile | The binding's `profile`. |
-| **Server order** | The binding's `prefer`, via the [step editor](routes.md#server-order). Empty follows the profile; a scenario program's order comes first. |
-| **Group settings** → **Servers** | **Name pattern**: `pool.include`, as above. |
-| **Group settings** → **Behaviour** | **Switching**: `feel` **Rarely** (`calm`), **Balanced**, **Often** (`eager`). **Checks**: `energy` **Economical**, **Balanced**, **Precise**. |
-| **Group settings** → **Network** | **Direct sites through this group** (when the profile has `direct-split`): **On now** or **Ready: direct sites still open**. |
+| Behaviour | The binding's `profile`. |
+| **Server order** | The binding's `prefer`, via the [step editor](routes.md#server-order). Empty follows the behaviour; a scenario program's order comes first. |
+| **Group settings** → **Choose from** | **Name pattern**: `pool.include`, as above. |
+| **Group settings** → **Behaviour** | **Switching**: `feel` **Rarely** (`calm`), **Balanced**, **Often** (`eager`). **Check frequency**: `energy` **Economical**, **Balanced**, **Precise**. |
+| **Group settings** → **Network** | **Direct sites through this group** (when the behaviour has `direct-split`): **On now** or **Ready: direct sites still open**. |
 
 > [!NOTE]
 > **Screenshot `group-behaviour`** — Fastest, Server order, Group settings
 
 > [!NOTE]
-> **Screenshot `group-settings`** — pattern, Switching, Checks, Direct sites
+> **Screenshot `group-settings`** — pattern, Switching, Check frequency, Direct sites
 
 ## Explanation
 
@@ -118,7 +118,7 @@ Each **Why this server** row shows the server and latency, then its exclusion or
 | Behaviour error: {error} | `profile.invalid` |
 | This group is not a selector in the current config · The group has no servers | `group.unavailable` · `group.empty` |
 | The route «{route}» was skipped: a group with its name already exists. | `route.name-taken` |
-| The route «{route}» sends traffic to «{to}», which is not in the profile. | `route.to-missing` |
+| The route «{route}» sends traffic to «{to}», which is not in the behaviour. | `route.to-missing` |
 | The route «{route}» could not be applied: {error} | `route.invalid` |
 | Routing state could not be saved: {error} | `store.failed` |
 

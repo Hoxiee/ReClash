@@ -123,6 +123,7 @@ void main() {
       [
         'page.general',
         'page.advanced',
+        'page.routing',
         'page.resources',
         'page.backup',
         'page.customResources',

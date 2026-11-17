@@ -28,7 +28,7 @@ title: Anything that works
 | `extends` | 配置 ID | 无 | 继承其他配置，最多 4 层。 |
 | `pool` | `{include, exclude}` | 所有服务器 | 组可以使用的服务器。 |
 | `tags` | 名称 → 条件映射 | 无 | 可在 `pool` 和 `prefer` 中以 `tag(name)` 使用的命名条件，最多 32 个。 |
-| `prefer` | 步骤列表 | 单步 `not dead` | 服务器顺序（阶梯），最多 16 步。 |
+| `prefer` | 步骤列表 | 单步 `not dead` | 服务器顺序，最多 16 步。 |
 | `rank` | `{by, tolerance}` | `latency`、0 | 同一步骤内的服务器排序方式。 |
 | `switch` | 对象 | `balanced` 预设 | 何时从可用服务器切换。 |
 | `stranded` | 字符串 | `hold` | 没有服务器符合条件时的操作。 |
@@ -519,7 +519,7 @@ energy: balanced
 - `checks.open` 通过每台服务器访问 Telegram API。状态码为 200、301、302 或 404 时，表示服务器可访问在俄罗斯被屏蔽的网站。
 - `network.diagnose` 不经过隧道，检查 Yandex DNS（`home`）是否响应，以及能否通过 TLS 访问 Cloudflare 和 Quad9（`foreign`）。
 - 网络类型 `portal` 在强制门户出现时暂停组；`open` 表示境外互联网可访问。
-- 阶梯依次尝试：可访问受限网站且已验证出口不在俄罗斯的服务器；任意可用的境外服务器；最后任意可用服务器。
+- 服务器顺序依次尝试：可访问受限网站且已验证出口不在俄罗斯的服务器；任意可用的境外服务器；最后任意可用服务器。
 - `exit.country` 在验证前为未知，因此尚未查询的服务器会处于待处理状态，规划器会安排查询。
 - 如果用户启用了直连分流，当 `home fail and foreign ok` 条件成立时，会将本地流量直连。
 

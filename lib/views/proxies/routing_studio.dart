@@ -422,7 +422,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
         stranded: _strandedLabel(l, p['stranded'] as String? ?? 'hold'),
       ),
       generateSection(
-        title: l.rcxServers,
+        title: l.rcxChangeTo,
         footer: l.rcxStudioServersHint,
         items: [
           _conditionRow(

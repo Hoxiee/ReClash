@@ -76,6 +76,11 @@ class _FakeAction extends RcxRoutingAction {
               'name': 'Video',
               'match': ['GEOSITE,youtube'],
             },
+            {
+              'name': 'Bank',
+              'match': ['GEOSITE,bank'],
+              'to': 'DIRECT',
+            },
           ],
           'groups': {'*': {}},
         },
@@ -145,25 +150,40 @@ void main() {
     return action;
   }
 
-  Finder destination(String label) => find.descendant(
-    of: find.byType(GlyphSegmentedControl<int>),
-    matching: find.byWidgetPredicate(
-      (widget) => widget is Semantics && widget.properties.label == label,
-    ),
-  );
+  Future<void> reveal(WidgetTester tester, Finder finder) async {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const PageStorageKey('routing-routes')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
+    await tester.pump();
+  }
 
-  testWidgets('overview shows the scenario, its routes and the groups', (
+  Future<void> openLibrary(WidgetTester tester) async {
+    await reveal(tester, find.text(l.rcxHubLibrary));
+    await tester.tap(find.text(l.rcxHubLibrary));
+    await _pumpFrames(tester);
+  }
+
+  testWidgets('one page shows the scenario, its routes and the groups', (
     tester,
   ) async {
     await pumpHub(tester);
 
-    expect(_text('Every group'), findsOneWidget);
+    expect(find.byType(GlyphSegmentedControl<int>), findsNothing);
     expect(_text('Each group picks its own server'), findsOneWidget);
     expect(_text('Video'), findsOneWidget);
     expect(find.textContaining('DE-1', findRichText: true), findsOneWidget);
     expect(_text('Bank'), findsOneWidget);
-    expect(_text(l.direct), findsOneWidget);
+    await reveal(tester, find.textContaining('NL-2', findRichText: true));
     expect(find.textContaining('NL-2', findRichText: true), findsOneWidget);
+    expect(find.text(l.rcxHubLibrary), findsOneWidget);
   });
 
   for (final scenario in [true, false]) {
@@ -177,8 +197,7 @@ void main() {
         );
         expect(find.byTooltip(l.more), findsNothing);
 
-        await tester.tap(destination(l.rcxHubLibrary));
-        await _pumpFrames(tester);
+        await openLibrary(tester);
 
         expect(find.text(l.rcxNewScenario).hitTestable(), findsOneWidget);
         expect(find.text(l.rcxNewProfile).hitTestable(), findsOneWidget);
@@ -212,27 +231,29 @@ void main() {
     tester,
   ) async {
     final opened = <Widget>[];
-    await pumpHub(
-      tester,
-      size: const Size(320, 740),
-      wrap: (child) => PageNavigationScope(
-        canOpen: (_) => false,
-        open: (_) {},
-        push: <T>(context, page) async {
-          opened.add(page);
-          return null;
-        },
-        child: child,
-      ),
+    late final Widget Function(Widget) scope;
+    scope = (child) => PageNavigationScope(
+      canOpen: (_) => false,
+      open: (_) {},
+      push: <T>(context, page) async {
+        if (page is RoutingLibraryView) {
+          return Navigator.of(
+            context,
+          ).push<T>(MaterialPageRoute(builder: (_) => scope(page)));
+        }
+        opened.add(page);
+        return null;
+      },
+      child: child,
     );
-    await tester.tap(destination(l.rcxHubLibrary));
-    await _pumpFrames(tester);
+    await pumpHub(tester, size: const Size(320, 740), wrap: scope);
+    await openLibrary(tester);
 
-    await tester.tap(find.text(l.rcxNewScenario));
+    await tester.tap(find.text(l.rcxNewScenario).hitTestable());
     await _pumpFrames(tester);
     expect(opened, [isA<ScenarioEditor>()]);
 
-    await tester.tap(find.text(l.rcxNewProfile));
+    await tester.tap(find.text(l.rcxNewProfile).hitTestable());
     await _pumpFrames(tester);
     expect(opened, [isA<ScenarioEditor>(), isA<RoutingStudio>()]);
     expect(tester.takeException(), isNull);
@@ -242,8 +263,7 @@ void main() {
     tester,
   ) async {
     await pumpHub(tester, library: const []);
-    await tester.tap(destination(l.rcxHubLibrary));
-    await _pumpFrames(tester);
+    await openLibrary(tester);
     await tester.tap(find.text(l.import));
     await _pumpFrames(tester);
 
@@ -267,15 +287,14 @@ void main() {
         ),
       ],
     );
-    await tester.tap(destination(l.rcxHubLibrary));
-    await _pumpFrames(tester);
+    await openLibrary(tester);
 
-    await tester.tap(_text('Whitelists'));
+    await tester.tap(_text('Whitelists').hitTestable());
     await _pumpFrames(tester);
     expect(action.scenarios, ['builtin/whitelist']);
     expect(find.byType(ScenarioEditor), findsNothing);
 
-    await tester.tap(_text('Every group'));
+    await tester.tap(_text('Every group').hitTestable());
     await _pumpFrames(tester);
     expect(action.scenarios, ['builtin/whitelist']);
 
@@ -288,11 +307,9 @@ void main() {
     tester,
   ) async {
     await pumpHub(tester);
-    await tester.tap(destination(l.rcxHubRoutes));
-    await _pumpFrames(tester);
 
     expect(find.text(l.rcxAddGroup), findsNothing);
-    await tester.ensureVisible(_text(l.rcxHubOtherGroups));
+    await reveal(tester, _text(l.rcxHubOtherGroups));
     await tester.tap(_text(l.rcxHubOtherGroups));
     await _pumpFrames(tester);
 
@@ -305,9 +322,7 @@ void main() {
       'adding a group from the ${fromButton ? 'button' : 'row'} keeps the menu anchored to the button',
       (tester) async {
         await pumpHub(tester);
-        await tester.tap(destination(l.rcxHubRoutes));
-        await _pumpFrames(tester);
-        await tester.ensureVisible(_text(l.rcxHubOtherGroups));
+        await reveal(tester, _text(l.rcxHubOtherGroups));
         await tester.tap(_text(l.rcxHubOtherGroups));
         await _pumpFrames(tester);
         await tester.pumpAndSettle();
@@ -341,7 +356,7 @@ void main() {
   testWidgets('the master switch turns the scenario off', (tester) async {
     final action = await pumpHub(tester);
 
-    await tester.tap(find.text(l.rcxHubAuto));
+    await tester.tap(find.byKey(const ValueKey('master')).last);
     await _pumpFrames(tester);
 
     expect(action.scenarios, [null]);
@@ -351,8 +366,6 @@ void main() {
     tester,
   ) async {
     final action = await pumpHub(tester);
-    await tester.tap(destination(l.rcxHubRoutes));
-    await _pumpFrames(tester);
 
     expect(_text('Video'), findsOneWidget);
     expect(

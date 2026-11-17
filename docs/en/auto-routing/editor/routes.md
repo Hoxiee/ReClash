@@ -39,7 +39,7 @@ The same page edits a route, **Everything else** and a subscription group progra
 | **Name** | Route and group name. **The name is too long** past 64 bytes; **This name is reserved** for reserved names; an error if a route or group already has it. |
 | Traffic | Summary such as "YouTube and 2 more"; opens the picker. |
 | **Where it goes** | **Best server**: the route's own group picks. **One server**: `to` a server or group chosen under **Choose**. **Direct**: `to: DIRECT`, routes only. |
-| **How to pick the server** → **Behaviour** | The program profile; for a group, **As set on the group** keeps the group's own. |
+| **How to pick the server** → **Behaviour** | The program's behaviour; for a group, **As set on the group** keeps the group's own. |
 | **Server order** | The program's `prefer`; see [Server order](#server-order). |
 | **Use only servers**, **Leave out servers** | `pool.include` and `pool.exclude` through the [condition builder](#conditions); routes have only **Leave out servers**. |
 
@@ -59,15 +59,15 @@ For a group, **One server** holds the group on a member with no search (`to`); *
 
 ## Server order
 
-Steps are tiers: the first step with a working server decides; see [Tiers](../profiles.md#tiers).
+Steps make up the server order: the first step with a working server decides; see [Tiers](../profiles.md#tiers).
 
 | Part | Meaning |
 | --- | --- |
-| **Add a step** | Adds a tier. The sort action reorders; the context menu deletes. |
+| **Add a step** | Adds a step. The sort action reorders; the context menu deletes. |
 | Empty list | **Any working server**: no order of its own. |
 | Muted steps | "From the behaviour — edit a step to make the order your own": editing copies them first. |
 | Connector | "if none of them works" between steps. |
-| Footer | In the studio: "If no step has a working server: {action}", the profile's `stranded`. |
+| Footer | In the studio: "If no step has a working server: {action}", the behaviour's `stranded`. |
 
 > [!NOTE]
 > **Screenshot `route-editor-ladder`** — steps «⚡ RU» and Any working server, with the connector
@@ -84,7 +84,7 @@ Steps are tiers: the first step with a working server decides; see [Tiers](../pr
 | **Add condition** → **Advanced condition…** | Any condition, through the [condition builder](#conditions) |
 | **Other conditions** | A part the rows cannot show, edited as text |
 
-The footer counts the servers that fit now, when the condition can be tested locally. **Label** names the step; **Last resort** sets `last-resort`.
+The footer counts the servers that fit now, when the condition can be tested locally. **Label** names the step; **Fallback** sets `last-resort`.
 
 > [!NOTE]
 > **Screenshot `ladder-step-editor`** — Name contains «⚡ RU», Country, «2 servers fit now»

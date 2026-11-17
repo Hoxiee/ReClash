@@ -9,7 +9,7 @@ RCX works on the select groups of the running config. Selection never changes a 
 | Object | What it is | Where it comes from |
 | --- | --- | --- |
 | Smart group | A select group whose member the engine chooses. | A binding from the subscription, the user or the running scenario. |
-| Profile | How one group chooses: pool, tiers, ranking, switching, checks, network kinds. | Built in, provider, or user. |
+| Profile | How one group chooses (the app calls it a behaviour): pool, tiers, ranking, switching, checks, network kinds. | Built in, provider, or user. |
 | Scenario | Whole-connection behavior: group programs, routes, tunnel mode per network kind. | Same three sources; one per subscription. |
 | Route | Rules placed before the config's rules; matched traffic goes to its own group, an existing target, or `DIRECT`. | The running scenario, at config apply. |
 | Evidence | Per-server latency samples, failures, check results and exit country. | Probes, URL tests and real traffic. |
@@ -72,8 +72,8 @@ Profiles and scenarios have separate namespaces, keyed as `<source>/<name>`.
 | Binding | Attaches a profile to a group: `profile`, `default`, `pool`, `prefer`, `feel`, `energy`, `chips`. See [Bindings](profiles.md#bindings). |
 | Program | Scenario action on one group: `profile`, `pool`, `prefer` or `to`. |
 | Pool | Members a group may choose from, after `include` and `exclude`. |
-| Tier | One `prefer` entry: a label and a condition; in the app, a server-order step. |
-| Last resort | A tier used only when no other tier has a working server. |
+| Tier | One `prefer` entry: a label and a condition; the app calls it a step of the **Server order**. |
+| Fallback | The last-resort step (`last-resort`): used only when no other step has a working server. |
 | Tolerance | Ranking bonus in milliseconds for the current server, against flapping. |
 | Stranded | No eligible member; `stranded` says what to do. |
 | Network kind | Named network class (`portal`, `whitelist`, …) recognized by network conditions. |

@@ -228,7 +228,7 @@ The journal keeps the last 200 entries of kinds `switch`, `stranded`, `change`, 
 | --- | --- |
 | Layers | Provider and user layers only narrow a profile's pool; an invalid profile or unusable group is a visible problem. |
 | Consent | A provider profile contacts third-party hosts only after the user allows them; until then the group runs `builtin/simple` and says why. |
-| Ladder | An order falls through once every server on a step is down; a last-resort step yields to every other step; a scenario program's order beats the user's, which beats the profile's. |
+| Server order | An order falls through once every server on a step is down; a last-resort step yields to every other step; a scenario program's order beats the user's, which beats the profile's. |
 | Scenario | A scenario sets the tunnel mode only until the user picks one, and drives only the groups it names. |
 | Routes | Routes become groups and rules only at config apply, steer traffic only in rule mode, never take over an existing group, and a route that cannot apply is a visible problem. |
 | Bundle | An export carries every non-built-in profile it references; an import never replaces a profile the user already has. |

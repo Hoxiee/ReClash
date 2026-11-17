@@ -43,7 +43,7 @@
   "rcxFeelCalm": "Rarely",
   "rcxFeelEager": "Often",
   "rcxBalanced": "Balanced",
-  "rcxChecks": "Checks",
+  "rcxChecks": "Check frequency",
   "rcxEnergyEco": "Economical",
   "rcxEnergyPrecise": "Precise",
   "rcxEnergyToday": "Checks today: {requests} · {used} of {cap}",
@@ -306,7 +306,7 @@
   "@rcxCheckNone": {
     "description": "Simulation result"
   },
-  "rcxCheckOn": "Check on {group}",
+  "rcxCheckOn": "What it picks in {group}",
   "@rcxCheckOn": {
     "description": "Section title: simulation of the profile on a proxy group",
     "placeholders": {
@@ -430,7 +430,7 @@
       }
     }
   },
-  "rcxDuplicate": "Duplicate and edit",
+  "rcxDuplicate": "Edit a copy",
   "@rcxDuplicate": {
     "description": "Menu item"
   },
@@ -547,11 +547,11 @@
       }
     }
   },
-  "rcxLastResort": "Last resort",
+  "rcxLastResort": "Fallback",
   "@rcxLastResort": {
     "description": "Switch/label: tier used only when better tiers are empty"
   },
-  "rcxLevel": "Level",
+  "rcxLevel": "Complexity",
   "@rcxLevel": {
     "description": "Row: simple or advanced"
   },
@@ -704,11 +704,11 @@
   "@rcxSourceChanges": {
     "description": "Row/page title: diff of the source"
   },
-  "rcxStranded": "When no server fits",
+  "rcxStranded": "When no server works",
   "@rcxStranded": {
     "description": "Row"
   },
-  "rcxStrandedDirect": "Go direct",
+  "rcxStrandedDirect": "Direct",
   "@rcxStrandedDirect": {
     "description": "Choice"
   },
@@ -777,10 +777,8 @@
   "rcxAddGroup": "Add group",
   "rcxAddKind": "Add network kind",
   "rcxAllGroups": "Every group",
-  "rcxMainGroup": "Main group",
-  "rcxAutoControl": "Auto control",
-  "rcxAutoControlHint": "A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own behaviour.",
-  "rcxCheckGroup": "Against group",
+  "rcxMainGroup": "Everything else",
+  "rcxCheckGroup": "Group",
   "rcxCondClause": "Condition {number}",
   "@rcxCondClause": {
     "placeholders": {
@@ -833,7 +831,7 @@
       }
     }
   },
-  "rcxManageHint": "Behaviours and scenarios are made and edited in Advanced configuration → Auto routing.",
+  "rcxManageHint": "Behaviours and scenarios are made and edited in Tools → Auto routing.",
   "rcxModeBackToAuto": "Give the mode back to the scenario",
   "rcxModeByScenario": "The scenario sets the mode on this network",
   "rcxModeIs": "Mode: {mode}",
@@ -845,7 +843,7 @@
     }
   },
   "rcxModeKeep": "Don't change",
-  "rcxModeManualNow": "You chose the mode yourself; the scenario waits until you pick Auto",
+  "rcxModeManualNow": "You chose the mode yourself; the scenario waits until you pick By scenario",
   "rcxModeYours": "The mode is yours on this network",
   "rcxNewScenario": "New scenario",
   "rcxOnThisNetwork": "On this network",
@@ -897,14 +895,13 @@
     }
   },
   "rcxScenarioGroups": "Groups",
-  "rcxScenarioGroupsHint": "Main group is where the final rule sends traffic; Every group covers the select groups not named here.",
+  "rcxScenarioGroupsHint": "Everything else is the group the final rule sends traffic to; Every group covers the select groups not named here.",
   "rcxScenarioKindsHint": "Recognize networks by direct diagnostics, then change the mode and groups on each.",
   "rcxScenarioMode": "Connection mode",
   "rcxScenarioOff": "Off",
   "rcxScenarios": "Scenarios",
   "rcxScenariosHint": "A scenario drives the whole connection. Tap one to run it; the pencil edits yours, or a copy of any other.",
   "rcxSmartGroups": "Groups",
-  "rcxHubOverview": "Overview",
   "rcxHubRoutes": "Routes",
   "rcxHubLibrary": "Library",
   "rcxHubAuto": "Auto routing",
@@ -914,7 +911,7 @@
   "rcxHubNoProfileHint": "Add a subscription first; auto routing works with its groups.",
   "rcxHubNeedsCore": "Start the connection to see auto routing",
   "rcxHubGroupsEmpty": "No group is driven by auto routing yet.",
-  "rcxHubCopyTitle": "Make your own copy?",
+  "rcxHubCopyTitle": "Edit a copy?",
   "rcxHubCopyMessage": "“{title}” is not yours to change. Your edits go to a copy, and the copy becomes the running scenario.",
   "@rcxHubCopyMessage": {
     "placeholders": {
@@ -923,12 +920,9 @@
       }
     }
   },
-  "rcxHubCopyConfirm": "Make a copy",
-  "rcxHubRoutesOff": "No scenario is running",
-  "rcxHubRoutesOffHint": "Routes send chosen traffic, such as one service, through its own servers.",
-  "rcxHubStartScenario": "Start a scenario",
-  "rcxHubOtherGroups": "Subscription groups",
-  "rcxHubOtherGroupsHint": "Groups of the subscription this scenario also drives.",
+  "rcxHubCopyConfirm": "Edit a copy",
+  "rcxHubOtherGroups": "Groups in this scenario",
+  "rcxHubOtherGroupsHint": "What this scenario does with individual subscription groups.",
   "rcxHubRoutesHint": "Traffic takes the first route it matches, top to bottom; the rest goes through Everything else.",
   "rcxHubRoutesRuleOnly": "Routes apply in rule mode; the connection is in {mode} mode now.",
   "@rcxHubRoutesRuleOnly": {
@@ -939,7 +933,7 @@
     }
   },
   "rcxHubEverythingElse": "Everything else",
-  "rcxHubNetworks": "Special networks",
+  "rcxHubNetworks": "Network kinds",
   "rcxHubDescriptionHint": "What this scenario does",
   "rcxHubBundle": "In this file",
   "rcxRouteNew": "New route",
@@ -1011,7 +1005,7 @@
   "rcxLadderFallThrough": "if none of them works",
   "rcxLadderInherited": "From the behaviour — edit a step to make the order your own",
   "rcxLadderEmptyHint": "Add steps to prefer some servers over others",
-  "rcxLadderStranded": "If no step has a working server: {action}",
+  "rcxLadderStranded": "If no server works: {action}",
   "@rcxLadderStranded": {
     "placeholders": {
       "action": {
@@ -1206,5 +1200,13 @@
   "rcxStudioServersHint": "Servers outside these conditions are never picked.",
   "@rcxStudioServersHint": {
     "description": "Footer under the server filter rows"
+  },
+  "rcxModeScenario": "By scenario",
+  "@rcxModeScenario": {
+    "description": "Label of the tunnel-mode choice where the running scenario sets the mode (dashboard mode card and mode bar). Short, 1–2 words."
+  },
+  "rcxHubLibraryHint": "Scenarios, behaviours and import",
+  "@rcxHubLibraryHint": {
+    "description": "Subtitle of the Library row at the bottom of the auto-routing screen."
   }
 }

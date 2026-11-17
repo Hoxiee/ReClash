@@ -21,9 +21,9 @@ routes:
     to: DIRECT
 ```
 
-## Ladder of preferences
+## Server order
 
-Starred servers first, then Finland, then anything that works.
+A server order: starred servers first, then Finland, then anything that works.
 
 ```yaml title="starred-ladder.rcx.yaml"
 rcx: 1

@@ -297,11 +297,11 @@ void main() {
   ) async {
     final action = await pumpMode(tester);
 
-    expect(find.text('Auto'), findsOneWidget);
+    expect(find.text('By scenario'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byType(DashboardConnectedGroup),
-        matching: find.text('Auto'),
+        matching: find.text('By scenario'),
       ),
       findsNothing,
     );

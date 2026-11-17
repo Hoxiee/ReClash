@@ -67,6 +67,8 @@ is true, so an unknown fact neither admits nor removes it. Non-servers (`DIRECT`
 
 ## Tiers
 
+The app shows the tiers as the **Server order**; each tier is a step, and a `last-resort` tier is the **Fallback**.
+
 ```yaml
 # fragment
 prefer:

@@ -737,7 +737,7 @@ class _GroupSettingsPageState extends ConsumerState<_GroupSettingsPage> {
         ).copyWith(top: context.contentTopPadding, bottom: 20),
         children: [
           generateSection(
-            title: l.rcxServers,
+            title: l.rcxChangeTo,
             footer: matched == null
                 ? l.rcxPatternInvalid
                 : l.rcxServersMatch(matched, names.length),

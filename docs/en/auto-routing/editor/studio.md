@@ -4,7 +4,7 @@ The behaviour (profile) editor: form and YAML, a live preview on a group, warnin
 
 ## Opening
 
-Hub → **Library** → **Behaviours**: a card of the user's own opens in place; any other opens as a copy. **New behaviour** starts from a template with one tier `Working` (`not dead`), `rank.tolerance` 50 and `feel: calm`. Save is disabled while there are errors or no changes. The format is in [Profiles](../profiles.md).
+Auto routing → **Library** → **Behaviours**: a card of the user's own opens in place; any other opens as a copy. **New behaviour** starts from a template with one tier `Working` (`not dead`), `rank.tolerance` 50 and `feel: calm`. Save is disabled while there are errors or no changes. The format is in [Profiles](../profiles.md).
 
 ## Form
 
@@ -13,9 +13,9 @@ Hub → **Library** → **Behaviours**: a card of the user's own opens in place;
 | Header | **Name**, description | `title`, `description` |
 | **What it would pick now** | **Against group**: the verdict and the leading candidates; **All candidates** opens the full ranking | — |
 | **Server order** | Steps, as in the [route editor](routes.md#server-order) | `prefer` |
-| **Servers** | **Use only servers**, **Leave out servers** | `pool` |
-| **Character** | **Switching**, **Checks**, **When no server fits** (**Keep current**, **Go direct**) | `switch.feel`, `energy`, `stranded` |
-| **More** | **Based on**, **Level**, **Tags**, **Advanced** | `extends`, `level`, `tags` |
+| **Choose from** | **Use only servers**, **Leave out servers** | `pool` |
+| **Character** | **Switching**, **Check frequency**, **When no server works** (**Keep current**, **Direct**) | `switch.feel`, `energy`, `stranded` |
+| **More** | **Based on**, **Complexity**, **Tags**, **Advanced** | `extends`, `level`, `tags` |
 | **Sites contacted** | Each host with its use (check, network diagnostic, exit-country check) and **third party** | — |
 | **Warnings** | Non-blocking issues | — |
 
@@ -24,7 +24,7 @@ Hub → **Library** → **Behaviours**: a card of the user's own opens in place;
 The preview verdict is **Would keep {pick}**, **Would pick {pick} instead of {now}** or **Would find no server**. It applies nothing.
 
 > [!NOTE]
-> **Screenshot `studio-form`** — Name, preview, Server order, Servers and Character
+> **Screenshot `studio-form`** — Name, preview, Server order, Choose from and Character
 
 > [!NOTE]
 > **Screenshot `studio-check`** — Would pick «🇳🇴 Oslo 1» instead of «🇸🇪 Stockholm 1»

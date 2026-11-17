@@ -110,7 +110,7 @@ class SimpleModeCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 2,
                       children: [
-                        Text(appLocalizations.rcxModeAuto, style: style),
+                        Text(appLocalizations.rcxModeScenario, style: style),
                         Text(
                           appLocalizations.simpleModeAutoDesc,
                           style: DashboardText.label(
@@ -122,7 +122,7 @@ class SimpleModeCard extends ConsumerWidget {
                   ),
                   DashboardSwitch(
                     value: automatic,
-                    semanticLabel: appLocalizations.rcxModeAuto,
+                    semanticLabel: appLocalizations.rcxModeScenario,
                     onChanged: (value) => unawaited(
                       globalState.safeRun(
                         () => ref

@@ -46,8 +46,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.dns ||
     ToolPage.telegram ||
     ToolPage.rules ||
-    ToolPage.scripts ||
-    ToolPage.routing => ToolPage.advanced,
+    ToolPage.scripts => ToolPage.advanced,
     ToolPage.userAgents || ToolPage.webDashboard => ToolPage.general,
     ToolPage.onDemand ||
     ToolPage.appRegion ||

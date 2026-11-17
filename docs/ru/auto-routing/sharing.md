@@ -124,7 +124,7 @@ file: note: [profile X: ]contacts third-party host H (use); the user must allow 
 | --- | --- |
 | `tag X is never used` | Ни одно условие не ссылается на тег. |
 | `check X is never used, so it never runs` | Ни одно условие не ссылается на проверку. |
-| `tier A repeats the condition of B, so nothing lands in it` | У двух уровней одно условие; второй недостижим. |
+| `tier A repeats the condition of B, so nothing lands in it` | У двух шагов одно условие; второй недостижим. |
 | `the pool admits no server of G` | В приложении, против работающей группы. |
 | `no server of G is in T right now` | В приложении, против работающей группы. |
 | `this config has no group G` | В приложении, для цели сценария. |

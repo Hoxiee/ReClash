@@ -66,13 +66,13 @@ void main() {
       ),
     );
 
-    expect(find.text(l.rcxModeAuto), findsOneWidget);
+    expect(find.text(l.rcxModeScenario), findsOneWidget);
   });
 
   testWidgets('has no Auto without a scenario', (tester) async {
     await pump(tester, const RcxStatus());
 
-    expect(find.text(l.rcxModeAuto), findsNothing);
+    expect(find.text(l.rcxModeScenario), findsNothing);
   });
 
   testWidgets('tapping Auto while the user holds the mode clears manual', (
@@ -89,7 +89,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text(l.rcxModeAuto));
+    await tester.tap(find.text(l.rcxModeScenario));
     await tester.pump();
 
     expect(action.manualCalls, [false]);
