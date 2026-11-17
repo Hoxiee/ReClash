@@ -88,10 +88,18 @@ Future<int> _keygen(_Options options) async {
     stderr.writeln('Refusing to overwrite ${out.path}');
     return 1;
   }
+  if (!out.parent.existsSync()) {
+    out.parent.createSync(recursive: true);
+    if (!Platform.isWindows) {
+      await Process.run('chmod', ['700', out.parent.path]);
+    }
+  }
+  // Restricted before the seed is written, so it is never world-readable.
+  out.createSync(exclusive: true);
+  if (!Platform.isWindows) await Process.run('chmod', ['600', out.path]);
   final random = Random.secure();
   final seed = List<int>.generate(32, (_) => random.nextInt(256));
   out.writeAsStringSync('${base64.encode(seed)}\n');
-  if (!Platform.isWindows) await Process.run('chmod', ['600', out.path]);
   stdout.writeln(await updateManifestPublicKey(seed));
   return 0;
 }

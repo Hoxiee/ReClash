@@ -58,6 +58,16 @@ void main() {
     expect(again.stdout, isNot(contains(key)));
   });
 
+  test('keygen creates a missing directory for the seed', () async {
+    final result = await run(['keygen', '--out', 'secrets/nested/seed.key']);
+    expect(result.exitCode, 0, reason: '${result.stderr}');
+    final seed = File('${root.path}/secrets/nested/seed.key');
+    expect(seed.existsSync(), isTrue);
+    if (!Platform.isWindows) {
+      expect(seed.statSync().modeString(), 'rw-------');
+    }
+  });
+
   test('sign then verify round trip', () async {
     final seedFile = File('${root.path}/seed.key');
     final generated = await run(['keygen', '--out', seedFile.path]);
