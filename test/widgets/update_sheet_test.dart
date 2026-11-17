@@ -13,6 +13,7 @@ import 'package:reclash/common/update_summary.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:reclash/widgets/update_content.dart';
@@ -49,7 +50,10 @@ void main() {
     directory = await Directory.systemTemp.createTemp('reclash-update-sheet-');
     runtime = TestUpdateRuntime(directory);
     container = ProviderContainer(
-      overrides: [appUpdateRuntimeProvider.overrideWithValue(runtime)],
+      overrides: [
+        appUpdateRuntimeProvider.overrideWithValue(runtime),
+        providerHintsProvider.overrideWithValue(ProviderHints.empty),
+      ],
     );
     globalState.container = container;
     container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);

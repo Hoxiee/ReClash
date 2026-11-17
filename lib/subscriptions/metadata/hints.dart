@@ -305,4 +305,11 @@ class ProviderHints {
   List<String> get fallbackHosts => metadata.strings('transport.fallbackHosts');
 
   String? get newDomain => metadata.strings('transport.newDomain').firstOrNull;
+
+  Uri? get updateMirror {
+    final uri = Uri.tryParse(metadata.text('updates.mirror') ?? '');
+    return uri != null && uri.isScheme('https') && uri.host.isNotEmpty
+        ? uri
+        : null;
+  }
 }

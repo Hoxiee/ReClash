@@ -79,5 +79,6 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | `profile-update-interval` | response | decimal | no |
 | `hide-url` | response | boolean | no |
 | `reclash-config` | response | url | no |
+| `reclash-update` | response | url | no |
 | `flclashx-newdomain` | response | host-list | no |
 | `new-domain` | response | host-list | no |

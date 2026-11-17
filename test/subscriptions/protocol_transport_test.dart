@@ -109,6 +109,7 @@ void main() {
         'settings',
         'transport',
         'support',
+        'updates',
       });
       expect(
         subscriptionFields.map((field) => field.path).toSet(),
@@ -118,6 +119,7 @@ void main() {
       expect(headers.toSet(), hasLength(headers.length));
       expect(headers.where((header) => header.startsWith('reclash-')), [
         'reclash-config',
+        'reclash-update',
       ]);
     });
 

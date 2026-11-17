@@ -1,7 +1,13 @@
 part of '../action.dart';
 
 const _pendingUpdateInstallFile = 'pending-install.json';
-const _updateCheckInterval = Duration(hours: 6);
+const _updateCheckInterval = Duration(hours: 1);
+const _updateRetryDelays = [
+  Duration(minutes: 2),
+  Duration(minutes: 5),
+  Duration(minutes: 15),
+  Duration(minutes: 30),
+];
 const _desktopApplyInterval = Duration(minutes: 1);
 const _desktopApplyIdle = Duration(minutes: 15);
 
@@ -27,6 +33,10 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   bool _observerAttached = false;
   bool _installWhenReady = false;
   bool _promptOnConfirmation = false;
+  bool _mirrorChanged = false;
+  DateTime? _checkedAt;
+  DateTime? _attemptedAt;
+  int _checkFailures = 0;
   int _revision = 0;
 
   AppUpdateRuntime get _runtime => ref.read(appUpdateRuntimeProvider);
@@ -47,9 +57,28 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           previous?.autoCheckUpdate != next.autoCheckUpdate) {
         unawaited(_applyPolicy());
       }
+      if (previous?.autoCheckUpdate != next.autoCheckUpdate) {
+        _scheduleCheck();
+        if (next.autoCheckUpdate) _checkIfDue();
+      }
     });
     ref.listen(isStartProvider, (_, running) {
-      if (!running) unawaited(_tryAutomaticInstall());
+      if (!running) {
+        unawaited(_tryAutomaticInstall());
+      } else if (_checkFailures > 0) {
+        _checkIfDue(retryNow: true);
+      }
+    });
+    ref.listen(providerHintsProvider.select((hints) => hints?.updateMirror), (
+      previous,
+      next,
+    ) {
+      if (previous == next || _attemptedAt == null && !_checking) return;
+      if (_checking) {
+        _mirrorChanged = true;
+      } else {
+        unawaited(check(automatic: true));
+      }
     });
     ref.onDispose(() {
       _revision++;
@@ -65,11 +94,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   Future<void> _afterReady() async {
     if (!ref.mounted || _restoring) return;
-    _checkTimer ??= Timer.periodic(_updateCheckInterval, (_) {
-      if (ref.mounted && ref.read(appSettingProvider).autoCheckUpdate) {
-        unawaited(check(automatic: true));
-      }
-    });
+    if (_checkTimer == null && !_checking) _scheduleCheck();
     if (_resumeProxy) {
       _resumeProxy = false;
       if (!ref.read(isStartProvider) && !ref.read(appSettingProvider).autoRun) {
@@ -81,16 +106,18 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   }
 
   Future<void> check({bool automatic = false}) async {
-    if (_checking ||
-        _restoring ||
+    if (_checking) return;
+    if (_restoring ||
         state.busy ||
         _installing ||
         (_pending != null && state.hasUpdate && !_supersedable)) {
+      if (automatic) _scheduleCheck(_updateCheckInterval);
       return;
     }
     final setting = ref.read(appSettingProvider);
     if (automatic && !setting.autoCheckUpdate) return;
     _checking = true;
+    var answered = false;
     final revision = ++_revision;
     if (!state.hasUpdate) {
       state = const AppUpdateState(phase: UpdatePhase.checking);
@@ -101,7 +128,9 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           configured: setting.updateChannel,
           isPreBuild: globalState.isPre,
         ),
+        mirror: ref.read(providerHintsProvider)?.updateMirror,
       );
+      answered = true;
       if (!_current(revision)) return;
       if (release == null) {
         if (!state.hasUpdate) {
@@ -124,7 +153,75 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       }
     } finally {
       _checking = false;
+      if (ref.mounted) _recordCheck(answered: answered);
     }
+  }
+
+  void _recordCheck({required bool answered}) {
+    final now = _runtime.now();
+    _attemptedAt = now;
+    if (answered) {
+      _checkedAt = now;
+      _checkFailures = 0;
+    } else {
+      _checkFailures++;
+    }
+    _scheduleCheck();
+    if (_mirrorChanged) {
+      _mirrorChanged = false;
+      unawaited(check(automatic: true));
+    }
+  }
+
+  Duration get _nextCheckDelay {
+    if (_checkFailures > 0) {
+      return _checkFailures <= _updateRetryDelays.length
+          ? _updateRetryDelays[_checkFailures - 1]
+          : _updateCheckInterval;
+    }
+    final checkedAt = _checkedAt;
+    if (checkedAt == null) return _updateRetryDelays.first;
+    final remaining =
+        _updateCheckInterval - _runtime.now().difference(checkedAt);
+    return remaining < _updateRetryDelays.first
+        ? _updateRetryDelays.first
+        : remaining;
+  }
+
+  void _scheduleCheck([Duration? delay]) {
+    _checkTimer?.cancel();
+    _checkTimer = null;
+    if (!ref.mounted ||
+        !ref.read(initProvider) ||
+        !ref.read(appSettingProvider).autoCheckUpdate) {
+      return;
+    }
+    _checkTimer = Timer(delay ?? _nextCheckDelay, () {
+      _checkTimer = null;
+      if (ref.mounted) unawaited(check(automatic: true));
+    });
+  }
+
+  /// Timers run on the monotonic clock, which stops while a phone sleeps, so
+  /// a return to the app compares wall-clock time instead.
+  void _checkIfDue({bool retryNow = false}) {
+    if (!ref.mounted ||
+        _checking ||
+        !ref.read(initProvider) ||
+        !ref.read(appSettingProvider).autoCheckUpdate) {
+      return;
+    }
+    final now = _runtime.now();
+    final checkedAt = _checkedAt;
+    final attemptedAt = _attemptedAt;
+    final due =
+        attemptedAt == null ||
+        (_checkFailures > 0
+            ? retryNow ||
+                  now.difference(attemptedAt) >= _updateRetryDelays.first
+            : checkedAt == null ||
+                  now.difference(checkedAt) >= _updateCheckInterval);
+    if (due) unawaited(check(automatic: true));
   }
 
   Future<void> offer(AppUpdateRelease release, {bool automatic = false}) async {
@@ -953,6 +1050,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   }
 
   Future<void> _onResume() async {
+    _checkIfDue();
     try {
       if (!ref.read(initProvider) || _installing) return;
       if (_permissionOpened) {

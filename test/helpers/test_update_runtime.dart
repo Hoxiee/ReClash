@@ -27,6 +27,7 @@ class TestUpdateSource implements AppUpdateSource {
   @override
   Future<List<Map<String, dynamic>>> fetchReleases({
     required UpdateChannel channel,
+    required String installedVersion,
   }) async => [];
 }
 
@@ -112,6 +113,8 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   Config? savedConfig;
   AppUpdateRelease? available;
   Exception? checkFailure;
+  Uri? checkedMirror;
+  DateTime clock = DateTime(2026);
   ApkInstallStatus nativeStatus = ApkInstallStatus.installing;
   Future<String?> Function(String, CancelToken, ProgressCallback)?
   downloadOperation;
@@ -127,6 +130,9 @@ class TestUpdateRuntime extends AppUpdateRuntime {
 
   @override
   bool get supported => enabled;
+
+  @override
+  DateTime now() => clock;
 
   @override
   bool get desktop => desktopMode;
@@ -146,7 +152,8 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   Future<bool> windowHidden() async => hidden;
 
   @override
-  Future<AppUpdateRelease?> check(UpdateChannel channel) async {
+  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) async {
+    checkedMirror = mirror;
     if (checkFailure case final error?) throw error;
     return available;
   }

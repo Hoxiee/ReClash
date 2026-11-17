@@ -812,6 +812,23 @@ jobs:
           version=$(dart run tool/check_release_version.dart "$TAG")
           sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
 
+      - name: Sign update manifest
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+          UPDATE_MANIFEST_KEY: ${{ secrets.UPDATE_MANIFEST_KEY }}
+        run: |
+          if [[ -z "$UPDATE_MANIFEST_KEY" ]]; then
+            echo "::notice::UPDATE_MANIFEST_KEY is not set; skipping the update manifest"
+            exit 0
+          fi
+          args=()
+          if [[ "$IS_STABLE" != 'true' ]]; then
+            args+=(--prerelease)
+          fi
+          dart run tool/update_manifest.dart sign --tag "$TAG" --notes release.md --dist dist \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/$TAG" "${args[@]}"
+
       - name: Generate checksums
         shell: bash
         run: |

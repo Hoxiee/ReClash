@@ -26,8 +26,10 @@ class AppUpdateRuntime {
 
   String get installedVersion => globalState.packageInfo.version;
 
-  Future<AppUpdateRelease?> check(UpdateChannel channel) =>
-      request.checkForUpdate(channel: channel);
+  DateTime now() => DateTime.now();
+
+  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) =>
+      request.checkForUpdate(channel: channel, mirror: mirror);
 
   Future<Directory> directory() async {
     final value = Directory(join(await appPath.homeDirPath, 'app-updates'));
@@ -131,6 +133,5 @@ class AppUpdateRuntime {
 
   Future<String> actualInstalledVersion() => app!.updateInstalledVersion();
 
-  AppUpdateSource? source(String id) =>
-      request.updateSources.where((source) => source.id == id).firstOrNull;
+  AppUpdateSource? source(String id) => request.updateSource(id);
 }

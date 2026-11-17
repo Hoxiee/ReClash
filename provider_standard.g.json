@@ -814,6 +814,19 @@
       "available": true
     },
     {
+      "name": "reclash-update",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "https-response"
+      ],
+      "available": true
+    },
+    {
       "name": "flclashx-newdomain",
       "direction": "response",
       "encoding": "host-list",

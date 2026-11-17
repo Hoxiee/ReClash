@@ -22,6 +22,7 @@ class Request {
   late final Dio _clashDio;
   String? userAgent;
   late final List<AppUpdateSource> updateSources;
+  final _updateCache = UpdateResponseCache();
 
   ProviderReader? _read;
 
@@ -51,7 +52,7 @@ class Request {
         return client;
       },
     );
-    updateSources = [GitHubUpdateSource(dio)];
+    updateSources = [GitHubUpdateSource(dio, _updateCache)];
   }
 
   Future<Response<T>> _download<T>(String url, ResponseType responseType) {
@@ -100,15 +101,23 @@ class Request {
   }
 
   /// Returns null only when a source answered and found no eligible release.
+  /// A provider's [mirror] answers in GitHub's place unless it fails.
   Future<AppUpdateRelease?> checkForUpdate({
     required UpdateChannel channel,
+    Uri? mirror,
   }) async {
     Object? lastError;
     StackTrace? lastStack;
-    for (final source in updateSources) {
+    final installed = globalState.packageInfo.version;
+    for (final source in [
+      if (mirror != null) MirrorUpdateSource(dio, mirror, _updateCache),
+      ...updateSources,
+    ]) {
       try {
-        final releases = await source.fetchReleases(channel: channel);
-        final installed = globalState.packageInfo.version;
+        final releases = await source.fetchReleases(
+          channel: channel,
+          installedVersion: installed,
+        );
         final selected = selectUpdateRelease(
           releases,
           installedVersion: installed,
@@ -142,6 +151,10 @@ class Request {
     }
     throw StateError('No app update sources configured');
   }
+
+  AppUpdateSource? updateSource(String id) => id == mirrorUpdateSourceId
+      ? MirrorUpdateSource(dio, null, _updateCache)
+      : updateSources.where((source) => source.id == id).firstOrNull;
 
   Future<String?> downloadUpdateFile(
     Uri uri,

@@ -43,6 +43,7 @@ class _UpdateSource implements AppUpdateSource {
   @override
   Future<List<Map<String, dynamic>>> fetchReleases({
     required UpdateChannel channel,
+    required String installedVersion,
   }) async {
     return const [];
   }

@@ -13,7 +13,7 @@ Every header, alias and limit is in the [Standard registry](standard.md). Everyt
 - A header value over 8 KiB, or over 64 KiB of headers in total, fails the fetch.
 - A field missing from the response is withdrawn, except usage fields, which go stale ([Metadata lifetime](README.md#metadata-lifetime)).
 - An empty `text` value is valid and replaces the stored value. `url`, `integer` and `boolean` fields cannot be cleared.
-- Metadata is read from headers only. A body carries no metadata. A `reclash-*` header other than `reclash-config` and `reclash-aliases` is ignored with an `Unsupported provider field` warning in the Subscription inspector.
+- Metadata is read from headers only. A body carries no metadata. A `reclash-*` header other than `reclash-config`, `reclash-aliases` and `reclash-update` is ignored with an `Unsupported provider field` warning in the Subscription inspector.
 
 ## Value formats
 
@@ -101,7 +101,54 @@ Formats: `plain` values follow the [value formats](#value-formats) of the standa
 reclash-config: https://example.net/reclash.yaml
 ```
 
-It is the only `reclash-*` header ReClash reads. It is a `url` and counts only in an `https` response. Delivery rules are in [Manifest delivery](manifest.md#delivery). Other clients ignore it.
+It is the `reclash-*` header that carries the manifest. It is a `url` and counts only in an `https` response. Delivery rules are in [Manifest delivery](manifest.md#delivery). Other clients ignore it.
+
+## Update mirror
+
+```http
+reclash-update: https://updates.example.net/update-manifest.json
+```
+
+A `url` that counts only as `https`. It names a provider-hosted copy of ReClash's signed update manifest and is read from the active profile's subscription response.
+
+- With the header set, ReClash asks the mirror instead of GitHub. GitHub is used only if the mirror fails: a network error, an invalid manifest or no entry that verifies.
+- A mirror that answers with no newer release means "no update". The provider controls when a release is offered.
+- The app picks its channel (stable or pre-release) and its platform asset from the entries itself. Asset URLs must be `https`.
+- A mirror is polled cheaply: ReClash sends `If-None-Match` and `If-Modified-Since`, so a static host that answers `304` costs nothing. Serve the file with `ETag` or `Last-Modified`.
+
+### Manifest format
+
+Every ReClash release publishes `update-manifest.json` as a release asset:
+
+```json
+{
+  "releases": [
+    {
+      "tag": "v1.2.3",
+      "prerelease": false,
+      "notes": "…",
+      "assets": [{"name": "…", "size": 0, "sha256": "…", "url": "https://…"}],
+      "signature": "…"
+    }
+  ]
+}
+```
+
+An Ed25519 signature, made with a key ReClash holds and checked against public keys built into the app, covers the tag, the channel, the notes and each asset's `name`, `size` and `sha256`. It does not cover the URLs. A mirror may therefore rewrite `url` fields and combine entries of several manifests, such as the latest stable and the latest pre-release, into one `releases` array. Any other edit makes the entry fail verification and it is ignored. A tampered or foreign build can never be installed from a mirror.
+
+```sh
+# Point every asset at the mirror
+jq --arg base https://cdn.example/reclash '.releases[].assets[] |= (.url = ($base + "/" + .name))' update-manifest.json
+
+# Merge two manifests
+jq -s '{releases: map(.releases[]) }' stable.json pre.json
+```
+
+Maintainers with the repository can verify a file: `dart run tool/update_manifest.dart verify <file> --key <public key>`.
+
+### Check timing
+
+ReClash checks at launch, every hour while running, and when the app returns to the foreground after an hour. After a failure it retries after 2, 5, 15 and 30 minutes, and right away when the VPN connects after a failed check.
 
 ## Device status
 

@@ -2,17 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/app_update.dart';
+import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:riverpod/misc.dart' show Override;
 import 'package:riverpod/riverpod.dart';
 
 import '../helpers/test_update_runtime.dart';
@@ -39,6 +44,18 @@ Future<void> deleteDirectory(Directory directory) async {
   }
 }
 
+class _CountingRuntime extends TestUpdateRuntime {
+  _CountingRuntime(super.root);
+
+  int checks = 0;
+
+  @override
+  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) {
+    checks++;
+    return super.check(channel, mirror: mirror);
+  }
+}
+
 class _FakeSystemAction extends SystemAction {
   int exits = 0;
 
@@ -58,6 +75,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         appUpdateRuntimeProvider.overrideWithValue(runtime),
+        providerHintsProvider.overrideWithValue(ProviderHints.empty),
         if (runtime.desktopMode)
           systemActionProvider.overrideWith(_FakeSystemAction.new),
       ],
@@ -805,5 +823,116 @@ void main() {
         expect(runtime.installations, 0);
       },
     );
+  });
+
+  group('automatic update checks', () {
+    late _CountingRuntime counting;
+
+    void useCounting({List<Override> overrides = const []}) {
+      container.dispose();
+      counting = _CountingRuntime(directory);
+      runtime = counting;
+      container = ProviderContainer(
+        overrides: [
+          appUpdateRuntimeProvider.overrideWithValue(runtime),
+          if (overrides.isEmpty)
+            providerHintsProvider.overrideWithValue(ProviderHints.empty),
+          ...overrides,
+        ],
+      );
+      globalState.container = container;
+      container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
+      action = container.read(appUpdateActionProvider.notifier);
+    }
+
+    void advance(FakeAsync async, Duration duration) {
+      runtime.clock = runtime.clock.add(duration);
+      async.elapse(duration);
+    }
+
+    void start(FakeAsync async) {
+      container.read(initProvider.notifier).value = true;
+      async.flushMicrotasks();
+    }
+
+    setUp(useCounting);
+
+    test('a failed check retries after 2 then 5 minutes', () {
+      runtime.checkFailure = const FormatException('offline');
+      fakeAsync((async) {
+        start(async);
+        advance(async, const Duration(minutes: 1, seconds: 59));
+        expect(counting.checks, 0);
+        advance(async, const Duration(seconds: 1));
+        expect(counting.checks, 1);
+        advance(async, const Duration(minutes: 1, seconds: 59));
+        expect(counting.checks, 1);
+        advance(async, const Duration(seconds: 1));
+        expect(counting.checks, 2);
+        advance(async, const Duration(minutes: 4, seconds: 59));
+        expect(counting.checks, 2);
+        advance(async, const Duration(seconds: 1));
+        expect(counting.checks, 3);
+        container.dispose();
+      });
+    });
+
+    test('a successful check waits an hour before the next', () {
+      fakeAsync((async) {
+        start(async);
+        advance(async, const Duration(minutes: 2));
+        expect(counting.checks, 1);
+        advance(async, const Duration(minutes: 59));
+        expect(counting.checks, 1);
+        advance(async, const Duration(minutes: 1));
+        expect(counting.checks, 2);
+        container.dispose();
+      });
+    });
+
+    test('no timer runs while automatic checking is disabled', () {
+      settings(const AppSettingProps(autoCheckUpdate: false));
+      fakeAsync((async) {
+        start(async);
+        advance(async, const Duration(hours: 3));
+        expect(counting.checks, 0);
+        container.dispose();
+      });
+    });
+
+    test('resuming checks only once an hour has passed', () async {
+      container.read(initProvider.notifier).value = true;
+      await action.check();
+      expect(counting.checks, 1);
+      runtime.clock = runtime.clock.add(const Duration(minutes: 59));
+      action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(counting.checks, 1);
+      runtime.clock = runtime.clock.add(const Duration(minutes: 1));
+      action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await settleUntil(() => counting.checks == 2);
+    });
+
+    test('the provider update mirror reaches the runtime', () async {
+      useCounting(
+        overrides: [
+          providerHintsProvider.overrideWithValue(
+            const ProviderHints(
+              SubscriptionMetadata({
+                'updates.mirror': 'https://m.example/u.json',
+              }),
+            ),
+          ),
+        ],
+      );
+      await action.check();
+      expect(runtime.checkedMirror, Uri.parse('https://m.example/u.json'));
+    });
+
+    test('without provider hints no mirror is passed', () async {
+      await action.check();
+      expect(counting.checks, 1);
+      expect(runtime.checkedMirror, isNull);
+    });
   });
 }

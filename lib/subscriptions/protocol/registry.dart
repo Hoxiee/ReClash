@@ -311,6 +311,14 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'manifest',
   ),
   SubscriptionField(
+    'updates.mirror',
+    SubscriptionFieldType.url,
+    header: 'reclash-update',
+    trust: SubscriptionTrust.hint,
+    secure: true,
+    consumer: 'updates',
+  ),
+  SubscriptionField(
     'reminder.expireDays',
     SubscriptionFieldType.numbers,
     manifest: 'reminders.expire-days',

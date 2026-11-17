@@ -14,6 +14,60 @@ import 'package:reclash/state.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _Exchange {
+  _Exchange(this.uri, this.headers);
+
+  final Uri uri;
+  final Map<String, String> headers;
+}
+
+class _ScriptedAdapter implements HttpClientAdapter {
+  _ScriptedAdapter(this.respond);
+
+  final ResponseBody Function(_Exchange exchange) respond;
+  final requests = <_Exchange>[];
+
+  int count(String fragment) =>
+      requests.where((request) => '${request.uri}'.contains(fragment)).length;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final exchange = _Exchange(options.uri, {
+      for (final entry in options.headers.entries)
+        entry.key.toLowerCase(): '${entry.value}',
+    });
+    requests.add(exchange);
+    return respond(exchange);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+const _latestUrl = 'https://api.github.com/repos/$repository/releases/latest';
+const _listUrl = 'https://api.github.com/repos/$repository/releases';
+
+String _releaseJson(String tag) => jsonEncode({
+  'tag_name': tag,
+  'prerelease': false,
+  'body': 'n',
+  'assets': [],
+});
+
+ResponseBody _json(String body, {int status = 200, String? etag}) =>
+    ResponseBody.fromString(
+      body,
+      status,
+      headers: {
+        Headers.contentTypeHeader: ['application/json'],
+        'etag': ?etag == null ? null : [etag],
+      },
+    );
+
 class _TestUpdateSource implements AppUpdateSource {
   _TestUpdateSource(this.id, this.releases, {this.failure});
 
@@ -25,6 +79,7 @@ class _TestUpdateSource implements AppUpdateSource {
   @override
   Future<List<Map<String, dynamic>>> fetchReleases({
     required UpdateChannel channel,
+    required String installedVersion,
   }) async {
     if (failure case final error?) throw error;
     return releases;
@@ -227,6 +282,123 @@ void main() {
         );
       },
     );
+  });
+
+  group('checkForUpdate against the GitHub API', () {
+    late Request client;
+
+    setUp(() {
+      globalState.packageInfo = PackageInfo(
+        appName: 'ReClash',
+        packageName: 'com.reclash',
+        version: '0.1.0',
+        buildNumber: '1',
+      );
+      client = Request();
+    });
+
+    _ScriptedAdapter serve(ResponseBody Function(_Exchange exchange) respond) {
+      final adapter = _ScriptedAdapter(respond);
+      client.dio.httpClientAdapter = adapter;
+      return adapter;
+    }
+
+    ResponseBody history(_Exchange exchange) {
+      final uri = '${exchange.uri}';
+      if (uri == _latestUrl) return _json(_releaseJson('v0.3.0'));
+      return _json(
+        jsonEncode([
+          for (final tag in ['v0.3.0', 'v0.2.0', 'v0.1.0'])
+            jsonDecode(_releaseJson(tag)),
+        ]),
+      );
+    }
+
+    test('a probe no newer than the install never reads the list', () async {
+      final adapter = serve((_) => _json(_releaseJson('v0.1.0')));
+      expect(
+        await client.checkForUpdate(channel: UpdateChannel.release),
+        isNull,
+      );
+      expect(adapter.requests.map((request) => '${request.uri}'), [_latestUrl]);
+    });
+
+    test('a newer probe reads the list once per newest tag', () async {
+      final adapter = serve(history);
+      final first = await client.checkForUpdate(channel: UpdateChannel.release);
+      final second = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+      );
+      expect(first?.tag, 'v0.3.0');
+      expect(first?.skipped.map((release) => release.tag), ['v0.2.0']);
+      expect(second?.tag, 'v0.3.0');
+      expect(second?.skipped.map((release) => release.tag), ['v0.2.0']);
+      expect(adapter.count('per_page=30'), 1);
+      expect(adapter.requests, hasLength(3));
+    });
+
+    test('a validator is sent back and a 304 reuses the answer', () async {
+      final adapter = serve((exchange) {
+        if (exchange.headers['if-none-match'] == 'abc') {
+          return _json('', status: 304);
+        }
+        if (exchange.uri.toString() == _latestUrl) {
+          return _json(_releaseJson('v0.3.0'), etag: 'abc');
+        }
+        return history(exchange);
+      });
+      final first = await client.checkForUpdate(channel: UpdateChannel.release);
+      final second = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+      );
+      final probes = adapter.requests
+          .where((request) => '${request.uri}' == _latestUrl)
+          .toList();
+      expect(probes.first.headers, isNot(contains('if-none-match')));
+      expect(probes.last.headers['if-none-match'], 'abc');
+      expect(second?.tag, first?.tag);
+      expect(second?.skipped, hasLength(first!.skipped.length));
+    });
+
+    test('a missing latest release is no update, not an error', () async {
+      serve((_) => _json('{}', status: 404));
+      expect(
+        await client.checkForUpdate(channel: UpdateChannel.release),
+        isNull,
+      );
+    });
+
+    test('the pre channel probes the newest single release', () async {
+      final adapter = serve(
+        (_) => _json(jsonEncode([jsonDecode(_releaseJson('v0.1.0'))])),
+      );
+      expect(await client.checkForUpdate(channel: UpdateChannel.pre), isNull);
+      expect(adapter.requests.map((request) => '${request.uri}'), [
+        '$_listUrl?per_page=1',
+      ]);
+    });
+
+    test('a mirror without a trusted key falls back to GitHub', () async {
+      final adapter = serve((exchange) {
+        if (exchange.uri.host == 'mirror.example') {
+          return _json('{"releases": []}');
+        }
+        return history(exchange);
+      });
+      final release = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+        mirror: Uri.parse('https://mirror.example/update-manifest.json'),
+      );
+      expect(release?.tag, 'v0.3.0');
+      expect(release?.source.id, 'github');
+      expect(adapter.requests.first.uri.host, 'mirror.example');
+    });
+
+    test('updateSource resolves the mirror and GitHub, nothing else', () {
+      expect(client.updateSource('mirror')?.id, 'mirror');
+      expect(client.updateSource('github')?.id, 'github');
+      expect(client.updateSource('unknown'), isNull);
+    });
   });
 
   group('downloadUpdateFile', () {
