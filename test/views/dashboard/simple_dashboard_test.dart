@@ -513,36 +513,67 @@ void main() {
     expect(find.byTooltip('Edit widgets'), findsNothing);
   });
 
-  testWidgets('a pending app update sits above the button on Home', (
-    tester,
-  ) async {
-    globalState.packageInfo = PackageInfo(
-      appName: 'ReClash',
-      packageName: 'com.reclash',
-      version: '0.8.95',
-      buildNumber: '1',
-    );
-    useContainer(
-      overrides: [
-        appUpdateActionProvider.overrideWith(
-          () => _PendingUpdate(
-            AppUpdateState(
-              phase: UpdatePhase.offered,
-              release: testUpdateRelease(),
+  group('a pending app update', () {
+    void pendingUpdate() {
+      globalState.packageInfo = PackageInfo(
+        appName: 'ReClash',
+        packageName: 'com.reclash',
+        version: '0.8.95',
+        buildNumber: '1',
+      );
+      useContainer(
+        overrides: [
+          appUpdateActionProvider.overrideWith(
+            () => _PendingUpdate(
+              AppUpdateState(
+                phase: UpdatePhase.offered,
+                release: testUpdateRelease(),
+              ),
             ),
           ),
-        ),
-      ],
-    );
-    chooseSimple();
-    await pumpPage(tester);
+        ],
+      );
+      chooseSimple();
+    }
 
+    final button = find.byKey(const ValueKey('simple-dashboard-update'));
     final card = find.byKey(const ValueKey('app-update-card'));
-    expect(card, findsOneWidget);
-    expect(
-      tester.getRect(card).bottom,
-      lessThan(tester.getRect(find.byType(PowerButton)).top),
-    );
+
+    testWidgets('is a header button on Home and a card atop Widgets', (
+      tester,
+    ) async {
+      pendingUpdate();
+      await pumpPage(tester);
+
+      expect(button, findsOneWidget);
+      expect(card, findsNothing);
+      expect(
+        tester.getRect(button).left,
+        greaterThan(tester.getRect(find.text('Widgets')).right),
+      );
+      expect(tester.getRect(button).right, lessThanOrEqualTo(_phone.width));
+
+      await openWidgets(tester);
+
+      expect(button, findsNothing);
+      expect(card, findsOneWidget);
+    });
+
+    testWidgets('tops the widget column on a wide layout', (tester) async {
+      pendingUpdate();
+      await pumpPage(tester, size: _desktop);
+
+      expect(button, findsNothing);
+      expect(card, findsOneWidget);
+      expect(
+        tester.getRect(card).left,
+        greaterThan(tester.getRect(find.byType(PowerButton)).right),
+      );
+      expect(
+        tester.getRect(card).bottom,
+        lessThan(tester.getRect(find.byType(LocationCard)).top),
+      );
+    });
   });
 
   testWidgets('tapping the Widgets title moves the pager to the widget list', (

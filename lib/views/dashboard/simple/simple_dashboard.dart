@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,9 @@ import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/layout.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/core_status_button.dart';
+import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:reclash/widgets/announcement_card.dart';
+import 'package:reclash/widgets/update_sheet.dart';
 
 import 'home.dart';
 import 'location_card.dart';
@@ -147,6 +150,9 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     );
     if (!editable || (!desktop && _page != 1)) _editing = false;
     final editing = _editing;
+    final hasUpdate = ref.watch(
+      appUpdateActionProvider.select((state) => state.hasUpdate),
+    );
     final announcement = ref.watch(
       providerAnnouncementProvider.select((card) => card != null),
     );
@@ -168,7 +174,10 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
               ],
               onSelect: _showPage,
             ),
-      actions: [if (!editing && coreLib == null) const CoreStatusButton()],
+      actions: [
+        if (!desktop && _page == 0 && hasUpdate) const _UpdateButton(),
+        if (!editing && coreLib == null) const CoreStatusButton(),
+      ],
       confirmationAction: editing
           ? IconButtonData(
               glyph: AppGlyphs.check,
@@ -185,8 +194,14 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
             density: density,
             scale: scale,
             child: density.isDesktop
-                ? _desktop(context, editing, announcement, scale)
-                : _mobile(context, constraints.maxWidth, editing, announcement),
+                ? _desktop(context, editing, announcement, hasUpdate, scale)
+                : _mobile(
+                    context,
+                    constraints.maxWidth,
+                    editing,
+                    announcement,
+                    hasUpdate,
+                  ),
           );
         },
       ),
@@ -198,6 +213,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     double width,
     bool editing,
     bool announcement,
+    bool hasUpdate,
   ) {
     final side = dashboardMobileSideOf(width);
     final top = context.contentTopPadding;
@@ -225,7 +241,10 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
               editing: editing,
               onDone: () => _setEditing(false),
               padding: EdgeInsets.fromLTRB(side, top, side, bottom),
-              leading: [if (announcement) const OpenAnnouncementCard()],
+              leading: [
+                if (hasUpdate) const UpdateCard(),
+                if (announcement) const OpenAnnouncementCard(),
+              ],
             ),
           ),
         ],
@@ -237,6 +256,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     BuildContext context,
     bool editing,
     bool announcement,
+    bool hasUpdate,
     double scale,
   ) {
     final top = context.contentTopPadding;
@@ -272,6 +292,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
                   bottom,
                 ),
                 leading: [
+                  if (hasUpdate) const UpdateCard(),
                   const LocationCard(),
                   if (announcement) const OpenAnnouncementCard(),
                 ],
@@ -280,6 +301,21 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A pending app update, opening the update sheet from the header's end.
+class _UpdateButton extends StatelessWidget {
+  const _UpdateButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      key: const ValueKey('simple-dashboard-update'),
+      onPressed: () => unawaited(UpdateSheet.show(context)),
+      icon: const GlyphIcon(AppGlyphs.cloudDownload, size: 18),
+      label: Text(context.appLocalizations.update),
     );
   }
 }
@@ -314,30 +350,34 @@ class _PagerTitle extends StatelessWidget {
       animation: controller,
       builder: (context, _) {
         final at = _position();
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 16,
-          children: [
-            for (final (index, label) in labels.indexed)
-              Semantics(
-                button: true,
-                selected: at.round() == index,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => onSelect(index),
-                  child: Text(
-                    label,
-                    style: style.copyWith(
-                      color: Color.lerp(
-                        colorScheme.onSurface,
-                        dim,
-                        (at - index).abs().clamp(0, 1).toDouble(),
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 16,
+            children: [
+              for (final (index, label) in labels.indexed)
+                Semantics(
+                  button: true,
+                  selected: at.round() == index,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onSelect(index),
+                    child: Text(
+                      label,
+                      style: style.copyWith(
+                        color: Color.lerp(
+                          colorScheme.onSurface,
+                          dim,
+                          (at - index).abs().clamp(0, 1).toDouble(),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         );
       },
     );

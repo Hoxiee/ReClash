@@ -15,7 +15,6 @@ import 'package:reclash/subscriptions/notification/record.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
-import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/views/doctor/doctor.dart';
@@ -28,8 +27,8 @@ import 'subscription_card.dart';
 
 export 'home_view.dart' show powerStateLabel;
 
-/// The button, what it did and what is left to spend, under a pending app
-/// update; on a phone also where traffic leaves.
+/// The button, what it did and what is left to spend; on a phone also where
+/// traffic leaves.
 class SimpleHome extends ConsumerWidget {
   const SimpleHome({super.key, required this.padding, this.wide = false});
 
@@ -39,16 +38,12 @@ class SimpleHome extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (minSize, maxSize) = wide ? (184.0, 256.0) : (160.0, 220.0);
-    final hasUpdate = ref.watch(
-      appUpdateActionProvider.select((state) => state.hasUpdate),
-    );
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         padding: padding,
         child: FillHero(
           viewport: constraints.maxHeight - padding.vertical,
           minHero: SimplePower.heightOf(minSize),
-          above: hasUpdate ? const UpdateCard() : null,
           hero: SimplePower(minSize: minSize, maxSize: maxSize),
           below: Padding(
             padding: const EdgeInsets.only(top: 16),
