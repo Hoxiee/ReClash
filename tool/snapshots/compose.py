@@ -4,7 +4,7 @@ Usage: python3 -I tool/snapshots/compose.py <raw dir> <out dir> [overview]
 
 Writes preview.png and preview-dark.png (a laptop and a phone in opposite
 themes on a transparent 2400x1500 canvas, as site/index.html declares) and one framed WebP per
-screen and theme under screens/.
+screen and theme under screens/, for the shots named in SCREENS.
 """
 
 import subprocess
@@ -20,15 +20,15 @@ SS = 4  # supersampling for antialiased shapes
 THEMES = ('light', 'dark')
 OTHER = {'light': 'dark', 'dark': 'light'}
 
-SCREENS = {
-    'desktop-dashboard': 'macos-dashboard-detailed',
-    'desktop-proxies': 'macos-proxies-detailed',
-    'desktop-profiles': 'macos-profiles-detailed',
-    'desktop-connections': 'macos-connections-detailed',
-    'mobile-dashboard': 'android-dashboard-simple',
-    'mobile-proxies': 'android-proxies-simple',
-    'mobile-profiles': 'android-profiles-simple',
-}
+SCREENS = [
+    'desktop-dashboard',
+    'desktop-profiles',
+    'desktop-branded',
+    'mobile-dashboard',
+    'mobile-profiles',
+    'mobile-proxies',
+    'mobile-branded',
+]
 
 # Wallpaper corners: top left, top right, bottom left, bottom right.
 WALLPAPER = {
@@ -325,7 +325,7 @@ def laptop(window, theme, width):
 
 def overview(raw, theme):
     canvas = Image.new('RGBA', (2400, 1500), (0, 0, 0, 0))
-    window = mac_window(raw_shot(raw, SCREENS['desktop-dashboard'], theme), 1440, theme)
+    window = mac_window(raw_shot(raw, 'desktop-dashboard', theme), 1440, theme)
     lid, base, overhang = laptop(window, theme, 1770)
     lx, ly = 96, 56
     shadow(canvas, lid, (lx, ly), 30, (0, 24), 0.35)
@@ -335,7 +335,7 @@ def overview(raw, theme):
     canvas.alpha_composite(base, (bx, by))
 
     other = OTHER[theme]
-    handset = phone(raw_shot(raw, SCREENS['mobile-dashboard'], other), 520, other)
+    handset = phone(raw_shot(raw, 'mobile-dashboard', other), 520, other)
     px, py = 2400 - 54 - handset.width, 1500 - 34 - handset.height
     shadow(canvas, handset, (px, py), 34, (-10, 28), 0.55)
     canvas.alpha_composite(handset, (px, py))
@@ -354,13 +354,16 @@ def main():
     raw, out = Path(sys.argv[1]), Path(sys.argv[2])
     (out / 'screens').mkdir(parents=True, exist_ok=True)
     only = sys.argv[3] if len(sys.argv) > 3 else None
+    for stale in (out / 'screens').glob('*.webp'):
+        if stale.stem.rsplit('-', 1)[0] not in SCREENS:
+            stale.unlink()
     for theme in THEMES:
         suffix = '' if theme == 'light' else '-dark'
         overview(raw, theme).save(out / f'preview{suffix}.png', optimize=True)
         if only == 'overview':
             continue
-        for name, source in SCREENS.items():
-            shot = raw_shot(raw, source, theme)
+        for name in SCREENS:
+            shot = raw_shot(raw, name, theme)
             if name.startswith('desktop'):
                 framed = card(mac_window(shot, 1600, theme), 48, 20, 0.32)
             else:

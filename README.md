@@ -59,20 +59,20 @@ Simple to use, open source and ad-free.
 
 <table>
   <tr>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Simple dashboard on a phone" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Proxy groups with latency on a phone" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on a phone" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Simple dashboard on a phone" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on a phone" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Proxy groups with latency on a phone" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="Dashboard customized by a provider on a phone" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="Detailed dashboard on the desktop" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-proxies-dark.webp"><img alt="Proxy groups on the desktop" src="snapshots/screens/desktop-proxies-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="Simple dashboard on the desktop" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Profiles on the desktop" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
   </tr>
   <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-connections-dark.webp"><img alt="Live connections on the desktop" src="snapshots/screens/desktop-connections-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Profiles on the desktop" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
+    <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="Dashboard customized by a provider on the desktop" src="snapshots/screens/desktop-branded-light.webp"></picture></td>
   </tr>
 </table>
 

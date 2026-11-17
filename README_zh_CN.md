@@ -53,20 +53,20 @@
 
 <table>
   <tr>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上带延迟的代理组" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
-    <td width="33%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上带延迟的代理组" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="桌面端的详细仪表盘" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-proxies-dark.webp"><img alt="桌面端的代理组" src="snapshots/screens/desktop-proxies-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="桌面端的简洁仪表盘" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端的配置列表" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
   </tr>
   <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-connections-dark.webp"><img alt="桌面端的实时连接" src="snapshots/screens/desktop-connections-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端的配置列表" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
+    <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-light.webp"></picture></td>
   </tr>
 </table>
 

@@ -1,31 +1,33 @@
 #!/usr/bin/env bash
 # Renders the README screenshots from tool/snapshots/mock.dart into
-# .dart_tool/snapshots/<platform>-<page>/, then composes them with compose.py.
+# .dart_tool/snapshots/<shot name>/, then composes them with compose.py.
 # Usage: tool/snapshots/render.sh [scale]
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 scale="${1:-2}"
 raw=.dart_tool/snapshots
+rm -rf "$raw"
 
 shots=(
-  'macos dashboard detailed'
-  'macos proxies detailed'
-  'macos profiles detailed'
-  'macos connections detailed'
-  'android dashboard simple'
-  'android proxies simple'
-  'android profiles simple'
+  'android dashboard plain mobile-dashboard'
+  'android profiles plain mobile-profiles'
+  'android proxies plain mobile-proxies'
+  'android dashboard brand mobile-branded'
+  'macos dashboard plain desktop-dashboard'
+  'macos profiles plain desktop-profiles'
+  'macos dashboard brand desktop-branded'
 )
 
 for shot in "${shots[@]}"; do
-  read -r platform page dashboard <<<"$shot"
+  read -r platform page brand name <<<"$shot"
   case "$platform" in
     android) size=412x915 ;;
     *) size=1280x800 ;;
   esac
-  out="$raw/$platform-$page-$dashboard"
+  out="$raw/$name"
   echo "$out"
-  SNAPSHOT_PLATFORM="$platform" SNAPSHOT_PAGE="$page" SNAPSHOT_DASHBOARD="$dashboard" \
+  SNAPSHOT_BRAND=$([[ $brand == brand ]] && echo 1 || echo 0) \
+    SNAPSHOT_PLATFORM="$platform" SNAPSHOT_PAGE="$page" SNAPSHOT_DASHBOARD=simple \
     dart run tool/preview.dart tool/snapshots/app_preview.dart \
     --size "$size" --theme light,dark --scale "$scale" --out "$out"
 done

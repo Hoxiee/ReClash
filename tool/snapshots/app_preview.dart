@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 
 import 'mock.dart' as mock;
 
@@ -22,8 +23,12 @@ final _dashboard = DashboardStyle.values.byName(
 );
 
 /// macOS draws its own window buttons over the sidebar, so the shell has no
-/// header there; compose.py paints them.
-Widget preview() => switch (_platform) {
+/// header there; compose.py paints them. A provider wallpaper sits behind the
+/// shell as it does in the app.
+Widget preview() =>
+    mock.branded ? AppWallpaperScope(child: _shell()) : _shell();
+
+Widget _shell() => switch (_platform) {
   'android' => Builder(
     builder: (context) => Theme(
       data: Theme.of(context).copyWith(platform: TargetPlatform.android),
