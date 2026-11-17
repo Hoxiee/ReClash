@@ -237,5 +237,9 @@
   "slotMachinePower": "用老虎机代替按钮",
   "slotMachineSpin": "转动",
   "slotMachineAlmost": "差一点！",
-  "slotMachineJackpot": "大奖！"
+  "slotMachineJackpot": "大奖！",
+  "simpleEggHold": "继续按住…",
+  "simpleEggAlmost": "马上就好",
+  "simpleEggFire": "火力全开！",
+  "simpleEggGreeting": "{provider} 向你问好"
 }

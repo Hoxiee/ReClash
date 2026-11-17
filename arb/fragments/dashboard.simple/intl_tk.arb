@@ -237,5 +237,9 @@
   "slotMachinePower": "Düwmäniň ýerine slot-maşyn",
   "slotMachineSpin": "Aýlamak",
   "slotMachineAlmost": "Az galdy!",
-  "slotMachineJackpot": "Jekpot!"
+  "slotMachineJackpot": "Jekpot!",
+  "simpleEggHold": "Basyp duruň…",
+  "simpleEggAlmost": "Az galdy",
+  "simpleEggFire": "Ot!",
+  "simpleEggGreeting": "{provider} salam aýdýar"
 }

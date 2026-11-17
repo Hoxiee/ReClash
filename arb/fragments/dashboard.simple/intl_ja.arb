@@ -237,5 +237,9 @@
   "slotMachinePower": "ボタンの代わりにスロット",
   "slotMachineSpin": "回す",
   "slotMachineAlmost": "惜しい！",
-  "slotMachineJackpot": "大当たり！"
+  "slotMachineJackpot": "大当たり！",
+  "simpleEggHold": "そのまま…",
+  "simpleEggAlmost": "もう少し",
+  "simpleEggFire": "ファイヤー！",
+  "simpleEggGreeting": "{provider} からごあいさつ"
 }

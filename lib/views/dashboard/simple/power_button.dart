@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:reclash/features/power/face.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/views/dashboard/simple/egg.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/ui/ui.dart';
@@ -13,6 +16,8 @@ import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
 
 export 'package:reclash/features/power/face.dart' show PowerLink, PowerTone;
+export 'package:reclash/views/dashboard/simple/egg.dart'
+    show EggConfig, EggStage, EggStatus;
 
 /// The verdict glyph on the rim; [tone] picks its fill.
 @immutable
@@ -40,7 +45,14 @@ const _connectingProgress = 0.45;
 const _badgeDelay = Duration(milliseconds: 570);
 const _badgeDuration = Duration(milliseconds: 250);
 
+const _eggSettle = Duration(milliseconds: 500);
+const _eggCancel = Duration(milliseconds: 400);
+const _eggTwist = math.pi / 4;
+
 const _haloSize = 1.34;
+
+/// How far the burst's canvas reaches past the halo, in button sizes.
+const _burstReach = 0.93;
 const _plateSize = 0.54;
 
 const _outlineStroke = BorderSide(width: 4);
@@ -108,6 +120,22 @@ Path _morphPath(ProviderPowerShape shape, double progress) => _morphOf(
   shape,
 ).toPath(progress: progress, rotationPivotX: 0.5, rotationPivotY: 0.5);
 
+final _eggMorphs = <ProviderPowerShape, Morph>{};
+
+/// The running shape on its way to the flower the egg pops.
+Path _eggPath(ProviderPowerShape shape, double hold) => _eggMorphs
+    .putIfAbsent(
+      shape,
+      () => Morph(_silhouettes[shape]!.polygon, MaterialShapes.flower),
+    )
+    .toPath(progress: hold, rotationPivotX: 0.5, rotationPivotY: 0.5);
+
+Path _bodyPath(ProviderPowerShape shape, double progress, double hold) =>
+    hold > 0 ? _eggPath(shape, hold) : _morphPath(shape, progress);
+
+double _bodyTurn(ProviderPowerShape shape, double progress, double hold) =>
+    hold > 0 ? hold * _eggTwist : _morphTurn(shape, progress);
+
 double _morphTurn(ProviderPowerShape shape, double progress) =>
     progress * 2 * math.pi / _silhouettes[shape]!.symmetry;
 
@@ -164,7 +192,15 @@ class PowerButton extends StatefulWidget {
     this.tone = PowerTone.normal,
     this.badge,
     this.spin = false,
+    this.egg = const EggConfig(),
+    this.onEggStage,
   });
+
+  /// Holding a running button sets off the egg; it never toggles the tunnel.
+  final EggConfig egg;
+
+  /// Told as the egg moves between stages, so the status text can follow.
+  final ValueChanged<EggStage>? onEggStage;
 
   final PowerTone tone;
   final PowerBadge? badge;
@@ -205,15 +241,127 @@ class _PowerButtonState extends State<PowerButton>
     vsync: this,
     duration: _haloPeriod,
   );
+  late final AnimationController _hold = AnimationController(
+    vsync: this,
+    duration: widget.egg.hold,
+  );
+  late final AnimationController _burst = AnimationController(
+    vsync: this,
+    duration: eggBurstDuration,
+  );
+  late final Listenable _bodyMotion = Listenable.merge([
+    _morphController,
+    _hold,
+    _burst,
+  ]);
   var _hovered = false;
   var _pressed = false;
   var _focused = false;
+  var _stage = EggStage.idle;
+
+  /// The body stays a flower from the burst until it has settled back.
+  var _fired = false;
+  var _particles = const <EggParticle>[];
+  Timer? _textTimer;
 
   static double _targetOf(PowerLink link) => switch (link) {
     PowerLink.off => 0,
     PowerLink.connecting => _connectingProgress,
     PowerLink.on || PowerLink.paused => 1,
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _hold
+      ..addListener(_onHold)
+      ..addStatusListener(_onHoldStatus);
+    _burst.addStatusListener(_onBurstStatus);
+  }
+
+  bool get _eggReady =>
+      widget.egg.enabled && widget.link == PowerLink.on && !widget.spin;
+
+  void _setStage(EggStage stage) {
+    if (_stage == stage) return;
+    _stage = stage;
+    final notify = widget.onEggStage;
+    if (notify == null) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) notify(_stage);
+      });
+    } else {
+      notify(stage);
+    }
+  }
+
+  void _eggStart() {
+    if (!_eggReady || _stage != EggStage.idle) return;
+    _setStage(EggStage.holding);
+    unawaited(_hold.forward());
+  }
+
+  void _eggEnd() {
+    if (_stage != EggStage.holding && _stage != EggStage.almost) return;
+    _setStage(EggStage.idle);
+    unawaited(
+      _hold.animateBack(0, duration: _eggCancel, curve: Curves.easeOutBack),
+    );
+  }
+
+  void _onHold() {
+    if (_stage == EggStage.holding && _hold.value >= 0.5) {
+      _setStage(EggStage.almost);
+    }
+  }
+
+  void _onHoldStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed &&
+        (_stage == EggStage.holding || _stage == EggStage.almost)) {
+      _fire();
+    } else if (status == AnimationStatus.dismissed && _fired) {
+      setState(() => _fired = false);
+    }
+  }
+
+  void _fire() {
+    unawaited(HapticFeedback.mediumImpact());
+    _setStage(EggStage.fired);
+    _textTimer?.cancel();
+    _textTimer = Timer(eggTextDuration, () => _setStage(EggStage.idle));
+    if (context.disableAnimations) {
+      _hold.value = 0;
+      return;
+    }
+    setState(() {
+      _fired = true;
+      _particles = buildEggParticles(
+        widget.egg,
+        context.colorScheme,
+        math.Random(),
+      );
+    });
+    unawaited(_burst.forward(from: 0));
+  }
+
+  void _onBurstStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    setState(() => _particles = const []);
+    unawaited(_hold.animateBack(0, duration: _eggSettle));
+  }
+
+  void _resetEgg() {
+    _textTimer?.cancel();
+    _fired = false;
+    _particles = const [];
+    _burst.value = 0;
+    _hold
+      ..stop()
+      ..value = 0;
+    _setStage(EggStage.idle);
+  }
 
   @override
   void didChangeDependencies() {
@@ -224,6 +372,8 @@ class _PowerButtonState extends State<PowerButton>
   @override
   void didUpdateWidget(PowerButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _hold.duration = widget.egg.hold;
+    if (!_eggReady) _resetEgg();
     if (oldWidget.link != widget.link) {
       final target = _targetOf(widget.link);
       if (context.disableAnimations) {
@@ -258,6 +408,9 @@ class _PowerButtonState extends State<PowerButton>
 
   @override
   void dispose() {
+    _textTimer?.cancel();
+    _hold.dispose();
+    _burst.dispose();
     _morphController.dispose();
     _halo.dispose();
     super.dispose();
@@ -315,6 +468,7 @@ class _PowerButtonState extends State<PowerButton>
             ? colorScheme.primary
             : colorScheme.onPrimary,
     };
+    final reduced = context.disableAnimations;
     final stateDuration = context.motionDuration(_stateDuration);
     final body = TweenAnimationBuilder<Color?>(
       tween: ColorTween(end: fill),
@@ -323,9 +477,15 @@ class _PowerButtonState extends State<PowerButton>
         tween: Tween(end: _overlay),
         duration: stateDuration,
         builder: (_, overlay, _) => AnimatedBuilder(
-          animation: _morphController,
+          animation: _bodyMotion,
           builder: (_, _) {
             final progress = _morphController.value;
+            final hold = reduced ? 0.0 : _hold.value;
+            final pop = reduced
+                ? 1.0
+                : 1 +
+                      0.14 *
+                          math.sin(math.pi * math.min(1, _burst.value / 0.3));
             final color = Color.alphaBlend(
               ink.withValues(alpha: overlay),
               fill!,
@@ -334,6 +494,7 @@ class _PowerButtonState extends State<PowerButton>
               painter: _BodyPainter(
                 shape: shape,
                 progress: progress,
+                hold: hold,
                 color: glass || hollow ? null : color,
                 shadow: link == PowerLink.off || stalled
                     ? Colors.black.withValues(alpha: 0.25)
@@ -346,13 +507,15 @@ class _PowerButtonState extends State<PowerButton>
               ),
               child: SizedBox.square(dimension: size),
             );
-            if (!glass || hollow) return painted;
-            return LiquidGlass(
-              style: LiquidGlassStyle.tinted(colorScheme, color),
-              clipper: _BodyClipper(shape, progress),
-              pressed: _pressed,
-              child: painted,
-            );
+            final Widget face = !glass || hollow
+                ? painted
+                : LiquidGlass(
+                    style: LiquidGlassStyle.tinted(colorScheme, color),
+                    clipper: _BodyClipper(shape, progress, hold),
+                    pressed: _pressed,
+                    child: painted,
+                  );
+            return pop == 1 ? face : Transform.scale(scale: pop, child: face);
           },
         ),
       ),
@@ -371,6 +534,16 @@ class _PowerButtonState extends State<PowerButton>
             tone: widget.tone,
             spin: widget.spin,
           ),
+          if (link == PowerLink.on && !_fired)
+            IgnorePointer(
+              child: CustomPaint(
+                size: Size.square(size * _haloSize),
+                painter: EggRingPainter(
+                  progress: _hold,
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
           Semantics(
             button: true,
             enabled: enabled,
@@ -378,56 +551,110 @@ class _PowerButtonState extends State<PowerButton>
             child: GestureDetector(
               onHorizontalDragUpdate: (_) {},
               onVerticalDragUpdate: (_) {},
-              child: InkResponse(
-                onTap: widget.onPressed,
-                onHover: (value) => setState(() => _hovered = value),
-                onHighlightChanged: (value) => setState(() => _pressed = value),
-                onFocusChange: (value) => setState(() => _focused = value),
-                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-                splashFactory: NoSplash.splashFactory,
-                customBorder: AppShape.circle,
-                child: ElasticPress(
-                  enabled: enabled,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      body,
-                      _LogoPlate(
-                        size: size * _plateSize,
-                        logo: widget.logo,
-                        images: widget.images,
-                        muted: link == PowerLink.off,
-                        raised: link == PowerLink.on,
-                      ),
-                      AnimatedBuilder(
-                        animation: _morphController,
-                        child: IgnorePointer(
-                          child: ExcludeSemantics(
-                            child: _BadgeSlot(
-                              badge: widget.badge,
-                              size: size * 0.24,
-                              delay: _morphController.isAnimating
-                                  ? _badgeDelay
-                                  : Duration.zero,
+              child: RawGestureDetector(
+                gestures: {
+                  if (_eggReady)
+                    LongPressGestureRecognizer:
+                        GestureRecognizerFactoryWithHandlers<
+                          LongPressGestureRecognizer
+                        >(
+                          () => LongPressGestureRecognizer(
+                            duration: eggPressDuration,
+                          ),
+                          (recognizer) => recognizer
+                            ..onLongPressStart = ((_) => _eggStart())
+                            ..onLongPressEnd = ((_) => _eggEnd())
+                            ..onLongPressCancel = _eggEnd,
+                        ),
+                },
+                child: InkResponse(
+                  onTap: widget.onPressed,
+                  onHover: (value) => setState(() => _hovered = value),
+                  onHighlightChanged: (value) =>
+                      setState(() => _pressed = value),
+                  onFocusChange: (value) => setState(() => _focused = value),
+                  overlayColor: const WidgetStatePropertyAll(
+                    Colors.transparent,
+                  ),
+                  splashFactory: NoSplash.splashFactory,
+                  customBorder: AppShape.circle,
+                  child: ElasticPress(
+                    enabled: enabled,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        body,
+                        AnimatedBuilder(
+                          animation: _hold,
+                          child: _LogoPlate(
+                            size: size * _plateSize,
+                            logo: widget.logo,
+                            images: widget.images,
+                            muted: link == PowerLink.off,
+                            raised: link == PowerLink.on,
+                          ),
+                          builder: (_, child) {
+                            final v = _hold.value;
+                            if (reduced || v == 0) return child!;
+                            return Transform.rotate(
+                              angle:
+                                  0.16 *
+                                  v *
+                                  (1 - math.pow(v, 8)) *
+                                  math.sin(v * 40),
+                              child: child,
+                            );
+                          },
+                        ),
+                        AnimatedBuilder(
+                          animation: _morphController,
+                          child: IgnorePointer(
+                            child: ExcludeSemantics(
+                              child: _BadgeSlot(
+                                badge: widget.badge,
+                                size: size * 0.24,
+                                delay: _morphController.isAnimating
+                                    ? _badgeDelay
+                                    : Duration.zero,
+                              ),
                             ),
                           ),
-                        ),
-                        builder: (_, child) => Transform.translate(
-                          offset: _rimOffset(
-                            shape,
-                            _morphController.value,
-                            size,
+                          builder: (_, child) => Transform.translate(
+                            offset: _rimOffset(
+                              shape,
+                              _morphController.value,
+                              size,
+                            ),
+                            child: child,
                           ),
-                          child: child,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+          if (_particles.isNotEmpty)
+            Positioned(
+              left: -size * _burstReach,
+              top: -size * _burstReach,
+              right: -size * _burstReach,
+              bottom: -size * _burstReach,
+              child: IgnorePointer(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: EggBurstPainter(
+                      progress: _burst,
+                      particles: _particles,
+                      unit: size,
+                      wave: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -610,6 +837,7 @@ class _BodyPainter extends CustomPainter {
   const _BodyPainter({
     required this.shape,
     required this.progress,
+    required this.hold,
     required this.color,
     required this.shadow,
     required this.ring,
@@ -620,18 +848,19 @@ class _BodyPainter extends CustomPainter {
 
   final ProviderPowerShape shape;
   final double progress;
+  final double hold;
   final Color? color;
   final Color shadow;
   final BorderSide? ring;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = _morphPath(shape, progress);
+    final path = _bodyPath(shape, progress, hold);
     final color = this.color;
     canvas
       ..save()
       ..translate(size.width / 2, size.height / 2)
-      ..rotate(_morphTurn(shape, progress))
+      ..rotate(_bodyTurn(shape, progress, hold))
       ..scale(size.width, size.height)
       ..translate(-0.5, -0.5);
     canvas.save();
@@ -668,30 +897,34 @@ class _BodyPainter extends CustomPainter {
   bool shouldRepaint(_BodyPainter oldDelegate) =>
       oldDelegate.shape != shape ||
       oldDelegate.progress != progress ||
+      oldDelegate.hold != hold ||
       oldDelegate.color != color ||
       oldDelegate.shadow != shadow ||
       oldDelegate.ring != ring;
 }
 
 class _BodyClipper extends CustomClipper<Path> {
-  const _BodyClipper(this.shape, this.progress);
+  const _BodyClipper(this.shape, this.progress, this.hold);
 
   final ProviderPowerShape shape;
   final double progress;
+  final double hold;
 
   @override
   Path getClip(Size size) {
     final transform =
         Matrix4.translationValues(size.width / 2, size.height / 2, 0)
-          ..rotateZ(_morphTurn(shape, progress))
+          ..rotateZ(_bodyTurn(shape, progress, hold))
           ..scaleByDouble(size.width, size.height, 1, 1)
           ..translateByDouble(-0.5, -0.5, 0, 1);
-    return _morphPath(shape, progress).transform(transform.storage);
+    return _bodyPath(shape, progress, hold).transform(transform.storage);
   }
 
   @override
   bool shouldReclip(_BodyClipper oldClipper) =>
-      oldClipper.shape != shape || oldClipper.progress != progress;
+      oldClipper.shape != shape ||
+      oldClipper.progress != progress ||
+      oldClipper.hold != hold;
 }
 
 /// Pops the badge in and out; one that arrives with a morph waits [delay] so

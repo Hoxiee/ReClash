@@ -237,5 +237,9 @@
   "slotMachinePower": "Machine à sous au lieu du bouton",
   "slotMachineSpin": "Lancer",
   "slotMachineAlmost": "Presque !",
-  "slotMachineJackpot": "Jackpot !"
+  "slotMachineJackpot": "Jackpot !",
+  "simpleEggHold": "Maintenez…",
+  "simpleEggAlmost": "Presque là",
+  "simpleEggFire": "Feu !",
+  "simpleEggGreeting": "{provider} vous dit bonjour"
 }

@@ -440,5 +440,16 @@
   "slotMachineJackpot": "Jackpot!",
   "@slotMachineJackpot": {
     "description": "Slot machine banner after 777 and while the connection runs."
+  },
+  "simpleEggHold": "Hold on…",
+  "simpleEggAlmost": "Almost there",
+  "simpleEggFire": "Fire!",
+  "simpleEggGreeting": "{provider} says hi",
+  "@simpleEggGreeting": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   }
 }

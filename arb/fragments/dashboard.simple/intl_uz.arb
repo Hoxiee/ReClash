@@ -237,5 +237,9 @@
   "slotMachinePower": "Tugma o‘rniga slot-mashina",
   "slotMachineSpin": "Aylantirish",
   "slotMachineAlmost": "Sal qoldi!",
-  "slotMachineJackpot": "Jekpot!"
+  "slotMachineJackpot": "Jekpot!",
+  "simpleEggHold": "Bosib turing…",
+  "simpleEggAlmost": "Oz qoldi",
+  "simpleEggFire": "Olov!",
+  "simpleEggGreeting": "{provider} salom yo‘llaydi"
 }

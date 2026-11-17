@@ -237,5 +237,9 @@
   "slotMachinePower": "Барабан вместо кнопки",
   "slotMachineSpin": "Крутить",
   "slotMachineAlmost": "Почти!",
-  "slotMachineJackpot": "Джекпот!"
+  "slotMachineJackpot": "Джекпот!",
+  "simpleEggHold": "Держите…",
+  "simpleEggAlmost": "Ещё секунду",
+  "simpleEggFire": "Огонь!",
+  "simpleEggGreeting": "{provider} передаёт привет"
 }

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/dashboard/simple/egg.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/widgets/icon.dart';
@@ -17,6 +18,8 @@ Widget _app({
   PowerBadge? badge,
   VoidCallback? onPressed,
   bool enabled = true,
+  EggConfig egg = const EggConfig(),
+  ValueChanged<EggStage>? onEggStage,
 }) => TestApp(
   child: Scaffold(
     body: Center(
@@ -30,12 +33,123 @@ Widget _app({
         onPressed: enabled ? onPressed ?? () {} : null,
         look: (shape: shape, type: type),
         badge: badge,
+        egg: egg,
+        onEggStage: onEggStage,
       ),
     ),
   ),
 );
 
 void main() {
+  group('egg', () {
+    const hold = Duration(milliseconds: 600);
+    const config = EggConfig(hold: hold);
+
+    testWidgets('holding a running button fires without toggling', (
+      tester,
+    ) async {
+      var taps = 0;
+      final stages = <EggStage>[];
+      await tester.pumpWidget(
+        _app(
+          shape: ProviderPowerShape.cookie,
+          egg: config,
+          onPressed: () => taps++,
+          onEggStage: stages.add,
+        ),
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PowerButton)),
+      );
+      await tester.pump(eggPressDuration + const Duration(milliseconds: 50));
+      expect(stages, [EggStage.holding]);
+      await tester.pump();
+      await tester.pump(hold);
+      await tester.pump(hold);
+      expect(stages.last, EggStage.fired);
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(eggTextDuration);
+      expect(stages.last, EggStage.idle);
+      expect(taps, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('releasing early cancels without a burst', (tester) async {
+      final stages = <EggStage>[];
+      await tester.pumpWidget(
+        _app(
+          shape: ProviderPowerShape.cookie,
+          egg: config,
+          onEggStage: stages.add,
+        ),
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PowerButton)),
+      );
+      await tester.pump(eggPressDuration + const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 2));
+      expect(stages, [EggStage.holding, EggStage.idle]);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a long press does nothing while the tunnel is off', (
+      tester,
+    ) async {
+      var taps = 0;
+      final stages = <EggStage>[];
+      await tester.pumpWidget(
+        _app(
+          shape: ProviderPowerShape.cookie,
+          link: PowerLink.off,
+          egg: config,
+          onPressed: () => taps++,
+          onEggStage: stages.add,
+        ),
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PowerButton)),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 2));
+      expect(stages, isEmpty);
+      expect(taps, 1);
+    });
+
+    testWidgets('losing the connection mid-hold resets the egg', (
+      tester,
+    ) async {
+      final stages = <EggStage>[];
+      await tester.pumpWidget(
+        _app(
+          shape: ProviderPowerShape.cookie,
+          egg: config,
+          onEggStage: stages.add,
+        ),
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PowerButton)),
+      );
+      await tester.pump(eggPressDuration + const Duration(milliseconds: 50));
+      await tester.pumpWidget(
+        _app(
+          shape: ProviderPowerShape.cookie,
+          link: PowerLink.off,
+          egg: config,
+          onEggStage: stages.add,
+        ),
+      );
+      await tester.pump();
+      expect(stages.last, EggStage.idle);
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   for (final type in ProviderPowerType.values) {
     testWidgets('every $type shape renders each connection state', (
       tester,

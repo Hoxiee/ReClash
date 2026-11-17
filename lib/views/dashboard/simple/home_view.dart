@@ -268,6 +268,8 @@ class SimplePowerView extends StatelessWidget {
     required this.look,
     required this.status,
     this.slotMachine = false,
+    this.egg = const EggConfig(),
+    this.onEggStage,
   });
 
   /// The button grows with its room between these, the status always under
@@ -281,6 +283,8 @@ class SimplePowerView extends StatelessWidget {
   final ProviderPowerButton look;
   final Widget status;
   final bool slotMachine;
+  final EggConfig egg;
+  final ValueChanged<EggStage>? onEggStage;
 
   static double heightOf(double size) =>
       PowerButton.extentOf(size) + _statusHeight;
@@ -317,6 +321,8 @@ class SimplePowerView extends StatelessWidget {
                 tone: face.tone,
                 badge: powerBadge(face),
                 spin: face.state == PowerFaceState.recovering,
+                egg: egg,
+                onEggStage: onEggStage,
                 label: powerTapLabel(context, face),
                 onPressed: face.tap == null ? null : onPressed,
               ),
@@ -339,7 +345,11 @@ class PowerStatusView extends StatelessWidget {
     required this.pausedHint,
     required this.live,
     this.onFix,
+    this.egg,
   });
+
+  /// What an egg in progress says; its title replaces the face's.
+  final EggStatus? egg;
 
   final PowerFace face;
   final ProviderPowerLabel? custom;
@@ -357,7 +367,8 @@ class PowerStatusView extends StatelessWidget {
     final appLocalizations = AppLocalizations.of(context);
     final title = powerTitle(appLocalizations, face);
     final custom = this.custom;
-    final shownTitle = custom?.title ?? title;
+    final egg = this.egg;
+    final shownTitle = egg?.title ?? custom?.title ?? title;
     final fix = face.checking ? null : face.fix;
     final hint = custom?.hint ?? _hint(appLocalizations, face, pausedHint);
     Widget pill(PowerAction fix) => PowerPillView(
@@ -380,6 +391,14 @@ class PowerStatusView extends StatelessWidget {
       onPressed: onFix == null ? null : () => onFix!(fix),
     );
     final Widget? second = switch ((fix, face.secondFix)) {
+      _ when egg?.line != null => Text(
+        egg!.line!,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTextStyle.subheadline
+            .of(context, emphasized: true)
+            .copyWith(color: context.colorScheme.primary),
+      ),
       (final fix?, final secondFix?) => Row(
         mainAxisSize: MainAxisSize.min,
         spacing: 8,
@@ -408,8 +427,8 @@ class PowerStatusView extends StatelessWidget {
       spacing: 6,
       children: [
         Semantics(
-          label: custom == null ? null : '$title. ${custom.title}',
-          excludeSemantics: custom != null,
+          label: egg == null && custom == null ? null : '$title. $shownTitle',
+          excludeSemantics: egg != null || custom != null,
           child: Text(
             shownTitle,
             textAlign: TextAlign.center,

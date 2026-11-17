@@ -237,5 +237,9 @@
   "slotMachinePower": "버튼 대신 슬롯머신",
   "slotMachineSpin": "돌리기",
   "slotMachineAlmost": "아깝다!",
-  "slotMachineJackpot": "잭팟!"
+  "slotMachineJackpot": "잭팟!",
+  "simpleEggHold": "계속 누르세요…",
+  "simpleEggAlmost": "거의 다 됐어요",
+  "simpleEggFire": "불꽃!",
+  "simpleEggGreeting": "{provider}의 인사입니다"
 }

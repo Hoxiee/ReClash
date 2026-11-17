@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/views/doctor/doctor.dart';
 import 'package:reclash/widgets/icon.dart';
 
+import 'egg.dart';
 import 'home_view.dart';
 import 'location_card.dart';
 import 'power_account_sheet.dart';
@@ -155,7 +156,10 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
   /// How long a fix that leaves the app keeps the start it was asked for.
   static const _startIntentFor = Duration(minutes: 10);
 
+  static const _egg = EggConfig();
+
   DateTime? _startWhenClear;
+  var _eggStage = EggStage.idle;
 
   @override
   void initState() {
@@ -266,7 +270,14 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
           images: const AppProviderImages(),
           look: look,
           slotMachine: slotMachine,
-          status: _StatusText(face: face, onFix: act),
+          egg: _egg,
+          onEggStage: (stage) => setState(() => _eggStage = stage),
+          status: _StatusText(
+            face: face,
+            onFix: act,
+            egg: _egg,
+            eggStage: _eggStage,
+          ),
         );
       },
     );
@@ -274,21 +285,50 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
 }
 
 class _StatusText extends ConsumerWidget {
-  const _StatusText({required this.face, required this.onFix});
+  const _StatusText({
+    required this.face,
+    required this.onFix,
+    required this.egg,
+    required this.eggStage,
+  });
 
   final PowerFace face;
   final ValueChanged<PowerAction> onFix;
+  final EggConfig egg;
+  final EggStage eggStage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => PowerStatusView(
     face: face,
     custom: _customLabel(ref),
+    egg: _eggStatus(context, ref),
     pausedHint: face.link == PowerLink.paused
         ? _pausedHint(context, ref)
         : null,
     live: const _LiveLine(),
     onFix: onFix,
   );
+
+  EggStatus? _eggStatus(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    return switch (eggStage) {
+      EggStage.idle => null,
+      EggStage.holding => EggStatus(egg.holdText ?? l.simpleEggHold),
+      EggStage.almost => EggStatus(egg.almostText ?? l.simpleEggAlmost),
+      EggStage.fired => EggStatus(
+        egg.fireText ?? l.simpleEggFire,
+        egg.greeting ??
+            switch (ref.watch(
+              currentProfileProvider.select(
+                (profile) => profile?.subscriptionSnapshot?.metadata.name,
+              ),
+            )) {
+              final name? when name.isNotEmpty => l.simpleEggGreeting(name),
+              _ => null,
+            },
+      ),
+    };
+  }
 
   String _pausedHint(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;

@@ -237,5 +237,9 @@
   "slotMachinePower": "Tragaperras en lugar del botón",
   "slotMachineSpin": "Girar",
   "slotMachineAlmost": "¡Casi!",
-  "slotMachineJackpot": "¡Premio!"
+  "slotMachineJackpot": "¡Premio!",
+  "simpleEggHold": "Mantén…",
+  "simpleEggAlmost": "Casi listo",
+  "simpleEggFire": "¡Fuego!",
+  "simpleEggGreeting": "{provider} te saluda"
 }

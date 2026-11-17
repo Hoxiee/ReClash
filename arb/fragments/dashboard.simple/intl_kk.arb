@@ -237,5 +237,9 @@
   "slotMachinePower": "Түйменің орнына слот-машина",
   "slotMachineSpin": "Айналдыру",
   "slotMachineAlmost": "Сәл ғана!",
-  "slotMachineJackpot": "Джекпот!"
+  "slotMachineJackpot": "Джекпот!",
+  "simpleEggHold": "Ұстап тұрыңыз…",
+  "simpleEggAlmost": "Азырақ қалды",
+  "simpleEggFire": "Жалын!",
+  "simpleEggGreeting": "{provider} сәлем айтады"
 }
