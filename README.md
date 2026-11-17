@@ -42,6 +42,10 @@ Simple to use, open source and ad-free.
   provider announcements, routing profiles and settings the provider offers and you approve. Clash, INCY and Happ
   links, plain proxy URIs and several config formats import directly. See
   [provider integration](docs/en/providers/README.md).
+- **The provider's look.** A subscription can bring its logo, accent color, wallpaper, connect button and status
+  labels, so the client looks like the provider's own app.
+- **Favorites and chains.** Starred servers sit at the top of a group, and a chain routes traffic through a domestic
+  entry to a foreign exit as one more server in the list.
 - **Service checks.** See whether Google, YouTube, ChatGPT, Netflix and other services open through the current route,
   with their latency.
 - **On-demand networks.** Pause the proxy on networks you trust and resume it everywhere else; ports stay open during a
@@ -61,7 +65,7 @@ Simple to use, open source and ad-free.
   <tr>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Simple dashboard on a phone" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on a phone" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Proxy groups with latency on a phone" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Favorites, chains and servers with latency on a phone" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="Dashboard customized by a provider on a phone" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
   </tr>
 </table>
@@ -69,7 +73,7 @@ Simple to use, open source and ad-free.
 <table>
   <tr>
     <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="Simple dashboard on the desktop" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Profiles on the desktop" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on the desktop" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
   </tr>
   <tr>
     <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="Dashboard customized by a provider on the desktop" src="snapshots/screens/desktop-branded-light.webp"></picture></td>

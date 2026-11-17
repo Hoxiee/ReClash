@@ -39,6 +39,8 @@
 - **读懂服务商的订阅。** 从 `Subscription-Userinfo` 读取流量与到期时间，支持配置标题、服务商公告，
   以及服务商提供、经你同意才生效的路由配置与设置。Clash、INCY、Happ 链接、普通代理 URI
   和多种配置格式都能直接导入。详见[服务商支持](docs/zh-CN/PROVIDER_FEATURES.md)。
+- **服务商的外观。** 订阅可以带来服务商的标志、主题色、壁纸、连接按钮和状态文字，让客户端看起来就像服务商自己的应用。
+- **收藏与链式代理。** 收藏的服务器排在代理组顶部；链式代理让流量经国内入口转到海外出口，并作为列表中的一个服务器出现。
 - **服务检测。** 查看 Google、YouTube、ChatGPT、Netflix 等服务能否通过当前线路打开，以及各自的延迟。
 - **按需连接。** 在信任的网络中暂停代理，在其他网络中自动恢复；暂停期间端口保持开放。
 - **mihomo（Clash Meta）内核**，支持规则分流、代理组、延迟测试、系统代理与 TUN 模式。
@@ -55,7 +57,7 @@
   <tr>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上带延迟的代理组" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上的收藏、链式代理与带延迟的服务器" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
   </tr>
 </table>
@@ -63,7 +65,7 @@
 <table>
   <tr>
     <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="桌面端的简洁仪表盘" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端的配置列表" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端显示流量与到期时间的订阅" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
   </tr>
   <tr>
     <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-light.webp"></picture></td>

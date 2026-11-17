@@ -42,6 +42,10 @@
   объявления провайдера, профили маршрутизации и настройки, которые провайдер предлагает, а вы одобряете. Ссылки
   Clash, INCY и Happ, обычные прокси-URI и несколько форматов конфигурации импортируются напрямую. См.
   [интеграцию провайдера](docs/ru/providers/README.md).
+- **Оформление провайдера.** Подписка может принести логотип, акцентный цвет, обои, кнопку подключения и подписи
+  статуса, и клиент выглядит как собственное приложение провайдера.
+- **Избранное и цепочки.** Отмеченные серверы стоят наверху группы, а цепочка ведёт трафик через вход внутри страны
+  к зарубежному выходу и выглядит как ещё один сервер в списке.
 - **Проверка сервисов.** Видно, открываются ли Google, YouTube, ChatGPT, Netflix и другие сервисы через текущий
   маршрут, и с какой задержкой.
 - **Сети по требованию.** Прокси можно ставить на паузу в доверенных сетях и возобновлять в остальных; во время
@@ -63,7 +67,7 @@
   <tr>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Простая панель на телефоне" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Подписки с трафиком и сроком на телефоне" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Группы прокси с задержками на телефоне" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
+    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Избранное, цепочки и серверы с задержками на телефоне" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
     <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="Панель с оформлением провайдера на телефоне" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
   </tr>
 </table>
@@ -71,7 +75,7 @@
 <table>
   <tr>
     <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="Простая панель на десктопе" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Профили на десктопе" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Подписки с трафиком и сроком на десктопе" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
   </tr>
   <tr>
     <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="Панель с оформлением провайдера на десктопе" src="snapshots/screens/desktop-branded-light.webp"></picture></td>
