@@ -7,13 +7,13 @@ Every header, alias and limit is in the [Standard registry](standard.md). Everyt
 ## Parsing
 
 - Header names are case-insensitive.
-- A field is read from its canonical header. An alias is read only when the canonical header is absent and the manifest does not set the field, so an invalid canonical value never falls back to the alias.
+- A field is read from its standard header, then from its [aliases from other clients](#headers-from-other-clients). The first valid value wins; the manifest overrides both.
 - A field sent more than once is ignored: `Duplicate singleton`.
 - An invalid value is dropped: `Invalid provider field`. The rest of the response applies.
 - A header value over 8 KiB, or over 64 KiB of headers in total, fails the fetch.
 - A field missing from the response is withdrawn, except usage fields, which go stale ([Metadata lifetime](README.md#metadata-lifetime)).
 - An empty `text` value is valid and replaces the stored value. `url`, `integer` and `boolean` fields cannot be cleared.
-- Metadata is read from headers only. A body carries no metadata. A `reclash-*` header other than `reclash-config` is ignored with an `Unsupported provider field` warning in the Subscription inspector.
+- Metadata is read from headers only. A body carries no metadata. A `reclash-*` header other than `reclash-config` and `reclash-aliases` is ignored with an `Unsupported provider field` warning in the Subscription inspector.
 
 ## Value formats
 
@@ -63,6 +63,37 @@ Four standard headers fill a [manifest `provider`](manifest.md#provider) field w
 | `profile-web-page-url` | `provider.web-url` | url |
 | `announce` | `provider.announce` | text, multiline, 1024 B |
 | `hide-url` | `provider.hide-url` | boolean |
+
+## Headers from other clients
+
+Headers that other VPN clients already send are read as aliases of existing fields, so a provider need not add ReClash-specific headers.
+
+- A field is read from its standard header first, then from its aliases in the order listed below. The first valid value wins; an invalid one is dropped with a warning and the next is tried.
+- A hosted manifest ([`reclash-config`](manifest.md)) overrides both.
+- A response with a manifest pointer is the manifest's alone: aliases are off unless it also sends `reclash-aliases: 1`. A pointer the client cannot use (a non-`https` response) does not count.
+- Without a manifest pointer aliases are on; `reclash-aliases: 0` turns them off. A value other than `1`, `true`, `yes`, `0`, `false` or `no` turns them off in either case, with an `Invalid provider field` warning.
+- Host aliases (`transport.*`) are read only from an `https` response.
+- Aliases carry display and transport hints only. Settings, apps, routing and policy are never read from them; headers such as `flclashx-view`, `flclashx-widgets`, `flclashx-settings`, `flclashx-special`, Happ routing and per-app headers are ignored.
+- `profile-update-interval` needs no conversion: it is in hours in every client checked, as in ReClash.
+- A provider that moves to the manifest can keep sending these headers for other clients.
+
+| Alias header | Client | ReClash field | Notes |
+| --- | --- | --- | --- |
+| `flclashx-servicename` | FlClashX | `provider.name` | Text; `base64:` prefix allowed. |
+| `isp-name` | Karing | `provider.name` | Percent-encoded text. |
+| `flclashx-servicelogo` | FlClashX | `provider.logo` | Same as the standard header. |
+| `profile-logo` | Koala Clash | `provider.logo` | Same as the standard header. |
+| `homepage` | Incy | `provider.web-url` | Same as the standard header. |
+| `isp-url` | Karing | `provider.web-url` | Same as the standard header. |
+| `flclashx-buyplan` | FlClashX | `provider.renew.url` | `<url>[,<n>]`; `n` goes to `provider.renew.days`. |
+| `sub-expire-button-link` | Happ | `provider.renew.url` | Same as the standard header. |
+| `flclashx-buytraffic` | FlClashX | `provider.top-up.url` | `<url>[,<n>]`; `n` goes to `provider.top-up.percent`. |
+| `announce-url` | Incy, v2RayTun | `provider.announce.url` | Same as the standard header. |
+| `subscription-name` | Incy | profile name (no manifest path) | Fills the profile name like `profile-title`; text, `base64:` prefix allowed. |
+| `flclashx-newdomain` | FlClashX | `transport.fallback-hosts` | Host list, at most 5. |
+| `new-domain` | Happ | `transport.new-domain` | Host list, at most 1. |
+
+Formats: `plain` values follow the [value formats](#value-formats) of the standard header; `urlWithNumber` drops an invalid `n` with a warning and keeps the URL; `hostList` accepts a comma-separated list of `host`, `host:port` or `scheme://host[:port]/...`, reduced to `host[:port]`, deduplicated and limited.
 
 ## Manifest pointer
 

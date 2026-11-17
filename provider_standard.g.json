@@ -13,6 +13,18 @@
       "type": "text",
       "encoding": "string-or-locale-map",
       "limit": 160,
+      "aliasHeaders": [
+        {
+          "name": "flclashx-servicename",
+          "client": "FlClashX",
+          "format": "plain"
+        },
+        {
+          "name": "isp-name",
+          "client": "Karing",
+          "format": "percentEncoded"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -24,6 +36,18 @@
       "type": "url",
       "encoding": "url",
       "limit": 1024,
+      "aliasHeaders": [
+        {
+          "name": "flclashx-servicelogo",
+          "client": "FlClashX",
+          "format": "plain"
+        },
+        {
+          "name": "profile-logo",
+          "client": "Koala Clash",
+          "format": "plain"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -59,6 +83,18 @@
       "encoding": "url",
       "limit": 1024,
       "fallbackHeader": "profile-web-page-url",
+      "aliasHeaders": [
+        {
+          "name": "homepage",
+          "client": "Incy",
+          "format": "plain"
+        },
+        {
+          "name": "isp-url",
+          "client": "Karing",
+          "format": "plain"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -75,6 +111,18 @@
         "minimum": 1,
         "maximum": 3650
       },
+      "aliasHeaders": [
+        {
+          "name": "flclashx-buyplan",
+          "client": "FlClashX",
+          "format": "urlWithNumber"
+        },
+        {
+          "name": "sub-expire-button-link",
+          "client": "Happ",
+          "format": "plain"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -91,6 +139,13 @@
         "minimum": 1,
         "maximum": 100
       },
+      "aliasHeaders": [
+        {
+          "name": "flclashx-buytraffic",
+          "client": "FlClashX",
+          "format": "urlWithNumber"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -114,6 +169,13 @@
       "type": "url",
       "encoding": "url",
       "limit": 1024,
+      "aliasHeaders": [
+        {
+          "name": "announce-url",
+          "client": "Incy, v2RayTun",
+          "format": "plain"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "withdraw",
@@ -231,6 +293,13 @@
       "type": "hosts",
       "encoding": "list-of-authorities",
       "limit": 5,
+      "aliasHeaders": [
+        {
+          "name": "flclashx-newdomain",
+          "client": "FlClashX",
+          "format": "hostList"
+        }
+      ],
       "trust": "hint",
       "introduced": 1,
       "absence": "withdraw",
@@ -242,6 +311,13 @@
       "type": "hosts",
       "encoding": "list-of-authorities",
       "limit": 1,
+      "aliasHeaders": [
+        {
+          "name": "new-domain",
+          "client": "Happ",
+          "format": "hostList"
+        }
+      ],
       "trust": "hint",
       "introduced": 1,
       "absence": "withdraw",
@@ -306,6 +382,19 @@
     }
   ],
   "headers": [
+    {
+      "name": "reclash-aliases",
+      "direction": "response",
+      "encoding": "boolean",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response"
+      ],
+      "available": true
+    },
     {
       "name": "x-hwid",
       "direction": "request",
@@ -476,6 +565,62 @@
       "available": true
     },
     {
+      "name": "flclashx-servicename",
+      "direction": "response",
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.name"
+      ],
+      "available": true
+    },
+    {
+      "name": "isp-name",
+      "direction": "response",
+      "encoding": "percent-encoded-text",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.name"
+      ],
+      "available": true
+    },
+    {
+      "name": "flclashx-servicelogo",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.logo"
+      ],
+      "available": true
+    },
+    {
+      "name": "profile-logo",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.logo"
+      ],
+      "available": true
+    },
+    {
       "name": "support-url",
       "direction": "response",
       "encoding": "url",
@@ -504,6 +649,76 @@
       "available": true
     },
     {
+      "name": "homepage",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.web-url"
+      ],
+      "available": true
+    },
+    {
+      "name": "isp-url",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.web-url"
+      ],
+      "available": true
+    },
+    {
+      "name": "flclashx-buyplan",
+      "direction": "response",
+      "encoding": "url-with-optional-number",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.renew.url"
+      ],
+      "available": true
+    },
+    {
+      "name": "sub-expire-button-link",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.renew.url"
+      ],
+      "available": true
+    },
+    {
+      "name": "flclashx-buytraffic",
+      "direction": "response",
+      "encoding": "url-with-optional-number",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.top-up.url"
+      ],
+      "available": true
+    },
+    {
       "name": "announce",
       "direction": "response",
       "encoding": "text-or-base64-prefixed",
@@ -518,6 +733,20 @@
       "available": true
     },
     {
+      "name": "announce-url",
+      "direction": "response",
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:provider.announce.url"
+      ],
+      "available": true
+    },
+    {
       "name": "profile-title",
       "direction": "response",
       "encoding": "text-or-base64-prefixed",
@@ -527,6 +756,20 @@
       "introduced": 1,
       "context": [
         "http-response"
+      ],
+      "available": true
+    },
+    {
+      "name": "subscription-name",
+      "direction": "response",
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "http-response",
+        "alias:account.title"
       ],
       "available": true
     },
@@ -567,6 +810,34 @@
       "introduced": 1,
       "context": [
         "https-response"
+      ],
+      "available": true
+    },
+    {
+      "name": "flclashx-newdomain",
+      "direction": "response",
+      "encoding": "host-list",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "https-response",
+        "alias:transport.fallback-hosts"
+      ],
+      "available": true
+    },
+    {
+      "name": "new-domain",
+      "direction": "response",
+      "encoding": "host-list",
+      "multiplicity": "singleton",
+      "limitBytes": 8192,
+      "sensitive": false,
+      "introduced": 1,
+      "context": [
+        "https-response",
+        "alias:transport.new-domain"
       ],
       "available": true
     }

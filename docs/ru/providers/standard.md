@@ -17,15 +17,15 @@
 
 | Путь | Тип | Лимит | Доверие | Получатель | Примечания |
 | --- | --- | ---: | --- | --- | --- |
-| `provider.name` | text | 160 | display | panel |  |
-| `provider.logo` | url | 1024 | display | panel |  |
+| `provider.name` | text | 160 | display | panel | заголовки-синонимы `flclashx-servicename` (FlClashX), `isp-name` (Karing) |
+| `provider.logo` | url | 1024 | display | panel | заголовки-синонимы `flclashx-servicelogo` (FlClashX), `profile-logo` (Koala Clash) |
 | `provider.logo-dark` | url | 1024 | display | panel |  |
 | `provider.support-url` | url | 1024 | display | panel | резервный заголовок `support-url` |
-| `provider.web-url` | url | 1024 | display | panel | резервный заголовок `profile-web-page-url` |
-| `provider.renew.url` | url | 1024 | display | panel | `provider.renew.days` от 1 до 3650 |
-| `provider.top-up.url` | url | 1024 | display | panel | `provider.top-up.percent` от 1 до 100 |
+| `provider.web-url` | url | 1024 | display | panel | резервный заголовок `profile-web-page-url`; заголовки-синонимы `homepage` (Incy), `isp-url` (Karing) |
+| `provider.renew.url` | url | 1024 | display | panel | заголовки-синонимы `flclashx-buyplan` (FlClashX), `sub-expire-button-link` (Happ); `provider.renew.days` от 1 до 3650 |
+| `provider.top-up.url` | url | 1024 | display | panel | заголовки-синонимы `flclashx-buytraffic` (FlClashX); `provider.top-up.percent` от 1 до 100 |
 | `provider.announce.text` | text | 1024 | display | panel | резервный заголовок `announce` |
-| `provider.announce.url` | url | 1024 | display | panel |  |
+| `provider.announce.url` | url | 1024 | display | panel | заголовки-синонимы `announce-url` (Incy, v2RayTun) |
 | `provider.notice.text` | text | 1024 | display | panel |  |
 | `provider.notice.url` | url | 1024 | display | panel |  |
 | `provider.type` | text | 32 | display | panel |  |
@@ -35,8 +35,8 @@
 | `reminders.traffic-percent` | numbers | 8 | hint | reminder |  |
 | `settings` | flags | 16 | hint | settings |  |
 | `policy` | policy | 16 | hint | settings |  |
-| `transport.fallback-hosts` | hosts | 5 | hint | transport |  |
-| `transport.new-domain` | hosts | 1 | hint | transport |  |
+| `transport.fallback-hosts` | hosts | 5 | hint | transport | заголовки-синонимы `flclashx-newdomain` (FlClashX) |
+| `transport.new-domain` | hosts | 1 | hint | transport | заголовки-синонимы `new-domain` (Happ) |
 | `apps.exclude` | packages | 512 | hint | apps |  |
 | `apps.include` | packages | 512 | hint | apps |  |
 | `apps.routing` | tokens | 1 | hint | apps |  |
@@ -47,6 +47,7 @@
 
 | Заголовок | Направление | Кодирование | Конфиденциальный |
 | --- | --- | --- | --- |
+| `reclash-aliases` | ответ | boolean | нет |
 | `x-hwid` | запрос | lowercase-hex-32 | да |
 | `x-device-os` | запрос | ascii | да |
 | `x-ver-os` | запрос | ascii | да |
@@ -60,10 +61,23 @@
 | `x-client` | запрос | ascii | нет |
 | `x-app-version` | запрос | ascii | нет |
 | `x-device-locale` | запрос | ascii | да |
+| `flclashx-servicename` | ответ | text-or-base64-prefixed | нет |
+| `isp-name` | ответ | percent-encoded-text | нет |
+| `flclashx-servicelogo` | ответ | url | нет |
+| `profile-logo` | ответ | url | нет |
 | `support-url` | ответ | url | нет |
 | `profile-web-page-url` | ответ | url | нет |
+| `homepage` | ответ | url | нет |
+| `isp-url` | ответ | url | нет |
+| `flclashx-buyplan` | ответ | url-with-optional-number | нет |
+| `sub-expire-button-link` | ответ | url | нет |
+| `flclashx-buytraffic` | ответ | url-with-optional-number | нет |
 | `announce` | ответ | text-or-base64-prefixed | нет |
+| `announce-url` | ответ | url | нет |
 | `profile-title` | ответ | text-or-base64-prefixed | нет |
+| `subscription-name` | ответ | text-or-base64-prefixed | нет |
 | `profile-update-interval` | ответ | decimal | нет |
 | `hide-url` | ответ | boolean | нет |
 | `reclash-config` | ответ | url | нет |
+| `flclashx-newdomain` | ответ | host-list | нет |
+| `new-domain` | ответ | host-list | нет |

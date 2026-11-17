@@ -108,51 +108,154 @@ SubscriptionMetadata _decodeFields(
   required bool secure,
 }) {
   final fields = <String, Object?>{};
+  final aliases = _aliasesEnabled(
+    headers,
+    warnings,
+    manifest: secure && headers.containsKey('reclash-config'),
+  );
   for (final field in subscriptionFields) {
-    final name = field.header;
-    if (name == null) continue;
-    final values = headers[name];
-    if (values == null) continue;
-    if (field.secure && !secure) {
-      _warning(warnings, 'Provider field needs an HTTPS response: $name');
-      continue;
+    final sources = [
+      if (field.header case final header?)
+        (header, SubscriptionAliasFormat.plain),
+      if (aliases)
+        for (final alias in field.aliases) (alias.name, alias.format),
+    ];
+    for (final (name, format) in sources) {
+      final values = headers[name];
+      if (values == null) continue;
+      if ((field.secure || field.type == SubscriptionFieldType.hosts) &&
+          !secure) {
+        _warning(warnings, 'Provider field needs an HTTPS response: $name');
+        continue;
+      }
+      if (values.length != 1) {
+        _warning(warnings, 'Duplicate singleton: $name');
+        continue;
+      }
+      final decoded = _decodeHeader(field, format, values.single.trim());
+      if (decoded == null) {
+        _warning(warnings, 'Invalid provider field: $name');
+        continue;
+      }
+      fields[field.path] = decoded.value;
+      if (field.suffix case final suffix?) {
+        if (decoded.count case final count?) {
+          fields[suffix.path] = count;
+        } else if (decoded.countInvalid) {
+          _warning(warnings, 'Invalid provider field: $name');
+        }
+      }
+      break;
     }
-    if (values.length != 1) {
-      _warning(warnings, 'Duplicate singleton: $name');
-      continue;
-    }
-    final raw = values.single.trim();
-    Object? value;
-    try {
-      value = switch (field.type) {
-        SubscriptionFieldType.text => _decodeText(raw),
-        SubscriptionFieldType.url => raw,
-        SubscriptionFieldType.integer => switch (int.tryParse(raw)) {
-          final count? => count * field.headerScale,
-          null => null,
-        },
-        SubscriptionFieldType.boolean => switch (raw.toLowerCase()) {
-          '1' || 'true' || 'yes' => true,
-          '0' || 'false' || 'no' => false,
-          _ => null,
-        },
-        _ => null,
-      };
-    } on FormatException {
-      value = null;
-    }
-    if (value == null || !validSubscriptionField(field, value)) {
-      _warning(warnings, 'Invalid provider field: $name');
-      continue;
-    }
-    fields[field.path] = value;
   }
   for (final key in headers.keys) {
-    if (key.startsWith('reclash-') && key != 'reclash-config') {
+    if (key.startsWith('reclash-') &&
+        key != 'reclash-config' &&
+        key != subscriptionAliasSwitchHeader) {
       _warning(warnings, 'Unsupported provider field: $key');
     }
   }
   return SubscriptionMetadata(Map.unmodifiable(fields));
+}
+
+/// Aliases apply by default only without a manifest pointer; a present switch
+/// that is not explicitly true turns them off.
+bool _aliasesEnabled(
+  Map<String, List<String>> headers,
+  List<String> warnings, {
+  required bool manifest,
+}) {
+  final values = headers[subscriptionAliasSwitchHeader];
+  if (values == null) return !manifest;
+  final value = values.length == 1 ? values.single.trim().toLowerCase() : '';
+  if (const {'1', 'true', 'yes'}.contains(value)) return true;
+  if (!const {'0', 'false', 'no'}.contains(value)) {
+    _warning(
+      warnings,
+      'Invalid provider field: $subscriptionAliasSwitchHeader',
+    );
+  }
+  return false;
+}
+
+typedef _Decoded = ({Object value, int? count, bool countInvalid});
+
+/// The valid value [raw] holds for [field] in [format], or null.
+_Decoded? _decodeHeader(
+  SubscriptionField field,
+  SubscriptionAliasFormat format,
+  String raw,
+) {
+  Object? value;
+  int? count;
+  var countInvalid = false;
+  try {
+    switch (format) {
+      case SubscriptionAliasFormat.plain:
+        value = _decodeStandard(field, raw);
+      case SubscriptionAliasFormat.percentEncoded:
+        value = _decodeText(Uri.decodeComponent(raw));
+      case SubscriptionAliasFormat.urlWithNumber:
+        final comma = raw.lastIndexOf(',');
+        value = comma == -1 ? raw : raw.substring(0, comma).trim();
+        if (comma != -1) {
+          final number = int.tryParse(raw.substring(comma + 1).trim());
+          final suffix = field.suffix;
+          if (number != null &&
+              suffix != null &&
+              number >= suffix.minimum &&
+              number <= suffix.maximum) {
+            count = number;
+          } else {
+            countInvalid = true;
+          }
+        }
+      case SubscriptionAliasFormat.hostList:
+        final hosts = _decodeHosts(raw).take(field.limit).toList();
+        value = hosts.isEmpty ? null : hosts;
+    }
+  } on FormatException {
+    return null;
+  } on ArgumentError {
+    return null;
+  }
+  if (value == null || !validSubscriptionField(field, value)) return null;
+  return (value: value, count: count, countInvalid: countInvalid);
+}
+
+Object? _decodeStandard(SubscriptionField field, String raw) =>
+    switch (field.type) {
+      SubscriptionFieldType.text => _decodeText(raw),
+      SubscriptionFieldType.url => raw,
+      SubscriptionFieldType.integer => switch (int.tryParse(raw)) {
+        final count? => count * field.headerScale,
+        null => null,
+      },
+      SubscriptionFieldType.boolean => switch (raw.toLowerCase()) {
+        '1' || 'true' || 'yes' => true,
+        '0' || 'false' || 'no' => false,
+        _ => null,
+      },
+      _ => null,
+    };
+
+/// Each entry of a comma-separated list reduced to `host[:port]`; invalid
+/// entries and repeats are dropped.
+Iterable<String> _decodeHosts(String raw) {
+  final seen = <String>{};
+  for (final entry in raw.split(',')) {
+    var item = entry.trim();
+    if (item.contains('://')) {
+      final uri = Uri.tryParse(item);
+      if (uri == null || uri.host.isEmpty) continue;
+      item = uri.hasPort ? '${uri.host}:${uri.port}' : uri.host;
+    } else {
+      final slash = item.indexOf('/');
+      if (slash != -1) item = item.substring(0, slash);
+    }
+    if (subscriptionAuthority(item) case final authority?) seen.add(authority);
+  }
+  return seen;
 }
 
 String _decodeText(String value) {

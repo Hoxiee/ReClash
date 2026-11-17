@@ -39,23 +39,44 @@ void main(List<String> arguments) {
 /// The device headers, then every standard header that supplies a field.
 List<SubscriptionHeader> _headers() => [
   ...subscriptionHeaders,
-  for (final field in subscriptionFields)
+  for (final field in subscriptionFields) ...[
     if (field.header case final header?)
       SubscriptionHeader(
         header,
         'response',
-        switch (field.type) {
-          SubscriptionFieldType.integer => 'decimal',
-          SubscriptionFieldType.boolean => 'boolean',
-          SubscriptionFieldType.url => 'url',
-          _ => 'text-or-base64-prefixed',
-        },
+        _encoding(field, SubscriptionAliasFormat.plain),
         context: [
           field.secure ? 'https-response' : 'http-response',
           if (field.manifest != null) 'fallback:${field.manifest}',
         ],
       ),
+    for (final alias in field.aliases)
+      SubscriptionHeader(
+        alias.name,
+        'response',
+        _encoding(field, alias.format),
+        context: [
+          field.secure || field.type == SubscriptionFieldType.hosts
+              ? 'https-response'
+              : 'http-response',
+          'alias:${field.manifest ?? field.path}',
+        ],
+      ),
+  ],
 ];
+
+String _encoding(SubscriptionField field, SubscriptionAliasFormat format) =>
+    switch (format) {
+      SubscriptionAliasFormat.percentEncoded => 'percent-encoded-text',
+      SubscriptionAliasFormat.urlWithNumber => 'url-with-optional-number',
+      SubscriptionAliasFormat.hostList => 'host-list',
+      SubscriptionAliasFormat.plain => switch (field.type) {
+        SubscriptionFieldType.integer => 'decimal',
+        SubscriptionFieldType.boolean => 'boolean',
+        SubscriptionFieldType.url => 'url',
+        _ => 'text-or-base64-prefixed',
+      },
+    };
 
 String _markdown() {
   final out = StringBuffer()
@@ -92,6 +113,8 @@ String _markdown() {
     if (manifest == null) continue;
     final notes = [
       if (field.header case final header?) 'fallback header `$header`',
+      if (field.aliases.isNotEmpty)
+        'alias headers ${field.aliases.map((a) => '`${a.name}` (${a.client})').join(', ')}',
       if (field.suffix case final suffix?)
         '`${suffix.manifest}` ${suffix.minimum}-${suffix.maximum}',
       if (field.secure) 'https only',

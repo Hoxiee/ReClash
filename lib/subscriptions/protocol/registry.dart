@@ -1,4 +1,8 @@
 const subscriptionStandardVersion = 1;
+
+/// A response header that, unless true, stops [SubscriptionField.aliases] from
+/// being read.
+const subscriptionAliasSwitchHeader = 'reclash-aliases';
 const subscriptionHeaderLimit = 8 * 1024;
 const subscriptionHeadersLimit = 64 * 1024;
 const subscriptionWireLimit = 16 * 1024 * 1024;
@@ -39,6 +43,28 @@ class SubscriptionSuffix {
   final int maximum;
 }
 
+enum SubscriptionAliasFormat { plain, percentEncoded, urlWithNumber, hostList }
+
+/// A response header of another VPN client that supplies a field when the
+/// field's standard header is absent or invalid.
+class SubscriptionHeaderAlias {
+  const SubscriptionHeaderAlias(
+    this.name,
+    this.client, {
+    this.format = SubscriptionAliasFormat.plain,
+  });
+
+  final String name;
+  final String client;
+  final SubscriptionAliasFormat format;
+
+  Map<String, Object?> toJson() => {
+    'name': name,
+    'client': client,
+    'format': format.name,
+  };
+}
+
 /// A value the snapshot keeps under [path]. The manifest names it at
 /// [manifest]; [header] is the standard response header that supplies it when
 /// the manifest does not (or, with no [manifest], the only source).
@@ -57,6 +83,7 @@ class SubscriptionField {
     this.suffix,
     this.multiline = false,
     this.secure = false,
+    this.aliases = const [],
     required this.consumer,
   });
 
@@ -77,6 +104,7 @@ class SubscriptionField {
 
   /// An `https` URL only.
   final bool secure;
+  final List<SubscriptionHeaderAlias> aliases;
   final String consumer;
 
   Map<String, Object?> toJson() => {
@@ -110,6 +138,8 @@ class SubscriptionField {
       },
     if (secure) 'https': true,
     if (header != null) 'fallbackHeader': header,
+    if (aliases.isNotEmpty)
+      'aliasHeaders': [for (final alias in aliases) alias.toJson()],
     'trust': trust.name,
     'introduced': 1,
     'absence': 'withdraw',
@@ -124,12 +154,24 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.text,
     manifest: 'provider.name',
     limit: 160,
+    aliases: [
+      SubscriptionHeaderAlias('flclashx-servicename', 'FlClashX'),
+      SubscriptionHeaderAlias(
+        'isp-name',
+        'Karing',
+        format: SubscriptionAliasFormat.percentEncoded,
+      ),
+    ],
     consumer: 'panel',
   ),
   SubscriptionField(
     'provider.logo',
     SubscriptionFieldType.url,
     manifest: 'provider.logo',
+    aliases: [
+      SubscriptionHeaderAlias('flclashx-servicelogo', 'FlClashX'),
+      SubscriptionHeaderAlias('profile-logo', 'Koala Clash'),
+    ],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -150,6 +192,10 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.url,
     manifest: 'provider.web-url',
     header: 'profile-web-page-url',
+    aliases: [
+      SubscriptionHeaderAlias('homepage', 'Incy'),
+      SubscriptionHeaderAlias('isp-url', 'Karing'),
+    ],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -161,6 +207,14 @@ const subscriptionFields = <SubscriptionField>[
       'provider.renew.days',
       maximum: 3650,
     ),
+    aliases: [
+      SubscriptionHeaderAlias(
+        'flclashx-buyplan',
+        'FlClashX',
+        format: SubscriptionAliasFormat.urlWithNumber,
+      ),
+      SubscriptionHeaderAlias('sub-expire-button-link', 'Happ'),
+    ],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -171,6 +225,13 @@ const subscriptionFields = <SubscriptionField>[
       'provider.buyTrafficPercent',
       'provider.top-up.percent',
     ),
+    aliases: [
+      SubscriptionHeaderAlias(
+        'flclashx-buytraffic',
+        'FlClashX',
+        format: SubscriptionAliasFormat.urlWithNumber,
+      ),
+    ],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -185,6 +246,7 @@ const subscriptionFields = <SubscriptionField>[
     'provider.announceUrl',
     SubscriptionFieldType.url,
     manifest: 'provider.announce.url',
+    aliases: [SubscriptionHeaderAlias('announce-url', 'Incy, v2RayTun')],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -212,6 +274,7 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.text,
     header: 'profile-title',
     limit: 160,
+    aliases: [SubscriptionHeaderAlias('subscription-name', 'Incy')],
     consumer: 'panel',
   ),
   SubscriptionField(
@@ -289,6 +352,13 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.hosts,
     manifest: 'transport.fallback-hosts',
     limit: 5,
+    aliases: [
+      SubscriptionHeaderAlias(
+        'flclashx-newdomain',
+        'FlClashX',
+        format: SubscriptionAliasFormat.hostList,
+      ),
+    ],
     trust: SubscriptionTrust.hint,
     consumer: 'transport',
   ),
@@ -297,6 +367,13 @@ const subscriptionFields = <SubscriptionField>[
     SubscriptionFieldType.hosts,
     manifest: 'transport.new-domain',
     limit: 1,
+    aliases: [
+      SubscriptionHeaderAlias(
+        'new-domain',
+        'Happ',
+        format: SubscriptionAliasFormat.hostList,
+      ),
+    ],
     trust: SubscriptionTrust.hint,
     consumer: 'transport',
   ),
@@ -342,9 +419,12 @@ const subscriptionFields = <SubscriptionField>[
   ),
 ];
 
-/// Every standard header the decoder reads for [subscriptionFields].
+/// Every standard and alias header the decoder reads for [subscriptionFields].
 Iterable<String> get subscriptionFieldHeaders => [
-  for (final field in subscriptionFields) ?field.header,
+  for (final field in subscriptionFields) ...[
+    ?field.header,
+    for (final alias in field.aliases) alias.name,
+  ],
 ];
 
 class SubscriptionHeader {
@@ -378,6 +458,12 @@ class SubscriptionHeader {
 }
 
 const subscriptionHeaders = <SubscriptionHeader>[
+  SubscriptionHeader(
+    subscriptionAliasSwitchHeader,
+    'response',
+    'boolean',
+    context: ['http-response'],
+  ),
   SubscriptionHeader('x-hwid', 'request', 'lowercase-hex-32', sensitive: true),
   SubscriptionHeader('x-device-os', 'request', 'ascii', sensitive: true),
   SubscriptionHeader('x-ver-os', 'request', 'ascii', sensitive: true),

@@ -163,7 +163,6 @@ void main() {
     test('removed reclash headers warn and decode nothing', () {
       final result = readSubscriptionMetadata({
         'reclash-servicename': ['Provider'],
-        'flclashx-servicename': ['Provider'],
         'reclash-routing': ['https://routing.example.test/bundle.yaml'],
       });
       expect(result.metadata.fields, isEmpty);
@@ -174,6 +173,189 @@ void main() {
           'Unsupported provider field: reclash-routing',
         ]),
       );
+    });
+
+    group('alias headers', () {
+      test('reclash-aliases turns aliases off unless true', () {
+        Map<String, Object?> fields(String? value) => readSubscriptionMetadata({
+          'flclashx-servicename': ['Name'],
+          'support-url': ['https://t.me/support'],
+          'reclash-aliases': ?(value == null ? null : [value]),
+        }).metadata.fields;
+
+        expect(fields(null)['provider.name'], 'Name');
+        expect(fields('1')['provider.name'], 'Name');
+        expect(fields('0'), {'provider.supportUrl': 'https://t.me/support'});
+        final invalid = readSubscriptionMetadata({
+          'flclashx-servicename': ['Name'],
+          'reclash-aliases': ['maybe'],
+        });
+        expect(invalid.metadata.fields, isEmpty);
+        expect(invalid.warnings, ['Invalid provider field: reclash-aliases']);
+      });
+
+      test(
+        'a manifest pointer turns aliases off unless reclash-aliases is true',
+        () {
+          Map<String, Object?> fields(
+            Map<String, List<String>> extra, {
+            bool secure = true,
+          }) => readSubscriptionMetadata({
+            'flclashx-servicename': ['Name'],
+            'reclash-config': ['https://example.net/reclash.yaml'],
+            ...extra,
+          }, secure: secure).metadata.fields;
+
+          expect(fields({})['provider.name'], isNull);
+          expect(
+            fields({
+              'reclash-aliases': ['1'],
+            })['provider.name'],
+            'Name',
+          );
+          expect(fields({}, secure: false)['provider.name'], 'Name');
+        },
+      );
+
+      Map<String, Object?> read(
+        Map<String, String> headers, {
+        bool secure = false,
+      }) => readSubscriptionMetadata({
+        for (final MapEntry(:key, :value) in headers.entries) key: [value],
+      }, secure: secure).metadata.fields;
+
+      List<String> warn(Map<String, String> headers, {bool secure = false}) =>
+          readSubscriptionMetadata({
+            for (final MapEntry(:key, :value) in headers.entries) key: [value],
+          }, secure: secure).warnings;
+
+      test('plain and percent-encoded aliases decode', () {
+        expect(
+          read({
+            'flclashx-servicelogo': 'https://logo.example.test/a.png',
+            'homepage': 'https://web.example.test',
+            'announce-url': 'https://announce.example.test',
+            'subscription-name': 'base64:SGVsbG8=',
+            'isp-name': 'Hello%20World',
+          }),
+          {
+            'provider.logo': 'https://logo.example.test/a.png',
+            'provider.webUrl': 'https://web.example.test',
+            'provider.announceUrl': 'https://announce.example.test',
+            'account.title': 'Hello',
+            'provider.name': 'Hello World',
+          },
+        );
+      });
+
+      test(
+        'the standard header beats an alias and the first valid alias wins',
+        () {
+          expect(
+            read({
+              'profile-web-page-url': 'https://standard.example.test',
+              'homepage': 'https://incy.example.test',
+              'isp-url': 'https://karing.example.test',
+            }),
+            {'provider.webUrl': 'https://standard.example.test'},
+          );
+          expect(
+            read({'flclashx-servicename': 'FlClashX', 'isp-name': 'Karing'}),
+            {'provider.name': 'FlClashX'},
+          );
+        },
+      );
+
+      test('an invalid source warns and falls through', () {
+        final headers = {
+          'profile-web-page-url': 'javascript:alert(1)',
+          'homepage': 'ftp://nope.example.test',
+          'isp-url': 'https://karing.example.test',
+        };
+        expect(read(headers), {
+          'provider.webUrl': 'https://karing.example.test',
+        });
+        expect(
+          warn(headers),
+          containsAll([
+            'Invalid provider field: profile-web-page-url',
+            'Invalid provider field: homepage',
+          ]),
+        );
+      });
+
+      test('a url with a number fills the suffix when it is in range', () {
+        expect(read({'flclashx-buyplan': 'https://buy.example.test,30'}), {
+          'provider.buyPlanUrl': 'https://buy.example.test',
+          'provider.buyPlanDays': 30,
+        });
+        expect(read({'flclashx-buytraffic': 'https://buy.example.test'}), {
+          'provider.buyTrafficUrl': 'https://buy.example.test',
+        });
+        final headers = {'flclashx-buytraffic': 'https://buy.example.test,500'};
+        expect(read(headers), {
+          'provider.buyTrafficUrl': 'https://buy.example.test',
+        });
+        expect(warn(headers), ['Invalid provider field: flclashx-buytraffic']);
+      });
+
+      test('a host list keeps authorities up to the limit', () {
+        expect(
+          read({
+            'flclashx-newdomain':
+                ' A.example.test , https://b.example.test:8443/path, bad host,'
+                'c.example.test:80, d.example.test, e.example.test, f.example.test',
+          }, secure: true),
+          {
+            'transport.fallbackHosts': [
+              'a.example.test',
+              'b.example.test:8443',
+              'c.example.test:80',
+              'd.example.test',
+              'e.example.test',
+            ],
+          },
+        );
+        expect(
+          read({
+            'new-domain': 'one.example.test, two.example.test',
+          }, secure: true),
+          {
+            'transport.newDomain': ['one.example.test'],
+          },
+        );
+      });
+
+      test('a host list needs an HTTPS response', () {
+        final headers = {'new-domain': 'one.example.test'};
+        expect(read(headers), isEmpty);
+        expect(warn(headers), [
+          'Provider field needs an HTTPS response: new-domain',
+        ]);
+      });
+
+      test('the manifest overrides an alias-derived value', () {
+        final manifest = parseProviderConfig(
+          jsonEncode({
+            'version': 1,
+            'provider': {'name': 'Manifest provider'},
+          }),
+          'en',
+        ).config;
+        final result = withManifest(
+          readSubscriptionMetadata({
+            'flclashx-servicename': ['Alias provider'],
+            'homepage': ['https://alias.example.test'],
+          }),
+          manifest,
+          excluded: const [],
+          included: const [],
+        );
+        expect(result.metadata.fields, {
+          'provider.name': 'Manifest provider',
+          'provider.webUrl': 'https://alias.example.test',
+        });
+      });
     });
 
     test('the manifest address needs an HTTPS response', () {

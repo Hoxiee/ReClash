@@ -17,15 +17,15 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 
 | Path | Type | Limit | Trust | Consumer | Notes |
 | --- | --- | ---: | --- | --- | --- |
-| `provider.name` | text | 160 | display | panel |  |
-| `provider.logo` | url | 1024 | display | panel |  |
+| `provider.name` | text | 160 | display | panel | alias headers `flclashx-servicename` (FlClashX), `isp-name` (Karing) |
+| `provider.logo` | url | 1024 | display | panel | alias headers `flclashx-servicelogo` (FlClashX), `profile-logo` (Koala Clash) |
 | `provider.logo-dark` | url | 1024 | display | panel |  |
 | `provider.support-url` | url | 1024 | display | panel | fallback header `support-url` |
-| `provider.web-url` | url | 1024 | display | panel | fallback header `profile-web-page-url` |
-| `provider.renew.url` | url | 1024 | display | panel | `provider.renew.days` 1-3650 |
-| `provider.top-up.url` | url | 1024 | display | panel | `provider.top-up.percent` 1-100 |
+| `provider.web-url` | url | 1024 | display | panel | fallback header `profile-web-page-url`; alias headers `homepage` (Incy), `isp-url` (Karing) |
+| `provider.renew.url` | url | 1024 | display | panel | alias headers `flclashx-buyplan` (FlClashX), `sub-expire-button-link` (Happ); `provider.renew.days` 1-3650 |
+| `provider.top-up.url` | url | 1024 | display | panel | alias headers `flclashx-buytraffic` (FlClashX); `provider.top-up.percent` 1-100 |
 | `provider.announce.text` | text | 1024 | display | panel | fallback header `announce` |
-| `provider.announce.url` | url | 1024 | display | panel |  |
+| `provider.announce.url` | url | 1024 | display | panel | alias headers `announce-url` (Incy, v2RayTun) |
 | `provider.notice.text` | text | 1024 | display | panel |  |
 | `provider.notice.url` | url | 1024 | display | panel |  |
 | `provider.type` | text | 32 | display | panel |  |
@@ -35,8 +35,8 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | `reminders.traffic-percent` | numbers | 8 | hint | reminder |  |
 | `settings` | flags | 16 | hint | settings |  |
 | `policy` | policy | 16 | hint | settings |  |
-| `transport.fallback-hosts` | hosts | 5 | hint | transport |  |
-| `transport.new-domain` | hosts | 1 | hint | transport |  |
+| `transport.fallback-hosts` | hosts | 5 | hint | transport | alias headers `flclashx-newdomain` (FlClashX) |
+| `transport.new-domain` | hosts | 1 | hint | transport | alias headers `new-domain` (Happ) |
 | `apps.exclude` | packages | 512 | hint | apps |  |
 | `apps.include` | packages | 512 | hint | apps |  |
 | `apps.routing` | tokens | 1 | hint | apps |  |
@@ -47,6 +47,7 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 
 | Header | Direction | Encoding | Sensitive |
 | --- | --- | --- | --- |
+| `reclash-aliases` | response | boolean | no |
 | `x-hwid` | request | lowercase-hex-32 | yes |
 | `x-device-os` | request | ascii | yes |
 | `x-ver-os` | request | ascii | yes |
@@ -60,10 +61,23 @@ Machine-readable copy: [`provider_standard.g.json`](../../../provider_standard.g
 | `x-client` | request | ascii | no |
 | `x-app-version` | request | ascii | no |
 | `x-device-locale` | request | ascii | yes |
+| `flclashx-servicename` | response | text-or-base64-prefixed | no |
+| `isp-name` | response | percent-encoded-text | no |
+| `flclashx-servicelogo` | response | url | no |
+| `profile-logo` | response | url | no |
 | `support-url` | response | url | no |
 | `profile-web-page-url` | response | url | no |
+| `homepage` | response | url | no |
+| `isp-url` | response | url | no |
+| `flclashx-buyplan` | response | url-with-optional-number | no |
+| `sub-expire-button-link` | response | url | no |
+| `flclashx-buytraffic` | response | url-with-optional-number | no |
 | `announce` | response | text-or-base64-prefixed | no |
+| `announce-url` | response | url | no |
 | `profile-title` | response | text-or-base64-prefixed | no |
+| `subscription-name` | response | text-or-base64-prefixed | no |
 | `profile-update-interval` | response | decimal | no |
 | `hide-url` | response | boolean | no |
 | `reclash-config` | response | url | no |
+| `flclashx-newdomain` | response | host-list | no |
+| `new-domain` | response | host-list | no |
