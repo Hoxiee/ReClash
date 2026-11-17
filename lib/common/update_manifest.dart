@@ -9,7 +9,7 @@ import 'app_version.dart';
 /// Ed25519 public keys, base64, whose signature makes a mirrored release
 /// installable. A list, so a successor ships in the app before the old key
 /// retires; empty, mirrors are refused and GitHub answers instead.
-const updateManifestKeys = <String>[];
+const updateManifestKeys = ['13jh6ngw81CHozTu2OASUVQvv538qIH4XDjo2zaD0Z8='];
 
 const updateManifestFileName = 'update-manifest.json';
 const updateManifestLimit = 1024 * 1024;

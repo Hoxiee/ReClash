@@ -378,7 +378,21 @@ void main() {
       ]);
     });
 
-    test('a mirror without a trusted key falls back to GitHub', () async {
+    test('a failing mirror falls back to GitHub', () async {
+      final adapter = serve((exchange) {
+        if (exchange.uri.host == 'mirror.example') return _json('not json');
+        return history(exchange);
+      });
+      final release = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+        mirror: Uri.parse('https://mirror.example/update-manifest.json'),
+      );
+      expect(release?.tag, 'v0.3.0');
+      expect(release?.source.id, 'github');
+      expect(adapter.requests.first.uri.host, 'mirror.example');
+    });
+
+    test('a mirror without a newer release is final', () async {
       final adapter = serve((exchange) {
         if (exchange.uri.host == 'mirror.example') {
           return _json('{"releases": []}');
@@ -389,9 +403,10 @@ void main() {
         channel: UpdateChannel.release,
         mirror: Uri.parse('https://mirror.example/update-manifest.json'),
       );
-      expect(release?.tag, 'v0.3.0');
-      expect(release?.source.id, 'github');
-      expect(adapter.requests.first.uri.host, 'mirror.example');
+      expect(release, isNull);
+      expect(adapter.requests.map((request) => request.uri.host), [
+        'mirror.example',
+      ]);
     });
 
     test('updateSource resolves the mirror and GitHub, nothing else', () {
