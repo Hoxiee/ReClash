@@ -15,11 +15,6 @@ import 'package:reclash/ui/ui.dart';
 import 'update_content.dart';
 import 'update_preferences.dart';
 
-const _offerSheetProps = SheetProps(
-  backgroundColor: Colors.transparent,
-  detents: [0.6],
-);
-
 class UpdateSheet extends ConsumerWidget {
   const UpdateSheet({super.key, this.platform});
 
@@ -49,7 +44,7 @@ class UpdateSheet extends ConsumerWidget {
     return _offer.open(
       () => showSheet<void>(
         context: context,
-        props: _offerSheetProps,
+        props: nestedPagedSheetProps,
         builder: (_) =>
             _offer.track(NestedPagedSheet(builder: (_) => const UpdateSheet())),
       ),
