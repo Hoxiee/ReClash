@@ -355,16 +355,20 @@ void main() {
   });
 
   test(
-    'new VPN intent during verification is checked again before installation',
+    'new VPN intent during the permission check is checked again before installation',
     () async {
       await action.offer(testUpdateRelease());
       await action.download();
-      final verified = Completer<bool>();
-      runtime.verifyOperation = () => verified.future;
+      final permitted = Completer<bool>();
+      var permissionChecks = 0;
+      runtime.permissionOperation = () {
+        permissionChecks++;
+        return permitted.future;
+      };
       final installing = action.installNow();
-      await settleUntil(() => runtime.verifies == 2);
+      await settleUntil(() => permissionChecks == 1);
       container.read(runTimeProvider.notifier).value = 0;
-      verified.complete(true);
+      permitted.complete(true);
       await installing;
       expect(current().phase, UpdatePhase.vpnActive);
       expect(runtime.installations, 0);
@@ -403,8 +407,75 @@ void main() {
     });
   }
 
+  test('a tap on update downloads and installs without a second tap', () async {
+    await action.offer(testUpdateRelease());
+    final phases = <UpdatePhase>[];
+    container.listen(
+      appUpdateActionProvider,
+      (_, next) => phases.add(next.phase),
+    );
+    await action.download(install: true);
+    expect(runtime.installations, 1);
+    expect(runtime.lastAutomatic, isFalse);
+    expect(runtime.verifies, 1);
+    expect(current().phase, UpdatePhase.installing);
+    expect(phases, isNot(contains(UpdatePhase.ready)));
+  });
+
+  test('a chained install stops at an active VPN', () async {
+    runtime.vpn = true;
+    await action.offer(testUpdateRelease());
+    await action.download(install: true);
+    expect(current().phase, UpdatePhase.vpnActive);
+    expect(runtime.installations, 0);
+  });
+
+  test('a paused download forgets the tap to install', () async {
+    runtime.downloadOperation = (path, token, progress) async {
+      progress(2, updateTestBytes.length);
+      await token.whenCancel;
+      return '';
+    };
+    await action.offer(testUpdateRelease());
+    final task = action.download(install: true);
+    await settleUntil(() => current().received == 2);
+    action.pause();
+    await task;
+    runtime.downloadOperation = null;
+    await action.download();
+    expect(current().phase, UpdatePhase.ready);
+    expect(runtime.installations, 0);
+  });
+
+  test('a failed download forgets the tap to install', () async {
+    runtime.downloadOperation = (path, token, progress) async => 'offline';
+    await action.offer(testUpdateRelease());
+    await action.download(install: true);
+    expect(current().phase, UpdatePhase.downloadFailed);
+    runtime.downloadOperation = null;
+    await action.download(automatic: true);
+    expect(current().phase, UpdatePhase.ready);
+    expect(runtime.installations, 0);
+  });
+
+  test('the tapped install opens the Android prompt once by itself', () async {
+    final binding = TestWidgetsFlutterBinding.instance;
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    addTearDown(
+      () => binding.handleAppLifecycleStateChanged(AppLifecycleState.detached),
+    );
+    runtime.nativeStatus = ApkInstallStatus.awaitingConfirmation;
+    await action.offer(testUpdateRelease());
+    await action.download(install: true);
+    expect(runtime.confirmations, 1);
+    expect(current().phase, UpdatePhase.installing);
+    runtime.installEvents.add(ApkInstallStatus.awaitingConfirmation);
+    await settleUntil(() => current().phase == UpdatePhase.confirmation);
+    expect(runtime.confirmations, 1);
+  });
+
   test(
-    'native confirmation never opens itself and repeated taps are coalesced',
+    'native confirmation in the background waits and repeated taps are coalesced',
     () async {
       runtime.nativeStatus = ApkInstallStatus.awaitingConfirmation;
       await action.offer(testUpdateRelease());

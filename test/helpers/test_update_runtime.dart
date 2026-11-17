@@ -117,6 +117,7 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   downloadOperation;
   Future<bool> Function()? verifyOperation;
   Future<bool> Function()? confirmOperation;
+  Future<bool> Function()? permissionOperation;
   Future<bool> Function()? saveOperation;
   final wifiEvents = StreamController<bool>.broadcast(sync: true);
   final installEvents = StreamController<ApkInstallStatus>.broadcast(
@@ -204,7 +205,8 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   Future<bool> vpnActive() async => vpn;
 
   @override
-  Future<bool> installPermission() async => permission;
+  Future<bool> installPermission() async =>
+      permissionOperation != null ? permissionOperation!() : permission;
 
   @override
   Future<bool> openPermission() async {

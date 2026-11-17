@@ -552,13 +552,14 @@ class _TransferLine extends StatelessWidget {
   final supported = action.isSupported;
   final direct = supported && update.asset?.sha256 != null;
   final size = update.asset?.size;
+  final start = action.isDesktop ? l.updateDownloadAction : l.update;
   final (primary, secondary) = switch (update.phase) {
     UpdatePhase.offered => (
       !direct
           ? l.goDownload
           : size != null
-          ? '${l.updateDownloadAction}  ·  ${size.traffic.show}'
-          : l.updateDownloadAction,
+          ? '$start  ·  ${size.traffic.show}'
+          : start,
       l.updateNotNow,
     ),
     UpdatePhase.downloading => (
@@ -597,13 +598,13 @@ class _TransferLine extends StatelessWidget {
           }
           onClose();
         } else {
-          unawaited(action.download());
+          unawaited(action.download(install: true));
         }
       case UpdatePhase.paused:
       case UpdatePhase.downloadFailed:
-        unawaited(action.download());
+        unawaited(action.download(install: true));
       case UpdatePhase.verifyFailed:
-        unawaited(action.download(restart: true));
+        unawaited(action.download(restart: true, install: true));
       case UpdatePhase.ready:
       case UpdatePhase.installFailed:
         unawaited(action.installNow());

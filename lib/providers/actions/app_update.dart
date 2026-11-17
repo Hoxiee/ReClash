@@ -25,6 +25,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   bool _restored = false;
   bool _permissionOpened = false;
   bool _observerAttached = false;
+  bool _installWhenReady = false;
+  bool _promptOnConfirmation = false;
   int _revision = 0;
 
   AppUpdateRuntime get _runtime => ref.read(appUpdateRuntimeProvider);
@@ -162,6 +164,8 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     if (!ref.mounted || revision != _revision) return;
     _pending = null;
     _permissionOpened = false;
+    _installWhenReady = false;
+    _promptOnConfirmation = false;
     state = AppUpdateState(
       phase: UpdatePhase.offered,
       release: release,
@@ -226,9 +230,18 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     }
   }
 
-  Future<void> download({bool automatic = false, bool restart = false}) {
+  /// [install] carries the reader's tap through to installation on Android,
+  /// so a finished download does not stop to ask a second time.
+  Future<void> download({
+    bool automatic = false,
+    bool restart = false,
+    bool install = false,
+  }) {
     final task = _downloadTask;
-    if (task != null) return task;
+    if (task != null) {
+      if (install && !_runtime.desktop) _installWhenReady = true;
+      return task;
+    }
     if (!isSupported ||
         state.release == null ||
         _installing ||
@@ -237,6 +250,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         state.verified) {
       return Future.value();
     }
+    _installWhenReady = install && !_runtime.desktop;
     final future = _download(automatic: automatic, restart: restart);
     _downloadTask = future;
     return future.whenComplete(() {
@@ -368,15 +382,31 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       }
       final length = await file.length();
       if (!_current(revision)) return;
+      final chained = _installWhenReady;
+      _installWhenReady = false;
       state = state.copyWith(
-        phase: UpdatePhase.ready,
+        phase: chained ? UpdatePhase.verifying : UpdatePhase.ready,
         verified: true,
         received: length,
         total: length,
       );
       await _recordPhase(directory);
       _attachObservers();
-      await _tryAutomaticInstall();
+      if (!chained) {
+        await _tryAutomaticInstall();
+        return;
+      }
+      await installNow();
+      if (!_current(revision)) return;
+      if (state.phase == UpdatePhase.verifying) {
+        state = state.copyWith(phase: UpdatePhase.ready);
+      } else if (const {
+        UpdatePhase.vpnActive,
+        UpdatePhase.permission,
+        UpdatePhase.confirmation,
+      }.contains(state.phase)) {
+        _revealSheet();
+      }
     } catch (error) {
       if (!ref.mounted || revision != _revision) return;
       commonPrint.log(
@@ -404,6 +434,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   void pause({bool forWifi = false}) {
     if (state.phase != UpdatePhase.downloading) return;
+    _installWhenReady = false;
     _downloadToken?.cancel();
     state = state.copyWith(
       phase: UpdatePhase.paused,
@@ -419,6 +450,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       return;
     }
     _cancelling = true;
+    _installWhenReady = false;
     try {
       _revision++;
       _downloadToken?.cancel();
@@ -471,6 +503,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     }
     if (automatic && !_automaticAllowed) return;
     _installing = true;
+    _promptOnConfirmation = !automatic;
     final revision = _revision;
     try {
       if (await _blockedByVpn()) {
@@ -503,22 +536,25 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       final directory = await _runtime.directory();
       if (!_current(revision)) return;
       final pending = _pending!;
-      // Hashing the package takes seconds; the phase says so meanwhile, rather
-      // than leaving the step that was tapped on screen and unresponsive.
-      state = state.copyWith(phase: UpdatePhase.verifying);
-      final verified = await _runtime.verify(
-        File(join(directory.path, pending.fileName)),
-        pending.asset,
-        pending.release.tag,
-      );
-      if (!_current(revision)) return;
-      if (!verified) {
-        state = state.copyWith(
-          phase: UpdatePhase.verifyFailed,
-          verified: false,
+      // The Android installer verifies the package itself before staging it.
+      if (_runtime.desktop) {
+        // Hashing takes seconds; the phase says so meanwhile, rather than
+        // leaving the step that was tapped on screen and unresponsive.
+        state = state.copyWith(phase: UpdatePhase.verifying);
+        final verified = await _runtime.verify(
+          File(join(directory.path, pending.fileName)),
+          pending.asset,
+          pending.release.tag,
         );
-        await _recordPhase(directory);
-        return;
+        if (!_current(revision)) return;
+        if (!verified) {
+          state = state.copyWith(
+            phase: UpdatePhase.verifyFailed,
+            verified: false,
+          );
+          await _recordPhase(directory);
+          return;
+        }
       }
       final permission = await _runtime.installPermission();
       if (!_current(revision)) return;
@@ -862,7 +898,11 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     final revision = _revision;
     switch (status) {
       case ApkInstallStatus.awaitingConfirmation:
-        state = state.copyWith(phase: UpdatePhase.confirmation);
+        final prompted = await _promptConfirmation();
+        if (!_current(revision)) return;
+        state = state.copyWith(
+          phase: prompted ? UpdatePhase.installing : UpdatePhase.confirmation,
+        );
       case ApkInstallStatus.preparing:
       case ApkInstallStatus.installing:
         state = state.copyWith(phase: UpdatePhase.installing);
@@ -887,6 +927,22 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         }
     }
     await _recordPhase(await _runtime.directory());
+  }
+
+  /// The tap that started the install already asked for Android's prompt, so
+  /// it opens once by itself; in the background it waits for the return.
+  Future<bool> _promptConfirmation() async {
+    if (!_promptOnConfirmation ||
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return false;
+    }
+    _promptOnConfirmation = false;
+    try {
+      return await _runtime.confirmInstall();
+    } catch (error) {
+      commonPrint.log('update confirmation failed: ${compactError(error)}');
+      return false;
+    }
   }
 
   @override

@@ -118,12 +118,12 @@ class UpdateCard extends ConsumerWidget {
     ].join('  ·  ');
     final (label, onStep) = switch (phase) {
       UpdatePhase.offered when direct => (
-        l.goDownload,
-        () => unawaited(action.download()),
+        action.isDesktop ? l.goDownload : l.update,
+        () => unawaited(action.download(install: true)),
       ),
       UpdatePhase.paused || UpdatePhase.downloadFailed => (
         l.updateResumeShort,
-        () => unawaited(action.download()),
+        () => unawaited(action.download(install: true)),
       ),
       UpdatePhase.ready || UpdatePhase.installFailed => (
         l.update,
