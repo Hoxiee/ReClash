@@ -808,6 +808,35 @@ void main() {
     expect(find.text('child'), findsOneWidget);
   });
 
+  testWidgets('a level takes presses while the sub menu above it folds', (
+    tester,
+  ) async {
+    final open = await pumpMenu(tester, [
+      const CommonPopupMenuItem(
+        label: 'first',
+        subItems: [CommonPopupMenuItem(label: 'first child')],
+      ),
+      const CommonPopupMenuItem(
+        label: 'second',
+        subItems: [CommonPopupMenuItem(label: 'second child')],
+      ),
+    ]);
+    open();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('first'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('first').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.text('first child'), findsOneWidget);
+
+    await tester.tap(find.text('second'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('first child'), findsNothing);
+    expect(find.text('second child'), findsOneWidget);
+  });
+
   testWidgets('back walks one level up and leaves the popup open', (
     tester,
   ) async {

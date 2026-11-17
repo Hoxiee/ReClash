@@ -2108,19 +2108,22 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     }
     setState(() => _folding = true);
     _springTo(0, _foldSpring).then((_) {
-      if (!mounted || !_folding) {
-        return;
+      if (mounted && _folding) {
+        setState(_settleFold);
       }
-      setState(() {
-        _folding = false;
-        final step = _path.removeLast();
-        // The header stood on the item that opened its sub menu.
-        if (_pressed == _headerIndex) {
-          _pressed = step.index;
-        }
-        _unfold.value = 1;
-      });
     });
+  }
+
+  /// The fold spring's tail outlasts the visible fold by about a second.
+  void _settleFold() {
+    _unfold.stop();
+    _folding = false;
+    final step = _path.removeLast();
+    // The header stood on the item that opened its sub menu.
+    if (_pressed == _headerIndex) {
+      _pressed = step.index;
+    }
+    _unfold.value = 1;
   }
 
   /// The header stands on the item that opened its sub menu, so tapping it
@@ -2194,7 +2197,12 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     _landed = false;
     final onTap = row?.onTap;
     final index = onTap == null ? null : row!.index;
-    setState(() => _pressed = index);
+    setState(() {
+      if (_folding && row != null && row.index != _headerIndex) {
+        _settleFold();
+      }
+      _pressed = index;
+    });
     if (onTap == null || !row!.togglesSubMenu) {
       return;
     }
@@ -2552,7 +2560,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
               );
             },
             child: IgnorePointer(
-              ignoring: receding,
+              ignoring: receding && !(_folding && depth == 1),
               child: Material(
                 type: MaterialType.transparency,
                 child: Padding(
