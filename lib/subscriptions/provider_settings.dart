@@ -185,6 +185,13 @@ final providerSettingsCatalog = <ProviderSetting>[
     (config) => config.themeProps.pureBlack,
     (config, value) => _theme(config, (p) => p.copyWith(pureBlack: value)),
   ),
+  _flag(
+    'app.seasonal',
+    (input) => input.hints.view.seasonal,
+    (config) => config.themeProps.seasonalEffects,
+    (config, value) =>
+        _theme(config, (p) => p.copyWith(seasonalEffects: value)),
+  ),
   ProviderSetting(
     'widgets',
     provided: (input) => switch (input.hints.widgets) {

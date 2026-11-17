@@ -229,7 +229,49 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
               ),
             ]),
           ),
+          const SizedBox(height: 16),
+          const _SeasonalSection(),
           SizedBox(height: context.bottomInset + 32),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeasonalSection extends ConsumerWidget {
+  const _SeasonalSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final provided = ref.watch(
+      providerHintsProvider.select(
+        (hints) => hints?.seasonal?.effects.isNotEmpty ?? false,
+      ),
+    );
+    return _WallpaperSection(
+      info: Info(label: l.seasonalEffects, glyph: AppGlyphs.sparkle),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          generateGroup([
+            ConfigToggleItem(
+              setting: seasonalToolSetting,
+              selector: themeSettingProvider.select(
+                (theme) => theme.seasonalEffects,
+              ),
+              title: (l) => l.seasonalEffects,
+              leading: const GlyphIcon(AppGlyphs.sparkle),
+              onChanged: (ref, value) => ref
+                  .read(themeSettingProvider.notifier)
+                  .update((theme) => theme.copyWith(seasonalEffects: value)),
+            ),
+          ]),
+          ListFooter(
+            text: provided
+                ? '${l.seasonalEffectsDesc} ${l.seasonalEffectsProviderDesc}'
+                : l.seasonalEffectsDesc,
+          ),
         ],
       ),
     );
@@ -625,6 +667,13 @@ class _WallpaperTile extends ConsumerWidget {
     );
   }
 }
+
+final seasonalToolSetting = SettingSpec(
+  id: 'theme.seasonalEffects',
+  page: ToolPage.theme,
+  title: (l) => l.seasonalEffects,
+  keywords: ['seasonalEffects', 'background'],
+);
 
 final wallpaperToolSettings = <SettingSpec>[
   SettingSpec(

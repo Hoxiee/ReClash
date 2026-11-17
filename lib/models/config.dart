@@ -666,6 +666,7 @@ abstract class ThemeProps with _$ThemeProps {
     ColorContrast contrast,
     @Default(false) bool pureBlack,
     @Default(false) bool sidebarBlur,
+    @Default(true) bool seasonalEffects,
     @Default(LiquidGlassMode.none)
     @JsonKey(readValue: _readLiquidGlass)
     LiquidGlassMode liquidGlass,

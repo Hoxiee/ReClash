@@ -1,0 +1,16 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  calendar: Effects follow the device's local date and move on at midnight and on resume; the built-in calendar shows snow in winter, lights over the New Year holidays, leaves in autumn and petals in spring, and nothing outside those ranges.
+  provider: The manifest's view.app.seasonal is a provider-managed setting the user can take back; its seasonal section adds dated effects that replace the calendar's of the same kind and may turn the calendar off, but never shows effects while the setting is off.
+  rendering: Effects paint between the page background and content, take no input or semantics, share one frame clock so route backdrops line up, hold still with reduced motion, stop ticking when hidden or out of season, and show at most three layers.
+  appearance: The setting is on by default and sits in its own group at the end of the Background category, with its description in the group footer.
+  localization: Seasonal labels belong to this feature fragment in every supported locale.
+watch: [lib/features/seasonal/**, lib/subscriptions/metadata/provider_seasonal.dart, 'arb/fragments/appearance.seasonal/**', test/features/seasonal/**, test/subscriptions/provider_seasonal_test.dart]
+checks:
+  tests: [calendar, provider, rendering]
+  specs: [appearance]
+  localization: [localization]
+deps: [appearance.wallpaper, subscriptions.providers, localization.catalog]

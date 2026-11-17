@@ -78,6 +78,10 @@ power-button:
 wallpaper:
   url: https://cdn.example.net/wallpaper.webp
   opacity: 12
+seasonal:
+  calendar: default
+  effects:
+    - { effect: confetti, from: "12-31", to: "01-01", colors: ["#336699"] }
 widgets: [outboundMode, serviceStatus, health]
 cards:
   - id: spring-sale
@@ -384,10 +388,11 @@ support:
 | `app.color-dark` | Same as `app.color`. Replaces it in the dark theme; ignored without `app.color`. |
 | `app.style` | `vivid`, `tinted`, `soft`, `monochrome` |
 | `app.black` | Boolean |
+| `app.seasonal` | Boolean. Turns the "Seasonal effects" theme setting on or off. |
 
 `app.glass` is the requested quality. Sustained rendering overload can lower the effective quality for the current session without changing the saved setting or its provider ownership; the notification offers to restore it.
 
-`view`, `power-button`, `wallpaper` and `widgets` are the only source of appearance; no header sets it. Values are tagged "From provider" and yield to the user ([Ownership](#ownership)).
+`view`, `power-button`, `wallpaper`, `seasonal` and `widgets` are the only source of appearance; no header sets it. Values are tagged "From provider" and yield to the user ([Ownership](#ownership)).
 
 ```yaml
 view:
@@ -435,6 +440,44 @@ The image is downloaded once per URL and cached. The user can replace it with th
 wallpaper:
   url: https://cdn.example.net/wallpaper.webp
   opacity: 12
+```
+
+### Seasonal effects
+
+`seasonal` adds particle effects behind the app content on chosen dates, such as snow, confetti or hearts. The client also has a built-in calendar, and the user can turn the whole feature off with the "Seasonal effects" theme setting; `view.app.seasonal` sets that switch.
+
+| Key | Values | Default |
+| --- | --- | --- |
+| `calendar` | `default`, `none`. `none` turns off the client's built-in calendar for this subscription. | `default` |
+| `effects` | List of up to 16 effects; extra entries are ignored with a warning | — |
+
+Each effect takes these keys:
+
+| Key | Values | Default |
+| --- | --- | --- |
+| `effect` | `snow`, `lights`, `stars`, `leaves`, `petals`, `confetti`, `hearts`. Required. | — |
+| `from` | `MM-DD` or `YYYY-MM-DD`, inclusive. Required. | — |
+| `to` | Same form as `from`, inclusive. Required. | — |
+| `density` | `low`, `medium`, `high` | `medium` |
+| `colors` | 1–8 quoted `RRGGBB` colors, optional `#`; they replace the effect's own palette | — |
+
+- Dates are the device's local date. Quote `MM-DD` values in YAML so they stay strings.
+- `MM-DD` ranges repeat every year and may wrap past the new year, as `12-31` to `01-01` does. Dated ranges apply once, must use the same form in `from` and `to`, and must not run backwards.
+- The built-in calendar shows light snow from Dec 1 to Feb 29, heavier snow with festive lights from Dec 20 to Jan 14, leaves from Oct 1 to Nov 10, and petals from Apr 1 to May 10.
+- A provider effect replaces the calendar's effect of the same kind on the days it covers.
+- At most three effect layers show at once; the provider's are kept first.
+- Effects stop and freeze with reduced motion, and never show while the user has the setting off.
+- An invalid effect is skipped with a warning. An invalid section, such as a wrong shape or an unknown `calendar` value, is ignored whole.
+
+```yaml
+seasonal:
+  calendar: default
+  effects:
+    - effect: confetti
+      from: "12-31"
+      to: "01-01"
+      density: high
+      colors: ["#336699", "#FFCC00"]
 ```
 
 ### Widgets

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reclash/features/seasonal/layer.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/ui/page_background.dart';
@@ -23,7 +24,7 @@ class AppWallpaperScope extends ConsumerWidget {
         image: image,
         settings: settings,
         baseColor: baseColor,
-        builder: (_, _) => content,
+        builder: (_, _) => SeasonalBackdrop(child: content),
       ),
       child: child,
     );

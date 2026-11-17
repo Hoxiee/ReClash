@@ -1,0 +1,5 @@
+{
+  "seasonalEffects": "季節のエフェクト",
+  "seasonalEffectsDesc": "冬は雪、年末年始はお祝いの光、秋は落ち葉、春は花びらを、端末の日付に合わせて表示します。エフェクトはコンテンツの背後に表示されます。",
+  "seasonalEffectsProviderDesc": "サブスクリプションが独自のエフェクトを追加しています。"
+}

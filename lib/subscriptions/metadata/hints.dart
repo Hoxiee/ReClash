@@ -5,6 +5,7 @@ import 'metadata.dart';
 import 'provider_cards.dart';
 import 'provider_config.dart';
 import 'provider_power_labels.dart';
+import 'provider_seasonal.dart';
 
 enum ProviderRestriction {
   noGlobal,
@@ -90,6 +91,7 @@ class ProviderView {
     this.primaryColorDark,
     this.colorStyle,
     this.pureBlack,
+    this.seasonal,
   });
 
   factory ProviderView.fromPairs(Map<String, String> pairs) {
@@ -111,11 +113,8 @@ class ProviderView {
       primaryColor: _color(pairs['app.color']),
       primaryColorDark: _color(pairs['app.colordark']),
       colorStyle: pick('app.style', ColorStyle.values),
-      pureBlack: switch (pairs['app.black']) {
-        'true' => true,
-        'false' => false,
-        _ => null,
-      },
+      pureBlack: _flag(pairs['app.black']),
+      seasonal: _flag(pairs['app.seasonal']),
     );
   }
 
@@ -134,7 +133,14 @@ class ProviderView {
   final int? primaryColorDark;
   final ColorStyle? colorStyle;
   final bool? pureBlack;
+  final bool? seasonal;
 }
+
+bool? _flag(String? value) => switch (value) {
+  'true' => true,
+  'false' => false,
+  _ => null,
+};
 
 int? _color(String? value) {
   if (value == null) return null;
@@ -234,6 +240,8 @@ class ProviderHints {
   List<ProviderCard> get cards => config?.cards ?? const [];
 
   ProviderPowerLabels get powerLabels => config?.powerLabels ?? const {};
+
+  ProviderSeasonal? get seasonal => config?.seasonal;
 
   ProviderBackground? get background {
     final wallpaper = config?.wallpaper;

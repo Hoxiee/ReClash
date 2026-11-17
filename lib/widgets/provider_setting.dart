@@ -63,6 +63,7 @@ const providerSettingsBySpec = {
   'application.openLogs': ['settings.openlogs'],
   'theme.themeColor': ['app.color', 'app.style'],
   'theme.pureBlackMode': ['app.black'],
+  'theme.seasonalEffects': ['app.seasonal'],
   'theme.navigationBarStyle': ['app.navbar'],
   'theme.liquidGlass': ['app.glass'],
   'theme.wallpaper.enabled': ['background'],

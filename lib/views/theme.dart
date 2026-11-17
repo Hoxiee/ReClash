@@ -85,7 +85,10 @@ class _ThemeViewState extends ConsumerState<ThemeView>
 
   int? _tabOf(String target) {
     if (!themeToolSettings.any((setting) => setting.id == target)) return null;
-    if (target.startsWith('theme.wallpaper.')) return 1;
+    if (target.startsWith('theme.wallpaper.') ||
+        target == seasonalToolSetting.id) {
+      return 1;
+    }
     return switch (target) {
       'theme.themeMode' ||
       'theme.themeColor' ||
@@ -2603,6 +2606,7 @@ final themeToolSettings = <SettingSpec>[
     condition: SettingCondition.navigationBar,
   ),
   ...wallpaperToolSettings,
+  seasonalToolSetting,
   SettingSpec(
     id: 'theme.profilesStyle',
     page: ToolPage.theme,

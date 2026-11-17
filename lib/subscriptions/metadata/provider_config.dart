@@ -6,6 +6,7 @@ import '../protocol/registry.dart';
 import 'metadata.dart';
 import 'provider_cards.dart';
 import 'provider_power_labels.dart';
+import 'provider_seasonal.dart';
 
 const providerConfigSizeLimit = 512 * 1024;
 const providerConfigDepthLimit = 32;
@@ -20,6 +21,7 @@ class ProviderConfig {
     this.view = const {},
     this.powerButton = const {},
     this.wallpaper,
+    this.seasonal,
     this.widgets,
     this.fields = const {},
     this.routing,
@@ -34,6 +36,7 @@ class ProviderConfig {
   /// The valid `shape` and `type` entries of `power-button`, lowercased.
   final Map<String, String> powerButton;
   final ({String url, int opacity})? wallpaper;
+  final ProviderSeasonal? seasonal;
 
   /// Lowercased widget names in display order, null without a valid section.
   final List<String>? widgets;
@@ -85,6 +88,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
     var view = const <String, String>{};
     var powerButton = const <String, String>{};
     ({String url, int opacity})? wallpaper;
+    ProviderSeasonal? seasonal;
     List<String>? widgets;
     var cards = const <ProviderCard>[];
     var labels = const <String, List<ProviderPowerLabel>>{};
@@ -111,6 +115,9 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
               ? _wallpaper(value, warnings)
               : null;
           if (wallpaper == null) warnings.add('Invalid wallpaper section');
+        case 'seasonal':
+          seasonal = parseProviderSeasonal(value, warnings);
+          if (seasonal == null) warnings.add('Invalid seasonal section');
         case 'widgets':
           if (value is List && value.every((name) => name is String)) {
             widgets = [
@@ -143,6 +150,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         view: Map.unmodifiable(view),
         powerButton: Map.unmodifiable(powerButton),
         wallpaper: wallpaper,
+        seasonal: seasonal,
         widgets: widgets == null ? null : List.unmodifiable(widgets),
         fields: Map.unmodifiable(fields),
         routing: routing,
@@ -264,8 +272,18 @@ String _localized(Map<String, Object?> map, List<String> tags) {
 
 const _viewKeys = {
   'proxies': {'type', 'sort', 'layout', 'icon', 'card'},
-  'app': {'navbar', 'tabs', 'glass', 'color', 'color-dark', 'style', 'black'},
+  'app': {
+    'navbar',
+    'tabs',
+    'glass',
+    'color',
+    'color-dark',
+    'style',
+    'black',
+    'seasonal',
+  },
 };
+const _viewFlags = {'black', 'seasonal'};
 const _wallpaperDefaultOpacity = 8;
 
 Map<String, String> _view(Map<String, Object?> view, List<String> warnings) {
@@ -283,9 +301,9 @@ Map<String, String> _view(Map<String, Object?> view, List<String> warnings) {
       final value = item.value;
       if (!known.contains(key)) {
         warnings.add('Unknown key ${item.key} in view.${group.key}');
-      } else if (name == 'app' && key == 'black' && value is bool) {
-        pairs['app.black'] = '$value';
-      } else if (key != 'black' && value is String) {
+      } else if (name == 'app' && _viewFlags.contains(key) && value is bool) {
+        pairs['app.$key'] = '$value';
+      } else if (!_viewFlags.contains(key) && value is String) {
         pairs['$name.${key.replaceAll('-', '')}'] = value.trim().toLowerCase();
       } else {
         warnings.add('Invalid value for ${group.key}.${item.key} in view');

@@ -795,4 +795,36 @@ void main() {
       expect(changed.providerSettings.userOwned, {'background.opacity'});
     });
   });
+
+  group('seasonal effects setting', () {
+    final off = ProviderSettingsInput(
+      presentedHints({
+        'view': {
+          'app': {'seasonal': false},
+        },
+      }),
+    );
+    final unset = ProviderSettingsInput(presentedHints({}));
+
+    test('a provider turns the effects off and the user value comes back', () {
+      final applied = applyProviderSettings(_base, off);
+      expect(applied.themeProps.seasonalEffects, isFalse);
+      expect(applied.providerSettings.userBaseline['app.seasonal'], isTrue);
+      expect(isProviderManaged(applied, 'app.seasonal'), isTrue);
+
+      final withdrawn = applyProviderSettings(applied, unset);
+      expect(withdrawn.themeProps.seasonalEffects, isTrue);
+    });
+
+    test('a user change to the effects is kept and reported as released', () {
+      final applied = applyProviderSettings(_base, off);
+      final changed = applied.copyWith(
+        themeProps: applied.themeProps.copyWith(seasonalEffects: true),
+      );
+      final after = applyProviderSettings(changed, off);
+      expect(after.themeProps.seasonalEffects, isTrue);
+      expect(after.providerSettings.userOwned, contains('app.seasonal'));
+      expect(isProviderReleased(after, off, 'app.seasonal'), isTrue);
+    });
+  });
 }
