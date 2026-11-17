@@ -105,17 +105,19 @@
   "doctorConfirmForeignAction": "O‘zgartirish",
   "doctorHealedNotice": "{title} — avtomatik tuzatildi",
   "doctorAutoHeal": "Muammolarni avtomatik tuzatish",
-  "doctorAutoHealDescription": "Muammolarni avtomatik tuzatish faqat ReClash sozlamalarini oʻzgartiradi; boshqa dasturlar sozlamalari faqat siz tasdiqlaganingizdan keyin oʻzgaradi.",
+  "doctorAutoHealDescription": "Faqat ReClash sozlamalarini oʻzgartiradi; boshqa dasturlar sozlamalari sizning tasdiqlashingizni kutadi.",
   "doctorProxyOffDetail": "ReClash tizim proksisi ilovadan tashqarida o‘chirildi, shuning uchun ilovalar ReClash’ni chetlab o‘tmoqda.",
   "doctorFixConfirm": "Tuzatish…",
   "coreErrorNotices": "Yadro xatolari haqida bildirishnomalar",
-  "coreErrorNoticesDesc": "Oʻchirilsa, yopilgan ulanishlar kabi yadro xatolari qalqib chiquvchi xabar sifatida koʻrsatilmaydi. Ular jurnalda qoladi.",
+  "coreErrorNoticesDesc": "Oʻchirilsa, yadro xatolari qalqib chiquvchi xabar sifatida koʻrsatilmaydi. Ular jurnalda qoladi.",
   "doctorProfileRevokedTitle": "Obuna havolasi endi ishlamaydi",
   "doctorProfileRevokedDetail": "Provayder obuna havolasini rad etdi (HTTP {status}). Provayderdan yangi havola oling.",
   "doctorProfileNoServersTitle": "Profilda serverlar yoʻq",
   "doctorProfileNoServersDetail": "Obuna yuklandi, lekin unda serverlar yoʻq. Keyinroq yangilang yoki provayderga murojaat qiling.",
   "powerSmartButton": "Aqlli yoqish tugmasi",
-  "powerSmartButtonDescription": "Aqlli yoqish tugmasi «Himoyalangan» holatini faqat ulanish tekshirilgandan keyin ko‘rsatadi, ulanishni tuzatadi va tarif tugaganda tunnelni to‘xtatadi. O‘chirilsa, faqat yoqadi va o‘chiradi.",
+  "powerSmartButtonDescription": "«Himoyalangan» holatini faqat ulanish tekshirilib tuzatilgandan keyin ko‘rsatadi. Tarif tugaganda tunnelni to‘xtatadi.",
   "doctorVpnLostTitle": "VPN’ni boshqa ilova olib qo‘ydi",
-  "doctorVpnLostDetail": "VPN ruxsati bor boshqa ilova tunnelni so‘ragani uchun Android uni to‘xtatdi; ko‘pincha bu shu ilovaning ikkinchi nusxasi yoki ruxsatini shunchaki tekshirayotgan boshqa mijoz bo‘ladi. Buni qila oladigan ilovalar: {apps}. Ularni yoping yoki VPN ruxsatini olib qo‘ying, so‘ng qayta ulaning."
+  "doctorVpnLostDetail": "VPN ruxsati bor boshqa ilova tunnelni so‘ragani uchun Android uni to‘xtatdi; ko‘pincha bu shu ilovaning ikkinchi nusxasi yoki ruxsatini shunchaki tekshirayotgan boshqa mijoz bo‘ladi. Buni qila oladigan ilovalar: {apps}. Ularni yoping yoki VPN ruxsatini olib qo‘ying, so‘ng qayta ulaning.",
+  "connectionRecovery": "Ulanishni tiklash",
+  "logsAndDiagnostics": null
 }

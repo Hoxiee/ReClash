@@ -105,17 +105,19 @@
   "doctorConfirmForeignAction": "변경",
   "doctorHealedNotice": "{title} — 자동으로 수정됨",
   "doctorAutoHeal": "문제 자동 수정",
-  "doctorAutoHealDescription": "문제 자동 수정은 ReClash 자체 설정만 변경합니다. 다른 프로그램의 설정은 확인한 뒤에만 변경됩니다.",
+  "doctorAutoHealDescription": "ReClash 자체 설정만 변경합니다. 다른 프로그램의 설정은 확인을 기다립니다.",
   "doctorProxyOffDetail": "ReClash 시스템 프록시가 앱 밖에서 꺼져서 앱들이 ReClash를 거치지 않습니다.",
   "doctorFixConfirm": "수정…",
   "coreErrorNotices": "코어 오류 알림",
-  "coreErrorNoticesDesc": "끄면 연결 종료 같은 코어 오류가 팝업으로 표시되지 않습니다. 로그에는 계속 남습니다.",
+  "coreErrorNoticesDesc": "끄면 코어 오류 팝업이 표시되지 않습니다. 로그에는 계속 남습니다.",
   "doctorProfileRevokedTitle": "구독 링크가 더 이상 작동하지 않습니다",
   "doctorProfileRevokedDetail": "제공자가 구독 링크를 거부했습니다(HTTP {status}). 제공자에게 새 링크를 받으세요.",
   "doctorProfileNoServersTitle": "프로필에 서버가 없습니다",
   "doctorProfileNoServersDetail": "구독을 불러왔지만 서버가 없습니다. 나중에 업데이트하거나 제공자에게 문의하세요.",
   "powerSmartButton": "스마트 전원 버튼",
-  "powerSmartButtonDescription": "스마트 전원 버튼은 연결을 확인한 뒤에만 보호됨으로 표시하고, 연결을 복구하며, 요금제가 끝나면 터널을 중지합니다. 끄면 시작과 중지만 합니다.",
+  "powerSmartButtonDescription": "연결을 확인하고 복구한 뒤에만 보호됨으로 표시합니다. 요금제가 끝나면 터널을 중지합니다.",
   "doctorVpnLostTitle": "다른 앱이 VPN을 가져갔습니다",
-  "doctorVpnLostDetail": "VPN 권한이 있는 다른 앱이 터널을 요청해 Android가 터널을 중지했습니다. 이 앱의 다른 사본이나 권한만 확인하는 다른 클라이언트인 경우가 많습니다. 이렇게 할 수 있는 앱: {apps}. 해당 앱을 종료하거나 VPN 권한을 해제한 뒤 다시 연결하세요."
+  "doctorVpnLostDetail": "VPN 권한이 있는 다른 앱이 터널을 요청해 Android가 터널을 중지했습니다. 이 앱의 다른 사본이나 권한만 확인하는 다른 클라이언트인 경우가 많습니다. 이렇게 할 수 있는 앱: {apps}. 해당 앱을 종료하거나 VPN 권한을 해제한 뒤 다시 연결하세요.",
+  "connectionRecovery": "연결 복구",
+  "logsAndDiagnostics": null
 }

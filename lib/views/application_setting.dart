@@ -227,7 +227,7 @@ class ApplicationSettingView extends ConsumerWidget {
         ),
       ),
     ];
-    final diagnostics = <Widget>[
+    final recovery = <Widget>[
       _toggle(
         id: 'application.autoHeal',
         select: (s) => s.autoHeal,
@@ -238,6 +238,8 @@ class ApplicationSettingView extends ConsumerWidget {
         select: (s) => s.smartPowerButton,
         update: (s, v) => s.copyWith(smartPowerButton: v),
       ),
+    ];
+    final logs = <Widget>[
       _toggle(
         id: 'application.openLogs',
         select: (s) => s.openLogs,
@@ -311,14 +313,17 @@ class ApplicationSettingView extends ConsumerWidget {
                 footer: l.checkCertificateDesc,
               ),
               generateSection(
-                title: l.logsAndDiagnostics,
-                items: diagnostics,
+                title: l.connectionRecovery,
+                items: recovery,
                 footer: [
                   l.doctorAutoHealDescription,
                   l.powerSmartButtonDescription,
-                  l.logcatDesc,
-                  l.coreErrorNoticesDesc,
                 ].join('\n'),
+              ),
+              generateSection(
+                title: l.logs,
+                items: logs,
+                footer: [l.logcatDesc, l.coreErrorNoticesDesc].join('\n'),
               ),
               const ProviderSettingsReturnSection(),
             ],

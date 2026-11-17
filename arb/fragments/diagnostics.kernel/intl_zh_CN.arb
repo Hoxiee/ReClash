@@ -105,17 +105,19 @@
   "doctorConfirmForeignAction": "更改",
   "doctorHealedNotice": "{title}——已自动修复",
   "doctorAutoHeal": "自动修复问题",
-  "doctorAutoHealDescription": "自动修复问题只会更改 ReClash 自身的设置；其他程序的设置仅在你确认后才会更改。",
+  "doctorAutoHealDescription": "只更改 ReClash 自身的设置；其他程序的设置需你确认后才会更改。",
   "doctorProxyOffDetail": "ReClash 的系统代理在应用外被关闭，因此应用会绕过 ReClash。",
   "doctorFixConfirm": "修复…",
   "coreErrorNotices": "内核错误通知",
-  "coreErrorNoticesDesc": "关闭后，连接被关闭等内核错误不再弹出提示，日志中仍会保留。",
+  "coreErrorNoticesDesc": "关闭后，内核错误弹窗不再显示，日志中仍会保留。",
   "doctorProfileRevokedTitle": "订阅链接已失效",
   "doctorProfileRevokedDetail": "服务商拒绝了该订阅链接（HTTP {status}）。请向服务商索取新的链接。",
   "doctorProfileNoServersTitle": "配置中没有服务器",
   "doctorProfileNoServersDetail": "订阅已加载，但其中没有服务器。请稍后更新，或联系服务商。",
   "powerSmartButton": "智能电源按钮",
-  "powerSmartButtonDescription": "智能电源按钮仅在连接验证后才显示“已保护”，会修复连接，并在套餐结束时停止隧道。关闭后，按钮只负责启动和停止。",
+  "powerSmartButtonDescription": "仅在检查并修复连接后才显示“已受保护”。套餐结束时停止隧道。",
   "doctorVpnLostTitle": "另一个应用占用了 VPN",
-  "doctorVpnLostDetail": "另一个拥有 VPN 权限的应用请求了隧道，因此 Android 停止了它；这通常是本应用的另一个副本，或只是在检查权限的其他客户端。可能的应用：{apps}。请关闭它们或撤销其 VPN 权限，然后重新连接。"
+  "doctorVpnLostDetail": "另一个拥有 VPN 权限的应用请求了隧道，因此 Android 停止了它；这通常是本应用的另一个副本，或只是在检查权限的其他客户端。可能的应用：{apps}。请关闭它们或撤销其 VPN 权限，然后重新连接。",
+  "connectionRecovery": "连接恢复",
+  "logsAndDiagnostics": null
 }

@@ -268,14 +268,14 @@
     }
   },
   "doctorAutoHeal": "Fix problems automatically",
-  "doctorAutoHealDescription": "Fix problems automatically changes only ReClash's own settings; other programs' settings change only after you confirm.",
+  "doctorAutoHealDescription": "Changes only ReClash's own settings; other programs' settings wait for your confirmation.",
   "doctorProxyOffDetail": "The ReClash system proxy was turned off outside the app, so apps go around ReClash.",
   "doctorFixConfirm": "Fix…",
   "@doctorFixConfirm": {
     "description": "Button for a fix that changes another program's settings; the ellipsis signals that a confirmation follows."
   },
   "coreErrorNotices": "Core error notices",
-  "coreErrorNoticesDesc": "Turning this off stops error pop-ups from the core, such as closed connections. Errors still appear in the logs.",
+  "coreErrorNoticesDesc": "Turning this off hides core error pop-ups; the logs keep them.",
   "doctorProfileRevokedTitle": "Subscription link no longer works",
   "doctorProfileRevokedDetail": "The provider refused the subscription link (HTTP {status}). Get a new link from your provider.",
   "@doctorProfileRevokedDetail": {
@@ -288,7 +288,7 @@
   "doctorProfileNoServersTitle": "The profile has no servers",
   "doctorProfileNoServersDetail": "The subscription loaded but contains no servers. Update it later or contact your provider.",
   "powerSmartButton": "Smart power button",
-  "powerSmartButtonDescription": "Smart power button shows Protected only after the connection is verified, repairs it, and stops the tunnel when the plan ends. When off, the button only starts and stops.",
+  "powerSmartButtonDescription": "Shows Protected only after checking the connection and repairs it. Stops the tunnel when the plan ends.",
   "doctorVpnLostTitle": "Another app took the VPN",
   "doctorVpnLostDetail": "Android stopped the tunnel because another app with VPN access claimed it, often a second copy of this app or another client merely checking its permission. Apps that can do this: {apps}. Close them or remove their VPN access, then connect again.",
   "@doctorVpnLostDetail": {
@@ -297,5 +297,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "connectionRecovery": "Connection recovery",
+  "logsAndDiagnostics": null
 }

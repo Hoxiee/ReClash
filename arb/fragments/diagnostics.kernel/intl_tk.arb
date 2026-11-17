@@ -105,17 +105,19 @@
   "doctorConfirmForeignAction": "Üýtgetmek",
   "doctorHealedNotice": "{title} — awtomatik düzedildi",
   "doctorAutoHeal": "Meseleleri awtomatik düzet",
-  "doctorAutoHealDescription": "Meseleleri awtomatik düzetmek diňe ReClash-yň öz sazlamalaryny üýtgedýär; beýleki programmalaryň sazlamalary diňe siz tassyklandan soň üýtgeýär.",
+  "doctorAutoHealDescription": "Diňe ReClash-yň öz sazlamalaryny üýtgedýär; beýleki programmalaryň sazlamalary siziň tassyklamaňyzy garaşýar.",
   "doctorProxyOffDetail": "ReClash-yň ulgam proksisi programmadan daşarda öçürildi, şonuň üçin programmalar ReClash-dan aýlanyp geçýär.",
   "doctorFixConfirm": "Düzet…",
   "coreErrorNotices": "Ýadro säwlikleri barada habarlar",
-  "coreErrorNoticesDesc": "Öçürilende ýapylan birikmeler ýaly ýadro säwlikleri gapma-gapdal habar bolup görkezilmeýär. Olar žurnalda galýar.",
+  "coreErrorNoticesDesc": "Öçürilende ýadro säwlikleri gapma-gapdal habar bolup görkezilmez. Olar žurnalda galýar.",
   "doctorProfileRevokedTitle": "Abunalyk baglanyşygy işlemeýär",
   "doctorProfileRevokedDetail": "Üpjün edijisi abunalyk baglanyşygyny kabul etmedi (HTTP {status}). Üpjün edijiden täze baglanyşyk alyň.",
   "doctorProfileNoServersTitle": "Profilde serwer ýok",
   "doctorProfileNoServersDetail": "Abunalyk ýüklendi, emma onda serwer ýok. Soňrak täzeläň ýa-da üpjün edijiňiz bilen habarlaşyň.",
   "powerSmartButton": "Akylly güýç düwmesi",
-  "powerSmartButtonDescription": "Akylly güýç düwmesi «Gorag astynda» ýagdaýyny diňe birikme barlanandan soň görkezýär, birikmäni düzedýär we tarif gutarandan soň tuneli duruzýar. Öçürilende diňe işe goýberýär we duruzýar.",
+  "powerSmartButtonDescription": "Diňe birikme barlanyp düzedilenden soň «Goralýar» ýagdaýyny görkezýär. Tarif gutaranda tuneli duruzýar.",
   "doctorVpnLostTitle": "VPN-i başga programma aldy",
-  "doctorVpnLostDetail": "VPN rugsady bolan başga programma tuneli talap edendigi sebäpli Android ony togtatdy; köplenç bu şu programmanyň ikinji nusgasy ýa-da diňe rugsadyny barlaýan başga müşderi. Muny edip biljek programmalar: {apps}. Olary ýapyň ýa-da VPN rugsadyny aýryň, soňra täzeden birikiň."
+  "doctorVpnLostDetail": "VPN rugsady bolan başga programma tuneli talap edendigi sebäpli Android ony togtatdy; köplenç bu şu programmanyň ikinji nusgasy ýa-da diňe rugsadyny barlaýan başga müşderi. Muny edip biljek programmalar: {apps}. Olary ýapyň ýa-da VPN rugsadyny aýryň, soňra täzeden birikiň.",
+  "connectionRecovery": "Birikmäni dikeltmek",
+  "logsAndDiagnostics": null
 }

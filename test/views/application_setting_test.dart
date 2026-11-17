@@ -394,7 +394,7 @@ void main() {
 
     expect(level, findsNothing);
     expect(capture, findsNothing);
-    expect(find.text('Logs and diagnostics'), findsNothing);
+    expect(find.text('Connection recovery'), findsNothing);
     expect(find.text('Turning off Logcat hides the logs entry.'), findsNothing);
     expect(container.read(appSettingProvider).openLogs, isTrue);
     expect(container.read(patchClashConfigProvider).logLevel, LogLevel.debug);
