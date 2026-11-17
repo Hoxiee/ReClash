@@ -23,18 +23,9 @@ Auto routing → **Library** → **Behaviours**: a card of the user's own opens 
 
 The preview verdict is **Would keep {pick}**, **Would pick {pick} instead of {now}** or **Would find no server**. It applies nothing.
 
-> [!NOTE]
-> **Screenshot `studio-form`** — Name, preview, Server order, Choose from and Character
-
-> [!NOTE]
-> **Screenshot `studio-check`** — Would pick «🇳🇴 Oslo 1» instead of «🇸🇪 Stockholm 1»
-
 ## YAML
 
 **YAML** in the menu opens the whole document as text; saving it replaces the form. Form edits rewrite the text from the parsed document, so comments are lost. The menu also has **Export** and, for a saved behaviour, **Delete**.
-
-> [!NOTE]
-> **Screenshot `studio-yaml`** — the YAML editor of a behaviour
 
 ## Warnings
 
@@ -50,19 +41,10 @@ The first error shows in a banner and blocks saving; an issue tied to text is pr
 | This config has no group {group} | A scenario names a missing group. |
 | Contacts third-party sites: {hosts} | A provider entry needs consent; see [Consent](../sharing.md#consent). |
 
-> [!NOTE]
-> **Screenshot `studio-warnings`** — a repeated tier and an unused tag
-
 ## Merging
 
 A copy remembers its original. When the original changes, **The original changed** offers **Bring changes over** (merges them and keeps the user's own edits) and **What changed** (a line diff). Results: "Changes brought over", "Brought over; you changed these too, so yours were kept: {keys}" or "Couldn't bring the changes over".
 
-> [!NOTE]
-> **Screenshot `studio-merge`** — The original changed, with Bring changes over and What changed
-
 ## Versions
 
 Each save keeps the replaced text; the last 10 versions per behaviour are kept. **Earlier versions** in the menu loads one into the editor; it is saved on the next save. Scenarios keep versions too, but the editor does not offer them.
-
-> [!NOTE]
-> **Screenshot `studio-restore`** — Earlier versions with timestamps

@@ -21,18 +21,6 @@ Open the sheet from the auto routing action of a select group in **Proxies**, or
 
 Without a binding, the group shows **With auto routing on** (the behaviour it would get, server count) and **Turn on auto routing**, which adds a user binding with the default behaviour.
 
-> [!NOTE]
-> **Screenshot `group-sheet-auto`** — Auto group: status, Control, Choose from, Behaviour
-
-> [!NOTE]
-> **Screenshot `group-intro`** — no auto routing, with Turn on auto routing
-
-> [!NOTE]
-> **Screenshot `group-consent`** — Permission needed, hosts, Allow
-
-> [!NOTE]
-> **Screenshot `group-route`** — the «▶️ YouTube» sheet, Made by a route
-
 ## Control
 
 | Option | Engine control |
@@ -42,9 +30,6 @@ Without a binding, the group shows **With auto routing on** (the behaviour it wo
 | **Manual** | `manual`: the user selects in the proxies list; the engine never switches and runs no checks. |
 
 Selecting a server by hand in an Auto group pins it. See [Control](../engine.md#control).
-
-> [!NOTE]
-> **Screenshot `group-sheet-pinned`** — Control Pinned, Holding the pinned server
 
 ## Choose from
 
@@ -59,9 +44,6 @@ Each chip sets `pool.include` of the user's binding and returns a pinned group t
 
 A user chip's context menu deletes it.
 
-> [!NOTE]
-> **Screenshot `group-change-to`** — Any, 🇳🇴, 🇸🇪, 🇷🇺 and one pattern
-
 ## Behaviour
 
 | Row | Edits |
@@ -72,21 +54,9 @@ A user chip's context menu deletes it.
 | **Group settings** → **Behaviour** | **Switching**: `feel` **Rarely** (`calm`), **Balanced**, **Often** (`eager`). **Check frequency**: `energy` **Economical**, **Balanced**, **Precise**. |
 | **Group settings** → **Network** | **Direct sites through this group** (when the behaviour has `direct-split`): **On now** or **Ready: direct sites still open**. |
 
-> [!NOTE]
-> **Screenshot `group-behaviour`** — Fastest, Server order, Group settings
-
-> [!NOTE]
-> **Screenshot `group-settings`** — pattern, Switching, Check frequency, Direct sites
-
 ## Explanation
 
 Each **Why this server** row shows the server and latency, then its exclusion or its tier and health (**Working**, **Worked before**, **Not checked**, **Not working**), "may reach “{tier}” after a check", "exit {country}", check results (✓ pass, × fail, ~ soft) and the last check time. **History** lists switches, failures, pins and mode changes. Fields: [Explanations and journal](../engine.md#explanations-and-journal).
-
-> [!NOTE]
-> **Screenshot `group-why`** — Why this server, with a Skipped after «Change server» row
-
-> [!NOTE]
-> **Screenshot `group-history`** — History with a failover and a pin
 
 ## Messages
 

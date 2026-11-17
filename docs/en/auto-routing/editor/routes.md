@@ -24,12 +24,6 @@ The route editor and its pickers: traffic, server order, steps, countries and co
 
 A malformed value shows **Invalid value**. Other match types are written in YAML; see [Match types](../scenarios.md#match-types).
 
-> [!NOTE]
-> **Screenshot `route-traffic-picker`** — New route with YouTube and Gemini, and Custom
-
-> [!NOTE]
-> **Screenshot `route-entry-form`** — Site category with an Invalid value error
-
 ## Route editor
 
 The same page edits a route, **Everything else** and a subscription group program; the last two have no name or traffic.
@@ -45,18 +39,6 @@ The same page edits a route, **Everything else** and a subscription group progra
 
 For a group, **One server** holds the group on a member with no search (`to`); **Every group** does not offer it. Field errors show beside the field, others in a banner; saving is disabled while any remain. Delete removes the route; its traffic falls to the next match.
 
-> [!NOTE]
-> **Screenshot `route-editor`** — «▶️ YouTube» with name, traffic, Best server, behaviour and order
-
-> [!NOTE]
-> **Screenshot `route-editor-fixed`** — One server, choosing «🇳🇴 Oslo 1»
-
-> [!NOTE]
-> **Screenshot `route-behaviour`** — Built-in, From provider and Mine
-
-> [!NOTE]
-> **Screenshot `route-pool`** — Leave out servers with a name condition
-
 ## Server order
 
 Steps make up the server order: the first step with a working server decides; see [Tiers](../profiles.md#tiers).
@@ -68,9 +50,6 @@ Steps make up the server order: the first step with a working server decides; se
 | Muted steps | "From the behaviour — edit a step to make the order your own": editing copies them first. |
 | Connector | "if none of them works" between steps. |
 | Footer | In the studio: "If no step has a working server: {action}", the behaviour's `stranded`. |
-
-> [!NOTE]
-> **Screenshot `route-editor-ladder`** — steps «⚡ RU» and Any working server, with the connector
 
 ### Steps
 
@@ -86,15 +65,9 @@ Steps make up the server order: the first step with a working server decides; se
 
 The footer counts the servers that fit now, when the condition can be tested locally. **Label** names the step; **Fallback** sets `last-resort`.
 
-> [!NOTE]
-> **Screenshot `ladder-step-editor`** — Name contains «⚡ RU», Country, «2 servers fit now»
-
 ### Countries
 
 **Choose countries** lists **On your servers** (server counts; **verified** when an exit country is confirmed), then **All countries**. Search matches the code and the English or Russian name.
-
-> [!NOTE]
-> **Screenshot `country-picker`** — Norway verified, Sweden and Russia, then All countries
 
 ## Conditions
 
@@ -107,9 +80,3 @@ The builder edits pools, advanced step conditions, tags and **Recognized when** 
 | **As text** | The condition text, checked as typed; a parse error blocks saving. |
 
 Fields map to [Fields](../conditions.md#fields). A condition with nested groups shows "This condition nests groups, so it is edited as text." An empty condition reads **Any server**, or **Always** for a network.
-
-> [!NOTE]
-> **Screenshot `condition-builder`** — All conditions: Country is Norway or Sweden; Latency under 300
-
-> [!NOTE]
-> **Screenshot `condition-text`** — As text with a parse error

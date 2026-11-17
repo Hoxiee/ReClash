@@ -61,7 +61,6 @@
         "en": "RCX auto routing",
         "zh-CN": "RCX 自动路由"
       },
-      "screenshots": "images/README.md",
       "groups": [
         {
           "title": {
@@ -108,19 +107,6 @@
             "editor/routes.md",
             "editor/groups.md",
             "editor/studio.md"
-          ]
-        },
-        {
-          "title": {
-            "ru": "Приложения",
-            "en": "Appendix",
-            "zh-CN": "附录"
-          },
-          "pages": [
-            {
-              "file": "images/README.md",
-              "slug": "screenshots"
-            }
           ]
         }
       ]

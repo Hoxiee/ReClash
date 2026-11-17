@@ -77,13 +77,10 @@ flowchart LR
 
 | 页面 | 内容 |
 | --- | --- |
-| [编辑器指南](editor/README.md) | 编辑器各个界面的概览。 |
 | [自动路由页面](editor/hub.md) | 自动路由页面：当前场景、组和状态。 |
 | [路由](editor/routes.md) | 创建路由并调整顺序。 |
 | [组](editor/groups.md) | 每个组的行为、服务器顺序和控制。 |
 | [工作台](editor/studio.md) | 带实时校验的文本编辑器。 |
-| [在应用中共享](editor/sharing.md) | 在界面中导出、导入和使用链接。 |
-| [故障排查](editor/troubleshooting.md) | 应用报告的问题及处理方式。 |
 
 ## 五分钟快速上手
 
@@ -154,7 +151,7 @@ go run ./rcx/cmd/rcxlint path/to/file.yaml
 
 ### 5. 查看解释
 
-在应用中打开该组。排序结果会显示各服务器、所属步骤以及当前服务器被选中的原因。如果结果看起来不对，[故障排查](editor/troubleshooting.md)列出了应用报告的各种情况。
+在应用中打开该组。排序结果会显示各服务器、所属步骤以及当前服务器被选中的原因。如果结果看起来不对，[引擎](engine.md)说明了排序的原因。
 
 ## 保证
 

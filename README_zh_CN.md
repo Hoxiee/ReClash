@@ -38,7 +38,7 @@
   及其质量、服务检测、连接等。
 - **读懂服务商的订阅。** 从 `Subscription-Userinfo` 读取流量与到期时间，支持配置标题、服务商公告，
   以及服务商提供、经你同意才生效的路由配置与设置。Clash、INCY、Happ 链接、普通代理 URI
-  和多种配置格式都能直接导入。详见[服务商支持](docs/zh-CN/PROVIDER_FEATURES.md)。
+  和多种配置格式都能直接导入。详见[服务商支持](docs/en/providers/README.md)。
 - **服务商的外观。** 订阅可以带来服务商的标志、主题色、壁纸、连接按钮和状态文字，让客户端看起来就像服务商自己的应用。
 - **收藏与链式代理。** 收藏的服务器排在代理组顶部；链式代理让流量经国内入口转到海外出口，并作为列表中的一个服务器出现。
 - **服务检测。** 查看 Google、YouTube、ChatGPT、Netflix 等服务能否通过当前线路打开，以及各自的延迟。
@@ -135,7 +135,7 @@ adb shell am start -a com.reclash.action.TOGGLE
 ## 文档
 
 - [自动路由](docs/zh-CN/auto-routing/README.md)：基本概念、配置、场景、条件与实用示例。
-- [服务商支持](docs/zh-CN/PROVIDER_FEATURES.md)与[服务商标准](docs/zh-CN/PROVIDER_HEADERS.md)：订阅服务商可以向应用传达的信息。
+- [服务商支持](docs/en/providers/README.md)与[服务商标准](docs/en/providers/headers.md)：订阅服务商可以向应用传达的信息。
 
 ## 从源码构建
 

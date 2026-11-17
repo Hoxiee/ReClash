@@ -62,9 +62,6 @@ routes:
 
 **应用中的效果。** 自动路由页面会列出包含四条路由的场景。每条路由显示当前服务器和选中该服务器的步骤。“代理”页面会多出 `YouTube`、`Claude`、`Gemini` 三个组。路由仅在 rule 模式下生效；在 global 或 direct 模式下，自动路由页面会提示当前状态。
 
-> [!NOTE]
-> **截图 `cookbook-routes-hub`** —— 自动路由页面显示 YouTube、Claude、Gemini 和 Local 路由，并列出各自的当前服务器和选中步骤。
-
 ## 2. 服务器顺序：先星标，再国家，最后任意可用节点
 
 **目标。** 优先使用名称带 `*` 的服务器，其次选择芬兰，最后选择任意可用服务器。
@@ -93,9 +90,6 @@ prefer:
 `last-resort: true` 可确保 `Anything` 始终位于最后，即使以后在它后面添加步骤也是如此（参见[配置](profiles.md#prefer)）。
 
 **应用中的效果。** 组的说明按步骤分组显示排序结果。当前服务器会显示步骤标签（`Starred`、`Finland` 或 `Anything`）及其被选中的原因。
-
-> [!NOTE]
-> **截图 `cookbook-ladder-ranking`** —— 组排序按 Starred、Finland、Anything 分组，并标出当前服务器。
 
 ## 3. 适用于低性能手机的省电稳定配置
 
@@ -244,9 +238,6 @@ groups:
 
 **应用中的效果。** 固定组会将该服务器标为“由你选择”，说明中显示原因 `hold.pinned`。日志会记录 `pin` 和 `auto` 事件。
 
-> [!NOTE]
-> **截图 `cookbook-pin-control`** —— 智能组面板显示 Auto、Pinned、Manual 控制方式，并突出固定的服务器。
-
 ## 8. 导出包含自有配置的场景包
 
 **目标。** 将场景及其所需的配置一起发送给朋友。
@@ -287,6 +278,3 @@ profiles:
 `rcxlint` 和工作台均会按该文件当前形式检查它。
 
 **应用中的效果。** 保存之前，导入审核页面会列出场景和配置，以及它们最终使用的名称。
-
-> [!NOTE]
-> **截图 `cookbook-bundle-import`** —— 导入审核页面列出一个场景和一个配置，并显示最终名称。
