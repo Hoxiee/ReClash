@@ -155,6 +155,9 @@ impl NameSet {
     }
 }
 
+/// Set by the queue on a locked query; the ruleset redirects or drops it.
+pub(super) const LOCKED_MARK: u32 = 0x5c1d;
+
 #[derive(Default)]
 pub(super) struct Matcher {
     names: NameSet,
@@ -412,11 +415,10 @@ fn serve(mut queue: nfq::Queue, number: u16, matcher: &RwLock<Arc<Matcher>>) {
         match queue.recv() {
             Ok(mut message) => {
                 let current = matcher.read().unwrap_or_else(|e| e.into_inner()).clone();
-                message.set_verdict(if current.drops(message.get_payload()) {
-                    nfq::Verdict::Drop
-                } else {
-                    nfq::Verdict::Accept
-                });
+                if current.drops(message.get_payload()) {
+                    message.set_nfmark(LOCKED_MARK);
+                }
+                message.set_verdict(nfq::Verdict::Accept);
                 if let Err(error) = queue.verdict(message) {
                     eprintln!("Helper DNS filter could not send a verdict: {error}");
                 }

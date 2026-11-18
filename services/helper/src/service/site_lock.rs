@@ -1,6 +1,6 @@
 use super::hub::{error_response, json_response};
 use super::site_lock_dns::{
-    validate_names, DnsQueue, GuardedNames, Matcher, Names, NoQueue, SystemQueue,
+    validate_names, DnsQueue, GuardedNames, Matcher, Names, NoQueue, SystemQueue, LOCKED_MARK,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
@@ -233,26 +233,29 @@ fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> St
     )
 }
 
-// A resolver outside the TUN (a LAN router in route-exclude-address) gets the Core's
-// fake address instead; without the Core's cgroup its own upstreams would loop.
+// The queue only marks a locked query. A resolver outside the TUN (a LAN router in
+// route-exclude-address) is redirected to the Core, which answers with a fake address;
+// only a flow's first packet is NATed, so a marked packet of an unredirected flow drops.
+// Without the Core's cgroup its own upstreams would loop, so nothing is redirected.
 fn redirect_block(tun: &str, dns: Option<&DnsFilter>) -> String {
-    let Some(DnsFilter {
-        cgroup: Some(cgroup),
-        redirect: Some(target),
-    }) = dns
-    else {
+    let Some(dns) = dns else {
         return String::new();
     };
-    if tun.is_empty() {
-        return String::new();
+    let mut text = String::new();
+    if let (false, Some(_), Some(target)) = (tun.is_empty(), dns.cgroup, dns.redirect) {
+        text.push_str(&format!(
+            "  chain dns_redirect {{\n    type nat hook output priority 10; policy accept;\n    \
+             meta nfproto ipv4 meta mark {LOCKED_MARK:#x} dnat ip to {target}\n  }}\n"
+        ));
     }
-    let level = cgroup.split('/').count();
-    format!(
-        "  chain dns_redirect {{\n    type nat hook output priority dstnat; policy accept;\n    \
-         oifname \"lo\" accept\n    oifname \"{tun}\" accept\n    \
-         socket cgroupv2 level {level} \"{cgroup}\" accept\n    \
-         meta nfproto ipv4 meta l4proto {{ tcp, udp }} th dport 53 dnat ip to {target}\n  }}\n"
-    )
+    for hook in ["output", "forward"] {
+        text.push_str(&format!(
+            "  chain dns_{hook}_guard {{\n    type filter hook {hook} priority 20; policy accept;\n    \
+             meta mark {LOCKED_MARK:#x} ct status dnat meta mark set 0 accept\n    \
+             meta mark {LOCKED_MARK:#x} drop\n  }}\n"
+        ));
+    }
+    text
 }
 
 // The other end of the TUN's own subnet: routed into the TUN, never local.
@@ -1286,17 +1289,23 @@ mod tests {
     }
 
     #[test]
-    fn dns_ruleset_redirects_off_tun_dns_into_the_tun_except_the_core() {
+    fn dns_ruleset_redirects_locked_queries_into_the_tun_and_drops_the_rest() {
         let text = dns_rules("tun0", Some(CGROUP));
-        assert!(text.contains(&format!(
-            "  chain dns_redirect {{\n    type nat hook output priority dstnat; policy accept;\n    \
-             oifname \"lo\" accept\n    oifname \"tun0\" accept\n    \
-             socket cgroupv2 level 2 \"{CGROUP}\" accept\n    \
-             meta nfproto ipv4 meta l4proto {{ tcp, udp }} th dport 53 dnat ip to 198.18.0.2\n  }}\n"
-        )));
+        assert!(text.contains(
+            "  chain dns_redirect {\n    type nat hook output priority 10; policy accept;\n    \
+             meta nfproto ipv4 meta mark 0x5c1d dnat ip to 198.18.0.2\n  }\n"
+        ));
+        for hook in ["output", "forward"] {
+            assert!(text.contains(&format!(
+                "  chain dns_{hook}_guard {{\n    type filter hook {hook} priority 20; policy accept;\n    \
+                 meta mark 0x5c1d ct status dnat meta mark set 0 accept\n    \
+                 meta mark 0x5c1d drop\n  }}\n"
+            )));
+        }
         assert!(!dns_rules("tun0", None).contains("dns_redirect"));
+        assert!(dns_rules("tun0", None).contains("dns_output_guard"));
         assert!(!dns_rules("", Some(CGROUP)).contains("dns_redirect"));
-        assert!(!rules("tun0", &["10.0.0.0/8"]).contains("dns_redirect"));
+        assert!(!rules("tun0", &["10.0.0.0/8"]).contains("dns_"));
     }
 
     #[test]
