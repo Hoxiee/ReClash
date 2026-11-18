@@ -11,7 +11,7 @@ The Auto routing page: the switch, the running scenario with its routes, the sma
 | Route editor | Auto routing → **Routes** → a route | One route; see [Route editor](routes.md). |
 | Studio | Auto routing → **Library** → **Behaviours** → a card | One behaviour; see [Studio](studio.md). |
 
-Auto routing is one screen without tabs. From top to bottom: the permission card, the switch and the running scenario, the mode, the running scenario's **Routes** and **More**, the **Groups**, and a **Library** row.
+Auto routing is one screen without tabs. From top to bottom: the permission card, the switch and the running scenario, the mode, the running scenario's **Routes** and **More**, the **Groups**, a **Library** row and the **Advanced settings** switch.
 
 ## States
 
@@ -52,9 +52,11 @@ While the tunnel mode is not `rule`, the footer reads "Routes apply in rule mode
 | Row | Content |
 | --- | --- |
 | **Connection mode** | The scenario's `mode`; **Don't change** leaves it to the user. |
-| **Groups in this scenario** | Programs for named groups and **Every group** (`*`); **Add group** adds one. |
-| **Network kinds** | **Name**, **Recognized when**, **On this network** (mode), **Groups**; **Add network kind**. **Advanced** shows diagnostics and translations, edited as YAML. |
+| **Groups in this scenario** | Programs for named groups and **Every group** (`*`); **Add group** adds one. A row of a real group in the running scenario opens its [group sheet](groups.md).. |
+| **Network kinds** | **Name**, **Recognized when**, **On this network** (mode), **Groups**; **Add network kind**. |
 | **Tags** | Scenario tags; **Add tag**. |
+
+With **Advanced settings** off, a row shows only when it already holds a value.
 
 ### Saving
 
@@ -63,6 +65,17 @@ Edits to the user's own scenario save once they have no errors. A route change r
 ## Groups
 
 The smart groups the engine drives, each with the same status line as a route; each opens its group sheet. The footer reads **Checks today: {requests} · {used} of {cap}**: probe requests today and the data they used against the daily cap.
+
+## Advanced settings
+
+The switch below the **Library** row, **Advanced settings** ("Step-by-step server order conditions, YAML, networks, tags and versions"), is off by default and applies to every auto routing editor.
+
+| Editor | Off hides |
+| --- | --- |
+| [Studio](studio.md) | Description, **What it would pick now**, **Server order**, **Choose from**, **More**, **Sites contacted**, **YAML**, **Export**, **Earlier versions**, **The original changed**. **Name**, **Warnings**, consent, **Character**, save and delete stay. |
+| Scenario editor | Description, **Connection mode**, **Groups in this scenario**, **Network kinds**, **Tags**, **Sites contacted**, **YAML**, **Export**. A row that already holds a value stays. |
+| Route | **Custom** and **Add entry**; existing custom entries stay. |
+| Step editor | **Add condition**, **Advanced condition…**, **Fallback**; rows in use stay. |
 
 ## Library
 
@@ -81,7 +94,7 @@ A copy is saved when the editor saves it.
 
 ### Scenario editor
 
-Holds **Name**, a description ("What this scenario does"), the **Routes** and **More** sections, **Warnings** and **Sites contacted**. The menu has **YAML**, **Export** and **Delete**; save is disabled while there are errors or no changes.
+Holds **Name**, a description ("What this scenario does"), the **Routes** and **More** sections, **Warnings** and **Sites contacted**. The menu has **YAML**, **Export** and **Delete**; save is disabled while there are errors or no changes. With **Advanced settings** off, the description and **More** rows show only when they hold a value, and **Sites contacted**, **YAML** and **Export** are hidden.
 
 ## Import and export
 

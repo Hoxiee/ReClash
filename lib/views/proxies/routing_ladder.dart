@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'routing_advanced.dart';
 import 'routing_condition.dart';
 import 'routing_country.dart';
 import 'routing_studio.dart';
@@ -33,7 +34,6 @@ class RoutingLadderSection extends ConsumerStatefulWidget {
     this.inherited = const [],
     this.title,
     this.footer,
-    this.stranded,
   });
 
   final List<Map<String, Object?>> steps;
@@ -44,9 +44,6 @@ class RoutingLadderSection extends ConsumerStatefulWidget {
   final List<Map<String, Object?>> inherited;
   final String? title;
   final String? footer;
-
-  /// What the group does when no step has a working server, in words.
-  final String? stranded;
 
   @override
   ConsumerState<RoutingLadderSection> createState() =>
@@ -230,7 +227,6 @@ class _RoutingLadderSectionState extends ConsumerState<RoutingLadderSection> {
       );
     }
 
-    final stranded = widget.stranded;
     return CommonPopScope(
       onPop: _sorting
           ? (_) {
@@ -260,10 +256,6 @@ class _RoutingLadderSectionState extends ConsumerState<RoutingLadderSection> {
               ],
             ),
             body,
-            if (stranded != null && steps.isNotEmpty && !_sorting) ...[
-              const _Connector(),
-              _StrandedLine(text: l.rcxLadderStranded(stranded)),
-            ],
             if (inherited) ListFooter(text: l.rcxLadderInherited),
             if (widget.footer case final footer?) ListFooter(text: footer),
           ],
@@ -398,34 +390,6 @@ class _Connector extends StatelessWidget {
                   .copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _StrandedLine extends StatelessWidget {
-  const _StrandedLine({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(_rowInset, 2, _rowInset, 4),
-      child: Row(
-        spacing: 16,
-        children: [
-          const _Badge(glyph: AppGlyphs.info),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ),
         ],
       ),
     );
@@ -903,6 +867,7 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final advanced = watchRoutingAdvanced(ref);
     final groups = ref.watch(groupsProvider);
     final servers = rcxServersOf(groups, widget.groupName);
     final q = _query;
@@ -920,6 +885,7 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
     final fits = q.isLocal && servers.isNotEmpty
         ? servers.where((s) => q.matches(s) ?? false).length
         : null;
+    final showLastResort = advanced || _lastResort;
     PopupOpen? addCondition;
     return FormPage(
       title: widget.step == null
@@ -1005,38 +971,39 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
                   trailing: const DisclosureIndicator(),
                 ),
               ),
-            KeyedSubtree(
-              key: const ValueKey('add'),
-              child: FormRow(
-                title: l.rcxCondAdd,
-                onPressed: () => addCondition?.call(),
-                leading: CommonPopupBox(
-                  placement: PopupPlacement.overAnchorStart,
-                  targetBuilder: (open) {
-                    addCondition = open;
-                    return EntryButton.add(onPressed: open);
-                  },
-                  popupBuilder: (_) => CommonPopupMenu(
-                    items: [
-                      for (final extra in addable)
+            if (advanced)
+              KeyedSubtree(
+                key: const ValueKey('add'),
+                child: FormRow(
+                  title: l.rcxCondAdd,
+                  onPressed: () => addCondition?.call(),
+                  leading: CommonPopupBox(
+                    placement: PopupPlacement.overAnchorStart,
+                    targetBuilder: (open) {
+                      addCondition = open;
+                      return EntryButton.add(onPressed: open);
+                    },
+                    popupBuilder: (_) => CommonPopupMenu(
+                      items: [
+                        for (final extra in addable)
+                          CommonPopupMenuItem(
+                            label: _extraLabel(l, extra),
+                            onPressed: () => _show(extra, servers),
+                          ),
                         CommonPopupMenuItem(
-                          label: _extraLabel(l, extra),
-                          onPressed: () => _show(extra, servers),
+                          glyph: AppGlyphs.code,
+                          label: l.rcxLadderAdvanced,
+                          onPressed: () => unawaited(_advanced()),
                         ),
-                      CommonPopupMenuItem(
-                        glyph: AppGlyphs.code,
-                        label: l.rcxLadderAdvanced,
-                        onPressed: () => unawaited(_advanced()),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
         generateSection(
-          footer: l.rcxLadderLastResortHint,
+          footer: showLastResort ? l.rcxLadderLastResortHint : null,
           items: [
             FormRow(
               title: l.rcxTierLabel,
@@ -1045,14 +1012,15 @@ class _RoutingStepEditorState extends ConsumerState<RoutingStepEditor> {
                 hintText: rcxConditionSummary(l, q.when),
               ),
             ),
-            FormRow(
-              title: l.rcxLastResort,
-              onPressed: () => setState(() => _lastResort = !_lastResort),
-              trailing: Switch(
-                value: _lastResort,
-                onChanged: (value) => setState(() => _lastResort = value),
+            if (showLastResort)
+              FormRow(
+                title: l.rcxLastResort,
+                onPressed: () => setState(() => _lastResort = !_lastResort),
+                trailing: Switch(
+                  value: _lastResort,
+                  onChanged: (value) => setState(() => _lastResort = value),
+                ),
               ),
-            ),
           ],
         ),
       ],

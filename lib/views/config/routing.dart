@@ -8,6 +8,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/proxies/routing.dart';
+import 'package:reclash/views/proxies/routing_advanced.dart';
 import 'package:reclash/views/proxies/routing_import.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/proxies/routing_studio.dart';
@@ -66,7 +67,11 @@ class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView> {
         ),
         final status => RunningScenarioList(
           leading: const [_HubHeader()],
-          trailing: const [_HubGroups(), _LibraryEntry()],
+          trailing: const [
+            _HubGroups(),
+            _LibraryEntry(),
+            RoutingAdvancedToggle(),
+          ],
           route: _route,
           onRouteShown: () => setState(() => _route = null),
           routeLine: (name) => switch (status.groups

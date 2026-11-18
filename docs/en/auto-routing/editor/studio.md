@@ -8,6 +8,8 @@ Auto routing → **Library** → **Behaviours**: a card of the user's own opens 
 
 ## Form
 
+With **Advanced settings** off (the default; see [Advanced settings](hub.md#advanced-settings)) the form shows **Name**, **Warnings**, the consent card, **Character** and the menu's save and delete; the rest below appears when it is on.
+
 | Section | Rows | Key |
 | --- | --- | --- |
 | Header | **Name**, description | `title`, `description` |
@@ -15,17 +17,16 @@ Auto routing → **Library** → **Behaviours**: a card of the user's own opens 
 | **Server order** | Steps, as in the [route editor](routes.md#server-order) | `prefer` |
 | **Choose from** | **Use only servers**, **Leave out servers** | `pool` |
 | **Character** | **Switching**, **Check frequency**, **When no server works** (**Keep current**, **Direct**) | `switch.feel`, `energy`, `stranded` |
-| **More** | **Based on**, **Complexity**, **Tags**, **Advanced** | `extends`, `level`, `tags` |
+| **More** | **Based on**, **Complexity**, **Tags** | `extends`, `level`, `tags` |
 | **Sites contacted** | Each host with its use (check, network diagnostic, exit-country check) and **third party** | — |
 | **Warnings** | Non-blocking issues | — |
 
-**Advanced** lists the parts the form does not edit, each opening YAML: **Availability checks**, **Network kinds**, **Per-network changes**, **Direct sites through this group**, **Exit-country check**, **Translations**.
 
 The preview verdict is **Would keep {pick}**, **Would pick {pick} instead of {now}** or **Would find no server**. It applies nothing.
 
 ## YAML
 
-**YAML** in the menu opens the whole document as text; saving it replaces the form. Form edits rewrite the text from the parsed document, so comments are lost. The menu also has **Export** and, for a saved behaviour, **Delete**.
+With **Advanced settings** on, **YAML** in the menu opens the whole document as text; saving it replaces the form. Form edits rewrite the text from the parsed document, so comments are lost. The menu also has **Export** and, for a saved behaviour, **Delete**.
 
 ## Warnings
 

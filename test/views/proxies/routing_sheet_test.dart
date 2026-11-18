@@ -49,12 +49,27 @@ const _library = [
 
 const _inherited = {'label': 'Fast', 'when': 'latency < 200'};
 
+// English titles of keys the ARB no longer defines, so no generated getter can name them.
+const _retiredRowTitles = [
+  'Add a pattern',
+  'Availability checks',
+  'Exit-country check',
+  'Group settings',
+  'Network diagnostics',
+  'Network kinds',
+  'Per-network changes',
+  'Translations',
+];
+
 class _FixedStatus extends RcxStatusState {
   @override
   RcxStatus? build() => _status;
 }
 
 class _FakeAction extends RcxRoutingAction {
+  _FakeAction({this.entries = const []});
+
+  final List<RcxJournalEntry> entries;
   final bindings = <(String, RcxBinding?)>[];
   final actions = <(String, RcxAction, String?)>[];
 
@@ -73,7 +88,7 @@ class _FakeAction extends RcxRoutingAction {
   Future<RcxExplanation?> explain(String groupName) async => null;
 
   @override
-  Future<List<RcxJournalEntry>> journal(String groupName) async => const [];
+  Future<List<RcxJournalEntry>> journal(String groupName) async => entries;
 
   @override
   Future<RcxStudioResult?> studio(Map<String, Object?> request) async {
@@ -107,12 +122,16 @@ void main() {
     l = await AppLocalizations.load(const Locale('en'));
   });
 
-  Future<_FakeAction> pumpSheet(WidgetTester tester, String group) async {
+  Future<_FakeAction> pumpSheet(
+    WidgetTester tester,
+    String group, {
+    List<RcxJournalEntry> entries = const [],
+  }) async {
     tester.view.physicalSize = const Size(412, 915);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final action = _FakeAction();
+    final action = _FakeAction(entries: entries);
     await tester.pumpWidget(
       TestApp(
         overrides: [
@@ -209,5 +228,29 @@ void main() {
     expect(_text(l.rcxRouteGroup), findsOneWidget);
     expect(_text(l.rcxRouteGroupHint('Every group')), findsOneWidget);
     expect(_text(l.rcxTurnOff), findsNothing);
+  });
+
+  testWidgets('the sheet has one details row and none of the retired rows', (
+    tester,
+  ) async {
+    await pumpSheet(
+      tester,
+      'Proxy',
+      entries: [
+        RcxJournalEntry(
+          seq: 1,
+          at: DateTime.utc(2026),
+          group: 'Proxy',
+          kind: 'switch',
+          from: 'NL-1',
+          to: 'NL-2',
+        ),
+      ],
+    );
+
+    expect(_text(l.rcxDetails), findsOneWidget);
+    for (final title in _retiredRowTitles) {
+      expect(_text(title), findsNothing);
+    }
   });
 }

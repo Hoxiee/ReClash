@@ -14,7 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
-import 'routing_condition.dart';
+import 'routing_choice.dart';
 import 'routing_ladder.dart';
 import 'routing_match.dart';
 import 'routing_studio.dart';
@@ -219,16 +219,10 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
       _changed(() => _inherited = const []);
       return;
     }
-    final source = await _action.studio({'op': 'source', 'id': id});
-    final text = source?.text ?? '';
-    final lint = text.isEmpty
-        ? null
-        : await _action.studio({'op': 'lint', 'text': text, 'id': id});
+    final doc = await rcxProfileDocument(_action, id);
     if (!mounted || request != _request) return;
     _changed(() {
-      _inherited = [
-        for (final step in rcxList(lint?.profile?['prefer'])) rcxMap(step),
-      ];
+      _inherited = [for (final step in rcxList(doc['prefer'])) rcxMap(step)];
     });
   }
 
@@ -237,6 +231,17 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
       _value = {..._value, key: value};
       _errors = const {};
     });
+  }
+
+  String? _autoName;
+
+  void _setMatch(List<String> match) {
+    final name = _name.text.trim();
+    if (name.isEmpty || name == _autoName) {
+      final auto = rcxTrafficName(match);
+      _name.text = _autoName = widget.taken.contains(auto) ? '' : auto;
+    }
+    _set('match', match);
   }
 
   String? _nameError(AppLocalizations l) {
@@ -379,27 +384,6 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
     if (picked != null && mounted) _set('to', picked);
   }
 
-  Future<void> _pickProfile() async {
-    final picked = await BaseNavigator.push<String>(
-      context,
-      _BehaviourPage(selected: _profile, own: !_isRoute),
-    );
-    if (picked == null || !mounted) return;
-    _set('profile', picked);
-    unawaited(_loadInherited());
-  }
-
-  Future<void> _editPool(String key, String title) async {
-    final text = await editCondition(
-      context,
-      title: title,
-      text: _pool[key] as String? ?? '',
-      profile: {'tags': rcxMap(widget.scenario['tags'])},
-    );
-    if (text == null || !mounted) return;
-    _set('pool', {..._pool, key: text});
-  }
-
   String get _to => _value['to'] as String? ?? '';
 
   Future<void> _choose(_Send send) async {
@@ -420,19 +404,13 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
       ? ref.read(groupsProvider).getGroup(_name.text.trim())?.name
       : rcxTargetGroup(ref, widget.target!);
 
-  ({String title, String? description}) _behaviour(AppLocalizations l) {
+  String _behaviour(AppLocalizations l) {
+    if (_profile.isEmpty && !_isRoute) return l.rcxOwnProfile;
+    final id = _profile.isEmpty ? _routeProfile : _profile;
     final library = ref.read(rcxLibraryProvider).value ?? const [];
     final locale = Localizations.localeOf(context).toString();
-    if (_profile.isEmpty && !_isRoute) {
-      return (title: l.rcxOwnProfile, description: null);
-    }
-    final info = library
-        .where((p) => p.id == (_profile.isEmpty ? _routeProfile : _profile))
-        .firstOrNull;
-    return (
-      title: info?.displayTitle(locale) ?? _profile,
-      description: info?.localize(info.description, locale),
-    );
+    return library.where((p) => p.id == id).firstOrNull?.displayTitle(locale) ??
+        id;
   }
 
   String? get _choiceError =>
@@ -443,7 +421,7 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
     final include = _pool['include'] as String? ?? '';
     final exclude = _pool['exclude'] as String? ?? '';
     return [
-      _behaviour(l).title,
+      _behaviour(l),
       if (steps.isNotEmpty) _stepsSummary(l, steps),
       if (include.isNotEmpty) l.rcxOnly(rcxConditionSummary(l, include)),
       if (exclude.isNotEmpty) l.rcxExcept(rcxConditionSummary(l, exclude)),
@@ -459,37 +437,47 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
     ),
   );
 
+  static const _choiceKeys = ['profile', 'prefer', 'pool'];
+
   List<Widget> _choiceSections(AppLocalizations l) {
-    final behaviour = _behaviour(l);
+    final group = _groupName();
     return [
-      generateSection(
-        footer: _errorAt('profile') ?? behaviour.description,
-        items: [
-          DecorationListItem(
-            invalid: _errorAt('profile') != null,
-            title: Text(l.rcxBehaviour),
-            subtitle: EmojiText(behaviour.title),
-            onPressed: _pickProfile,
-            trailing: const DisclosureIndicator(),
+      RoutingChoiceSection(
+        layers: [
+          RcxChoiceLayer(
+            value: _value,
+            fields: _isRoute ? rcxRouteFields : rcxProgramFields,
+            onChanged: (next) {
+              final profile = next['profile'] != _value['profile'];
+              _changed(() {
+                _value = next;
+                _errors = const {};
+              });
+              if (profile) unawaited(_loadInherited());
+            },
           ),
+          if (!_isRoute && group != null)
+            RcxChoiceLayer(
+              value: rcxBindingChoice(
+                ref.read(currentRoutingLayerProvider).groups[group],
+              ),
+              fields: rcxProgramFields,
+              origin: l.rcxFromYours,
+            ),
         ],
-      ),
-      RoutingLadderSection(
-        steps: _steps,
-        onChanged: (steps) => _set('prefer', steps),
-        scope: widget.scenario,
-        scenario: true,
-        groupName: _groupName(),
-        inherited: _inherited,
-        footer: _errorAt('prefer'),
-      ),
-      generateSection(
-        footer: _errorAt('pool'),
-        items: [
-          if (!_isRoute)
-            _poolRow(l, 'include', l.rcxPoolInclude, l.rcxCondAnyServer),
-          _poolRow(l, 'exclude', l.rcxPoolExclude, l.none),
-        ],
+        profile: _isRoute
+            ? _routeProfile
+            : group == null
+            ? null
+            : ref.read(rcxGroupProvider(group))?.profile,
+        groupName: group,
+        scenario: widget.scenario,
+        ownProfile: !_isRoute,
+        errors: {
+          for (final MapEntry(:key, :value) in _errors.entries)
+            if (_choiceKeys.any((k) => key == k || key.startsWith('$k.')))
+              key: value,
+        },
       ),
     ];
   }
@@ -563,6 +551,11 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
       ],
       children: [
         if (_isRoute) ...[
+          RouteTrafficSection(
+            match: _match,
+            errors: _matchErrors(),
+            onChanged: _setMatch,
+          ),
           generateSection(
             footer: nameError,
             items: [
@@ -577,11 +570,6 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
                 ),
               ),
             ],
-          ),
-          RouteTrafficSection(
-            match: _match,
-            errors: _matchErrors(),
-            onChanged: (match) => _set('match', match),
           ),
         ],
         _sendSection(l),
@@ -609,86 +597,6 @@ class _RouteEditorState extends ConsumerState<RouteEditor> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _poolRow(AppLocalizations l, String key, String title, String empty) {
-    final text = _pool[key] as String? ?? '';
-    return DecorationListItem(
-      invalid: _errorAt('pool.$key') != null,
-      title: Text(title),
-      subtitle: EmojiText(
-        text.isEmpty ? empty : text,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
-      onPressed: () => _editPool(key, title),
-      trailing: const DisclosureIndicator(),
-    );
-  }
-}
-
-/// The group profiles a route or group can run, each with what it does.
-class _BehaviourPage extends ConsumerWidget {
-  const _BehaviourPage({required this.selected, required this.own});
-
-  final String selected;
-
-  /// Offers the group's own profile, which a program keeps by naming none.
-  final bool own;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final locale = Localizations.localeOf(context).toString();
-    final current = selected.isEmpty && !own ? _routeProfile : selected;
-    Widget row(String id, String title, String? subtitle) {
-      final isSelected = id == current;
-      return DecorationListItem(
-        isSelected: isSelected,
-        title: EmojiText(title),
-        subtitle: subtitle == null || subtitle.isEmpty
-            ? null
-            : Text(subtitle, maxLines: 3, overflow: TextOverflow.ellipsis),
-        onPressed: () => Navigator.of(context).pop(id),
-        trailing: isSelected ? const SelectionCheck() : null,
-      );
-    }
-
-    return CommonScaffold(
-      title: l.rcxBehaviour,
-      body: ListView(
-        padding:
-            const EdgeInsets.symmetric(
-              horizontal: 16,
-            ).copyWith(top: context.sectionsTopPadding, bottom: 20) +
-            context.bodyInsets,
-        children: [
-          if (own)
-            generateSection(
-              items: [row('', l.rcxOwnProfile, l.rcxOwnProfileHint)],
-            ),
-          for (final source in const ['builtin', 'provider', 'user'])
-            if (library.where(
-                  (p) => p.source == source && !p.isScenario && p.error.isEmpty,
-                )
-                case final profiles when profiles.isNotEmpty)
-              generateSection(
-                title: rcxSourceLabel(l, source),
-                items: [
-                  for (final profile in profiles)
-                    row(
-                      profile.id,
-                      profile.displayTitle(locale),
-                      profile.description.isEmpty
-                          ? rcxLevelLabel(l, profile.level)
-                          : profile.localize(profile.description, locale),
-                    ),
-                ],
-              ),
-        ],
-      ),
     );
   }
 }

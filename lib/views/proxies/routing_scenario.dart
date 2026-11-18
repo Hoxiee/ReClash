@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
+import 'routing_advanced.dart';
 import 'routing_condition.dart';
 import 'routing_import.dart' show exportRoutingDocument;
 import 'routing_match.dart';
@@ -78,7 +79,7 @@ void _clean(Map<String, Object?> scenario) {
 
 /// Text, lint and section edits of one scenario document, shared by the
 /// editor page and the Routes tab of the hub.
-mixin _ScenarioDocument<T extends ConsumerStatefulWidget> on ConsumerState<T> {
+mixin ScenarioDocument<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   String text = '';
   RcxStudioResult? lint;
   Map<String, Object?> scenario = const {};
@@ -164,7 +165,7 @@ class ScenarioEditor extends ConsumerStatefulWidget {
 }
 
 class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
-    with _ScenarioDocument {
+    with ScenarioDocument {
   late RcxUserProfile _saved;
   final _title = TextEditingController();
   final _description = TextEditingController();
@@ -281,6 +282,7 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final advanced = watchRoutingAdvanced(ref);
     final lint = this.lint;
     final errors = lint?.errors ?? const <RcxIssue>[];
     final placed = ScenarioSections.placed(errors);
@@ -288,25 +290,27 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
       title: _titleOf(context),
       isLoading: lint == null,
       menuItems: [
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.code,
-          label: l.rcxYaml,
-          onPressed: _editYaml,
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.export,
-          label: l.rcxExport,
-          onPressed: () => unawaited(
-            exportRoutingDocument(
-              context,
-              ref,
-              id: widget.name != null && !_dirty ? lintId : null,
-              kind: 'scenario',
-              text: text,
-              title: _titleOf(context),
+        if (advanced) ...[
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.code,
+            label: l.rcxYaml,
+            onPressed: _editYaml,
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.export,
+            label: l.rcxExport,
+            onPressed: () => unawaited(
+              exportRoutingDocument(
+                context,
+                ref,
+                id: widget.name != null && !_dirty ? lintId : null,
+                kind: 'scenario',
+                text: text,
+                title: _titleOf(context),
+              ),
             ),
           ),
-        ),
+        ],
         if (widget.name != null)
           CommonPopupMenuItem(
             glyph: AppGlyphs.delete,
@@ -347,19 +351,20 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
                     onChanged: (_) => _onTextChanged(),
                   ),
                 ),
-                DecorationListItem(
-                  title: TextField(
-                    controller: _description,
-                    minLines: 2,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    onChanged: (_) => _onTextChanged(),
-                    decoration: InputDecoration.collapsed(
-                      border: const NoInputBorder(),
-                      hintText: l.rcxHubDescriptionHint,
+                if (advanced || _description.text.isNotEmpty)
+                  DecorationListItem(
+                    title: TextField(
+                      controller: _description,
+                      minLines: 2,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (_) => _onTextChanged(),
+                      decoration: InputDecoration.collapsed(
+                        border: const NoInputBorder(),
+                        hintText: l.rcxHubDescriptionHint,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             ScenarioSections(
@@ -370,14 +375,18 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
               validate: validate,
             ),
           ],
-          if (lint != null) ..._lintSections(l, lint),
+          if (lint != null) ..._lintSections(l, lint, advanced),
         ],
       ),
     );
   }
 }
 
-List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
+List<Widget> _lintSections(
+  AppLocalizations l,
+  RcxStudioResult lint,
+  bool advanced,
+) => [
   if (ScenarioSections.placed(lint.warnings) case final warnings
       when warnings.isNotEmpty)
     generateSection(
@@ -389,7 +398,7 @@ List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
           ),
       ],
     ),
-  if (lint.endpoints.isNotEmpty)
+  if (advanced && lint.endpoints.isNotEmpty)
     generateSection(
       title: l.rcxContacts,
       footer: l.rcxContactsHint,
@@ -403,38 +412,16 @@ List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
     ),
 ];
 
-/// The active scenario of the subscription between [leading] and
-/// [trailing], edited in place: the first change to a built-in or provider
-/// scenario makes the user's own copy and runs it instead.
-class RunningScenarioList extends ConsumerStatefulWidget {
-  const RunningScenarioList({
-    super.key,
-    this.leading = const [],
-    this.trailing = const [],
-    this.route,
-    this.onRouteShown,
-    this.routeLine,
-  });
-
-  final List<Widget> leading;
-  final List<Widget> trailing;
-  final String? route;
-  final VoidCallback? onRouteShown;
-
-  /// Where a route's traffic goes now, when its group reports it.
-  final String? Function(String route)? routeLine;
-
-  @override
-  ConsumerState<RunningScenarioList> createState() =>
-      _RunningScenarioListState();
-}
-
-class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
-    with _ScenarioDocument {
-  late final ScrollController _controller = sheetScrollController(context);
+/// The running scenario as one document edited in place: the first change
+/// to a built-in or provider scenario makes the user's own copy and runs it
+/// instead, and every clean lint saves it.
+mixin RunningScenarioDocument<T extends ConsumerStatefulWidget>
+    on ScenarioDocument<T> {
   String? _id;
   bool _loaded = false;
   bool _copying = false;
+
+  String? get runningId => _id;
 
   String? get _own =>
       _id != null && _id!.startsWith('user/') ? _id!.substring(5) : null;
@@ -442,9 +429,8 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
   @override
   String get lintId => _id ?? 'user/draft';
 
-  @override
-  void initState() {
-    super.initState();
+  /// Loads the running scenario and follows it; called from initState.
+  void watchRunningScenario() {
     final id = ref.read(rcxStatusStateProvider)?.scenario?.id;
     if (id == null) {
       _loaded = true;
@@ -460,12 +446,6 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
       final saved = own == null ? null : profiles[own]?.text;
       if (saved != null && saved != text) setText(saved);
     });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   Future<void> _load(String? id) async {
@@ -500,7 +480,7 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
 
   /// Makes the running scenario the user's own before its first change;
   /// false when the user keeps the original.
-  Future<bool> _ensureOwn() async {
+  Future<bool> ensureOwn() async {
     if (_own != null) return true;
     if (_copying || _id == null) return false;
     final l = context.appLocalizations;
@@ -530,10 +510,23 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
     }
   }
 
-  Future<void> _edit(void Function(Map<String, Object?>) update) async {
-    if (!await _ensureOwn()) return;
+  /// False when the user keeps a scenario that is not theirs.
+  Future<bool> editRunning(
+    void Function(Map<String, Object?> scenario) update,
+  ) async {
+    if (!await ensureOwn()) return false;
     await edit(update);
+    return true;
   }
+
+  Future<Map<String, String>> validateRunning(
+    String prefix,
+    void Function(Map<String, Object?> scenario) update,
+  ) async => await ensureOwn() ? validate(prefix, update) : const {};
+
+  /// The lint problems under [prefix], by the key path below it.
+  Map<String, String> issuesUnder(String prefix) =>
+      lint?.errors.under(context.appLocalizations, prefix) ?? const {};
 
   @override
   void onLinted(RcxStudioResult result) {
@@ -542,6 +535,49 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
     final saved = ref.read(rcxProfilesProvider)[own];
     if (saved == null || saved.text == text) return;
     unawaited(action.saveProfile(own, saved.copyWith(text: text)));
+  }
+}
+
+/// The active scenario of the subscription between [leading] and
+/// [trailing], edited in place: the first change to a built-in or provider
+/// scenario makes the user's own copy and runs it instead.
+class RunningScenarioList extends ConsumerStatefulWidget {
+  const RunningScenarioList({
+    super.key,
+    this.leading = const [],
+    this.trailing = const [],
+    this.route,
+    this.onRouteShown,
+    this.routeLine,
+  });
+
+  final List<Widget> leading;
+  final List<Widget> trailing;
+  final String? route;
+  final VoidCallback? onRouteShown;
+
+  /// Where a route's traffic goes now, when its group reports it.
+  final String? Function(String route)? routeLine;
+
+  @override
+  ConsumerState<RunningScenarioList> createState() =>
+      _RunningScenarioListState();
+}
+
+class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
+    with ScenarioDocument, RunningScenarioDocument {
+  late final ScrollController _controller = sheetScrollController(context);
+
+  @override
+  void initState() {
+    super.initState();
+    watchRunningScenario();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -579,9 +615,11 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
             scenario: scenario,
             errors: errors,
             warnings: lint?.warnings ?? const [],
-            onEdit: _edit,
-            validate: (prefix, update) async =>
-                await _ensureOwn() ? validate(prefix, update) : const {},
+            onEdit: (update) async {
+              await editRunning(update);
+            },
+            validate: validateRunning,
+            running: status.scenario?.id == _id,
             openRoute: widget.route,
             onRouteOpened: widget.onRouteShown,
             routes: status.scenario?.id == _id
@@ -590,7 +628,8 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
             tunnelMode: status.tunnelMode,
             routeLine: widget.routeLine,
           ),
-        if (_id != null && lint != null) ..._lintSections(l, lint),
+        if (_id != null && lint != null)
+          ..._lintSections(l, lint, watchRoutingAdvanced(ref)),
         ...widget.trailing,
       ],
     );
@@ -621,6 +660,7 @@ class ScenarioSections extends ConsumerStatefulWidget {
     this.openRoute,
     this.onRouteOpened,
     this.routeLine,
+    this.running = false,
   });
 
   final Map<String, Object?> scenario;
@@ -639,6 +679,10 @@ class ScenarioSections extends ConsumerStatefulWidget {
   final String? openRoute;
   final VoidCallback? onRouteOpened;
   final String? Function(String route)? routeLine;
+
+  /// These are the running scenario's sections, saved as they change, so a
+  /// group's program opens in the group's own sheet.
+  final bool running;
 
   static const _placedRoots = ['routes', 'groups', 'title'];
 
@@ -726,12 +770,7 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   }
 
   Future<void> _addRoute() async {
-    final match = await pickRouteTraffic(context);
-    if (match == null || !mounted) return;
-    final taken = _takenBy(null);
-    var name = rcxTrafficName(match);
-    if (taken.contains(name)) name = '';
-    await _openRoute(null, {'name': name, 'match': match});
+    await _openRoute(null, {'name': '', 'match': <String>[]});
   }
 
   Future<void> _openRoute(int? index, Map<String, Object?> route) async {
@@ -763,6 +802,11 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   }
 
   Future<void> _openProgram(String target) async {
+    if (widget.running &&
+        !const {r'$main', '*', 'GLOBAL'}.contains(target) &&
+        ref.read(rcxGroupProvider(target)) != null) {
+      return showRoutingSheet(context, target);
+    }
     void put(Map<String, Object?> s, Map<String, Object?> value) {
       s['groups'] = {...rcxMap(s['groups']), target: value};
     }
@@ -806,6 +850,7 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   }
 
   Widget _moreSection(AppLocalizations l) {
+    final advanced = watchRoutingAdvanced(ref);
     final programs = rcxMap(_s['groups'])..remove(r'$main');
     final kinds = [
       for (final kind in rcxList(rcxMap(_s['network'])['kinds']))
@@ -830,14 +875,11 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
       trailing: const DisclosureIndicator(),
     );
 
-    return generateSection(
-      title: l.more,
-      items: [
-        _modeRow(
-          l,
-          _s['mode'] as String? ?? '',
-          (mode) => widget.onEdit((s) => s['mode'] = mode),
-        ),
+    final mode = _s['mode'] as String? ?? '';
+    final items = [
+      if (advanced || mode.isNotEmpty)
+        _modeRow(l, mode, (mode) => widget.onEdit((s) => s['mode'] = mode)),
+      if (advanced || programs.isNotEmpty)
         link(
           l.rcxHubOtherGroups,
           programs.isEmpty
@@ -850,18 +892,22 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
                 widget.warnings.hits('groups.$key'),
           ),
         ),
+      if (advanced || kinds.isNotEmpty)
         link(
           l.rcxHubNetworks,
           kinds.isEmpty ? l.rcxScenarioKindsHint : kinds.join(', '),
           _networkSections,
         ),
+      if (advanced || tags.isNotEmpty)
         link(
           l.rcxTags,
           tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
           (l) => [_tagsSection(l, rcxMap(_s['tags']))],
         ),
-      ],
-    );
+    ];
+    return items.isEmpty
+        ? const SizedBox.shrink()
+        : generateSection(title: l.more, items: items);
   }
 
   Widget _programsSection(AppLocalizations l) => _ProgramsSection(
@@ -1059,9 +1105,6 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
           ),
         ],
       ),
-      if (rcxMap(network['diagnose']).isNotEmpty ||
-          rcxMap(_s['l10n']).isNotEmpty)
-        _advancedSection(l, network),
     ];
   }
 
@@ -1107,25 +1150,6 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
           leading: EntryButton.add(onPressed: _addTag),
           onPressed: _addTag,
         ),
-      ],
-    );
-  }
-
-  Widget _advancedSection(AppLocalizations l, Map<String, Object?> network) {
-    return generateSection(
-      title: l.rcxAdvanced,
-      footer: l.rcxAdvancedHint,
-      items: [
-        if (rcxMap(network['diagnose']) case final diag when diag.isNotEmpty)
-          DecorationListItem(
-            title: Text(l.rcxDiagnostics),
-            subtitle: Text(diag.keys.join(', ')),
-          ),
-        if (rcxMap(_s['l10n']) case final languages when languages.isNotEmpty)
-          DecorationListItem(
-            title: Text(l.rcxTranslations),
-            subtitle: Text(languages.keys.join(', ')),
-          ),
       ],
     );
   }

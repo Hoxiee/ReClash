@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
 import 'routing_condition.dart';
+import 'routing_advanced.dart';
 import 'routing_import.dart';
 import 'routing_ladder.dart';
 import 'routing_route.dart';
@@ -297,6 +298,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final lint = _lint;
+    final advanced = watchRoutingAdvanced(ref);
     final errors = lint?.errors ?? const <RcxIssue>[];
     final sourceChanged =
         _source != null && _saved.base.isNotEmpty && _source != _saved.base;
@@ -304,24 +306,26 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
       title: _titleOf(context),
       isLoading: lint == null,
       menuItems: [
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.code,
-          label: l.rcxYaml,
-          onPressed: _editYaml,
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.export,
-          label: l.rcxExport,
-          onPressed: () => unawaited(
-            showRoutingExport(context, text: _text, title: _titleOf(context)),
-          ),
-        ),
-        if (_saved.history.isNotEmpty)
+        if (advanced) ...[
           CommonPopupMenuItem(
-            glyph: AppGlyphs.clock,
-            label: l.rcxHistoryVersions,
-            onPressed: _restore,
+            glyph: AppGlyphs.code,
+            label: l.rcxYaml,
+            onPressed: _editYaml,
           ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.export,
+            label: l.rcxExport,
+            onPressed: () => unawaited(
+              showRoutingExport(context, text: _text, title: _titleOf(context)),
+            ),
+          ),
+          if (_saved.history.isNotEmpty)
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.clock,
+              label: l.rcxHistoryVersions,
+              onPressed: _restore,
+            ),
+        ],
         if (widget.name != null)
           CommonPopupMenuItem(
             glyph: AppGlyphs.delete,
@@ -348,7 +352,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ErrorBanner(
             message: errors.isEmpty ? null : rcxIssueText(l, errors.first),
           ),
-          if (sourceChanged)
+          if (advanced && sourceChanged)
             generateSection(
               title: l.rcxSourceChanged,
               items: [
@@ -365,7 +369,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
                 ),
               ],
             ),
-          if (lint?.profile != null) ..._sections(context, lint!),
+          if (lint?.profile != null) ..._sections(context, lint!, advanced),
           if (lint != null && lint.warnings.isNotEmpty)
             generateSection(
               title: l.rcxWarnings,
@@ -374,14 +378,18 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
                   DecorationListItem(title: Text(rcxIssueText(l, warning))),
               ],
             ),
-          if (lint != null && lint.endpoints.isNotEmpty)
+          if (advanced && lint != null && lint.endpoints.isNotEmpty)
             _endpointsSection(l, lint.endpoints),
         ],
       ),
     );
   }
 
-  List<Widget> _sections(BuildContext context, RcxStudioResult lint) {
+  List<Widget> _sections(
+    BuildContext context,
+    RcxStudioResult lint,
+    bool advanced,
+  ) {
     final l = context.appLocalizations;
     final p = _profile;
     final pool = rcxMap(p['pool']);
@@ -398,51 +406,53 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
               onChanged: _onTextChanged,
             ),
           ),
-          DecorationListItem(
-            title: TextField(
-              controller: _description,
-              minLines: 2,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              onChanged: _onTextChanged,
-              decoration: InputDecoration.collapsed(
-                border: const NoInputBorder(),
-                hintText: l.rcxProfileDescriptionHint,
+          if (advanced)
+            DecorationListItem(
+              title: TextField(
+                controller: _description,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                onChanged: _onTextChanged,
+                decoration: InputDecoration.collapsed(
+                  border: const NoInputBorder(),
+                  hintText: l.rcxProfileDescriptionHint,
+                ),
               ),
             ),
-          ),
         ],
       ),
-      _previewSection(lint),
-      RoutingLadderSection(
-        steps: [for (final step in steps) rcxMap(step)],
-        onChanged: (steps) => _edit((p) => p['prefer'] = steps),
-        scope: p,
-        groupName: _group,
-        stranded: _strandedLabel(l, p['stranded'] as String? ?? 'hold'),
-      ),
-      generateSection(
-        title: l.rcxChangeTo,
-        footer: l.rcxStudioServersHint,
-        items: [
-          _conditionRow(
-            title: l.rcxPoolInclude,
-            value: pool['include'] as String? ?? '',
-            empty: l.rcxCondAnyServer,
-            onChanged: (text) => _edit(
-              (p) => p['pool'] = {...rcxMap(p['pool']), 'include': text},
+      if (advanced) ...[
+        _previewSection(lint),
+        RoutingLadderSection(
+          steps: [for (final step in steps) rcxMap(step)],
+          onChanged: (steps) => _edit((p) => p['prefer'] = steps),
+          scope: p,
+          groupName: _group,
+        ),
+        generateSection(
+          title: l.rcxChangeTo,
+          footer: l.rcxStudioServersHint,
+          items: [
+            _conditionRow(
+              title: l.rcxPoolInclude,
+              value: pool['include'] as String? ?? '',
+              empty: l.rcxCondAnyServer,
+              onChanged: (text) => _edit(
+                (p) => p['pool'] = {...rcxMap(p['pool']), 'include': text},
+              ),
             ),
-          ),
-          _conditionRow(
-            title: l.rcxPoolExclude,
-            value: pool['exclude'] as String? ?? '',
-            empty: l.none,
-            onChanged: (text) => _edit(
-              (p) => p['pool'] = {...rcxMap(p['pool']), 'exclude': text},
+            _conditionRow(
+              title: l.rcxPoolExclude,
+              value: pool['exclude'] as String? ?? '',
+              empty: l.none,
+              onChanged: (text) => _edit(
+                (p) => p['pool'] = {...rcxMap(p['pool']), 'exclude': text},
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
       generateSection(
         title: l.rcxStudioCharacter,
         footer: l.rcxStudioCharacterHint,
@@ -471,14 +481,13 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ),
         ],
       ),
-      _moreSection(l),
+      if (advanced) _moreSection(l),
     ];
   }
 
   Widget _moreSection(AppLocalizations l) {
     final p = _profile;
     final tags = rcxMap(p['tags']);
-    final advanced = _advancedRows(l);
     Widget link(String title, String summary, VoidCallback onPressed) =>
         DecorationListItem(
           title: Text(title),
@@ -506,12 +515,6 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
           () => _openPage(l.rcxTags, _tagsSections),
         ),
-        if (advanced.isNotEmpty)
-          link(
-            l.rcxAdvanced,
-            advanced.map((row) => row.$1).join(', '),
-            () => _openPage(l.rcxAdvanced, (l) => [_advancedSection(l)]),
-          ),
       ],
     );
   }
@@ -549,49 +552,6 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ),
         ],
       ),
-    ];
-  }
-
-  Widget _advancedSection(AppLocalizations l) => generateSection(
-    footer: l.rcxAdvancedHint,
-    items: [
-      for (final (title, value) in _advancedRows(l))
-        DecorationListItem(
-          title: Text(title),
-          subtitle: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis),
-          onPressed: _editYaml,
-          trailing: const GlyphIcon(AppGlyphs.code),
-        ),
-    ],
-  );
-
-  List<(String, String)> _advancedRows(AppLocalizations l) {
-    final p = _profile;
-    final checks = rcxMap(p['checks']);
-    final network = rcxMap(p['network']);
-    final kinds = [
-      for (final kind in rcxList(network['kinds']))
-        rcxMap(kind)['kind'] as String,
-    ];
-    final overrides = rcxMap(p['on']);
-    final languages = rcxMap(p['l10n']);
-    return [
-      if (checks.isNotEmpty) (l.rcxChecksDeclared, checks.keys.join(', ')),
-      if (kinds.isNotEmpty)
-        (l.rcxNetworkKinds, kinds.map((k) => rcxKindLabel(l, k)).join(', ')),
-      if (overrides.isNotEmpty)
-        (
-          l.rcxOverrides,
-          overrides.keys.map((k) => rcxKindLabel(l, k)).join(', '),
-        ),
-      if ((p['direct-split'] as String? ?? '').isNotEmpty)
-        (l.rcxDirectSplit, p['direct-split'] as String),
-      if (rcxMap(p['egress-verify']).isNotEmpty)
-        (
-          l.rcxExitCheck,
-          rcxList(rcxMap(p['egress-verify'])['echo']).join(', '),
-        ),
-      if (languages.isNotEmpty) (l.rcxTranslations, languages.keys.join(', ')),
     ];
   }
 

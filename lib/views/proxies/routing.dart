@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -13,8 +12,10 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'routing_choice.dart';
 import 'routing_country.dart';
-import 'routing_ladder.dart';
+import 'routing_route.dart' show RoutingLivePage;
+import 'routing_scenario.dart';
 import 'routing_studio.dart';
 
 const _whyRows = 8;
@@ -69,64 +70,45 @@ class RoutingSheet extends ConsumerStatefulWidget {
   ConsumerState<RoutingSheet> createState() => _RoutingSheetState();
 }
 
-class _RoutingSheetState extends ConsumerState<RoutingSheet> {
+class _RoutingSheetState extends ConsumerState<RoutingSheet>
+    with ScenarioDocument, RunningScenarioDocument {
   RcxExplanation? _explanation;
   List<RcxJournalEntry> _journal = const [];
-  Map<String, Object?> _profileDoc = const {};
-  String? _profileId;
+  Map<String, String> _programErrors = const {};
+  final _revision = ValueNotifier(0);
   bool _busy = false;
-  bool _whyOpen = false;
-  bool _historyOpen = false;
-
-  RcxRoutingAction get _action => ref.read(rcxRoutingActionProvider.notifier);
 
   @override
   void initState() {
     super.initState();
+    watchRunningScenario();
     unawaited(_load());
-    unawaited(
-      _loadProfile(ref.read(rcxGroupProvider(widget.groupName))?.profile),
-    );
     ref.listenManual(rcxGroupProvider(widget.groupName), (previous, next) {
       if (previous?.decision != next?.decision || previous?.now != next?.now) {
         unawaited(_load());
       }
-      if (previous?.profile != next?.profile) {
-        unawaited(_loadProfile(next?.profile));
-      }
     });
+  }
+
+  @override
+  void dispose() {
+    _revision.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
     final name = widget.groupName;
     final results = await Future.wait([
-      _action.explain(name),
-      _action.journal(name),
+      action.explain(name),
+      action.journal(name),
     ]);
     if (!mounted) return;
     setState(() {
       _explanation = results[0] as RcxExplanation?;
       _journal = (results[1] as List<RcxJournalEntry>).reversed.toList();
     });
+    _revision.value++;
   }
-
-  /// The group's profile as a document: its server order is what the
-  /// group's own order replaces, and its tags are what steps may name.
-  Future<void> _loadProfile(String? id) async {
-    if (id == null || id.isEmpty || id == _profileId) return;
-    _profileId = id;
-    final source = await _action.studio({'op': 'source', 'id': id});
-    final text = source?.text ?? '';
-    final lint = text.isEmpty
-        ? null
-        : await _action.studio({'op': 'lint', 'text': text, 'id': id});
-    if (!mounted || _profileId != id) return;
-    setState(() => _profileDoc = lint?.profile ?? const {});
-  }
-
-  List<Map<String, Object?>> get _inherited => [
-    for (final step in rcxList(_profileDoc['prefer'])) rcxMap(step),
-  ];
 
   Future<void> _run(Future<void> Function() work) async {
     if (_busy) return;
@@ -138,83 +120,28 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
     }
   }
 
-  RcxBinding _bindingOf(RcxGroupStatus? group) =>
-      rcxSavedBinding(ref, widget.groupName, group);
+  RcxBinding _savedBinding(RcxGroupStatus group) =>
+      ref.read(currentRoutingLayerProvider).groups[widget.groupName] ??
+      RcxBinding(profile: group.profile);
 
-  Future<void> _pickPool(RcxGroupStatus group, RcxChip? chip) {
-    return _run(() async {
-      final binding = _bindingOf(group);
-      await _action.setBinding(
-        widget.groupName,
-        binding.copyWith(pool: binding.pool.copyWith(include: chip?.include)),
-      );
-      // A pin would hold its server inside the new pool; picking a pool means
-      // letting auto choose there.
-      if (group.control.isPinned) {
-        await _action.act(widget.groupName, RcxAction.auto);
-      }
-      await _load();
-    });
-  }
+  void _setBinding(RcxBinding binding) =>
+      unawaited(action.setBinding(widget.groupName, binding));
 
-  Future<void> _addPool(RcxGroupStatus group, List<String> names) async {
-    final l = context.appLocalizations;
-    final pattern = await dialogs.showCommonDialog<String>(
-      child: InputDialog(
-        title: l.rcxAddPool,
-        value: '',
-        labelText: l.rcxServersPattern,
-        validator: (value) {
-          final text = value?.trim() ?? '';
-          final matched = rcxCountMatches(text, names);
-          if (matched == null) return l.rcxPatternInvalid;
-          if (text.isEmpty || matched == 0) {
-            return l.rcxServersMatch(matched, names.length);
-          }
-          return null;
-        },
+  void _removeChip(RcxGroupStatus group, RcxChip chip) {
+    final binding = _savedBinding(group);
+    _setBinding(
+      binding.copyWith(
+        chips: binding.chips.where((c) => c != chip).toList(),
+        pool: binding.pool.include == chip.include
+            ? binding.pool.copyWith(include: null)
+            : binding.pool,
       ),
     );
-    final text = pattern?.trim() ?? '';
-    if (text.isEmpty || !mounted) return;
-    final chip = RcxChip(label: text, include: rcxIncludeOf(text)!);
-    final binding = _bindingOf(group);
-    await _run(() async {
-      await _action.setBinding(
-        widget.groupName,
-        binding.copyWith(
-          chips: [
-            ...binding.chips.where((c) => c.include != chip.include),
-            chip,
-          ],
-          pool: binding.pool.copyWith(include: chip.include),
-        ),
-      );
-      if (group.control.isPinned) {
-        await _action.act(widget.groupName, RcxAction.auto);
-      }
-      await _load();
-    });
-  }
-
-  Future<void> _removePool(RcxGroupStatus group, RcxChip chip) {
-    return _run(() {
-      final binding = _bindingOf(group);
-      return _action.setBinding(
-        widget.groupName,
-        binding.copyWith(
-          chips: binding.chips.where((c) => c != chip).toList(),
-          pool: binding.pool.include == chip.include
-              ? binding.pool.copyWith(include: null)
-              : binding.pool,
-        ),
-      );
-    });
   }
 
   Future<void> _act(RcxAction action, {String? node}) {
     return _run(() async {
-      await _action.act(widget.groupName, action, node: node);
+      await this.action.act(widget.groupName, action, node: node);
       await _load();
     });
   }
@@ -232,24 +159,68 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
 
   Future<void> _enable() {
     return _run(
-      () => _action.setBinding(
+      () => action.setBinding(
         widget.groupName,
         const RcxBinding(profile: rcxDefaultProfile),
       ),
     );
   }
 
-  void _openLadder() {
+  /// Where the running scenario programs the group: its route for a route
+  /// group, else the program key the engine reports it under.
+  _Program? _program(RcxGroupStatus group) {
+    if (runningId == null || lint?.scenario == null) return null;
+    if (group.route) {
+      final routes = rcxList(scenario['routes']);
+      final index = routes.indexWhere((r) => rcxMap(r)['name'] == group.name);
+      if (index < 0) return null;
+      return (
+        path: 'routes.$index',
+        value: rcxMap(routes[index]),
+        put: (s, next) =>
+            s['routes'] = [...rcxList(s['routes'])]..[index] = next,
+      );
+    }
+    final key = group.program;
+    if (key.isEmpty) return null;
+    // A change under '*' would reach every group; it gets a program of its own.
+    final target = key == '*' ? group.name : key;
+    return (
+      path: 'groups.$target',
+      value: rcxMap(rcxMap(scenario['groups'])[key]),
+      put: (s, next) => s['groups'] = {...rcxMap(s['groups']), target: next},
+    );
+  }
+
+  Future<void> _editProgram(
+    String path,
+    void Function(Map<String, Object?> scenario) update,
+  ) async {
+    if (!await ensureOwn() || !mounted) return;
+    final errors = await validateRunning(path, update);
+    if (!mounted) return;
+    setState(() => _programErrors = errors);
+    if (errors.isEmpty) await editRunning(update);
+  }
+
+  void _openDetails() {
     unawaited(
       showInSheet<void>(
         context,
-        builder: (_) => _GroupLadderPage(
-          groupName: widget.groupName,
-          inherited: _inherited,
-          scope: _profileDoc,
+        builder: (_) => RoutingLivePage(
+          title: context.appLocalizations.rcxDetails,
+          revision: _revision,
+          builder: (l) => mounted ? _detailSections(l) : const [],
         ),
       ),
     );
+  }
+
+  String Function(String) _own(String? profile) {
+    final library = ref.read(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
+    final info = library.where((p) => p.id == profile).firstOrNull;
+    return (text) => info?.localize(text, locale) ?? text;
   }
 
   @override
@@ -261,10 +232,12 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
         (status) => status?.problems ?? const <RcxReason>[],
       ),
     );
-    final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final locale = Localizations.localeOf(context).toString();
-    final info = library.where((p) => p.id == group?.profile).firstOrNull;
-    String own(String text) => info?.localize(text, locale) ?? text;
+    ref.watch(rcxLibraryProvider);
+    final saved = ref.watch(
+      currentRoutingLayerProvider.select(
+        (layer) => layer.groups[widget.groupName],
+      ),
+    );
     final direct = _watchNames(ref, widget.groupName);
     // The engine's ranking lists the servers behind flattened nested
     // selectors too, which is what a pool narrows.
@@ -289,7 +262,7 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
                       onEnable: _enable,
                     ),
                   ]
-                : _sections(l, group, problems, own, names),
+                : _sections(l, group, problems, saved, names),
           ),
         ],
       ),
@@ -300,13 +273,20 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
     AppLocalizations l,
     RcxGroupStatus group,
     List<RcxReason> problems,
-    String Function(String) own,
+    RcxBinding? saved,
     List<String> names,
   ) {
     final control = group.control;
+    final own = _own(group.profile);
     final onOpenSettings = widget.onOpenSettings;
+    final program = _program(group);
+    final fault = switch (group.problem) {
+      final problem? when problem.code != 'profile.consent' => problem,
+      _ => null,
+    };
+    final ranked = _explanation?.decision.ranking ?? const <RcxRanked>[];
     return [
-      for (final (index, problem) in problems.indexed)
+      for (final (index, problem) in [...problems, ?fault].indexed)
         Padding(
           key: ValueKey('problem-$index-${problem.code}'),
           padding: const EdgeInsets.only(bottom: 12),
@@ -357,28 +337,61 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
           ],
         ),
       ),
-      if (group.fixed.isEmpty)
-        _ChangeToSection(
-          key: const ValueKey('change-to'),
-          group: group,
-          names: names,
-          enabled: !_busy && !control.isManual,
-          onPick: (chip) => _pickPool(group, chip),
-          onAdd: (names) => _addPool(group, names),
-          onRemove: (chip) => _removePool(group, chip),
-        ),
       KeyedSubtree(
-        key: const ValueKey('behaviour'),
-        child: _behaviourSection(l, group),
-      ),
-      if (_explanation?.decision.ranking case final ranking?
-          when ranking.isNotEmpty)
-        KeyedSubtree(
-          key: const ValueKey('why'),
-          child: _whySection(l, ranking, own),
+        key: const ValueKey('choice'),
+        child: RoutingChoiceSection(
+          layers: [
+            if (program != null)
+              RcxChoiceLayer(
+                value: program.value,
+                fields: group.route ? rcxRouteFields : rcxProgramFields,
+                origin: l.rcxFromScenario(_scenarioTitle()),
+                onChanged: (next) => unawaited(
+                  _editProgram(program.path, (s) => program.put(s, next)),
+                ),
+              ),
+            RcxChoiceLayer(
+              value: rcxBindingChoice(saved),
+              fields: RcxChoiceField.values.toSet(),
+              origin: l.rcxFromYours,
+              onChanged: (value) =>
+                  _setBinding(rcxBindingWith(_savedBinding(group), value)),
+            ),
+          ],
+          profile: group.profile,
+          groupName: widget.groupName,
+          servers: names,
+          scenario: program == null ? null : scenario,
+          ownProfile: program != null && !group.route,
+          fixed: group.fixed,
+          errors: program == null
+              ? const {}
+              : {...issuesUnder(program.path), ..._programErrors},
+          removableChips: saved?.chips ?? const [],
+          onRemoveChip: (chip) => _removeChip(group, chip),
         ),
-      if (_journal.isNotEmpty)
-        KeyedSubtree(key: const ValueKey('history'), child: _historySection(l)),
+      ),
+      if (group.directSplit.isNotEmpty)
+        KeyedSubtree(
+          key: const ValueKey('split'),
+          child: _splitSection(l, group, saved?.directSplit ?? false),
+        ),
+      if (ranked.isNotEmpty || _journal.isNotEmpty)
+        KeyedSubtree(
+          key: const ValueKey('details'),
+          child: generateSection(
+            items: [
+              DecorationListItem(
+                title: Text(l.rcxDetails),
+                subtitle: ranked.isEmpty
+                    ? null
+                    : Text(l.rcxWhyCount(ranked.length)),
+                onPressed: _openDetails,
+                trailing: const DisclosureIndicator(),
+              ),
+            ],
+          ),
+        ),
       if (onOpenSettings != null)
         KeyedSubtree(
           key: const ValueKey('settings-link'),
@@ -424,9 +437,8 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
                 ),
                 onPressed: _busy
                     ? null
-                    : () => _run(
-                        () => _action.setBinding(widget.groupName, null),
-                      ),
+                    : () =>
+                          _run(() => action.setBinding(widget.groupName, null)),
               ),
             ],
           ),
@@ -446,135 +458,71 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
         scenario.title;
   }
 
-  /// How the group picks: its profile with what that does, its server
-  /// order, and its own settings. While a scenario names the group, what
-  /// the scenario set is said here too.
-  Widget _behaviourSection(AppLocalizations l, RcxGroupStatus group) {
-    final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final locale = Localizations.localeOf(context).toString();
-    final info = library.where((p) => p.id == group.profile).firstOrNull;
-    final description = info == null
-        ? ''
-        : info.localize(info.description, locale);
-    final byScenario = group.program.isNotEmpty;
-    final saved = ref.watch(
-      currentRoutingLayerProvider.select(
-        (layer) => layer.groups[widget.groupName],
-      ),
-    );
-    final own = [for (final tier in saved?.prefer ?? const []) _stepOf(tier)];
-    final steps = own.isEmpty ? _inherited : own;
-    final binding = saved ?? group.binding;
-    final feel =
-        binding.feel ??
-        rcxMap(_profileDoc['switch'])['feel'] as String? ??
-        'balanced';
-    final energy =
-        binding.energy ?? _profileDoc['energy'] as String? ?? 'balanced';
-    final fault = switch (group.problem) {
-      final problem? when problem.code != 'profile.consent' => problem,
-      _ => null,
-    };
-    return generateSection(
-      title: l.rcxBehaviour,
-      footer: fault == null ? null : rcxReasonText(l, fault),
-      items: [
-        DecorationListItem(
-          invalid: fault != null,
-          title: EmojiText(
-            group.fixed.isNotEmpty
-                ? l.rcxFixedOn(group.fixed)
-                : info?.displayTitle(locale) ?? group.profileTitle,
-          ),
-          subtitle: Text(
-            [
-              if (description.isNotEmpty)
-                description
-              else if (group.fixed.isEmpty)
-                rcxLevelLabel(l, group.level),
-              if (byScenario && group.program != group.name)
-                rcxProgramLabel(l, group.program),
-            ].join(' · '),
-          ),
-          onPressed: () => showInSheet<void>(
-            context,
-            builder: (_) => RoutingProfileChooser(groupName: widget.groupName),
-          ),
-          trailing: const DisclosureIndicator(),
-        ),
-        if (group.fixed.isEmpty)
-          DecorationListItem(
-            title: Text(l.rcxLadderTitle),
-            subtitle: EmojiText(
-              rcxLadderSummary(l, steps),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onPressed: _openLadder,
-            trailing: const DisclosureIndicator(),
-          ),
-        DecorationListItem(
-          title: Text(l.rcxGroupSettings),
-          subtitle: Text(
-            [
-              '${l.rcxSwitching}: ${rcxFeelLabel(l, feel)}',
-              '${l.rcxChecks}: ${rcxEnergyLabel(l, energy)}',
-            ].join(' · '),
-          ),
-          onPressed: () => showInSheet<void>(
-            context,
-            builder: (_) => _GroupSettingsPage(groupName: widget.groupName),
-          ),
-          trailing: const DisclosureIndicator(),
-        ),
-      ],
-    );
-  }
-
-  Widget _foldRow({
-    required String title,
-    required String summary,
-    required bool open,
-    required VoidCallback onToggle,
-  }) {
-    return DecorationListItem(
-      key: const ValueKey('fold'),
-      title: Text(title),
-      subtitle: open ? null : EmojiText(summary, maxLines: 1),
-      onPressed: onToggle,
-      trailing: SizedBox.square(
-        dimension: kMinInteractiveDimension,
-        child: Center(
-          child: GlyphIcon(open ? AppGlyphs.chevronUp : AppGlyphs.chevronDown),
-        ),
-      ),
-    );
-  }
-
-  Widget _whySection(
-    AppLocalizations l,
-    List<RcxRanked> ranking,
-    String Function(String) own,
-  ) {
+  Widget _splitSection(AppLocalizations l, RcxGroupStatus group, bool on) {
     return generateAnimatedSection(
+      title: l.network,
+      footer: l.rcxDirectSplitHint,
       items: [
-        _foldRow(
-          title: l.rcxWhy,
-          summary: l.rcxWhyCount(ranking.length),
-          open: _whyOpen,
-          onToggle: () => setState(() => _whyOpen = !_whyOpen),
+        ListItem.toggle(
+          key: const ValueKey('split'),
+          title: Text(l.rcxDirectSplit),
+          value: on,
+          onChanged: (on) =>
+              _setBinding(_savedBinding(group).copyWith(directSplit: on)),
         ),
-        if (_whyOpen)
-          for (final row in ranking.take(_whyRows))
-            DecorationListItem(
-              key: ValueKey('why-${row.name}'),
-              isSelected: row.current,
-              title: EmojiText(row.name, maxLines: 1),
-              subtitle: EmojiText(_rowDetail(l, row, own)),
-              trailing: row.latencyMs > 0 ? Text('${row.latencyMs} ms') : null,
+        if (on)
+          DecorationListItem(
+            key: const ValueKey('split-state'),
+            title: Text(
+              group.directSplit == 'active'
+                  ? l.rcxDirectSplitActive
+                  : l.rcxDirectSplitStandby,
             ),
+          ),
       ],
     );
+  }
+
+  List<Widget> _detailSections(AppLocalizations l) {
+    final group = ref.read(rcxGroupProvider(widget.groupName));
+    final own = _own(group?.profile);
+    final ranking = _explanation?.decision.ranking ?? const <RcxRanked>[];
+    return [
+      if (ranking.isNotEmpty)
+        KeyedSubtree(
+          key: const ValueKey('why'),
+          child: generateSection(
+            title: l.rcxWhy,
+            items: [
+              for (final row in ranking.take(_whyRows))
+                DecorationListItem(
+                  key: ValueKey('why-${row.name}'),
+                  isSelected: row.current,
+                  title: EmojiText(row.name, maxLines: 1),
+                  subtitle: EmojiText(_rowDetail(l, row, own)),
+                  trailing: row.latencyMs > 0
+                      ? Text('${row.latencyMs} ms')
+                      : null,
+                ),
+            ],
+          ),
+        ),
+      if (_journal.isNotEmpty)
+        KeyedSubtree(
+          key: const ValueKey('history'),
+          child: generateSection(
+            title: l.rcxHistory,
+            items: [
+              for (final entry in _journal.take(_historyRows))
+                DecorationListItem(
+                  key: ValueKey('history-${entry.seq}'),
+                  title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
+                  subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
+                ),
+            ],
+          ),
+        ),
+    ];
   }
 
   String _rowDetail(
@@ -598,318 +546,13 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
     ];
     return parts.join(' · ');
   }
-
-  Widget _historySection(AppLocalizations l) {
-    return generateAnimatedSection(
-      items: [
-        _foldRow(
-          title: l.rcxHistory,
-          summary: rcxJournalText(l, _journal.first),
-          open: _historyOpen,
-          onToggle: () => setState(() => _historyOpen = !_historyOpen),
-        ),
-        if (_historyOpen)
-          for (final entry in _journal.take(_historyRows))
-            DecorationListItem(
-              key: ValueKey('history-${entry.seq}'),
-              title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
-              subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
-            ),
-      ],
-    );
-  }
 }
 
-Map<String, Object?> _stepOf(RcxTier tier) => {
-  if (tier.label.isNotEmpty) 'label': tier.label,
-  'when': tier.when,
-  if (tier.lastResort) 'last-resort': true,
-};
-
-/// The group's own server order; empty follows its profile's.
-class _GroupLadderPage extends ConsumerWidget {
-  const _GroupLadderPage({
-    required this.groupName,
-    required this.inherited,
-    required this.scope,
-  });
-
-  final String groupName;
-  final List<Map<String, Object?>> inherited;
-  final Map<String, Object?> scope;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final group = ref.watch(rcxGroupProvider(groupName));
-    final prefer = ref.watch(
-      currentRoutingLayerProvider.select(
-        (layer) => layer.groups[groupName]?.prefer ?? const <RcxTier>[],
-      ),
-    );
-    void save(List<Map<String, Object?>> steps) {
-      final binding = rcxSavedBinding(ref, groupName, group);
-      unawaited(
-        ref
-            .read(rcxRoutingActionProvider.notifier)
-            .setBinding(
-              groupName,
-              binding.copyWith(
-                prefer: [for (final step in steps) RcxTier.fromJson(step)],
-              ),
-            ),
-      );
-    }
-
-    return CommonScaffold(
-      title: l.rcxLadderTitle,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
-        children: [
-          RoutingLadderSection(
-            steps: [for (final tier in prefer) _stepOf(tier)],
-            onChanged: save,
-            scope: scope,
-            groupName: groupName,
-            inherited: inherited,
-            title: groupName,
-            footer: group != null && group.program.isNotEmpty
-                ? l.rcxLadderScenarioFirst
-                : l.rcxLadderGroupHint,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The servers the group may use, how eagerly it switches and checks, and
-/// direct split.
-class _GroupSettingsPage extends ConsumerStatefulWidget {
-  const _GroupSettingsPage({required this.groupName});
-
-  final String groupName;
-
-  @override
-  ConsumerState<_GroupSettingsPage> createState() => _GroupSettingsPageState();
-}
-
-class _GroupSettingsPageState extends ConsumerState<_GroupSettingsPage> {
-  late final _pattern = TextEditingController(
-    text: rcxPatternOf(
-      ref.read(rcxGroupProvider(widget.groupName))?.binding.pool.include,
-    ),
-  );
-
-  @override
-  void dispose() {
-    _pattern.dispose();
-    super.dispose();
-  }
-
-  void _update(RcxBinding Function(RcxBinding) update) {
-    final group = ref.read(rcxGroupProvider(widget.groupName));
-    unawaited(
-      ref
-          .read(rcxRoutingActionProvider.notifier)
-          .setBinding(
-            widget.groupName,
-            update(rcxSavedBinding(ref, widget.groupName, group)),
-          ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final group = ref.watch(rcxGroupProvider(widget.groupName));
-    ref.watch(currentRoutingLayerProvider);
-    final binding = rcxSavedBinding(ref, widget.groupName, group);
-    final names = _watchNames(ref, widget.groupName);
-    final matched = rcxCountMatches(_pattern.text.trim(), names);
-    return CommonScaffold(
-      title: l.rcxGroupSettings,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
-        children: [
-          generateSection(
-            title: l.rcxChangeTo,
-            footer: matched == null
-                ? l.rcxPatternInvalid
-                : l.rcxServersMatch(matched, names.length),
-            items: [
-              FormRow(
-                title: l.rcxServersPattern,
-                trailing: FormRowTextField(
-                  controller: _pattern,
-                  autocorrect: false,
-                  hintText: l.rcxAnyServer,
-                  onChanged: (_) => setState(() {}),
-                  onFieldSubmitted: (value) {
-                    if (rcxCountMatches(value.trim(), names) != null) {
-                      _update(
-                        (b) => b.copyWith(
-                          pool: b.pool.copyWith(
-                            include: rcxIncludeOf(value.trim()),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          generateSection(
-            title: l.rcxBehaviour,
-            items: [
-              ListItem<String>.options(
-                title: Text(l.rcxSwitching),
-                options: rcxFeels,
-                value: binding.feel ?? 'balanced',
-                textBuilder: (v) => rcxFeelLabel(l, v),
-                onChanged: (v) => _update((b) => b.copyWith(feel: v)),
-              ),
-              ListItem<String>.options(
-                title: Text(l.rcxChecks),
-                options: rcxEnergies,
-                value: binding.energy ?? 'balanced',
-                textBuilder: (v) => rcxEnergyLabel(l, v),
-                onChanged: (v) => _update((b) => b.copyWith(energy: v)),
-              ),
-            ],
-          ),
-          if (group != null && group.directSplit.isNotEmpty)
-            generateAnimatedSection(
-              title: l.network,
-              footer: l.rcxDirectSplitHint,
-              items: [
-                ListItem.toggle(
-                  key: const ValueKey('split'),
-                  title: Text(l.rcxDirectSplit),
-                  value: binding.directSplit,
-                  onChanged: (on) =>
-                      _update((b) => b.copyWith(directSplit: on)),
-                ),
-                if (binding.directSplit)
-                  DecorationListItem(
-                    key: const ValueKey('split-state'),
-                    title: Text(
-                      group.directSplit == 'active'
-                          ? l.rcxDirectSplitActive
-                          : l.rcxDirectSplitStandby,
-                    ),
-                  ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The binding the user saved for the group, else what the engine runs.
-RcxBinding rcxSavedBinding(
-  WidgetRef ref,
-  String groupName,
-  RcxGroupStatus? group,
-) {
-  final saved = ref.read(currentRoutingLayerProvider).groups[groupName];
-  return saved ?? RcxBinding(profile: group?.profile);
-}
-
-/// The group profiles to choose from, built-in, provider and the user's own;
-/// a provider group offers only what its subscription lists.
-class RoutingProfileChooser extends ConsumerWidget {
-  const RoutingProfileChooser({super.key, required this.groupName});
-
-  final String groupName;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final group = ref.watch(rcxGroupProvider(groupName));
-    final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final locale = Localizations.localeOf(context).toString();
-    final selected =
-        ref.watch(
-          currentRoutingLayerProvider.select(
-            (layer) => layer.groups[groupName]?.profile,
-          ),
-        ) ??
-        group?.profile;
-    final offered = group?.offered.toSet() ?? const <String>{};
-    bool shown(RcxProfileInfo p) =>
-        !p.isScenario &&
-        (p.source != 'provider' ||
-            offered.isEmpty ||
-            offered.contains(p.id) ||
-            offered.contains(p.id.split('/').last));
-    void select(String id) {
-      unawaited(
-        ref
-            .read(rcxRoutingActionProvider.notifier)
-            .setBinding(
-              groupName,
-              rcxSavedBinding(ref, groupName, group).copyWith(profile: id),
-            ),
-      );
-      Navigator.of(context).pop();
-    }
-
-    return CommonScaffold(
-      title: l.rcxProfile,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
-        children: [
-          for (final source in const ['builtin', 'provider', 'user'])
-            if (library.where((p) => p.source == source && shown(p))
-                case final profiles when profiles.isNotEmpty)
-              generateSection(
-                title: rcxSourceLabel(l, source),
-                items: [
-                  for (final profile in profiles)
-                    SelectedDecorationListItem(
-                      isSelected: profile.id == selected,
-                      invalid: profile.error.isNotEmpty,
-                      title: EmojiText(profile.displayTitle(locale)),
-                      subtitle: Text(
-                        profile.error.isNotEmpty
-                            ? profile.error
-                            : [
-                                if (profile.description.isNotEmpty)
-                                  profile.localize(profile.description, locale)
-                                else
-                                  rcxLevelLabel(l, profile.level),
-                                if (profile.consent.isNotEmpty)
-                                  l.rcxNeedsConsent,
-                              ].join(' · '),
-                      ),
-                      onSelected: () => select(profile.id),
-                      onPressed: () => select(profile.id),
-                    ),
-                ],
-              ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              l.rcxManageHint,
-              style: AppTextStyle.footnote
-                  .of(context)
-                  .copyWith(color: context.colorScheme.onSurfaceVariant),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+typedef _Program = ({
+  String path,
+  Map<String, Object?> value,
+  void Function(Map<String, Object?> scenario, Map<String, Object?> next) put,
+});
 
 /// Third-party hosts a provider profile or scenario waits on.
 class RoutingConsentSection extends ConsumerStatefulWidget {
@@ -1076,123 +719,6 @@ class _StatusSection extends StatelessWidget {
           child: Text(l.rcxChangeServer),
         ),
       ],
-    );
-  }
-}
-
-/// "Change to": one tap narrows the group to a pool and moves to its best
-/// server. Pools come from the provider, the user, and the flags in names.
-class _ChangeToSection extends ConsumerWidget {
-  const _ChangeToSection({
-    super.key,
-    required this.group,
-    required this.names,
-    required this.enabled,
-    required this.onPick,
-    required this.onAdd,
-    required this.onRemove,
-  });
-
-  final RcxGroupStatus group;
-  final List<String> names;
-  final bool enabled;
-  final ValueChanged<RcxChip?> onPick;
-  final ValueChanged<List<String>> onAdd;
-  final ValueChanged<RcxChip> onRemove;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final saved = ref.watch(
-      currentRoutingLayerProvider.select(
-        (layer) => layer.groups[group.name]?.chips ?? const <RcxChip>[],
-      ),
-    );
-    final offered = group.binding.chips;
-    final known = {for (final chip in offered) chip.include};
-    final chips = [
-      ...offered,
-      ...rcxFlagChips(names).where((chip) => !known.contains(chip.include)),
-    ];
-    final current = group.binding.pool.include ?? '';
-    return generateSection(
-      title: l.rcxChangeTo,
-      actions: [
-        IconButtonData(
-          glyph: AppGlyphs.add,
-          tooltip: l.rcxAddPool,
-          onPressed: enabled ? () => onAdd(names) : null,
-        ),
-      ],
-      items: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _PoolChip(
-              label: l.rcxAnyServer,
-              selected: current.isEmpty,
-              onPressed: enabled ? () => onPick(null) : null,
-            ),
-            for (final chip in chips)
-              ContextMenuRegion(
-                menuItems: saved.contains(chip)
-                    ? [
-                        CommonPopupMenuItem(
-                          label: l.delete,
-                          glyph: AppGlyphs.delete,
-                          danger: true,
-                          onPressed: () => onRemove(chip),
-                        ),
-                      ]
-                    : null,
-                child: _PoolChip(
-                  label: chip.label,
-                  selected: chip.include == current,
-                  onPressed: enabled ? () => onPick(chip) : null,
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PoolChip extends StatelessWidget {
-  const _PoolChip({
-    required this.label,
-    required this.selected,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return SizedBox(
-      height: 36,
-      child: CommonCard(
-        isSelected: selected,
-        fillsSelection: true,
-        shape: AppShape.full,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        onPressed: onPressed,
-        child: EmojiText(
-          label,
-          maxLines: 1,
-          style: AppTextStyle.subheadline
-              .of(context, emphasized: true)
-              .copyWith(
-                color: selected
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurfaceVariant,
-              ),
-        ),
-      ),
     );
   }
 }

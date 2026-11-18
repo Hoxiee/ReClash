@@ -4,12 +4,12 @@ The route editor and its pickers: traffic, server order, steps, countries and co
 
 ## Traffic
 
-**Add route** opens **New route**. **Next** stays disabled until traffic is chosen; the editor then opens named after the first service, unless that name is taken.
+**Add route** opens **New route** directly with the traffic picker first; there is no separate picking step. The **Name** fills from the picked service until you type your own. **Save** stays disabled without traffic and a name.
 
 | Part | Content |
 | --- | --- |
 | **Services** | Chips for 19 services, each with one or more rules: YouTube (`GEOSITE,youtube`), Google, Gemini (`GEOSITE,google-gemini`), ChatGPT (`GEOSITE,openai`), Claude (`GEOSITE,anthropic`), Telegram (also `GEOIP,telegram,no-resolve`), Discord, WhatsApp, Instagram, Facebook, X (`GEOSITE,twitter`), TikTok, Netflix, Spotify, Twitch, Steam, GitHub, Apple, Microsoft. **All services** selects every chip. |
-| **Custom** | **Add entry**: **Type**, **Value** and, for IP types, **Don’t resolve domains**. |
+| **Custom** | **Add entry**: **Type**, **Value** and, for IP types, **Don’t resolve domains**. Shown with **Advanced settings** on, or when the route already has custom entries; **Add entry** needs **Advanced settings**. |
 
 | Type | Rule |
 | --- | --- |
@@ -31,11 +31,9 @@ The same page edits a route, **Everything else** and a subscription group progra
 | Row | Content |
 | --- | --- |
 | **Name** | Route and group name. **The name is too long** past 64 bytes; **This name is reserved** for reserved names; an error if a route or group already has it. |
-| Traffic | Summary such as "YouTube and 2 more"; opens the picker. |
+| Traffic | First on a route: the picker above ("No traffic chosen" until something is picked). |
 | **Where it goes** | **Best server**: the route's own group picks. **One server**: `to` a server or group chosen under **Choose**. **Direct**: `to: DIRECT`, routes only. |
-| **How to pick the server** → **Behaviour** | The program's behaviour; for a group, **As set on the group** keeps the group's own. |
-| **Server order** | The program's `prefer`; see [Server order](#server-order). |
-| **Use only servers**, **Leave out servers** | `pool.include` and `pool.exclude` through the [condition builder](#conditions); routes have only **Leave out servers**. |
+| **How to pick the server** | The same block as the [group sheet](groups.md#how-the-group-picks): **Behaviour** (for a group, **As set on the group** keeps its own), **Server order** (`prefer`, see [Server order](#server-order)) and **Servers** (`pool.include`, `pool.exclude` through the [condition builder](#conditions); routes have only **Leave out servers**). |
 
 For a group, **One server** holds the group on a member with no search (`to`); **Every group** does not offer it. Field errors show beside the field, others in a banner; saving is disabled while any remain. Delete removes the route; its traffic falls to the next match.
 
@@ -49,7 +47,6 @@ Steps make up the server order: the first step with a working server decides; se
 | Empty list | **Any working server**: no order of its own. |
 | Muted steps | "From the behaviour — edit a step to make the order your own": editing copies them first. |
 | Connector | "if none of them works" between steps. |
-| Footer | In the studio: "If no step has a working server: {action}", the behaviour's `stranded`. |
 
 ### Steps
 
@@ -64,6 +61,8 @@ Steps make up the server order: the first step with a working server decides; se
 | **Other conditions** | A part the rows cannot show, edited as text |
 
 The footer counts the servers that fit now, when the condition can be tested locally. **Label** names the step; **Fallback** sets `last-resort`.
+
+With **Advanced settings** off, **Add condition**, **Advanced condition…** and **Fallback** are hidden; rows and fallbacks already in use stay. See [Advanced settings](hub.md#advanced-settings).
 
 ### Countries
 

@@ -5,7 +5,10 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'routing_advanced.dart';
 
 /// A service a route can take in one tap; its [heads] are mihomo rule heads
 /// without a target, checked against the bundled GEOSITE and GEOIP data.
@@ -169,45 +172,12 @@ String rcxTrafficName(List<String> match) =>
         ?.routeName ??
     '';
 
-/// Asks what traffic a new route takes; null when the user backs out.
-Future<List<String>?> pickRouteTraffic(BuildContext context) {
-  return BaseNavigator.push<List<String>>(context, const _TrafficPicker());
-}
-
-class _TrafficPicker extends StatefulWidget {
-  const _TrafficPicker();
-
-  @override
-  State<_TrafficPicker> createState() => _TrafficPickerState();
-}
-
-class _TrafficPickerState extends State<_TrafficPicker> {
-  List<String> _match = const [];
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    return FormPage(
-      title: l.rcxRouteNew,
-      saveLabel: l.rcxMatchNext,
-      onSave: _match.isEmpty ? null : () => Navigator.of(context).pop(_match),
-      children: [
-        RouteTrafficSection(
-          match: _match,
-          onChanged: (match) => setState(() => _match = match),
-          footer: l.rcxMatchPickHint,
-        ),
-      ],
-    );
-  }
-}
-
 /// Services shown before the rest are asked for; picked ones always show.
 const _foldedServices = 8;
 
 /// The traffic of one route: services as chips, then the user's own entries.
 /// [errors] maps an index into [match] to the problem the lint found there.
-class RouteTrafficSection extends StatefulWidget {
+class RouteTrafficSection extends ConsumerStatefulWidget {
   const RouteTrafficSection({
     super.key,
     required this.match,
@@ -222,10 +192,11 @@ class RouteTrafficSection extends StatefulWidget {
   final String? footer;
 
   @override
-  State<RouteTrafficSection> createState() => _RouteTrafficSectionState();
+  ConsumerState<RouteTrafficSection> createState() =>
+      _RouteTrafficSectionState();
 }
 
-class _RouteTrafficSectionState extends State<RouteTrafficSection> {
+class _RouteTrafficSectionState extends ConsumerState<RouteTrafficSection> {
   bool _all = false;
 
   List<String> get match => widget.match;
@@ -265,6 +236,9 @@ class _RouteTrafficSectionState extends State<RouteTrafficSection> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final custom = _customOf(match);
+    final advanced = watchRoutingAdvanced(ref);
+    final showCustom = advanced || custom.isNotEmpty;
+    final footer = widget.footer ?? l.rcxMatchHint;
     final presets = [
       for (final (index, preset) in rcxTrafficPresets.indexed)
         if (_all || index < _foldedServices || _covers(match, preset)) preset,
@@ -273,6 +247,7 @@ class _RouteTrafficSectionState extends State<RouteTrafficSection> {
       children: [
         generateSection(
           title: l.rcxMatchServices,
+          footer: showCustom ? null : footer,
           items: [
             Wrap(
               spacing: 8,
@@ -295,20 +270,24 @@ class _RouteTrafficSectionState extends State<RouteTrafficSection> {
             ),
           ],
         ),
-        generateAnimatedSection(
-          title: l.rcxMatchCustom,
-          footer: widget.footer ?? l.rcxMatchHint,
-          items: [
-            for (final head in custom)
-              _entryRow(context, l, head, match.indexOf(head)),
-            FormRow(
-              key: const ValueKey('add'),
-              title: l.rcxMatchAdd,
-              leading: EntryButton.add(onPressed: () => _edit(context, null)),
-              onPressed: () => _edit(context, null),
-            ),
-          ],
-        ),
+        if (showCustom)
+          generateAnimatedSection(
+            title: l.rcxMatchCustom,
+            footer: footer,
+            items: [
+              for (final head in custom)
+                _entryRow(context, l, head, match.indexOf(head)),
+              if (advanced)
+                FormRow(
+                  key: const ValueKey('add'),
+                  title: l.rcxMatchAdd,
+                  leading: EntryButton.add(
+                    onPressed: () => _edit(context, null),
+                  ),
+                  onPressed: () => _edit(context, null),
+                ),
+            ],
+          ),
       ],
     );
   }

@@ -88,11 +88,17 @@ Future<void> _pumpFrames(WidgetTester tester) async {
 Future<void> _openPage(
   WidgetTester tester,
   _FakeAction action,
-  Widget page,
-) async {
+  Widget page, {
+  bool advanced = true,
+}) async {
   await tester.pumpWidget(
     TestApp(
-      overrides: [rcxRoutingActionProvider.overrideWith(() => action)],
+      overrides: [
+        rcxRoutingActionProvider.overrideWith(() => action),
+        appSettingProvider.overrideWithBuild(
+          (_, _) => AppSettingProps(routingAdvanced: advanced),
+        ),
+      ],
       homeBuilder: (_) => Builder(
         builder: (context) => TextButton(
           onPressed: () => Navigator.of(
@@ -249,6 +255,35 @@ void main() {
       expect(action.saved.single.$1, 'my-eu-servers');
       expect(action.saved.single.$2?.text, 'rcx: 1\n');
       expect(find.byType(RoutingStudio), findsNothing);
+    });
+
+    testWidgets('hides power-user sections until advanced is on', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(412, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      for (final advanced in [false, true]) {
+        final action = _FakeAction(const RcxStudioResult(profile: _profileMap));
+        await _openPage(
+          tester,
+          action,
+          const RoutingStudio(text: 'rcx: 1\n', groupName: 'Proxy'),
+          advanced: advanced,
+        );
+        final shown = advanced ? findsOneWidget : findsNothing;
+        expect(
+          find.byType(RoutingLadderSection),
+          advanced ? findsOneWidget : findsNothing,
+        );
+        expect(find.text(l.rcxPoolInclude), shown);
+        expect(find.text(l.rcxTags), shown);
+        expect(find.text(l.rcxSwitching), findsOneWidget);
+        expect(find.text(l.rcxStranded), findsOneWidget);
+        expect(find.text(l.rcxAdvanced), findsNothing);
+        expect(find.widgetWithText(TextField, 'Premium first'), shown);
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
     });
 
     testWidgets('keeps tags on their own page', (tester) async {

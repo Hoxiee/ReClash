@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -18,6 +19,22 @@ class _FakeAction extends RcxRoutingAction {
     return const RcxStudioResult();
   }
 }
+
+Finder _service(String label) => find.descendant(
+  of: find.byType(RouteTrafficSection),
+  matching: find.textContaining(label, findRichText: true),
+);
+
+Finder _nameField(AppLocalizations l) => find.descendant(
+  of: find.ancestor(
+    of: find.text(l.rcxRouteName),
+    matching: find.byType(FormRow),
+  ),
+  matching: find.byType(TextField),
+);
+
+String _nameText(WidgetTester tester, AppLocalizations l) =>
+    tester.widget<TextField>(_nameField(l)).controller!.text;
 
 Future<void> _pumpFrames(WidgetTester tester) async {
   for (var i = 0; i < 8; i++) {
@@ -80,13 +97,19 @@ void main() {
       WidgetTester tester,
       Map<String, Object?> value, {
       Set<String> taken = const {},
+      bool advanced = false,
     }) async {
       tester.view.physicalSize = const Size(412, 1400);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
         TestApp(
-          overrides: [rcxRoutingActionProvider.overrideWith(_FakeAction.new)],
+          overrides: [
+            rcxRoutingActionProvider.overrideWith(_FakeAction.new),
+            appSettingProvider.overrideWithBuild(
+              (_, _) => AppSettingProps(routingAdvanced: advanced),
+            ),
+          ],
           homeBuilder: (_) => Builder(
             builder: (context) => TextButton(
               onPressed: () => editRoute(
@@ -204,14 +227,54 @@ void main() {
       await open(tester, const {
         'name': 'Video',
         'match': ['GEOSITE,youtube'],
+      }, advanced: true);
+
+      await tester.tap(find.text(l.rcxHowToChoose));
+      await _pumpFrames(tester);
+      expect(find.text(l.rcxBehaviour), findsOneWidget);
+
+      await tester.tap(find.text(l.rcxServers));
+      await _pumpFrames(tester);
+
+      expect(find.byType(RoutingLivePage), findsNWidgets(2));
+      expect(find.text(l.rcxPoolExclude), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a route without a pool has no Servers row in simple mode', (
+      tester,
+    ) async {
+      await open(tester, const {
+        'name': 'Video',
+        'match': ['GEOSITE,youtube'],
       });
 
       await tester.tap(find.text(l.rcxHowToChoose));
       await _pumpFrames(tester);
 
-      expect(find.text(l.rcxBehaviour), findsOneWidget);
-      expect(find.text(l.rcxPoolExclude), findsOneWidget);
+      expect(find.text(l.rcxServers), findsNothing);
+      expect(find.text(l.rcxPoolExclude), findsNothing);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('names a new route after its first service until it is named', (
+      tester,
+    ) async {
+      await open(tester, const {});
+      final youtube = rcxTrafficPresets.firstWhere(
+        (preset) => preset.label == 'YouTube',
+      );
+
+      await tester.tap(_service(youtube.label));
+      await _pumpFrames(tester);
+      expect(_nameText(tester, l), youtube.routeName);
+
+      await tester.enterText(_nameField(l), 'My video');
+      await _pumpFrames(tester);
+      await tester.tap(_service('Google'));
+      await _pumpFrames(tester);
+
+      expect(_nameText(tester, l), 'My video');
     });
 
     testWidgets('refuses a name another route or group holds', (tester) async {

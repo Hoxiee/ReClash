@@ -217,7 +217,6 @@
   },
   "rcxChangeTo": "Choose from",
   "rcxAnyServer": "Any",
-  "rcxAddPool": "Add a pattern",
   "rcxNetwork": "Network: {kind}",
   "@rcxNetwork": {
     "placeholders": {
@@ -270,10 +269,6 @@
   "@rcxAdvanced": {
     "description": "Section title for advanced profile parts edited as YAML"
   },
-  "rcxAdvancedHint": "These parts are edited as YAML.",
-  "@rcxAdvancedHint": {
-    "description": "Footer under the advanced section"
-  },
   "rcxBasedOn": "Based on",
   "@rcxBasedOn": {
     "description": "Row: the profile this one extends"
@@ -323,10 +318,6 @@
         "type": "String"
       }
     }
-  },
-  "rcxChecksDeclared": "Availability checks",
-  "@rcxChecksDeclared": {
-    "description": "Row title: checks declared by the profile"
   },
   "rcxCondAdd": "Add condition",
   "@rcxCondAdd": {
@@ -433,10 +424,6 @@
   "rcxDuplicate": "Edit a copy",
   "@rcxDuplicate": {
     "description": "Menu item"
-  },
-  "rcxExitCheck": "Exit-country check",
-  "@rcxExitCheck": {
-    "description": "Row title"
   },
   "rcxExport": "Export",
   "@rcxExport": {
@@ -648,10 +635,6 @@
   "@rcxNeedsConsent": {
     "description": "Subtitle/reason"
   },
-  "rcxNetworkKinds": "Network kinds",
-  "@rcxNetworkKinds": {
-    "description": "Row title"
-  },
   "rcxNewProfile": "New behaviour",
   "@rcxNewProfile": {
     "description": "Row / default title"
@@ -679,10 +662,6 @@
   "rcxOpOk": "succeeds",
   "@rcxOpOk": {
     "description": "Operator: diagnostic succeeds"
-  },
-  "rcxOverrides": "Per-network changes",
-  "@rcxOverrides": {
-    "description": "Row title: overrides by network kind"
   },
   "rcxPoolExclude": "Leave out servers",
   "@rcxPoolExclude": {
@@ -740,10 +719,6 @@
   "@rcxTierLabel": {
     "description": "Row"
   },
-  "rcxTranslations": "Translations",
-  "@rcxTranslations": {
-    "description": "Row title: languages of the profile's l10n"
-  },
   "rcxUseCheck": "check {name}",
   "@rcxUseCheck": {
     "description": "Lowercase: endpoint used by a check",
@@ -787,7 +762,6 @@
       }
     }
   },
-  "rcxDiagnostics": "Network diagnostics",
   "rcxExcept": "except {condition}",
   "@rcxExcept": {
     "placeholders": {
@@ -964,8 +938,6 @@
       }
     }
   },
-  "rcxMatchNext": "Next",
-  "rcxMatchPickHint": "Pick the services this route takes; you can add your own entries too.",
   "rcxMatchType": "Type",
   "rcxMatchValue": "Value",
   "rcxMatchTypeHint": "A domain suffix also covers every subdomain.",
@@ -1005,14 +977,6 @@
   "rcxLadderFallThrough": "if none of them works",
   "rcxLadderInherited": "From the behaviour — edit a step to make the order your own",
   "rcxLadderEmptyHint": "Add steps to prefer some servers over others",
-  "rcxLadderStranded": "If no server works: {action}",
-  "@rcxLadderStranded": {
-    "placeholders": {
-      "action": {
-        "type": "String"
-      }
-    }
-  },
   "rcxLadderNameHas": "{text} in name",
   "@rcxLadderNameHas": {
     "placeholders": {
@@ -1094,7 +1058,6 @@
       }
     }
   },
-  "rcxGroupSettings": "Group settings",
   "rcxSettingsLink": "Auto routing settings",
   "rcxSettingsLinkHint": "Scenarios, routes and behaviours",
   "rcxRouteGroup": "Made by a route",
@@ -1145,8 +1108,6 @@
       }
     }
   },
-  "rcxLadderGroupHint": "This order is for this group only. Leave it empty to follow the behaviour’s order.",
-  "rcxLadderScenarioFirst": "A scenario drives this group now: a server order the scenario gives it comes before this one.",
   "rcxProfileDescriptionHint": "What this behaviour does",
   "rcxMatchAllServices": "All services",
   "@rcxMatchAllServices": {
@@ -1208,5 +1169,25 @@
   "rcxHubLibraryHint": "Scenarios, behaviours and import",
   "@rcxHubLibraryHint": {
     "description": "Subtitle of the Library row at the bottom of the auto-routing screen."
-  }
+  },
+  "rcxAdvancedMode": "Advanced settings",
+  "rcxAdvancedModeHint": "Step-by-step server order conditions, YAML, networks, tags and versions",
+  "rcxFromScenario": "From scenario «{scenario}»",
+  "@rcxFromScenario": {
+    "placeholders": {
+      "scenario": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxFromYours": "Yours for this group",
+  "rcxFromBehaviour": "From behaviour «{behaviour}»",
+  "@rcxFromBehaviour": {
+    "placeholders": {
+      "behaviour": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxDetails": "Details"
 }

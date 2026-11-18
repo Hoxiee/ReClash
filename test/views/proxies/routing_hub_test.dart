@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
@@ -301,6 +302,22 @@ void main() {
     await tester.tap(find.byTooltip(l.rcxDuplicate).first);
     await _pumpFrames(tester);
     expect(find.byType(ScenarioEditor), findsOneWidget);
+  });
+
+  testWidgets('the advanced settings toggle in the hub turns advanced on', (
+    tester,
+  ) async {
+    await pumpHub(tester);
+
+    await reveal(tester, find.text(l.rcxAdvancedMode));
+    await tester.tap(find.text(l.rcxAdvancedMode));
+    await _pumpFrames(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(RoutingSettingsView)),
+    );
+    expect(container.read(appSettingProvider).routingAdvanced, isTrue);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('rarer scenario settings open on their own pages', (
