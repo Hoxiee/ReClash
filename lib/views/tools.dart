@@ -257,8 +257,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
         host: this,
         parent: parent,
         parentHasBack:
-            below is _ToolsDetailRoute ||
-            _observer.pages.toList().indexOf(below) > 0,
+            below is _ToolsDetailRoute || _observer.pages.contains(below),
         page: page,
       ),
     );
