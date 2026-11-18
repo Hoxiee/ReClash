@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use std::convert::Infallible;
 use std::fs::{self, OpenOptions};
 use std::io::{ErrorKind, Write};
-use std::net::{IpAddr, Ipv6Addr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 #[cfg(unix)]
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
@@ -197,6 +197,7 @@ impl Scope {
 /// Off-TUN DNS goes to the helper's queue; `cgroup` is the helper's own, which holds the Core.
 struct DnsFilter<'a> {
     cgroup: Option<&'a str>,
+    redirect: Option<Ipv4Addr>,
 }
 
 // One rule per line: nft does not parse a reject statement closed by "}" on its line.
@@ -232,6 +233,84 @@ fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> St
     )
 }
 
+// A resolver outside the TUN (a LAN router in route-exclude-address) gets the Core's
+// fake address instead; without the Core's cgroup its own upstreams would loop.
+fn redirect_block(tun: &str, dns: Option<&DnsFilter>) -> String {
+    let Some(DnsFilter {
+        cgroup: Some(cgroup),
+        redirect: Some(target),
+    }) = dns
+    else {
+        return String::new();
+    };
+    if tun.is_empty() {
+        return String::new();
+    }
+    let level = cgroup.split('/').count();
+    format!(
+        "  chain dns_redirect {{\n    type nat hook output priority dstnat; policy accept;\n    \
+         oifname \"lo\" accept\n    oifname \"{tun}\" accept\n    \
+         socket cgroupv2 level {level} \"{cgroup}\" accept\n    \
+         meta nfproto ipv4 meta l4proto {{ tcp, udp }} th dport 53 dnat ip to {target}\n  }}\n"
+    )
+}
+
+// The other end of the TUN's own subnet: routed into the TUN, never local.
+#[cfg(target_os = "linux")]
+fn tun_peer(tun: &str) -> Option<Ipv4Addr> {
+    if tun.is_empty() {
+        return None;
+    }
+    let mut list: *mut libc::ifaddrs = std::ptr::null_mut();
+    // SAFETY: getifaddrs fills list, which freeifaddrs releases below.
+    if unsafe { libc::getifaddrs(&mut list) } != 0 {
+        return None;
+    }
+    let mut found = None;
+    let mut cursor = list;
+    while !cursor.is_null() {
+        // SAFETY: entries of the getifaddrs list; addresses match their declared family.
+        unsafe {
+            let entry = &*cursor;
+            cursor = entry.ifa_next;
+            if entry.ifa_addr.is_null()
+                || entry.ifa_netmask.is_null()
+                || libc::c_int::from((*entry.ifa_addr).sa_family) != libc::AF_INET
+                || std::ffi::CStr::from_ptr(entry.ifa_name).to_bytes() != tun.as_bytes()
+            {
+                continue;
+            }
+            let read = |address: *mut libc::sockaddr| {
+                u32::from_be((*address.cast::<libc::sockaddr_in>()).sin_addr.s_addr)
+            };
+            found = subnet_peer(read(entry.ifa_addr), read(entry.ifa_netmask));
+        }
+        break;
+    }
+    // SAFETY: list came from a successful getifaddrs.
+    unsafe { libc::freeifaddrs(list) };
+    found
+}
+
+#[cfg(not(target_os = "linux"))]
+fn tun_peer(_tun: &str) -> Option<Ipv4Addr> {
+    None
+}
+
+fn subnet_peer(address: u32, mask: u32) -> Option<Ipv4Addr> {
+    let network = address & mask;
+    let broadcast = network | !mask;
+    if broadcast - network < 3 || address == network || address == broadcast {
+        return None;
+    }
+    let peer = if address + 1 < broadcast {
+        address + 1
+    } else {
+        address - 1
+    };
+    (peer != network).then(|| Ipv4Addr::from(peer))
+}
+
 fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilter>) -> String {
     let table = &scope.table;
     let v4 = addresses
@@ -259,11 +338,12 @@ fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilt
         })
         .collect();
     format!(
-        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}}}\n",
+        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}{}}}\n",
         set_block("v4", "ipv4_addr", v4),
         set_block("v6", "ipv6_addr", v6),
         chain_block("output", scope.queue, tun, dns),
         chain_block("forward", scope.queue, tun, dns),
+        redirect_block(tun, dns),
     )
 }
 
@@ -402,8 +482,9 @@ impl SiteLockService {
     }
 
     fn render(&self, request: &SiteLockRequest, addresses: &Addresses) -> String {
-        let dns = (request.name_count() > 0).then_some(DnsFilter {
+        let dns = (request.name_count() > 0).then(|| DnsFilter {
             cgroup: self.cgroup.as_deref(),
+            redirect: tun_peer(&request.tun),
         });
         ruleset(&self.scope, &request.tun, addresses, dns.as_ref())
     }
@@ -853,7 +934,10 @@ mod tests {
 
     fn dns_rules(tun: &str, cgroup: Option<&str>) -> String {
         let request = named(tun, &["chatgpt.com"]);
-        let filter = DnsFilter { cgroup };
+        let filter = DnsFilter {
+            cgroup,
+            redirect: Some(Ipv4Addr::new(198, 18, 0, 2)),
+        };
         ruleset(
             &Scope::of(UID),
             tun,
@@ -1199,6 +1283,40 @@ mod tests {
             "  chain forward {{\n    type filter hook forward priority filter; policy accept;\n    \
              oifname \"tun0\" accept\n    {queue}\n    meta l4proto tcp ip daddr @v4 reject"
         )));
+    }
+
+    #[test]
+    fn dns_ruleset_redirects_off_tun_dns_into_the_tun_except_the_core() {
+        let text = dns_rules("tun0", Some(CGROUP));
+        assert!(text.contains(&format!(
+            "  chain dns_redirect {{\n    type nat hook output priority dstnat; policy accept;\n    \
+             oifname \"lo\" accept\n    oifname \"tun0\" accept\n    \
+             socket cgroupv2 level 2 \"{CGROUP}\" accept\n    \
+             meta nfproto ipv4 meta l4proto {{ tcp, udp }} th dport 53 dnat ip to 198.18.0.2\n  }}\n"
+        )));
+        assert!(!dns_rules("tun0", None).contains("dns_redirect"));
+        assert!(!dns_rules("", Some(CGROUP)).contains("dns_redirect"));
+        assert!(!rules("tun0", &["10.0.0.0/8"]).contains("dns_redirect"));
+    }
+
+    #[test]
+    fn tun_peer_is_the_other_host_of_the_subnet() {
+        let ip = |text: &str| u32::from(text.parse::<Ipv4Addr>().unwrap());
+        let mask = |prefix: u8| v4_mask(prefix);
+        assert_eq!(
+            subnet_peer(ip("198.18.0.1"), mask(30)),
+            Some(Ipv4Addr::new(198, 18, 0, 2))
+        );
+        assert_eq!(
+            subnet_peer(ip("198.18.0.2"), mask(30)),
+            Some(Ipv4Addr::new(198, 18, 0, 1))
+        );
+        assert_eq!(
+            subnet_peer(ip("198.18.0.1"), mask(16)),
+            Some(Ipv4Addr::new(198, 18, 0, 2))
+        );
+        assert_eq!(subnet_peer(ip("198.18.0.1"), mask(31)), None);
+        assert_eq!(subnet_peer(ip("198.18.0.1"), mask(32)), None);
     }
 
     #[test]
