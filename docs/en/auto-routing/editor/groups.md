@@ -10,13 +10,13 @@ Open the sheet from the auto routing action of a select group in **Proxies**, fr
 | --- | --- |
 | Problems | The group's problem; see [Messages](#messages). |
 | **Permission needed** | "“{profile}” wants to check these sites", the hosts, **Allow**. Until then the group runs `builtin/simple`. |
-| Status | Server, reason, forecast, exit country, tier, network kind, latency. **Change server** cools the current server for 15 minutes and switches; unavailable in Manual. |
-| **Control** | **Auto**, **Pinned** or **Manual**; see [Control](#control). A driving scenario adds the footer "The scenario «{scenario}» drives this group now." |
-| How the group picks | **Behaviour**, **Server order**, **Servers**, **Switching** and **Check frequency**; see [How the group picks](#how-the-group-picks). |
+| Status | The server with its flag and latency, then the reason, forecast, tier and network kind; the exit country only when it differs from the name. Tapping the server opens **Details**; see [Explanation](#explanation). **Change server** cools the current server for 15 minutes and switches; hidden in Manual. |
+| **Control** | **Auto**, **Pinned** or **Manual**; see [Control](#control). |
+| **How to pick the server** | **Behaviour**, **Server order**, **Servers**, **Switching** and **Check frequency**; hidden in Manual. A driving scenario adds the footer "The scenario «{scenario}» drives this group now." See [How the group picks](#how-the-group-picks). |
 | **Network** | **Direct sites through this group**, when the behaviour has `direct-split`: **On now** or **Ready: direct sites still open**. |
-| **Details** | "{count} servers compared"; opens **Why this server** (top 8 ranking rows) and **History** (last 20 journal entries); see [Explanation](#explanation). |
-| **Auto routing settings** | Opens [Auto routing](hub.md). |
-| **Made by a route** or **Turn off auto routing for this group** | A route group links to **Edit the route**, which opens the route editor. Otherwise, for a group with the user's own binding, removes it; the group keeps its server. |
+| **Made by a route** | A route group links to **Edit the route**, which opens the route editor. |
+
+The sheet's menu holds **Auto routing settings**, which opens [Auto routing](hub.md), and, for a group with the user's own binding, **Turn off auto routing for this group**, which removes the binding; the group keeps its server.
 
 Without a binding, the group shows **With auto routing on** (the behaviour it would get, server count) and **Turn on auto routing**, which adds a user binding with the default behaviour.
 
@@ -32,7 +32,7 @@ Selecting a server by hand in an Auto group pins it. See [Control](../engine.md#
 
 ## How the group picks
 
-The one place to see and change how a group picks a server. Every row shows where its value comes from: **From scenario «{scenario}»**, **Yours for this group** or **From behaviour «{behaviour}»**. A group held on one member shows only **Through {member}**.
+The one place to see and change how a group picks a server. Each row shows its value on the right; a value the running scenario sets adds **From scenario «{scenario}»** under the row title. A group held on one member shows only **Through {member}**.
 
 | Row | Edits |
 | --- | --- |
@@ -61,7 +61,7 @@ A user chip's context menu deletes it. **Use only servers** and **Leave out serv
 
 ## Explanation
 
-**Details** opens two sections. Each **Why this server** row shows the server and latency, then its exclusion or its tier and health (**Working**, **Worked before**, **Not checked**, **Not working**), "may reach “{tier}” after a check", "exit {country}", check results (✓ pass, × fail, ~ soft) and the last check time. **History** lists switches, failures, pins and mode changes. Fields: [Explanations and journal](../engine.md#explanations-and-journal).
+**Details**, opened from the current server, has two sections. Each **Why this server** row (top 8 ranking rows) and each **History** entry (last 20 journal entries) is described below. Each **Why this server** row shows the server and latency, then its exclusion or its tier and health (**Working**, **Worked before**, **Not checked**, **Not working**), "may reach “{tier}” after a check", "exit {country}", check results (✓ pass, × fail, ~ soft) and the last check time. **History** lists switches, failures, pins and mode changes. Fields: [Explanations and journal](../engine.md#explanations-and-journal).
 
 ## Messages
 

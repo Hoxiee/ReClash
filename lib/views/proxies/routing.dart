@@ -247,6 +247,7 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
         : [for (final row in ranking) row.name];
     return CommonScaffold(
       title: widget.groupName,
+      menuItems: _menuItems(l, group),
       body: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -278,7 +279,6 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
   ) {
     final control = group.control;
     final own = _own(group.profile);
-    final onOpenSettings = widget.onOpenSettings;
     final program = _program(group);
     final fault = switch (group.problem) {
       final problem? when problem.code != 'profile.consent' => problem,
@@ -311,19 +311,17 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
         own: own,
         busy: _busy,
         onChange: () => _act(RcxAction.change),
+        onDetails: ranked.isEmpty && _journal.isEmpty ? null : _openDetails,
       ),
       KeyedSubtree(
         key: const ValueKey('control'),
         child: generateSection(
           title: l.rcxControl,
-          footer: [
-            if (group.program.isNotEmpty) l.rcxScenarioDrives(_scenarioTitle()),
-            switch (control.mode) {
-              'pinned' => l.rcxModePinnedHint(control.pinName),
-              'manual' => l.rcxModeManualHint,
-              _ => l.rcxModeAutoHint,
-            },
-          ].join(' '),
+          footer: switch (control.mode) {
+            'pinned' => l.rcxModePinnedHint(control.pinName),
+            'manual' => l.rcxModeManualHint,
+            _ => l.rcxModeAutoHint,
+          },
           items: [
             SegmentedControl<String>(
               segments: [
@@ -337,75 +335,48 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
           ],
         ),
       ),
-      KeyedSubtree(
-        key: const ValueKey('choice'),
-        child: RoutingChoiceSection(
-          layers: [
-            if (program != null)
-              RcxChoiceLayer(
-                value: program.value,
-                fields: group.route ? rcxRouteFields : rcxProgramFields,
-                origin: l.rcxFromScenario(_scenarioTitle()),
-                onChanged: (next) => unawaited(
-                  _editProgram(program.path, (s) => program.put(s, next)),
+      if (!control.isManual)
+        KeyedSubtree(
+          key: const ValueKey('choice'),
+          child: RoutingChoiceSection(
+            title: l.rcxHowToChoose,
+            footer: group.program.isEmpty
+                ? null
+                : l.rcxScenarioDrives(_scenarioTitle()),
+            layers: [
+              if (program != null)
+                RcxChoiceLayer(
+                  value: program.value,
+                  fields: group.route ? rcxRouteFields : rcxProgramFields,
+                  origin: l.rcxFromScenario(_scenarioTitle()),
+                  onChanged: (next) => unawaited(
+                    _editProgram(program.path, (s) => program.put(s, next)),
+                  ),
                 ),
+              RcxChoiceLayer(
+                value: rcxBindingChoice(saved),
+                fields: RcxChoiceField.values.toSet(),
+                onChanged: (value) =>
+                    _setBinding(rcxBindingWith(_savedBinding(group), value)),
               ),
-            RcxChoiceLayer(
-              value: rcxBindingChoice(saved),
-              fields: RcxChoiceField.values.toSet(),
-              origin: l.rcxFromYours,
-              onChanged: (value) =>
-                  _setBinding(rcxBindingWith(_savedBinding(group), value)),
-            ),
-          ],
-          profile: group.profile,
-          groupName: widget.groupName,
-          servers: names,
-          scenario: program == null ? null : scenario,
-          ownProfile: program != null && !group.route,
-          fixed: group.fixed,
-          errors: program == null
-              ? const {}
-              : {...issuesUnder(program.path), ..._programErrors},
-          removableChips: saved?.chips ?? const [],
-          onRemoveChip: (chip) => _removeChip(group, chip),
+            ],
+            profile: group.profile,
+            groupName: widget.groupName,
+            servers: names,
+            scenario: program == null ? null : scenario,
+            ownProfile: program != null && !group.route,
+            fixed: group.fixed,
+            errors: program == null
+                ? const {}
+                : {...issuesUnder(program.path), ..._programErrors},
+            removableChips: saved?.chips ?? const [],
+            onRemoveChip: (chip) => _removeChip(group, chip),
+          ),
         ),
-      ),
       if (group.directSplit.isNotEmpty)
         KeyedSubtree(
           key: const ValueKey('split'),
           child: _splitSection(l, group, saved?.directSplit ?? false),
-        ),
-      if (ranked.isNotEmpty || _journal.isNotEmpty)
-        KeyedSubtree(
-          key: const ValueKey('details'),
-          child: generateSection(
-            items: [
-              DecorationListItem(
-                title: Text(l.rcxDetails),
-                subtitle: ranked.isEmpty
-                    ? null
-                    : Text(l.rcxWhyCount(ranked.length)),
-                onPressed: _openDetails,
-                trailing: const DisclosureIndicator(),
-              ),
-            ],
-          ),
-        ),
-      if (onOpenSettings != null)
-        KeyedSubtree(
-          key: const ValueKey('settings-link'),
-          child: generateSection(
-            items: [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.shuffle),
-                title: Text(l.rcxSettingsLink),
-                subtitle: Text(l.rcxSettingsLinkHint),
-                onPressed: onOpenSettings,
-                trailing: const DisclosureIndicator(),
-              ),
-            ],
-          ),
         ),
       if (group.route)
         KeyedSubtree(
@@ -423,25 +394,32 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
               ),
             ],
           ),
-        )
-      else if (group.source == 'user')
-        KeyedSubtree(
-          key: const ValueKey('turn-off'),
-          child: generateSection(
-            footer: l.rcxTurnOffHint,
-            items: [
-              DecorationListItem(
-                title: Text(
-                  l.rcxTurnOff,
-                  style: TextStyle(color: context.colorScheme.error),
+        ),
+    ];
+  }
+
+  List<CommonPopupMenuItem> _menuItems(
+    AppLocalizations l,
+    RcxGroupStatus? group,
+  ) {
+    final onOpenSettings = widget.onOpenSettings;
+    return [
+      if (onOpenSettings != null)
+        CommonPopupMenuItem(
+          label: l.rcxSettingsLink,
+          glyph: AppGlyphs.shuffle,
+          onPressed: onOpenSettings,
+        ),
+      if (group != null && !group.route && group.source == 'user')
+        CommonPopupMenuItem(
+          label: l.rcxTurnOff,
+          glyph: AppGlyphs.power,
+          danger: true,
+          onPressed: _busy
+              ? null
+              : () => unawaited(
+                  _run(() => action.setBinding(widget.groupName, null)),
                 ),
-                onPressed: _busy
-                    ? null
-                    : () =>
-                          _run(() => action.setBinding(widget.groupName, null)),
-              ),
-            ],
-          ),
         ),
     ];
   }
@@ -655,7 +633,7 @@ class _Intro extends ConsumerWidget {
 }
 
 /// What the group holds now: the server with its flag and latency, why in
-/// one line, and the button that moves it on.
+/// one line, and in auto routing the row that moves it on.
 class _StatusSection extends StatelessWidget {
   const _StatusSection({
     super.key,
@@ -663,22 +641,32 @@ class _StatusSection extends StatelessWidget {
     required this.own,
     required this.busy,
     required this.onChange,
+    required this.onDetails,
   });
 
   final RcxGroupStatus group;
   final String Function(String) own;
   final bool busy;
   final VoidCallback onChange;
+  final VoidCallback? onDetails;
+
+  /// Reasons that only repeat the control the sheet shows below.
+  static const _modeReasons = {'manual.requested', 'hold.pinned'};
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
     final decision = group.decision;
     final until = decision.until;
     final latency = group.current?.latencyMs ?? 0;
     final exit = group.current?.exit ?? '';
-    final country = exit.isNotEmpty ? exit : rcxCountryOfName(group.now);
+    final named = rcxCountryOfName(group.now);
+    final country = exit.isNotEmpty ? exit : named;
     final flag = country == null ? '' : rcxCountryFlag(country);
+    final title = flag.isNotEmpty && group.now.startsWith(flag)
+        ? group.now.substring(flag.length).trim()
+        : group.now;
     final network = group.network;
     final kind = switch (network) {
       RcxGroupNetwork(kind: final kind) when kind.isNotEmpty => kind,
@@ -686,38 +674,56 @@ class _StatusSection extends StatelessWidget {
       _ => null,
     };
     final details = [
-      if (country != null) rcxCountryName(context, country),
+      if (exit.isNotEmpty && exit.toUpperCase() != named?.toUpperCase())
+        l.rcxExit(rcxCountryLabel(exit)),
       if (decision.tier.isNotEmpty &&
           decision.reason.args['tier'] != decision.tier)
         own(decision.tier),
       if (kind != null) l.rcxNetwork(rcxKindLabel(l, kind, own: own)),
     ].join(' · ');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        generateSection(
-          items: [
-            DecorationListItem(
-              leading: flag.isEmpty || group.now.contains(flag)
-                  ? null
-                  : EmojiText(flag, style: AppTextStyle.title2.of(context)),
-              title: EmojiText(group.now.isEmpty ? '—' : group.now),
-              subtitle: EmojiText(
-                [
-                  rcxReasonText(l, decision.reason, own: own),
-                  if (until != null) rcxReasonText(l, until, own: own),
-                  details,
-                ].where((line) => line.isNotEmpty).join('\n'),
-              ),
-              trailing: latency > 0 ? Text('$latency ms') : null,
+    final lines = [
+      if (!_modeReasons.contains(decision.reason.code))
+        rcxReasonText(l, decision.reason, own: own),
+      if (until != null) rcxReasonText(l, until, own: own),
+      details,
+    ].where((line) => line.isNotEmpty);
+    return generateSection(
+      items: [
+        DecorationListItem(
+          key: const ValueKey('now'),
+          leading: flag.isEmpty
+              ? null
+              : EmojiText(flag, style: AppTextStyle.title1.of(context)),
+          title: EmojiText(
+            title.isEmpty ? '—' : title,
+            style: AppTextStyle.headline.of(context),
+          ),
+          subtitle: lines.isEmpty ? null : EmojiText(lines.join('\n')),
+          onPressed: onDetails,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (latency > 0)
+                Text(
+                  '$latency ms',
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              if (onDetails != null) const DisclosureIndicator(),
+            ],
+          ),
+        ),
+        if (!group.control.isManual)
+          DecorationListItem(
+            key: const ValueKey('change'),
+            leading: GlyphIcon(AppGlyphs.skip, color: colorScheme.primary),
+            title: Text(
+              l.rcxChangeServer,
+              style: TextStyle(color: colorScheme.primary),
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        FilledButton.tonal(
-          onPressed: busy || group.control.isManual ? null : onChange,
-          child: Text(l.rcxChangeServer),
-        ),
+            onPressed: busy ? null : onChange,
+          ),
       ],
     );
   }

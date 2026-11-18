@@ -6,9 +6,11 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/proxies/routing.dart';
 import 'package:reclash/views/proxies/routing_ladder.dart';
 
+import '../../helpers/glyph_finders.dart';
 import '../../helpers/preferences.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -34,6 +36,13 @@ const _status = RcxStatus(
       route: true,
       now: 'DE-1',
       current: RcxCurrentNode(name: 'DE-1', exit: 'de', latencyMs: 80),
+    ),
+    RcxGroupStatus(
+      name: 'Manual',
+      profile: 'builtin/fastest',
+      source: 'user',
+      control: RcxControl(mode: 'manual'),
+      now: 'NL-1',
     ),
   ],
 );
@@ -190,7 +199,11 @@ void main() {
     tester,
   ) async {
     final action = await pumpSheet(tester, 'Proxy');
-    await tapVisible(tester, _text(l.rcxTurnOff));
+    expect(_text(l.rcxTurnOff), findsNothing);
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await _pumpFrames(tester);
+    await tester.tap(_text(l.rcxTurnOff));
+    await _pumpFrames(tester);
 
     expect(action.bindings, [('Proxy', null)]);
   });
@@ -227,30 +240,49 @@ void main() {
 
     expect(_text(l.rcxRouteGroup), findsOneWidget);
     expect(_text(l.rcxRouteGroupHint('Every group')), findsOneWidget);
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await _pumpFrames(tester);
+    expect(_text(l.rcxSettingsLink), findsOneWidget);
     expect(_text(l.rcxTurnOff), findsNothing);
   });
 
-  testWidgets('the sheet has one details row and none of the retired rows', (
+  testWidgets('manual control hides the server choice and the change row', (
     tester,
   ) async {
-    await pumpSheet(
-      tester,
-      'Proxy',
-      entries: [
-        RcxJournalEntry(
-          seq: 1,
-          at: DateTime.utc(2026),
-          group: 'Proxy',
-          kind: 'switch',
-          from: 'NL-1',
-          to: 'NL-2',
-        ),
-      ],
-    );
+    await pumpSheet(tester, 'Manual');
 
-    expect(_text(l.rcxDetails), findsOneWidget);
-    for (final title in _retiredRowTitles) {
-      expect(_text(title), findsNothing);
-    }
+    expect(_text(l.rcxModeManualHint), findsOneWidget);
+    expect(_text(l.rcxHowToChoose), findsNothing);
+    expect(_text(l.rcxLadderTitle), findsNothing);
+    expect(_text(l.rcxChangeServer), findsNothing);
   });
+
+  testWidgets(
+    'the current server opens the details, and no retired row shows',
+    (tester) async {
+      await pumpSheet(
+        tester,
+        'Proxy',
+        entries: [
+          RcxJournalEntry(
+            seq: 1,
+            at: DateTime.utc(2026),
+            group: 'Proxy',
+            kind: 'switch',
+            from: 'NL-1',
+            to: 'NL-2',
+          ),
+        ],
+      );
+
+      expect(_text(l.rcxChangeServer), findsOneWidget);
+      for (final title in _retiredRowTitles) {
+        expect(_text(title), findsNothing);
+      }
+
+      await tester.tap(_text('NL-2'));
+      await _pumpFrames(tester);
+      expect(_text(l.rcxHistory), findsOneWidget);
+    },
+  );
 }

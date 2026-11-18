@@ -1042,7 +1042,6 @@
       }
     }
   },
-  "rcxTurnOffHint": "The group keeps its current server and stops switching on its own.",
   "rcxWouldDo": "With auto routing on",
   "rcxWouldServers": "{count, plural, one{It chooses from the {count} server of this group.} other{It chooses among the {count} servers of this group.}}",
   "@rcxWouldServers": {
@@ -1053,7 +1052,6 @@
     }
   },
   "rcxSettingsLink": "Auto routing settings",
-  "rcxSettingsLinkHint": "Scenarios, routes and behaviours",
   "rcxRouteGroup": "Made by a route",
   "rcxRouteGroupHint": "A route in the scenario «{scenario}» created this group. Edit or remove it there.",
   "@rcxRouteGroupHint": {
@@ -1091,14 +1089,6 @@
       },
       "error": {
         "type": "String"
-      }
-    }
-  },
-  "rcxWhyCount": "{count, plural, one{{count} server compared} other{{count} servers compared}}",
-  "@rcxWhyCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -1175,13 +1165,5 @@
     }
   },
   "rcxFromYours": "Yours for this group",
-  "rcxFromBehaviour": "From behaviour «{behaviour}»",
-  "@rcxFromBehaviour": {
-    "placeholders": {
-      "behaviour": {
-        "type": "String"
-      }
-    }
-  },
   "rcxDetails": "Details"
 }

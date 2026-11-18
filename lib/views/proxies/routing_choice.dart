@@ -13,6 +13,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
 import 'routing_condition.dart';
+import 'routing_country.dart';
 import 'routing_advanced.dart';
 import 'routing_ladder.dart';
 import 'routing_route.dart' show RoutingLivePage;
@@ -149,6 +150,7 @@ class RoutingChoiceSection extends ConsumerStatefulWidget {
     this.fixed = '',
     this.errors = const {},
     this.title,
+    this.footer,
     this.orderHint,
     this.removableChips = const [],
     this.onRemoveChip,
@@ -176,6 +178,7 @@ class RoutingChoiceSection extends ConsumerStatefulWidget {
   /// Problems by key path under the edited layer: profile, prefer.0, pool.
   final Map<String, String> errors;
   final String? title;
+  final String? footer;
   final String? orderHint;
   final List<RcxChip> removableChips;
   final ValueChanged<RcxChip>? onRemoveChip;
@@ -287,8 +290,13 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
         id;
   }
 
-  String _fromBehaviour(AppLocalizations l) =>
-      l.rcxFromBehaviour(_profileTitle(_profileId ?? ''));
+  /// Text the running behaviour wrote, in its own translation.
+  String _localized(String text) {
+    final library = ref.read(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
+    final info = library.where((p) => p.id == _profileId).firstOrNull;
+    return info?.localize(text, locale) ?? text;
+  }
 
   List<Map<String, Object?>> get _templateSteps => [
     for (final step in rcxList(_template['prefer'])) rcxMap(step),
@@ -358,13 +366,9 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
       key: ValueKey(field),
       invalid: _errorAt(errorKey) != null,
       title: Text(title),
-      subtitle: EmojiText(
-        [value, ?origin].join('\n'),
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-      ),
+      subtitle: origin == null ? null : EmojiText(origin, maxLines: 2),
       onPressed: onPressed,
-      trailing: const DisclosureIndicator(),
+      trailing: _LinkValue(value),
     );
   }
 
@@ -389,8 +393,10 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
     return _link(
       field: RcxChoiceField.prefer,
       title: l.rcxLadderTitle,
-      value: rcxLadderSummary(l, steps),
-      origin: found?.origin ?? (steps.isEmpty ? null : _fromBehaviour(l)),
+      value: steps.isEmpty
+          ? l.rcxLadderAnyWorking
+          : steps.map((s) => _localized(rcxStepSummary(l, s))).join(' → '),
+      origin: found?.origin,
       errorKey: 'prefer',
       onPressed: () => unawaited(_push(l.rcxLadderTitle, _orderPage)),
     );
@@ -416,9 +422,17 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
     ];
   }
 
-  String _poolText(AppLocalizations l, String include, List<RcxChip> chips) =>
-      chips.where((chip) => chip.include == include).firstOrNull?.label ??
-      l.rcxOnly(rcxConditionSummary(l, include));
+  String _poolText(AppLocalizations l, String include, List<RcxChip> chips) {
+    final label = chips
+        .where((chip) => chip.include == include)
+        .firstOrNull
+        ?.label;
+    if (label == null) return l.rcxOnly(rcxConditionSummary(l, include));
+    final country = rcxCountryOfName(label);
+    return country != null && label == rcxCountryFlag(country)
+        ? '$label ${rcxCountryName(context, country)}'
+        : label;
+  }
 
   Widget _serversRow(AppLocalizations l) {
     final include = _find(RcxChoiceField.include);
@@ -429,7 +443,7 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
       title: l.rcxServers,
       value: [
         if (include == null)
-          l.rcxCondAnyServer
+          l.rcxAnyServer
         else
           _poolText(l, include.value as String, chips),
         if (exclude != null)
@@ -506,8 +520,7 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
         : _template['energy'] as String?;
     final options = feel ? rcxFeels : rcxEnergies;
     final value = found?.value as String? ?? fallback ?? 'balanced';
-    final origin =
-        found?.origin ?? (fallback == null ? null : _fromBehaviour(l));
+    final origin = found?.origin;
     return ListItem<String>.options(
       key: ValueKey(field),
       title: Text(feel ? l.rcxSwitching : l.rcxChecks),
@@ -528,7 +541,7 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
     final advanced = watchRoutingAdvanced(ref);
     return generateSection(
       title: widget.title,
-      footer: widget.errors.values.firstOrNull,
+      footer: widget.errors.values.firstOrNull ?? widget.footer,
       items: widget.fixed.isNotEmpty
           ? [
               DecorationListItem(
@@ -551,6 +564,35 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
               if (_can(RcxChoiceField.energy))
                 _optionsRow(l, RcxChoiceField.energy),
             ],
+    );
+  }
+}
+
+/// A link row's current value, held to the width an options row gives its
+/// own so a long behaviour name leaves the title room.
+class _LinkValue extends StatelessWidget {
+  const _LinkValue(this.value);
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 160),
+          child: EmojiText(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.listTitleStyle.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const DisclosureIndicator(),
+      ],
     );
   }
 }
