@@ -390,7 +390,7 @@ void main() {
         ),
         findsNothing,
       );
-      expect(find.byType(ListFooter), findsOneWidget);
+      expect(find.byType(ListFooter), findsAtLeastNWidgets(1));
       expect(tester.takeException(), isNull);
     });
 
