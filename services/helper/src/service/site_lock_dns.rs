@@ -331,6 +331,8 @@ fn read_name(message: &[u8], start: usize) -> Option<(String, usize)> {
 pub(super) trait DnsQueue: Send + Sync {
     /// Binds the queue and starts answering it; later calls are no-ops.
     fn start(&self) -> Result<(), String>;
+    /// Whether the queue still answers packets the ruleset sends to it.
+    fn running(&self) -> bool;
     /// Returns the matcher it replaces.
     fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher>;
 }
@@ -340,6 +342,10 @@ pub(super) struct NoQueue;
 impl DnsQueue for NoQueue {
     fn start(&self) -> Result<(), String> {
         Err("the DNS filter queue is not available".to_string())
+    }
+
+    fn running(&self) -> bool {
+        false
     }
 
     fn set_matcher(&self, _matcher: Arc<Matcher>) -> Arc<Matcher> {
@@ -392,6 +398,10 @@ impl DnsQueue for SystemQueue {
     fn start(&self) -> Result<(), String> {
         let _ = &self.started;
         Err("the DNS filter is only available on Linux".to_string())
+    }
+
+    fn running(&self) -> bool {
+        *self.started.lock().unwrap_or_else(|e| e.into_inner())
     }
 
     fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher> {

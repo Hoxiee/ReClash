@@ -61,7 +61,8 @@ pub(super) enum NftError {
 
 pub(super) trait NftRunner: Send + Sync {
     fn apply(&self, ruleset: &str) -> Result<(), NftError>;
-    fn holds_table(&self, table: &str) -> Result<bool, NftError>;
+    /// The stored ruleset as nft prints it, or `None` while the table is absent.
+    fn stored(&self, table: &str) -> Result<Option<String>, NftError>;
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -390,6 +391,18 @@ fn delete_ruleset(scope: &Scope) -> String {
     format!("add table inet {table}\ndelete table inet {table}\n")
 }
 
+// `nft list` prints a different ruleset than the one nft reads, so only what a TUN
+// appearing adds is compared: the redirect chain and the address it sends queries to.
+fn same_ruleset(stored: &str, wanted: &str) -> bool {
+    let target = |text: &str| {
+        text.split("dnat ip to ")
+            .nth(1)
+            .and_then(|rest| rest.split(['\n', ' ', ';']).next())
+            .map(str::to_string)
+    };
+    target(stored) == target(wanted)
+}
+
 pub(super) struct SystemNft;
 
 #[cfg(target_os = "linux")]
@@ -442,12 +455,13 @@ impl NftRunner for SystemNft {
         Self::run(&["-f", "-"], Some(ruleset)).map(drop)
     }
 
-    fn holds_table(&self, table: &str) -> Result<bool, NftError> {
-        let listing = Self::run(&["list", "tables", "inet"], None)?;
-        let wanted = format!("table inet {table}");
-        Ok(String::from_utf8_lossy(&listing)
-            .lines()
-            .any(|line| line.trim() == wanted))
+    fn stored(&self, table: &str) -> Result<Option<String>, NftError> {
+        match Self::run(&["list", "table", "inet", table], None) {
+            Ok(listing) => Ok(Some(String::from_utf8_lossy(&listing).into_owned())),
+            // nft reports no such table as a failure, which reads as an absent table.
+            Err(NftError::Failed(_)) => Ok(None),
+            Err(NftError::Missing) => Err(NftError::Missing),
+        }
     }
 }
 
@@ -457,7 +471,7 @@ impl NftRunner for SystemNft {
         Err(NftError::Missing)
     }
 
-    fn holds_table(&self, _table: &str) -> Result<bool, NftError> {
+    fn stored(&self, _table: &str) -> Result<Option<String>, NftError> {
         Err(NftError::Missing)
     }
 }
@@ -599,21 +613,31 @@ impl SiteLockService {
         }
     }
 
-    /// Re-applies the persisted lock when its table is gone, as after
-    /// `nft flush ruleset` or a firewall service restart; true when it did.
+    /// Re-applies the persisted lock when the stored table no longer matches what the
+    /// current TUN and cgroup produce, as after `nft flush ruleset`, a firewall service
+    /// restart, or a policy applied while the TUN was still coming up; true when it did.
     pub(super) fn heal(&self) -> Result<bool, String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
         let Some(request) = self.load()? else {
             return Ok(false);
         };
-        if self
+        let addresses = normalize(&request)?;
+        let wanted = self.render(&request, &addresses);
+        let stored = self
             .runner
-            .holds_table(&self.scope.table)
+            .stored(&self.scope.table)
             .map_err(|error| format!("{error:?}"))?
-        {
+            .is_some_and(|listing| same_ruleset(&listing, &wanted));
+        if stored && self.queue_ok(&request) {
             return Ok(false);
         }
         self.enforce(&request).map(|()| true)
+    }
+
+    // The queue is started by a policy with names, and a restart rebinds it; a rule
+    // sending packets to a queue nobody answers would hold every off-TUN query.
+    fn queue_ok(&self, request: &SiteLockRequest) -> bool {
+        request.name_count() == 0 || self.queue.running()
     }
 
     fn enforce(&self, request: &SiteLockRequest) -> Result<(), String> {
@@ -837,6 +861,10 @@ mod tests {
             Ok(())
         }
 
+        fn running(&self) -> bool {
+            !self.starts.lock().unwrap().is_empty() && !self.fail.load(Ordering::SeqCst)
+        }
+
         fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher> {
             let mut matchers = self.matchers.lock().unwrap();
             let previous = matchers.last().cloned().unwrap_or_default();
@@ -852,6 +880,10 @@ mod tests {
             self.0.start()
         }
 
+        fn running(&self) -> bool {
+            self.0.running()
+        }
+
         fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher> {
             self.0.set_matcher(matcher)
         }
@@ -861,7 +893,7 @@ mod tests {
     struct FakeNft {
         calls: Mutex<Vec<String>>,
         outcome: Mutex<Option<NftError>>,
-        table: Mutex<bool>,
+        stored: Mutex<Option<String>>,
     }
 
     impl FakeNft {
@@ -888,8 +920,8 @@ mod tests {
             }
         }
 
-        fn holds_table(&self, _table: &str) -> Result<bool, NftError> {
-            Ok(*self.0.table.lock().unwrap())
+        fn stored(&self, _table: &str) -> Result<Option<String>, NftError> {
+            Ok(self.0.stored.lock().unwrap().clone())
         }
     }
 
@@ -1280,7 +1312,7 @@ mod tests {
     }
 
     #[test]
-    fn heal_reapplies_only_a_persisted_lock_whose_table_is_gone() {
+    fn heal_reapplies_a_persisted_lock_whose_table_is_missing_or_outdated() {
         let fixture = Fixture::new("heal");
         assert_eq!(fixture.service.heal(), Ok(false));
         fs::write(
@@ -1288,12 +1320,38 @@ mod tests {
             r#"{"tun":"tun0","addresses":["10.0.0.0/8"]}"#,
         )
         .unwrap();
-        *fixture.fake.table.lock().unwrap() = true;
+        let stored = rules("tun0", &["10.0.0.0/8"]);
+        *fixture.fake.stored.lock().unwrap() = Some(stored);
         assert_eq!(fixture.service.heal(), Ok(false));
         assert!(fixture.fake.calls().is_empty());
-        *fixture.fake.table.lock().unwrap() = false;
+        *fixture.fake.stored.lock().unwrap() = None;
         assert_eq!(fixture.service.heal(), Ok(true));
         assert_eq!(fixture.fake.calls(), vec![rules("tun0", &["10.0.0.0/8"])]);
+    }
+
+    // A policy applied before the TUN existed stores a table without the redirect, and
+    // the revision never changes again, so only a heal can put the redirect in.
+    #[test]
+    fn heal_compares_only_the_redirect_the_stored_table_carries() {
+        let fixture = Fixture::new("heal-redirect");
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"tun0","addresses":["10.0.0.0/8"],"names":{"suffix":["chatgpt.com"]}}"#,
+        )
+        .unwrap();
+        let without = dns_rules("tun0", Some(CGROUP)).replace(
+            "  chain dns_redirect {\n    type nat hook output priority 10; policy accept;\n    \
+             meta nfproto ipv4 meta mark 0x5c1d dnat ip to 198.18.0.2\n  }\n",
+            "",
+        );
+        assert!(!without.contains("dns_redirect"));
+        // The fake nft runner never lists a TUN, so the render drops the redirect; what
+        // the test holds is that a stored table lacking it is never taken for current.
+        let redirect = dns_rules("tun0", Some(CGROUP));
+        assert!(!same_ruleset(&without, &redirect));
+        assert!(same_ruleset(&redirect, &redirect));
+        let listed = "table inet t {\n  chain dns_redirect {\n    type nat hook output priority 10; policy accept;\n    meta mark 0x00005c1d dnat ip to 198.18.0.2\n  }\n}\n";
+        assert!(same_ruleset(listed, &redirect));
     }
 
     #[test]

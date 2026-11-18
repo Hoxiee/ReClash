@@ -1978,7 +1978,8 @@ A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. T
 which the Core lives in, is exempt so the Core can still resolve upstream. The applied policy is persisted in the
 Helper's state directory and restored before `READY=1`; the unit runs before `network-pre.target`, so locks hold from boot, before the app
 starts. Every 10 s the Helper re-applies a persisted policy whose table has disappeared (`nft flush ruleset`, a
-firewall service restart). Uninstall removes the table right after the Helper stops, before the queue loses its last
+firewall service restart), whose redirect no longer matches the TUN it can reach, or whose queue stopped answering.
+Uninstall removes the table right after the Helper stops, before the queue loses its last
 listener for good.
 
 Browser DNS-over-HTTPS and DoT bypass the DNS filter after a Core crash; that is a documented limitation, not handled.
