@@ -37,5 +37,13 @@
   "siteLockExitMissing": "Ағымдағы профильде жоқ",
   "siteLockErrorMatchEmpty": "Кемінде бір сайт қосыңыз.",
   "siteLockErrorTooMany": "Бекітуде ең көбі {max} жазба болады.",
-  "siteLockErrorNoExit": "Кемінде бір шығу серверін таңдаңыз."
+  "siteLockErrorNoExit": "Кемінде бір шығу серверін таңдаңыз.",
+  "siteLockExitsChoose": "Серверлерді таңдау",
+  "siteLockExitsChosen": "Таңдалған · {count}/{max}",
+  "siteLockExitsAll": "Барлық серверлер",
+  "siteLockExitsNoMatch": "Іздеуге сәйкес сервер жоқ.",
+  "siteLockExitMoreNames": "және тағы {count}",
+  "siteLockExitsSearch": "Ел немесе атау",
+  "siteLockStillBlockedTitle": "Сайттар әлі бұғатталған",
+  "siteLockStillBlockedBody": "Жүйелік брандмауэр бекітілген сайттарды туннельден тыс әлі бұғаттап тұр. Helper жауап бергенде ReClash бұғатты алып тастайды."
 }

@@ -37,5 +37,13 @@
   "siteLockExitMissing": "No está en el perfil actual",
   "siteLockErrorMatchEmpty": "Añade al menos un sitio.",
   "siteLockErrorTooMany": "Un anclaje admite como máximo {max} entradas.",
-  "siteLockErrorNoExit": "Elige al menos un servidor de salida."
+  "siteLockErrorNoExit": "Elige al menos un servidor de salida.",
+  "siteLockExitsChoose": "Elegir servidores",
+  "siteLockExitsChosen": "Elegidos · {count} de {max}",
+  "siteLockExitsAll": "Todos los servidores",
+  "siteLockExitsNoMatch": "Ningún servidor coincide con la búsqueda.",
+  "siteLockExitMoreNames": "y {count} más",
+  "siteLockExitsSearch": "País o nombre",
+  "siteLockStillBlockedTitle": "Los sitios siguen bloqueados",
+  "siteLockStillBlockedBody": "El cortafuegos del sistema aún bloquea los sitios anclados fuera del túnel. ReClash lo levantará en cuanto Helper responda."
 }

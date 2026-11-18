@@ -1952,7 +1952,9 @@ All subscription entrypoints, route selection, cancellation, failure handling an
 ## Site Lock
 
 A site lock (`SiteLock` in `lib/models/site_lock.dart`, stored globally in `Config.siteLocks`) holds mihomo rule
-entries without a target to exits named by type, server and port. `CoreManager` pushes the whole list through
+entries without a target to exits named by their definition without the name (the fork's `RouteFingerprint`), with
+the proxy name as the fallback once a refresh changes it: one address can serve many exits that differ only in
+credentials. `CoreManager` pushes the whole list through
 `setSiteLocks` on every change and to each newly connected Core; a rejected list keeps the previous one in force and the
 report carries every problem. In the Core, `core/sitelock` compiles the list and a hook in the fork's
 `resolveMetadata` claims a matching connection before mode and rules: it leaves through a live exit, else the first
@@ -1961,13 +1963,18 @@ one, else is refused. Groups and built-ins never qualify as exits because they c
 
 On Linux the Core also mirrors what the host can enforce: `siteLockPolicy` returns the TUN device, locked prefixes plus
 the fake-ip ranges, and the locked names (geosite expanded; entries the host cannot mirror, such as negated geosite or
-lookahead regex, come back as the `core-only` warning). `SiteLockHostPolicy` polls it every 15 s with the last
+lookahead regex, come back as the `core-only` warning). Locks with name exceptions travel apart as `guarded` pairs
+so an exception frees a name only from its own lock; an exception the host cannot mirror leaves the name blocked, and
+address exceptions are not subtracted from the prefixes. A GeoSite update recompiles the locks, which refreshes both. `SiteLockHostPolicy` polls it every 15 s with the last
 revision, so an unchanged policy costs one hash, and sends it to the Helper's `PUT /site-lock`; `DELETE` lifts it when no
-lock is enabled. The Helper keeps the `reclash_sitelock` nft table: locked addresses are rejected on every interface but
-`lo` and the TUN, and off-TUN DNS goes to NFQUEUE `31415` without `bypass`, where the Helper drops queries for
-locked names. A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. The Helper's own cgroup,
+lock is enabled. The Helper keeps the `reclash_sitelock_<uid>` nft table: locked addresses are rejected on every interface
+but `lo` and the TUN, and off-TUN DNS goes to NFQUEUE `0x8000 | uid` without `bypass`, where the Helper drops
+queries for locked names and every query it cannot parse whole (fragments, split TCP messages). A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. The Helper's own cgroup,
 which the Core lives in, is exempt so the Core can still resolve upstream. The applied policy is persisted in the
-Helper's state directory and restored before `READY=1`, so locks hold from boot, before the app starts.
+Helper's state directory and restored before `READY=1`; the unit runs before `network-pre.target`, so locks hold from boot, before the app
+starts. Every 10 s the Helper re-applies a persisted policy whose table has disappeared (`nft flush ruleset`, a
+firewall service restart). Uninstall removes the table right after the Helper stops, before the queue loses its last
+listener for good.
 
 Browser DNS-over-HTTPS and DoT bypass the DNS filter after a Core crash; that is a documented limitation, not handled.
 Windows and macOS have the Core layer only.

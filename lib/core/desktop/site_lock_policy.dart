@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/site_lock.dart';
 
@@ -13,7 +14,7 @@ final class SiteLockHostPolicy {
   final Future<SiteLockPolicy?> Function(String known) _fetch;
   final Future<void> Function(SiteLockPolicy policy) _put;
   final Future<void> Function() _delete;
-  final Future<bool> Function() _helperReady;
+  final Future<HelperReadiness> Function() _readiness;
   final void Function(SiteLockHostStatus status) _onStatus;
   final Duration _interval;
 
@@ -30,13 +31,13 @@ final class SiteLockHostPolicy {
     required Future<SiteLockPolicy?> Function(String known) fetch,
     required Future<void> Function(SiteLockPolicy policy) put,
     required Future<void> Function() delete,
-    required Future<bool> Function() helperReady,
+    required Future<HelperReadiness> Function() readiness,
     required void Function(SiteLockHostStatus status) onStatus,
     Duration interval = const Duration(seconds: 15),
   }) : _fetch = fetch,
        _put = put,
        _delete = delete,
-       _helperReady = helperReady,
+       _readiness = readiness,
        _onStatus = onStatus,
        _interval = interval;
 
@@ -51,6 +52,8 @@ final class SiteLockHostPolicy {
       if (coreConnected) {
         _timer = Timer.periodic(_interval, (_) => _kick());
       }
+    } else if (!_lifted) {
+      _timer = Timer.periodic(_interval, (_) => _kick());
     }
     _kick();
   }
@@ -88,7 +91,7 @@ final class SiteLockHostPolicy {
 
   Future<void> _sync() async {
     try {
-      if (!await _helperReady() && !_disposed) {
+      if (await _readiness() != HelperReadiness.ready && !_disposed) {
         _appliedRevision = null;
         _emit(SiteLockHostStatus.helperUnavailable);
         return;
@@ -103,13 +106,26 @@ final class SiteLockHostPolicy {
     }
   }
 
+  // Retried every tick until it lands: a stopped Helper restores the
+  // persisted policy when it comes back.
   Future<void> _lift() async {
     if (_lifted) return;
     try {
-      if (!await _helperReady() || _disposed) return;
-      await _delete();
+      switch (await _readiness()) {
+        case HelperReadiness.notReady:
+          if (!_locksEnabled) _emit(SiteLockHostStatus.helperUnavailable);
+          return;
+        case HelperReadiness.manifestMissing:
+          break;
+        case HelperReadiness.ready:
+          if (_disposed || _locksEnabled) return;
+          await _delete();
+      }
+      if (_disposed || _locksEnabled) return;
       _lifted = true;
       _appliedRevision = null;
+      _timer?.cancel();
+      _timer = null;
       _emit(SiteLockHostStatus.inactive);
     } catch (error) {
       _fail('lift', error);

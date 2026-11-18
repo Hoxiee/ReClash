@@ -59,13 +59,13 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
 
   Future<void> _edit(SiteLock lock, {bool isNew = false}) async {
     final edited = await showSiteLockEditor(context, lock, isNew: isNew);
-    if (edited == null || !mounted) return;
-    final locks = ref.read(siteLocksProvider);
-    _write(
-      locks.any((item) => item.id == edited.id)
-          ? [for (final item in locks) item.id == edited.id ? edited : item]
-          : [...locks, edited],
-    );
+    if (!mounted) return;
+    if (edited == null) {
+      // A refused save left its report behind; the core kept the saved locks.
+      _refresh();
+      return;
+    }
+    _write(withSiteLock(ref.read(siteLocksProvider), edited));
   }
 
   Future<void> _add() =>
@@ -182,6 +182,15 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
         if (!tunEnabled)
           card(IssueTone.warning, l.siteLockTunOffTitle, l.siteLockTunOffBody),
       ],
+      if (host &&
+          !anyEnabled &&
+          (hostStatus == SiteLockHostStatus.helperUnavailable ||
+              hostStatus == SiteLockHostStatus.failed))
+        card(
+          IssueTone.warning,
+          l.siteLockStillBlockedTitle,
+          l.siteLockStillBlockedBody,
+        ),
       for (final warning in report?.warnings ?? const <SiteLockWarning>[])
         if (_names(locks, warning.locks) case final names when names.isNotEmpty)
           switch (warning.code) {

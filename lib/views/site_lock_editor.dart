@@ -8,17 +8,36 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/site_lock_exits.dart';
 
 const _maxEntries = 128;
-const _maxExits = 16;
 
 final _ipv4 = RegExp(r'^\d{1,3}(\.\d{1,3}){3}(/\d{1,2})?$');
 final _ipv6 = RegExp(r'^[0-9a-fA-F]*(:[0-9a-fA-F.]*){2,}(/\d{1,3})?$');
 final _host = RegExp(r'^[\p{L}\p{N}_-]+(\.[\p{L}\p{N}_-]+)+$', unicode: true);
 final _geosite = RegExp(r'^geosite:(.+)$', caseSensitive: false);
+final _scheme = RegExp(r'^[a-z][a-z0-9+.-]*://', caseSensitive: false);
+
+/// The host of a pasted address such as `https://user@host:443/path`.
+String _hostOf(String url) {
+  var host = url.substring(_scheme.firstMatch(url)!.end);
+  host = host.split(RegExp('[/?#]')).first;
+  host = host.substring(host.lastIndexOf('@') + 1);
+  if (host.startsWith('[')) {
+    final end = host.indexOf(']');
+    return end < 0 ? host : host.substring(1, end);
+  }
+  final colon = host.indexOf(':');
+  return colon < 0 ? host : host.substring(0, colon);
+}
 
 String _normalizeEntry(String line) {
+  if (_scheme.hasMatch(line)) {
+    final host = _hostOf(line);
+    if (host.isNotEmpty) line = host;
+  }
   final comma = line.indexOf(',');
   if (comma >= 0) {
     return '${line.substring(0, comma).trim().toUpperCase()},'
@@ -28,10 +47,10 @@ String _normalizeEntry(String line) {
     return 'GEOSITE,${match[1]!.trim()}';
   }
   if (_ipv4.hasMatch(line)) {
-    return 'IP-CIDR,${line.contains('/') ? line : '$line/32'}';
+    return 'IP-CIDR,${line.contains('/') ? line : '$line/32'},no-resolve';
   }
   if (_ipv6.hasMatch(line)) {
-    return 'IP-CIDR6,${line.contains('/') ? line : '$line/128'}';
+    return 'IP-CIDR6,${line.contains('/') ? line : '$line/128'},no-resolve';
   }
   final suffix = line.startsWith('*.')
       ? line.substring(2)
@@ -58,19 +77,10 @@ List<String> normalizeSiteLockEntries(String text) {
   return entries.toList();
 }
 
-String _kind(String type) {
-  final kind = type.toLowerCase().replaceAll('-', '');
-  return switch (kind) {
-    'ss' => 'shadowsocks',
-    'ssr' => 'shadowsocksr',
-    _ => kind,
-  };
-}
-
-bool _isCandidate(SiteLockExit exit, SiteLockExitCandidate candidate) =>
-    _kind(exit.type) == _kind(candidate.type) &&
-    exit.server.toLowerCase() == candidate.server.toLowerCase() &&
-    exit.port == candidate.port;
+List<SiteLock> withSiteLock(List<SiteLock> locks, SiteLock edited) =>
+    locks.any((item) => item.id == edited.id)
+    ? [for (final item in locks) item.id == edited.id ? edited : item]
+    : [...locks, edited];
 
 enum _Field { match, exits }
 
@@ -106,6 +116,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
   List<SiteLockExitCandidate>? _candidates;
   bool _loaded = false;
   bool _attempted = false;
+  bool _saving = false;
   _Field? _invalid;
   String? _error;
 
@@ -158,44 +169,72 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     if (_attempted) _check();
   }
 
-  void _save() {
+  // The core checks the list before the sheet closes, so a refused edit is
+  // never saved while the core keeps enforcing the previous one.
+  Future<void> _save() async {
     setState(() {
       _attempted = true;
       _check();
     });
     if (_error != null) return;
-    Navigator.of(context).pop(
-      widget.lock.copyWith(
-        name: _name.text.trim(),
-        match: normalizeSiteLockEntries(_match.text),
-        except: normalizeSiteLockEntries(_except.text),
-        exits: _exits,
-      ),
+    final edited = widget.lock.copyWith(
+      name: _name.text.trim(),
+      match: normalizeSiteLockEntries(_match.text),
+      except: normalizeSiteLockEntries(_except.text),
+      exits: _exits,
     );
+    if (ref.read(coreStatusProvider) == CoreStatus.connected) {
+      setState(() => _saving = true);
+      final report = await ref
+          .read(siteLockReportStateProvider.notifier)
+          .push(withSiteLock(ref.read(siteLocksProvider), edited));
+      if (!mounted) return;
+      setState(() => _saving = false);
+      if (report != null && !report.applied) {
+        setState(() => _refuse(report.problems, edited));
+        return;
+      }
+    }
+    Navigator.of(context).pop(edited);
   }
 
-  bool _chosen(SiteLockExitCandidate candidate) =>
-      _exits.any((exit) => _isCandidate(exit, candidate));
+  void _refuse(List<SiteLockProblem> problems, SiteLock edited) {
+    final own = problems.where((problem) => problem.id == edited.id).toList();
+    final shown = own.isEmpty ? problems : own;
+    _invalid = shown.any((problem) => problem.field.startsWith('match'))
+        ? _Field.match
+        : shown.any((problem) => problem.field.startsWith('exits'))
+        ? _Field.exits
+        : null;
+    _error = [
+      for (final problem in shown) _describe(problem, edited),
+    ].join('\n');
+  }
 
-  void _toggle(SiteLockExitCandidate candidate) {
-    if (_chosen(candidate)) {
-      _exits = [
-        for (final exit in _exits)
-          if (!_isCandidate(exit, candidate)) exit,
-      ];
-    } else if (_exits.length < _maxExits) {
-      _exits = [
-        ..._exits,
-        SiteLockExit(
-          type: candidate.type,
-          server: candidate.server,
-          port: candidate.port,
-        ),
-      ];
-    } else {
-      return;
-    }
-    setState(_changed);
+  String _describe(SiteLockProblem problem, SiteLock edited) {
+    final [field, ...rest] = problem.field.split('.');
+    final index = rest.isEmpty ? null : int.tryParse(rest.first);
+    final entries = switch (field) {
+      'match' => edited.match,
+      'except' => edited.except,
+      _ => const <String>[],
+    };
+    return index != null && index < entries.length
+        ? '${entries[index]}: ${problem.message}'
+        : problem.message;
+  }
+
+  Future<void> _choose(List<SiteLockExitCandidate> candidates) async {
+    final chosen = await showSiteLockExitPicker(
+      context,
+      candidates: candidates,
+      chosen: _exits,
+    );
+    if (chosen == null || !mounted) return;
+    setState(() {
+      _exits = chosen;
+      _changed();
+    });
   }
 
   Widget _entries({
@@ -228,54 +267,66 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     );
   }
 
-  Widget _exitsSection(AppLocalizations l) {
-    final candidates = _candidates;
-    final orphans = [
-      for (final exit in _exits)
-        if (candidates == null ||
-            !candidates.any((candidate) => _isCandidate(exit, candidate)))
-          exit,
-    ];
-    final rows = <Widget>[
-      for (final exit in orphans)
-        ListItem(
-          title: Text('${exit.server}:${exit.port}'),
-          subtitle: Text(
-            candidates == null ? exit.type : l.siteLockExitMissing,
-          ),
-          trailing: const SelectionCheck(),
-          onTap: () {
+  Widget _exitRow(
+    AppLocalizations l,
+    SiteLockExit exit,
+    List<SiteLockExitCandidate>? candidates,
+  ) {
+    final candidate = candidates == null
+        ? null
+        : siteLockCandidateOf(exit, candidates);
+    final name = candidate?.names.first ?? siteLockExitLabel(exit);
+    return ContextMenuRegion(
+      menuItems: [
+        CommonPopupMenuItem(
+          danger: true,
+          glyph: AppGlyphs.delete,
+          label: l.remove,
+          onPressed: () => setState(() {
             _exits = [
               for (final item in _exits)
-                if (item != exit) item,
+                if (!identical(item, exit)) item,
             ];
-            setState(_changed);
-          },
+            _changed();
+          }),
         ),
-      for (final candidate in candidates ?? const <SiteLockExitCandidate>[])
-        ListItem(
-          title: Text(candidate.names.join(', ')),
-          subtitle: Text(
-            '${candidate.type} · ${candidate.server}:${candidate.port}',
-          ),
-          trailing: _chosen(candidate) ? const SelectionCheck() : null,
-          onTap: () => _toggle(candidate),
-        ),
-    ];
-    final note = candidates == null ? l.siteLockExitsOffline : null;
+      ],
+      child: SiteLockExitRow(
+        name: name,
+        subtitle: candidates != null && candidate == null
+            ? l.siteLockExitMissing
+            : null,
+        onPressed: candidates == null || candidates.isEmpty
+            ? null
+            : () => unawaited(_choose(candidates)),
+      ),
+    );
+  }
+
+  Widget _exitsSection(AppLocalizations l) {
+    final candidates = _candidates;
+    final available = candidates != null && candidates.isNotEmpty;
     return generateSection(
       title: l.siteLockExitsTitle,
-      items: rows.isEmpty
-          ? [
-              ListItem(
-                title: Text(
-                  note ?? l.siteLockExitsEmpty,
-                  style: TextStyle(color: context.colorScheme.onSurfaceVariant),
-                ),
-              ),
-            ]
-          : rows,
-      footer: rows.isEmpty || note == null ? l.siteLockExitsFooter : note,
+      footer: candidates == null
+          ? l.siteLockExitsOffline
+          : candidates.isEmpty
+          ? l.siteLockExitsEmpty
+          : l.siteLockExitsFooter,
+      items: [
+        for (final exit in _exits) _exitRow(l, exit, candidates),
+        DecorationListItem(
+          invalid: _invalid == _Field.exits,
+          leading: const GlyphIcon(AppGlyphs.add),
+          title: Text(
+            l.siteLockExitsChoose,
+            style: available
+                ? null
+                : TextStyle(color: context.colorScheme.onSurfaceVariant),
+          ),
+          onPressed: available ? () => unawaited(_choose(candidates)) : null,
+        ),
+      ],
     );
   }
 
@@ -284,7 +335,8 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     final l = context.appLocalizations;
     return FormPage(
       title: widget.isNew ? l.siteLockNew : l.siteLockEdit,
-      onSave: _save,
+      onSave: () => unawaited(_save()),
+      saving: _saving,
       error: _error,
       children: [
         generateSection(

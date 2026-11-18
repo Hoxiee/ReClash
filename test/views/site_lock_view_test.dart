@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/core/desktop/site_lock_policy.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -16,18 +18,29 @@ class _FixedSiteLockReport extends SiteLockReportState {
   _FixedSiteLockReport(this._report);
 
   final SiteLockReport? _report;
+  SiteLockReport? Function(List<SiteLock> locks)? answer;
+  final pushed = <List<SiteLock>>[];
 
   @override
   SiteLockReport? build() => _report;
 
   @override
   Future<void> refresh() async {}
+
+  @override
+  Future<SiteLockReport?> push(List<SiteLock> locks) async {
+    pushed.add(locks);
+    final report = answer?.call(locks);
+    state = report;
+    return report;
+  }
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late ProviderContainer container;
+  late _FixedSiteLockReport core;
 
   setUpAll(() => mockPreferences());
 
@@ -38,6 +51,7 @@ void main() {
     SiteLockReport? report,
     SiteLockHostStatus hostStatus = SiteLockHostStatus.inactive,
     bool tunEnabled = true,
+    CoreStatus coreStatus = CoreStatus.disconnected,
   }) async {
     tester.view.physicalSize = const Size(1200, 1800);
     tester.view.devicePixelRatio = 1;
@@ -45,8 +59,9 @@ void main() {
     container = ProviderContainer(
       overrides: [
         siteLockReportStateProvider.overrideWith(
-          () => _FixedSiteLockReport(report),
+          () => core = _FixedSiteLockReport(report),
         ),
+        coreStatusProvider.overrideWithValue(coreStatus),
         siteLockHostStateProvider.overrideWithBuild((_, _) => hostStatus),
         siteLocksProvider.overrideWithBuild((_, _) => locks),
         patchClashConfigProvider.overrideWithBuild(
@@ -232,6 +247,79 @@ void main() {
       hostStatus: SiteLockHostStatus.helperUnavailable,
     );
     expect(find.text(l.siteLockHelperTitle), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets(
+    'a lift the helper has not done yet warns that sites stay blocked',
+    (tester) async {
+      const locks = [
+        SiteLock(
+          id: 'mail',
+          name: 'Mail',
+          enabled: false,
+          match: ['m.example'],
+        ),
+      ];
+      await pumpView(
+        tester,
+        hostFirewall: true,
+        locks: locks,
+        hostStatus: SiteLockHostStatus.helperUnavailable,
+      );
+      final l = l10n(tester);
+      expect(find.text(l.siteLockStillBlockedTitle), findsOneWidget);
+      expect(find.text(l.siteLockHelperTitle), findsNothing);
+      await unmount(tester);
+
+      await pumpView(tester, hostFirewall: true, locks: locks);
+      expect(find.text(l.siteLockStillBlockedTitle), findsNothing);
+      await unmount(tester);
+    },
+  );
+
+  testWidgets('an edit the core refuses keeps the sheet open and unsaved', (
+    tester,
+  ) async {
+    const lock = SiteLock(
+      id: 'mail',
+      name: 'Mail',
+      match: ['DOMAIN-SUFFIX,mail.example'],
+      exits: [SiteLockExit(type: 'ss', server: '203.0.113.1', port: 443)],
+    );
+    await pumpView(
+      tester,
+      hostFirewall: false,
+      locks: const [lock],
+      coreStatus: CoreStatus.connected,
+    );
+    core.answer = (_) => const SiteLockReport(
+      problems: [
+        SiteLockProblem(id: 'mail', field: 'match.0', message: 'refused'),
+      ],
+    );
+    await tester.tap(find.text('Mail'));
+    await tester.pumpAndSettle();
+    tester.widget<FormPage>(find.byType(FormPage)).onSave!();
+    await tester.pumpAndSettle();
+
+    expect(core.pushed.single.single.id, 'mail');
+    expect(
+      find.textContaining('DOMAIN-SUFFIX,mail.example: refused'),
+      findsOneWidget,
+    );
+    expect(find.byType(FormPage), findsOneWidget);
+
+    core.answer = (_) => const SiteLockReport(applied: true);
+    tester.widget<FormPage>(find.byType(FormPage)).onSave!();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FormPage), findsNothing);
+    expect(container.read(siteLocksProvider).single.match, [
+      'DOMAIN-SUFFIX,mail.example',
+    ]);
+    // Lets the editor's exit query, which no core answers here, time out.
+    await tester.pump(const Duration(seconds: 11));
     await unmount(tester);
   });
 

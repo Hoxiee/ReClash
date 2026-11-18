@@ -37,5 +37,13 @@
   "siteLockExitMissing": "Нет в текущем профиле",
   "siteLockErrorMatchEmpty": "Добавьте хотя бы один сайт.",
   "siteLockErrorTooMany": "В привязке не больше {max} записей.",
-  "siteLockErrorNoExit": "Выберите хотя бы один выходной сервер."
+  "siteLockErrorNoExit": "Выберите хотя бы один выходной сервер.",
+  "siteLockExitsChoose": "Выбрать серверы",
+  "siteLockExitsChosen": "Выбрано · {count} из {max}",
+  "siteLockExitsAll": "Все серверы",
+  "siteLockExitsNoMatch": "Под поиск не подходит ни один сервер.",
+  "siteLockExitMoreNames": "и ещё {count}",
+  "siteLockExitsSearch": "Страна или название",
+  "siteLockStillBlockedTitle": "Сайты всё ещё заблокированы",
+  "siteLockStillBlockedBody": "Системный брандмауэр пока блокирует закреплённые сайты вне туннеля. ReClash снимет блокировку, как только Helper ответит."
 }

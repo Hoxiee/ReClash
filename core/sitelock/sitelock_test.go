@@ -173,6 +173,20 @@ func TestIPEntriesResolveThroughTheHelper(t *testing.T) {
 	}
 }
 
+func TestNoResolveIPEntriesLeaveOtherNamesUnresolved(t *testing.T) {
+	lock := Lock{ID: "net", Enabled: true, Match: []string{"IP-CIDR,203.0.113.0/24,no-resolve"}, Exits: chatgpt.Exits}
+	set := compileOK(t, lock)
+	env := testEnv(nil, socks(t, "pinned", "10.0.0.1", 1080, false))
+	helper := C.RuleMatchHelper{ResolveIP: func() { t.Error("a no-resolve entry resolved the name") }}
+
+	if got := claimName(set, host("example.net"), helper, env); got != "" {
+		t.Errorf("claimed by %q, want nothing", got)
+	}
+	if got := set.Prefixes(); len(got) != 1 || got[0] != netip.MustParsePrefix("203.0.113.0/24") {
+		t.Errorf("prefixes %v, want the entry's range", got)
+	}
+}
+
 func TestShadowsocksExitMatchesItsConfigType(t *testing.T) {
 	ss, err := outbound.NewShadowSocks(outbound.ShadowSocksOption{Name: "ss", Server: "10.0.0.1", Port: 8388, Password: "p", Cipher: "aes-128-gcm"})
 	if err != nil {

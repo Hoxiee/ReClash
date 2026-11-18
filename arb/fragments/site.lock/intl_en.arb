@@ -72,5 +72,30 @@
       }
     }
   },
-  "siteLockErrorNoExit": "Choose at least one exit server."
+  "siteLockErrorNoExit": "Choose at least one exit server.",
+  "siteLockExitsChoose": "Choose servers",
+  "siteLockExitsChosen": "Chosen · {count} of {max}",
+  "@siteLockExitsChosen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "siteLockExitsAll": "All servers",
+  "siteLockExitsNoMatch": "No server matches the search.",
+  "siteLockExitMoreNames": "and {count} more",
+  "@siteLockExitMoreNames": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "siteLockExitsSearch": "Country or name",
+  "siteLockStillBlockedTitle": "Sites are still blocked",
+  "siteLockStillBlockedBody": "The system firewall still blocks the locked sites off the tunnel. ReClash lifts it as soon as the Helper responds."
 }

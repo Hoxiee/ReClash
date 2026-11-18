@@ -37,5 +37,13 @@
   "siteLockExitMissing": "Joriy profilda yo‘q",
   "siteLockErrorMatchEmpty": "Kamida bitta sayt qo‘shing.",
   "siteLockErrorTooMany": "Mahkamlashda ko‘pi bilan {max} ta yozuv bo‘lishi mumkin.",
-  "siteLockErrorNoExit": "Kamida bitta chiqish serverini tanlang."
+  "siteLockErrorNoExit": "Kamida bitta chiqish serverini tanlang.",
+  "siteLockExitsChoose": "Serverlarni tanlash",
+  "siteLockExitsChosen": "Tanlangan · {count}/{max}",
+  "siteLockExitsAll": "Barcha serverlar",
+  "siteLockExitsNoMatch": "Qidiruvga mos server yoʻq.",
+  "siteLockExitMoreNames": "va yana {count}",
+  "siteLockExitsSearch": "Mamlakat yoki nom",
+  "siteLockStillBlockedTitle": "Saytlar hali ham bloklangan",
+  "siteLockStillBlockedBody": "Tizim brandmaueri mahkamlangan saytlarni tunneldan tashqarida hali ham bloklamoqda. Helper javob berishi bilan ReClash blokni olib tashlaydi."
 }

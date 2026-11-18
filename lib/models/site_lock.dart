@@ -16,12 +16,16 @@ enum SiteLockStatus {
   unknown,
 }
 
+/// [route] fingerprints the server's whole definition but its name; [name]
+/// finds it once a subscription rotates its credentials.
 @freezed
 abstract class SiteLockExit with _$SiteLockExit {
   const factory SiteLockExit({
     required String type,
     required String server,
     required int port,
+    @Default('') String route,
+    @Default('') String name,
   }) = _SiteLockExit;
 
   factory SiteLockExit.fromJson(Map<String, Object?> json) =>
@@ -29,13 +33,14 @@ abstract class SiteLockExit with _$SiteLockExit {
 }
 
 /// A server of the running config that a lock can name as an exit, with
-/// every proxy name that points at it.
+/// every proxy name that shares its definition.
 @freezed
 abstract class SiteLockExitCandidate with _$SiteLockExitCandidate {
   const factory SiteLockExitCandidate({
     required String type,
     required String server,
     required int port,
+    @Default('') String route,
     @Default([]) List<String> names,
   }) = _SiteLockExitCandidate;
 
@@ -122,6 +127,17 @@ abstract class SiteLockNames with _$SiteLockNames {
       _$SiteLockNamesFromJson(json);
 }
 
+@freezed
+abstract class SiteLockGuardedNames with _$SiteLockGuardedNames {
+  const factory SiteLockGuardedNames({
+    @Default(SiteLockNames()) SiteLockNames names,
+    @Default(SiteLockNames()) SiteLockNames except,
+  }) = _SiteLockGuardedNames;
+
+  factory SiteLockGuardedNames.fromJson(Map<String, Object?> json) =>
+      _$SiteLockGuardedNamesFromJson(json);
+}
+
 /// What the host firewall keeps off every path but the TUN (empty when TUN is
 /// off): locked addresses and names. `unchanged` answers a query whose known
 /// revision is still current.
@@ -133,6 +149,7 @@ abstract class SiteLockPolicy with _$SiteLockPolicy {
     @Default('') String tun,
     @Default([]) List<String> addresses,
     @Default(SiteLockNames()) SiteLockNames names,
+    @Default([]) List<SiteLockGuardedNames> guarded,
   }) = _SiteLockPolicy;
 
   factory SiteLockPolicy.fromJson(Map<String, Object?> json) =>

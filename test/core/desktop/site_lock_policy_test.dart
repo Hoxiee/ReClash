@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/models/site_lock.dart';
 
@@ -15,10 +16,11 @@ final class _Host {
   );
   final known = <String>[];
   final puts_ = <SiteLockPolicy>[];
-  bool ready = true;
+  HelperReadiness readiness = HelperReadiness.ready;
   Exception? putError;
   Exception? deleteError;
   Completer<void>? fetchGate;
+  Completer<void>? deleteGate;
   final calls = <String>[];
   final statuses = <SiteLockHostStatus>[];
 
@@ -40,9 +42,10 @@ final class _Host {
     },
     delete: () async {
       calls.add('delete');
+      await deleteGate?.future;
       if (deleteError != null) throw deleteError!;
     },
-    helperReady: () async => ready,
+    readiness: () async => readiness,
     onStatus: statuses.add,
     interval: _tick,
   );
@@ -153,14 +156,13 @@ void main() {
     });
   });
 
-  test('a failed delete is retried on the next update', () {
+  test('a failed delete is retried on the next tick until it lands', () {
     _run((async, host) {
       host.deleteError = Exception('nft');
       host.policy.update(locksEnabled: false, coreConnected: false);
       async.flushMicrotasks();
       host.deleteError = null;
-      host.policy.update(locksEnabled: false, coreConnected: false);
-      async.flushMicrotasks();
+      async.elapse(_tick * 3);
 
       expect(host.calls, ['delete', 'delete']);
       expect(host.statuses, [
@@ -170,16 +172,63 @@ void main() {
     });
   });
 
+  test('an unready helper keeps the lift pending until it returns', () {
+    _run((async, host) {
+      host.readiness = HelperReadiness.notReady;
+      host.policy.update(locksEnabled: false, coreConnected: false);
+      async.elapse(_tick * 2);
+      expect(host.calls, isEmpty);
+      expect(host.statuses.last, SiteLockHostStatus.helperUnavailable);
+
+      host.readiness = HelperReadiness.ready;
+      async.elapse(_tick * 3);
+      expect(host.calls, ['delete']);
+      expect(host.statuses.last, SiteLockHostStatus.inactive);
+    });
+  });
+
+  test('a missing helper holds no policy and is not retried', () {
+    _run((async, host) {
+      host.readiness = HelperReadiness.manifestMissing;
+      host.policy.update(locksEnabled: false, coreConnected: false);
+      async.elapse(_tick * 3);
+
+      expect(host.calls, isEmpty);
+      expect(host.statuses, [SiteLockHostStatus.inactive]);
+    });
+  });
+
+  test('enabling during a lift keeps syncing and a later disable lifts', () {
+    _run((async, host) {
+      final gate = host.deleteGate = Completer<void>();
+      host.policy.update(locksEnabled: false, coreConnected: true);
+      async.flushMicrotasks();
+      host.policy.update(locksEnabled: true, coreConnected: true);
+      host.deleteGate = null;
+      gate.complete();
+      async.flushMicrotasks();
+      host.policy.update(locksEnabled: false, coreConnected: true);
+      async.flushMicrotasks();
+
+      expect(host.calls.where((c) => c == 'delete'), hasLength(2));
+      expect(host.puts, hasLength(1));
+      expect(host.statuses.last, SiteLockHostStatus.inactive);
+    });
+  });
+
   test('an unready helper reports unavailable without put or delete', () {
     _run((async, host) {
-      host.ready = false;
+      host.readiness = HelperReadiness.notReady;
       host.policy.update(locksEnabled: true, coreConnected: true);
       async.flushMicrotasks();
       host.policy.update(locksEnabled: false, coreConnected: true);
       async.flushMicrotasks();
 
       expect(host.calls, isEmpty);
-      expect(host.statuses, [SiteLockHostStatus.helperUnavailable]);
+      expect(host.statuses, [
+        SiteLockHostStatus.helperUnavailable,
+        SiteLockHostStatus.helperUnavailable,
+      ]);
     });
   });
 

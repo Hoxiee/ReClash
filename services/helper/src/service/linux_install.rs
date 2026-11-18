@@ -1,5 +1,5 @@
 use super::linux::Owner;
-use super::site_lock::{SiteLockService, SystemNft};
+use super::site_lock::{Scope, SiteLockService, SystemNft};
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -21,6 +21,8 @@ const MANIFEST_NAME: &str = "manifest.json";
 const STATE_ROOT: &str = "/var/lib/reclash-helper";
 const UNIT_ROOT: &str = "/etc/systemd/system";
 const PROTOCOL: &str = "10";
+// An upgrade replaces and prunes bundles of these; nothing runs from them.
+const PREVIOUS_PROTOCOLS: [&str; 1] = ["9"];
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum InstallFailure {
@@ -85,9 +87,13 @@ struct Manifest {
 
 impl Manifest {
     fn validate(&self) -> Result<()> {
+        self.validate_for(&[PROTOCOL])
+    }
+
+    fn validate_for(&self, protocols: &[&str]) -> Result<()> {
         if !valid_hash(&self.core_sha256)
             || !valid_hash(&self.helper_sha256)
-            || self.helper_protocol_version != PROTOCOL
+            || !protocols.contains(&self.helper_protocol_version.as_str())
         {
             bail!("invalid Helper bundle manifest");
         }
@@ -214,7 +220,9 @@ pub(super) fn unit_contents(executable: &Path, owner: Owner) -> String {
         "# ReClash Helper owner={} protocol=10\n\
          [Unit]\n\
          Description=ReClash network Helper for UID {}\n\
-         After=network-online.target nftables.service iptables.service\n\
+         Wants=network-pre.target\n\
+         Before=network-pre.target\n\
+         After=nftables.service iptables.service\n\
          StartLimitIntervalSec=60\n\
          StartLimitBurst=5\n\n\
          [Service]\n\
@@ -255,6 +263,54 @@ pub(super) fn unit_contents(executable: &Path, owner: Owner) -> String {
         owner.uid,
         owner.gid,
         owner.uid,
+        owner.uid,
+    )
+}
+
+// Frozen as v0.1.0-pre.10 installed it, so that upgrades still recognize the unit.
+fn protocol_9_unit_contents(executable: &Path, owner: Owner) -> String {
+    format!(
+        "# ReClash Helper owner={} protocol=9\n\
+         [Unit]\n\
+         Description=ReClash network Helper for UID {}\n\
+         After=network-online.target nftables.service iptables.service\n\
+         StartLimitIntervalSec=60\n\
+         StartLimitBurst=5\n\n\
+         [Service]\n\
+         Type=notify\n\
+         NotifyAccess=main\n\
+         User={}\n\
+         Group={}\n\
+         ExecStart={}\n\
+         Environment=RECLASH_HELPER_OWNER_UID={}\n\
+         Environment=RECLASH_HELPER_OWNER_GID={}\n\
+         AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW\n\
+         CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW\n\
+         NoNewPrivileges=yes\n\
+         RestrictSUIDSGID=yes\n\
+         LockPersonality=yes\n\
+         ProtectSystem=full\n\
+         ProtectKernelModules=yes\n\
+         ProtectKernelTunables=yes\n\
+         ProtectControlGroups=yes\n\
+         RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_PACKET\n\
+         RuntimeDirectory=reclash-helper-{}\n\
+         RuntimeDirectoryMode=0700\n\
+         UMask=0077\n\
+         KillMode=control-group\n\
+         TimeoutStartSec=15\n\
+         TimeoutStopSec=10\n\
+         Restart=on-failure\n\
+         RestartSec=5\n\n\
+         [Install]\n\
+         WantedBy=multi-user.target\n",
+        owner.uid,
+        owner.uid,
+        owner.uid,
+        owner.gid,
+        quoted_unit_argument(executable),
+        owner.uid,
+        owner.gid,
         owner.uid,
     )
 }
@@ -535,6 +591,20 @@ fn atomic_write(path: &Path, value: &[u8], mode: u32, uid: u32) -> Result<()> {
 }
 
 fn installed_manifest(path: &Path, uid: u32) -> Result<Manifest> {
+    verified_bundle(path, uid, &[PROTOCOL])
+}
+
+fn replaceable_protocols() -> Vec<&'static str> {
+    std::iter::once(PROTOCOL)
+        .chain(PREVIOUS_PROTOCOLS)
+        .collect()
+}
+
+fn replaceable_manifest(path: &Path, uid: u32) -> Result<Manifest> {
+    verified_bundle(path, uid, &replaceable_protocols())
+}
+
+fn verified_bundle(path: &Path, uid: u32, protocols: &[&str]) -> Result<Manifest> {
     let directory = secure_directory(path, uid)?;
     if directory.metadata()?.mode() & 0o222 != 0 {
         bail!("installed bundle must be immutable");
@@ -557,7 +627,7 @@ fn installed_manifest(path: &Path, uid: u32) -> Result<Manifest> {
         bail!("installed manifest is too large");
     }
     let manifest: Manifest = serde_json::from_reader(manifest_file)?;
-    manifest.validate()?;
+    manifest.validate_for(protocols)?;
     if path.file_name().and_then(|name| name.to_str()) != Some(manifest.id().as_str()) {
         bail!("bundle hash-address does not match its manifest");
     }
@@ -806,7 +876,7 @@ fn snapshot(
             .map(|value| serde_json::from_slice::<Registration>(&value))
             .transpose()?;
         if let Some(registration) = &registration {
-            registration.bundle.validate()?;
+            registration.bundle.validate_for(&replaceable_protocols())?;
             if registration.uid != owner.uid
                 || registration.gid == 0
                 || registration.gid == u32::MAX
@@ -817,14 +887,18 @@ fn snapshot(
                 uid: registration.uid,
                 gid: registration.gid,
             };
-            let expected = unit_contents(
-                &layout.bundle(owner, &registration.bundle).join(HELPER_NAME),
-                previous_owner,
-            );
-            if unit.as_deref() != Some(expected.as_bytes()) {
+            let executable = layout.bundle(owner, &registration.bundle).join(HELPER_NAME);
+            let recognized = [
+                unit_contents(&executable, previous_owner),
+                protocol_9_unit_contents(&executable, previous_owner),
+            ];
+            if !recognized
+                .iter()
+                .any(|expected| unit.as_deref() == Some(expected.as_bytes()))
+            {
                 bail!("refusing to overwrite an unrecognized systemd unit");
             }
-            installed_manifest(&layout.bundle(owner, &registration.bundle), layout.root_uid)?;
+            replaceable_manifest(&layout.bundle(owner, &registration.bundle), layout.root_uid)?;
         } else if let Some(unit) = &unit {
             if !replace_owned {
                 return Err(InstallFailure::RegistrationConflict)
@@ -932,7 +1006,7 @@ fn prune(layout: &Layout, owner: Owner, keep: &[String]) -> Result<()> {
             continue;
         }
         let path = entry.path();
-        if installed_manifest(&path, layout.root_uid).is_err() {
+        if replaceable_manifest(&path, layout.root_uid).is_err() {
             continue;
         }
         fs::set_permissions(&path, fs::Permissions::from_mode(0o700))?;
@@ -1113,6 +1187,14 @@ fn uninstall_owner(
     }
     let name = service_name(owner);
     stop_confirmed(systemd, &name)?;
+    // Right after the stop: the DNS queue has no listener until the table is gone.
+    if layout.site_lock_cleanup {
+        let site_lock =
+            SiteLockService::new(state_path(owner), Scope::of(owner.uid), Box::new(SystemNft));
+        if let Err(error) = site_lock.clear() {
+            eprintln!("Helper stopped; site lock cleanup failed: {error}");
+        }
+    }
     systemd
         .run(&["disable", &name])
         .context(InstallFailure::SystemdFailed)?;
@@ -1133,12 +1215,6 @@ fn uninstall_owner(
         Vec::new()
     };
     prune(layout, owner, &keep)?;
-    if layout.site_lock_cleanup {
-        let site_lock = SiteLockService::new(state_path(owner), Box::new(SystemNft));
-        if let Err(error) = site_lock.clear() {
-            eprintln!("Helper removed; site lock cleanup skipped: {error}");
-        }
-    }
     Ok(())
 }
 
@@ -1629,6 +1705,7 @@ mod tests {
             "StateDirectoryMode=0700\n",
             "protocol=10\n",
             "KillMode=control-group\n",
+            "Before=network-pre.target\n",
         ] {
             assert!(unit.contains(line), "missing {line}");
         }
@@ -1639,6 +1716,61 @@ mod tests {
             quoted_unit_argument(Path::new("/a b/100%/a\"b\\c")),
             "\"/a b/100%%/a\\\"b\\\\c\""
         );
+    }
+
+    #[test]
+    fn upgrade_replaces_an_owned_protocol_9_unit() {
+        let fixture = Fixture::new();
+        let first = fixture.source("first");
+        let manifest = first.manifest.clone();
+        let mut systemd = FakeSystemd::default();
+        install_bundle(&fixture.layout, fixture.owner, first, &mut systemd).unwrap();
+        let executable = fixture
+            .layout
+            .bundle(fixture.owner, &manifest)
+            .join(HELPER_NAME);
+        let old = protocol_9_unit_contents(&executable, fixture.owner);
+        assert!(old.contains(" protocol=9\n") && !old.contains("StateDirectory"));
+        let bundle = fixture.layout.bundle(fixture.owner, &manifest);
+        fs::set_permissions(&bundle, fs::Permissions::from_mode(0o755)).unwrap();
+        let manifest_path = bundle.join(MANIFEST_NAME);
+        fs::set_permissions(&manifest_path, fs::Permissions::from_mode(0o644)).unwrap();
+        let previous = Manifest {
+            helper_protocol_version: "9".to_string(),
+            ..manifest.clone()
+        };
+        fs::write(&manifest_path, serde_json::to_vec(&previous).unwrap()).unwrap();
+        fs::set_permissions(&manifest_path, fs::Permissions::from_mode(0o444)).unwrap();
+        fs::set_permissions(&bundle, fs::Permissions::from_mode(0o555)).unwrap();
+        assert!(installed_manifest(&bundle, fixture.layout.root_uid).is_err());
+        let registration = fixture.layout.registration(fixture.owner);
+        let mut stored: serde_json::Value =
+            serde_json::from_slice(&fs::read(&registration).unwrap()).unwrap();
+        stored["bundle"]["helperProtocolVersion"] = "9".into();
+        atomic_write(
+            &registration,
+            &serde_json::to_vec(&stored).unwrap(),
+            0o644,
+            fixture.layout.root_uid,
+        )
+        .unwrap();
+        atomic_write(
+            &fixture.layout.unit(fixture.owner),
+            old.as_bytes(),
+            0o644,
+            fixture.layout.root_uid,
+        )
+        .unwrap();
+        install_bundle(
+            &fixture.layout,
+            fixture.owner,
+            fixture.source("second"),
+            &mut systemd,
+        )
+        .unwrap();
+        let unit =
+            String::from_utf8(fs::read(fixture.layout.unit(fixture.owner)).unwrap()).unwrap();
+        assert!(unit.contains(" protocol=10\n") && unit.contains("StateDirectory="));
     }
 
     #[test]

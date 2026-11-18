@@ -5,7 +5,7 @@ risk: critical
 why: Chosen sites are reachable only through the exits the user allows; without the tunnel they are unreachable, even when the core is down.
 must:
   before-rules: The core claims a locked connection before mode and rules, and sends it through a live exit or refuses it; groups and built-ins never qualify as exits.
-  exits-by-definition: An exit is a server by type, address and port, so renames and subscription refreshes keep the lock.
+  exits-by-definition: An exit is a server by its definition without the name, falling back to the name once a refresh changes it, so renames keep the lock and one address serving many exits stays apart.
   atomic-apply: A rejected lock list leaves the previous one in force and reports every problem.
   fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.

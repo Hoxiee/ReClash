@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/core/method.dart';
@@ -14,9 +15,15 @@ part 'generated/site_lock.g.dart';
 @Riverpod(keepAlive: true)
 class SiteLockReportState extends _$SiteLockReportState {
   int _revision = 0;
+  List<SiteLock>? _applied;
 
   @override
-  SiteLockReport? build() => null;
+  SiteLockReport? build() {
+    ref.listen(coreStatusProvider, (_, next) {
+      if (next != CoreStatus.connected) _applied = null;
+    });
+    return null;
+  }
 
   Future<void> refresh() async {
     if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
@@ -33,11 +40,16 @@ class SiteLockReportState extends _$SiteLockReportState {
     }
   }
 
+  /// Whether the Core already runs [locks], as the editor's push before a save leaves it.
+  bool holds(List<SiteLock> locks) =>
+      const ListEquality<SiteLock>().equals(_applied, locks);
+
   Future<SiteLockReport?> push(List<SiteLock> locks) async {
     final revision = ++_revision;
     try {
       final report = await ref.read(coreHandlerProvider).setSiteLocks(locks);
       if (!ref.mounted || revision != _revision) return report;
+      if (report?.applied ?? false) _applied = locks;
       state = report;
       return report;
     } catch (error) {

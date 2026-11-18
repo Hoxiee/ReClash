@@ -37,5 +37,13 @@
   "siteLockExitMissing": "Häzirki profilde ýok",
   "siteLockErrorMatchEmpty": "Azyndan bir sahypa goşuň.",
   "siteLockErrorTooMany": "Bekitmede iň köp {max} ýazgy bolup biler.",
-  "siteLockErrorNoExit": "Azyndan bir çykyş serweri saýlaň."
+  "siteLockErrorNoExit": "Azyndan bir çykyş serweri saýlaň.",
+  "siteLockExitsChoose": "Serwerleri saýla",
+  "siteLockExitsChosen": "Saýlanan · {count}/{max}",
+  "siteLockExitsAll": "Ähli serwerler",
+  "siteLockExitsNoMatch": "Gözlege laýyk serwer ýok.",
+  "siteLockExitMoreNames": "we ýene {count}",
+  "siteLockExitsSearch": "Ýurt ýa-da at",
+  "siteLockStillBlockedTitle": "Sahypalar henizem bloklanan",
+  "siteLockStillBlockedBody": "Ulgam brandmaueri bekidilen sahypalary tuneliň daşynda henizem bloklaýar. Helper jogap berende ReClash ony aýyrar."
 }

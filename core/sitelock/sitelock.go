@@ -14,6 +14,7 @@ import (
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/rules"
 	RC "github.com/metacubex/mihomo/rules/common"
+	"golang.org/x/net/idna"
 )
 
 const (
@@ -22,6 +23,9 @@ const (
 	maxExits   = 16
 	maxID      = 64
 	maxName    = 64
+	// Proxy names come from subscriptions and run longer than lock names.
+	maxExitName = 512
+	maxRoute    = 128
 )
 
 // Lock entries are mihomo rules without a target.
@@ -34,11 +38,16 @@ type Lock struct {
 	Exits   []Exit   `json:"exits"`
 }
 
-// Exit names a server by its definition, which survives renames and subscriptions.
+// Exit names a server by its definition without the name (Route), which
+// survives renames. Providers that serve many exits from one address tell
+// them apart only by credentials, so the address alone is no identity; Name
+// takes over once a refresh rotates those credentials.
 type Exit struct {
 	Type   string `json:"type"`
 	Server string `json:"server"`
 	Port   int    `json:"port"`
+	Route  string `json:"route,omitempty"`
+	Name   string `json:"name,omitempty"`
 }
 
 type Problem struct {
@@ -146,6 +155,9 @@ func compile(lock Lock, seen map[string]bool) (*compiled, []Problem) {
 		if strings.TrimSpace(exit.Type) == "" || strings.TrimSpace(exit.Server) == "" || exit.Port < 1 || exit.Port > 65535 {
 			fail("exits."+strconv.Itoa(i), "needs a type, a server and a port")
 		}
+		if len(exit.Route) > maxRoute || len(exit.Name) > maxExitName || !utf8.ValidString(exit.Name) {
+			fail("exits."+strconv.Itoa(i), "route or name too long")
+		}
 	}
 	built := &compiled{lock: lock}
 	parseAll := func(field string, entries []string) []C.Rule {
@@ -183,7 +195,37 @@ func parseEntry(entry, target string) (C.Rule, error) {
 		}
 	}
 	tp, payload, _, params := RC.ParseRulePayload(entry, false)
-	return rules.ParseRule(tp, payload, target, params, nil)
+	return rules.ParseRule(tp, asciiDomain(tp, payload), target, params, nil)
+}
+
+// Connections carry names in their ASCII (punycode) form, as DNS does.
+func asciiDomain(tp, payload string) string {
+	switch strings.ToUpper(tp) {
+	case "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD":
+	default:
+		return payload
+	}
+	labels := strings.Split(payload, ".")
+	for i, label := range labels {
+		if isASCII(label) {
+			continue
+		}
+		if ascii, err := idna.Lookup.ToASCII(label); err == nil {
+			labels[i] = ascii
+		} else if ascii, err := idna.Punycode.ToASCII(label); err == nil {
+			labels[i] = ascii
+		}
+	}
+	return strings.Join(labels, ".")
+}
+
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= 0x80 {
+			return false
+		}
+	}
+	return true
 }
 
 func ruleTypes(entry string) []string {
@@ -253,19 +295,40 @@ func (c *compiled) pick(env Env, udp bool) (C.Proxy, bool) {
 // Groups and built-ins never qualify: they could lead back to DIRECT.
 func candidates(all map[string]C.Proxy, exit Exit) []C.Proxy {
 	kind := normalType(exit.Type)
-	var found []C.Proxy
-	for _, proxy := range all {
+	var byRoute, byName []C.Proxy
+	for name, proxy := range all {
 		if proxy.Type() < C.Shadowsocks || normalType(proxy.Type().String()) != kind {
 			continue
 		}
-		host, port, err := net.SplitHostPort(proxy.Addr())
-		if err != nil || port != strconv.Itoa(exit.Port) || !strings.EqualFold(host, exit.Server) {
-			continue
+		switch {
+		case exit.Route == "":
+			if atAddress(proxy, exit) {
+				byRoute = append(byRoute, proxy)
+			}
+		case routeOf(proxy) == exit.Route:
+			byRoute = append(byRoute, proxy)
+		case exit.Name != "" && name == exit.Name:
+			byName = append(byName, proxy)
 		}
-		found = append(found, proxy)
+	}
+	found := byRoute
+	if len(found) == 0 {
+		found = byName
 	}
 	slices.SortFunc(found, func(a, b C.Proxy) int { return strings.Compare(a.Name(), b.Name()) })
 	return found
+}
+
+func atAddress(proxy C.Proxy, exit Exit) bool {
+	host, port, err := net.SplitHostPort(proxy.Addr())
+	return err == nil && port == strconv.Itoa(exit.Port) && strings.EqualFold(host, exit.Server)
+}
+
+func routeOf(proxy C.Proxy) string {
+	if parsed, ok := proxy.(interface{ RouteFingerprint() string }); ok {
+		return parsed.RouteFingerprint()
+	}
+	return ""
 }
 
 // normalType folds config types ("ss", "gost-relay") and adapter types to one spelling.
@@ -316,6 +379,14 @@ func (s *Set) Prefixes() []netip.Prefix {
 		}
 	}
 	return prefixes
+}
+
+// Locks are the locks the set was compiled from, disabled ones included.
+func (s *Set) Locks() []Lock {
+	if s == nil {
+		return nil
+	}
+	return s.all
 }
 
 func (s *Set) enabledLocks() []Lock {

@@ -37,5 +37,13 @@
   "siteLockExitMissing": "Absent du profil actuel",
   "siteLockErrorMatchEmpty": "Ajoutez au moins un site.",
   "siteLockErrorTooMany": "Un épinglage contient au maximum {max} entrées.",
-  "siteLockErrorNoExit": "Choisissez au moins un serveur de sortie."
+  "siteLockErrorNoExit": "Choisissez au moins un serveur de sortie.",
+  "siteLockExitsChoose": "Choisir des serveurs",
+  "siteLockExitsChosen": "Choisis · {count} sur {max}",
+  "siteLockExitsAll": "Tous les serveurs",
+  "siteLockExitsNoMatch": "Aucun serveur ne correspond à la recherche.",
+  "siteLockExitMoreNames": "et {count} de plus",
+  "siteLockExitsSearch": "Pays ou nom",
+  "siteLockStillBlockedTitle": "Les sites restent bloqués",
+  "siteLockStillBlockedBody": "Le pare-feu du système bloque encore les sites épinglés hors du tunnel. ReClash le lèvera dès que le Helper répondra."
 }

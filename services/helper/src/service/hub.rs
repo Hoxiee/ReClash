@@ -919,15 +919,29 @@ struct ForbiddenClient;
 
 impl warp::reject::Reject for ForbiddenClient {}
 
-#[cfg(any(test, not(all(feature = "windows-service", target_os = "windows"))))]
+#[cfg(any(
+    test,
+    not(any(
+        all(feature = "windows-service", target_os = "windows"),
+        target_os = "linux"
+    ))
+))]
 pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     caller_routes(Caller::default())
 }
 
+#[cfg(any(test, not(target_os = "linux")))]
 pub(super) fn caller_routes(
     caller: Caller,
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     caller_routes_with(caller, Arc::new(SiteLockService::system()))
+}
+
+#[cfg(target_os = "linux")]
+pub(super) fn routes_with(
+    site_lock: Arc<SiteLockService>,
+) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+    caller_routes_with(Caller::default(), site_lock)
 }
 
 pub(super) fn caller_routes_with(

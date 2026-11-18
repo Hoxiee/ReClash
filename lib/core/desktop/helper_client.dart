@@ -376,18 +376,28 @@ final class HelperClient {
     }
   }
 
-  /// nft runs inside these requests, so they wait longer than a ping.
-  static const siteLockTimeout = Duration(seconds: 5);
+  /// nft loads a ruleset of up to the address and name limits inside these
+  /// requests, so they wait far longer than a ping.
+  static const siteLockTimeout = Duration(seconds: 20);
 
   Future<void> putSiteLock({
     required String tun,
     required List<String> addresses,
     required SiteLockNames names,
+    List<SiteLockGuardedNames> guarded = const [],
   }) async {
     try {
       final response = await _dio.put<Object?>(
         '$baseUrl/site-lock',
-        data: {'tun': tun, 'addresses': addresses, 'names': names.toJson()},
+        data: {
+          'tun': tun,
+          'addresses': addresses,
+          'names': names.toJson(),
+          'guarded': [
+            for (final lock in guarded)
+              {'names': lock.names.toJson(), 'except': lock.except.toJson()},
+          ],
+        },
         options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
       );
       _responseMap(response, operation: 'site lock');

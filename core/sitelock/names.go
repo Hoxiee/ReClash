@@ -23,34 +23,71 @@ func (n Names) Empty() bool {
 	return len(n.Full)+len(n.Suffix)+len(n.Keyword)+len(n.Regex) == 0
 }
 
+// GuardedNames are the names of one lock with exceptions: a query matching
+// Except is free even when Names matches it.
+type GuardedNames struct {
+	Names  Names `json:"names"`
+	Except Names `json:"except"`
+}
+
 type GeoSiteLoader func(code string) ([]*router.Domain, error)
 
-// Names collects what the enabled locks match by name; partial lists the locks
-// with an entry outside both Names and Prefixes.
-func (s *Set) Names(load GeoSiteLoader) (names Names, partial []string) {
+// Names collects what the enabled locks match by name: locks without name
+// exceptions merge into names, the rest stay apart in guarded. An exception the
+// filter cannot mirror keeps the name locked, the safer side. partial lists the
+// locks with an entry outside both Names and Prefixes.
+func (s *Set) Names(load GeoSiteLoader) (names Names, guarded []GuardedNames, partial []string) {
 	for _, lock := range s.enabledLocks() {
+		var own Names
 		covered := true
 		for _, entry := range lock.Match {
-			if !names.add(entry, load) {
+			if !own.add(entry, load) {
 				covered = false
 			}
 		}
 		if !covered {
 			partial = append(partial, lock.ID)
 		}
+		var except Names
+		for _, entry := range lock.Except {
+			except.add(entry, load)
+		}
+		if own.Empty() {
+			continue
+		}
+		if except.Empty() {
+			names.merge(own)
+			continue
+		}
+		guarded = append(guarded, GuardedNames{Names: own.sorted(), Except: except.sorted()})
 	}
-	for _, list := range []*[]string{&names.Full, &names.Suffix, &names.Keyword, &names.Regex} {
+	if guarded == nil {
+		guarded = []GuardedNames{}
+	}
+	return names.sorted(), guarded, partial
+}
+
+func (n *Names) merge(other Names) {
+	n.Full = append(n.Full, other.Full...)
+	n.Suffix = append(n.Suffix, other.Suffix...)
+	n.Keyword = append(n.Keyword, other.Keyword...)
+	n.Regex = append(n.Regex, other.Regex...)
+}
+
+func (n Names) sorted() Names {
+	for _, list := range []*[]string{&n.Full, &n.Suffix, &n.Keyword, &n.Regex} {
 		if *list == nil {
 			*list = []string{}
 		}
 		slices.Sort(*list)
 		*list = slices.Compact(*list)
 	}
-	return names, partial
+	return n
 }
 
 func (n *Names) add(entry string, load GeoSiteLoader) bool {
 	tp, payload, _, _ := RC.ParseRulePayload(strings.TrimSpace(entry), false)
+	payload = asciiDomain(tp, payload)
 	switch strings.ToUpper(tp) {
 	case "IP-CIDR", "IP-CIDR6":
 		return true

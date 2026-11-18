@@ -696,6 +696,12 @@ void main() {
           tun: 'tun0',
           addresses: ['198.51.100.0/24'],
           names: const SiteLockNames(suffix: ['example.com']),
+          guarded: const [
+            SiteLockGuardedNames(
+              names: SiteLockNames(suffix: ['example.org']),
+              except: SiteLockNames(full: ['free.example.org']),
+            ),
+          ],
         );
 
         expect(seen.method, 'PUT');
@@ -709,6 +715,22 @@ void main() {
             'keyword': <String>[],
             'regex': <String>[],
           },
+          'guarded': [
+            {
+              'names': {
+                'full': <String>[],
+                'suffix': ['example.org'],
+                'keyword': <String>[],
+                'regex': <String>[],
+              },
+              'except': {
+                'full': ['free.example.org'],
+                'suffix': <String>[],
+                'keyword': <String>[],
+                'regex': <String>[],
+              },
+            },
+          ],
         });
         expect(seen.receiveTimeout, HelperClient.siteLockTimeout);
       },

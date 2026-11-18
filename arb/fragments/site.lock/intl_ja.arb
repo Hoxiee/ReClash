@@ -37,5 +37,13 @@
   "siteLockExitMissing": "現在のプロファイルにありません",
   "siteLockErrorMatchEmpty": "サイトを 1 つ以上追加してください。",
   "siteLockErrorTooMany": "1 つの固定に入れられるエントリは最大 {max} 件です。",
-  "siteLockErrorNoExit": "出口サーバーを 1 つ以上選んでください。"
+  "siteLockErrorNoExit": "出口サーバーを 1 つ以上選んでください。",
+  "siteLockExitsChoose": "サーバーを選択",
+  "siteLockExitsChosen": "選択済み · {count}/{max}",
+  "siteLockExitsAll": "すべてのサーバー",
+  "siteLockExitsNoMatch": "検索に一致するサーバーはありません。",
+  "siteLockExitMoreNames": "ほか{count}件",
+  "siteLockExitsSearch": "国または名前",
+  "siteLockStillBlockedTitle": "サイトはまだブロックされています",
+  "siteLockStillBlockedBody": "システムのファイアウォールが、トンネル外で固定されたサイトをまだブロックしています。Helper が応答すると ReClash が解除します。"
 }

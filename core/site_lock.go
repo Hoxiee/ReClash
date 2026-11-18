@@ -24,6 +24,7 @@ type siteLockState struct {
 	set      *sitelock.Set
 	problems []sitelock.Problem
 	names    sitelock.Names
+	guarded  []sitelock.GuardedNames
 	namesSum [sha256.Size]byte
 	partial  []string
 }
@@ -92,22 +93,44 @@ func applySetupSiteLocks(locks *[]sitelock.Lock) {
 	storeSiteLocks(&siteLockState{set: set, problems: problems})
 }
 
+// GEOSITE entries hold the lists loaded at compile time, so a new database
+// needs a fresh compile; one that loses a list keeps the locks as they were.
+func recompileSiteLocks() {
+	current := siteLocks.Load()
+	if current == nil {
+		return
+	}
+	set, problems := sitelock.Compile(current.set.Locks())
+	if len(problems) > 0 {
+		for _, problem := range problems {
+			logError("site lock %q kept on the previous GeoSite, %s: %s", problem.ID, problem.Field, problem.Message)
+		}
+		return
+	}
+	siteLocks.CompareAndSwap(current, withNames(&siteLockState{set: set, problems: current.problems}))
+}
+
 func storeSiteLocks(state *siteLockState) {
-	state.names, state.partial = state.set.Names(loadGeoSite)
-	encoded, _ := json.Marshal(state.names)
+	siteLocks.Store(withNames(state))
+}
+
+func withNames(state *siteLockState) *siteLockState {
+	state.names, state.guarded, state.partial = state.set.Names(loadGeoSite)
+	encoded, _ := json.Marshal([]any{state.names, state.guarded})
 	state.namesSum = sha256.Sum256(encoded)
-	siteLocks.Store(state)
+	return state
 }
 
 // SiteLockPolicy is what the OS firewall enforces once the core is gone: the
 // addresses and names that may leave only through Tun (empty while TUN is off).
 // A host that already holds Revision gets it back Unchanged, without the rest.
 type SiteLockPolicy struct {
-	Revision  string          `json:"revision"`
-	Unchanged bool            `json:"unchanged,omitempty"`
-	Tun       string          `json:"tun"`
-	Addresses []string        `json:"addresses"`
-	Names     *sitelock.Names `json:"names,omitempty"`
+	Revision  string                  `json:"revision"`
+	Unchanged bool                    `json:"unchanged,omitempty"`
+	Tun       string                  `json:"tun"`
+	Addresses []string                `json:"addresses"`
+	Names     *sitelock.Names         `json:"names,omitempty"`
+	Guarded   []sitelock.GuardedNames `json:"guarded,omitempty"`
 }
 
 type siteLockPolicyParams struct {
@@ -121,7 +144,7 @@ func siteLockPolicy(known string) *SiteLockPolicy {
 		return nil
 	}
 	prefixes := state.set.Prefixes()
-	if !state.names.Empty() {
+	if !state.names.Empty() || len(state.guarded) > 0 {
 		prefixes = append(prefixes, fakeIPRanges()...)
 	}
 	addresses := make([]string, 0, len(prefixes))
@@ -138,7 +161,7 @@ func siteLockPolicy(known string) *SiteLockPolicy {
 	if revision == known {
 		return &SiteLockPolicy{Revision: revision, Unchanged: true}
 	}
-	return &SiteLockPolicy{Revision: revision, Tun: tun, Addresses: addresses, Names: &state.names}
+	return &SiteLockPolicy{Revision: revision, Tun: tun, Addresses: addresses, Names: &state.names, Guarded: state.guarded}
 }
 
 func siteLockTun() string {

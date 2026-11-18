@@ -1,5 +1,7 @@
 use super::hub::{error_response, json_response};
-use super::site_lock_dns::{DnsQueue, Matcher, Names, NoQueue, SystemQueue, QUEUE_NUM};
+use super::site_lock_dns::{
+    validate_names, DnsQueue, GuardedNames, Matcher, Names, NoQueue, SystemQueue,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::convert::Infallible;
@@ -15,7 +17,6 @@ use std::thread;
 use warp::http::StatusCode;
 use warp::{Filter, Rejection};
 
-const TABLE: &str = "reclash_sitelock";
 const STATE_FILE: &str = "site-lock.json";
 const MAX_ADDRESSES: usize = 8192;
 const MAX_TUN_LENGTH: usize = 15;
@@ -33,6 +34,23 @@ pub(super) struct SiteLockRequest {
     addresses: Vec<String>,
     #[serde(default)]
     names: Names,
+    #[serde(default)]
+    guarded: Vec<GuardedNames>,
+}
+
+impl SiteLockRequest {
+    fn name_count(&self) -> usize {
+        self.names.count()
+            + self
+                .guarded
+                .iter()
+                .map(|lock| lock.names.count())
+                .sum::<usize>()
+    }
+
+    fn matcher(&self) -> Result<Matcher, String> {
+        Matcher::new(&self.names, &self.guarded)
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -43,6 +61,7 @@ pub(super) enum NftError {
 
 pub(super) trait NftRunner: Send + Sync {
     fn apply(&self, ruleset: &str) -> Result<(), NftError>;
+    fn holds_table(&self, table: &str) -> Result<bool, NftError>;
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -116,7 +135,14 @@ fn parse_entry(entry: &str) -> Option<Network> {
 
 fn normalize(request: &SiteLockRequest) -> Result<Addresses, String> {
     validate_tun(&request.tun)?;
-    request.names.validate()?;
+    validate_names(
+        std::iter::once(&request.names).chain(
+            request
+                .guarded
+                .iter()
+                .flat_map(|lock| [&lock.names, &lock.except]),
+        ),
+    )?;
     if request.addresses.len() > MAX_ADDRESSES {
         return Err(format!("at most {MAX_ADDRESSES} addresses are allowed"));
     }
@@ -151,6 +177,23 @@ fn set_block(name: &str, kind: &str, elements: Vec<String>) -> String {
     block
 }
 
+/// The table and DNS queue of one owner's Helper, so that per-user Helpers
+/// never replace each other's rules or compete for one queue.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct Scope {
+    table: String,
+    queue: u16,
+}
+
+impl Scope {
+    pub(super) fn of(uid: u32) -> Self {
+        Self {
+            table: format!("reclash_sitelock_{uid}"),
+            queue: 0x8000 | (uid & 0x7fff) as u16,
+        }
+    }
+}
+
 /// Off-TUN DNS goes to the helper's queue; `cgroup` is the helper's own, which holds the Core.
 struct DnsFilter<'a> {
     cgroup: Option<&'a str>,
@@ -158,7 +201,7 @@ struct DnsFilter<'a> {
 
 // One rule per line: nft does not parse a reject statement closed by "}" on its line.
 // Without a TUN nothing may reach these addresses but the core's proxied connections.
-fn chain_block(name: &str, tun: &str, dns: Option<&DnsFilter>) -> String {
+fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> String {
     let output = name == "output";
     let mut through_tun = String::new();
     if let (true, Some(_)) = (output, dns) {
@@ -176,7 +219,7 @@ fn chain_block(name: &str, tun: &str, dns: Option<&DnsFilter>) -> String {
             ));
         }
         through_tun.push_str(&format!(
-            "    meta l4proto {{ tcp, udp }} th dport 53 queue num {QUEUE_NUM}\n"
+            "    meta l4proto {{ tcp, udp }} th dport 53 queue num {queue}\n"
         ));
     }
     format!(
@@ -189,7 +232,8 @@ fn chain_block(name: &str, tun: &str, dns: Option<&DnsFilter>) -> String {
     )
 }
 
-fn ruleset(tun: &str, addresses: &Addresses, dns: Option<&DnsFilter>) -> String {
+fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilter>) -> String {
+    let table = &scope.table;
     let v4 = addresses
         .v4
         .iter()
@@ -215,23 +259,24 @@ fn ruleset(tun: &str, addresses: &Addresses, dns: Option<&DnsFilter>) -> String 
         })
         .collect();
     format!(
-        "add table inet {TABLE}\ndelete table inet {TABLE}\ntable inet {TABLE} {{\n{}{}{}{}}}\n",
+        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}}}\n",
         set_block("v4", "ipv4_addr", v4),
         set_block("v6", "ipv6_addr", v6),
-        chain_block("output", tun, dns),
-        chain_block("forward", tun, dns),
+        chain_block("output", scope.queue, tun, dns),
+        chain_block("forward", scope.queue, tun, dns),
     )
 }
 
-fn delete_ruleset() -> String {
-    format!("add table inet {TABLE}\ndelete table inet {TABLE}\n")
+fn delete_ruleset(scope: &Scope) -> String {
+    let table = &scope.table;
+    format!("add table inet {table}\ndelete table inet {table}\n")
 }
 
 pub(super) struct SystemNft;
 
 #[cfg(target_os = "linux")]
-impl NftRunner for SystemNft {
-    fn apply(&self, ruleset: &str) -> Result<(), NftError> {
+impl SystemNft {
+    fn run(args: &[&str], input: Option<&str>) -> Result<Vec<u8>, NftError> {
         let path = NFT_PATHS
             .iter()
             .map(Path::new)
@@ -239,21 +284,29 @@ impl NftRunner for SystemNft {
             .ok_or(NftError::Missing)?;
         let failed = |error: std::io::Error| NftError::Failed(error.to_string());
         let mut child = Command::new(path)
-            .args(["-f", "-"])
+            .args(args)
             .env_clear()
-            .stdin(Stdio::piped())
-            .stdout(Stdio::null())
+            .stdin(if input.is_some() {
+                Stdio::piped()
+            } else {
+                Stdio::null()
+            })
+            .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .map_err(failed)?;
-        let mut stdin = child.stdin.take().expect("piped stdin");
-        let input = ruleset.to_owned();
-        // Writing from a thread keeps a large ruleset from deadlocking against nft's stderr.
-        let writer = thread::spawn(move || stdin.write_all(input.as_bytes()));
+        // Writing from a thread keeps a large ruleset from deadlocking against nft's output.
+        let writer = input.map(|input| {
+            let mut stdin = child.stdin.take().expect("piped stdin");
+            let input = input.to_owned();
+            thread::spawn(move || stdin.write_all(input.as_bytes()))
+        });
         let output = child.wait_with_output().map_err(failed)?;
-        let _ = writer.join();
+        if let Some(writer) = writer {
+            let _ = writer.join();
+        }
         if output.status.success() {
-            return Ok(());
+            return Ok(output.stdout);
         }
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stderr: String = stderr.trim().chars().take(MAX_STDERR_CHARS).collect();
@@ -265,9 +318,28 @@ impl NftRunner for SystemNft {
     }
 }
 
+#[cfg(target_os = "linux")]
+impl NftRunner for SystemNft {
+    fn apply(&self, ruleset: &str) -> Result<(), NftError> {
+        Self::run(&["-f", "-"], Some(ruleset)).map(drop)
+    }
+
+    fn holds_table(&self, table: &str) -> Result<bool, NftError> {
+        let listing = Self::run(&["list", "tables", "inet"], None)?;
+        let wanted = format!("table inet {table}");
+        Ok(String::from_utf8_lossy(&listing)
+            .lines()
+            .any(|line| line.trim() == wanted))
+    }
+}
+
 #[cfg(not(target_os = "linux"))]
 impl NftRunner for SystemNft {
     fn apply(&self, _ruleset: &str) -> Result<(), NftError> {
+        Err(NftError::Missing)
+    }
+
+    fn holds_table(&self, _table: &str) -> Result<bool, NftError> {
         Err(NftError::Missing)
     }
 }
@@ -286,6 +358,7 @@ fn cgroup_path(proc_cgroup: &str) -> Option<String> {
 
 pub(super) struct SiteLockService {
     state_dir: PathBuf,
+    scope: Scope,
     runner: Box<dyn NftRunner>,
     queue: Arc<dyn DnsQueue>,
     cgroup: Option<String>,
@@ -293,18 +366,20 @@ pub(super) struct SiteLockService {
 }
 
 impl SiteLockService {
-    pub(super) fn new(state_dir: PathBuf, runner: Box<dyn NftRunner>) -> Self {
-        Self::with_dns(state_dir, runner, Arc::new(NoQueue), None)
+    pub(super) fn new(state_dir: PathBuf, scope: Scope, runner: Box<dyn NftRunner>) -> Self {
+        Self::with_dns(state_dir, scope, runner, Arc::new(NoQueue), None)
     }
 
     fn with_dns(
         state_dir: PathBuf,
+        scope: Scope,
         runner: Box<dyn NftRunner>,
         queue: Arc<dyn DnsQueue>,
         cgroup: Option<String>,
     ) -> Self {
         Self {
             state_dir,
+            scope,
             runner,
             queue,
             cgroup,
@@ -312,21 +387,25 @@ impl SiteLockService {
         }
     }
 
-    /// Starts the queue before a ruleset that sends DNS to it is applied.
-    fn prepare_dns(&self, names: &Names) -> Result<(), String> {
-        if names.count() == 0 {
-            return Ok(());
+    /// Starts the queue before a ruleset that sends DNS to it is applied, and
+    /// returns the matcher to put back if that ruleset is refused.
+    fn prepare_dns(
+        &self,
+        request: &SiteLockRequest,
+        matcher: Matcher,
+    ) -> Result<Option<Arc<Matcher>>, String> {
+        if request.name_count() == 0 {
+            return Ok(None);
         }
         self.queue.start()?;
-        self.queue.set_matcher(Matcher::new(names));
-        Ok(())
+        Ok(Some(self.queue.set_matcher(Arc::new(matcher))))
     }
 
     fn render(&self, request: &SiteLockRequest, addresses: &Addresses) -> String {
-        let dns = (request.names.count() > 0).then_some(DnsFilter {
+        let dns = (request.name_count() > 0).then_some(DnsFilter {
             cgroup: self.cgroup.as_deref(),
         });
-        ruleset(&request.tun, addresses, dns.as_ref())
+        ruleset(&self.scope, &request.tun, addresses, dns.as_ref())
     }
 
     #[cfg(target_os = "linux")]
@@ -344,17 +423,14 @@ impl SiteLockService {
         let cgroup = fs::read_to_string("/proc/self/cgroup")
             .ok()
             .and_then(|contents| cgroup_path(&contents));
-        Self::with_dns(
-            state_dir,
-            Box::new(SystemNft),
-            SystemQueue::shared(),
-            cgroup,
-        )
+        let scope = Scope::of(owner.uid);
+        let queue = SystemQueue::shared(scope.queue);
+        Self::with_dns(state_dir, scope, Box::new(SystemNft), queue, cgroup)
     }
 
     #[cfg(not(target_os = "linux"))]
     pub(super) fn system() -> Self {
-        Self::new(PathBuf::new(), Box::new(SystemNft))
+        Self::new(PathBuf::new(), Scope::of(0), Box::new(SystemNft))
     }
 
     fn state_file(&self) -> PathBuf {
@@ -382,7 +458,10 @@ impl SiteLockService {
         let mut file = options.open(&temporary)?;
         file.write_all(&serde_json::to_vec(request)?)?;
         file.sync_all()?;
-        fs::rename(&temporary, self.state_file())
+        fs::rename(&temporary, self.state_file())?;
+        #[cfg(unix)]
+        fs::File::open(&self.state_dir)?.sync_all()?;
+        Ok(())
     }
 
     fn remove_state(&self) -> std::io::Result<()> {
@@ -395,20 +474,41 @@ impl SiteLockService {
     /// Re-applies the persisted lock; a missing file is not an error.
     pub(super) fn restore(&self) -> Result<(), String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
+        match self.load()? {
+            Some(request) => self.enforce(&request),
+            None => Ok(()),
+        }
+    }
+
+    /// Re-applies the persisted lock when its table is gone, as after
+    /// `nft flush ruleset` or a firewall service restart; true when it did.
+    pub(super) fn heal(&self) -> Result<bool, String> {
+        let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
         let Some(request) = self.load()? else {
-            return Ok(());
+            return Ok(false);
         };
-        let addresses = normalize(&request)?;
-        self.prepare_dns(&request.names)?;
+        if self
+            .runner
+            .holds_table(&self.scope.table)
+            .map_err(|error| format!("{error:?}"))?
+        {
+            return Ok(false);
+        }
+        self.enforce(&request).map(|()| true)
+    }
+
+    fn enforce(&self, request: &SiteLockRequest) -> Result<(), String> {
+        let addresses = normalize(request)?;
+        self.prepare_dns(request, Matcher::lenient(&request.names, &request.guarded))?;
         self.runner
-            .apply(&self.render(&request, &addresses))
+            .apply(&self.render(request, &addresses))
             .map_err(|error| format!("{error:?}"))
     }
 
     /// Drops the table and the persisted state; used by uninstall.
     pub(super) fn clear(&self) -> Result<(), String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        match self.runner.apply(&delete_ruleset()) {
+        match self.runner.apply(&delete_ruleset(&self.scope)) {
             Ok(()) | Err(NftError::Missing) => {}
             Err(NftError::Failed(message)) => return Err(message),
         }
@@ -425,15 +525,27 @@ impl SiteLockService {
                 return error_response("invalidRequest", message, StatusCode::BAD_REQUEST)
             }
         };
+        let matcher = match request.matcher() {
+            Ok(matcher) => matcher,
+            Err(message) => {
+                return error_response("invalidRequest", message, StatusCode::BAD_REQUEST)
+            }
+        };
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        if let Err(message) = self.prepare_dns(&request.names) {
-            return error_response(
-                "dnsFilterFailed",
-                message,
-                StatusCode::INTERNAL_SERVER_ERROR,
-            );
-        }
+        let previous = match self.prepare_dns(&request, matcher) {
+            Ok(previous) => previous,
+            Err(message) => {
+                return error_response(
+                    "dnsFilterFailed",
+                    message,
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                )
+            }
+        };
         if let Err(response) = self.run(&self.render(&request, &addresses)) {
+            if let Some(previous) = previous {
+                self.queue.set_matcher(previous);
+            }
             return *response;
         }
         if let Err(error) = self.persist(&request) {
@@ -447,7 +559,7 @@ impl SiteLockService {
             &serde_json::json!({
                 "active": true,
                 "addresses": addresses.count(),
-                "names": request.names.count(),
+                "names": request.name_count(),
             }),
             StatusCode::OK,
         )
@@ -458,8 +570,10 @@ impl SiteLockService {
             return unsupported();
         }
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        match self.run(&delete_ruleset()) {
-            Ok(()) => self.queue.set_matcher(Matcher::default()),
+        match self.run(&delete_ruleset(&self.scope)) {
+            Ok(()) => {
+                self.queue.set_matcher(Arc::default());
+            }
             // Without nft there is no table to delete unless a lock was persisted.
             Err(response) if self.state_file().exists() => return *response,
             Err(_) => {}
@@ -482,8 +596,8 @@ impl SiteLockService {
         let state = self.load().and_then(|request| {
             request
                 .map(|request| {
-                    normalize(&request)
-                        .map(|addresses| (request.tun, addresses, request.names.count()))
+                    let count = request.name_count();
+                    normalize(&request).map(|addresses| (request.tun, addresses, count))
                 })
                 .transpose()
         });
@@ -579,6 +693,7 @@ mod tests {
     use std::sync::atomic::{AtomicBool, Ordering};
 
     const CGROUP: &str = "system.slice/reclash-helper-1000.service";
+    const UID: u32 = 1000;
 
     #[derive(Default)]
     struct FakeQueue {
@@ -603,8 +718,11 @@ mod tests {
             Ok(())
         }
 
-        fn set_matcher(&self, matcher: Matcher) {
-            self.matchers.lock().unwrap().push(Arc::new(matcher));
+        fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher> {
+            let mut matchers = self.matchers.lock().unwrap();
+            let previous = matchers.last().cloned().unwrap_or_default();
+            matchers.push(matcher);
+            previous
         }
     }
 
@@ -615,7 +733,7 @@ mod tests {
             self.0.start()
         }
 
-        fn set_matcher(&self, matcher: Matcher) {
+        fn set_matcher(&self, matcher: Arc<Matcher>) -> Arc<Matcher> {
             self.0.set_matcher(matcher)
         }
     }
@@ -624,6 +742,7 @@ mod tests {
     struct FakeNft {
         calls: Mutex<Vec<String>>,
         outcome: Mutex<Option<NftError>>,
+        table: Mutex<bool>,
     }
 
     impl FakeNft {
@@ -648,6 +767,10 @@ mod tests {
                 Some(NftError::Failed(message)) => Err(NftError::Failed(message.clone())),
                 None => Ok(()),
             }
+        }
+
+        fn holds_table(&self, _table: &str) -> Result<bool, NftError> {
+            Ok(*self.0.table.lock().unwrap())
         }
     }
 
@@ -676,6 +799,7 @@ mod tests {
             fs::create_dir_all(&directory).unwrap();
             let service = Arc::new(SiteLockService::with_dns(
                 directory.clone(),
+                Scope::of(UID),
                 Box::new(SharedNft(fake.clone())),
                 Arc::new(SharedQueue(queue.clone())),
                 cgroup.map(str::to_string),
@@ -712,6 +836,7 @@ mod tests {
             tun: tun.to_string(),
             addresses: addresses.iter().map(|value| value.to_string()).collect(),
             names: Names::default(),
+            guarded: Vec::new(),
         }
     }
 
@@ -723,20 +848,25 @@ mod tests {
 
     fn rules(tun: &str, addresses: &[&str]) -> String {
         let request = request(tun, addresses);
-        ruleset(tun, &normalize(&request).unwrap(), None)
+        ruleset(&Scope::of(UID), tun, &normalize(&request).unwrap(), None)
     }
 
     fn dns_rules(tun: &str, cgroup: Option<&str>) -> String {
         let request = named(tun, &["chatgpt.com"]);
         let filter = DnsFilter { cgroup };
-        ruleset(tun, &normalize(&request).unwrap(), Some(&filter))
+        ruleset(
+            &Scope::of(UID),
+            tun,
+            &normalize(&request).unwrap(),
+            Some(&filter),
+        )
     }
 
     #[test]
     fn ruleset_holds_both_families_to_the_tun_in_output_and_forward() {
         let text = rules("tun0", &["203.0.113.0/24", "2001:db8::/32", "198.51.100.7"]);
         assert!(text.starts_with(
-            "add table inet reclash_sitelock\ndelete table inet reclash_sitelock\ntable inet reclash_sitelock {\n"
+            "add table inet reclash_sitelock_1000\ndelete table inet reclash_sitelock_1000\ntable inet reclash_sitelock_1000 {\n"
         ));
         assert!(text.contains(
             "set v4 { type ipv4_addr; flags interval; auto-merge; elements = { 198.51.100.7, 203.0.113.0/24 }; }"
@@ -799,7 +929,7 @@ mod tests {
             ]
         );
         assert_eq!(addresses.v6.len(), 2);
-        let text = ruleset("tun0", &addresses, None);
+        let text = ruleset(&Scope::of(UID), "tun0", &addresses, None);
         assert!(text.contains("elements = { 10.0.0.0/8, 192.0.2.1, 198.51.100.0/24 }"));
         assert!(text.contains("elements = { ::1, 2001:db8::/32 }"));
     }
@@ -940,7 +1070,10 @@ mod tests {
             .await;
         let (status, body) = fixture.send("DELETE", None).await;
         assert_eq!((status, body), (StatusCode::OK, json!({"active": false})));
-        assert_eq!(fixture.fake.calls().last().unwrap(), &delete_ruleset());
+        assert_eq!(
+            fixture.fake.calls().last().unwrap(),
+            &delete_ruleset(&Scope::of(UID))
+        );
         assert!(!fixture.directory.join(STATE_FILE).exists());
         let (_, body) = fixture.send("GET", None).await;
         assert_eq!(
@@ -1025,18 +1158,35 @@ mod tests {
     }
 
     #[test]
+    fn heal_reapplies_only_a_persisted_lock_whose_table_is_gone() {
+        let fixture = Fixture::new("heal");
+        assert_eq!(fixture.service.heal(), Ok(false));
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"tun0","addresses":["10.0.0.0/8"]}"#,
+        )
+        .unwrap();
+        *fixture.fake.table.lock().unwrap() = true;
+        assert_eq!(fixture.service.heal(), Ok(false));
+        assert!(fixture.fake.calls().is_empty());
+        *fixture.fake.table.lock().unwrap() = false;
+        assert_eq!(fixture.service.heal(), Ok(true));
+        assert_eq!(fixture.fake.calls(), vec![rules("tun0", &["10.0.0.0/8"])]);
+    }
+
+    #[test]
     fn clear_deletes_the_table_and_the_state_file() {
         let fixture = Fixture::new("clear");
         fs::write(fixture.directory.join(STATE_FILE), "{}").unwrap();
         fixture.service.clear().unwrap();
-        assert_eq!(fixture.fake.calls(), vec![delete_ruleset()]);
+        assert_eq!(fixture.fake.calls(), vec![delete_ruleset(&Scope::of(UID))]);
         assert!(!fixture.directory.join(STATE_FILE).exists());
     }
 
     #[test]
     fn dns_ruleset_queues_off_tun_dns_after_the_exemptions() {
         let text = dns_rules("tun0", Some(CGROUP));
-        let queue = "meta l4proto { tcp, udp } th dport 53 queue num 31415";
+        let queue = "meta l4proto { tcp, udp } th dport 53 queue num 33768";
         let cgroup = format!(
             "socket cgroupv2 level 2 \"{CGROUP}\" meta l4proto {{ tcp, udp }} th dport 53 accept"
         );
@@ -1054,7 +1204,7 @@ mod tests {
     #[test]
     fn dns_ruleset_without_tun_or_cgroup_drops_those_lines() {
         let text = dns_rules("", None);
-        assert!(text.contains("policy accept;\n    oifname \"lo\" accept\n    meta l4proto { tcp, udp } th dport 53 queue num 31415\n"));
+        assert!(text.contains("policy accept;\n    oifname \"lo\" accept\n    meta l4proto { tcp, udp } th dport 53 queue num 33768\n"));
         assert!(!text.contains("cgroupv2"));
         assert_eq!(text.matches("oifname").count(), 1);
     }
@@ -1089,7 +1239,7 @@ mod tests {
             assert!(matchers[0].matches("api.chatgpt.com"));
             assert!(!matchers[0].matches("notchatgpt.com"));
         }
-        assert!(fixture.fake.calls()[0].contains("queue num 31415"));
+        assert!(fixture.fake.calls()[0].contains("queue num 33768"));
         let (_, body) = fixture.send("GET", None).await;
         assert_eq!(body["names"], 1);
         fixture.send("DELETE", None).await;
@@ -1114,6 +1264,40 @@ mod tests {
         assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
         assert_eq!(body["code"], "dnsFilterFailed");
         assert!(fixture.fake.calls().is_empty());
+        assert!(!fixture.directory.join(STATE_FILE).exists());
+    }
+
+    #[tokio::test]
+    async fn refused_ruleset_puts_the_previous_matcher_back() {
+        let fixture = Fixture::new("names-rollback");
+        let first = named("tun0", &["first.test"]);
+        fixture
+            .send("PUT", Some(serde_json::to_value(&first).unwrap()))
+            .await;
+        *fixture.fake.outcome.lock().unwrap() = Some(NftError::Failed("refused".into()));
+        let second = named("tun0", &["second.test"]);
+        let (status, _) = fixture
+            .send("PUT", Some(serde_json::to_value(&second).unwrap()))
+            .await;
+        assert_ne!(status, StatusCode::OK);
+        let matchers = fixture.queue.matchers.lock().unwrap();
+        let current = matchers.last().unwrap();
+        assert!(current.matches("first.test"));
+        assert!(!current.matches("second.test"));
+    }
+
+    #[tokio::test]
+    async fn pattern_the_filter_cannot_compile_is_refused_before_anything_changes() {
+        let fixture = Fixture::new("names-bad-regex");
+        let mut request = named("tun0", &["chatgpt.com"]);
+        request.names.regex = vec!["\\Qliteral\\E".to_string()];
+        let (status, body) = fixture
+            .send("PUT", Some(serde_json::to_value(&request).unwrap()))
+            .await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(body["code"], "invalidRequest");
+        assert!(fixture.fake.calls().is_empty());
+        assert!(fixture.queue.matchers.lock().unwrap().is_empty());
         assert!(!fixture.directory.join(STATE_FILE).exists());
     }
 

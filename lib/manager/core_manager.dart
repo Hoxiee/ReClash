@@ -107,7 +107,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     }, fireImmediately: true);
     ref.listenManual(siteLocksProvider, (prev, next) {
       if (prev == next ||
-          ref.read(coreStatusProvider) != CoreStatus.connected) {
+          ref.read(coreStatusProvider) != CoreStatus.connected ||
+          ref.read(siteLockReportStateProvider.notifier).holds(next)) {
         return;
       }
       unawaited(_pushSiteLocks(next));
@@ -129,11 +130,10 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         tun: policy.tun,
         addresses: policy.addresses,
         names: policy.names,
+        guarded: policy.guarded,
       ),
       delete: helperClient.deleteSiteLock,
-      helperReady: () async =>
-          await helperClient.readiness(logFailure: false) ==
-          HelperReadiness.ready,
+      readiness: () => helperClient.readiness(logFailure: false),
       onStatus: (status) =>
           ref.read(siteLockHostStateProvider.notifier).set(status),
     );

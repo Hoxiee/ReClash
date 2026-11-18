@@ -37,5 +37,13 @@
   "siteLockExitMissing": "不在当前配置中",
   "siteLockErrorMatchEmpty": "至少添加一个站点。",
   "siteLockErrorTooMany": "一个锁定最多包含 {max} 个条目。",
-  "siteLockErrorNoExit": "至少选择一个出口服务器。"
+  "siteLockErrorNoExit": "至少选择一个出口服务器。",
+  "siteLockExitsChoose": "选择服务器",
+  "siteLockExitsChosen": "已选 · {count}/{max}",
+  "siteLockExitsAll": "所有服务器",
+  "siteLockExitsNoMatch": "没有与搜索匹配的服务器。",
+  "siteLockExitMoreNames": "及另外 {count} 个",
+  "siteLockExitsSearch": "国家或名称",
+  "siteLockStillBlockedTitle": "站点仍被阻断",
+  "siteLockStillBlockedBody": "系统防火墙仍在隧道外阻断被锁定的站点。Helper 响应后，ReClash 会立即解除。"
 }
