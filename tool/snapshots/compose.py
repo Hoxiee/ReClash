@@ -25,6 +25,7 @@ SCREENS = [
     'desktop-profiles',
     'desktop-branded',
     'mobile-dashboard',
+    'mobile-widgets',
     'mobile-profiles',
     'mobile-proxies',
     'mobile-branded',

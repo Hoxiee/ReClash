@@ -10,6 +10,7 @@ rm -rf "$raw"
 
 shots=(
   'android dashboard plain mobile-dashboard'
+  'android dashboard brand mobile-widgets'
   'android profiles plain mobile-profiles'
   'android proxies plain mobile-proxies'
   'android dashboard brand mobile-branded'
@@ -20,6 +21,7 @@ shots=(
 
 for shot in "${shots[@]}"; do
   read -r platform page brand name <<<"$shot"
+  tab=$([[ $name == *-widgets ]] && echo widgets || echo home)
   case "$platform" in
     android) size=412x915 ;;
     *) size=1280x800 ;;
@@ -27,7 +29,7 @@ for shot in "${shots[@]}"; do
   out="$raw/$name"
   echo "$out"
   SNAPSHOT_BRAND=$([[ $brand == brand ]] && echo 1 || echo 0) \
-    SNAPSHOT_PLATFORM="$platform" SNAPSHOT_PAGE="$page" SNAPSHOT_DASHBOARD=simple \
+    SNAPSHOT_PLATFORM="$platform" SNAPSHOT_PAGE="$page" SNAPSHOT_DASHBOARD=simple SNAPSHOT_TAB="$tab" \
     dart run tool/preview.dart tool/snapshots/app_preview.dart \
     --size "$size" --theme light,dark --scale "$scale" --out "$out"
 done

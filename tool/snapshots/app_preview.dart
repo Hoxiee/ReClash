@@ -14,10 +14,12 @@ import 'mock.dart' as mock;
 
 /// The whole app shell over [mock] data. `SNAPSHOT_PAGE` names the page,
 /// `SNAPSHOT_PLATFORM` the layout (`android`, `macos` or `linux`) and
-/// `SNAPSHOT_DASHBOARD` the dashboard style; `tool/snapshots/render.sh` sets them.
+/// `SNAPSHOT_DASHBOARD` the dashboard style, and `SNAPSHOT_TAB=widgets` opens
+/// the phone dashboard's widgets page; `tool/snapshots/render.sh` sets them.
 final _env = Platform.environment;
 final _page = PageLabel.values.byName(_env['SNAPSHOT_PAGE'] ?? 'dashboard');
 final _platform = _env['SNAPSHOT_PLATFORM'] ?? 'linux';
+final _widgetsTab = _env['SNAPSHOT_TAB'] == 'widgets';
 final _dashboard = DashboardStyle.values.byName(
   _env['SNAPSHOT_DASHBOARD'] ?? 'detailed',
 );
@@ -78,4 +80,10 @@ Future<void> previewAct(WidgetTester tester) async {
   tester.view.padding = FakeViewPadding(top: 36 * ratio, bottom: 16 * ratio);
   addTearDown(tester.view.resetPadding);
   await tester.pump();
+  if (!_widgetsTab) return;
+  final label = tester
+      .element(find.byType(HomePage))
+      .appLocalizations
+      .simpleDashboardWidgets;
+  await tester.tap(find.text(label).first);
 }
