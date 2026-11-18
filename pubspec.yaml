@@ -125,6 +125,12 @@ flutter:
       platforms: [ windows ]
     - path: assets/images/tray/windows/dark/
       platforms: [ windows ]
+    - path: assets/images/tray/unix/status_2.png
+      platforms: [ windows ]
+    - path: assets/images/tray/unix/light/status_2.png
+      platforms: [ windows ]
+    - path: assets/images/tray/unix/dark/status_2.png
+      platforms: [ windows ]
   shaders:
     - shaders/liquid_glass.frag
   fonts:
