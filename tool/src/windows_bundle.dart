@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import 'pe_image.dart';
+import 'windows_system_libraries.dart';
 
 const windowsMachineAmd64 = 0x8664;
 const windowsMachineArm64 = 0xaa64;
@@ -26,88 +27,6 @@ const _nativeRoots = [
   'rust_api.dll',
   'sqlite3.dll',
 ];
-const _systemLibraries = {
-  'advapi32.dll',
-  'avrt.dll',
-  'bcrypt.dll',
-  'bcryptprimitives.dll',
-  'cfgmgr32.dll',
-  'combase.dll',
-  'comctl32.dll',
-  'comdlg32.dll',
-  'credui.dll',
-  'crypt32.dll',
-  'd2d1.dll',
-  'd3d9.dll',
-  'd3d11.dll',
-  'd3d12.dll',
-  'd3dcompiler_47.dll',
-  'dbghelp.dll',
-  'dcomp.dll',
-  'dnsapi.dll',
-  'dwmapi.dll',
-  'dwrite.dll',
-  'dxgi.dll',
-  'gdi32.dll',
-  'hid.dll',
-  'imm32.dll',
-  'icu.dll',
-  'iphlpapi.dll',
-  'kernel32.dll',
-  'ksuser.dll',
-  'mf.dll',
-  'mfplat.dll',
-  'mfreadwrite.dll',
-  'mfuuid.dll',
-  'msacm32.dll',
-  'msimg32.dll',
-  'msvcrt.dll',
-  'ncrypt.dll',
-  'netapi32.dll',
-  'normaliz.dll',
-  'ntdll.dll',
-  'ole32.dll',
-  'oleacc.dll',
-  'oleaut32.dll',
-  'opengl32.dll',
-  'powrprof.dll',
-  'propsys.dll',
-  'psapi.dll',
-  'rasapi32.dll',
-  'rpcrt4.dll',
-  'secur32.dll',
-  'setupapi.dll',
-  'shell32.dll',
-  'shcore.dll',
-  'shlwapi.dll',
-  'synchronization.dll',
-  'ucrtbase.dll',
-  'urlmon.dll',
-  'uiautomationcore.dll',
-  'user32.dll',
-  'userenv.dll',
-  'usp10.dll',
-  'uxtheme.dll',
-  'version.dll',
-  'wevtapi.dll',
-  'windowsapp.dll',
-  'windowscodecs.dll',
-  'winhttp.dll',
-  'wininet.dll',
-  'winmm.dll',
-  'winspool.drv',
-  'wintrust.dll',
-  'wlanapi.dll',
-  'wldap32.dll',
-  'ws2_32.dll',
-  'wtsapi32.dll',
-};
-
-bool _isSystemLibrary(String name) =>
-    _systemLibraries.contains(name) ||
-    name.startsWith('api-ms-win-') && name.endsWith('.dll') ||
-    name.startsWith('ext-ms-win-') && name.endsWith('.dll');
-
 String windowsBundlePath(String path) {
   final normalized = path.replaceAll('\\', '/');
   final parts = normalized.split('/');
@@ -257,7 +176,7 @@ final class WindowsBundle {
     }
 
     void resolve(PeImport symbol, Set<String> chain) {
-      if (_isSystemLibrary(symbol.library) &&
+      if (isWindowsSystemLibrary(symbol.library) &&
           !files.containsKey(symbol.library)) {
         return;
       }
@@ -303,7 +222,7 @@ final class WindowsBundle {
     }
     for (final name in _installedServiceImages) {
       for (final symbol in image(name).imports) {
-        if (!_isSystemLibrary(symbol.library)) {
+        if (!isWindowsSystemLibrary(symbol.library)) {
           throw FormatException(
             'Installed service image $name must not import app-local '
             '${symbol.library}',

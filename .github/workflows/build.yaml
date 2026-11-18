@@ -439,6 +439,18 @@ jobs:
       - name: Run Windows service tests
         run: cargo test --locked --manifest-path services/helper/Cargo.toml --features windows-service
 
+      - name: Setup Dart
+        if: matrix.arch == 'amd64'
+        uses: dart-lang/setup-dart@v1
+
+      - name: Check Windows service imports
+        if: matrix.arch == 'amd64'
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
+        run: |
+          cargo build --locked --release --manifest-path services/helper/Cargo.toml --features windows-service
+          dart tool/check_windows_imports.dart services/helper/target/release/helper.exe
+
       - name: Run managed Windows backend tests
         run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
 
