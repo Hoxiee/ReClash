@@ -36,40 +36,27 @@ void main() {
     return kernel;
   }
 
-  testWidgets('lists the path, the issues and the incident history', (
-    tester,
-  ) async {
+  testWidgets('lists the path and the issues', (tester) async {
     await pumpSheet(tester, findings: [directModeFinding]);
     final l = currentAppLocalizations;
 
     expect(find.text(l.doctorPathTitle), findsOneWidget);
     expect(find.text(l.doctorIssues), findsOneWidget);
-    expect(find.text(l.rcxHistory), findsOneWidget);
     expect(find.text(l.doctorDirectModeTitle), findsOneWidget);
   });
 
-  testWidgets('expands and collapses the empty history', (tester) async {
+  testWidgets('shows the empty history from the header', (tester) async {
     await pumpSheet(tester);
     final l = currentAppLocalizations;
 
-    final emptyRow = find.descendant(
-      of: find.byKey(const ValueKey('doctor-history-empty')),
-      matching: find.text(l.doctorHistoryEmpty),
-    );
-    expect(find.text(l.doctorHistoryEmpty), findsOneWidget);
-    expect(emptyRow, findsNothing);
+    expect(find.text(l.doctorHistoryEmpty), findsNothing);
 
-    await tester.tap(find.text(l.rcxHistory));
+    await tester.tap(find.byTooltip(l.rcxHistory));
     await tester.pumpAndSettle();
-    expect(emptyRow, findsOneWidget);
-
-    await tester.tap(find.text(l.rcxHistory));
-    await tester.pumpAndSettle();
-    expect(emptyRow, findsNothing);
     expect(find.text(l.doctorHistoryEmpty), findsOneWidget);
   });
 
-  testWidgets('keeps incidents collapsed until opened and shows newest first', (
+  testWidgets('opens incidents from the header and shows newest first', (
     tester,
   ) async {
     final now = DateTime.now();
@@ -91,30 +78,16 @@ void main() {
       ],
     );
     final l = currentAppLocalizations;
-    final header = find.text(l.rcxHistory);
-    final summary = find.descendant(
-      of: find.byKey(const ValueKey('doctor-history-toggle')),
-      matching: find.text(l.doctorEventFindingCleared),
-    );
-    expect(summary, findsOneWidget);
-    expect(find.text('Older incident'), findsNothing);
     expect(find.text('Latest incident'), findsNothing);
 
-    await tester.tap(header);
+    await tester.tap(find.byTooltip(l.rcxHistory));
     await tester.pumpAndSettle();
-    expect(summary, findsNothing);
     expect(find.text('Older incident'), findsOneWidget);
     expect(find.text('Latest incident'), findsOneWidget);
     expect(
       tester.getTopLeft(find.text('Latest incident')).dy,
       lessThan(tester.getTopLeft(find.text('Older incident')).dy),
     );
-
-    await tester.tap(header);
-    await tester.pumpAndSettle();
-    expect(summary, findsOneWidget);
-    expect(find.text('Older incident'), findsNothing);
-    expect(find.text('Latest incident'), findsNothing);
   });
 
   testWidgets('snoozes a warning for a week from its menu', (tester) async {

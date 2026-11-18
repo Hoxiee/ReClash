@@ -257,32 +257,32 @@ void main() {
     expect(_text(l.rcxChangeServer), findsNothing);
   });
 
-  testWidgets(
-    'the current server opens the details, and no retired row shows',
-    (tester) async {
-      await pumpSheet(
-        tester,
-        'Proxy',
-        entries: [
-          RcxJournalEntry(
-            seq: 1,
-            at: DateTime.utc(2026),
-            group: 'Proxy',
-            kind: 'switch',
-            from: 'NL-1',
-            to: 'NL-2',
-          ),
-        ],
-      );
+  testWidgets('the header opens the history, and no retired row shows', (
+    tester,
+  ) async {
+    await pumpSheet(
+      tester,
+      'Proxy',
+      entries: [
+        RcxJournalEntry(
+          seq: 1,
+          at: DateTime.utc(2026),
+          group: 'Proxy',
+          kind: 'switch',
+          from: 'NL-1',
+          to: 'NL-2',
+        ),
+      ],
+    );
 
-      expect(_text(l.rcxChangeServer), findsOneWidget);
-      for (final title in _retiredRowTitles) {
-        expect(_text(title), findsNothing);
-      }
+    expect(_text(l.rcxChangeServer), findsOneWidget);
+    for (final title in _retiredRowTitles) {
+      expect(_text(title), findsNothing);
+    }
 
-      await tester.tap(_text('NL-2'));
-      await _pumpFrames(tester);
-      expect(_text(l.rcxHistory), findsOneWidget);
-    },
-  );
+    expect(_text(l.rcxHistory), findsNothing);
+    await tester.tap(find.byTooltip(l.rcxHistory));
+    await _pumpFrames(tester);
+    expect(_text(l.rcxHistory), findsOneWidget);
+  });
 }

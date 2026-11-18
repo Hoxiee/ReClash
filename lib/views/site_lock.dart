@@ -33,6 +33,7 @@ class SiteLockView extends ConsumerStatefulWidget {
 
 class _SiteLockViewState extends ConsumerState<SiteLockView> {
   Timer? _timer;
+  var _query = SearchQuery('');
 
   @override
   void initState() {
@@ -231,15 +232,26 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
     final locks = ref.watch(siteLocksProvider);
     final report = ref.watch(siteLockReportStateProvider);
     final gap = listHeaderPaddingOf(context).top;
+    final visible = _query.isEmpty
+        ? locks
+        : [
+            for (final lock in locks)
+              if (_query.matches([_label(lock), ...lock.match])) lock,
+          ];
     return CommonScaffold(
       title: l.siteLockTitle,
+      searchState: AppBarSearchState(
+        onSearch: (value) => setState(() => _query = SearchQuery(value)),
+      ),
+      searchInBar: true,
       primaryAction: IconButtonData(
         glyph: AppGlyphs.add,
         tooltip: l.siteLockNew,
         onPressed: locks.length >= _maxLocks ? null : () => unawaited(_add()),
       ),
       body: NullStatusSwitcher(
-        isEmpty: locks.isEmpty,
+        isEmpty: visible.isEmpty,
+        isSearching: _query.isNotEmpty,
         nullStatus: NullStatus(
           label: l.siteLockEmpty,
           description: l.siteLockEmptyHint,
@@ -265,7 +277,7 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
                     child: banner,
                   ),
                 generateSection(
-                  items: [for (final lock in locks) _row(l, lock, report)],
+                  items: [for (final lock in visible) _row(l, lock, report)],
                   footer: l.siteLockFooter,
                 ),
                 if (widget.androidVpn ?? system.isAndroid)

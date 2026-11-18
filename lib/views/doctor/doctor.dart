@@ -62,8 +62,6 @@ class DoctorSheet extends ConsumerStatefulWidget {
 }
 
 class _DoctorSheetState extends ConsumerState<DoctorSheet> {
-  bool _historyExpanded = false;
-
   @override
   void initState() {
     super.initState();
@@ -84,11 +82,17 @@ class _DoctorSheetState extends ConsumerState<DoctorSheet> {
             (b.id == widget.check ? 1 : 0) - (a.id == widget.check ? 1 : 0),
       );
     final path = ref.watch(pathProvider).value;
-    final history = ref.watch(incidentHistoryProvider).value ?? const [];
     final running = path != null && !path.complete;
     return CommonScaffold(
       title: l.toolsObservation,
       iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.clock,
+          tooltip: l.rcxHistory,
+          onPressed: () => unawaited(
+            showInSheet<void>(context, builder: (_) => const _HistorySheet()),
+          ),
+        ),
         IconButtonData(
           glyph: AppGlyphs.refresh,
           tooltip: l.setupRepeat,
@@ -130,51 +134,45 @@ class _DoctorSheetState extends ConsumerState<DoctorSheet> {
                       _FindingItem(finding: finding),
                   ],
           ),
-          generateAnimatedSection(
-            items: [
-              Semantics(
-                key: const ValueKey('doctor-history-toggle'),
-                button: true,
-                expanded: _historyExpanded,
-                child: DecorationListItem(
-                  title: Text(l.rcxHistory),
-                  subtitle: _historyExpanded
-                      ? null
-                      : Text(
-                          history.isEmpty
-                              ? l.doctorHistoryEmpty
-                              : eventLabel(l, history.last.kind),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                  onPressed: () =>
-                      setState(() => _historyExpanded = !_historyExpanded),
-                  trailing: SizedBox.square(
-                    dimension: kMinInteractiveDimension,
-                    child: Center(
-                      child: GlyphIcon(
-                        _historyExpanded
-                            ? AppGlyphs.chevronUp
-                            : AppGlyphs.chevronDown,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (_historyExpanded)
-                if (history.isEmpty)
-                  DecorationListItem(
-                    key: const ValueKey('doctor-history-empty'),
-                    title: Text(l.doctorHistoryEmpty),
-                  )
-                else
-                  for (final (index, event)
-                      in history.indexed.toList().reversed.take(_historyRows))
-                    _EventItem(key: ValueKey((index, event)), event: event),
-            ],
-          ),
           generateSection(items: [const ReportProblemItem()]),
         ],
+      ),
+    );
+  }
+}
+
+class _HistorySheet extends ConsumerWidget {
+  const _HistorySheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final history = ref.watch(incidentHistoryProvider).value ?? const [];
+    return CommonScaffold(
+      title: l.rcxHistory,
+      body: NullStatusSwitcher(
+        isEmpty: history.isEmpty,
+        nullStatus: NullStatus(
+          label: l.doctorHistoryEmpty,
+          illustration: NullStatusIllustration.history,
+        ),
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            16 + context.bottomInset,
+          ),
+          children: [
+            generateSection(
+              items: [
+                for (final (index, event)
+                    in history.indexed.toList().reversed.take(_historyRows))
+                  _EventItem(key: ValueKey((index, event)), event: event),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

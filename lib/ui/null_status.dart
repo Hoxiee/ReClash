@@ -34,6 +34,7 @@ enum NullStatusIllustration {
   camera,
   error,
   search,
+  history,
 }
 
 class NullStatusSwitcher extends StatefulWidget {
@@ -499,6 +500,7 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     ),
     NullStatusIllustration.error => (MaterialShapes.softBurst, AppGlyphs.error),
     NullStatusIllustration.search => (MaterialShapes.flower, AppGlyphs.search),
+    NullStatusIllustration.history => (MaterialShapes.bun, AppGlyphs.clock),
   };
 }
 

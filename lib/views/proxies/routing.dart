@@ -216,6 +216,19 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
     );
   }
 
+  void _openHistory() {
+    unawaited(
+      showInSheet<void>(
+        context,
+        builder: (_) => RoutingLivePage(
+          title: context.appLocalizations.rcxHistory,
+          revision: _revision,
+          builder: (l) => mounted ? _historySections(l) : const [],
+        ),
+      ),
+    );
+  }
+
   String Function(String) _own(String? profile) {
     final library = ref.read(rcxLibraryProvider).value ?? const [];
     final locale = Localizations.localeOf(context).toString();
@@ -247,6 +260,14 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
         : [for (final row in ranking) row.name];
     return CommonScaffold(
       title: widget.groupName,
+      iconActions: [
+        if (group != null && _journal.isNotEmpty)
+          IconButtonData(
+            glyph: AppGlyphs.clock,
+            tooltip: l.rcxHistory,
+            onPressed: _openHistory,
+          ),
+      ],
       menuItems: _menuItems(l, group),
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -311,7 +332,7 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
         own: own,
         busy: _busy,
         onChange: () => _act(RcxAction.change),
-        onDetails: ranked.isEmpty && _journal.isEmpty ? null : _openDetails,
+        onDetails: ranked.isEmpty ? null : _openDetails,
       ),
       KeyedSubtree(
         key: const ValueKey('control'),
@@ -485,21 +506,21 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
             ],
           ),
         ),
-      if (_journal.isNotEmpty)
-        KeyedSubtree(
-          key: const ValueKey('history'),
-          child: generateSection(
-            title: l.rcxHistory,
-            items: [
-              for (final entry in _journal.take(_historyRows))
-                DecorationListItem(
-                  key: ValueKey('history-${entry.seq}'),
-                  title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
-                  subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
-                ),
-            ],
-          ),
-        ),
+    ];
+  }
+
+  List<Widget> _historySections(AppLocalizations l) {
+    return [
+      generateSection(
+        items: [
+          for (final entry in _journal.take(_historyRows))
+            DecorationListItem(
+              key: ValueKey('history-${entry.seq}'),
+              title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
+              subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
+            ),
+        ],
+      ),
     ];
   }
 

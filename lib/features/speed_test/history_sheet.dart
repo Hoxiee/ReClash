@@ -67,51 +67,60 @@ class _SpeedTestHistorySheetState extends ConsumerState<SpeedTestHistorySheet> {
       body: history.when(
         loading: () => const SizedBox.shrink(),
         error: (_, _) => Center(child: Text(l.speedTestHistorySaveFailed)),
-        data: (records) => ListView.builder(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            context.contentTopPadding + 12,
-            16,
-            context.bottomInset + 24,
+        data: (records) => NullStatusSwitcher(
+          isEmpty: records.isEmpty,
+          nullStatus: NullStatus(
+            label: l.speedTestHistoryEmpty,
+            description: l.speedTestHistoryHint,
+            illustration: NullStatusIllustration.history,
           ),
-          itemCount: records.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              context.contentTopPadding + 12,
+              16,
+              context.bottomInset + 24,
+            ),
+            itemCount: records.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    l.speedTestHistoryHint,
+                    style: AppTextStyle.footnote.of(context),
+                  ),
+                );
+              }
+              final record = records[index - 1];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  records.isEmpty
-                      ? l.speedTestHistoryEmpty
-                      : l.speedTestHistoryHint,
-                  style: AppTextStyle.footnote.of(context),
+                padding: const EdgeInsets.only(bottom: 8),
+                child: CommonCard(
+                  child: ListItem(
+                    title: Text(record.platformName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          '${l.speedTestDownload} ${speedTestRate(context, record.downloadMbps)} · ${l.speedTestUpload} ${speedTestRate(context, record.uploadMbps)}',
+                        ),
+                        LastUpdateTimeText(lastUpdateDate: record.checkedAt),
+                      ],
+                    ),
+                    trailing: const GlyphIcon(
+                      AppGlyphs.chevronForward,
+                      size: 18,
+                    ),
+                    onTap: () => showInSheet<void>(
+                      context,
+                      builder: (_) => SpeedTestResultPage(test: record),
+                    ),
+                  ),
                 ),
               );
-            }
-            final record = records[index - 1];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: CommonCard(
-                child: ListItem(
-                  title: Text(record.platformName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        '${l.speedTestDownload} ${speedTestRate(context, record.downloadMbps)} · ${l.speedTestUpload} ${speedTestRate(context, record.uploadMbps)}',
-                      ),
-                      LastUpdateTimeText(lastUpdateDate: record.checkedAt),
-                    ],
-                  ),
-                  trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 18),
-                  onTap: () => showInSheet<void>(
-                    context,
-                    builder: (_) => SpeedTestResultPage(test: record),
-                  ),
-                ),
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
     );

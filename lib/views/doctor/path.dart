@@ -162,7 +162,10 @@ class PathStepList extends StatelessWidget {
 Future<void> showPathSheet(BuildContext context) {
   return showSheet<void>(
     context: context,
-    props: nestedPagedSheetProps,
+    props: const SheetProps(
+      backgroundColor: Colors.transparent,
+      detents: [0.9],
+    ),
     builder: (_) => NestedPagedSheet(builder: (_) => const PathSheet()),
   );
 }
