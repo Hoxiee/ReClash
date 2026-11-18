@@ -314,7 +314,7 @@ class _UpdateButton extends StatelessWidget {
     return FilledButton.icon(
       key: const ValueKey('simple-dashboard-update'),
       onPressed: () => unawaited(UpdateSheet.show(context)),
-      icon: const GlyphIcon(AppGlyphs.cloudDownload, size: 18),
+      icon: const GlyphIcon(AppGlyphs.cloudDownload, size: 18, fill: 1),
       label: Text(context.appLocalizations.update),
     );
   }
