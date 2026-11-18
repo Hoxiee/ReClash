@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "¿Eliminar el anclaje {name}?",
   "siteLockRejectedTitle": "El núcleo rechazó los anclajes",
   "siteLockRejectedBody": "Los anteriores siguen vigentes.",
-  "siteLockSnifferTitle": "El sniffing está desactivado",
-  "siteLockSnifferBody": "Las entradas de dominio de {locks} solo coinciden cuando el núcleo resuelve el nombre por sí mismo.",
   "siteLockCoreOnlyTitle": "Algunas entradas viven solo en el núcleo",
   "siteLockCoreOnlyBody": "{locks}: algunas entradas solo puede mantenerlas el núcleo en marcha; el cortafuegos del sistema no puede bloquearlas cuando el núcleo se detiene.",
   "siteLockHelperTitle": "Helper no disponible",

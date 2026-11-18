@@ -13,9 +13,12 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/geodata"
 	"github.com/metacubex/mihomo/component/geodata/router"
+	"github.com/metacubex/mihomo/component/sniffer"
 	C "github.com/metacubex/mihomo/constant"
+	snifferTypes "github.com/metacubex/mihomo/constant/sniffer"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/tunnel"
 )
@@ -78,7 +81,61 @@ func setSiteLocks(locks []sitelock.Lock) SiteLockReport {
 		return siteLockReport(false, problems)
 	}
 	storeSiteLocks(&siteLockState{set: set})
+	configMu.Lock()
+	syncSiteLockSniffer()
+	configMu.Unlock()
 	return siteLockReport(true, nil)
+}
+
+// Set while the lock's own sniffer stands in for a config that sniffs nothing.
+// Guarded by configMu.
+var siteLockSniffing bool
+
+func siteLockSnifferConfig() *sniffer.Config {
+	ports := func(list ...string) utils.IntRanges[uint16] {
+		ranges, _ := utils.NewUnsignedRangesFromList[uint16](list)
+		return ranges
+	}
+	return &sniffer.Config{
+		Enable:      true,
+		ParsePureIp: true,
+		Sniffers: map[snifferTypes.Type]sniffer.SnifferConfig{
+			snifferTypes.TLS:  {Ports: ports("443", "8443")},
+			snifferTypes.HTTP: {Ports: ports("80", "8080-8880")},
+			snifferTypes.QUIC: {Ports: ports("443", "8443")},
+		},
+	}
+}
+
+// Domain entries see only named connections, and one that reached the core
+// as a bare address (browser DoH, a cached answer) is named only by sniffing,
+// so a config without a sniffer gets one while a domain lock is on. A config
+// that sniffs keeps its own. Runs with configMu held.
+func syncSiteLockSniffer() {
+	if currentConfig == nil {
+		siteLockSniffing = false
+		return
+	}
+	own := currentConfig.Sniffer
+	if own == nil {
+		own = &sniffer.Config{}
+	}
+	state := siteLocks.Load()
+	want := !own.Enable && state != nil && len(state.set.Named()) > 0
+	if want == siteLockSniffing {
+		return
+	}
+	next := own
+	if want {
+		next = siteLockSnifferConfig()
+	}
+	dispatcher, err := sniffer.NewDispatcher(next)
+	if err != nil {
+		logError("site lock sniffer not applied: %v", err)
+		return
+	}
+	tunnel.UpdateSniffer(dispatcher)
+	siteLockSniffing = want
 }
 
 // Runs before the listeners are rebuilt; a setup cannot be refused, so a broken lock is only reported.
@@ -202,9 +259,6 @@ func siteLockReport(applied bool, rejected []sitelock.Problem) SiteLockReport {
 		report.Locks = state.set.States(siteLockEnv)
 		if rejected == nil {
 			report.Problems = state.problems
-		}
-		if named := state.set.Named(); len(named) > 0 && !tunnel.IsSniffing() {
-			report.Warnings = append(report.Warnings, sitelock.Warning{Code: sitelock.WarningSnifferOff, Locks: named})
 		}
 		if len(state.partial) > 0 {
 			report.Warnings = append(report.Warnings, sitelock.Warning{Code: sitelock.WarningCoreOnly, Locks: state.partial})

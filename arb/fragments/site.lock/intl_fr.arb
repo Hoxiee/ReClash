@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "Supprimer l’épinglage {name} ?",
   "siteLockRejectedTitle": "Le cœur a refusé les épinglages",
   "siteLockRejectedBody": "Les précédents restent en vigueur.",
-  "siteLockSnifferTitle": "Le sniffing est désactivé",
-  "siteLockSnifferBody": "Les entrées de domaine de {locks} ne correspondent que lorsque le cœur résout le nom lui-même.",
   "siteLockCoreOnlyTitle": "Certaines entrées n’existent que dans le cœur",
   "siteLockCoreOnlyBody": "{locks} : certaines entrées ne peuvent être tenues que par le cœur en cours d’exécution ; le pare-feu du système ne peut pas les bloquer quand le cœur s’arrête.",
   "siteLockHelperTitle": "Helper indisponible",

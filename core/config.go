@@ -243,6 +243,8 @@ func applyConfig(params *SetupParams) error {
 	}
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
+	siteLockSniffing = false
+	syncSiteLockSniffer()
 	tunnel.SetMode(rcxSetUserMode(cfg.General.Mode))
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()

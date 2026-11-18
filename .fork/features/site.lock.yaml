@@ -10,7 +10,7 @@ must:
   fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
   core-only-warning: Entries the host cannot mirror are reported as core-only rather than silently dropped.
-  untouched: Traffic that matches no lock is neither routed nor filtered differently.
+  untouched: Traffic that matches no lock is neither routed nor filtered differently, except that a domain lock over a profile without a sniffer turns sniffing on, so the profile's own domain rules also see sniffed names.
 watch:
   - core/site_lock.go
   - core/sitelock/**

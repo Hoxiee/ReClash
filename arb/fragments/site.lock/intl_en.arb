@@ -28,15 +28,6 @@
   },
   "siteLockRejectedTitle": "The core rejected the locks",
   "siteLockRejectedBody": "The previous ones stay in force.",
-  "siteLockSnifferTitle": "Sniffing is off",
-  "siteLockSnifferBody": "Domain entries of {locks} only match when the core resolves the name itself.",
-  "@siteLockSnifferBody": {
-    "placeholders": {
-      "locks": {
-        "type": "String"
-      }
-    }
-  },
   "siteLockCoreOnlyTitle": "Some entries live only in the core",
   "siteLockCoreOnlyBody": "{locks} include entries only the running core can hold; the system firewall cannot block them when the core stops.",
   "@siteLockCoreOnlyBody": {

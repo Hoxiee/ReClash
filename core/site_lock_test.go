@@ -2,7 +2,6 @@ package core
 
 import (
 	"net/netip"
-	"reflect"
 	"slices"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/component/sniffer"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -77,18 +77,6 @@ func TestSiteLockOutranksAListenerProxyButNotTheInnerListener(t *testing.T) {
 		if err != nil || proxy.Name() != want {
 			t.Errorf("%s listener with proxy DIRECT routes to %v (%v), want %s", kind, proxy, err, want)
 		}
-	}
-}
-
-func TestSiteLockReportWarnsThatDomainsNeedTheSniffer(t *testing.T) {
-	withSiteLockTunnel(t)
-	setSiteLocks([]sitelock.Lock{lockedChatgpt})
-	want := []sitelock.Warning{{Code: sitelock.WarningSnifferOff, Locks: []string{"chatgpt"}}}
-	if tunnel.IsSniffing() {
-		want = []sitelock.Warning{}
-	}
-	if got := siteLockReport(true, nil).Warnings; !reflect.DeepEqual(got, want) {
-		t.Errorf("warnings %+v, want %+v", got, want)
 	}
 }
 
@@ -188,5 +176,31 @@ func TestSetupSiteLocksKeepWhenAbsentAndReportWhatTheyDrop(t *testing.T) {
 	tunnel.SetMode(tunnel.Direct)
 	if got := routeOf(t, "chatgpt.com"); got != "DIRECT" {
 		t.Errorf("an empty setup list routes to %s, want the locks lifted", got)
+	}
+}
+
+func TestSiteLockSniffsWhileDomainLockIsOn(t *testing.T) {
+	withSiteLockTunnel(t)
+	configMu.Lock()
+	saved := currentConfig
+	currentConfig = &config.Config{Sniffer: &sniffer.Config{}}
+	configMu.Unlock()
+	t.Cleanup(func() {
+		setSiteLocks(nil)
+		configMu.Lock()
+		currentConfig = saved
+		configMu.Unlock()
+	})
+
+	setSiteLocks([]sitelock.Lock{lockedChatgpt})
+	if !tunnel.IsSniffing() {
+		t.Fatal("a domain lock over a config without a sniffer does not sniff")
+	}
+	if got := siteLockReport(true, nil).Warnings; len(got) != 0 {
+		t.Errorf("warnings %+v, want none", got)
+	}
+	setSiteLocks(nil)
+	if tunnel.IsSniffing() {
+		t.Error("sniffing outlived the last domain lock")
 	}
 }

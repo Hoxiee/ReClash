@@ -48,12 +48,12 @@ void main() {
       'applied': true,
       'warnings': [
         {
-          'code': 'sniffer-off',
+          'code': 'core-only',
           'locks': ['a'],
         },
       ],
     });
-    expect(report.warnings.single.code, 'sniffer-off');
+    expect(report.warnings.single.code, 'core-only');
     expect(report.warnings.single.locks, ['a']);
     expect(SiteLockReport.fromJson({}).warnings, isEmpty);
   });

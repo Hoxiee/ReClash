@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "删除锁定 {name}？",
   "siteLockRejectedTitle": "核心拒绝了锁定",
   "siteLockRejectedBody": "之前的锁定仍然有效。",
-  "siteLockSnifferTitle": "域名嗅探已关闭",
-  "siteLockSnifferBody": "{locks} 中的域名条目只有在核心自行解析域名时才会匹配。",
   "siteLockCoreOnlyTitle": "部分条目只存在于核心中",
   "siteLockCoreOnlyBody": "{locks} 包含只有正在运行的核心才能保存的条目；核心停止时，系统防火墙无法阻断它们。",
   "siteLockHelperTitle": "Helper 不可用",

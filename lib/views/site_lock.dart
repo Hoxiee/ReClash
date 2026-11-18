@@ -194,11 +194,6 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
       for (final warning in report?.warnings ?? const <SiteLockWarning>[])
         if (_names(locks, warning.locks) case final names when names.isNotEmpty)
           switch (warning.code) {
-            'sniffer-off' => card(
-              IssueTone.warning,
-              l.siteLockSnifferTitle,
-              l.siteLockSnifferBody(names),
-            ),
             'core-only' => card(
               IssueTone.warning,
               l.siteLockCoreOnlyTitle,

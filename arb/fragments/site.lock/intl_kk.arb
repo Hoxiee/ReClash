@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "{name} бекітуін жою керек пе?",
   "siteLockRejectedTitle": "Ядро бекітулерді қабылдамады",
   "siteLockRejectedBody": "Бұрынғылары күшінде қалады.",
-  "siteLockSnifferTitle": "Sniffing өшірулі",
-  "siteLockSnifferBody": "{locks} домен жазбалары тек ядро аттың өзін анықтаған кезде сәйкес келеді.",
   "siteLockCoreOnlyTitle": "Кейбір жазбалар тек ядрода ғана бар",
   "siteLockCoreOnlyBody": "{locks}: кейбір жазбаларды тек жұмыс істеп тұрған ядро ұстай алады; ядро тоқтаған кезде жүйелік брандмауэр оларды бұғаттай алмайды.",
   "siteLockHelperTitle": "Helper қолжетімсіз",

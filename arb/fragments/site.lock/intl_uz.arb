@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "{name} mahkamlashini o‘chirasizmi?",
   "siteLockRejectedTitle": "Yadro mahkamlashlarni rad etdi",
   "siteLockRejectedBody": "Avvalgilari kuchda qoladi.",
-  "siteLockSnifferTitle": "Sniffing o‘chiq",
-  "siteLockSnifferBody": "{locks} domen yozuvlari faqat yadro nomni o‘zi aniqlaganda mos keladi.",
   "siteLockCoreOnlyTitle": "Ba‘zi yozuvlar faqat yadroda saqlanadi",
   "siteLockCoreOnlyBody": "{locks}: ayrim yozuvlarni faqat ishlayotgan yadro ushlab tura oladi; yadro to‘xtasa, tizim brandmaueri ularni bloklay olmaydi.",
   "siteLockHelperTitle": "Helper mavjud emas",

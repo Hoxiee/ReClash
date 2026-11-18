@@ -65,11 +65,6 @@ const (
 	StatusExitsDown = "exits-down"
 )
 
-// WarningSnifferOff: without sniffing, a connection whose name the core did
-// not resolve (browser DoH, a cached answer) arrives as a bare IP and slips
-// past every domain entry.
-const WarningSnifferOff = "sniffer-off"
-
 // WarningCoreOnly: entries the OS firewall cannot mirror, so only the running
 // core holds them to their exits.
 const WarningCoreOnly = "core-only"

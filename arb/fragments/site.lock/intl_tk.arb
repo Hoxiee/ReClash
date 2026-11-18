@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "{name} bekitmesini pozmak isleýärsiňizmi?",
   "siteLockRejectedTitle": "Ýadro bekitmeleri ret etdi",
   "siteLockRejectedBody": "Öňki bekitmeler güýjünde galýar.",
-  "siteLockSnifferTitle": "Sniffing öçük",
-  "siteLockSnifferBody": "{locks} domen ýazgylary diňe ýadro adyň özi çözende gabat gelýär.",
   "siteLockCoreOnlyTitle": "Käbir ýazgylar diňe ýadroda bar",
   "siteLockCoreOnlyBody": "{locks}: käbir ýazgylary diňe işleýän ýadro saklap bilýär; ýadro togtasa, ulgamyň brandmaueri olary bloklap bilmeýär.",
   "siteLockHelperTitle": "Helper elýeterli däl",

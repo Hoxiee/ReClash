@@ -14,8 +14,6 @@
   "siteLockDeleteConfirm": "Удалить привязку {name}?",
   "siteLockRejectedTitle": "Ядро отклонило привязки",
   "siteLockRejectedBody": "Прежние остаются в силе.",
-  "siteLockSnifferTitle": "Сниффинг выключен",
-  "siteLockSnifferBody": "Доменные записи {locks} срабатывают, только когда ядро само разрешает имя.",
   "siteLockCoreOnlyTitle": "Часть записей живёт только в ядре",
   "siteLockCoreOnlyBody": "{locks}: часть записей может держать только работающее ядро, системный фаервол не заблокирует их, когда ядро остановится.",
   "siteLockHelperTitle": "Helper недоступен",
