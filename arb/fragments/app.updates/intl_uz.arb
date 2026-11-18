@@ -76,5 +76,6 @@
   "updateDesktopAutomatic": "Avtomatik yangilash",
   "updateDesktopAutoDescription": "ReClash yangilanishlarni fonda yuklab oladi va ilova ishga tushganda, yopilganda yoki kompyuter bo‘sh turganda o‘rnatadi. Faol ulanish o‘zi tiklanadi.",
   "updateRestartNow": "Yangilash uchun qayta ishga tushirish",
-  "updateSkippedVersions": "Oraliq versiyalar"
+  "updateSkippedVersions": "Oraliq versiyalar",
+  "autoCheckUpdate": null
 }

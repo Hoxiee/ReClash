@@ -76,5 +76,6 @@
   "updateDesktopAutomatic": "Обновлять автоматически",
   "updateDesktopAutoDescription": "ReClash скачивает обновления в фоне и ставит их при запуске, при выходе или пока компьютер простаивает. Активное подключение восстановится само.",
   "updateRestartNow": "Перезапустить для обновления",
-  "updateSkippedVersions": "Промежуточные версии"
+  "updateSkippedVersions": "Промежуточные версии",
+  "autoCheckUpdate": null
 }

@@ -76,5 +76,6 @@
   "updateDesktopAutomatic": "自動的に更新",
   "updateDesktopAutoDescription": "ReClashは更新をバックグラウンドでダウンロードし、起動時、終了時、またはコンピューターのアイドル時にインストールします。有効な接続は自動的に復帰します。",
   "updateRestartNow": "再起動して更新",
-  "updateSkippedVersions": "間のバージョン"
+  "updateSkippedVersions": "間のバージョン",
+  "autoCheckUpdate": null
 }

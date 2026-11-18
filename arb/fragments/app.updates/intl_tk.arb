@@ -76,5 +76,6 @@
   "updateDesktopAutomatic": "Awtomatik täzelemek",
   "updateDesktopAutoDescription": "ReClash täzelemeleri arka planda ýükleýär we başlananda, çykanda ýa-da kompýuter boş duranda gurnaýar. Işjeň birikme özi dikelýär.",
   "updateRestartNow": "Täzelemek üçin gaýtadan işletmek",
-  "updateSkippedVersions": "Aradaky wersiýalar"
+  "updateSkippedVersions": "Aradaky wersiýalar",
+  "autoCheckUpdate": null
 }

@@ -82,14 +82,10 @@ class ApplicationSettings {
       title: (l) => l.checkCertificate,
     ),
     SettingSpec(
-      id: 'application.autoCheckUpdate',
-      page: ToolPage.application,
-      title: (l) => l.autoCheckUpdate,
-    ),
-    SettingSpec(
       id: 'application.updatePreferences',
       page: ToolPage.application,
       title: (l) => l.updatePreferencesTitle,
+      keywords: ['autoCheckUpdate'],
     ),
     SettingSpec(
       id: 'application.openLogs',
@@ -213,15 +209,11 @@ class ApplicationSettingView extends ConsumerWidget {
         select: (s) => s.checkCertificate,
         update: (s, v) => s.copyWith(checkCertificate: v),
       ),
-      _toggle(
-        id: 'application.autoCheckUpdate',
-        select: (s) => s.autoCheckUpdate,
-        update: (s, v) => s.copyWith(autoCheckUpdate: v),
-      ),
       SettingTarget(
         spec: ApplicationSettings.spec('application.updatePreferences'),
         child: ListItem(
           title: Text(l.updatePreferencesTitle),
+          subtitle: providerSettingTag(ref, ['settings.autoupdate']),
           trailing: const GlyphIcon(AppGlyphs.chevronForward),
           onTap: () => UpdateSheet.show(context, preferences: true),
         ),

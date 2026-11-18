@@ -282,7 +282,7 @@ reminders:
 | `launch-at-login` | Auto launch | Starts the app at login. |
 | `start-hidden` | Silent launch | Starts without showing the window. |
 | `connect-on-launch` | Auto run | Starts the proxy when the app opens. |
-| `check-app-updates` | Auto check for updates | Checks for app updates. |
+| `check-app-updates` | Update preferences › Check automatically | Checks for app updates. |
 | `capture-logs` | Logcat | Captures logs. Off hides the logs entry. |
 | `close-connections` | Close connections | Drops open connections when the proxy changes. |
 

@@ -59,7 +59,6 @@ const providerSettingsBySpec = {
   'application.autoRun': ['settings.autostart'],
   'application.minimizeOnExit': ['settings.minimize'],
   'application.closeConnections': ['settings.closeconnections'],
-  'application.autoCheckUpdate': ['settings.autoupdate'],
   'application.openLogs': ['settings.openlogs'],
   'theme.themeColor': ['app.color', 'app.style'],
   'theme.pureBlackMode': ['app.black'],
