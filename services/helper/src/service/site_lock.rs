@@ -272,6 +272,8 @@ fn queue_block(queue: u16, tun: &str, dns: Option<&DnsFilter>) -> String {
 // route-exclude-address) is redirected to the Core, which answers with a fake address;
 // only a flow's first packet is NATed, so a marked packet of an unredirected flow drops.
 // Without the Core's cgroup its own upstreams would loop, so nothing is redirected.
+// Only postrouting sees the interface a rerouted packet really leaves by: a redirect
+// outliving its TUN would otherwise send the locked name out of the physical one.
 fn redirect_block(tun: &str, dns: Option<&DnsFilter>) -> String {
     let Some(dns) = dns else {
         return String::new();
@@ -283,13 +285,15 @@ fn redirect_block(tun: &str, dns: Option<&DnsFilter>) -> String {
              meta nfproto ipv4 meta mark {LOCKED_MARK:#x} dnat ip to {target}\n  }}\n"
         ));
     }
-    for hook in ["output", "forward"] {
-        text.push_str(&format!(
-            "  chain dns_{hook}_guard {{\n    type filter hook {hook} priority 20; policy accept;\n    \
-             meta mark {LOCKED_MARK:#x} ct status dnat meta mark set 0 accept\n    \
-             meta mark {LOCKED_MARK:#x} drop\n  }}\n"
-        ));
-    }
+    let into_tun = if tun.is_empty() {
+        String::new()
+    } else {
+        format!("    meta mark {LOCKED_MARK:#x} ct status dnat oifname \"{tun}\" meta mark set 0 accept\n")
+    };
+    text.push_str(&format!(
+        "  chain dns_guard {{\n    type filter hook postrouting priority 20; policy accept;\n\
+         {into_tun}    meta mark {LOCKED_MARK:#x} drop\n  }}\n"
+    ));
     text
 }
 
@@ -1393,15 +1397,17 @@ mod tests {
             "    meta mark 0x5c1d ct status dnat accept\n    \
              meta l4proto tcp ip daddr @v4 reject with tcp reset\n"
         ));
-        for hook in ["output", "forward"] {
-            assert!(text.contains(&format!(
-                "  chain dns_{hook}_guard {{\n    type filter hook {hook} priority 20; policy accept;\n    \
-                 meta mark 0x5c1d ct status dnat meta mark set 0 accept\n    \
-                 meta mark 0x5c1d drop\n  }}\n"
-            )));
-        }
+        assert!(text.contains(
+            "  chain dns_guard {\n    type filter hook postrouting priority 20; policy accept;\n    \
+             meta mark 0x5c1d ct status dnat oifname \"tun0\" meta mark set 0 accept\n    \
+             meta mark 0x5c1d drop\n  }\n"
+        ));
         assert!(!dns_rules("tun0", None).contains("dns_redirect"));
-        assert!(dns_rules("tun0", None).contains("dns_output_guard"));
+        assert!(dns_rules("tun0", None).contains("dns_guard"));
+        assert!(dns_rules("", Some(CGROUP)).contains(
+            "  chain dns_guard {\n    type filter hook postrouting priority 20; policy accept;\n    \
+             meta mark 0x5c1d drop\n  }\n"
+        ));
         assert!(!dns_rules("", Some(CGROUP)).contains("dns_redirect"));
         assert!(!rules("tun0", &["10.0.0.0/8"]).contains("dns_"));
     }

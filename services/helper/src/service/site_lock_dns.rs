@@ -158,6 +158,13 @@ impl NameSet {
 /// Set by the queue on a locked query; the ruleset redirects or drops it.
 pub(super) const LOCKED_MARK: u32 = 0x5c1d;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum Query {
+    Pass,
+    Locked,
+    Unreadable,
+}
+
 #[derive(Default)]
 pub(super) struct Matcher {
     names: NameSet,
@@ -202,13 +209,17 @@ impl Matcher {
                 .any(|(names, except)| names.matches(&qname) && !except.matches(&qname))
     }
 
-    /// True when the packet asks for a locked name, or cannot be read in
-    /// full: a query this filter cannot see must not slip past it.
-    pub(super) fn drops(&self, packet: &[u8]) -> bool {
+    /// A packet this filter cannot read in full is unreadable: a query it cannot
+    /// see must not slip past it, nor be redirected as if it were locked.
+    pub(super) fn inspect(&self, packet: &[u8]) -> Query {
         if self.names.is_empty() && self.guarded.iter().all(|(names, _)| names.is_empty()) {
-            return false;
+            return Query::Pass;
         }
-        question_names(packet).is_none_or(|names| names.iter().any(|name| self.matches(name)))
+        match question_names(packet) {
+            None => Query::Unreadable,
+            Some(names) if names.iter().any(|name| self.matches(name)) => Query::Locked,
+            Some(_) => Query::Pass,
+        }
     }
 }
 
@@ -425,10 +436,15 @@ fn serve(mut queue: nfq::Queue, number: u16, matcher: &RwLock<Arc<Matcher>>) {
         match queue.recv() {
             Ok(mut message) => {
                 let current = matcher.read().unwrap_or_else(|e| e.into_inner()).clone();
-                if current.drops(message.get_payload()) {
-                    message.set_nfmark(LOCKED_MARK);
-                }
-                message.set_verdict(nfq::Verdict::Accept);
+                let verdict = match current.inspect(message.get_payload()) {
+                    Query::Pass => nfq::Verdict::Accept,
+                    Query::Locked => {
+                        message.set_nfmark(LOCKED_MARK);
+                        nfq::Verdict::Accept
+                    }
+                    Query::Unreadable => nfq::Verdict::Drop,
+                };
+                message.set_verdict(verdict);
                 if let Err(error) = queue.verdict(message) {
                     eprintln!("Helper DNS filter could not send a verdict: {error}");
                 }
@@ -610,7 +626,7 @@ mod tests {
         let alone = Matcher::new(&Names::default(), &guarded).unwrap();
         assert!(alone.matches("api.openai.com"));
         assert!(!alone.matches("status.openai.com"));
-        assert!(!alone.drops(&udp4(&dns("status.openai.com"))));
+        assert_eq!(alone.inspect(&udp4(&dns("status.openai.com"))), Query::Pass);
         let both = Matcher::new(&names(&["status.openai.com"], &[], &[], &[]), &guarded).unwrap();
         assert!(both.matches("status.openai.com"));
     }
@@ -629,7 +645,10 @@ mod tests {
     #[test]
     fn empty_matcher_matches_nothing() {
         assert!(!Matcher::default().matches("example.com"));
-        assert!(!Matcher::default().drops(&udp4(&dns("example.com"))));
+        assert_eq!(
+            Matcher::default().inspect(&udp4(&dns("example.com"))),
+            Query::Pass
+        );
     }
 
     fn one(name: &str) -> Option<Vec<String>> {
@@ -707,20 +726,26 @@ mod tests {
     }
 
     #[test]
-    fn drops_locked_names_and_what_it_cannot_read() {
+    fn tells_locked_names_from_what_it_cannot_read() {
         let matcher = Matcher::new(&names(&[], &["chatgpt.com"], &[], &[]), &[]).unwrap();
-        assert!(matcher.drops(&udp4(&dns("api.chatgpt.com"))));
-        assert!(matcher.drops(&tcp4(&prefixed(&dns("chatgpt.com")))));
+        assert_eq!(
+            matcher.inspect(&udp4(&dns("api.chatgpt.com"))),
+            Query::Locked
+        );
+        assert_eq!(
+            matcher.inspect(&tcp4(&prefixed(&dns("chatgpt.com")))),
+            Query::Locked
+        );
         let mut second = dns("example.com");
         second[5] = 2;
         second.extend([
             7, b'c', b'h', b'a', b't', b'g', b'p', b't', 0xc0, 20, 0, 1, 0, 1,
         ]);
-        assert!(matcher.drops(&udp4(&second)));
-        assert!(matcher.drops(&[1, 2, 3]));
-        assert!(!matcher.drops(&udp4(&dns("example.com"))));
-        assert!(!matcher.drops(&tcp4(&[])));
-        assert!(!Matcher::default().drops(&[1, 2, 3]));
+        assert_eq!(matcher.inspect(&udp4(&second)), Query::Locked);
+        assert_eq!(matcher.inspect(&[1, 2, 3]), Query::Unreadable);
+        assert_eq!(matcher.inspect(&udp4(&dns("example.com"))), Query::Pass);
+        assert_eq!(matcher.inspect(&tcp4(&[])), Query::Pass);
+        assert_eq!(Matcher::default().inspect(&[1, 2, 3]), Query::Pass);
     }
 
     #[test]
