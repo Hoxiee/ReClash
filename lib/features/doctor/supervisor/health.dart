@@ -26,9 +26,9 @@ enum ConnectionPhase {
   waitingNetwork,
 }
 
-/// The healing steps. [bestNode] runs only on the user's tap; the rest climb
-/// in this order on the repair tap, and only [resetConnections] runs on its
-/// own.
+/// The healing steps. [bestNode] runs only on the user's tap; the repair tap
+/// climbs [resetConnections] first, then the rest in this order, and only
+/// [resetConnections] runs on its own.
 enum HealStep {
   bestNode,
   updateProfile,

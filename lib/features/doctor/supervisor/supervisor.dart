@@ -9,6 +9,7 @@ import '../kernel.dart';
 import '../path.dart';
 import '../remedies/connection.dart';
 import '../remedies/remedy.dart';
+import '../snapshot.dart';
 import 'health.dart';
 
 enum VerifyVerdict { pass, fail, unknown }
@@ -50,9 +51,11 @@ const _ladder = {
 /// and drops every connection, which costs more than the failure it guesses at.
 const _autoSteps = [HealStep.resetConnections];
 
+/// A fetch re-applies the profile and drops every connection, so it follows
+/// the cheap reset and is skipped for a subscription fetched recently.
 const _repairSteps = [
-  HealStep.updateProfile,
   HealStep.resetConnections,
+  HealStep.updateProfile,
   HealStep.restartCore,
   HealStep.restartTunnel,
 ];
@@ -73,6 +76,9 @@ class ConnectionSupervisor {
     this.resumeTtl = const Duration(minutes: 2),
     this.graceInterval = const Duration(minutes: 5),
     this.recoveringDelay = const Duration(milliseconds: 800),
+    this.brokenRetry = const Duration(seconds: 15),
+    this.brokenRetryLimit = const Duration(minutes: 2),
+    this.profileFreshFor = const Duration(hours: 1),
   }) : _kernel = kernel,
        _autoHeal = autoHeal,
        _selectedNode = selectedNode,
@@ -90,6 +96,14 @@ class ConnectionSupervisor {
   /// How often an expired plan that still works is checked while visible.
   final Duration graceInterval;
   final Duration recoveringDelay;
+
+  /// While broken and visible, checks again after this, doubling up to
+  /// [brokenRetryLimit], so a passing blip does not stay red until a tap.
+  final Duration brokenRetry;
+  final Duration brokenRetryLimit;
+
+  /// The repair ladder skips the subscription fetch within this long of one.
+  final Duration profileFreshFor;
 
   final DiagnosticKernel _kernel;
   final bool Function() _autoHeal;
@@ -129,6 +143,8 @@ class ConnectionSupervisor {
   Timer? _confirmTimer;
   Timer? _graceTimer;
   Timer? _recoveringTimer;
+  Timer? _retryTimer;
+  late Duration _retryDelay = brokenRetry;
   bool _disposed = false;
 
   ConnectionHealth get health => _health;
@@ -155,6 +171,7 @@ class ConnectionSupervisor {
     _visible = visible;
     if (!visible) {
       _graceTimer?.cancel();
+      _retryTimer?.cancel();
       return;
     }
     if (!_running) return;
@@ -166,6 +183,7 @@ class ConnectionSupervisor {
       _trigger();
     } else {
       _scheduleGrace();
+      _scheduleRetry();
     }
   }
 
@@ -264,6 +282,7 @@ class ConnectionSupervisor {
     _cause = null;
     _step = null;
     _stepDetail = null;
+    _retryDelay = brokenRetry;
     if (!running) {
       _emit(ConnectionHealth.idle);
       return;
@@ -306,12 +325,13 @@ class ConnectionSupervisor {
     unawaited(_connect(epoch));
   }
 
-  /// A failed first check is confirmed like any other break.
+  /// A failed first check is confirmed like any other break, and one that
+  /// could not tell, often a node still dialling, is asked once more.
   Future<void> _connect(int epoch) async {
     var result = await _verify();
     if (epoch != _epoch) return;
-    if (result.verdict == VerifyVerdict.fail && _connecting) {
-      _cause = result.cause;
+    if (result.verdict != VerifyVerdict.pass && _connecting) {
+      if (result.verdict == VerifyVerdict.fail) _cause = result.cause;
       await Future<void>.delayed(confirmGap);
       if (epoch != _epoch || !_connecting) return;
       result = await _verify();
@@ -354,6 +374,7 @@ class ConnectionSupervisor {
       case VerifyVerdict.fail:
         _failed(result.cause, epoch);
     }
+    _scheduleRetry();
   }
 
   void _failed(FailureCause? cause, int epoch) {
@@ -362,7 +383,9 @@ class ConnectionSupervisor {
     if (changedAt != null && now.difference(changedAt) < networkSettle) return;
     _cause = cause;
     if (_health.phase == ConnectionPhase.broken) {
-      _emit(_checked(ConnectionPhase.broken));
+      _emit(
+        _checked(ConnectionPhase.broken, repairFailed: _health.repairFailed),
+      );
       return;
     }
     final first = _firstFailureAt;
@@ -398,6 +421,8 @@ class ConnectionSupervisor {
     _cause = null;
     _step = null;
     _stepDetail = null;
+    _retryTimer?.cancel();
+    _retryDelay = brokenRetry;
     _emit(_checked(ConnectionPhase.verified));
     _scheduleGrace();
   }
@@ -407,6 +432,7 @@ class ConnectionSupervisor {
     _firstFailureAt = null;
     _cause = cause;
     _emit(_checked(ConnectionPhase.broken));
+    _scheduleRetry();
     if (_visible) unawaited(_kernel.runPath().then((_) {}, onError: (_) {}));
     if (!_autoHeal() || _climb != null) return;
     final plan = ++_plan;
@@ -448,6 +474,7 @@ class ConnectionSupervisor {
         _step = null;
         _stepDetail = null;
         _emit(_checked(ConnectionPhase.broken, repairFailed: repair));
+        _scheduleRetry();
       }
       return false;
     } finally {
@@ -460,6 +487,7 @@ class ConnectionSupervisor {
 
   /// Applies one rung and verifies; true when the check passed.
   Future<bool> _runStep(HealStep step, int plan) async {
+    if (step == HealStep.updateProfile && _profileIsFresh()) return false;
     _step = step;
     _stepDetail = null;
     if (_recoveringShown) _emitRecovering();
@@ -484,6 +512,12 @@ class ConnectionSupervisor {
     if (plan != _plan) return false;
     if (result.verdict == VerifyVerdict.fail) _cause = result.cause;
     return result.verdict == VerifyVerdict.pass;
+  }
+
+  bool _profileIsFresh() {
+    final fetchedAt = _kernel.snapshot.valueOf(Facts.subscription)?.fetchedAt;
+    return fetchedAt != null &&
+        _clock().difference(fetchedAt) < profileFreshFor;
   }
 
   void _emitRecovering() => _emit(
@@ -512,6 +546,19 @@ class ConnectionSupervisor {
     _graceTimer = Timer(graceInterval, _trigger);
   }
 
+  void _scheduleRetry() {
+    _retryTimer?.cancel();
+    if (!_visible || !_running || _health.phase != ConnectionPhase.broken) {
+      return;
+    }
+    final delay = _retryDelay;
+    _retryTimer = Timer(delay, () {
+      final next = delay * 2;
+      _retryDelay = next > brokenRetryLimit ? brokenRetryLimit : next;
+      _trigger();
+    });
+  }
+
   void _emit(ConnectionHealth health) {
     if (_disposed || health == _health) return;
     _health = health;
@@ -525,6 +572,7 @@ class ConnectionSupervisor {
       _confirmTimer,
       _graceTimer,
       _recoveringTimer,
+      _retryTimer,
     ]) {
       timer?.cancel();
     }

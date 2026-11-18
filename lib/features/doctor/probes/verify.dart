@@ -10,7 +10,10 @@ import '../path.dart';
 import 'path.dart';
 import 'scheduler.dart';
 
-const _verifyTimeout = Duration(seconds: 5);
+/// A working node behind a slow link can take several round trips past 5 s
+/// to answer through a fresh TLS handshake; a dead one fails fast or hits
+/// this.
+const _verifyTimeout = Duration(seconds: 10);
 
 /// The group whose selection carries the user's traffic: none in direct mode,
 /// `GLOBAL` in global mode, and in rule mode the group the simple dashboard

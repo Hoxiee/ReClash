@@ -9,6 +9,7 @@ import 'package:reclash/features/doctor/path.dart';
 import 'package:reclash/features/doctor/probes/scheduler.dart';
 import 'package:reclash/features/doctor/remedies/connection.dart';
 import 'package:reclash/features/doctor/rules/rules.dart';
+import 'package:reclash/features/doctor/snapshot.dart';
 import 'package:reclash/features/doctor/supervisor/health.dart';
 import 'package:reclash/features/doctor/supervisor/supervisor.dart';
 import 'package:reclash/models/models.dart';
@@ -168,6 +169,18 @@ void main() {
       expect(rig.health.phase, ConnectionPhase.verified);
     });
 
+    _test('a connect that cannot tell asks once more', (rig) {
+      rig
+        ..answer = const StepCheck.unknown()
+        ..connect();
+      expect(rig.health.phase, ConnectionPhase.connecting);
+      rig
+        ..pass()
+        ..run(const Duration(seconds: 3));
+      expect(rig.checks, 2);
+      expect(rig.health.phase, ConnectionPhase.verified);
+    });
+
     _test('the budget ends a check that never answers', (rig) {
       rig
         ..gate = Completer<void>()
@@ -257,6 +270,39 @@ void main() {
       unawaited(rig.supervisor.recheck());
       rig.settle();
       expect(rig.health.phase, ConnectionPhase.verified);
+    }, autoHeal: false);
+
+    _test('a broken connection is checked again while visible', (rig) {
+      rig
+        ..fail()
+        ..connect()
+        ..run(const Duration(seconds: 3));
+      expect(rig.health.phase, ConnectionPhase.broken);
+      final before = rig.checks;
+      rig.run(const Duration(seconds: 15));
+      expect(rig.checks, before + 1);
+      rig.run(const Duration(seconds: 29));
+      expect(rig.checks, before + 1);
+      rig.run(const Duration(seconds: 1));
+      expect(rig.checks, before + 2);
+      rig
+        ..pass()
+        ..run(const Duration(seconds: 60));
+      expect(rig.health.phase, ConnectionPhase.verified);
+      rig.run(const Duration(minutes: 10));
+      expect(rig.checks, before + 3);
+    }, autoHeal: false);
+
+    _test('a hidden app never rechecks a broken connection', (rig) {
+      rig
+        ..fail()
+        ..connect()
+        ..run(const Duration(seconds: 3));
+      final before = rig.checks;
+      rig
+        ..supervisor.setVisible(false)
+        ..run(const Duration(minutes: 10));
+      expect(rig.checks, before);
     }, autoHeal: false);
 
     _test('a check that cannot tell is never a problem', (rig) {
@@ -362,7 +408,12 @@ void main() {
       unawaited(rig.supervisor.repair().then((value) => healed = value));
       rig.run(const Duration(seconds: 1));
       expect(healed, isFalse);
-      expect(rig.applied, _ladderIds.skip(1));
+      expect(rig.applied, [
+        ConnectionRemedy.resetConnections,
+        'profile.update',
+        ConnectionRemedy.restartCore,
+        ConnectionRemedy.reconnect,
+      ]);
       expect(rig.health.phase, ConnectionPhase.broken);
       expect(rig.health.repairFailed, isTrue);
       rig.pass();
@@ -370,6 +421,24 @@ void main() {
       rig.settle();
       expect(rig.health.phase, ConnectionPhase.verified);
       expect(rig.health.repairFailed, isFalse);
+    }, autoHeal: false);
+
+    _test('repair skips a subscription fetched within the hour', (rig) {
+      rig
+        ..fail()
+        ..connect()
+        ..run(const Duration(seconds: 3))
+        ..kernel.put(
+          Facts.subscription,
+          SubscriptionFact(
+            profileId: 1,
+            fetchedAt: _start.add(rig.async.elapsed),
+          ),
+        );
+      unawaited(rig.supervisor.repair());
+      rig.run(const Duration(seconds: 1));
+      expect(rig.applied, isNot(contains('profile.update')));
+      expect(rig.applied.last, ConnectionRemedy.reconnect);
     }, autoHeal: false);
 
     _test('only a tap switches the server', (rig) {
