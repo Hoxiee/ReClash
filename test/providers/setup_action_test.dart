@@ -723,6 +723,27 @@ void main() {
       expect(container.read(runningVpnOptionsProvider), isNull);
     });
 
+    test('a start keeps the options that settled while it ran', () async {
+      markInitialized();
+      final setup = container.read(setupActionProvider.notifier);
+      await container.read(vpnOptionsProvider.future);
+      action.blockCoreCalls = true;
+
+      final starting = setup.setRunning(true);
+      await action.firstCoreCall.future;
+      container
+          .read(vpnSettingProvider.notifier)
+          .update((state) => state.copyWith(ipv6: !state.ipv6));
+      await container.read(vpnOptionsProvider.future);
+      action.pendingCoreCalls.single.complete();
+      await starting;
+
+      expect(
+        container.read(runningVpnOptionsProvider),
+        await container.read(vpnOptionsProvider.future),
+      );
+    });
+
     test('a start the core rejects keeps nothing', () async {
       markInitialized();
       action.coreRunningError = StateError('listener refused');

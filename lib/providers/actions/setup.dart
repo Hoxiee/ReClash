@@ -431,13 +431,17 @@ class SetupAction extends _$SetupAction {
 
   Future<bool> _setListening(_RunRequest request) async {
     final running = request.running;
-    final vpnOptions = await ref.read(vpnOptionsProvider.future);
+    await ref.read(vpnOptionsProvider.future);
     if (!ref.mounted || !_isCurrent(request)) return true;
     final answered = await setCoreRunning(running);
     if (!ref.mounted || !_isCurrent(request)) return true;
-    ref.read(runningVpnOptionsProvider.notifier).value = running && answered
-        ? vpnOptions
+    // The service starts from the options synced up to now, not from those
+    // read before the start: anything that settled meanwhile is not a change.
+    final started = running && answered
+        ? await ref.read(vpnOptionsProvider.future)
         : null;
+    if (!ref.mounted || !_isCurrent(request)) return true;
+    ref.read(runningVpnOptionsProvider.notifier).value = started;
     if (!running && ref.mounted) {
       ref.read(tunAppliedProvider.notifier).value = false;
     }

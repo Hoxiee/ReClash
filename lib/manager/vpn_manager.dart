@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -30,10 +32,21 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
             running != null &&
             running != next &&
             !ref.read(setupSessionProvider).active) {
+          commonPrint.log('VPN restart tip: ${_changedFields(running, next)}');
           _showRestartTip();
         }
       },
     );
+  }
+
+  String _changedFields(VpnOptions running, VpnOptions next) {
+    final before = jsonDecode(jsonEncode(running)) as Map<String, dynamic>;
+    final after = jsonDecode(jsonEncode(next)) as Map<String, dynamic>;
+    return [
+      for (final key in after.keys)
+        if (jsonEncode(before[key]) != jsonEncode(after[key]))
+          '$key: ${jsonEncode(before[key])} -> ${jsonEncode(after[key])}',
+    ].join('; ');
   }
 
   void _showRestartTip() {
