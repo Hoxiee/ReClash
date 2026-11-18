@@ -32,7 +32,7 @@
 
 ## ReClash 替你做什么
 
-- **ChatGPT 不会看到错误的国家。** [站点锁定](docs/en/site-lock/README.md)只让指定网站经由你选的出口服务器发出，
+- **ChatGPT、Claude 和 Gemini 不会看到错误的国家。** [站点锁定](docs/en/site-lock/README.md)只让指定网站经由你选的出口服务器发出，
   否则不发出，无论模式和规则如何。其余流量照常。
 - **打不开？马上知道原因。** 服务检测显示 Google、YouTube、ChatGPT、Netflix 等服务能否通过当前线路打开以及延迟，
   一眼看出是服务器的问题还是网站的问题。

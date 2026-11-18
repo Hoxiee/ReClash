@@ -33,7 +33,7 @@ Free, open source and ad-free.
 
 ## What it does for you
 
-- **ChatGPT never sees the wrong country.** [Site lock](docs/en/site-lock/README.md) sends chosen sites only through the
+- **ChatGPT, Claude and Gemini never see the wrong country.** [Site lock](docs/en/site-lock/README.md) sends chosen sites only through the
   exit servers you pick, or nowhere, whatever the mode or rules. Everything else keeps its usual route.
 - **Won't load? You see why.** Service checks show whether Google, YouTube, ChatGPT, Netflix and other services open
   through the current route, and how fast, so you know whether the server or the site is at fault.
