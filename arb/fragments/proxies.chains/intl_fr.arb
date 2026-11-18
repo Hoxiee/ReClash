@@ -108,5 +108,7 @@
   "chainsSitesSee": "Les sites voient {country}",
   "powerHintBrokenChain": "La chaîne par laquelle tout passe est cassée",
   "chainsSimilarEntry": "Entrées similaires",
-  "chainsSimilarExit": "Sorties similaires"
+  "chainsSimilarExit": "Sorties similaires",
+  "chainsProviderSection": "De votre fournisseur",
+  "chainsProviderManaged": "« {name} » provient de votre fournisseur et est remplacée à chaque mise à jour de celui-ci. Créer votre propre copie pour la modifier ?"
 }

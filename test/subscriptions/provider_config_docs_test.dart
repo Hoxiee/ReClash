@@ -51,6 +51,7 @@ void main() {
       expect(config.wallpaper, isNotNull);
       expect(config.widgets, isNotEmpty);
       expect(config.routing, isNotNull);
+      expect(config.chains, hasLength(1));
       expect(config.fields.keys, contains('settings.restrictions'));
       expect(config.fields.keys, contains('settings.flags'));
       expect(config.fields.keys, contains('transport.newDomain'));
@@ -69,6 +70,7 @@ void main() {
         'cards:',
         'power-labels:',
         'routing:',
+        'chains:',
       ]) {
         expect(example, contains('\n$section'));
       }

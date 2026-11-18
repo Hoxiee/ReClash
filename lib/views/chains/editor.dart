@@ -22,12 +22,33 @@ import 'issues.dart';
 import 'marks.dart';
 
 /// Opens the one sheet that makes, shows and fixes a chain.
-Future<void> showChainEditor(BuildContext context, {ProxyChain? chain}) =>
-    showSheet<void>(
-      context: context,
-      props: const SheetProps(detents: [0.9]),
-      builder: (_) => ChainEditor(chain: chain),
-    );
+Future<void> showChainEditor(BuildContext context, {ProxyChain? chain}) {
+  if (chain != null && isProviderChainId(chain.id)) {
+    return _offerCopy(context, chain);
+  }
+  return showSheet<void>(
+    context: context,
+    props: const SheetProps(detents: [0.9]),
+    builder: (_) => ChainEditor(chain: chain),
+  );
+}
+
+/// A provider updates its chains with the manifest, so a change would be lost.
+Future<void> _offerCopy(BuildContext context, ProxyChain chain) async {
+  final l = context.appLocalizations;
+  final container = ProviderScope.containerOf(context, listen: false);
+  final confirmed = await dialogs.showMessage(
+    message: TextSpan(text: l.chainsProviderManaged(chainTitle(chain))),
+    confirmText: l.chainsDuplicate,
+  );
+  if (confirmed != true) return;
+  await globalState.safeRun(
+    () => container
+        .read(proxyChainsActionProvider.notifier)
+        .copyProviderChain(chain),
+    silence: false,
+  );
+}
 
 enum ChainHopSlot { entry, middle, exit }
 

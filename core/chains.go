@@ -616,8 +616,27 @@ func (a *chainAnalysis) add(hop int, code string) *ChainIssue {
 	return &a.issues[len(a.issues)-1]
 }
 
+// healedHops renames a missing hop to its fingerprint's only match; a match
+// that is not unique stays missing, with the suggestions on its issue.
+func (ix *chainIndex) healedHops(spec ChainSpec) []string {
+	if !spec.Heal {
+		return spec.Hops
+	}
+	hops := slices.Clone(spec.Hops)
+	for i, name := range hops {
+		if ix.hop(name).code != chainMissingHop || i >= len(spec.Fingerprints) || spec.Fingerprints[i] == nil {
+			continue
+		}
+		if matches := ix.suggest(*spec.Fingerprints[i]); len(matches) == 1 {
+			hops[i] = matches[0]
+		}
+	}
+	return hops
+}
+
 func (ix *chainIndex) analyze(spec ChainSpec, hint string) chainAnalysis {
 	a := chainAnalysis{issues: []ChainIssue{}, udp: chainUDPNone}
+	spec.Hops = ix.healedHops(spec)
 	if len(spec.Hops) < 2 {
 		a.add(-1, chainEmptyExit)
 	}

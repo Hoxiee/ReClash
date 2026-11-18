@@ -77,6 +77,9 @@ abstract class ChainSpec with _$ChainSpec {
     required bool offered,
     @JsonKey(name: 'target-group') String? targetGroup,
     @JsonKey(includeIfNull: false) List<HopFingerprint?>? fingerprints,
+
+    /// Lets a missing hop take the one node its fingerprint matches.
+    @JsonKey(includeIfNull: false) bool? heal,
   }) = _ChainSpec;
 
   factory ChainSpec.fromJson(Map<String, Object?> json) =>

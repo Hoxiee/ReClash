@@ -7,6 +7,7 @@ import 'package:reclash/enum/enum.dart';
 
 import '../transport/header_policy.dart';
 import '../transport/transport.dart';
+import 'provider_chains.dart';
 import 'provider_config.dart';
 
 const providerConfigFetchBudget = Duration(seconds: 8);
@@ -53,6 +54,20 @@ Future<StoredProviderConfig?> readStoredProviderConfig(int profileId) async {
 
 Future<void> deleteStoredProviderConfig(int profileId) async =>
     (await _storedFile(profileId)).safeDelete();
+
+String? _chainsSource;
+List<ProviderChain> _chains = const [];
+
+/// The chains of the stored manifest, empty without one. The last reading is
+/// kept, since every apply asks for it.
+Future<List<ProviderChain>> readStoredProviderChains(int profileId) async {
+  final stored = await readStoredProviderConfig(profileId);
+  if (stored == null) return const [];
+  if (stored.source == _chainsSource) return _chains;
+  final parsed = await parseProviderConfigOffThread(stored.source, 'en');
+  _chainsSource = stored.source;
+  return _chains = parsed.config?.chains ?? const [];
+}
 
 Future<ProviderConfigResult> parseProviderConfigOffThread(
   String source,

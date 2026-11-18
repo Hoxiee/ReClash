@@ -108,5 +108,7 @@
   "chainsSitesSee": "사이트에는 {country}로 보임",
   "powerHintBrokenChain": "모든 트래픽이 지나는 체인이 고장 났습니다",
   "chainsSimilarEntry": "비슷한 입구",
-  "chainsSimilarExit": "비슷한 출구"
+  "chainsSimilarExit": "비슷한 출구",
+  "chainsProviderSection": "제공업체 제공",
+  "chainsProviderManaged": "“{name}”은(는) 제공업체에서 온 것이며, 제공업체가 업데이트할 때마다 교체됩니다. 변경하려면 자신만의 사본을 만들까요?"
 }

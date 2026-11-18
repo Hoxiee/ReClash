@@ -101,11 +101,12 @@ class _ChainsViewState extends ConsumerState<ChainsView> {
   List<CommonPopupMenuItem> _menuOf(ProxyChain chain) {
     final l = context.appLocalizations;
     return [
-      CommonPopupMenuItem(
-        glyph: AppGlyphs.edit,
-        label: l.edit,
-        onPressed: () => showChainEditor(context, chain: chain),
-      ),
+      if (!isProviderChainId(chain.id))
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.edit,
+          label: l.edit,
+          onPressed: () => showChainEditor(context, chain: chain),
+        ),
       if (chain.enabled)
         CommonPopupMenuItem(
           glyph: AppGlyphs.speed,
@@ -115,14 +116,17 @@ class _ChainsViewState extends ConsumerState<ChainsView> {
       CommonPopupMenuItem(
         glyph: AppGlyphs.copy,
         label: l.chainsDuplicate,
-        onPressed: () => _duplicate(chain),
+        onPressed: () => isProviderChainId(chain.id)
+            ? showChainEditor(context, chain: chain)
+            : _duplicate(chain),
       ),
-      CommonPopupMenuItem(
-        danger: true,
-        glyph: AppGlyphs.delete,
-        label: l.delete,
-        onPressed: () => _delete(chain),
-      ),
+      if (!isProviderChainId(chain.id))
+        CommonPopupMenuItem(
+          danger: true,
+          glyph: AppGlyphs.delete,
+          label: l.delete,
+          onPressed: () => _delete(chain),
+        ),
     ];
   }
 
@@ -130,6 +134,7 @@ class _ChainsViewState extends ConsumerState<ChainsView> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final loaded = ref.watch(currentProfileChainsProvider).value;
+    final provided = ref.watch(currentProviderChainsProvider);
     final group = ref.watch(chainMainGroupProvider)?.name ?? '';
     final profile = ref.watch(
       currentProfileProvider.select((profile) => profile?.realLabel),
@@ -174,10 +179,27 @@ class _ChainsViewState extends ConsumerState<ChainsView> {
       );
     }
 
+    Widget providedRow(int index) {
+      final chain = provided[index];
+      return ContextMenuRegion(
+        menuItems: _menuOf(chain),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, provided.length),
+          child: ChainRow(
+            chain: chain,
+            delays: _delays[chain.id],
+            onToggle: (value) => _setEnabled(chain, value),
+          ),
+        ),
+      );
+    }
+
+    final hasChains = chains.isNotEmpty || provided.isNotEmpty;
+
     return CommonScaffold(
       title: l.chainsTitle,
       iconActions: [
-        if (chains.isNotEmpty)
+        if (hasChains)
           IconButtonData(
             glyph: AppGlyphs.add,
             tooltip: l.chainsNew,
@@ -186,22 +208,30 @@ class _ChainsViewState extends ConsumerState<ChainsView> {
       ],
       body: loaded == null
           ? const SizedBox.shrink()
-          : chains.isEmpty
+          : !hasChains
           ? Padding(
               padding: insets + const EdgeInsets.symmetric(horizontal: 16),
               child: const ChainsEmpty(),
             )
           : RefreshIndicator(
-              onRefresh: () => _testAll(chains),
+              onRefresh: () => _testAll([...chains, ...provided]),
               child: ReorderableListView.builder(
                 padding: insets,
                 buildDefaultDragHandles: false,
-                header: profile == null
+                header: profile == null || chains.isEmpty
                     ? null
                     : ListHeader(title: l.chainsProfileSection(profile)),
-                footer: group.isEmpty
-                    ? null
-                    : ListFooter(text: l.chainsPageFooter(group)),
+                footer: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (provided.isNotEmpty) ...[
+                      ListHeader(title: l.chainsProviderSection),
+                      for (var i = 0; i < provided.length; i++) providedRow(i),
+                    ],
+                    if (group.isNotEmpty)
+                      ListFooter(text: l.chainsPageFooter(group)),
+                  ],
+                ),
                 itemCount: chains.length,
                 itemBuilder: (_, index) => row(index),
                 proxyDecorator: (_, index, animation) =>

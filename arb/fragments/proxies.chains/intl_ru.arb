@@ -108,5 +108,7 @@
   "chainsSitesSee": "Сайты видят {country}",
   "powerHintBrokenChain": "Сломалась цепочка, через которую всё идёт",
   "chainsSimilarEntry": "Похожие входы",
-  "chainsSimilarExit": "Похожие выходы"
+  "chainsSimilarExit": "Похожие выходы",
+  "chainsProviderSection": "От вашего провайдера",
+  "chainsProviderManaged": "«{name}» поставляется вашим провайдером и заменяется при каждом его обновлении. Создать собственную копию, чтобы её изменить?"
 }

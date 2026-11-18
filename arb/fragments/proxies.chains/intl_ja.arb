@@ -108,5 +108,7 @@
   "chainsSitesSee": "サイトに見えるのは{country}",
   "powerHintBrokenChain": "すべての通信が通るチェーンが壊れました",
   "chainsSimilarEntry": "似た入口",
-  "chainsSimilarExit": "似た出口"
+  "chainsSimilarExit": "似た出口",
+  "chainsProviderSection": "プロバイダー提供",
+  "chainsProviderManaged": "「{name}」はプロバイダーから提供され、プロバイダーが更新するたびに差し替えられます。変更するには自分用のコピーを作成しますか？"
 }

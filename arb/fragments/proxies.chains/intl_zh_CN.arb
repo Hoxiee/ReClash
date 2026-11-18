@@ -108,5 +108,7 @@
   "chainsSitesSee": "网站看到的是{country}",
   "powerHintBrokenChain": "承载全部流量的链路坏了",
   "chainsSimilarEntry": "相似的入口",
-  "chainsSimilarExit": "相似的出口"
+  "chainsSimilarExit": "相似的出口",
+  "chainsProviderSection": "服务商提供",
+  "chainsProviderManaged": "“{name}”来自你的服务商，每次服务商更新时都会被替换。要创建你自己的副本来修改吗？"
 }

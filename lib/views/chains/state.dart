@@ -15,11 +15,10 @@ final chainOfGroupProvider = Provider.autoDispose.family<ChainEntry?, String>((
       .where((report) => report.group == groupName)
       .firstOrNull;
   if (report == null) return null;
-  final chain = ref
-      .watch(currentProfileChainsProvider)
-      .value
-      ?.where((chain) => chain.id == report.id)
-      .firstOrNull;
+  final chain = [
+    ...?ref.watch(currentProfileChainsProvider).value,
+    ...ref.watch(currentProviderChainsProvider),
+  ].where((chain) => chain.id == report.id).firstOrNull;
   return chain == null ? null : (chain: chain, report: report);
 });
 

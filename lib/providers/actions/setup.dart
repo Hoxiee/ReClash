@@ -117,14 +117,20 @@ class SetupAction extends _$SetupAction {
   SetupParams get _appliedParams =>
       _setupParams.copyWith(selectedMap: const {});
 
-  /// Enabled chains in their order; the hint is the input `pickMainGroup`
-  /// takes, which the Core resolves a chain's default target group with.
+  /// Enabled chains in their order, the provider's after the user's; the
+  /// hint is the input `pickMainGroup` takes, which the Core resolves a
+  /// chain's default target group with.
   Future<SetupParams> _withChains(SetupParams params, int? profileId) async {
     if (profileId == null) return params;
     final chains = await database.proxyChainsDao.query(profileId).get();
+    final provided = await readStoredProviderChains(profileId);
+    final off = await preferences.getProviderChainsOff();
     final specs = [
       for (final chain in chains)
         if (chain.enabled) chain.toSpec(),
+      for (final (index, chain) in provided.indexed)
+        if (!off.contains(providerChainKey(profileId, chain.name)))
+          chain.toSpec(providerChainId(index)),
     ];
     if (specs.isEmpty) return params;
     return params.copyWith(

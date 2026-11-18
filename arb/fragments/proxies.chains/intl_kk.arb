@@ -108,5 +108,7 @@
   "chainsSitesSee": "Сайттар {country} көреді",
   "powerHintBrokenChain": "Барлық трафик өтетін тізбек бұзылды",
   "chainsSimilarEntry": "Ұқсас кірулер",
-  "chainsSimilarExit": "Ұқсас шығулар"
+  "chainsSimilarExit": "Ұқсас шығулар",
+  "chainsProviderSection": "Провайдеріңізден",
+  "chainsProviderManaged": "«{name}» провайдерден келеді және провайдер оны жаңартқан сайын ауыстырылады. Өзгерту үшін өзіңіздің көшірмеңізді жасайсыз ба?"
 }

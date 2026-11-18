@@ -4,6 +4,7 @@ import 'package:yaml/yaml.dart';
 
 import '../protocol/registry.dart';
 import 'metadata.dart';
+import 'provider_chains.dart';
 import 'provider_cards.dart';
 import 'provider_power_labels.dart';
 import 'provider_seasonal.dart';
@@ -25,6 +26,7 @@ class ProviderConfig {
     this.widgets,
     this.fields = const {},
     this.routing,
+    this.chains = const [],
   });
 
   final List<ProviderCard> cards;
@@ -48,6 +50,9 @@ class ProviderConfig {
   /// The `routing` section when its shape is valid. The Core reads it from
   /// the stored source, so only its presence matters here.
   final Map<String, Object?>? routing;
+
+  /// The valid entries of the `chains` section.
+  final List<ProviderChain> chains;
 }
 
 typedef ProviderConfigResult = ({
@@ -94,6 +99,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
     var labels = const <String, List<ProviderPowerLabel>>{};
     final fields = <String, Object?>{};
     Map<String, Object?>? routing;
+    var chains = const <ProviderChain>[];
     for (final MapEntry(:key, :value) in plain.entries) {
       switch (key) {
         case 'version':
@@ -137,6 +143,13 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         case 'routing':
           routing = _routing(value);
           if (routing == null) warnings.add('Invalid routing section');
+        case 'chains':
+          final parsed = parseProviderChains(value, warnings);
+          if (parsed == null) {
+            warnings.add('Invalid chains section');
+          } else {
+            chains = parsed;
+          }
         case _ when _fieldSections.contains(key):
           fields.addAll(_section(key, value, tags, warnings));
         default:
@@ -154,6 +167,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         widgets: widgets == null ? null : List.unmodifiable(widgets),
         fields: Map.unmodifiable(fields),
         routing: routing,
+        chains: chains,
       ),
       warnings: List.unmodifiable(warnings),
     );

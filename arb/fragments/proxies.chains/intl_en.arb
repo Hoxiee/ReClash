@@ -338,5 +338,14 @@
   },
   "powerHintBrokenChain": "The chain all traffic goes through broke",
   "chainsSimilarEntry": "Similar entries",
-  "chainsSimilarExit": "Similar exits"
+  "chainsSimilarExit": "Similar exits",
+  "chainsProviderSection": "From your provider",
+  "chainsProviderManaged": "“{name}” comes from your provider and is replaced whenever the provider updates it. Make your own copy to change it?",
+  "@chainsProviderManaged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

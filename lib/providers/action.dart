@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:reclash/subscriptions/metadata/provider_chains.dart';
 import 'package:reclash/subscriptions/metadata/provider_config_store.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
@@ -31,6 +32,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/doctor/account/fetch.dart';
 import 'package:reclash/features/doctor/recorder/provider.dart';
 import 'package:reclash/features/doctor/snapshot.dart' show ProfileUpdateFact;
+import 'package:reclash/features/proxy_chains/provider_chains.dart';
 import 'package:reclash/features/proxy_chains/reports.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';

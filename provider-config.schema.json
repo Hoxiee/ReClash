@@ -511,6 +511,81 @@
         }
       }
     },
+    "chains": {
+      "type": "array",
+      "maxItems": 16,
+      "description": "Routes through two or three of the subscription's own nodes or groups.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "hops"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "The chain's group name in the running config; unique within the section."
+          },
+          "hops": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Names of nodes or groups of the subscription, entry first."
+          },
+          "target-group": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Group the chain is offered in; the main group without it."
+          },
+          "offered": {
+            "type": "boolean",
+            "description": "False keeps the chain out of every group."
+          },
+          "fingerprints": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "type",
+                    "server",
+                    "port"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "server": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "port": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65535
+                    }
+                  }
+                }
+              ]
+            },
+            "description": "One entry per hop, null where the hop has none; a renamed hop follows its only match."
+          }
+        }
+      }
+    },
     "policy": {
       "type": "object",
       "additionalProperties": false,

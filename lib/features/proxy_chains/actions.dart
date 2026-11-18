@@ -6,6 +6,7 @@ import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/subscriptions/metadata/provider_chains.dart';
 
 import 'providers.dart';
 import 'reports.dart';
@@ -64,8 +65,28 @@ class ProxyChainsAction extends Notifier<void> {
     await _apply(chain.profileId);
   }
 
-  Future<ProxyChain> setEnabled(ProxyChain chain, bool enabled) =>
-      _save(chain.copyWith(enabled: enabled));
+  Future<ProxyChain> setEnabled(ProxyChain chain, bool enabled) {
+    if (!isProviderChainId(chain.id)) {
+      return _save(chain.copyWith(enabled: enabled));
+    }
+    ref
+        .read(providerChainsOffProvider.notifier)
+        .set(providerChainKey(chain.profileId, chain.name), off: !enabled);
+    if (_isCurrent(chain.profileId)) {
+      ref.read(setupActionProvider.notifier).applyProfileDebounce();
+    }
+    return Future.value(chain.copyWith(enabled: enabled));
+  }
+
+  /// The user's own, editable chain over a provider chain's hops, off until
+  /// the user turns it on.
+  Future<ProxyChain> copyProviderChain(ProxyChain chain) => create(
+    profileId: chain.profileId,
+    hops: chain.hops,
+    enabled: false,
+    offered: chain.offered,
+    targetGroup: chain.targetGroup,
+  );
 
   Future<ProxyChain> setOffered(ProxyChain chain, bool offered) =>
       _save(chain.copyWith(offered: offered));

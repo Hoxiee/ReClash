@@ -108,5 +108,7 @@
   "chainsSitesSee": "Saýtlar {country} görýär",
   "powerHintBrokenChain": "Ähli trafigiň geçýän zynjyry döwüldi",
   "chainsSimilarEntry": "Meňzeş girişler",
-  "chainsSimilarExit": "Meňzeş çykyşlar"
+  "chainsSimilarExit": "Meňzeş çykyşlar",
+  "chainsProviderSection": "Üpjün edijiňizden",
+  "chainsProviderManaged": "«{name}» üpjün edijiňizden gelýär we üpjün ediji ony täzelände çalyşylýar. Üýtgetmek üçin öz nusgaňyzy döretmek isleýärsiňizmi?"
 }

@@ -5,7 +5,9 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/subscriptions/metadata/provider_chains.dart';
 
+import 'provider_chains.dart';
 import 'reports.dart';
 
 /// Chains of a profile in `sortIndex` order, live from the database.
@@ -21,6 +23,55 @@ final currentProfileChainsProvider =
       return ref.watch(profileChainsProvider(profileId));
     });
 
+final providerChainsOffProvider =
+    NotifierProvider<ProviderChainsOff, Set<String>>(ProviderChainsOff.new);
+
+class ProviderChainsOff extends Notifier<Set<String>> {
+  @override
+  Set<String> build() {
+    unawaited(
+      preferences.getProviderChainsOff().then((stored) {
+        if (ref.mounted) state = {...stored, ...state};
+      }),
+    );
+    return const {};
+  }
+
+  void set(String key, {required bool off}) {
+    if (state.contains(key) == off) return;
+    state = off ? {...state, key} : ({...state}..remove(key));
+    unawaited(preferences.saveProviderChainsOff(state));
+  }
+}
+
+/// The chains the current profile's provider offers, in the manifest's order.
+/// Their ids are negative, so they never meet a stored chain's.
+final currentProviderChainsProvider = Provider.autoDispose<List<ProxyChain>>((
+  ref,
+) {
+  final profileId = ref.watch(currentProfileIdProvider);
+  if (profileId == null) return const [];
+  final provided = ref.watch(
+    providerHintsProvider.select((hints) => hints?.chains ?? const []),
+  );
+  final off = ref.watch(providerChainsOffProvider);
+  return [
+    for (final (index, chain) in provided.indexed)
+      ProxyChain(
+        id: providerChainId(index),
+        profileId: profileId,
+        name: chain.name,
+        hops: chain.hops,
+        nameAuto: false,
+        enabled: !off.contains(providerChainKey(profileId, chain.name)),
+        offered: chain.offered,
+        targetGroup: chain.targetGroup,
+        fingerprints: chain.hopFingerprints,
+        sortIndex: index,
+      ),
+  ];
+});
+
 /// Reports of the current profile's chains by chain id; a chain without one
 /// is disabled or was saved after the last apply.
 final currentChainReportsProvider = Provider.autoDispose<Map<int, ChainReport>>(
@@ -28,7 +79,13 @@ final currentChainReportsProvider = Provider.autoDispose<Map<int, ChainReport>>(
     final reports = ref.watch(chainReportsProvider) ?? const {};
     final chains = ref.watch(currentProfileChainsProvider).value;
     if (chains == null || reports.isEmpty) return const {};
-    return {for (final chain in chains) chain.id: ?reports[chain.id]};
+    return {
+      for (final chain in [
+        ...chains,
+        ...ref.watch(currentProviderChainsProvider),
+      ])
+        chain.id: ?reports[chain.id],
+    };
   },
 );
 

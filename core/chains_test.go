@@ -188,6 +188,41 @@ func TestMaterializeChainsReportsEachIssue(t *testing.T) {
 	}
 }
 
+func TestMaterializeChainsHealsAMissingHopOnlyOnAUniqueFingerprint(t *testing.T) {
+	renamed := &ChainFingerprint{Type: "ss", Server: "10.0.1.1", Port: 8388}
+	elsewhere := &ChainFingerprint{Type: "ss", Server: "10.9.9.9", Port: 8388}
+	spec := func(heal bool, fingerprint *ChainFingerprint) ChainSpec {
+		chain := chainSpec("c", "entry", "gone")
+		chain.Fingerprints = []*ChainFingerprint{nil, fingerprint}
+		chain.Heal = heal
+		return chain
+	}
+	tests := []struct {
+		name   string
+		spec   ChainSpec
+		status string
+		codes  []string
+	}{
+		{"healed", spec(true, renamed), chainStatusOK, []string{}},
+		{"not asked to heal", spec(false, renamed), chainStatusBroken, []string{"1:missingHop"}},
+		{"no match", spec(true, elsewhere), chainStatusBroken, []string{"1:missingHop"}},
+		{"no fingerprint", spec(true, nil), chainStatusBroken, []string{"1:missingHop"}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := materializeTest(t, chainProfile, "", nil, test.spec)
+
+			report := result.reports[0]
+			if report.Status != test.status || !reflect.DeepEqual(issueCodes(report.Issues), test.codes) {
+				t.Errorf("report = %s %v, want %s %v", report.Status, issueCodes(report.Issues), test.status, test.codes)
+			}
+			if _, built := result.proxies["c ⟶ hk1"]; built != (test.status == chainStatusOK) {
+				t.Errorf("clone of hk1 built = %v", built)
+			}
+		})
+	}
+}
+
 func TestMaterializeChainsClonesANodeExitAndOffersItLast(t *testing.T) {
 	result := materializeTest(t, chainProfile, "", nil, chainSpec("c", "entry", "hk1"))
 

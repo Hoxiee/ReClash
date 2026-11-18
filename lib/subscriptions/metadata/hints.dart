@@ -3,6 +3,7 @@ import 'package:reclash/ui/color.dart';
 
 import 'metadata.dart';
 import 'provider_cards.dart';
+import 'provider_chains.dart';
 import 'provider_config.dart';
 import 'provider_power_labels.dart';
 import 'provider_seasonal.dart';
@@ -269,6 +270,8 @@ class ProviderHints {
         if (named.contains(restriction.name.toLowerCase())) restriction,
     };
   }
+
+  List<ProviderChain> get chains => config?.chains ?? const [];
 
   String? get serverGroup => metadata.text('presentation.serverGroup');
 

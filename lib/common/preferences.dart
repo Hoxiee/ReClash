@@ -95,6 +95,22 @@ class Preferences {
     ]);
   }
 
+  /// Provider chains the user turned off, as `<profile id>:<chain name>`.
+  Future<Set<String>> getProviderChainsOff() async {
+    try {
+      final store = await _store.value;
+      return (store?.getStringList('chains.providerOff') ?? const []).toSet();
+    } on Object {
+      return const {};
+    }
+  }
+
+  Future<void> saveProviderChainsOff(Set<String> keys) async {
+    final store = await _store.value;
+    if (_preventWrites) return;
+    await store?.setStringList('chains.providerOff', keys.toList());
+  }
+
   Future<List<String>> getSpeedTestHistory() async {
     final store = await _store.value;
     if (store == null) throw StateError('Preferences are unavailable');

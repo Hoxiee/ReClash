@@ -108,5 +108,7 @@
   "chainsSitesSee": "Saytlar {country}ni ko‘radi",
   "powerHintBrokenChain": "Hamma trafik o‘tadigan zanjir buzildi",
   "chainsSimilarEntry": "O‘xshash kirishlar",
-  "chainsSimilarExit": "O‘xshash chiqishlar"
+  "chainsSimilarExit": "O‘xshash chiqishlar",
+  "chainsProviderSection": "Provayderingizdan",
+  "chainsProviderManaged": "«{name}» provayderingizdan keladi va provayder uni yangilaganda almashtiriladi. O‘zgartirish uchun o‘z nusxangizni yaratasizmi?"
 }

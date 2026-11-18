@@ -108,5 +108,7 @@
   "chainsSitesSee": "Los sitios ven {country}",
   "powerHintBrokenChain": "Se rompió la cadena por la que va todo",
   "chainsSimilarEntry": "Entradas parecidas",
-  "chainsSimilarExit": "Salidas parecidas"
+  "chainsSimilarExit": "Salidas parecidas",
+  "chainsProviderSection": "De tu proveedor",
+  "chainsProviderManaged": "«{name}» viene de tu proveedor y se reemplaza cada vez que el proveedor la actualiza. ¿Crear una copia propia para modificarla?"
 }

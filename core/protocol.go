@@ -159,6 +159,9 @@ type ChainSpec struct {
 	Offered      bool                `json:"offered"`
 	TargetGroup  *string             `json:"target-group"`
 	Fingerprints []*ChainFingerprint `json:"fingerprints,omitempty"`
+	// Heal lets a missing hop take the one node its fingerprint matches, for
+	// chains nobody on the device can repair by hand.
+	Heal bool `json:"heal,omitempty"`
 }
 
 type ChainFingerprint struct {

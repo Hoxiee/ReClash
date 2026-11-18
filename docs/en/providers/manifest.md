@@ -150,6 +150,12 @@ routing:
   scenario: work
   bindings:
     Proxy: { profiles: [fast-de], default: fast-de }
+chains:
+  - name: Via Frankfurt
+    hops: [DE entry, NL exit]
+    fingerprints:
+      - { type: vless, server: de1.example.net, port: 443 }
+      - { type: vless, server: nl1.example.net, port: 443 }
 ```
 
 ## Validate in your editor
@@ -710,6 +716,34 @@ dart run tool/rcx.dart lint reclash.yaml
 
 The linter accepts a profile, a scenario, a document with `profiles` or `scenarios`, or a manifest with `routing`. In the app, the Core reports an invalid or missing provider profile in the group or scenario status.
 
+### Chains
+
+`chains` offers routes that send traffic through two or three of the subscription's own nodes or groups, entry first. The user sees them in Proxies → Chains under "From your provider", turns them on or off, and can copy one into a chain of their own to edit.
+
+```yaml
+chains:
+  - name: Via Frankfurt
+    hops: [DE entry, NL exit]
+    target-group: Proxy
+    fingerprints:
+      - { type: vless, server: de1.example.net, port: 443 }
+      - null
+```
+
+| Key | Value |
+| --- | --- |
+| `name` | Text, 64. The chain's group name in the running config; unique within the section. |
+| `hops` | Two or three names of nodes or groups of the subscription, entry first. |
+| `target-group` | Group the chain is offered in. Without it, the main group ([`server-group`](#provider)). |
+| `offered` | `false` keeps the chain out of every group, for routing rules only. Default `true`. |
+| `fingerprints` | One entry per hop: `{type, server, port}`, or `null` for a hop without one. |
+
+A fingerprint names the node a hop stands for. When the subscription renames that node, the chain follows it to the one node that has the same `type`, `server` and `port`; with none or several, the chain stays broken until the manifest is fixed. Without `fingerprints`, a renamed hop breaks the chain.
+
+- At most 16 chains. An invalid chain is skipped alone with a warning, and so is a repeated name.
+- A chain can only use what the subscription holds, so it adds no destination of its own.
+- A user's own chain with the same name wins; the provider's chain is then reported as a name clash.
+
 ## Images
 
 - `image` and `image-dark` are `https` only: PNG, JPEG or WebP, at most 2 MiB. SVG is not supported.
@@ -736,7 +770,7 @@ The client picks the logo on the profile's card once, when the profile is added,
 
 ## Boundaries
 
-- A provider can set only the settings on this page, the [update interval](headers.md#update-interval), and the routing offers in [Routing](#routing).
+- A provider can set only the settings on this page, the [update interval](headers.md#update-interval), the routing offers in [Routing](#routing) and the routes in [Chains](#chains).
 - Nothing in the manifest triggers reports, telemetry or uploads on its own.
 - `provider.hide-url` masks the URL; it does not protect it.
 - Package exclusions do not cover the same service opened in a browser.
