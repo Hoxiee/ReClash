@@ -822,11 +822,7 @@
   "rcxNewScenario": "New scenario",
   "rcxOnThisNetwork": "On this network",
   "rcxOwnProfile": "As set on the group",
-  "rcxProfileProgramHint": "The group picks a server with this behaviour among the servers the pool keeps.",
-  "rcxProgramAction": "Action",
-  "rcxProgramFixed": "Hand to one member",
   "rcxProgramMember": "Member",
-  "rcxProgramPick": "Pick a server",
   "rcxReasonFixed": "The scenario holds {node}",
   "@rcxReasonFixed": {
     "placeholders": {
@@ -869,10 +865,8 @@
     }
   },
   "rcxScenarioGroups": "Groups",
-  "rcxScenarioGroupsHint": "Everything else is the group the final rule sends traffic to; Every group covers the select groups not named here.",
   "rcxScenarioKindsHint": "Recognize networks by direct diagnostics, then change the mode and groups on each.",
   "rcxScenarioMode": "Connection mode",
-  "rcxScenarioOff": "Off",
   "rcxScenarios": "Scenarios",
   "rcxScenariosHint": "A scenario drives the whole connection. Tap one to run it; the pencil edits yours, or a copy of any other.",
   "rcxSmartGroups": "Groups",
