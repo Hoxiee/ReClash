@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "et {count} de plus",
   "siteLockExitsSearch": "Pays ou nom",
   "siteLockStillBlockedTitle": "Les sites restent bloqués",
-  "siteLockStillBlockedBody": "Le pare-feu du système bloque encore les sites épinglés hors du tunnel. ReClash le lèvera dès que le Helper répondra."
+  "siteLockStillBlockedBody": "Le pare-feu du système bloque encore les sites épinglés hors du tunnel. ReClash le lèvera dès que le Helper répondra.",
+  "siteLockAllowBypassDesc": "Tant que l’épinglage des sites est actif, les apps ne peuvent pas contourner le VPN, quel que soit ce réglage.",
+  "siteLockExcludedAppsTitle": "Certaines apps contournent l’épinglage",
+  "siteLockExcludedAppsBody": "{count, plural, one{{count} app est exclue du VPN et atteint les sites épinglés sans l’épinglage.} other{{count} apps sont exclues du VPN et atteignent les sites épinglés sans l’épinglage.}}",
+  "siteLockSelectedAppsBody": "Le VPN ne couvre que les apps sélectionnées dans le contrôle d’accès ; toutes les autres apps atteignent donc les sites épinglés sans l’épinglage.",
+  "siteLockKillSwitchDesc": "Bloquer les connexions sans VPN arrête tout le trafic quand le VPN est désactivé, pas seulement celui des sites épinglés. Les apps exclues du VPN peuvent perdre l’accès au réseau sous ce réglage."
 }

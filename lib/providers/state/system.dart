@@ -284,8 +284,10 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
   final safeMode = ref.watch(safeModeProvider);
   final routeAddress = ref.watch(vpnRouteAddressProvider.future);
   final providerApps = ref.watch(providerAppsProvider.future);
+  final siteLocked = ref.watch(siteLockActiveProvider);
+  final siteLockRoutes = ref.watch(siteLockRoutesProvider.future);
   final tun = clashConfig.tun;
-  return VpnOptions(
+  final options = VpnOptions(
     enable: vpnSetting.enable && !safeMode,
     stack: tun.stack.name,
     // VpnService.setHttpProxy cannot carry credentials, so an authenticated
@@ -316,6 +318,7 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
     onDemandStrict: vpnSetting.onDemandStrict,
     onDemandNetworks: ref.watch(excludeSSIDsProvider),
   );
+  return siteLocked ? options.underSiteLock(await siteLockRoutes) : options;
 }
 
 @riverpod

@@ -13,6 +13,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/features/doctor/sensors/device.dart';
 import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/site_lock.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/views/config/tun.dart';
@@ -288,8 +289,22 @@ class BlockBrowserDohItem extends ConsumerWidget {
   }
 }
 
-class KillSwitchItem extends ConsumerWidget {
+class KillSwitchItem extends StatelessWidget {
   const KillSwitchItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingTarget(
+      spec: networkToolSettings[21],
+      child: const KillSwitchTile(),
+    );
+  }
+}
+
+/// Android's always-on VPN lockdown for this app, opening the system VPN
+/// settings on tap.
+class KillSwitchTile extends ConsumerWidget {
+  const KillSwitchTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -297,21 +312,18 @@ class KillSwitchItem extends ConsumerWidget {
     final state = ref.watch(
       deviceDoctorStateProvider.select((state) => state.value?.killSwitch),
     );
-    return SettingTarget(
-      spec: networkToolSettings[21],
-      child: ListItem(
-        title: Text(networkToolSettings[21].title(l)),
-        trailing: switch (state) {
-          KillSwitchState.on => Text(l.killSwitchOn),
-          KillSwitchState.alwaysOn => Text(l.killSwitchAlwaysOn),
-          KillSwitchState.off => Text(l.killSwitchOff),
-          null => null,
-        },
-        onTap: () {
-          final opened = doctorPlugin?.openSettings(DoctorSettings.vpn);
-          if (opened != null) unawaited(opened);
-        },
-      ),
+    return ListItem(
+      title: Text(l.killSwitch),
+      trailing: switch (state) {
+        KillSwitchState.on => Text(l.killSwitchOn),
+        KillSwitchState.alwaysOn => Text(l.killSwitchAlwaysOn),
+        KillSwitchState.off => Text(l.killSwitchOff),
+        null => null,
+      },
+      onTap: () {
+        final opened = doctorPlugin?.openSettings(DoctorSettings.vpn);
+        if (opened != null) unawaited(opened);
+      },
     );
   }
 }
@@ -612,6 +624,7 @@ class VpnSections extends ConsumerWidget {
     final authenticationEnable = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
+    final siteLocked = ref.watch(siteLockActiveProvider);
     return Column(
       children: [
         generateSection(
@@ -633,6 +646,7 @@ class VpnSections extends ConsumerWidget {
             if (authenticationEnable)
               appLocalizations.authenticationSystemProxyDesc,
             appLocalizations.bypassDomainDesc,
+            if (siteLocked) appLocalizations.siteLockAllowBypassDesc,
             appLocalizations.ipv6InboundDesc,
           ].join('\n'),
         ),

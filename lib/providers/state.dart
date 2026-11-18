@@ -30,6 +30,7 @@ import 'core.dart';
 import 'database.dart';
 import 'provider_settings.dart';
 import 'routing.dart';
+import 'site_lock.dart';
 import 'web_dashboard.dart';
 
 part 'generated/state.g.dart';

@@ -88,5 +88,17 @@
   },
   "siteLockExitsSearch": "Country or name",
   "siteLockStillBlockedTitle": "Sites are still blocked",
-  "siteLockStillBlockedBody": "The system firewall still blocks the locked sites off the tunnel. ReClash lifts it as soon as the Helper responds."
+  "siteLockStillBlockedBody": "The system firewall still blocks the locked sites off the tunnel. ReClash lifts it as soon as the Helper responds.",
+  "siteLockAllowBypassDesc": "While a site lock is on, apps cannot bypass the VPN, whatever this setting says.",
+  "siteLockExcludedAppsTitle": "Some apps bypass the lock",
+  "siteLockExcludedAppsBody": "{count, plural, one{{count} app is excluded from the VPN and reaches locked sites without the lock.} other{{count} apps are excluded from the VPN and reach locked sites without the lock.}}",
+  "@siteLockExcludedAppsBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "siteLockSelectedAppsBody": "The VPN covers only the apps selected in access control, so every other app reaches locked sites without the lock.",
+  "siteLockKillSwitchDesc": "Block connections without VPN stops all traffic while the VPN is off, not only locked sites. Apps excluded from the VPN may lose network access under it."
 }

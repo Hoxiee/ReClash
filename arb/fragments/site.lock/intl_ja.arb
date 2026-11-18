@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "ほか{count}件",
   "siteLockExitsSearch": "国または名前",
   "siteLockStillBlockedTitle": "サイトはまだブロックされています",
-  "siteLockStillBlockedBody": "システムのファイアウォールが、トンネル外で固定されたサイトをまだブロックしています。Helper が応答すると ReClash が解除します。"
+  "siteLockStillBlockedBody": "システムのファイアウォールが、トンネル外で固定されたサイトをまだブロックしています。Helper が応答すると ReClash が解除します。",
+  "siteLockAllowBypassDesc": "サイト固定が有効な間は、この設定に関係なくアプリはVPNをバイパスできません。",
+  "siteLockExcludedAppsTitle": "一部のアプリは固定を回避します",
+  "siteLockExcludedAppsBody": "{count, plural, other{{count}個のアプリはVPNから除外されており、固定なしで固定対象のサイトに到達します。}}",
+  "siteLockSelectedAppsBody": "VPNが対象とするのはアクセス制御で選択したアプリのみのため、それ以外のアプリは固定なしで固定対象のサイトに到達します。",
+  "siteLockKillSwitchDesc": "「VPNなしの接続をブロック」は、VPNがオフの間はロックされたサイトだけでなくすべての通信を止めます。VPNから除外されたアプリは、この状態でネットワークに接続できなくなることがあります。"
 }

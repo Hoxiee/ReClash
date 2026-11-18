@@ -138,7 +138,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
           ref.read(siteLockHostStateProvider.notifier).set(status),
     );
     void sync() => policy.update(
-      locksEnabled: ref.read(siteLocksProvider).any((lock) => lock.enabled),
+      locksEnabled: ref.read(siteLockActiveProvider),
       coreConnected: ref.read(coreStatusProvider) == CoreStatus.connected,
     );
     ref.listenManual(siteLocksProvider, (_, _) => sync());

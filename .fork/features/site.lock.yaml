@@ -10,7 +10,8 @@ must:
   fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
   core-only-warning: Entries the host cannot mirror are reported as core-only rather than silently dropped.
-  untouched: Traffic that matches no lock is neither routed nor filtered differently, except that a domain lock over a profile without a sniffer turns sniffing on, so the profile's own domain rules also see sniffed names.
+  untouched: Traffic that matches no lock is neither routed nor filtered differently, except that a domain lock over a profile without a sniffer turns sniffing on, so the profile's own domain rules also see sniffed names, and on Android an enabled lock turns VPN bypass off for every app.
+  android-vpn: On Android an enabled lock turns VPN bypass off and routes the locked prefixes and fake-ip ranges into the TUN past a partial route list; Flutter computes the options, the service only applies them, and a running VPN changes them only through the restart notice.
 watch:
   - core/site_lock.go
   - core/sitelock/**
@@ -21,8 +22,9 @@ watch:
   - lib/core/desktop/site_lock_policy.dart
   - lib/views/site_lock.dart
   - lib/views/site_lock_editor.dart
+  - lib/providers/state/system.dart
 checks:
   site-lock-core: [before-rules, exits-by-definition, atomic-apply, core-only-warning, untouched]
   site-lock-host: [fail-closed-host, core-dns-exempt]
-  site-lock-app: [atomic-apply, fail-closed-host]
+  site-lock-app: [atomic-apply, fail-closed-host, android-vpn]
 drop: Upstream mihomo ships per-destination exit pinning with an OS-level kill switch.

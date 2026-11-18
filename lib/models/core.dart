@@ -124,6 +124,24 @@ extension VpnOptionsExt on VpnOptions {
         : access.rejectList.toSet().containsAll(remaining);
   }
 
+  /// The apps the tunnel leaves out, as the service's effectiveAccessControl
+  /// builds them; null when it covers only the selected apps.
+  Set<String>? get excludedApps {
+    final access = accessControlProps;
+    if (!access.enable) return requiredExcludedApps.toSet();
+    if (access.mode == AccessControlMode.acceptSelected) return null;
+    return {...access.rejectList, ...requiredExcludedApps};
+  }
+
+  /// No app may bypass the tunnel, and [lockRoutes] reach it past a partial
+  /// route list; an empty list already routes everything.
+  VpnOptions underSiteLock(List<String> lockRoutes) => copyWith(
+    allowBypass: false,
+    routeAddress: routeAddress.isEmpty || lockRoutes.isEmpty
+        ? routeAddress
+        : {...routeAddress, ...lockRoutes}.toList(),
+  );
+
   /// Settings that require rebuilding the Android VPN, excluding live policy.
   VpnOptions get effective {
     if (!enable) {

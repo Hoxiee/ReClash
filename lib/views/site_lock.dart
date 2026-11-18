@@ -10,6 +10,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/chains/issues.dart';
+import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/site_lock_editor.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -18,10 +19,13 @@ const _maxLocks = 32;
 const _refreshInterval = Duration(seconds: 10);
 
 class SiteLockView extends ConsumerStatefulWidget {
-  const SiteLockView({super.key, this.hostFirewall});
+  const SiteLockView({super.key, this.hostFirewall, this.androidVpn});
 
   /// Whether the host firewall status applies; the current platform when null.
   final bool? hostFirewall;
+
+  /// Whether the Android VPN rows apply; the current platform when null.
+  final bool? androidVpn;
 
   @override
   ConsumerState<SiteLockView> createState() => _SiteLockViewState();
@@ -182,6 +186,9 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
         if (!tunEnabled)
           card(IssueTone.warning, l.siteLockTunOffTitle, l.siteLockTunOffBody),
       ],
+      if ((widget.androidVpn ?? system.isAndroid) && anyEnabled)
+        if (_bypassBody(l) case final body?)
+          card(IssueTone.warning, l.siteLockExcludedAppsTitle, body),
       if (host &&
           !anyEnabled &&
           (hostStatus == SiteLockHostStatus.helperUnavailable ||
@@ -202,6 +209,20 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
             _ => const SizedBox.shrink(),
           },
     ];
+  }
+
+  String? _bypassBody(AppLocalizations l) {
+    final options = ref.watch(
+      vpnOptionsProvider.select((state) => state.value),
+    );
+    if (options == null || !options.enable) return null;
+    return switch (options.excludedApps) {
+      null => l.siteLockSelectedAppsBody,
+      final apps when apps.isNotEmpty => l.siteLockExcludedAppsBody(
+        apps.length,
+      ),
+      _ => null,
+    };
   }
 
   @override
@@ -247,6 +268,11 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
                   items: [for (final lock in locks) _row(l, lock, report)],
                   footer: l.siteLockFooter,
                 ),
+                if (widget.androidVpn ?? system.isAndroid)
+                  generateSection(
+                    items: const [KillSwitchTile()],
+                    footer: l.siteLockKillSwitchDesc,
+                  ),
               ],
             ),
           ),

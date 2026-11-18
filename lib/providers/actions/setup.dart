@@ -1262,6 +1262,7 @@ class SetupAction extends _$SetupAction {
       }
       await _refreshChainReports();
       await ref.read(siteLockReportStateProvider.notifier).refresh();
+      if (system.isAndroid) ref.invalidate(siteLockRoutesProvider);
       await onUpdated?.call();
     }
 

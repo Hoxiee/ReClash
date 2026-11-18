@@ -11,6 +11,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/notification.dart';
+import 'package:reclash/providers/site_lock.dart';
 import '../helpers/provider_presentation.dart';
 import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/ui/color.dart';
@@ -1294,6 +1295,107 @@ void main() {
     expect(zh.stopTip, isNot(en.stopTip));
     expect(zh.startTip, isNot(en.startTip));
   });
+  group('site lock VPN options', () {
+    const lockRoutes = ['198.18.0.0/16', '2001:db8::/32'];
+    const lock = SiteLock(id: 'news', match: ['news.example']);
+
+    ProviderContainer scopedContainer({List<String> routes = lockRoutes}) {
+      final scoped = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          siteLockRoutesProvider.overrideWith(
+            () => _FixedSiteLockRoutes(routes),
+          ),
+        ],
+      );
+      scoped.listen(siteLocksProvider, (_, _) {});
+      addTearDown(scoped.dispose);
+      return scoped;
+    }
+
+    test(
+      'an enabled site lock turns app bypass off in the VPN options',
+      () async {
+        final scoped = scopedContainer();
+        scoped.read(siteLocksProvider.notifier).value = const [lock];
+        scoped
+            .read(vpnSettingProvider.notifier)
+            .update((state) => state.copyWith(allowBypass: true));
+
+        final vpn = await scoped.read(vpnOptionsProvider.future);
+        expect(vpn.allowBypass, isFalse);
+        expect(scoped.read(vpnSettingProvider).allowBypass, isTrue);
+      },
+    );
+
+    test('disabled site locks keep app bypass and the routes', () async {
+      final scoped = scopedContainer();
+      scoped.read(siteLocksProvider.notifier).value = const [
+        SiteLock(id: 'off', enabled: false, match: ['off.example']),
+      ];
+      scoped
+          .read(vpnSettingProvider.notifier)
+          .update((state) => state.copyWith(allowBypass: true));
+      scoped
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              tun: state.tun.copyWith(routeAddress: const ['10.0.0.0/8']),
+            ),
+          );
+
+      final routes = await scoped.read(vpnRouteAddressProvider.future);
+      final vpn = await scoped.read(vpnOptionsProvider.future);
+      expect(vpn.allowBypass, isTrue);
+      expect(vpn.routeAddress, routes);
+      expect(vpn.routeAddress, isNot(contains(lockRoutes.first)));
+    });
+
+    test(
+      'an enabled site lock appends its routes after the VPN routes',
+      () async {
+        final scoped = scopedContainer();
+        scoped.read(siteLocksProvider.notifier).value = const [lock];
+        scoped
+            .read(networkSettingProvider.notifier)
+            .update((state) => state.copyWith(bypassPrivateRoute: true));
+        scoped
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                tun: state.tun.copyWith(routeAddress: const ['10.0.0.0/8']),
+              ),
+            );
+
+        final routes = await scoped.read(vpnRouteAddressProvider.future);
+        final vpn = await scoped.read(vpnOptionsProvider.future);
+        expect(vpn.routeAddress, [...routes, ...lockRoutes]);
+      },
+    );
+
+    test(
+      'an enabled site lock keeps an empty route list routing everything',
+      () async {
+        final scoped = scopedContainer();
+        scoped.read(siteLocksProvider.notifier).value = const [lock];
+        scoped
+            .read(networkSettingProvider.notifier)
+            .update((state) => state.copyWith(bypassPrivateRoute: false));
+
+        final vpn = await scoped.read(vpnOptionsProvider.future);
+        expect(vpn.routeAddress, isEmpty);
+      },
+    );
+  });
+}
+
+class _FixedSiteLockRoutes extends SiteLockRoutes {
+  _FixedSiteLockRoutes(this._routes);
+
+  final List<String> _routes;
+
+  @override
+  Future<List<String>> build() async => _routes;
 }
 
 TestProfiles _profiles(ProviderContainer container) {

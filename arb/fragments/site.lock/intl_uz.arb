@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "va yana {count}",
   "siteLockExitsSearch": "Mamlakat yoki nom",
   "siteLockStillBlockedTitle": "Saytlar hali ham bloklangan",
-  "siteLockStillBlockedBody": "Tizim brandmaueri mahkamlangan saytlarni tunneldan tashqarida hali ham bloklamoqda. Helper javob berishi bilan ReClash blokni olib tashlaydi."
+  "siteLockStillBlockedBody": "Tizim brandmaueri mahkamlangan saytlarni tunneldan tashqarida hali ham bloklamoqda. Helper javob berishi bilan ReClash blokni olib tashlaydi.",
+  "siteLockAllowBypassDesc": "Saytlarni mahkamlash yoniq paytda, bu sozlamadan qat’i nazar, ilovalar VPN’ni chetlab o‘ta olmaydi.",
+  "siteLockExcludedAppsTitle": "Ba’zi ilovalar mahkamlashni chetlab o‘tadi",
+  "siteLockExcludedAppsBody": "{count, plural, one{{count} ta ilova VPN’dan chiqarilgan va mahkamlangan saytlarga mahkamlashsiz yetadi.} other{{count} ta ilova VPN’dan chiqarilgan va mahkamlangan saytlarga mahkamlashsiz yetadi.}}",
+  "siteLockSelectedAppsBody": "VPN faqat kirish nazoratida tanlangan ilovalarni qamraydi, shu sababli boshqa barcha ilovalar mahkamlashsiz mahkamlangan saytlarga yetadi.",
+  "siteLockKillSwitchDesc": "«VPN’siz ulanishlarni bloklash» VPN o‘chiq turganda faqat mahkamlangan saytlarnigina emas, barcha trafikni to‘xtatadi. VPN’dan chiqarilgan ilovalar bu holatda tarmoqqa kirish imkonini yo‘qotishi mumkin."
 }

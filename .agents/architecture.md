@@ -1988,6 +1988,15 @@ listener for good.
 Browser DNS-over-HTTPS and DoT bypass the DNS filter after a Core crash; that is a documented limitation, not handled.
 Windows and macOS have the Core layer only.
 
+Android has no host layer; Flutter hardens the VPN while `siteLockActiveProvider` (any enabled lock) is true.
+`vpnOptionsProvider` applies `VpnOptions.underSiteLock`: `allowBypass` off whatever `VpnProps` says, and the
+prefixes of `siteLockRoutesProvider` added after `vpnRouteAddressProvider`'s subtraction unless the list routes
+everything. Those prefixes are the `addresses` of the same `siteLockPolicy` answer the Linux host gets, so the fake-ip
+ranges arrive only with name entries; the provider refetches on a report change, a Core connection and every applied
+profile, and keeps its last list while the Core cannot answer. The service only applies the options, and a change while
+the VPN runs takes the restart notice of `VpnManager`. The page warns about apps `excludedApps` leaves outside the
+tunnel and shows the system kill switch from the doctor state channel (`DeviceDoctorState.killSwitch`).
+
 ## Desktop Privileged Core
 
 `DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without

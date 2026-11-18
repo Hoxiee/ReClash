@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "외 {count}개",
   "siteLockExitsSearch": "국가 또는 이름",
   "siteLockStillBlockedTitle": "사이트가 아직 차단되어 있습니다",
-  "siteLockStillBlockedBody": "시스템 방화벽이 터널 밖에서 고정된 사이트를 아직 차단하고 있습니다. Helper가 응답하면 ReClash가 해제합니다."
+  "siteLockStillBlockedBody": "시스템 방화벽이 터널 밖에서 고정된 사이트를 아직 차단하고 있습니다. Helper가 응답하면 ReClash가 해제합니다.",
+  "siteLockAllowBypassDesc": "사이트 고정이 켜져 있는 동안에는 이 설정과 관계없이 앱이 VPN을 우회할 수 없습니다.",
+  "siteLockExcludedAppsTitle": "일부 앱은 고정을 우회합니다",
+  "siteLockExcludedAppsBody": "{count, plural, other{{count}개의 앱이 VPN에서 제외되어 고정 없이 고정된 사이트에 접근합니다.}}",
+  "siteLockSelectedAppsBody": "VPN은 접근 제어에서 선택한 앱만 거치므로, 나머지 모든 앱은 고정 없이 고정된 사이트에 접근합니다.",
+  "siteLockKillSwitchDesc": "'VPN 없는 연결 차단'은 VPN이 꺼져 있는 동안 고정된 사이트뿐 아니라 모든 트래픽을 차단합니다. VPN에서 제외된 앱은 이 상태에서 네트워크 접근이 끊길 수 있습니다."
 }

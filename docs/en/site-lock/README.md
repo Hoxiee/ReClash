@@ -49,9 +49,21 @@ On Linux with TUN enabled and the Helper installed, the Helper also keeps the lo
 
 Only a query for a locked name over IPv4 and UDP goes into the tunnel. A query the Helper cannot read, such as a fragmented one, and a locked name asked over IPv6 or TCP, are dropped without an answer, so an application waits for its own timeout.
 
+## On Android
+
+Android has no firewall layer for the lock, but while a lock is on ReClash closes the gaps its own VPN would open:
+
+- **No bypass**: apps cannot bypass the VPN, whatever **Tools → Network → Allow apps to bypass VPN** says. The setting keeps its value and applies again once every lock is off.
+- **Routes**: the locked addresses and the profile's fake-ip ranges always go into the tunnel, even when **Route addresses** list only some networks or private networks are bypassed. With the default route list everything goes into the tunnel anyway.
+- **Excluded apps**: apps that **Access control** leaves out of the VPN, or every app outside the list in "only selected apps" mode, reach locked sites without the lock. The page warns about them.
+- **Kill switch**: the page shows whether Android's **Always-on VPN** with **Block connections without VPN** is on for ReClash and opens the system VPN settings. With it on, Android blocks traffic while the VPN is off, so locked sites stay unreachable when ReClash stops, but so does everything else, and apps excluded from the VPN may lose network access.
+
+These options apply when the VPN starts. Turning a lock on or off, or changing its addresses, while the VPN runs offers a VPN restart, as other VPN settings do.
+
 ## Limitations
 
-- **Windows, macOS and Android** have the core layer only: once the core stops, nothing blocks the locked sites.
+- **Windows and macOS** have the core layer only: once the core stops, nothing blocks the locked sites.
+- **Android** adds only the VPN measures above: once the core stops, nothing but the system kill switch blocks the locked sites.
 - **TUN off**: the lock covers only traffic that goes through the core, and the system firewall blocks nothing.
 - **Sniffing**: domain entries match a connection by its name, and one whose name the core did not resolve itself, such as a browser using its own DNS, arrives as a bare address. While a lock with domain entries is on, the core therefore reads the name from TLS, HTTP and QUIC on their usual ports even when the profile has no sniffer; a profile that sets up its own sniffer keeps it. The name only picks the rule, so the connection still goes to the same address, but domain rules of the profile can now also catch such connections.
 - **Encrypted Client Hello**: a browser that hides the site name with ECH, as Chrome and Firefox do for many Cloudflare sites, reveals only the provider's public name, so such a connection matches only address entries unless the core resolved the name itself.

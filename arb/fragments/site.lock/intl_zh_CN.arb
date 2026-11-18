@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "及另外 {count} 个",
   "siteLockExitsSearch": "国家或名称",
   "siteLockStillBlockedTitle": "站点仍被阻断",
-  "siteLockStillBlockedBody": "系统防火墙仍在隧道外阻断被锁定的站点。Helper 响应后，ReClash 会立即解除。"
+  "siteLockStillBlockedBody": "系统防火墙仍在隧道外阻断被锁定的站点。Helper 响应后，ReClash 会立即解除。",
+  "siteLockAllowBypassDesc": "站点锁定开启期间，无论此设置如何，应用都无法绕过 VPN。",
+  "siteLockExcludedAppsTitle": "部分应用会绕过锁定",
+  "siteLockExcludedAppsBody": "{count, plural, other{{count} 个应用已被排除在 VPN 之外，无需锁定即可访问被锁定的站点。}}",
+  "siteLockSelectedAppsBody": "VPN 只覆盖访问控制中选中的应用，因此其他所有应用都会在无锁定的情况下访问被锁定的站点。",
+  "siteLockKillSwitchDesc": "“屏蔽未使用 VPN 的连接”会在 VPN 关闭时阻止所有流量，而不只是被锁定站点的流量。被排除在 VPN 之外的应用在此设置下可能失去网络访问。"
 }

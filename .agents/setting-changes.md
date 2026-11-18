@@ -126,14 +126,18 @@ asks for nothing. The tap runs `SetupAction.restartVpn`: a stop, then a start, a
 | `enable`               | `VpnProps.enable`, off in safe mode                           | always                                 |
 | `stack`                | `Tun.stack`                                                   | with the VPN                           |
 | `ipv6`, `dnsHijacking` | `VpnProps`                                                    | with the VPN                           |
-| `allowBypass`          | `VpnProps`                                                    | with the VPN                           |
+| `allowBypass`          | `VpnProps`, off while a site lock is on                       | with the VPN                           |
 | `accessControlProps`   | `VpnProps.accessControlProps`                                 | `enable`, `mode` and that mode's list  |
 | `systemProxy`          | `VpnProps.systemProxy`, off under local auth or safe mode     | with the VPN                           |
 | `port`                 | `PatchClashConfig.mixedPort`                                  | with `systemProxy`                     |
 | `bypassDomain`         | `NetworkProps.bypassDomain`                                   | with `systemProxy`                     |
-| `routeAddress`         | `Tun.routeAddress` and `bypassPrivateRoute`                   | with the VPN                           |
+| `routeAddress`         | `Tun.routeAddress`, `bypassPrivateRoute`, site lock prefixes  | with the VPN                           |
 | `mtu`                  | `Tun.mtu`                                                     | with the VPN                           |
 | `congestionController` | `Tun`                                                         | with the VPN                           |
+
+A site lock is the one setting outside `VpnProps` that reaches these options: while any lock is on,
+`VpnOptions.underSiteLock` turns bypass off and adds `siteLockRoutesProvider`'s prefixes to a partial route list, so
+turning a lock on or off, or changing its addresses, under a running VPN takes the same restart notice.
 
 The service never reads the access list's sort and filter fields. `effective` resets them, along with every field
 the table does not mark as read, so changing them does not ask for a restart.

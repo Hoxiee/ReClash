@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "y {count} más",
   "siteLockExitsSearch": "País o nombre",
   "siteLockStillBlockedTitle": "Los sitios siguen bloqueados",
-  "siteLockStillBlockedBody": "El cortafuegos del sistema aún bloquea los sitios anclados fuera del túnel. ReClash lo levantará en cuanto Helper responda."
+  "siteLockStillBlockedBody": "El cortafuegos del sistema aún bloquea los sitios anclados fuera del túnel. ReClash lo levantará en cuanto Helper responda.",
+  "siteLockAllowBypassDesc": "Mientras el anclaje de sitios esté activo, las apps no pueden eludir la VPN, aunque este ajuste diga lo contrario.",
+  "siteLockExcludedAppsTitle": "Algunas apps eluden el anclaje",
+  "siteLockExcludedAppsBody": "{count, plural, one{{count} app está excluida de la VPN y llega a los sitios anclados sin el anclaje.} other{{count} apps están excluidas de la VPN y llegan a los sitios anclados sin el anclaje.}}",
+  "siteLockSelectedAppsBody": "La VPN cubre solo las apps seleccionadas en control de acceso, así que el resto de apps llega a los sitios anclados sin el anclaje.",
+  "siteLockKillSwitchDesc": "Bloquear conexiones sin VPN detiene todo el tráfico mientras la VPN está apagada, no solo el de los sitios anclados. Las apps excluidas de la VPN pueden perder el acceso a la red con esta opción."
 }

@@ -184,6 +184,88 @@ void main() {
     });
   });
 
+  group('VpnOptions under a site lock', () {
+    const base = VpnOptions(
+      enable: true,
+      port: 7890,
+      ipv6: false,
+      dnsHijacking: false,
+      accessControlProps: AccessControlProps(),
+      allowBypass: true,
+      systemProxy: false,
+      bypassDomain: [],
+      stack: 'mixed',
+      routeAddress: [],
+    );
+    const lockRoutes = ['198.18.0.0/16', '2001:db8::/32'];
+
+    test('underSiteLock turns app bypass off', () {
+      expect(base.underSiteLock(lockRoutes).allowBypass, isFalse);
+    });
+
+    test('underSiteLock appends lock routes after the original routes', () {
+      final locked = base
+          .copyWith(routeAddress: const ['10.0.0.0/8'])
+          .underSiteLock(lockRoutes);
+      expect(locked.routeAddress, [
+        '10.0.0.0/8',
+        '198.18.0.0/16',
+        '2001:db8::/32',
+      ]);
+    });
+
+    test('underSiteLock does not repeat a lock route already routed', () {
+      final locked = base
+          .copyWith(routeAddress: const ['10.0.0.0/8', '198.18.0.0/16'])
+          .underSiteLock(lockRoutes);
+      expect(locked.routeAddress, [
+        '10.0.0.0/8',
+        '198.18.0.0/16',
+        '2001:db8::/32',
+      ]);
+    });
+
+    test('underSiteLock keeps an empty route list routing everything', () {
+      expect(base.underSiteLock(lockRoutes).routeAddress, isEmpty);
+    });
+
+    test('underSiteLock without lock routes keeps the route list', () {
+      final routed = base.copyWith(routeAddress: const ['10.0.0.0/8']);
+      expect(routed.underSiteLock(const []).routeAddress, ['10.0.0.0/8']);
+    });
+
+    test('excludedApps without access control is the required list', () {
+      final options = base.copyWith(requiredExcludedApps: const ['core.app']);
+      expect(options.excludedApps, {'core.app'});
+    });
+
+    test(
+      'excludedApps in reject mode unites the rejected and required apps',
+      () {
+        final options = base.copyWith(
+          requiredExcludedApps: const ['core.app'],
+          accessControlProps: const AccessControlProps(
+            enable: true,
+            mode: AccessControlMode.rejectSelected,
+            rejectList: ['b.app'],
+          ),
+        );
+        expect(options.excludedApps, {'b.app', 'core.app'});
+      },
+    );
+
+    test('excludedApps in accept mode is null', () {
+      final options = base.copyWith(
+        accessControlProps: const AccessControlProps(
+          enable: true,
+          mode: AccessControlMode.acceptSelected,
+          acceptList: ['a.app'],
+        ),
+      );
+      expect(options.excludedApps, isNull);
+    });
+  });
+
   group('ChangeProxyParams', () {
     test('fromJson and toJson use snake-case', () {
       final json = {'group-name': 'Proxy', 'proxy-name': 'auto'};

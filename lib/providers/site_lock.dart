@@ -4,9 +4,11 @@ import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'app.dart';
+import 'config.dart';
 import 'core.dart';
 
 part 'generated/site_lock.g.dart';
@@ -59,6 +61,30 @@ class SiteLockReportState extends _$SiteLockReportState {
       );
       return null;
     }
+  }
+}
+
+/// Whether any site lock is on, the notion every lock-scoped policy follows.
+@Riverpod(keepAlive: true)
+bool siteLockActive(Ref ref) => ref.watch(
+  siteLocksProvider.select((locks) => locks.any((lock) => lock.enabled)),
+);
+
+/// The prefixes the Android TUN must always route while a lock is on: the
+/// Core's locked addresses plus the fake-ip ranges, the list the Linux host
+/// policy gets. A Core that cannot answer yet keeps the last list.
+@Riverpod(keepAlive: true)
+class SiteLockRoutes extends _$SiteLockRoutes {
+  @override
+  Future<List<String>> build() async {
+    if (!system.isAndroid || !ref.watch(siteLockActiveProvider)) {
+      return const [];
+    }
+    ref.watch(siteLockReportStateProvider);
+    final previous = state.value ?? const <String>[];
+    if (ref.watch(coreStatusProvider) != CoreStatus.connected) return previous;
+    final policy = await ref.read(coreHandlerProvider).siteLockPolicy();
+    return policy?.addresses ?? previous;
   }
 }
 

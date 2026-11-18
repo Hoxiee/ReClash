@@ -43,5 +43,10 @@
   "siteLockExitMoreNames": "we ýene {count}",
   "siteLockExitsSearch": "Ýurt ýa-da at",
   "siteLockStillBlockedTitle": "Sahypalar henizem bloklanan",
-  "siteLockStillBlockedBody": "Ulgam brandmaueri bekidilen sahypalary tuneliň daşynda henizem bloklaýar. Helper jogap berende ReClash ony aýyrar."
+  "siteLockStillBlockedBody": "Ulgam brandmaueri bekidilen sahypalary tuneliň daşynda henizem bloklaýar. Helper jogap berende ReClash ony aýyrar.",
+  "siteLockAllowBypassDesc": "Sahypa bekitmesi açykdygyça, bu sazlama nähili bolsa-da, programmalar VPN-iň daşyndan geçip bilmez.",
+  "siteLockExcludedAppsTitle": "Käbir programmalar bekitmäni geçýär",
+  "siteLockExcludedAppsBody": "{count, plural, one{{count} programma VPN-den çykarylan we bekitmeli sahypalara bekitmesiz ýetýär.} other{{count} programma VPN-den çykarylan we bekitmeli sahypalara bekitmesiz ýetýär.}}",
+  "siteLockSelectedAppsBody": "VPN diňe elýetmäge gözegçilikde saýlanan programmalary öz içine alýar, şonuň üçin beýleki ähli programmalar bekitmesiz bekitmeli sahypalara ýetýär.",
+  "siteLockKillSwitchDesc": "«VPN-siz birikmeleri petle» VPN öçürilen wagty diňe bekitmeli sahypalary däl, ähli gatnawy togtadýar. VPN-den çykarylan programmalar bu ýagdaýda tor elýeterliligini ýitirip biler."
 }
