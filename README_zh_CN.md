@@ -4,18 +4,19 @@
 
 # ReClash
 
-基于 Clash Meta（mihomo）内核、能替你选择线路的多平台代理客户端。
-简单易用，开源无广告。
+**与互联网保持联系——也与提供它的人保持联系。**
 
-[English](README.md) · **简体中文** · [Русский](README_ru.md)
+基于 mihomo（Clash Meta）内核的代理客户端，支持 Android、Windows、macOS 和 Linux。
+免费、开源、无广告。
+
+[English](README.md) · [Русский](README_ru.md) · **简体中文**
 
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)
 [![License](https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square)](LICENSE)
 [![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ReClashApp)
 
-[下载](#下载) · [截图](#截图) · [自动路由](docs/zh-CN/auto-routing/README.md) · [更新日志](CHANGELOG.md) ·
-[从源码构建](#从源码构建)
+[网站](https://reclash.pages.dev) · [下载](#下载) · [文档](#文档) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
 
 </div>
 
@@ -29,46 +30,56 @@
 > [!NOTE]
 > ReClash 目前处于预览阶段。在 0.1 版本线稳定之前，版本以 `0.1.0-pre.N` 预发布的形式发布。
 
-## 功能
+## ReClash 替你做什么
 
-- **自动路由。** 智能代理组按照一份可读的策略选择服务器：哪些服务器可用、优先顺序如何、切换要多积极。
-  它会按网络分别衡量延迟、失败次数和出口国家，并说明当前服务器被选中的原因。场景可以按网络设置隧道模式，
-  并把指定的网站交给专门的代理组。[阅读指南](docs/zh-CN/auto-routing/README.md)。
-- **两种仪表盘。** 简洁版只有一个连接按钮，加上当前位置和订阅剩余用量；详细版由小组件组成：流量、出口 IP
-  及其质量、服务检测、连接等。
-- **读懂服务商的订阅。** 从 `Subscription-Userinfo` 读取流量与到期时间，支持配置标题、服务商公告，
-  以及服务商提供、经你同意才生效的路由配置与设置。Clash、INCY、Happ 链接、普通代理 URI
-  和多种配置格式都能直接导入。详见[服务商支持](docs/en/providers/README.md)。
-- **服务商的外观。** 订阅可以带来服务商的标志、主题色、壁纸、连接按钮和状态文字，让客户端看起来就像服务商自己的应用。
-- **收藏与链式代理。** 收藏的服务器排在代理组顶部；链式代理让流量经国内入口转到海外出口，并作为列表中的一个服务器出现。
-- **服务检测。** 查看 Google、YouTube、ChatGPT、Netflix 等服务能否通过当前线路打开，以及各自的延迟。
-- **按需连接。** 在信任的网络中暂停代理，在其他网络中自动恢复；暂停期间端口保持开放。
-- **mihomo（Clash Meta）内核**，支持规则分流、代理组、延迟测试、系统代理与 TUN 模式。
-- **配置**可通过链接或文件导入，内置编辑器、覆写脚本，以及自定义规则、代理和代理组。
-- **实时查看**连接、请求、DNS 查询和日志。
-- **Material You 设计，搭配 Apple 风格的交互**：动态取色、浅色与深色主题、连续曲率圆角、可在多个高度间吸附的面板，
+- **ChatGPT 不会看到错误的国家。** [站点锁定](docs/en/site-lock/README.md)只让指定网站经由你选的出口服务器发出，
+  否则不发出，无论模式和规则如何。其余流量照常。
+- **打不开？马上知道原因。** 服务检测显示 Google、YouTube、ChatGPT、Netflix 等服务能否通过当前线路打开以及延迟，
+  一眼看出是服务器的问题还是网站的问题。
+- **流量够不够，提前知道。** 剩余流量和到期时间一目了然，流量预测会告诉你能否撑到周期结束。配置像钱包里的卡片一样叠放。
+- **一个按钮，或者全部数据。** 简洁仪表盘只有连接按钮、当前位置和订阅剩余用量；详细仪表盘由小组件组成：
+  流量、出口 IP 及其质量、流量预测、测速、诊断、连接和服务检测。
+- **在家直连，出门走代理。** 在信任的网络中代理自动暂停，在其他网络中自动恢复。
+- **没有广告，没有付费功能。** 免费开源，无需账号或注册。
+
+## 致服务商
+
+你的标志、你的公告、你的用户——保持联系，而不是堆在工单里。订阅响应中的一个 `reclash-config` 头指向一份清单，
+客户端就会显示你的标志、主题色、壁纸和连接按钮，你的公告与维护通知、客服与续费链接，以及经用户同意的设置。
+不需要 SDK，也不需要自己开发应用。清单可以在[网站](https://reclash.pages.dev)上生成，详见
+[服务商接入指南](docs/en/providers/README.md)（英文）。
+
+## 更多
+
+- mihomo（Clash Meta）内核，支持规则分流、代理组、延迟测试、系统代理与 TUN 模式。
+- Clash、INCY、Happ 链接、普通代理 URI 和多种配置格式都能直接导入。
+- 收藏的服务器排在每个代理组顶部；链式代理经国内入口转到海外出口。
+- 配置可通过链接或文件导入，内置编辑器、覆写脚本，以及自定义规则、代理和代理组。
+- [自动路由](docs/zh-CN/auto-routing/README.md)（仍在完善中）：智能代理组按你设定的策略切换服务器，
+  场景可以按网络设置模式，并把指定的网站交给专门的代理组。
+- 实时查看连接、请求、DNS 查询和日志；已知的 DNS 泄漏途径均已封堵。
+- 应用内更新，并校验 SHA-256；服务商可以提供带签名的版本镜像。
+- 备份与恢复，支持 WebDAV 或本地文件。
+- Material You 设计，搭配 Apple 风格的交互：动态取色、浅色与深色主题、连续曲率圆角、可在多个高度间吸附的面板，
   以及从手机到桌面自适应的布局。
-- **备份与恢复**，支持 WebDAV 或本地文件。
-- **平台细节**：Android 上有快捷设置磁贴、分应用代理、可选的启动器图标和 Android TV 支持；桌面端有托盘菜单和全局快捷键。
+- Android：快捷设置磁贴、分应用代理、系统 kill switch、可选的启动器图标和 Android TV。桌面端：托盘菜单和全局快捷键。
 
 ## 截图
 
 <table>
   <tr>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上的收藏、链式代理与带延迟的服务器" src="snapshots/screens/mobile-proxies-light.webp"></picture></td>
-    <td width="25%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-light.webp"></picture></td>
+    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture><br><sub>一键连接</sub></td>
+    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-widgets-dark.webp"><img alt="手机上带服务商公告的小组件页" src="snapshots/screens/mobile-widgets-light.webp"></picture><br><sub>服务商公告</sub></td>
+    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-light.webp"></picture><br><sub>服务商的外观</sub></td>
+    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture><br><sub>卡包式订阅</sub></td>
+    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上的收藏、链式代理与带延迟的服务器" src="snapshots/screens/mobile-proxies-light.webp"></picture><br><sub>收藏与链式代理</sub></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-dashboard-dark.webp"><img alt="桌面端的简洁仪表盘" src="snapshots/screens/desktop-dashboard-light.webp"></picture></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端显示流量与到期时间的订阅" src="snapshots/screens/desktop-profiles-light.webp"></picture></td>
-  </tr>
-  <tr>
-    <td width="50%" colspan="2" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-light.webp"></picture></td>
+    <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-light.webp"></picture><br><sub>桌面端同样有服务商外观</sub></td>
+    <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端显示流量与到期时间的订阅" src="snapshots/screens/desktop-profiles-light.webp"></picture><br><sub>所有订阅一目了然</sub></td>
   </tr>
 </table>
 
@@ -76,14 +87,14 @@
 
 ## 下载
 
-在 [GitHub Releases](https://github.com/Hoxiee/ReClash/releases) 获取最新版本。每个版本都附带 `SHA256SUMS`
-文件，可用来校验下载的文件。
+在 [GitHub Releases](https://github.com/Hoxiee/ReClash/releases) 或[网站](https://reclash.pages.dev)获取最新版本。
+每个版本都附带 `SHA256SUMS` 文件，可用来校验下载的文件。
 
 | 平台 | 安装包 | 说明 |
 | --- | --- | --- |
 | Android 7 及以上 | `arm64-v8a`、`armeabi-v7a`、`x86_64` 的 APK | 大多数手机选 `arm64-v8a`。 |
 | Windows 10 及以上 | 安装程序（`-setup.exe`）或便携版 `.zip`，x64 与 ARM64 | 骁龙等 ARM 笔记本请选 ARM64。 |
-| macOS 12 及以上 | Apple 芯片（`arm64`）与 Intel（`amd64`）的 DMG | |
+| macOS 12 及以上 | Apple 芯片（`arm64`）与 Intel（`amd64`）的 DMG | 非 App Store 版本：首次请通过右键菜单 →「打开」启动。 |
 | Linux | x64 与 ARM64 的 `.deb`、`.rpm`、Arch `.pkg.tar.xz`；x64 的 AppImage | 见下方托盘说明。 |
 
 <p>
@@ -92,24 +103,22 @@
 
 ReClash 使用独立的包名和数据目录，可以与 FlClash 并存安装，互不影响。
 
-**Linux 托盘图标**
-
-`.deb` 安装包会自动安装所需依赖。使用 AppImage 或 `.rpm` 时，需要先安装 AyatanaAppIndicator 库，托盘图标才能显示：
+**Linux 托盘图标。** `.deb` 安装包会自动安装所需依赖。使用 AppImage 或 `.rpm` 时，需要先安装 AyatanaAppIndicator
+库，托盘图标才能显示：
 
 ```bash
 sudo apt-get install libayatana-appindicator3-1   # Debian 与 Ubuntu
 sudo dnf install libayatana-appindicator-gtk3     # Fedora
 ```
 
-**无人值守的桌面环境**
-
-ReClash 要在免责声明被接受后才会启动核心。在容器等无人点击的环境里，可在应用的环境变量中设置
+**无人值守的桌面环境。** ReClash 要在免责声明被接受后才会启动核心。在容器等无人点击的环境里，可在应用的环境变量中设置
 `FLCLASH_ACCEPT_DISCLAIMER=1`，首次启动时即视为接受。
 
 ## 使用
 
-**通过链接导入配置。** 打开下面格式的链接，即可导入订阅。`clash://` 和 `clashmeta://` 开头的链接同样可用，
-INCY、Happ 的导入链接以及 `vless://`、`hysteria2://` 等普通代理 URI 也都支持。
+**通过链接导入订阅。** 打开下面格式的链接，即可导入订阅。`clash://` 和 `clashmeta://` 开头的链接同样可用，
+INCY、Happ 的导入链接以及 `vless://`、`hysteria2://` 等普通代理 URI 也都支持。[网站](https://reclash.pages.dev)
+可以根据订阅地址生成这种链接。
 
 ```text
 reclash://install-config?url=<经过 URL 编码的订阅链接>
@@ -134,8 +143,12 @@ adb shell am start -a com.reclash.action.TOGGLE
 
 ## 文档
 
+[网站](https://reclash.pages.dev)以英文和俄文发布文档；源文件位于 [`docs/`](docs/en/README.md)。
+
 - [自动路由](docs/zh-CN/auto-routing/README.md)：基本概念、配置、场景、条件与实用示例。
-- [服务商支持](docs/en/providers/README.md)与[服务商标准](docs/en/providers/headers.md)：订阅服务商可以向应用传达的信息。
+- [站点锁定](docs/en/site-lock/README.md)（英文）：把网站绑定到指定出口服务器，以及各平台能保证到什么程度。
+- [服务商支持](docs/en/providers/README.md)与[响应头](docs/en/providers/headers.md)（英文）：订阅服务商可以向应用传达的信息，
+  以及如何定制客户端外观。
 
 ## 从源码构建
 
@@ -145,11 +158,10 @@ adb shell am start -a com.reclash.action.TOGGLE
 ```bash
 git clone --recursive https://github.com/Hoxiee/ReClash.git
 cd ReClash
-flutter pub get
 dart setup.dart android   # 或 windows、macos、linux
 ```
 
-安装包输出到 `dist/`。Go 内核和 Rust 库会在 Flutter 构建过程中一并编译。
+脚本会解析依赖、生成代码，并在 Flutter 构建过程中一并编译 Go 内核和 Rust 库。安装包输出到 `dist/`。
 
 | 平台 | 额外依赖 |
 | --- | --- |
@@ -159,7 +171,7 @@ dart setup.dart android   # 或 windows、macos、linux
 | Linux | Debian 或 Ubuntu。脚本会用 apt 安装构建所需的软件包，并下载 `appimagetool`。 |
 
 其余选项可以运行 `dart setup.dart --help` 查看，例如用 `--targets` 只构建部分安装包格式。
-本文中的截图由 `tool/snapshots/render.sh` 根据模拟数据生成。
+截图由 `tool/snapshots/render.sh` 根据模拟数据生成。
 
 ## 支持
 
