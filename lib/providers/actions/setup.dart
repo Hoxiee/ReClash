@@ -109,6 +109,7 @@ class SetupAction extends _$SetupAction {
       lockApps: policy?.lockApps,
       vpnEnabled: system.isAndroid && ref.read(vpnSettingProvider).enable,
       excludedApps: applied ? (required.toList()..sort()) : const [],
+      siteLocks: ref.read(siteLocksProvider),
     );
   }
 
@@ -1260,6 +1261,7 @@ class SetupAction extends _$SetupAction {
         await preferences.saveAppliedConfigMd5(yamlMd5);
       }
       await _refreshChainReports();
+      await ref.read(siteLockReportStateProvider.notifier).refresh();
       await onUpdated?.call();
     }
 

@@ -1,0 +1,76 @@
+{
+  "siteLockTitle": "Site lock",
+  "siteLockNew": "New lock",
+  "siteLockEdit": "Edit lock",
+  "siteLockFooter": "A lock pins sites to the exit servers you choose: locked traffic leaves only through one of them or is refused. On Linux with TUN and the Helper, locked sites stay blocked outside the tunnel even if the core stops. Browser DNS-over-HTTPS can bypass that after a crash, so turn it off in the browser for locked sites.",
+  "siteLockEmpty": "No site locks",
+  "siteLockEmptyHint": "Pin a site to the exit servers it may use.",
+  "siteLockThrough": "Through {exit}",
+  "@siteLockThrough": {
+    "placeholders": {
+      "exit": {
+        "type": "String"
+      }
+    }
+  },
+  "siteLockReady": "Ready",
+  "siteLockOff": "Off",
+  "siteLockNoExit": "No exit server in the profile",
+  "siteLockExitsDown": "All exits are down",
+  "siteLockWaiting": "Waiting for the core",
+  "siteLockDeleteConfirm": "Delete the lock {name}?",
+  "@siteLockDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "siteLockRejectedTitle": "The core rejected the locks",
+  "siteLockRejectedBody": "The previous ones stay in force.",
+  "siteLockSnifferTitle": "Sniffing is off",
+  "siteLockSnifferBody": "Domain entries of {locks} only match when the core resolves the name itself.",
+  "@siteLockSnifferBody": {
+    "placeholders": {
+      "locks": {
+        "type": "String"
+      }
+    }
+  },
+  "siteLockCoreOnlyTitle": "Some entries live only in the core",
+  "siteLockCoreOnlyBody": "{locks} include entries only the running core can hold; the system firewall cannot block them when the core stops.",
+  "@siteLockCoreOnlyBody": {
+    "placeholders": {
+      "locks": {
+        "type": "String"
+      }
+    }
+  },
+  "siteLockHelperTitle": "Helper not available",
+  "siteLockHelperBody": "Install the Helper so locked sites stay blocked when the core stops.",
+  "siteLockFirewallTitle": "The firewall refused the lock",
+  "siteLockFirewallBody": "The system firewall did not accept the lock.",
+  "siteLockTunOffTitle": "TUN is off",
+  "siteLockTunOffBody": "Locks cover only traffic that goes through the core; the system firewall blocks nothing.",
+  "siteLockMatchTitle": "Sites",
+  "siteLockMatchHint": "chatgpt.com\nGEOSITE,openai\nIP-CIDR,1.2.3.0/24",
+  "siteLockMatchFooter": "One entry per line: a domain, GEOSITE,name, IP-CIDR,range or another rule entry without a target.",
+  "siteLockExceptTitle": "Except",
+  "siteLockExceptHint": "Optional, one entry per line",
+  "siteLockExceptFooter": "Entries that stay outside the lock even when they match above.",
+  "siteLockExitsTitle": "Exit servers",
+  "siteLockExitsFooter": "Locked traffic leaves only through a chosen server.",
+  "siteLockExitsOffline": "Servers load when the core runs.",
+  "siteLockExitsEmpty": "The profile has no servers.",
+  "siteLockExitMissing": "Not in the current profile",
+  "siteLockErrorMatchEmpty": "Add at least one site.",
+  "siteLockErrorTooMany": "A lock holds at most {max} entries.",
+  "@siteLockErrorTooMany": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "siteLockErrorNoExit": "Choose at least one exit server."
+}

@@ -119,6 +119,14 @@ class RcxProfiles extends _$RcxProfiles with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class SiteLocks extends _$SiteLocks with AutoDisposeNotifierMixin {
+  @override
+  List<SiteLock> build() {
+    return const [];
+  }
+}
+
+@riverpod
 class ProviderSettings extends _$ProviderSettings
     with AutoDisposeNotifierMixin {
   @override
@@ -142,6 +150,7 @@ Config _config(Ref ref) {
   final patchClashConfig = ref.watch(patchClashConfigProvider);
   final excludeSSIDs = ref.watch(excludeSSIDsProvider);
   final rcxProfiles = ref.watch(rcxProfilesProvider);
+  final siteLocks = ref.watch(siteLocksProvider);
   final providerSettings = ref.watch(providerSettingsProvider);
   return Config(
     appSettingProps: appSettingProps,
@@ -157,6 +166,7 @@ Config _config(Ref ref) {
     patchClashConfig: patchClashConfig,
     excludeSSIDs: excludeSSIDs,
     rcxProfiles: rcxProfiles,
+    siteLocks: siteLocks,
     providerSettings: providerSettings,
   );
 }
@@ -178,6 +188,7 @@ void writeConfig(Ref ref, Config config) {
       .ensureControllerSecret();
   ref.read(excludeSSIDsProvider.notifier).value = config.excludeSSIDs;
   ref.read(rcxProfilesProvider.notifier).value = config.rcxProfiles;
+  ref.read(siteLocksProvider.notifier).value = config.siteLocks;
   ref.read(providerSettingsProvider.notifier).value = config.providerSettings;
 }
 
@@ -204,6 +215,7 @@ List<Override> buildConfigOverrides(Config config) {
     ),
     excludeSSIDsProvider.overrideWithBuild((_, _) => config.excludeSSIDs),
     rcxProfilesProvider.overrideWithBuild((_, _) => config.rcxProfiles),
+    siteLocksProvider.overrideWithBuild((_, _) => config.siteLocks),
     providerSettingsProvider.overrideWithBuild(
       (_, _) => config.providerSettings,
     ),

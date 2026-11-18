@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -14,6 +16,7 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/route_state.dart';
 import 'package:reclash/providers/routing.dart';
 import 'package:reclash/providers/setup.dart';
+import 'package:reclash/providers/site_lock.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/features/doctor/explain.dart';
 import 'package:reclash/features/doctor/recorder/provider.dart';
@@ -36,6 +39,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   CoreController get _core => ref.read(coreHandlerProvider);
 
   bool get _setupActive => ref.read(setupSessionProvider).active;
+
+  SiteLockHostPolicy? _hostPolicy;
 
   @override
   Widget build(BuildContext context) {
@@ -100,11 +105,57 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         unawaited(_syncTelegramProxy(afterCoreStart: true));
       }
     }, fireImmediately: true);
+    ref.listenManual(siteLocksProvider, (prev, next) {
+      if (prev == next ||
+          ref.read(coreStatusProvider) != CoreStatus.connected) {
+        return;
+      }
+      unawaited(_pushSiteLocks(next));
+    });
     ref.listenManual(telegramProxySettingProvider, (prev, next) {
       if (prev != next) {
         unawaited(_syncTelegramProxy());
       }
     });
+    if (system.isLinux) {
+      _startHostPolicy();
+    }
+  }
+
+  void _startHostPolicy() {
+    final policy = _hostPolicy = SiteLockHostPolicy(
+      fetch: (known) => _core.siteLockPolicy(known: known),
+      put: (policy) => helperClient.putSiteLock(
+        tun: policy.tun,
+        addresses: policy.addresses,
+        names: policy.names,
+      ),
+      delete: helperClient.deleteSiteLock,
+      helperReady: () async =>
+          await helperClient.readiness(logFailure: false) ==
+          HelperReadiness.ready,
+      onStatus: (status) =>
+          ref.read(siteLockHostStateProvider.notifier).set(status),
+    );
+    void sync() => policy.update(
+      locksEnabled: ref.read(siteLocksProvider).any((lock) => lock.enabled),
+      coreConnected: ref.read(coreStatusProvider) == CoreStatus.connected,
+    );
+    ref.listenManual(siteLocksProvider, (_, _) => sync());
+    ref.listenManual(coreStatusProvider, (_, _) => sync());
+    sync();
+  }
+
+  Future<void> _pushSiteLocks(List<SiteLock> locks) async {
+    final report = await ref
+        .read(siteLockReportStateProvider.notifier)
+        .push(locks);
+    if (report == null || report.applied) return;
+    final problems = report.problems.map((p) => p.message).join('; ');
+    commonPrint.log(
+      'Site locks rejected: $problems',
+      logLevel: LogLevel.warning,
+    );
   }
 
   // A relay lives and dies with its Core process, so each new Core gets the
@@ -159,6 +210,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void dispose() {
     coreEventManager.removeListener(this);
+    _hostPolicy?.dispose();
     super.dispose();
   }
 

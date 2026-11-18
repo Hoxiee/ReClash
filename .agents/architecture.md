@@ -1949,6 +1949,29 @@ returns the JSON the script produced. Nothing about the script runs in Dart.
 All subscription entrypoints, route selection, cancellation, failure handling and local test scenarios are recorded in
 [`subscription-import.md`](subscription-import.md).
 
+## Site Lock
+
+A site lock (`SiteLock` in `lib/models/site_lock.dart`, stored globally in `Config.siteLocks`) holds mihomo rule
+entries without a target to exits named by type, server and port. `CoreManager` pushes the whole list through
+`setSiteLocks` on every change and to each newly connected Core; a rejected list keeps the previous one in force and the
+report carries every problem. In the Core, `core/sitelock` compiles the list and a hook in the fork's
+`resolveMetadata` claims a matching connection before mode and rules: it leaves through a live exit, else the first
+one, else is refused. Groups and built-ins never qualify as exits because they could lead back to DIRECT.
+`siteLockExits` lists the servers of the running config for the editor.
+
+On Linux the Core also mirrors what the host can enforce: `siteLockPolicy` returns the TUN device, locked prefixes plus
+the fake-ip ranges, and the locked names (geosite expanded; entries the host cannot mirror, such as negated geosite or
+lookahead regex, come back as the `core-only` warning). `SiteLockHostPolicy` polls it every 15 s with the last
+revision, so an unchanged policy costs one hash, and sends it to the Helper's `PUT /site-lock`; `DELETE` lifts it when no
+lock is enabled. The Helper keeps the `reclash_sitelock` nft table: locked addresses are rejected on every interface but
+`lo` and the TUN, and off-TUN DNS goes to NFQUEUE `31415` without `bypass`, where the Helper drops queries for
+locked names. A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. The Helper's own cgroup,
+which the Core lives in, is exempt so the Core can still resolve upstream. The applied policy is persisted in the
+Helper's state directory and restored before `READY=1`, so locks hold from boot, before the app starts.
+
+Browser DNS-over-HTTPS and DoT bypass the DNS filter after a Core crash; that is a documented limitation, not handled.
+Windows and macOS have the Core layer only.
+
 ## Desktop Privileged Core
 
 `DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without
@@ -1963,7 +1986,7 @@ grant so a broken Helper cannot loop restarts. Core RPCs answer null at once whi
 `CoreInfo.tunActive` are separate. System DNS follows applied TUN, not merely the saved switch or authorization.
 Cancellation revokes pending grants; a late launch is stopped, and an unconfirmed exit prevents replacement.
 
-Linux builds `services/helper/` beside Core with the final Core SHA256 embedded. Protocol `9` uses a per-owner systemd
+Linux builds `services/helper/` beside Core with the final Core SHA256 embedded. Protocol `10` uses a per-owner systemd
 `Type=notify` unit with `User`, `Group`, `NoNewPrivileges` and only `CAP_NET_ADMIN`/`CAP_NET_RAW`. Helper and Core never
 run as root. Core clears ambient capabilities on every Go thread before processing requests. The private runtime is
 `/run/reclash-helper-<uid>` (0700), the socket is `helper.sock` (0600), and each peer must have the owner UID.

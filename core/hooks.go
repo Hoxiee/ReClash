@@ -65,6 +65,7 @@ func init() {
 	}
 	updater.GeoUpdateHook = onGeoUpdate
 	tunnel.DirectSplitHook = rcxDirectSplit
+	tunnel.SiteLockHook = siteLockClaim
 	proxydialer.DefaultLoopNotify = reportDialerLoop
 }
 

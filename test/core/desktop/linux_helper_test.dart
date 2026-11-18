@@ -222,7 +222,7 @@ void main() {
         jsonEncode({
           'coreSha256': sha256.convert(core).toString(),
           'helperSha256': sha256.convert(helper).toString(),
-          'helperProtocolVersion': '9',
+          'helperProtocolVersion': '10',
         }),
       );
       final environment = LinuxHelperEnvironment(
@@ -247,7 +247,7 @@ void main() {
                   ).readAsString(),
                 )
                 as Map<String, dynamic>;
-        expect(stagedManifest['helperProtocolVersion'], '9');
+        expect(stagedManifest['helperProtocolVersion'], '10');
         expect((await staged.stat()).mode & 0x1ff, 0x1c0);
         expect(
           (await File(p.join(staged.path, appHelperService)).stat()).mode &
@@ -372,7 +372,7 @@ void main() {
       jsonEncode({
         'coreSha256': sha256.convert(core).toString(),
         'helperSha256': sha256.convert(helper).toString(),
-        'helperProtocolVersion': '9',
+        'helperProtocolVersion': '10',
       }),
     );
     final environment = LinuxHelperEnvironment(

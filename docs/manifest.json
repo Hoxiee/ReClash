@@ -110,6 +110,28 @@
           ]
         }
       ]
+    },
+    {
+      "id": "site-lock",
+      "dir": "site-lock",
+      "slug": "site-lock",
+      "title": {
+        "ru": "Привязка сайтов",
+        "en": "Site lock",
+        "zh-CN": "站点锁定"
+      },
+      "groups": [
+        {
+          "title": {
+            "ru": "Руководство",
+            "en": "Guide",
+            "zh-CN": "指南"
+          },
+          "pages": [
+            "README.md"
+          ]
+        }
+      ]
     }
   ]
 }

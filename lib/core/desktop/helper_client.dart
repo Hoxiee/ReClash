@@ -7,6 +7,7 @@ import 'package:dio/io.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/print.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/site_lock.dart';
 import 'package:path/path.dart' as p;
 import 'package:win32_registry/win32_registry.dart';
 
@@ -34,6 +35,18 @@ final class HelperStopResponse {
     required this.sessionId,
     required this.stopped,
     this.reason,
+  });
+}
+
+final class HelperSiteLock {
+  final bool active;
+  final String? tun;
+  final int addresses;
+
+  const HelperSiteLock({
+    required this.active,
+    required this.tun,
+    required this.addresses,
   });
 }
 
@@ -358,6 +371,90 @@ final class HelperClient {
       throw HelperException(
         code: 'transportError',
         message: 'Unable to stop Core through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  /// nft runs inside these requests, so they wait longer than a ping.
+  static const siteLockTimeout = Duration(seconds: 5);
+
+  Future<void> putSiteLock({
+    required String tun,
+    required List<String> addresses,
+    required SiteLockNames names,
+  }) async {
+    try {
+      final response = await _dio.put<Object?>(
+        '$baseUrl/site-lock',
+        data: {'tun': tun, 'addresses': addresses, 'names': names.toJson()},
+        options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
+      );
+      _responseMap(response, operation: 'site lock');
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'site lock');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to apply the site lock through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  Future<void> deleteSiteLock() async {
+    try {
+      final response = await _dio.delete<Object?>(
+        '$baseUrl/site-lock',
+        options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
+      );
+      _responseMap(response, operation: 'site lock');
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'site lock');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to lift the site lock through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  Future<HelperSiteLock> siteLock() async {
+    try {
+      final response = await _dio.get<Object?>(
+        '$baseUrl/site-lock',
+        options: _options(ResponseType.json),
+      );
+      final data = _responseMap(response, operation: 'site lock');
+      final active = data['active'];
+      final tun = data['tun'];
+      final addresses = data['addresses'];
+      if (active is! bool ||
+          (tun != null && tun is! String) ||
+          addresses is! int) {
+        throw const HelperException(
+          code: 'invalidResponse',
+          message: 'Helper returned an invalid site lock response',
+        );
+      }
+      return HelperSiteLock(
+        active: active,
+        tun: tun as String?,
+        addresses: addresses,
+      );
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'site lock');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to read the site lock through Helper',
         details: error.toString(),
       );
     }

@@ -8,6 +8,7 @@ import 'package:reclash/common/constant.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/lifecycle.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/models/site_lock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
@@ -677,6 +678,142 @@ void main() {
     );
 
     expect(await client.readiness(), HelperReadiness.notReady);
+  });
+
+  group('site lock', () {
+    test(
+      'putSiteLock sends the policy to /site-lock with a nft budget',
+      () async {
+        late RequestOptions seen;
+        final client = _client(
+          _ResponseAdapter((options) {
+            seen = options;
+            return _jsonResponse({'active': true, 'addresses': 2});
+          }),
+        );
+
+        await client.putSiteLock(
+          tun: 'tun0',
+          addresses: ['198.51.100.0/24'],
+          names: const SiteLockNames(suffix: ['example.com']),
+        );
+
+        expect(seen.method, 'PUT');
+        expect(seen.path, endsWith('/site-lock'));
+        expect(seen.data, {
+          'tun': 'tun0',
+          'addresses': ['198.51.100.0/24'],
+          'names': {
+            'full': <String>[],
+            'suffix': ['example.com'],
+            'keyword': <String>[],
+            'regex': <String>[],
+          },
+        });
+        expect(seen.receiveTimeout, HelperClient.siteLockTimeout);
+      },
+    );
+
+    test('deleteSiteLock issues DELETE /site-lock', () async {
+      late RequestOptions seen;
+      final client = _client(
+        _ResponseAdapter((options) {
+          seen = options;
+          return _jsonResponse({'active': false});
+        }),
+      );
+
+      await client.deleteSiteLock();
+
+      expect(seen.method, 'DELETE');
+      expect(seen.path, endsWith('/site-lock'));
+    });
+
+    test('siteLock parses the reported state', () async {
+      final client = _client(
+        _ResponseAdapter((options) {
+          expect(options.method, 'GET');
+          return _jsonResponse({'active': true, 'tun': 'tun0', 'addresses': 3});
+        }),
+      );
+
+      final state = await client.siteLock();
+
+      expect(state.active, isTrue);
+      expect(state.tun, 'tun0');
+      expect(state.addresses, 3);
+    });
+
+    test(
+      'siteLock accepts a null device and rejects a malformed body',
+      () async {
+        var body = <String, Object?>{
+          'active': false,
+          'tun': null,
+          'addresses': 0,
+        };
+        final client = _client(_ResponseAdapter((_) => _jsonResponse(body)));
+
+        expect((await client.siteLock()).tun, isNull);
+        body = {'active': 'yes', 'addresses': 0};
+        await expectLater(
+          client.siteLock(),
+          throwsA(
+            isA<HelperException>().having(
+              (error) => error.code,
+              'code',
+              'invalidResponse',
+            ),
+          ),
+        );
+      },
+    );
+
+    test('Helper error codes and transport failures are mapped', () async {
+      final coded = _client(
+        _ResponseAdapter(
+          (_) => _jsonResponse({
+            'code': 'nftMissing',
+            'message': 'nft is not installed',
+          }, statusCode: 500),
+        ),
+      );
+      await expectLater(
+        coded.putSiteLock(
+          tun: '',
+          addresses: const [],
+          names: const SiteLockNames(),
+        ),
+        throwsA(
+          isA<HelperException>().having(
+            (error) => error.code,
+            'code',
+            'nftMissing',
+          ),
+        ),
+      );
+
+      final broken = _client(
+        _ResponseAdapter(
+          (options) => throw DioException(
+            requestOptions: options,
+            type: DioExceptionType.connectionError,
+          ),
+        ),
+      );
+      for (final call in [broken.deleteSiteLock, broken.siteLock]) {
+        await expectLater(
+          call(),
+          throwsA(
+            isA<HelperException>().having(
+              (error) => error.code,
+              'code',
+              'transportError',
+            ),
+          ),
+        );
+      }
+    });
   });
 
   test('invalid session IDs are rejected before the request', () async {

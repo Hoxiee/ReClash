@@ -1,0 +1,28 @@
+v: 1
+kind: feature
+state: active
+risk: critical
+why: Chosen sites are reachable only through the exits the user allows; without the tunnel they are unreachable, even when the core is down.
+must:
+  before-rules: The core claims a locked connection before mode and rules, and sends it through a live exit or refuses it; groups and built-ins never qualify as exits.
+  exits-by-definition: An exit is a server by type, address and port, so renames and subscription refreshes keep the lock.
+  atomic-apply: A rejected lock list leaves the previous one in force and reports every problem.
+  fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them.
+  core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
+  core-only-warning: Entries the host cannot mirror are reported as core-only rather than silently dropped.
+  untouched: Traffic that matches no lock is neither routed nor filtered differently.
+watch:
+  - core/site_lock.go
+  - core/sitelock/**
+  - services/helper/src/service/site_lock.rs
+  - services/helper/src/service/site_lock_dns.rs
+  - lib/models/site_lock.dart
+  - lib/providers/site_lock.dart
+  - lib/core/desktop/site_lock_policy.dart
+  - lib/views/site_lock.dart
+  - lib/views/site_lock_editor.dart
+checks:
+  site-lock-core: [before-rules, exits-by-definition, atomic-apply, core-only-warning, untouched]
+  site-lock-host: [fail-closed-host, core-dns-exempt]
+  site-lock-app: [atomic-apply, fail-closed-host]
+drop: Upstream mihomo ships per-destination exit pinning with an OS-level kill switch.

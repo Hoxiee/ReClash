@@ -714,6 +714,9 @@ abstract class Config with _$Config {
 
     /// The user's own routing profiles, shared by every subscription.
     @Default({}) Map<String, RcxUserProfile> rcxProfiles,
+
+    /// Site locks are global: they follow the app, not the selected profile.
+    @Default([]) List<SiteLock> siteLocks,
     @Default(ProviderSettingsState())
     @JsonKey(fromJson: ProviderSettingsState.safeFromJson)
     ProviderSettingsState providerSettings,

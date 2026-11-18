@@ -10,5 +10,6 @@ export 'provider_settings.dart';
 export 'proxy_chain.dart';
 export 'rcx.dart';
 export 'references.dart';
+export 'site_lock.dart';
 export 'state.dart';
 export 'wallpaper.dart';

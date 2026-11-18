@@ -23,6 +23,8 @@ abstract class SetupParams with _$SetupParams {
     @JsonKey(includeIfNull: false) List<ChainSpec>? chains,
     @JsonKey(name: 'main-group-hint', includeIfNull: false)
     String? mainGroupHint,
+    @JsonKey(name: 'site-locks', includeIfNull: false)
+    List<SiteLock>? siteLocks,
   }) = _SetupParams;
 
   factory SetupParams.fromJson(Map<String, dynamic> json) =>

@@ -271,6 +271,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     keywords: ['proxy', 'mtproto', 'unblock', 'прокси', 'разблокировка', '代理'],
   );
   page(
+    ToolPage.siteLock,
+    l.siteLockTitle,
+    ToolCategory.configuration,
+    AppGlyphs.lock,
+    root: false,
+    keywords: ['kill switch', 'lock', 'vpn leak', 'привязка', 'блокировка'],
+  );
+  page(
     ToolPage.onDemand,
     l.onDemand,
     ToolCategory.application,

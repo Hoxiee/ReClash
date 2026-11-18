@@ -9,6 +9,7 @@ export 'profile_brand.dart';
 export 'provider_settings.dart';
 export 'route_state.dart';
 export 'routing.dart';
+export 'site_lock.dart';
 export 'state.dart';
 export 'tools.dart';
 export 'web_dashboard.dart';

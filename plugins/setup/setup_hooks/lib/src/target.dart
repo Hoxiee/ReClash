@@ -37,7 +37,7 @@ class Target {
   bool get hasHelper => goos == 'linux' || goos == 'windows';
 
   String get helperProtocolVersion => switch (goos) {
-    'linux' => '9',
+    'linux' => '10',
     'windows' => '10',
     _ => throw BuildException('No Helper protocol for $this'),
   };

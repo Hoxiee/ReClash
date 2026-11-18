@@ -1,4 +1,5 @@
 use super::linux::Owner;
+use super::site_lock::{SiteLockService, SystemNft};
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -19,7 +20,7 @@ pub(super) const CORE_NAME: &str = "ReClashCore";
 const MANIFEST_NAME: &str = "manifest.json";
 const STATE_ROOT: &str = "/var/lib/reclash-helper";
 const UNIT_ROOT: &str = "/etc/systemd/system";
-const PROTOCOL: &str = "9";
+const PROTOCOL: &str = "10";
 
 #[derive(Debug, Clone, Copy)]
 pub(super) enum InstallFailure {
@@ -114,6 +115,7 @@ pub(super) struct Layout {
     root_uid: u32,
     external_units: Vec<PathBuf>,
     obsolete_root: PathBuf,
+    site_lock_cleanup: bool,
 }
 
 impl Layout {
@@ -135,6 +137,7 @@ impl Layout {
             .map(PathBuf::from)
             .to_vec(),
             obsolete_root: "/opt/reclash-helper".into(),
+            site_lock_cleanup: true,
         }
     }
 
@@ -202,9 +205,13 @@ pub(super) fn runtime_path(owner: Owner) -> PathBuf {
     PathBuf::from(format!("/run/reclash-helper-{}", owner.uid))
 }
 
+pub(super) fn state_path(owner: Owner) -> PathBuf {
+    PathBuf::from(format!("/var/lib/reclash-helper-{}", owner.uid))
+}
+
 pub(super) fn unit_contents(executable: &Path, owner: Owner) -> String {
     format!(
-        "# ReClash Helper owner={} protocol=9\n\
+        "# ReClash Helper owner={} protocol=10\n\
          [Unit]\n\
          Description=ReClash network Helper for UID {}\n\
          After=network-online.target nftables.service iptables.service\n\
@@ -230,6 +237,8 @@ pub(super) fn unit_contents(executable: &Path, owner: Owner) -> String {
          RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_PACKET\n\
          RuntimeDirectory=reclash-helper-{}\n\
          RuntimeDirectoryMode=0700\n\
+         StateDirectory=reclash-helper-{}\n\
+         StateDirectoryMode=0700\n\
          UMask=0077\n\
          KillMode=control-group\n\
          TimeoutStartSec=15\n\
@@ -245,6 +254,7 @@ pub(super) fn unit_contents(executable: &Path, owner: Owner) -> String {
         quoted_unit_argument(executable),
         owner.uid,
         owner.gid,
+        owner.uid,
         owner.uid,
     )
 }
@@ -1122,7 +1132,14 @@ fn uninstall_owner(
     } else {
         Vec::new()
     };
-    prune(layout, owner, &keep)
+    prune(layout, owner, &keep)?;
+    if layout.site_lock_cleanup {
+        let site_lock = SiteLockService::new(state_path(owner), Box::new(SystemNft));
+        if let Err(error) = site_lock.clear() {
+            eprintln!("Helper removed; site lock cleanup skipped: {error}");
+        }
+    }
+    Ok(())
 }
 
 fn packaged_manifest(path: &Path, uid: u32) -> Result<Manifest> {
@@ -1276,6 +1293,7 @@ mod tests {
                     root_uid: uid,
                     external_units: Vec::new(),
                     obsolete_root: root.join("obsolete"),
+                    site_lock_cleanup: false,
                 },
                 owner: Owner {
                     uid: if uid == 0 { 1000 } else { uid },
@@ -1545,12 +1563,12 @@ mod tests {
     }
 
     #[test]
-    fn manifest_protocol_is_exact_string_nine() {
+    fn manifest_protocol_is_exact_string_ten() {
         let fixture = Fixture::new();
         let source = fixture.source("protocol");
         let manifest = source.manifest.clone();
         let mut value = serde_json::to_value(&manifest).unwrap();
-        assert_eq!(value["helperProtocolVersion"], "9");
+        assert_eq!(value["helperProtocolVersion"], "10");
         let parsed: Manifest = serde_json::from_value(value.clone()).unwrap();
         parsed.validate().unwrap();
         for invalid in [
@@ -1586,7 +1604,7 @@ mod tests {
             .unwrap(),
         )
         .unwrap();
-        assert_eq!(installed["helperProtocolVersion"], "9");
+        assert_eq!(installed["helperProtocolVersion"], "10");
     }
 
     #[test]
@@ -1607,12 +1625,16 @@ mod tests {
             "AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW\n",
             "CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW\n",
             "RuntimeDirectoryMode=0700\n",
+            "StateDirectory=reclash-helper-1000\n",
+            "StateDirectoryMode=0700\n",
+            "protocol=10\n",
             "KillMode=control-group\n",
         ] {
             assert!(unit.contains(line), "missing {line}");
         }
         assert_eq!(service_name(owner), "reclash-helper-1000.service");
         assert_eq!(runtime_path(owner), Path::new("/run/reclash-helper-1000"));
+        assert_eq!(state_path(owner), Path::new("/var/lib/reclash-helper-1000"));
         assert_eq!(
             quoted_unit_argument(Path::new("/a b/100%/a\"b\\c")),
             "\"/a b/100%%/a\\\"b\\\\c\""
@@ -1771,7 +1793,7 @@ mod tests {
         let registration: Registration =
             serde_json::from_slice(&fs::read(fixture.layout.registration(fixture.owner)).unwrap())
                 .unwrap();
-        assert_eq!(registration.bundle.helper_protocol_version, "9");
+        assert_eq!(registration.bundle.helper_protocol_version, "10");
         assert!(systemd.active && systemd.enabled);
         assert!(
             systemd

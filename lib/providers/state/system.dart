@@ -250,6 +250,7 @@ SharedState sharedState(Ref ref) {
       lockApps: ref.watch(providerPolicyProvider)?.lockApps,
       vpnEnabled: ref.watch(vpnSettingProvider).enable,
       excludedApps: ref.watch(providerRequiredAppsProvider).toList()..sort(),
+      siteLocks: ref.watch(siteLocksProvider),
     ),
     vpnOptions: ref.watch(vpnOptionsProvider).value,
   );

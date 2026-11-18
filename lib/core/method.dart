@@ -80,6 +80,10 @@ enum CoreMethod {
   rcxHints,
   rcxProfiles,
   rcxStudio,
+  setSiteLocks,
+  siteLockStatus,
+  siteLockPolicy,
+  siteLockExits,
 }
 
 class CoreMethodCall {

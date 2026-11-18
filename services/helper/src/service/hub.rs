@@ -1,3 +1,4 @@
+use crate::service::site_lock::{self, SiteLockService};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -24,7 +25,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 #[cfg(target_os = "linux")]
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 use std::{io, thread};
 use warp::http::StatusCode;
@@ -55,7 +56,7 @@ const PROTOCOL_VERSION_HEADER: &str = "x-reclash-helper-protocol";
 #[cfg(windows)]
 const PROTOCOL_VERSION: &str = "10";
 #[cfg(target_os = "linux")]
-const PROTOCOL_VERSION: &str = "9";
+const PROTOCOL_VERSION: &str = "10";
 #[cfg(not(any(windows, target_os = "linux")))]
 const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
@@ -475,11 +476,11 @@ fn complete_core_adoption(
     ))
 }
 
-fn json_response<T: Serialize>(value: &T, status: StatusCode) -> warp::reply::Response {
+pub(super) fn json_response<T: Serialize>(value: &T, status: StatusCode) -> warp::reply::Response {
     warp::reply::with_status(warp::reply::json(value), status).into_response()
 }
 
-fn error_response(
+pub(super) fn error_response(
     code: &'static str,
     message: impl Into<String>,
     status: StatusCode,
@@ -870,7 +871,7 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
         return Ok(warp::reply::with_header(
             error_response(
                 "invalidRequest",
-                "request body exceeds 4096 bytes",
+                "request body is too large",
                 StatusCode::PAYLOAD_TOO_LARGE,
             ),
             "connection",
@@ -926,6 +927,13 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
 pub(super) fn caller_routes(
     caller: Caller,
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+    caller_routes_with(caller, Arc::new(SiteLockService::system()))
+}
+
+pub(super) fn caller_routes_with(
+    caller: Caller,
+    site_lock: Arc<SiteLockService>,
+) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     let native_client = warp::header::optional::<String>("origin")
         .and(warp::header::optional::<String>("host"))
         .and_then(|origin: Option<String>, host: Option<String>| async move {
@@ -972,7 +980,13 @@ pub(super) fn caller_routes(
         .map(get_logs);
 
     native_client
-        .and(api_ping.or(api_start).or(api_stop).or(api_logs))
+        .and(
+            api_ping
+                .or(api_start)
+                .or(api_stop)
+                .or(api_logs)
+                .or(site_lock::routes(site_lock)),
+        )
         .recover(handle_rejection)
 }
 
@@ -1099,10 +1113,8 @@ mod tests {
     fn protocol_uses_lowercase_session_ownership() {
         assert_eq!(
             PROTOCOL_VERSION,
-            if cfg!(windows) {
+            if cfg!(any(windows, target_os = "linux")) {
                 "10"
-            } else if cfg!(target_os = "linux") {
-                "9"
             } else {
                 "6"
             }

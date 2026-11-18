@@ -137,7 +137,7 @@ Future<String> _stageBundle(String directory, int uid) async {
       helper is! String ||
       !RegExp(r'^[0-9a-f]{64}$').hasMatch(core) ||
       !RegExp(r'^[0-9a-f]{64}$').hasMatch(helper) ||
-      protocol != '9') {
+      protocol != '10') {
     throw const FormatException('Bundle hashes or protocol are invalid');
   }
   final staged = await Directory.systemTemp.createTemp('reclash-helper-$uid-');
@@ -177,7 +177,7 @@ Future<String> _stageBundle(String directory, int uid) async {
       jsonEncode({
         'coreSha256': core,
         'helperSha256': helper,
-        'helperProtocolVersion': '9',
+        'helperProtocolVersion': '10',
       }),
       flush: true,
     );

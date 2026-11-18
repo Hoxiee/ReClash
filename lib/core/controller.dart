@@ -486,6 +486,17 @@ class CoreController {
   Future<OutboundIpResult?> outboundIp(OutboundIpParams params) async =>
       sandbox?.outboundIp(params) ?? _interface.outboundIp(params);
 
+  Future<SiteLockReport?> setSiteLocks(List<SiteLock> locks) =>
+      _interface.setSiteLocks(locks);
+
+  Future<SiteLockReport?> siteLockStatus() => _interface.siteLockStatus();
+
+  Future<SiteLockPolicy?> siteLockPolicy({String known = ''}) =>
+      _interface.siteLockPolicy(known: known);
+
+  Future<List<SiteLockExitCandidate>?> siteLockExits() =>
+      _interface.siteLockExits();
+
   Future<List<ServiceCheckItem>> serviceCheck(
     ServiceCheckParams params,
   ) async => sandbox?.serviceCheck(params) ?? _interface.serviceCheck(params);

@@ -53,6 +53,10 @@ To move a setting onto this path:
 
 Prefer update whenever Go has a setter for the setting, because an apply reloads the whole config.
 
+Site locks take their own live path: `CoreManager` sends the whole list through `setSiteLocks` on each change, never an
+apply, and a full apply carries it in `SetupParams.siteLocks` so the new config is claimed from its first connection.
+On Android the list also rides in the shared state, so the service's own applies keep it without the engine.
+
 ## Apply
 
 `CoreManager` answers each change of `setupPatchProvider` with `applyProfileDebounce(silence: true)`. That call

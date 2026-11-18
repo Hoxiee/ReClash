@@ -1,6 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -25,7 +24,7 @@ const helperPortKey =
 const helperPortValue = 'Port';
 const helperSocketPath = '/run/reclash/helper.sock';
 const helperProtocolVersionHeader = 'x-reclash-helper-protocol';
-final helperProtocolVersion = Platform.isWindows ? '10' : '9';
+const helperProtocolVersion = '10';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
 

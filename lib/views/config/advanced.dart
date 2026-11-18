@@ -7,6 +7,7 @@ import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/scripts.dart';
+import 'package:reclash/views/site_lock.dart';
 import 'package:reclash/views/telegram_proxy.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -39,6 +40,11 @@ class AdvancedConfigView extends StatelessWidget {
           leading: const GlyphIcon(AppGlyphs.rules),
           widget: const AddedRulesView(),
         ),
+      ),
+      ListItem.open(
+        title: Text(appLocalizations.siteLockTitle),
+        leading: const GlyphIcon(AppGlyphs.lock),
+        widget: const SiteLockView(),
       ),
       SettingTarget(
         spec: advancedToolSettings[2],

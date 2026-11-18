@@ -112,6 +112,14 @@ mixin CoreInterface {
 
   Future<OutboundIpResult?> outboundIp(OutboundIpParams params);
 
+  Future<SiteLockReport?> setSiteLocks(List<SiteLock> locks);
+
+  Future<SiteLockReport?> siteLockStatus();
+
+  Future<SiteLockPolicy?> siteLockPolicy({String known = ''});
+
+  Future<List<SiteLockExitCandidate>?> siteLockExits();
+
   Future<bool> startSpeedTest(
     SpeedTestSettings settings, {
     required String requestId,
@@ -988,6 +996,46 @@ abstract class CoreHandlerInterface with CoreInterface {
       timeout: coreGuardFor(params.timeout),
     );
     return data == null ? null : OutboundIpResult.fromJson(data);
+  }
+
+  @override
+  Future<SiteLockReport?> setSiteLocks(List<SiteLock> locks) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.setSiteLocks,
+      arguments: locks.map((lock) => lock.toJson()).toList(),
+    );
+    return data == null ? null : SiteLockReport.fromJson(data);
+  }
+
+  @override
+  Future<SiteLockReport?> siteLockStatus() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.siteLockStatus,
+    );
+    return data == null ? null : SiteLockReport.fromJson(data);
+  }
+
+  @override
+  Future<SiteLockPolicy?> siteLockPolicy({String known = ''}) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.siteLockPolicy,
+      arguments: {'known': known},
+    );
+    return data == null ? null : SiteLockPolicy.fromJson(data);
+  }
+
+  @override
+  Future<List<SiteLockExitCandidate>?> siteLockExits() async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.siteLockExits,
+    );
+    return data
+        ?.map(
+          (item) => SiteLockExitCandidate.fromJson(
+            Map<String, Object?>.from(item as Map),
+          ),
+        )
+        .toList();
   }
 
   @override

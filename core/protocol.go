@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"core/rcx"
+	"core/sitelock"
 
 	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/adapter/provider"
@@ -95,6 +96,10 @@ const (
 	rcxHintsMethod                 CoreMethod = "rcxHints"
 	rcxProfilesMethod              CoreMethod = "rcxProfiles"
 	rcxStudioMethod                CoreMethod = "rcxStudio"
+	setSiteLocksMethod             CoreMethod = "setSiteLocks"
+	siteLockStatusMethod           CoreMethod = "siteLockStatus"
+	siteLockPolicyMethod           CoreMethod = "siteLockPolicy"
+	siteLockExitsMethod            CoreMethod = "siteLockExits"
 )
 
 type MessageType string
@@ -143,6 +148,8 @@ type SetupParams struct {
 	Rcx           *rcx.UserLayer `json:"rcx,omitempty"`
 	Chains        []ChainSpec    `json:"chains,omitempty"`
 	MainGroupHint string         `json:"main-group-hint,omitempty"`
+	// Absent keeps the locks in force; an empty list lifts them.
+	SiteLocks *[]sitelock.Lock `json:"site-locks,omitempty"`
 }
 
 type ChainSpec struct {

@@ -8,6 +8,7 @@ enum ToolPage {
   dns,
   onDemand,
   telegram,
+  siteLock,
   lovense,
   appRegion,
   notifications,
@@ -45,6 +46,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.network ||
     ToolPage.dns ||
     ToolPage.telegram ||
+    ToolPage.siteLock ||
     ToolPage.rules ||
     ToolPage.scripts => ToolPage.advanced,
     ToolPage.userAgents || ToolPage.webDashboard => ToolPage.general,

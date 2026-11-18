@@ -51,7 +51,7 @@ void main() {
 
     expect(config.helperFileName(Target.linuxAmd64), 'ReClashHelperService');
     expect(config.helperFileName(Target.windowsArm64), 'ReClashService.exe');
-    expect(Target.linuxArm64.helperProtocolVersion, '9');
+    expect(Target.linuxArm64.helperProtocolVersion, '10');
     expect(Target.windowsAmd64.helperProtocolVersion, '10');
     expect(
       () => Target.macosArm64.helperProtocolVersion,

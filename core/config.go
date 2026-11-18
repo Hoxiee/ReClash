@@ -209,6 +209,7 @@ func applyConfig(params *SetupParams) error {
 	configMu.Lock()
 	defer configMu.Unlock()
 
+	applySetupSiteLocks(params.SiteLocks)
 	policy, err := loadProviderPolicy(params)
 	if err != nil {
 		return blockProviderPolicy(err)

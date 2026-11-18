@@ -8,6 +8,10 @@ mod linux_install;
 pub mod owner;
 #[cfg(all(feature = "windows-service", target_os = "windows"))]
 pub mod peer;
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+pub mod site_lock;
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+mod site_lock_dns;
 #[cfg(all(feature = "windows-service", target_os = "windows"))]
 pub mod windows;
 #[cfg(all(feature = "windows-service", target_os = "windows"))]

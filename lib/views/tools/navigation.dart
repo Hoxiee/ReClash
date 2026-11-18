@@ -29,6 +29,7 @@ import 'package:reclash/views/hotkey_desktop.dart';
 import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
 import 'package:reclash/views/lovense.dart';
+import 'package:reclash/views/site_lock.dart';
 import 'package:reclash/views/telegram_proxy.dart';
 import 'package:reclash/views/profiles/custom/custom_proxies.dart';
 import 'package:reclash/views/region.dart';
@@ -48,6 +49,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
     ToolPage.dns,
   OnDemandView() => ToolPage.onDemand,
   TelegramProxyView() => ToolPage.telegram,
+  SiteLockView() => ToolPage.siteLock,
   LovenseView() => ToolPage.lovense,
   RegionView() => ToolPage.appRegion,
   NotificationSettingsView() => ToolPage.notifications,
@@ -89,6 +91,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.dns => const DnsView(),
   ToolPage.onDemand => const OnDemandView(),
   ToolPage.telegram => const TelegramProxyView(),
+  ToolPage.siteLock => const SiteLockView(),
   ToolPage.lovense => const LovenseView(),
   ToolPage.appRegion => const RegionView(),
   ToolPage.notifications => const NotificationSettingsView(),

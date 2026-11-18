@@ -3,6 +3,7 @@ use crate::service::hub::{
     begin_shutdown, ensure_core_sha256_configured, log_message,
     release_managed_core_on_shutdown_confirmed, routes,
 };
+use crate::service::site_lock::SiteLockService;
 use anyhow::{bail, Context, Result};
 use std::ffi::{OsStr, OsString};
 use std::fs::{self, File, OpenOptions};
@@ -223,6 +224,9 @@ fn run_service() -> Result<()> {
         let mut terminate = signal(SignalKind::terminate()).context("listen for SIGTERM")?;
         let mut interrupt = signal(SignalKind::interrupt()).context("listen for SIGINT")?;
         let incoming = AuthorizedIncoming::bind(owner, &linux_install::runtime_path(owner))?;
+        if let Err(error) = SiteLockService::system().restore() {
+            log_message(format!("Helper could not restore the site lock: {error}"));
+        }
         notify_systemd(b"READY=1")?;
         let shutdown = async move {
             tokio::select! {
