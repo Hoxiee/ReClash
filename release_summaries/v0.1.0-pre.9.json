@@ -28,7 +28,14 @@
           "kind": "dashboard"
         }
       ],
-      "warnings": []
+      "warnings": [
+        {
+          "title": "The macOS app does not launch",
+          "description": "This build is rejected at startup on macOS. It is fixed in v0.1.0-pre.10 or later.",
+          "kind": "update",
+          "platforms": ["macos"]
+        }
+      ]
     },
     "ru": {
       "headline": "Правка TUN на Windows и ссылка провайдера на карте профиля",
@@ -55,7 +62,14 @@
           "kind": "dashboard"
         }
       ],
-      "warnings": []
+      "warnings": [
+        {
+          "title": "Приложение macOS не запускается",
+          "description": "Эта сборка отклоняется при запуске на macOS. Исправлено в v0.1.0-pre.10 и новее.",
+          "kind": "update",
+          "platforms": ["macos"]
+        }
+      ]
     }
   }
 }

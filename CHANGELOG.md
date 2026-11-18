@@ -42,6 +42,9 @@ Network leak protection, per-profile favorites and a macOS launch fix.
 
 ## v0.1.0-pre.9
 
+> [!WARNING]
+> **macOS:** this build does not launch — the app is rejected at startup. Use v0.1.0-pre.10 or later.
+
 ### New
 
 - **Provider page from the wallet pass**: tap the host under the active profile's name to open the page the
