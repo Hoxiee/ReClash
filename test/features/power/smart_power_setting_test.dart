@@ -84,6 +84,7 @@ void main() {
         ),
         diagnosticKernelProvider.overrideWithValue(kernel),
         connectionSupervisorProvider.overrideWithValue(supervisor),
+        accountEvidenceHoldProvider.overrideWithValue(Duration.zero),
       ],
     );
     addTearDown(() async {

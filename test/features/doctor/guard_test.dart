@@ -91,6 +91,7 @@ class _Rig {
 
   void plan({
     int profileId = 1,
+    DateTime? expiresAt,
     Duration expiresIn = const Duration(days: -1),
     Duration fetchedAgo = Duration.zero,
     int used = 0,
@@ -99,7 +100,7 @@ class _Rig {
     Facts.subscription,
     SubscriptionFact(
       profileId: profileId,
-      expiresAt: now().add(expiresIn),
+      expiresAt: expiresAt ?? now().add(expiresIn),
       used: used,
       total: total,
       fetchedAt: now().subtract(fetchedAgo),
@@ -108,6 +109,13 @@ class _Rig {
 
   void broken([FailureCause cause = FailureCause.authRejected]) =>
       health.add(ConnectionHealth(phase: ConnectionPhase.broken, cause: cause));
+
+  /// A broken connection that a later check still finds broken.
+  void failing([FailureCause cause = FailureCause.authRejected]) {
+    broken(cause);
+    async.elapse(const Duration(seconds: 45));
+    broken(cause);
+  }
 
   void verified() =>
       health.add(const ConnectionHealth(phase: ConnectionPhase.verified));
@@ -138,7 +146,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan()
-        ..broken()
+        ..failing()
         ..settle();
       expect(rig.applied, [ConnectionRemedy.stopForAccount]);
       expect(rig.standing.lock, AccountLock.expired);
@@ -151,7 +159,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan(expiresIn: const Duration(days: 3), used: 10, total: 10)
-        ..broken(FailureCause.timeout)
+        ..failing(FailureCause.timeout)
         ..settle();
       expect(rig.standing.lock, AccountLock.exhausted);
     });
@@ -176,31 +184,86 @@ void main() {
       expect(rig.standing.lock, AccountLock.none);
     });
 
-    _test('a stale ended plan is refreshed first, at most every 10 min', (rig) {
+    _test('a failure that passes within the hold never stops the tunnel', (
+      rig,
+    ) {
       rig
         ..guard.setRunning(true)
+        ..plan()
+        ..broken();
+      rig.async.elapse(const Duration(seconds: 30));
+      rig
+        ..verified()
+        ..broken();
+      rig.async.elapse(const Duration(seconds: 30));
+      rig
         ..broken()
-        ..plan(
-          expiresIn: const Duration(minutes: -30),
-          fetchedAgo: const Duration(hours: 1),
-        )
+        ..settle();
+      expect(rig.applied, isEmpty);
+      expect(rig.standing.lock, AccountLock.none);
+      rig.async.elapse(const Duration(seconds: 15));
+      rig
+        ..broken()
+        ..settle();
+      expect(rig.applied, [ConnectionRemedy.stopForAccount]);
+    });
+
+    _test('a stale ended plan is fetched once for the same figures', (rig) {
+      final ended = _start.subtract(const Duration(minutes: 30));
+      rig
+        ..guard.setRunning(true)
+        ..plan(expiresAt: ended, fetchedAgo: const Duration(hours: 1))
         ..settle();
       expect(rig.applied, ['profile.update']);
       expect(rig.standing.checking, isFalse);
       expect(rig.standing.lock, AccountLock.none);
+      for (var hour = 0; hour < 12; hour++) {
+        rig.async.elapse(const Duration(hours: 1));
+        rig
+          ..plan(expiresAt: ended, fetchedAgo: const Duration(hours: 2))
+          ..verified()
+          ..guard.setVisible(false)
+          ..guard.setVisible(true)
+          ..settle();
+      }
+      expect(rig.applied, ['profile.update']);
       rig
-        ..plan(
-          expiresIn: const Duration(minutes: -30),
-          fetchedAgo: const Duration(hours: 2),
-        )
+        ..plan(expiresIn: const Duration(minutes: -5))
         ..settle();
       expect(rig.applied, ['profile.update']);
-      rig.async.elapse(const Duration(minutes: 10));
+    });
+
+    _test(
+      'figures fetched before a restart are not fetched again',
+      (rig) {
+        rig
+          ..plan(
+            expiresAt: _start.subtract(const Duration(days: 1)),
+            fetchedAgo: const Duration(hours: 2),
+          )
+          ..settle();
+        expect(rig.applied, isEmpty);
+      },
+      memo: AccountMemo(
+        checkedFingerprint:
+            '1|${_start.subtract(const Duration(days: 1)).millisecondsSinceEpoch}|0',
+        checkedAt: _start.subtract(const Duration(hours: 1)),
+      ).encode(),
+    );
+
+    _test('a failed connection fetches the figures again after 30 min', (rig) {
+      final ended = _start.subtract(const Duration(minutes: 30));
       rig
-        ..plan(
-          expiresIn: const Duration(minutes: -30),
-          fetchedAgo: const Duration(hours: 3),
-        )
+        ..guard.setRunning(true)
+        ..plan(expiresAt: ended, fetchedAgo: const Duration(hours: 1))
+        ..settle()
+        ..failing()
+        ..settle();
+      expect(rig.applied, ['profile.update']);
+      expect(rig.standing.lock, AccountLock.none);
+      rig.async.elapse(const Duration(minutes: 30));
+      rig
+        ..broken()
         ..settle();
       expect(rig.applied, ['profile.update', 'profile.update']);
     });
@@ -227,7 +290,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan()
-        ..broken()
+        ..failing()
         ..settle();
       bool? clear;
       unawaited(rig.guard.recheck().then((value) => clear = value));
@@ -247,7 +310,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan()
-        ..broken()
+        ..failing()
         ..settle()
         ..guard.setRunning(false)
         ..plan(expiresIn: const Duration(days: 30))
@@ -264,7 +327,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan()
-        ..broken()
+        ..failing()
         ..settle()
         ..guard.setRunning(false)
         ..guard.setRunning(true);
@@ -301,7 +364,7 @@ void main() {
       rig
         ..guard.setRunning(true)
         ..plan()
-        ..broken()
+        ..failing()
         ..settle();
       unawaited(rig.guard.connectAnyway());
       rig
@@ -317,7 +380,7 @@ void main() {
       );
       rig
         ..plan(expiresIn: const Duration(days: -2))
-        ..broken()
+        ..failing()
         ..settle();
       expect(rig.standing.overridden, isFalse);
       expect(rig.standing.lock, AccountLock.expired);
@@ -353,6 +416,8 @@ void main() {
       stoppedProfile: 4,
       lockFingerprint: '4|5|6',
       lock: AccountLock.exhausted,
+      checkedFingerprint: '4|5|6',
+      checkedAt: _start,
     );
     expect(AccountMemo.decode(memo.encode()), memo);
     expect(AccountMemo.decode('not json'), const AccountMemo());

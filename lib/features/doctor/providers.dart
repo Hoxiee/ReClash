@@ -283,6 +283,10 @@ class ConnectionHealthState extends Notifier<ConnectionHealth> {
   }
 }
 
+final accountEvidenceHoldProvider = Provider<Duration>(
+  (ref) => AccountGuard.defaultEvidenceHold,
+);
+
 final accountGuardProvider = Provider<AccountGuard>((ref) {
   final kernel = ref.watch(diagnosticKernelProvider);
   final enabled = ref.watch(
@@ -294,6 +298,7 @@ final accountGuardProvider = Provider<AccountGuard>((ref) {
     health: ref.watch(connectionSupervisorProvider).updates,
     store: store,
     reevaluate: kernel is DoctorKernel ? kernel.refresh : null,
+    evidenceHold: ref.read(accountEvidenceHoldProvider),
   );
   ref
     ..listen(isStartProvider, (_, running) {

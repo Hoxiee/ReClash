@@ -41,6 +41,8 @@ final class AccountMemo {
     this.stoppedProfile,
     this.lockFingerprint,
     this.lock = AccountLock.none,
+    this.checkedFingerprint,
+    this.checkedAt,
   });
 
   factory AccountMemo.decode(String? source) {
@@ -56,6 +58,11 @@ final class AccountMemo {
         stoppedProfile: json['stopped'] as int?,
         lockFingerprint: json['lockFor'] as String?,
         lock: AccountLock.values.asNameMap()[json['lock']] ?? AccountLock.none,
+        checkedFingerprint: json['checked'] as String?,
+        checkedAt: switch (json['checkedAt']) {
+          final int ms => DateTime.fromMillisecondsSinceEpoch(ms),
+          _ => null,
+        },
       );
     } on Object {
       return const AccountMemo();
@@ -68,12 +75,19 @@ final class AccountMemo {
   final String? lockFingerprint;
   final AccountLock lock;
 
+  /// The figures the guard last fetched to confirm, so a provider that keeps
+  /// reporting an ended plan is not fetched again on every restart.
+  final String? checkedFingerprint;
+  final DateTime? checkedAt;
+
   AccountMemo copyWith({
     Object? overrideFingerprint = _keep,
     Object? overrideUntil = _keep,
     Object? stoppedProfile = _keep,
     Object? lockFingerprint = _keep,
     AccountLock? lock,
+    Object? checkedFingerprint = _keep,
+    Object? checkedAt = _keep,
   }) => AccountMemo(
     overrideFingerprint: overrideFingerprint == _keep
         ? this.overrideFingerprint
@@ -88,6 +102,10 @@ final class AccountMemo {
         ? this.lockFingerprint
         : lockFingerprint as String?,
     lock: lock ?? this.lock,
+    checkedFingerprint: checkedFingerprint == _keep
+        ? this.checkedFingerprint
+        : checkedFingerprint as String?,
+    checkedAt: checkedAt == _keep ? this.checkedAt : checkedAt as DateTime?,
   );
 
   @override
@@ -97,7 +115,9 @@ final class AccountMemo {
       other.overrideUntil == overrideUntil &&
       other.stoppedProfile == stoppedProfile &&
       other.lockFingerprint == lockFingerprint &&
-      other.lock == lock;
+      other.lock == lock &&
+      other.checkedFingerprint == checkedFingerprint &&
+      other.checkedAt == checkedAt;
 
   @override
   int get hashCode => Object.hash(
@@ -106,6 +126,8 @@ final class AccountMemo {
     stoppedProfile,
     lockFingerprint,
     lock,
+    checkedFingerprint,
+    checkedAt,
   );
 
   String encode() => jsonEncode({
@@ -114,6 +136,8 @@ final class AccountMemo {
     'stopped': ?stoppedProfile,
     'lockFor': ?lockFingerprint,
     if (lock != AccountLock.none) 'lock': lock.name,
+    'checked': ?checkedFingerprint,
+    'checkedAt': ?checkedAt?.millisecondsSinceEpoch,
   });
 }
 
@@ -133,21 +157,32 @@ class AccountGuard {
     required AccountStore store,
     Future<void> Function()? reevaluate,
     DateTime Function()? clock,
-    this.freshFor = const Duration(minutes: 10),
-    this.staleRefreshGap = const Duration(minutes: 10),
+    this.freshFor = const Duration(minutes: 30),
+    this.evidenceRefreshGap = const Duration(minutes: 30),
     this.lockedRefreshGap = const Duration(minutes: 1),
     this.overrideLimit = const Duration(hours: 24),
+    this.evidenceHold = defaultEvidenceHold,
   }) : _kernel = kernel,
        _health = health,
        _store = store,
        _reevaluate = reevaluate,
        _clock = clock ?? DateTime.now;
 
+  static const defaultEvidenceHold = Duration(seconds: 45);
+
   /// An expired reading fetched within this long is believed.
   final Duration freshFor;
-  final Duration staleRefreshGap;
+
+  /// A stale ended reading is fetched once per figures; a failed connection
+  /// that may be the provider refusing us fetches it again after this gap.
+  final Duration evidenceRefreshGap;
   final Duration lockedRefreshGap;
   final Duration overrideLimit;
+
+  /// A refusal counts only once the connection stayed broken this long
+  /// without a pass: a blip on a plan the provider still serves past its
+  /// expiry must not stop the tunnel or fetch the subscription.
+  final Duration evidenceHold;
 
   final DiagnosticKernel _kernel;
   final Stream<ConnectionHealth> _health;
@@ -160,7 +195,6 @@ class AccountGuard {
   final _updates = StreamController<AccountStanding>.broadcast(sync: true);
   final _notices = StreamController<AccountNotice>.broadcast();
   final _subscriptions = <StreamSubscription<Object?>>[];
-  final _refreshedAt = <int, DateTime>{};
 
   AccountStanding _standing = AccountStanding.clear;
   AccountMemo _memo = const AccountMemo();
@@ -171,6 +205,7 @@ class AccountGuard {
   bool _ourStart = false;
   bool _stopping = false;
   FailureCause? _evidence;
+  DateTime? _evidenceSince;
   Timer? _expiry;
   DateTime? _expiryAt;
   bool _started = false;
@@ -202,7 +237,7 @@ class AccountGuard {
       }
       _ourStart = false;
     } else {
-      _evidence = null;
+      _clearEvidence();
     }
     _evaluate();
   }
@@ -213,7 +248,7 @@ class AccountGuard {
     final fact = _fact;
     if (!visible || fact == null) return;
     if (_memo.lock != AccountLock.none) {
-      unawaited(_refresh(fact.profileId, gap: lockedRefreshGap));
+      unawaited(_refresh(fact, gap: lockedRefreshGap));
     } else {
       _evaluate();
     }
@@ -238,7 +273,7 @@ class AccountGuard {
   /// Fetches the subscription now; true when no lock remains.
   Future<bool> recheck() async {
     final fact = _fact;
-    if (fact != null) await _refresh(fact.profileId, gap: Duration.zero);
+    if (fact != null) await _refresh(fact, gap: Duration.zero);
     return _memo.lock == AccountLock.none;
   }
 
@@ -252,13 +287,26 @@ class AccountGuard {
   void _onHealth(ConnectionHealth health) {
     switch (health.phase) {
       case ConnectionPhase.verified:
-        _evidence = null;
+        _clearEvidence();
       case ConnectionPhase.broken when accountEvidence.contains(health.cause):
         _evidence = health.cause;
+        _evidenceSince ??= _clock();
       default:
         return;
     }
     _evaluate();
+  }
+
+  void _clearEvidence() {
+    _evidence = null;
+    _evidenceSince = null;
+  }
+
+  bool _held(DateTime now) {
+    final since = _evidenceSince;
+    return _evidence != null &&
+        since != null &&
+        now.difference(since) >= evidenceHold;
   }
 
   bool _fresh(SubscriptionFact fact, AccountLock ended, DateTime now) {
@@ -307,8 +355,9 @@ class AccountGuard {
     }
     if (fact != null && ended != AccountLock.none) {
       if (!_fresh(fact, ended, now)) {
-        unawaited(_refresh(fact.profileId, gap: staleRefreshGap));
-      } else if (_evidence != null && _running && !overridden && !_stopping) {
+        final suspect = _held(now) && _running && !overridden;
+        unawaited(_refresh(fact, gap: suspect ? evidenceRefreshGap : null));
+      } else if (_held(now) && _running && !overridden && !_stopping) {
         unawaited(_lockAndStop(ended, fingerprint!, fact.profileId));
       }
     }
@@ -321,7 +370,7 @@ class AccountGuard {
     int profile,
   ) async {
     _stopping = true;
-    _evidence = null;
+    _clearEvidence();
     _remember(
       _memo.copyWith(
         lockFingerprint: fingerprint,
@@ -347,11 +396,16 @@ class AccountGuard {
     unawaited(_kernel.apply(ConnectionRemedy.resumeAfterRenewal));
   }
 
-  Future<void> _refresh(int profileId, {required Duration gap}) async {
+  /// A null [gap] fetches only figures not fetched to confirm before.
+  Future<void> _refresh(SubscriptionFact fact, {Duration? gap}) async {
+    if (_checking) return;
     final now = _clock();
-    final last = _refreshedAt[profileId];
-    if (_checking || last != null && now.difference(last) < gap) return;
-    _refreshedAt[profileId] = now;
+    final fingerprint = accountFingerprint(fact);
+    final last = _memo.checkedFingerprint == fingerprint
+        ? _memo.checkedAt
+        : null;
+    if (last != null && (gap == null || now.difference(last) < gap)) return;
+    _remember(_memo.copyWith(checkedFingerprint: fingerprint, checkedAt: now));
     _checking = true;
     _publish(null);
     try {
