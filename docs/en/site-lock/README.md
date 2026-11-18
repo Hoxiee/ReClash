@@ -42,12 +42,12 @@ A lock holds up to 128 entries and 16 exit servers, and you can keep up to 32 lo
 
 ## Outside the tunnel on Linux
 
-On Linux with TUN enabled and the Helper installed, the Helper also keeps the lock in the system firewall. Outside the TUN interface it rejects traffic to the locked addresses and the fake-ip range, and it drops DNS queries for the locked names. This holds while the core is stopped or has crashed, and the Helper restores it at boot before ReClash starts. Exceptions by name apply here too; exceptions by address do not, so such an address stays blocked outside the tunnel. If something wipes the firewall, such as a firewall service restart, the Helper puts the lock back within about 10 seconds. To reach a locked site directly, turn its lock off. If the Helper is not running when you turn the last lock off, the firewall keeps blocking until the Helper is back; the page says so, and ReClash lifts the block as soon as the Helper responds.
+On Linux with TUN enabled and the Helper installed, the Helper also keeps the lock in the system firewall. Outside the TUN interface it rejects traffic to the locked addresses and the fake-ip range. A DNS query for a locked name is not dropped: the Helper sends it into the tunnel, and the core answers with a fake address, so the name resolves and the connection leaves through the locked exit. Every other DNS query passes through untouched, so names known only to the home router or to another VPN keep resolving. This holds while the core is stopped or has crashed, and the Helper restores it at boot before ReClash starts. Exceptions by name apply here too; exceptions by address do not, so such an address stays blocked outside the tunnel. If something wipes the firewall, such as a firewall service restart, the Helper puts the lock back within about 10 seconds. To reach a locked site directly, turn its lock off. If the Helper is not running when you turn the last lock off, the firewall keeps blocking until the Helper is back; the page says so, and ReClash lifts the block as soon as the Helper responds.
 
 > [!IMPORTANT]
 > While a lock is enabled, every DNS query outside the tunnel passes through the Helper. If the Helper stops, those queries stop too instead of leaking.
 
-A dropped DNS query is not answered, so an application waits for its own timeout before it gives up on a locked name. A query the Helper cannot read, such as a fragmented one, is dropped the same way.
+Only a query for a locked name, and only over IPv4, goes into the tunnel. A query the Helper cannot read, such as a fragmented one, and a locked name asked over IPv6, are dropped without an answer, so an application waits for its own timeout.
 
 ## Limitations
 

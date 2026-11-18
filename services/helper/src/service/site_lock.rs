@@ -200,25 +200,35 @@ struct DnsFilter<'a> {
     redirect: Option<Ipv4Addr>,
 }
 
+// The address an off-TUN query is redirected to. Without the Core's cgroup its own
+// upstreams would loop, and without a TUN there is nowhere to redirect.
+fn redirect_target(tun: &str, dns: Option<&DnsFilter>) -> Option<Ipv4Addr> {
+    let dns = dns?;
+    dns.cgroup?;
+    if tun.is_empty() {
+        return None;
+    }
+    dns.redirect
+}
+
 // One rule per line: nft does not parse a reject statement closed by "}" on its line.
 // Without a TUN nothing may reach these addresses but the core's proxied connections.
 fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> String {
     let output = name == "output";
+    let redirect = output && redirect_target(tun, dns).is_some();
     let mut through_tun = String::new();
-    if let (true, Some(_)) = (output, dns) {
+    if output && dns.is_some() {
         through_tun.push_str("    oifname \"lo\" accept\n");
     }
     if !tun.is_empty() {
         through_tun.push_str(&format!("    oifname \"{tun}\" accept\n"));
     }
-    if let Some(dns) = dns {
-        // The Core's own upstream DNS must keep working (redir-host mode).
-        if let (true, Some(cgroup)) = (output, dns.cgroup) {
-            let level = cgroup.split('/').count();
-            through_tun.push_str(&format!(
-                "    socket cgroupv2 level {level} \"{cgroup}\" meta l4proto {{ tcp, udp }} th dport 53 accept\n"
-            ));
-        }
+    if redirect {
+        // The redirected query now targets the TUN's own subnet, which @v4 holds.
+        through_tun.push_str(&format!(
+            "    meta mark {LOCKED_MARK:#x} ct status dnat accept\n"
+        ));
+    } else if !output && dns.is_some() {
         through_tun.push_str(&format!(
             "    meta l4proto {{ tcp, udp }} th dport 53 queue num {queue}\n"
         ));
@@ -230,6 +240,30 @@ fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> St
          ip daddr @v4 reject with icmpx admin-prohibited\n    \
          meta l4proto tcp ip6 daddr @v6 reject with tcp reset\n    \
          ip6 daddr @v6 reject with icmpx admin-prohibited\n  }}\n"
+    )
+}
+
+// The output queue marks off-TUN DNS for the redirect, and the NAT hooks settle a packet
+// at their own priority, before the filter hook. A mark made at the filter priority is
+// therefore too late for the redirect, and the guard would drop the query.
+fn queue_block(queue: u16, tun: &str, dns: Option<&DnsFilter>) -> String {
+    let Some(dns) = dns else {
+        return String::new();
+    };
+    let mut text = String::from("    oifname \"lo\" accept\n");
+    if !tun.is_empty() {
+        text.push_str(&format!("    oifname \"{tun}\" accept\n"));
+    }
+    // The Core's own upstream DNS must keep working (redir-host mode).
+    if let Some(cgroup) = dns.cgroup {
+        let level = cgroup.split('/').count();
+        text.push_str(&format!(
+            "    socket cgroupv2 level {level} \"{cgroup}\" meta l4proto {{ tcp, udp }} th dport 53 accept\n"
+        ));
+    }
+    format!(
+        "  chain dns_queue {{\n    type filter hook output priority mangle; policy accept;\n\
+         {text}    meta l4proto {{ tcp, udp }} th dport 53 queue num {queue}\n  }}\n"
     )
 }
 
@@ -341,9 +375,10 @@ fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilt
         })
         .collect();
     format!(
-        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}{}}}\n",
+        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}{}{}}}\n",
         set_block("v4", "ipv4_addr", v4),
         set_block("v6", "ipv6_addr", v6),
+        queue_block(scope.queue, tun, dns),
         chain_block("output", scope.queue, tun, dns),
         chain_block("forward", scope.queue, tun, dns),
         redirect_block(tun, dns),
@@ -1271,17 +1306,17 @@ mod tests {
     }
 
     #[test]
-    fn dns_ruleset_queues_off_tun_dns_after_the_exemptions() {
+    fn dns_ruleset_queues_off_tun_dns_before_the_nat_hooks() {
         let text = dns_rules("tun0", Some(CGROUP));
         let queue = "meta l4proto { tcp, udp } th dport 53 queue num 33768";
         let cgroup = format!(
             "socket cgroupv2 level 2 \"{CGROUP}\" meta l4proto {{ tcp, udp }} th dport 53 accept"
         );
         assert!(text.contains(&format!(
-            "  chain output {{\n    type filter hook output priority filter; policy accept;\n    \
-             oifname \"lo\" accept\n    oifname \"tun0\" accept\n    {cgroup}\n    {queue}\n    \
-             meta l4proto tcp ip daddr @v4 reject with tcp reset\n"
+            "  chain dns_queue {{\n    type filter hook output priority mangle; policy accept;\n    \
+             oifname \"lo\" accept\n    oifname \"tun0\" accept\n    {cgroup}\n    {queue}\n  }}\n"
         )));
+        assert!(text.find("chain dns_queue").unwrap() < text.find("chain output").unwrap());
         assert!(text.contains(&format!(
             "  chain forward {{\n    type filter hook forward priority filter; policy accept;\n    \
              oifname \"tun0\" accept\n    {queue}\n    meta l4proto tcp ip daddr @v4 reject"
@@ -1294,6 +1329,11 @@ mod tests {
         assert!(text.contains(
             "  chain dns_redirect {\n    type nat hook output priority 10; policy accept;\n    \
              meta nfproto ipv4 meta mark 0x5c1d dnat ip to 198.18.0.2\n  }\n"
+        ));
+        // The redirected packet now targets the fake range, which the output reject holds.
+        assert!(text.contains(
+            "    meta mark 0x5c1d ct status dnat accept\n    \
+             meta l4proto tcp ip daddr @v4 reject with tcp reset\n"
         ));
         for hook in ["output", "forward"] {
             assert!(text.contains(&format!(
@@ -1333,7 +1373,8 @@ mod tests {
         let text = dns_rules("", None);
         assert!(text.contains("policy accept;\n    oifname \"lo\" accept\n    meta l4proto { tcp, udp } th dport 53 queue num 33768\n"));
         assert!(!text.contains("cgroupv2"));
-        assert_eq!(text.matches("oifname").count(), 1);
+        assert!(!text.contains("dnat ip to"));
+        assert!(!text.contains("oifname \"tun"));
     }
 
     #[test]

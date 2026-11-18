@@ -1968,8 +1968,13 @@ so an exception frees a name only from its own lock; an exception the host canno
 address exceptions are not subtracted from the prefixes. A GeoSite update recompiles the locks, which refreshes both. `SiteLockHostPolicy` polls it every 15 s with the last
 revision, so an unchanged policy costs one hash, and sends it to the Helper's `PUT /site-lock`; `DELETE` lifts it when no
 lock is enabled. The Helper keeps the `reclash_sitelock_<uid>` nft table: locked addresses are rejected on every interface
-but `lo` and the TUN, and off-TUN DNS goes to NFQUEUE `0x8000 | uid` without `bypass`, where the Helper drops
-queries for locked names and every query it cannot parse whole (fragments, split TCP messages). A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. The Helper's own cgroup,
+but `lo` and the TUN, and off-TUN DNS goes to NFQUEUE `0x8000 | uid` without `bypass` from a chain at the `mangle`
+priority, before the NAT hooks. The Helper marks a query for a locked name and accepts it, and the table DNATs that mark
+into the TUN, so the Core answers with a fake address and the connection reaches its exit. Every query the Helper cannot
+parse whole (fragments, split TCP messages) keeps the plain drop, as does a marked query on IPv6 or in a flow NAT already
+settled. The output reject rule carries the only exemption for such a redirected packet, which now targets the fake
+range. A chain later than the NAT hooks would mark too late for the redirect and drop the query instead.
+A dead Helper therefore stops all off-TUN DNS instead of leaking locked names. The Helper's own cgroup,
 which the Core lives in, is exempt so the Core can still resolve upstream. The applied policy is persisted in the
 Helper's state directory and restored before `READY=1`; the unit runs before `network-pre.target`, so locks hold from boot, before the app
 starts. Every 10 s the Helper re-applies a persisted policy whose table has disappeared (`nft flush ruleset`, a
