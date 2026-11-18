@@ -71,7 +71,7 @@ bool siteLockActive(Ref ref) => ref.watch(
 );
 
 /// The prefixes the Android TUN must always route while a lock is on: the
-/// Core's locked addresses plus the fake-ip ranges, the list the Linux host
+/// Core's locked addresses plus the fake-ip ranges, the list the desktop host
 /// policy gets. A Core that cannot answer yet keeps the last list.
 @Riverpod(keepAlive: true)
 class SiteLockRoutes extends _$SiteLockRoutes {
@@ -88,7 +88,7 @@ class SiteLockRoutes extends _$SiteLockRoutes {
   }
 }
 
-/// What the Linux Helper's firewall policy last reported.
+/// What the Helper's host policy last reported.
 @Riverpod(keepAlive: true)
 class SiteLockHostState extends _$SiteLockHostState {
   @override

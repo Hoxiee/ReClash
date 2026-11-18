@@ -12,6 +12,9 @@ pub mod peer;
 pub mod site_lock;
 #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
 mod site_lock_dns;
+#[cfg(any(windows, test))]
+#[cfg_attr(not(all(windows, feature = "windows-service")), allow(dead_code))]
+mod site_lock_windows;
 #[cfg(all(feature = "windows-service", target_os = "windows"))]
 pub mod windows;
 #[cfg(all(feature = "windows-service", target_os = "windows"))]

@@ -376,8 +376,8 @@ final class HelperClient {
     }
   }
 
-  /// nft loads a ruleset of up to the address and name limits inside these
-  /// requests, so they wait far longer than a ping.
+  /// The Helper loads a firewall ruleset of up to the address and name limits
+  /// inside these requests, so they wait far longer than a ping.
   static const siteLockTimeout = Duration(seconds: 20);
 
   Future<void> putSiteLock({

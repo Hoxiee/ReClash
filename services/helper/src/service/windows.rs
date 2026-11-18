@@ -28,6 +28,7 @@ pub fn main() -> Result<()> {
         Ok(ServiceCommand::Install { owner_pid }) => windows_install::install(owner_pid),
         Ok(ServiceCommand::Upgrade) => windows_install::upgrade(),
         Ok(ServiceCommand::Uninstall) => windows_install::uninstall(),
+        Ok(ServiceCommand::LiftSiteLock) => windows_install::lift_site_lock(),
         Err(error) => Err(error),
     };
     if let Err(error) = maintenance {

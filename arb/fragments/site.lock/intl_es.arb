@@ -2,7 +2,7 @@
   "siteLockTitle": "Anclaje de sitios",
   "siteLockNew": "Nuevo anclaje",
   "siteLockEdit": "Editar anclaje",
-  "siteLockFooter": "Un anclaje fija sitios a los servidores de salida que elijas: el tráfico anclado sale solo por uno de ellos o se rechaza. En Linux con TUN y Helper, los sitios anclados siguen bloqueados fuera del túnel aunque el núcleo se detenga. El DNS sobre HTTPS del navegador puede saltarse esto tras un fallo, así que desactívalo en el navegador para los sitios anclados.",
+  "siteLockFooter": "Un anclaje fija sitios a los servidores de salida que elijas: el tráfico anclado sale solo por uno de ellos o se rechaza. En Linux y Windows con TUN y Helper, los sitios anclados siguen bloqueados fuera del túnel aunque el núcleo se detenga. El DNS sobre HTTPS del navegador puede saltarse esto tras un fallo, así que desactívalo en el navegador para los sitios anclados.",
   "siteLockEmpty": "Sin anclajes",
   "siteLockEmptyHint": "Ancla un sitio a los servidores de salida que puede usar.",
   "siteLockThrough": "Vía {exit}",

@@ -1,4 +1,4 @@
-use super::hub::{error_response, json_response};
+use super::hub::{error_response, json_response, log_message};
 use super::site_lock_dns::{
     validate_names, DnsQueue, GuardedNames, Matcher, Names, NoQueue, SystemQueue, LOCKED_MARK,
 };
@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 use warp::http::StatusCode;
 use warp::{Filter, Rejection};
 
@@ -24,18 +25,19 @@ const MAX_STDERR_CHARS: usize = 1024;
 const MAX_ERROR_ENTRY_CHARS: usize = 64;
 // 8192 IPv6 CIDRs plus the largest escaped name list.
 const MAX_BODY_BYTES: u64 = 16 * 1024 * 1024;
+const HEAL_INTERVAL: Duration = Duration::from_secs(10);
 #[cfg(target_os = "linux")]
 const NFT_PATHS: [&str; 3] = ["/usr/sbin/nft", "/usr/bin/nft", "/sbin/nft"];
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SiteLockRequest {
-    tun: String,
-    addresses: Vec<String>,
+    pub(super) tun: String,
+    pub(super) addresses: Vec<String>,
     #[serde(default)]
-    names: Names,
+    pub(super) names: Names,
     #[serde(default)]
-    guarded: Vec<GuardedNames>,
+    pub(super) guarded: Vec<GuardedNames>,
 }
 
 impl SiteLockRequest {
@@ -66,9 +68,9 @@ pub(super) trait NftRunner: Send + Sync {
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
-struct Addresses {
-    v4: Vec<(u32, u8)>,
-    v6: Vec<(u128, u8)>,
+pub(super) struct Addresses {
+    pub(super) v4: Vec<(u32, u8)>,
+    pub(super) v6: Vec<(u128, u8)>,
 }
 
 impl Addresses {
@@ -89,7 +91,7 @@ fn validate_tun(tun: &str) -> Result<(), String> {
     }
 }
 
-fn v4_mask(prefix: u8) -> u32 {
+pub(super) fn v4_mask(prefix: u8) -> u32 {
     u32::MAX.checked_shl(32 - u32::from(prefix)).unwrap_or(0)
 }
 
@@ -339,7 +341,7 @@ fn tun_peer(_tun: &str) -> Option<Ipv4Addr> {
     None
 }
 
-fn subnet_peer(address: u32, mask: u32) -> Option<Ipv4Addr> {
+pub(super) fn subnet_peer(address: u32, mask: u32) -> Option<Ipv4Addr> {
     let network = address & mask;
     let broadcast = network | !mask;
     if broadcast - network < 3 || address == network || address == broadcast {
@@ -492,37 +494,51 @@ fn cgroup_path(proc_cgroup: &str) -> Option<String> {
     valid.then(|| path.to_string())
 }
 
-pub(super) struct SiteLockService {
-    state_dir: PathBuf,
+pub(super) enum HostError {
+    Missing,
+    Failed(&'static str, String),
+}
+
+impl From<NftError> for HostError {
+    fn from(error: NftError) -> Self {
+        match error {
+            NftError::Missing => Self::Missing,
+            NftError::Failed(message) => Self::Failed("nftFailed", message),
+        }
+    }
+}
+
+impl std::fmt::Display for HostError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Missing => formatter.write_str("the nft binary was not found"),
+            Self::Failed(_, message) => formatter.write_str(message),
+        }
+    }
+}
+
+/// What holds a lock outside the Core: nft on Linux, WFP and NRPT on Windows.
+pub(super) trait HostLayer: Send + Sync {
+    /// The matcher is the strict one of a request being put; a restore passes none.
+    fn apply(
+        &self,
+        request: &SiteLockRequest,
+        addresses: &Addresses,
+        matcher: Option<Matcher>,
+    ) -> Result<(), HostError>;
+    /// Whether the system still holds what applying the request made.
+    fn holds(&self, request: &SiteLockRequest, addresses: &Addresses) -> Result<bool, String>;
+    fn lift(&self) -> Result<(), HostError>;
+}
+
+struct NftLayer {
     scope: Scope,
     runner: Box<dyn NftRunner>,
     queue: Arc<dyn DnsQueue>,
     cgroup: Option<String>,
-    guard: Mutex<()>,
 }
 
-impl SiteLockService {
-    pub(super) fn new(state_dir: PathBuf, scope: Scope, runner: Box<dyn NftRunner>) -> Self {
-        Self::with_dns(state_dir, scope, runner, Arc::new(NoQueue), None)
-    }
-
-    fn with_dns(
-        state_dir: PathBuf,
-        scope: Scope,
-        runner: Box<dyn NftRunner>,
-        queue: Arc<dyn DnsQueue>,
-        cgroup: Option<String>,
-    ) -> Self {
-        Self {
-            state_dir,
-            scope,
-            runner,
-            queue,
-            cgroup,
-            guard: Mutex::new(()),
-        }
-    }
-
+impl NftLayer {
     /// Starts the queue before a ruleset that sends DNS to it is applied, and
     /// returns the matcher to put back if that ruleset is refused.
     fn prepare_dns(
@@ -545,6 +561,87 @@ impl SiteLockService {
         ruleset(&self.scope, &request.tun, addresses, dns.as_ref())
     }
 
+    // The queue is started by a policy with names, and a restart rebinds it; a rule
+    // sending packets to a queue nobody answers would hold every off-TUN query.
+    fn queue_ok(&self, request: &SiteLockRequest) -> bool {
+        request.name_count() == 0 || self.queue.running()
+    }
+}
+
+impl HostLayer for NftLayer {
+    fn apply(
+        &self,
+        request: &SiteLockRequest,
+        addresses: &Addresses,
+        matcher: Option<Matcher>,
+    ) -> Result<(), HostError> {
+        let strict = matcher.is_some();
+        let matcher = matcher.unwrap_or_else(|| Matcher::lenient(&request.names, &request.guarded));
+        let previous = self
+            .prepare_dns(request, matcher)
+            .map_err(|message| HostError::Failed("dnsFilterFailed", message))?;
+        self.runner
+            .apply(&self.render(request, addresses))
+            .map_err(|error| {
+                if let (true, Some(previous)) = (strict, previous) {
+                    self.queue.set_matcher(previous);
+                }
+                error.into()
+            })
+    }
+
+    fn holds(&self, request: &SiteLockRequest, addresses: &Addresses) -> Result<bool, String> {
+        let wanted = self.render(request, addresses);
+        let stored = self
+            .runner
+            .stored(&self.scope.table)
+            .map_err(|error| format!("{error:?}"))?
+            .is_some_and(|listing| same_ruleset(&listing, &wanted));
+        Ok(stored && self.queue_ok(request))
+    }
+
+    fn lift(&self) -> Result<(), HostError> {
+        self.runner.apply(&delete_ruleset(&self.scope))?;
+        self.queue.set_matcher(Arc::default());
+        Ok(())
+    }
+}
+
+pub(super) struct SiteLockService {
+    state_dir: PathBuf,
+    layer: Box<dyn HostLayer>,
+    guard: Mutex<()>,
+}
+
+impl SiteLockService {
+    pub(super) fn new(state_dir: PathBuf, scope: Scope, runner: Box<dyn NftRunner>) -> Self {
+        Self::with_dns(state_dir, scope, runner, Arc::new(NoQueue), None)
+    }
+
+    fn with_dns(
+        state_dir: PathBuf,
+        scope: Scope,
+        runner: Box<dyn NftRunner>,
+        queue: Arc<dyn DnsQueue>,
+        cgroup: Option<String>,
+    ) -> Self {
+        let layer = NftLayer {
+            scope,
+            runner,
+            queue,
+            cgroup,
+        };
+        Self::with_layer(state_dir, Box::new(layer))
+    }
+
+    fn with_layer(state_dir: PathBuf, layer: Box<dyn HostLayer>) -> Self {
+        Self {
+            state_dir,
+            layer,
+            guard: Mutex::new(()),
+        }
+    }
+
     #[cfg(target_os = "linux")]
     pub(super) fn system() -> Self {
         // SAFETY: getuid and getgid have no preconditions.
@@ -565,7 +662,17 @@ impl SiteLockService {
         Self::with_dns(state_dir, scope, Box::new(SystemNft), queue, cgroup)
     }
 
-    #[cfg(not(target_os = "linux"))]
+    // The install root only administrators and the service can write.
+    #[cfg(all(windows, feature = "windows-service"))]
+    pub(super) fn system() -> Self {
+        let state_dir = super::windows_install::install_root_path().unwrap_or_default();
+        Self::with_layer(
+            state_dir,
+            Box::new(super::site_lock_windows::WindowsLayer::default()),
+        )
+    }
+
+    #[cfg(not(any(target_os = "linux", all(windows, feature = "windows-service"))))]
     pub(super) fn system() -> Self {
         Self::new(PathBuf::new(), Scope::of(0), Box::new(SystemNft))
     }
@@ -617,53 +724,40 @@ impl SiteLockService {
         }
     }
 
-    /// Re-applies the persisted lock when the stored table no longer matches what the
-    /// current TUN and cgroup produce, as after `nft flush ruleset`, a firewall service
-    /// restart, or a policy applied while the TUN was still coming up; true when it did.
+    /// Re-applies the persisted lock when the system no longer holds what the current
+    /// TUN produces, as after a firewall reset or a policy applied while the TUN was
+    /// still coming up; true when it did.
     pub(super) fn heal(&self) -> Result<bool, String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
         let Some(request) = self.load()? else {
             return Ok(false);
         };
         let addresses = normalize(&request)?;
-        let wanted = self.render(&request, &addresses);
-        let stored = self
-            .runner
-            .stored(&self.scope.table)
-            .map_err(|error| format!("{error:?}"))?
-            .is_some_and(|listing| same_ruleset(&listing, &wanted));
-        if stored && self.queue_ok(&request) {
+        if self.layer.holds(&request, &addresses)? {
             return Ok(false);
         }
         self.enforce(&request).map(|()| true)
     }
 
-    // The queue is started by a policy with names, and a restart rebinds it; a rule
-    // sending packets to a queue nobody answers would hold every off-TUN query.
-    fn queue_ok(&self, request: &SiteLockRequest) -> bool {
-        request.name_count() == 0 || self.queue.running()
-    }
-
     fn enforce(&self, request: &SiteLockRequest) -> Result<(), String> {
         let addresses = normalize(request)?;
-        self.prepare_dns(request, Matcher::lenient(&request.names, &request.guarded))?;
-        self.runner
-            .apply(&self.render(request, &addresses))
-            .map_err(|error| format!("{error:?}"))
+        self.layer
+            .apply(request, &addresses, None)
+            .map_err(|error| error.to_string())
     }
 
-    /// Drops the table and the persisted state; used by uninstall.
+    /// Lifts the lock and drops the persisted state; used by uninstall.
     pub(super) fn clear(&self) -> Result<(), String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        match self.runner.apply(&delete_ruleset(&self.scope)) {
-            Ok(()) | Err(NftError::Missing) => {}
-            Err(NftError::Failed(message)) => return Err(message),
+        match self.layer.lift() {
+            Ok(()) | Err(HostError::Missing) => {}
+            Err(HostError::Failed(_, message)) => return Err(message),
         }
         self.remove_state().map_err(|error| error.to_string())
     }
 
     fn put(&self, request: SiteLockRequest) -> warp::reply::Response {
-        if !cfg!(target_os = "linux") {
+        if !SUPPORTED {
             return unsupported();
         }
         let addresses = match normalize(&request) {
@@ -679,21 +773,8 @@ impl SiteLockService {
             }
         };
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        let previous = match self.prepare_dns(&request, matcher) {
-            Ok(previous) => previous,
-            Err(message) => {
-                return error_response(
-                    "dnsFilterFailed",
-                    message,
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                )
-            }
-        };
-        if let Err(response) = self.run(&self.render(&request, &addresses)) {
-            if let Some(previous) = previous {
-                self.queue.set_matcher(previous);
-            }
-            return *response;
+        if let Err(error) = self.layer.apply(&request, &addresses, Some(matcher)) {
+            return host_response(error);
         }
         if let Err(error) = self.persist(&request) {
             return error_response(
@@ -713,16 +794,14 @@ impl SiteLockService {
     }
 
     fn delete(&self) -> warp::reply::Response {
-        if !cfg!(target_os = "linux") {
+        if !SUPPORTED {
             return unsupported();
         }
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        match self.run(&delete_ruleset(&self.scope)) {
-            Ok(()) => {
-                self.queue.set_matcher(Arc::default());
-            }
+        match self.layer.lift() {
+            Ok(()) => {}
             // Without nft there is no table to delete unless a lock was persisted.
-            Err(response) if self.state_file().exists() => return *response,
+            Err(error) if self.state_file().exists() => return host_response(error),
             Err(_) => {}
         }
         if let Err(error) = self.remove_state() {
@@ -736,7 +815,7 @@ impl SiteLockService {
     }
 
     fn get(&self) -> warp::reply::Response {
-        if !cfg!(target_os = "linux") {
+        if !SUPPORTED {
             return unsupported();
         }
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
@@ -767,29 +846,61 @@ impl SiteLockService {
             }
         }
     }
+}
 
-    fn run(&self, ruleset: &str) -> Result<(), Box<warp::reply::Response>> {
-        self.runner.apply(ruleset).map_err(|error| {
-            Box::new(match error {
-                NftError::Missing => error_response(
-                    "nftMissing",
-                    "the nft binary was not found",
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                ),
-                NftError::Failed(message) => {
-                    error_response("nftFailed", message, StatusCode::INTERNAL_SERVER_ERROR)
-                }
-            })
-        })
+const SUPPORTED: bool = cfg!(any(
+    target_os = "linux",
+    all(windows, feature = "windows-service")
+));
+
+fn host_response(error: HostError) -> warp::reply::Response {
+    match error {
+        HostError::Missing => error_response(
+            "nftMissing",
+            "the nft binary was not found",
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ),
+        HostError::Failed(code, message) => {
+            error_response(code, message, StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
 fn unsupported() -> warp::reply::Response {
     error_response(
         "unsupported",
-        "site lock is only available on Linux",
+        "site lock is not available on this system",
         StatusCode::NOT_IMPLEMENTED,
     )
+}
+
+/// Re-applies a lock the system lost and retries a restore that failed at boot.
+/// A repeated error is logged once.
+pub(super) async fn keep_healed(site_lock: Arc<SiteLockService>) {
+    let mut interval = tokio::time::interval(HEAL_INTERVAL);
+    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+    interval.tick().await;
+    let mut reported: Option<String> = None;
+    loop {
+        interval.tick().await;
+        let service = site_lock.clone();
+        let Ok(outcome) = tokio::task::spawn_blocking(move || service.heal()).await else {
+            continue;
+        };
+        match outcome {
+            Ok(healed) => {
+                if healed {
+                    log_message("Helper re-applied the site lock the system lost".to_string());
+                }
+                reported = None;
+            }
+            Err(error) if reported.as_ref() != Some(&error) => {
+                log_message(format!("Helper could not re-apply the site lock: {error}"));
+                reported = Some(error);
+            }
+            Err(_) => {}
+        }
+    }
 }
 
 async fn blocking(

@@ -7,7 +7,7 @@ must:
   before-rules: The core claims a locked connection before mode and rules, and sends it through a live exit or refuses it; groups and built-ins never qualify as exits.
   exits-by-definition: An exit is a server by its definition without the name, falling back to the name once a refresh changes it, so renames keep the lock and one address serving many exits stays apart.
   atomic-apply: A rejected lock list leaves the previous one in force and reports every problem.
-  fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them.
+  fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them. On Windows persistent WFP filters block the same addresses plus the tunnel resolver off the TUN, and NRPT sends locked names only to that resolver, so they fail closed without the core or the Helper.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
   core-only-warning: Entries the host cannot mirror are reported as core-only rather than silently dropped.
   untouched: Traffic that matches no lock is neither routed nor filtered differently, except that a domain lock over a profile without a sniffer turns sniffing on, so the profile's own domain rules also see sniffed names, and on Android an enabled lock turns VPN bypass off for every app.
@@ -17,6 +17,7 @@ watch:
   - core/sitelock/**
   - services/helper/src/service/site_lock.rs
   - services/helper/src/service/site_lock_dns.rs
+  - services/helper/src/service/site_lock_windows.rs
   - lib/models/site_lock.dart
   - lib/providers/site_lock.dart
   - lib/core/desktop/site_lock_policy.dart

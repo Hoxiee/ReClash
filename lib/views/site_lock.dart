@@ -155,7 +155,7 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
     List<SiteLock> locks,
     SiteLockReport? report,
   ) {
-    final host = widget.hostFirewall ?? system.isLinux;
+    final host = widget.hostFirewall ?? (system.isLinux || system.isWindows);
     final anyEnabled = locks.any((lock) => lock.enabled);
     final tunEnabled = ref.watch(
       patchClashConfigProvider.select((state) => state.tun.enable),

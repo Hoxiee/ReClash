@@ -118,7 +118,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         unawaited(_syncTelegramProxy());
       }
     });
-    if (system.isLinux) {
+    if (system.isLinux || system.isWindows) {
       _startHostPolicy();
     }
   }

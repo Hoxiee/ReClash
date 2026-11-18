@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/netip"
+	"runtime"
 	"slices"
 	"strings"
 	"sync/atomic"
@@ -171,8 +172,11 @@ func storeSiteLocks(state *siteLockState) {
 	siteLocks.Store(withNames(state))
 }
 
+// NRPT, the Windows host layer, holds only full names and suffixes.
+const hostMatchesPatterns = runtime.GOOS != "windows"
+
 func withNames(state *siteLockState) *siteLockState {
-	state.names, state.guarded, state.partial = state.set.Names(loadGeoSite)
+	state.names, state.guarded, state.partial = state.set.Names(loadGeoSite, hostMatchesPatterns)
 	encoded, _ := json.Marshal([]any{state.names, state.guarded})
 	state.namesSum = sha256.Sum256(encoded)
 	return state

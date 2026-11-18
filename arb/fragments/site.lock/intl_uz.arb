@@ -2,7 +2,7 @@
   "siteLockTitle": "Saytlarni mahkamlash",
   "siteLockNew": "Yangi mahkamlash",
   "siteLockEdit": "Mahkamlashni tahrirlash",
-  "siteLockFooter": "Mahkamlash saytlarni siz tanlagan chiqish serverlariga biriktiradi: mahkamlangan trafik faqat ulardan biri orqali chiqadi yoki rad etiladi. Linuxda TUN va Helper bilan yadro to‘xtagan taqdirda ham mahkamlangan saytlar tunneldan tashqarida bloklangan holda qoladi. Brauzerning DNS-over-HTTPS funksiyasi nosozlikdan keyin buni chetlab o‘tishi mumkin, shuning uchun mahkamlangan saytlar uchun uni brauzerda o‘chiring.",
+  "siteLockFooter": "Mahkamlash saytlarni siz tanlagan chiqish serverlariga biriktiradi: mahkamlangan trafik faqat ulardan biri orqali chiqadi yoki rad etiladi. Linux va Windowsda TUN va Helper bilan yadro to‘xtagan taqdirda ham mahkamlangan saytlar tunneldan tashqarida bloklangan holda qoladi. Brauzerning DNS-over-HTTPS funksiyasi nosozlikdan keyin buni chetlab o‘tishi mumkin, shuning uchun mahkamlangan saytlar uchun uni brauzerda o‘chiring.",
   "siteLockEmpty": "Mahkamlashlar yo‘q",
   "siteLockEmptyHint": "Saytni foydalanishi mumkin bo‘lgan chiqish serverlariga mahkamlang.",
   "siteLockThrough": "{exit} orqali",

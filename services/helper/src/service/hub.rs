@@ -930,7 +930,13 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
     caller_routes(Caller::default())
 }
 
-#[cfg(any(test, not(target_os = "linux")))]
+#[cfg(any(
+    test,
+    not(any(
+        all(feature = "windows-service", target_os = "windows"),
+        target_os = "linux"
+    ))
+))]
 pub(super) fn caller_routes(
     caller: Caller,
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {

@@ -49,6 +49,18 @@ On Linux with TUN enabled and the Helper installed, the Helper also keeps the lo
 
 Only a query for a locked name over IPv4 and UDP goes into the tunnel. A query the Helper cannot read, such as a fragmented one, and a locked name asked over IPv6 or TCP, are dropped without an answer, so an application waits for its own timeout.
 
+## Outside the tunnel on Windows
+
+On Windows with TUN enabled and the Helper installed, the Helper keeps the lock in Windows Filtering Platform and in the DNS client's name resolution policy. Outside the TUN interface Windows rejects connections to the locked addresses, the fake-ip range and the tunnel's DNS address. Locked names, both full names and suffixes, are resolved only by the tunnel's DNS, so the core answers with a fake address and the connection leaves through the locked exit; every other name resolves as before. While the core is stopped or has crashed there is no tunnel, so a locked name does not resolve and the block holds. The filters and rules persist across a reboot without the Helper. If something removes them, the Helper puts them back within about 10 seconds, and uninstalling the Helper lifts them. If the Helper is broken or was deleted without uninstalling, run `ReClashService.exe lift-site-lock` from the ReClash folder in an administrator terminal: it stops the Helper and removes the filters and rules. Turning the last lock off behaves as on Linux.
+
+Windows differs from Linux in three ways:
+
+- **Keywords and regular expressions**: the name resolution policy matches only full names and suffixes, so `DOMAIN-KEYWORD`, `DOMAIN-REGEX` and `DOMAIN-WILDCARD` entries, and the keywords and expressions of a geosite list, are core-only.
+- **Exceptions**: neither name nor address exceptions apply outside the tunnel, so an excepted name under a locked suffix does not resolve while the core is stopped.
+- **Shared connections**: traffic Windows forwards for other devices, such as a mobile hotspot, is not filtered.
+
+On a computer whose name resolution policy comes from domain Group Policy, the Helper adds its rules to that policy, and a policy refresh can remove them until the Helper restores them.
+
 ## On Android
 
 Android has no firewall layer for the lock, but while a lock is on ReClash closes the gaps its own VPN would open:
@@ -62,11 +74,11 @@ These options apply when the VPN starts. Turning a lock on or off, or changing i
 
 ## Limitations
 
-- **Windows and macOS** have the core layer only: once the core stops, nothing blocks the locked sites.
+- **macOS** has the core layer only: once the core stops, nothing blocks the locked sites.
 - **Android** adds only the VPN measures above: once the core stops, nothing but the system kill switch blocks the locked sites.
 - **TUN off**: the lock covers only traffic that goes through the core, and the system firewall blocks nothing.
 - **Sniffing**: domain entries match a connection by its name, and one whose name the core did not resolve itself, such as a browser using its own DNS, arrives as a bare address. While a lock with domain entries is on, the core therefore reads the name from TLS, HTTP and QUIC on their usual ports even when the profile has no sniffer; a profile that sets up its own sniffer keeps it. The name only picks the rule, so the connection still goes to the same address, but domain rules of the profile can now also catch such connections.
 - **Encrypted Client Hello**: a browser that hides the site name with ECH, as Chrome and Firefox do for many Cloudflare sites, reveals only the provider's public name, so such a connection matches only address entries unless the core resolved the name itself.
-- **Core-only entries**: entries the system firewall cannot mirror, such as negated geosite attributes, regular expressions with lookaround, logic rules or port rules, are held only while the core runs. The page lists the locks that have them.
+- **Core-only entries**: entries the system firewall cannot mirror, such as negated geosite attributes, regular expressions with lookaround, logic rules or port rules, and on Windows keywords and regular expressions, are held only while the core runs. The page lists the locks that have them.
 - **Encrypted DNS in browsers**: DNS over HTTPS and DNS over TLS bypass the Helper's DNS filter. While the core runs this does not matter, but after a crash such a browser can resolve and reach a locked site. Turn secure DNS off in the browser: in Chrome under **Settings → Privacy and security → Security → Use secure DNS**, in Firefox under **Settings → Privacy & Security → DNS over HTTPS**.
 - **Hard-coded addresses**: an application that connects by an address it already knows is caught only by address entries. Add `IP-CIDR` entries for services that do this.

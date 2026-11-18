@@ -2,7 +2,7 @@
   "siteLockTitle": "Site lock",
   "siteLockNew": "New lock",
   "siteLockEdit": "Edit lock",
-  "siteLockFooter": "A lock pins sites to the exit servers you choose: locked traffic leaves only through one of them or is refused. On Linux with TUN and the Helper, locked sites stay blocked outside the tunnel even if the core stops. Browser DNS-over-HTTPS can bypass that after a crash, so turn it off in the browser for locked sites.",
+  "siteLockFooter": "A lock pins sites to the exit servers you choose: locked traffic leaves only through one of them or is refused. On Linux and Windows with TUN and the Helper, locked sites stay blocked outside the tunnel even if the core stops. Browser DNS-over-HTTPS can bypass that after a crash, so turn it off in the browser for locked sites.",
   "siteLockEmpty": "No site locks",
   "siteLockEmptyHint": "Pin a site to the exit servers it may use.",
   "siteLockThrough": "Through {exit}",

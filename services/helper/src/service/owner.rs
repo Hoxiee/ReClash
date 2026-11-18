@@ -14,6 +14,7 @@ pub enum ServiceCommand {
     Install { owner_pid: u32 },
     Upgrade,
     Uninstall,
+    LiftSiteLock,
 }
 
 /// The service is registered with its owner on the command line, which is how a
@@ -35,6 +36,7 @@ pub fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<Servi
         }
         [command] if *command == OsStr::new("uninstall") => Ok(ServiceCommand::Uninstall),
         [command] if *command == OsStr::new("upgrade") => Ok(ServiceCommand::Upgrade),
+        [command] if *command == OsStr::new("lift-site-lock") => Ok(ServiceCommand::LiftSiteLock),
         [command, flag, pid]
             if *command == OsStr::new("install") && *flag == OsStr::new(OWNER_PID_FLAG) =>
         {
@@ -194,6 +196,10 @@ mod tests {
         assert_eq!(
             service_command(os(&["upgrade"])).unwrap(),
             ServiceCommand::Upgrade
+        );
+        assert_eq!(
+            service_command(os(&["lift-site-lock"])).unwrap(),
+            ServiceCommand::LiftSiteLock
         );
     }
 

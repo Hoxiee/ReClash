@@ -28,7 +28,7 @@ func namesOf(t *testing.T, match ...string) (Names, []string) {
 	t.Helper()
 	// Built by hand: compiling a GEOSITE entry would load the real database.
 	set := &Set{enabled: []*compiled{{lock: Lock{ID: "lock", Enabled: true, Match: match}}}}
-	names, _, partial := set.Names(geoSites)
+	names, _, partial := set.Names(geoSites, true)
 	return names, partial
 }
 
@@ -68,7 +68,7 @@ func TestNamesLeaveWhatTheFilterCannotMirrorToTheCore(t *testing.T) {
 
 func TestNamesSkipDisabledLocks(t *testing.T) {
 	set, _ := Compile([]Lock{{ID: "off", Match: []string{"DST-PORT,443"}}})
-	names, guarded, partial := set.Names(geoSites)
+	names, guarded, partial := set.Names(geoSites, true)
 	if !names.Empty() || len(guarded) != 0 || len(partial) != 0 || names.Full == nil {
 		t.Errorf("names %+v partial %v, want empty lists and nothing partial", names, partial)
 	}
@@ -80,13 +80,31 @@ func TestNamesKeepExceptionsWithTheirOwnLock(t *testing.T) {
 		{lock: Lock{ID: "guarded", Enabled: true, Match: []string{"DOMAIN-SUFFIX,example.com"}, Except: []string{"DOMAIN,free.example.com"}}},
 		{lock: Lock{ID: "addresses", Enabled: true, Match: []string{"DOMAIN,a.test"}, Except: []string{"IP-CIDR,10.0.0.0/8"}}},
 	}}
-	names, guarded, _ := set.Names(geoSites)
+	names, guarded, _ := set.Names(geoSites, true)
 	if want := []string{"example.org"}; !reflect.DeepEqual(names.Suffix, want) || !reflect.DeepEqual(names.Full, []string{"a.test"}) {
 		t.Errorf("names %+v, want example.org and a.test merged", names)
 	}
 	if len(guarded) != 1 || !reflect.DeepEqual(guarded[0].Names.Suffix, []string{"example.com"}) ||
 		!reflect.DeepEqual(guarded[0].Except.Full, []string{"free.example.com"}) {
 		t.Errorf("guarded %+v, want example.com except free.example.com", guarded)
+	}
+}
+
+func TestNamesWithoutPatternsLeaveKeywordsAndRegexesToTheCore(t *testing.T) {
+	set := &Set{enabled: []*compiled{
+		{lock: Lock{ID: "names", Enabled: true, Match: []string{"DOMAIN-SUFFIX,example.org"}}},
+		{lock: Lock{ID: "keyword", Enabled: true, Match: []string{"DOMAIN,a.test", "DOMAIN-KEYWORD,claude"}}},
+		{lock: Lock{ID: "geosite", Enabled: true, Match: []string{"GEOSITE,openai"}}},
+	}}
+	names, _, partial := set.Names(geoSites, false)
+	want := Names{
+		Full:    []string{"a.test", "cdn.oaistatic.com"},
+		Suffix:  []string{"example.org", "openai.com"},
+		Keyword: []string{},
+		Regex:   []string{},
+	}
+	if !reflect.DeepEqual(names, want) || !reflect.DeepEqual(partial, []string{"keyword", "geosite"}) {
+		t.Errorf("names %+v partial %v, want %+v and the keyword and geosite locks", names, partial, want)
 	}
 }
 

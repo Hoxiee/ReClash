@@ -2,7 +2,7 @@
   "siteLockTitle": "Sahypa bekitmesi",
   "siteLockNew": "Täze bekitme",
   "siteLockEdit": "Bekitmäni üýtget",
-  "siteLockFooter": "Bekitme sahypalary saýlan çykyş serwerlerine bekidýär: bekidilen gatnaw diňe olaryň biri arkaly çykýar ýa-da ret edilýär. Linux-da TUN we Helper bilen ýadro togtasa-da, bekidilen sahypalar tuneliň daşynda bloklanyp galýar. Brauzeriň DNS-over-HTTPS-i awariýadan soň muny aýlap geçip biler, şonuň üçin bekidilen sahypalar üçin ony brauzerde öçüriň.",
+  "siteLockFooter": "Bekitme sahypalary saýlan çykyş serwerlerine bekidýär: bekidilen gatnaw diňe olaryň biri arkaly çykýar ýa-da ret edilýär. Linux-da we Windows-da TUN we Helper bilen ýadro togtasa-da, bekidilen sahypalar tuneliň daşynda bloklanyp galýar. Brauzeriň DNS-over-HTTPS-i awariýadan soň muny aýlap geçip biler, şonuň üçin bekidilen sahypalar üçin ony brauzerde öçüriň.",
   "siteLockEmpty": "Bekitme ýok",
   "siteLockEmptyHint": "Sahypany ulanyp biljek çykyş serwerlerine bekidiň.",
   "siteLockThrough": "{exit} arkaly",

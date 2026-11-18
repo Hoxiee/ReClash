@@ -1,8 +1,9 @@
 use crate::service::hub::{
-    caller_routes, ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown,
-    Caller,
+    caller_routes_with, ensure_core_sha256_configured, log_message,
+    release_managed_core_on_shutdown, Caller,
 };
 use crate::service::owner::{client_pid, same_sid, ManagedHost, TcpConnection};
+use crate::service::site_lock::{self, SiteLockService};
 
 use std::convert::Infallible;
 use std::ffi::c_void;
@@ -12,6 +13,7 @@ use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::pin::Pin;
 use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
@@ -358,6 +360,11 @@ where
         .port();
     let published = PublishedPort::publish(port)
         .map_err(|error| anyhow::anyhow!("publish helper server port: {error}"))?;
+    let site_lock = Arc::new(SiteLockService::system());
+    if let Err(error) = site_lock.restore() {
+        log_message(format!("Helper could not restore the site lock: {error}"));
+    }
+    let healing = tokio::spawn(site_lock::keep_healed(site_lock.clone()));
     on_started()?;
     let incoming = AuthorizedIncoming {
         listener,
@@ -365,7 +372,8 @@ where
         retry: None,
     };
     let make_service = make_service_fn(|connection: &CallerStream| {
-        let service = warp::service(caller_routes(connection.caller.clone()));
+        let routes = caller_routes_with(connection.caller.clone(), site_lock.clone());
+        let service = warp::service(routes);
         async move { Ok::<_, Infallible>(service) }
     });
     let served = Server::builder(accept::from_stream(incoming))
@@ -375,6 +383,7 @@ where
     if let Err(error) = served {
         log_message(format!("Helper server stopped: {error}"));
     }
+    healing.abort();
     drop(published);
     release_managed_core_on_shutdown();
 

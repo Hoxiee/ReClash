@@ -3,7 +3,7 @@ use crate::service::hub::{
     begin_shutdown, ensure_core_sha256_configured, log_message,
     release_managed_core_on_shutdown_confirmed, routes_with,
 };
-use crate::service::site_lock::SiteLockService;
+use crate::service::site_lock::{self, SiteLockService};
 use anyhow::{bail, Context, Result};
 use std::ffi::{OsStr, OsString};
 use std::fs::{self, File, OpenOptions};
@@ -27,7 +27,6 @@ const OWNER_UID_ENV: &str = "RECLASH_HELPER_OWNER_UID";
 const OWNER_GID_ENV: &str = "RECLASH_HELPER_OWNER_GID";
 const NETWORK_CAPABILITIES: u64 = (1 << 12) | (1 << 13);
 const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
-const SITE_LOCK_HEAL_INTERVAL: Duration = Duration::from_secs(10);
 
 #[derive(Debug, PartialEq, Eq)]
 enum ServiceCommand {
@@ -230,7 +229,7 @@ fn run_service() -> Result<()> {
         if let Err(error) = site_lock.restore() {
             log_message(format!("Helper could not restore the site lock: {error}"));
         }
-        tokio::spawn(heal_site_lock(site_lock.clone()));
+        tokio::spawn(site_lock::keep_healed(site_lock.clone()));
         notify_systemd(b"READY=1")?;
         let shutdown = async move {
             tokio::select! {
@@ -246,37 +245,6 @@ fn run_service() -> Result<()> {
         release_managed_core_on_shutdown_confirmed()?;
         Ok(())
     })
-}
-
-// Also retries a restore that failed at boot. A repeated error is logged once.
-async fn heal_site_lock(site_lock: Arc<SiteLockService>) {
-    let mut interval = tokio::time::interval(SITE_LOCK_HEAL_INTERVAL);
-    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
-    interval.tick().await;
-    let mut reported: Option<String> = None;
-    loop {
-        interval.tick().await;
-        let service = site_lock.clone();
-        let Ok(outcome) = tokio::task::spawn_blocking(move || service.heal()).await else {
-            continue;
-        };
-        match outcome {
-            Ok(healed) => {
-                if healed {
-                    log_message(
-                        "Helper re-applied the site lock after its firewall table disappeared"
-                            .to_string(),
-                    );
-                }
-                reported = None;
-            }
-            Err(error) if reported.as_ref() != Some(&error) => {
-                log_message(format!("Helper could not re-apply the site lock: {error}"));
-                reported = Some(error);
-            }
-            Err(_) => {}
-        }
-    }
 }
 
 fn notify_systemd(message: &[u8]) -> Result<()> {

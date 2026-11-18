@@ -35,8 +35,9 @@ type GeoSiteLoader func(code string) ([]*router.Domain, error)
 // Names collects what the enabled locks match by name: locks without name
 // exceptions merge into names, the rest stay apart in guarded. An exception the
 // filter cannot mirror keeps the name locked, the safer side. partial lists the
-// locks with an entry outside both Names and Prefixes.
-func (s *Set) Names(load GeoSiteLoader) (names Names, guarded []GuardedNames, partial []string) {
+// locks with an entry outside both Names and Prefixes. Without patterns the host
+// matches only full names and suffixes, so keywords and regexes stay with the core.
+func (s *Set) Names(load GeoSiteLoader, patterns bool) (names Names, guarded []GuardedNames, partial []string) {
 	for _, lock := range s.enabledLocks() {
 		var own Names
 		covered := true
@@ -45,12 +46,18 @@ func (s *Set) Names(load GeoSiteLoader) (names Names, guarded []GuardedNames, pa
 				covered = false
 			}
 		}
+		if !patterns && own.dropPatterns() {
+			covered = false
+		}
 		if !covered {
 			partial = append(partial, lock.ID)
 		}
 		var except Names
 		for _, entry := range lock.Except {
 			except.add(entry, load)
+		}
+		if !patterns {
+			except.dropPatterns()
 		}
 		if own.Empty() {
 			continue
@@ -72,6 +79,13 @@ func (n *Names) merge(other Names) {
 	n.Suffix = append(n.Suffix, other.Suffix...)
 	n.Keyword = append(n.Keyword, other.Keyword...)
 	n.Regex = append(n.Regex, other.Regex...)
+}
+
+// dropPatterns reports whether there were keywords or regexes to drop.
+func (n *Names) dropPatterns() bool {
+	had := len(n.Keyword)+len(n.Regex) > 0
+	n.Keyword, n.Regex = nil, nil
+	return had
 }
 
 func (n Names) sorted() Names {

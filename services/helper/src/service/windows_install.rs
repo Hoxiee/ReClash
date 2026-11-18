@@ -1,5 +1,6 @@
 use crate::service::owner::{configured_owner_sid, owner_sid_arguments};
 use crate::service::peer::{process_sid, sid_to_string};
+use crate::service::site_lock::SiteLockService;
 use crate::service::windows_layout::{
     is_protected_directory, is_prunable, staging_name, Ace, InstallFailure, Manifest,
     INSTALL_MUTEX, INSTALL_ROOT_NAME, MANIFEST_NAME, PROTECTED_DIRECTORY_SDDL,
@@ -99,6 +100,10 @@ pub(super) fn uninstall() -> Result<()> {
         let manager = open_manager(ServiceManagerAccess::CONNECT)?;
         remove_service(&manager).context(InstallFailure::ServiceFailed)?;
     }
+    // Persistent filters and NRPT rules outlive the service and would keep blocking.
+    if let Err(error) = SiteLockService::system().clear() {
+        eprintln!("ReClash Service stopped; site lock cleanup failed: {error}");
+    }
     let root = install_root_path().context(InstallFailure::BundleInvalid)?;
     match fs::symlink_metadata(&root) {
         Err(error) if error.kind() == ErrorKind::NotFound => return Ok(()),
@@ -107,6 +112,21 @@ pub(super) fn uninstall() -> Result<()> {
     }
     drop(open_protected_directory(&root).context(InstallFailure::BundleInvalid)?);
     fs::remove_dir_all(&root).context("remove the installed ReClash Service")
+}
+
+/// The way out when the Helper is gone or broken and its persistent site lock stays.
+pub(super) fn lift_site_lock() -> Result<()> {
+    let _lock = InstallLock::acquire(INSTALL_MUTEX)?;
+    let manager = open_manager(ServiceManagerAccess::CONNECT)?;
+    // A running service would put the lock back within seconds.
+    if let Some(service) =
+        open_existing(&manager, ServiceAccess::QUERY_STATUS | ServiceAccess::STOP)?
+    {
+        stop_service(&service).context(InstallFailure::ServiceFailed)?;
+    }
+    SiteLockService::system()
+        .clear()
+        .map_err(|error| anyhow!("site lock cleanup failed: {error}"))
 }
 
 fn install_for(owner_sid: &str) -> Result<()> {
@@ -285,7 +305,7 @@ fn verify_bundle(path: &Path, manifest: &Manifest) -> Result<()> {
     Ok(())
 }
 
-fn install_root_path() -> Result<PathBuf> {
+pub(super) fn install_root_path() -> Result<PathBuf> {
     let mut path: *mut u16 = null_mut();
     // SAFETY: the returned buffer is freed with CoTaskMemFree as the API requires,
     // also on failure.

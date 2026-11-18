@@ -2,7 +2,7 @@
   "siteLockTitle": "사이트 고정",
   "siteLockNew": "새 고정",
   "siteLockEdit": "고정 편집",
-  "siteLockFooter": "고정은 사이트를 선택한 출구 서버에 묶습니다. 고정된 트래픽은 그중 하나로만 나가거나 거부됩니다. Linux에서 TUN과 Helper를 쓰면 코어가 중지되어도 고정된 사이트는 터널 밖에서 계속 차단됩니다. 브라우저의 DNS-over-HTTPS는 비정상 종료 후 이를 우회할 수 있으므로, 고정된 사이트에 대해서는 브라우저에서 끄세요.",
+  "siteLockFooter": "고정은 사이트를 선택한 출구 서버에 묶습니다. 고정된 트래픽은 그중 하나로만 나가거나 거부됩니다. Linux와 Windows에서 TUN과 Helper를 쓰면 코어가 중지되어도 고정된 사이트는 터널 밖에서 계속 차단됩니다. 브라우저의 DNS-over-HTTPS는 비정상 종료 후 이를 우회할 수 있으므로, 고정된 사이트에 대해서는 브라우저에서 끄세요.",
   "siteLockEmpty": "사이트 고정 없음",
   "siteLockEmptyHint": "사이트를 사용할 수 있는 출구 서버에 고정하세요.",
   "siteLockThrough": "{exit} 경유",

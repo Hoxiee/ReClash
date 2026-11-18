@@ -2,7 +2,7 @@
   "siteLockTitle": "Épinglage des sites",
   "siteLockNew": "Nouvel épinglage",
   "siteLockEdit": "Modifier l’épinglage",
-  "siteLockFooter": "Un épinglage fixe des sites aux serveurs de sortie que vous choisissez : le trafic épinglé ne sort que par l’un d’eux, ou il est refusé. Sous Linux avec TUN et le Helper, les sites épinglés restent bloqués hors du tunnel même si le cœur s’arrête. Le DNS over HTTPS du navigateur peut contourner cela après un plantage ; désactivez-le donc dans le navigateur pour les sites épinglés.",
+  "siteLockFooter": "Un épinglage fixe des sites aux serveurs de sortie que vous choisissez : le trafic épinglé ne sort que par l’un d’eux, ou il est refusé. Sous Linux et Windows avec TUN et le Helper, les sites épinglés restent bloqués hors du tunnel même si le cœur s’arrête. Le DNS over HTTPS du navigateur peut contourner cela après un plantage ; désactivez-le donc dans le navigateur pour les sites épinglés.",
   "siteLockEmpty": "Aucun épinglage",
   "siteLockEmptyHint": "Épinglez un site aux serveurs de sortie qu’il peut utiliser.",
   "siteLockThrough": "Via {exit}",

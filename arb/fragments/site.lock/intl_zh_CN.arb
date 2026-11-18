@@ -2,7 +2,7 @@
   "siteLockTitle": "站点锁定",
   "siteLockNew": "新建锁定",
   "siteLockEdit": "编辑锁定",
-  "siteLockFooter": "锁定会把站点固定到你选择的出口服务器：锁定的流量只能经由其中之一离开，否则被拒绝。在 Linux 上使用 TUN 和 Helper 时，即使核心停止，被锁定的站点仍会在隧道之外保持阻断。浏览器的 DNS-over-HTTPS 可能在崩溃后绕过这一点，因此请为被锁定的站点在浏览器中关闭它。",
+  "siteLockFooter": "锁定会把站点固定到你选择的出口服务器：锁定的流量只能经由其中之一离开，否则被拒绝。在 Linux 和 Windows 上使用 TUN 和 Helper 时，即使核心停止，被锁定的站点仍会在隧道之外保持阻断。浏览器的 DNS-over-HTTPS 可能在崩溃后绕过这一点，因此请为被锁定的站点在浏览器中关闭它。",
   "siteLockEmpty": "没有站点锁定",
   "siteLockEmptyHint": "把站点固定到它可以使用的出口服务器。",
   "siteLockThrough": "经由 {exit}",
