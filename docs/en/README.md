@@ -7,7 +7,7 @@ Technical reference for subscription providers integrating with ReClash and for 
 | Section | For | Covers |
 | --- | --- | --- |
 | [Providers](providers/README.md) | Subscription services | Response headers, provider manifest, client requests, required policy, preview API, rollout |
-| [RCX auto routing](auto-routing/README.md) | Users and providers who ship routing | Profiles, conditions, scenarios, sharing, the in-app editor |
+| [RCX auto routing](auto-routing/README.md) | Users and providers who ship routing | Profiles, conditions, scenarios, sharing |
 
 ## Machine-readable sources
 

@@ -95,19 +95,6 @@
           "pages": [
             "cookbook.md"
           ]
-        },
-        {
-          "title": {
-            "ru": "Редактор в приложении",
-            "en": "In-app editor",
-            "zh-CN": "应用内编辑器"
-          },
-          "pages": [
-            "editor/hub.md",
-            "editor/routes.md",
-            "editor/groups.md",
-            "editor/studio.md"
-          ]
         }
       ]
     },
