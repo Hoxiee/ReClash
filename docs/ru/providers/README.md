@@ -81,6 +81,21 @@ provider:
   support-url: https://t.me/example_support
 ```
 
+## Поля узла
+
+Два необязательных ключа узла в `proxies:` или в данных proxy-провайдера:
+
+```text
+proxies:
+  - name: Frankfurt 1
+    type: vless
+    desc: Streaming, 1 Gbit/s
+    favorite: true
+```
+
+- `desc` заменяет протокол на карточке узла и участвует в поиске. Псевдонимы: `description`, `serverDescription`, `server-description`.
+- `favorite: true` ставит узлу звезду. Нажатие пользователя на звезду переворачивает отметку провайдера, поэтому узел со звездой можно снять, и он останется снятым.
+
 ## Совместимость
 
 - Заголовки других клиентов читаются как стандартные: `Subscription-Userinfo`, `Content-Disposition`, `profile-title`, `profile-update-interval`, `profile-web-page-url`, `support-url`, `announce`, `hide-url`.

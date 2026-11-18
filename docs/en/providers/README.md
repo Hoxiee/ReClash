@@ -81,6 +81,21 @@ provider:
   support-url: https://t.me/example_support
 ```
 
+## Node fields
+
+Two optional keys on a node in `proxies:` or in a proxy provider's payload:
+
+```text
+proxies:
+  - name: Frankfurt 1
+    type: vless
+    desc: Streaming, 1 Gbit/s
+    favorite: true
+```
+
+- `desc` replaces the protocol on the node card and is searchable. `description`, `serverDescription` and `server-description` are accepted as aliases.
+- `favorite: true` stars the node. The user's own tap on the star flips the provider's mark, so a starred node can be unstarred and stays that way.
+
 ## Compatibility
 
 - Other clients' headers are read as standard headers: `Subscription-Userinfo`, `Content-Disposition`, `profile-title`, `profile-update-interval`, `profile-web-page-url`, `support-url`, `announce`, `hide-url`.

@@ -1084,6 +1084,25 @@ func TestProxyViewKeepsWhatTheHostReads(t *testing.T) {
 		t.Errorf("extension node view = %v, want its extension id", view)
 	}
 
+	annotatedNode, err := adapter.ParseProxy(map[string]any{
+		"name": "node-d", "type": "direct", "desc": " Fast ", "favorite": "true",
+	})
+	if err != nil {
+		t.Fatalf("parse annotated node: %v", err)
+	}
+	if view := encode(annotatedNode); view["desc"] != "Fast" || view["favorite"] != true {
+		t.Errorf("annotated node view = %v, want its desc and favorite", view)
+	}
+	aliased, err := adapter.ParseProxy(map[string]any{
+		"name": "node-f", "type": "direct", "serverDescription": "Legacy", "favorite": false,
+	})
+	if err != nil {
+		t.Fatalf("parse aliased node: %v", err)
+	}
+	if view := encode(aliased); view["desc"] != "Legacy" || view["favorite"] != nil {
+		t.Errorf("aliased node view = %v, want desc only", view)
+	}
+
 	members := []constant.Proxy{namedProxy("node-a"), namedProxy("node-b")}
 	pd, err := provider.NewCompatibleProvider(
 		"group-provider", members, provider.NewHealthCheck(members, "", 0, 0, true, nil),

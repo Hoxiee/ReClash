@@ -73,6 +73,31 @@ void main() {
     expect(container.read(currentGroupsStateProvider).value, isEmpty);
   });
 
+  test('a provider favorite mark is flipped by the profile set', () {
+    final profile = Profile.normal(
+      label: 'p',
+    ).copyWith(favoriteSet: {'B', 'C'});
+    _profiles(container).put(profile);
+    container.read(currentProfileIdProvider.notifier).update((_) => profile.id);
+    container
+        .read(groupsProvider.notifier)
+        .update(
+          (_) => [
+            const Group(
+              name: 'Proxy',
+              type: GroupType.Selector,
+              all: [
+                Proxy(name: 'A', type: 'Direct', favorite: true),
+                Proxy(name: 'B', type: 'Direct'),
+                Proxy(name: 'C', type: 'Direct', favorite: true),
+              ],
+            ),
+          ],
+        );
+
+    expect(container.read(favoriteSetProvider), {'A', 'B'});
+  });
+
   test('favorites lead each group in their core order', () {
     final profile = Profile.normal(
       label: 'p',

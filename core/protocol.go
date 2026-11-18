@@ -421,6 +421,8 @@ type nodeView struct {
 	Type         string `json:"type"`
 	ProviderName string `json:"provider-name,omitempty"`
 	Extension    string `json:"extension,omitempty"`
+	Desc         string `json:"desc,omitempty"`
+	Favorite     bool   `json:"favorite,omitempty"`
 }
 
 type GeoUpdateStatus struct {

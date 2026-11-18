@@ -257,11 +257,20 @@ Set<String> unfoldSet(Ref ref) {
   return unfoldSet;
 }
 
+/// The profile's set holds the user's flips of what the provider marks: a star
+/// on an unmarked node, or a removed star on a marked one.
 @riverpod
 Set<String> favoriteSet(Ref ref) {
-  return ref.watch(
+  final flipped = ref.watch(
     currentProfileProvider.select((state) => state?.favoriteSet ?? const {}),
   );
+  final marked = <String>{
+    for (final group in ref.watch(groupsProvider))
+      for (final proxy in group.all)
+        if (proxy.favorite) proxy.name,
+  };
+  if (marked.isEmpty) return flipped;
+  return {...flipped.difference(marked), ...marked.difference(flipped)};
 }
 
 @riverpod

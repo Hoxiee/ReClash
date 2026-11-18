@@ -101,6 +101,10 @@ func handleGetProxies() ProxiesData {
 	return ProxiesData{All: names, Proxies: views}
 }
 
+type annotated interface {
+	Annotations() (desc string, favorite bool)
+}
+
 // Proxy.MarshalJSON encodes each node twice, with history the host never reads.
 func proxyView(proxy constant.Proxy) any {
 	node := nodeView{
@@ -108,6 +112,9 @@ func proxyView(proxy constant.Proxy) any {
 		Type:         proxy.Type().String(),
 		ProviderName: proxy.ProxyInfo().ProviderName,
 		Extension:    extensions.IDOf(proxy),
+	}
+	if marked, ok := proxy.(annotated); ok {
+		node.Desc, node.Favorite = marked.Annotations()
 	}
 	if !isProxyGroupType(proxy.Type()) {
 		return node

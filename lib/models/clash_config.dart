@@ -245,6 +245,8 @@ abstract class Proxy with _$Proxy {
     String? now,
     @JsonKey(name: 'provider-name') String? providerName,
     String? extension,
+    String? desc,
+    @Default(false) bool favorite,
   }) = _Proxy;
 
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
@@ -253,7 +255,10 @@ abstract class Proxy with _$Proxy {
 extension ProxyExt on Proxy {
   String get typeLabel => proxyTypeLabel(type, extension);
 
-  List<String> get searchFields => [name, type, ?extension, typeLabel];
+  /// The provider's own description stands in for the protocol.
+  String get detailLabel => desc ?? typeLabel;
+
+  List<String> get searchFields => [name, type, ?extension, typeLabel, ?desc];
 }
 
 /// The `type` values `adapter.ParseProxy` accepts, in its own order.
