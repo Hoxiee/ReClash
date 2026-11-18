@@ -92,7 +92,10 @@ Future<SiteLock?> showSiteLockEditor(
 }) {
   return showFormSheet<SiteLock>(
     context: context,
-    builder: (_) => _SiteLockForm(lock: lock, isNew: isNew),
+    props: nestedPagedSheetProps,
+    builder: (_) => NestedPagedSheet(
+      builder: (_) => _SiteLockForm(lock: lock, isNew: isNew),
+    ),
   );
 }
 
@@ -195,7 +198,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
         return;
       }
     }
-    Navigator.of(context).pop(edited);
+    context.safeNestedPop(edited);
   }
 
   void _refuse(List<SiteLockProblem> problems, SiteLock edited) {

@@ -96,8 +96,8 @@ Future<List<SiteLockExit>?> showSiteLockExitPicker(
   BuildContext context, {
   required List<SiteLockExitCandidate> candidates,
   required List<SiteLockExit> chosen,
-}) => showFormSheet<List<SiteLockExit>>(
-  context: context,
+}) => showInSheet<List<SiteLockExit>>(
+  context,
   builder: (_) => _ExitPicker(candidates: candidates, chosen: chosen),
 );
 
