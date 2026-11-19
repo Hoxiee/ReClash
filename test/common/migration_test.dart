@@ -350,6 +350,48 @@ void main() {
         expect(await upgrade(4), isTrue);
       });
 
+      test('links locks holding a shipped preset copy, once', () async {
+        const claude = [
+          'DOMAIN-SUFFIX,anthropic.com',
+          'DOMAIN-SUFFIX,claude.ai',
+          'DOMAIN-SUFFIX,claude.com',
+          'DOMAIN-SUFFIX,claudeusercontent.com',
+          'DOMAIN-SUFFIX,claudemcpcontent.com',
+          'DOMAIN-SUFFIX,clau.de',
+          'DOMAIN,http-intake.logs.us5.datadoghq.com',
+          'DOMAIN,browser-intake-us5-datadoghq.com',
+          'DOMAIN,o1158394.ingest.us.sentry.io',
+          'IP-CIDR,160.79.104.0/21,no-resolve',
+          'IP-CIDR,153.61.208.0/20,no-resolve',
+          'IP-CIDR,153.61.224.0/22,no-resolve',
+          'IP-CIDR6,2607:6bc0::/48,no-resolve',
+        ];
+        Future<List<SiteLock>> upgrade(int from) async {
+          final configMap = _createConfigMap()
+            ..['siteLocks'] = [
+              {
+                'id': 'a',
+                'name': 'Claude',
+                'match': ['example.com', ...claude],
+              },
+              {'id': 'b', 'match': claude.skip(1).toList()},
+            ];
+          final store = _FakeMigrationStore(
+            configMap: configMap,
+            version: Migration.currentVersion,
+            upgradeVersion: from,
+          );
+          return (await Migration(store: store).run()).siteLocks;
+        }
+
+        final [linked, partial] = await upgrade(4);
+        expect(linked.preset, 'claude');
+        expect(linked.match, ['example.com']);
+        expect(linked.entries.toSet(), containsAll(claude));
+        expect(partial.preset, isEmpty);
+        expect((await upgrade(5)).first.preset, isEmpty);
+      });
+
       test('a new install only records it', () async {
         final store = _FakeMigrationStore(
           configMap: null,

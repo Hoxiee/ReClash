@@ -91,13 +91,14 @@ class Migration {
 
   /// One-off setting changes for upgrades, apart from [currentVersion], which
   /// backups carry and an older app refuses when it is newer than its own.
-  static const upgradeVersion = 4;
+  static const upgradeVersion = 5;
 
   static const Map<int, Config Function(Config config)> _upgrades = {
     1: _resetThemeColors,
     2: _keepGlassLook,
     3: _followSystemColors,
     4: _turnOffSidebarBlur,
+    5: _linkSiteLockPresets,
   };
 
   Future<Config> run() async {
@@ -252,6 +253,60 @@ Config _followSystemColors(Config config) {
 // Releases stored sidebar blur on while its switch stayed hidden.
 Config _turnOffSidebarBlur(Config config) =>
     config.copyWith(themeProps: config.themeProps.copyWith(sidebarBlur: false));
+
+// Releases copied a preset's entries into the lock. A lock still holding a
+// shipped copy follows that preset instead and keeps only entries of its own.
+const _shippedSiteLockPresets = <String, List<String>>{
+  'claude': [
+    'DOMAIN-SUFFIX,anthropic.com',
+    'DOMAIN-SUFFIX,claude.ai',
+    'DOMAIN-SUFFIX,claude.com',
+    'DOMAIN-SUFFIX,claudeusercontent.com',
+    'DOMAIN-SUFFIX,claudemcpcontent.com',
+    'DOMAIN-SUFFIX,clau.de',
+    'DOMAIN,http-intake.logs.us5.datadoghq.com',
+    'DOMAIN,browser-intake-us5-datadoghq.com',
+    'DOMAIN,o1158394.ingest.us.sentry.io',
+    'IP-CIDR,160.79.104.0/21,no-resolve',
+    'IP-CIDR,153.61.208.0/20,no-resolve',
+    'IP-CIDR,153.61.224.0/22,no-resolve',
+    'IP-CIDR6,2607:6bc0::/48,no-resolve',
+  ],
+  'chatgpt': [
+    'GEOSITE,openai',
+    'DOMAIN-SUFFIX,chatgpt.com',
+    'DOMAIN-SUFFIX,oaistatic.com',
+    'DOMAIN-SUFFIX,oaiusercontent.com',
+    'DOMAIN-SUFFIX,openai.com',
+  ],
+  'gemini': ['GEOSITE,google-gemini'],
+  'grok': ['DOMAIN-SUFFIX,x.ai', 'DOMAIN-SUFFIX,grok.com'],
+  'perplexity': ['GEOSITE,perplexity'],
+  'deepseek': ['GEOSITE,deepseek'],
+  'cursor': ['GEOSITE,cursor'],
+};
+
+Config _linkSiteLockPresets(Config config) => config.copyWith(
+  siteLocks: [for (final lock in config.siteLocks) _linkSiteLockPreset(lock)],
+);
+
+SiteLock _linkSiteLockPreset(SiteLock lock) {
+  if (lock.preset.isNotEmpty) return lock;
+  for (final MapEntry(key: id, value: copy)
+      in _shippedSiteLockPresets.entries) {
+    final preset = siteLockPresetOf(id);
+    if (preset == null || !copy.every(lock.match.contains)) continue;
+    final covered = {...copy, ...preset.match};
+    return lock.copyWith(
+      preset: id,
+      match: [
+        for (final entry in lock.match)
+          if (!covered.contains(entry)) entry,
+      ],
+    );
+  }
+  return lock;
+}
 
 bool _isV0(Map<String, Object?>? configMap) =>
     configMap?['proxiesStyle'] != null;
