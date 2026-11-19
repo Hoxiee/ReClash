@@ -13,6 +13,7 @@ icon: ./assets/images/icon.png
 dependencies:
   - libayatana-appindicator3-1
   - libsecret-1-0
+  - nftables
 
 supported_mime_type:
   - x-scheme-handler/clash

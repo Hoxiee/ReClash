@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "킬 스위치가 활성화된 동안에는 ReClash의 TUN 밖의 모든 트래픽이 차단되며, TUN이 제외하는 주소도 포함됩니다. Core 자체와 허용한 경우 로컬 네트워크만 계속 연결됩니다. TUN을 시작할 때마다 활성화되고, TUN이나 프록시를 끄거나 ReClash를 종료하면 비활성화됩니다.",
+  "killSwitchAlwaysMode": "ReClash가 중지된 동안에도 차단",
+  "killSwitchAllowLan": "로컬 네트워크 허용",
+  "killSwitchStatusActive": "차단 중",
+  "killSwitchStatusArmed": "활성",
+  "killSwitchStatusStandby": "TUN 대기 중",
+  "killSwitchNftMissing": "킬 스위치를 사용하려면 nftables 패키지를 설치하세요",
+  "killSwitchFirewallFailed": "방화벽 규칙을 적용할 수 없습니다",
+  "killSwitchHelperMissing": "킬 스위치에는 Helper가 필요합니다. TUN을 한 번 켜서 설정하세요.",
+  "killSwitchAlwaysConfirmTitle": "ReClash가 중지된 동안 인터넷을 차단할까요?",
+  "killSwitchAlwaysConfirmBody": "Helper를 먼저 제거하지 않으면, ReClash를 제거한 후에도 ReClash의 TUN이 실행되지 않을 때마다 이 컴퓨터는 인터넷에 연결되지 않습니다.",
+  "killSwitchBlockingTitle": "킬 스위치가 인터넷을 차단하고 있습니다",
+  "killSwitchBlockingBody": "ReClash가 TUN으로 실행되기 전까지 ReClash의 TUN 밖 트래픽은 차단됩니다.",
+  "killSwitchUnblock": "차단 해제",
+  "removeHelper": "Helper 제거",
+  "removeHelperDesc": "TUN을 실행하는 권한 있는 Helper를 제거합니다",
+  "removeHelperConfirmBody": "ReClash는 먼저 Helper를 통해 실행 중인 Core를 중지합니다. Helper를 제거하면 이 컴퓨터의 사이트 잠금과 킬 스위치도 해제됩니다. 다음번에 TUN이 Helper를 다시 설정하라고 요청합니다.",
+  "removeHelperDone": "Helper를 제거했습니다",
+  "removeHelperFailed": "Helper를 제거할 수 없습니다"
+}

@@ -1961,14 +1961,16 @@ report carries every problem. In the Core, `core/sitelock` compiles the list and
 one, else is refused. Groups and built-ins never qualify as exits because they could lead back to DIRECT.
 `siteLockExits` lists the servers of the running config for the editor.
 
-On Linux the Core also mirrors what the host can enforce: `siteLockPolicy` returns the TUN device, locked prefixes plus
-the fake-ip ranges, and the locked names (geosite expanded; entries the host cannot mirror, such as negated geosite or
+On Linux the Core also mirrors what the host can enforce: `siteLockPolicy` returns the TUN device, the locked prefixes,
+the fake-ip ranges apart as `fakeRanges` (only while names are locked), and the locked names (geosite expanded; entries the host cannot mirror, such as negated geosite or
 lookahead regex, come back as the `core-only` warning). Locks with name exceptions travel apart as `guarded` pairs
 so an exception frees a name only from its own lock; an exception the host cannot mirror leaves the name blocked, and
 address exceptions are not subtracted from the prefixes. A GeoSite update recompiles the locks, which refreshes both. `SiteLockHostPolicy` polls it every 15 s with the last
 revision, so an unchanged policy costs one hash, and sends it to the Helper's `PUT /site-lock`; `DELETE` lifts it when no
 lock is enabled. The Helper keeps the `reclash_sitelock_<uid>` nft table: locked addresses are rejected on every interface
-but `lo` and the TUN, and off-TUN DNS goes to NFQUEUE `0x8000 | uid` without `bypass` from a chain at the `mangle`
+but `lo` and the TUN, the fake-ip ranges (`fake` in the request, sets `fake4`/`fake6`) only on interfaces that are not
+an L3 tunnel (`meta oiftype` other than `ARPHRD_NONE`), so another VPN handing out the same fake range keeps working
+while a locked name still reaches it only through the DNS queue. Off-TUN DNS goes to NFQUEUE `0x8000 | uid` without `bypass` from a chain at the `mangle`
 priority, before the NAT hooks. The Helper marks a query for a locked name and accepts it, and the table DNATs that mark
 into the TUN, so the Core answers with a fake address and the connection reaches its exit. The Helper drops every query
 it cannot parse whole (fragments, split TCP messages) in its verdict, without marking it. The postrouting `dns_guard`
@@ -1983,7 +1985,18 @@ Helper's state directory and restored before `READY=1`; the unit runs before `ne
 starts. Every 10 s the Helper re-applies a persisted policy whose table has disappeared (`nft flush ruleset`, a
 firewall service restart), whose redirect no longer matches the TUN it can reach, or whose queue stopped answering.
 Uninstall removes the table right after the Helper stops, before the queue loses its last
-listener for good.
+listener for good. `GET /site-lock` also reports the host layer for the page: the table, queue and whether it runs,
+a `problem` (`nftMissing` as a 200 answer, `nftFailed`, `queueStopped`) and the live `nft list table` text with long
+element lists elided and capped at 64 KiB.
+
+The desktop kill switch is a second, independent table, `reclash_killswitch_<uid>`, kept by `kill_switch.rs`. `PUT
+/kill-switch` persists `kill-switch.json` (mode, TUN, `allowLan`) next to the site lock state. `always` is armed
+whenever configured; `standard` is armed by every successful `/start` and records the boot in
+`kill-switch-armed.json`, so it survives Core exits and Helper restarts but not a reboot, and only
+`/kill-switch/disarm` or `DELETE` ends it. While armed, output and forward reject everything but `lo`, the TUN, the
+Helper's own cgroup (the Core's upstream connections, output only), DHCP, ICMPv6 ND, link-local and multicast, and the
+private ranges when `allowLan` is set (forward always lets them through for container bridges); the block stays while
+the Core runs. It is restored before `READY=1`, re-synced by the same 10 s loop and removed on uninstall.
 
 Browser DNS-over-HTTPS and DoT bypass the DNS filter after a Core crash; that is a documented limitation, not handled.
 Windows and macOS have the Core layer only.
@@ -1991,8 +2004,8 @@ Windows and macOS have the Core layer only.
 Android has no host layer; Flutter hardens the VPN while `siteLockActiveProvider` (any enabled lock) is true.
 `vpnOptionsProvider` applies `VpnOptions.underSiteLock`: `allowBypass` off whatever `VpnProps` says, and the
 prefixes of `siteLockRoutesProvider` added after `vpnRouteAddressProvider`'s subtraction unless the list routes
-everything. Those prefixes are the `addresses` of the same `siteLockPolicy` answer the Linux host gets, so the fake-ip
-ranges arrive only with name entries; the provider refetches on a report change, a Core connection and every applied
+everything. Those prefixes are the `addresses` plus `fakeRanges` of the same `siteLockPolicy` answer the Linux host gets, so the
+fake-ip ranges arrive only with name entries; the provider refetches on a report change, a Core connection and every applied
 profile, and keeps its last list while the Core cannot answer. The service only applies the options, and a change while
 the VPN runs takes the restart notice of `VpnManager`. The page warns about apps `excludedApps` leaves outside the
 tunnel and shows the system kill switch from the doctor state channel (`DeviceDoctorState.killSwitch`).

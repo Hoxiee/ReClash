@@ -129,6 +129,8 @@ class IssueCard extends StatelessWidget {
     required this.body,
     this.action,
     this.onAction,
+    this.secondaryAction,
+    this.onSecondaryAction,
   });
 
   final IssueTone tone;
@@ -136,6 +138,8 @@ class IssueCard extends StatelessWidget {
   final String body;
   final String? action;
   final VoidCallback? onAction;
+  final String? secondaryAction;
+  final VoidCallback? onSecondaryAction;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +157,14 @@ class IssueCard extends StatelessWidget {
         AppGlyphs.warning,
       ),
     };
+    final actions = <(String, VoidCallback)>[
+      if ((action, onAction) case (final label?, final onTap?)) (label, onTap),
+      if ((secondaryAction, onSecondaryAction) case (
+        final label?,
+        final onTap?,
+      ))
+        (label, onTap),
+    ];
     return DecoratedBox(
       decoration: ShapeDecoration(color: fill, shape: AppShape.xl),
       child: Padding(
@@ -179,23 +191,30 @@ class IssueCard extends StatelessWidget {
                         .of(context)
                         .copyWith(color: ink.withValues(alpha: 0.85)),
                   ),
-                  if ((action, onAction) case (final action?, final onAction?))
+                  if (actions.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: DashboardBlock(
-                        radius: AppCorner.full,
-                        color: ink.withValues(alpha: 0.12),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        onTap: onAction,
-                        child: Text(
-                          action,
-                          style: AppTextStyle.footnote
-                              .of(context, emphasized: true)
-                              .copyWith(color: ink),
-                        ),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final (label, onTap) in actions)
+                            DashboardBlock(
+                              radius: AppCorner.full,
+                              color: ink.withValues(alpha: 0.12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 7,
+                              ),
+                              onTap: onTap,
+                              child: Text(
+                                label,
+                                style: AppTextStyle.footnote
+                                    .of(context, emphasized: true)
+                                    .copyWith(color: ink),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                 ],

@@ -7,10 +7,11 @@ must:
   before-rules: The core claims a locked connection before mode and rules, and sends it through a live exit or refuses it; groups and built-ins never qualify as exits.
   exits-by-definition: An exit is a server by its definition without the name, falling back to the name once a refresh changes it, so renames keep the lock and one address serving many exits stays apart.
   atomic-apply: A rejected lock list leaves the previous one in force and reports every problem.
-  fail-closed-host: On Linux the Helper blocks locked addresses and fake-ip ranges off the TUN, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them. On Windows persistent WFP filters block the same addresses plus the tunnel resolver off the TUN, and NRPT sends locked names only to that resolver, so they fail closed without the core or the Helper.
+  fail-closed-host: On Linux the Helper blocks locked addresses off the TUN and the fake-ip ranges on physical interfaces only, so another VPN handing out the same range keeps working, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them, through any interface. On Windows persistent WFP filters block the same addresses plus the tunnel resolver off the TUN and the fake-ip ranges on Ethernet, Wi-Fi and PPP interfaces, and NRPT sends locked names only to that resolver, so they fail closed without the core or the Helper.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
   core-only-warning: Entries the host cannot mirror are reported as core-only rather than silently dropped.
   untouched: Traffic that matches no lock is neither routed nor filtered differently, except that a domain lock over a profile without a sniffer turns sniffing on, so the profile's own domain rules also see sniffed names, and on Android an enabled lock turns VPN bypass off for every app.
+  host-visible: On Linux and Windows the page shows what the Helper enforces, its problem and its live rules, and warns that the lock outlives ReClash until every lock is off or the Helper is removed.
   android-vpn: On Android an enabled lock turns VPN bypass off and routes the locked prefixes and fake-ip ranges into the TUN past a partial route list; Flutter computes the options, the service only applies them, and a running VPN changes them only through the restart notice.
 watch:
   - core/site_lock.go
@@ -23,9 +24,11 @@ watch:
   - lib/core/desktop/site_lock_policy.dart
   - lib/views/site_lock.dart
   - lib/views/site_lock_editor.dart
+  - lib/views/site_lock_host.dart
+  - lib/views/site_lock_presets.dart
   - lib/providers/state/system.dart
 checks:
   site-lock-core: [before-rules, exits-by-definition, atomic-apply, core-only-warning, untouched]
   site-lock-host: [fail-closed-host, core-dns-exempt]
-  site-lock-app: [atomic-apply, fail-closed-host, android-vpn]
+  site-lock-app: [atomic-apply, fail-closed-host, host-visible, android-vpn]
 drop: Upstream mihomo ships per-destination exit pinning with an OS-level kill switch.

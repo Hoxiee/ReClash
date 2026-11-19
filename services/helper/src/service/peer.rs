@@ -1,7 +1,8 @@
 use crate::service::hub::{
-    caller_routes_with, ensure_core_sha256_configured, log_message,
-    release_managed_core_on_shutdown, Caller,
+    ensure_core_sha256_configured, host_routes, log_message, release_managed_core_on_shutdown,
+    Caller,
 };
+use crate::service::kill_switch::KillSwitchService;
 use crate::service::owner::{client_pid, same_sid, ManagedHost, TcpConnection};
 use crate::service::site_lock::{self, SiteLockService};
 
@@ -364,7 +365,14 @@ where
     if let Err(error) = site_lock.restore() {
         log_message(format!("Helper could not restore the site lock: {error}"));
     }
-    let healing = tokio::spawn(site_lock::keep_healed(site_lock.clone()));
+    let kill_switch = Arc::new(KillSwitchService::system());
+    if let Err(error) = kill_switch.restore() {
+        log_message(format!("Helper could not restore the kill switch: {error}"));
+    }
+    let healing = tokio::spawn(site_lock::keep_healed_with(
+        site_lock.clone(),
+        Some(kill_switch.clone()),
+    ));
     on_started()?;
     let incoming = AuthorizedIncoming {
         listener,
@@ -372,7 +380,11 @@ where
         retry: None,
     };
     let make_service = make_service_fn(|connection: &CallerStream| {
-        let routes = caller_routes_with(connection.caller.clone(), site_lock.clone());
+        let routes = host_routes(
+            connection.caller.clone(),
+            site_lock.clone(),
+            kill_switch.clone(),
+        );
         let service = warp::service(routes);
         async move { Ok::<_, Infallible>(service) }
     });

@@ -8,6 +8,7 @@ import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/announcement_card.dart';
+import 'package:reclash/widgets/kill_switch_notice.dart';
 import 'package:reclash/widgets/provider_cards.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -142,6 +143,7 @@ class _DesktopDashboard extends ConsumerWidget {
     final hasAnnouncement = ref.watch(
       providerAnnouncementProvider.select((card) => card != null),
     );
+    final blocking = ref.watch(killSwitchBlockingProvider);
     final hasNotice = ref.watch(
       providerNoticeProvider.select((card) => card != null),
     );
@@ -206,6 +208,7 @@ class _DesktopDashboard extends ConsumerWidget {
             child: Column(
               spacing: gap,
               children: [
+                if (blocking) const KillSwitchNotice(),
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
                 if (hasNotice) const NoticeCard(),
                 if (hasCards) const ProviderCards(),
@@ -290,6 +293,11 @@ class _DesktopDashboard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (blocking)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: const KillSwitchNotice(),
+                      ),
                     if (hasNotice)
                       Padding(
                         padding: EdgeInsets.only(bottom: gap),
@@ -422,6 +430,8 @@ class _MobileDashboard extends ConsumerWidget {
                 child: Column(
                   spacing: gap,
                   children: [
+                    if (ref.watch(killSwitchBlockingProvider))
+                      const KillSwitchNotice(),
                     if (ref.watch(
                       appUpdateActionProvider.select(
                         (state) => state.hasUpdate,

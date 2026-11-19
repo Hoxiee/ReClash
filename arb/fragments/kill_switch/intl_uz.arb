@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "Kill switch yoqilgan paytda ReClash TUN'idan tashqaridagi barcha trafik bloklanadi, shu jumladan TUN istisno qiladigan manzillar ham. Faqat Core'ning o'zi va ruxsat berilgan bo'lsa, mahalliy tarmoq ishlaydi. Har bir TUN ishga tushganda yoqiladi va TUN yoki proksini o'chirganingizda yoki ReClash'dan chiqqanda o'chadi.",
+  "killSwitchAlwaysMode": "ReClash to'xtatilgan paytda ham bloklash",
+  "killSwitchAllowLan": "Mahalliy tarmoqqa ruxsat berish",
+  "killSwitchStatusActive": "Bloklanmoqda",
+  "killSwitchStatusArmed": "Yoqilgan",
+  "killSwitchStatusStandby": "TUN kutilmoqda",
+  "killSwitchNftMissing": "Kill switch'dan foydalanish uchun nftables paketini o'rnating",
+  "killSwitchFirewallFailed": "Yong'in devori qoidalarini qo'llab bo'lmadi",
+  "killSwitchHelperMissing": "Kill switch uchun Helper kerak. Sozlash uchun TUN'ni bir marta yoqing.",
+  "killSwitchAlwaysConfirmTitle": "ReClash to'xtatilgan paytda internet bloklansinmi?",
+  "killSwitchAlwaysConfirmBody": "Helper'ni avval olib tashlamasangiz, ReClash TUN'i ishlamayotganda, hatto ReClash o'chirib tashlanganidan keyin ham bu kompyuterda internet bo'lmaydi.",
+  "killSwitchBlockingTitle": "Kill switch internetni bloklamoqda",
+  "killSwitchBlockingBody": "ReClash TUN bilan ishga tushguncha, ReClash TUN'idan tashqaridagi trafik bloklanadi.",
+  "killSwitchUnblock": "Blokdan chiqarish",
+  "removeHelper": "Helper'ni olib tashlash",
+  "removeHelperDesc": "TUN'ni ishga tushiradigan imtiyozli Helper'ni o'chirish",
+  "removeHelperConfirmBody": "ReClash avval Helper orqali ishlayotgan Core'ni to'xtatadi. Helper'ni olib tashlash bu kompyuterdagi sayt qulflarini va kill switch'ni ham bekor qiladi. Keyingi safar TUN Helper'ni qayta sozlashni so'raydi.",
+  "removeHelperDone": "Helper olib tashlandi",
+  "removeHelperFailed": "Helper'ni olib tashlab bo'lmadi"
+}

@@ -912,6 +912,8 @@ enum LoadingTag {
   proxies,
 }
 
+enum KillSwitchMode { standard, always }
+
 enum CoreStatus { connecting, connected, disconnected }
 
 enum UpdatingScope { core, local }

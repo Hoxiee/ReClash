@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "Kill switch іске қосулы болғанда ReClash TUN-нан тыс барлық трафик бұғатталады, соның ішінде TUN қоспайтын мекенжайлар да. Тек Core және рұқсат етілсе, жергілікті желі қолжетімді болады. Әр TUN іске қосылғанда қосылады, TUN не проксиді өшіргенде немесе ReClash-тен шыққанда өшеді.",
+  "killSwitchAlwaysMode": "ReClash тоқтаған кезде де бұғаттау",
+  "killSwitchAllowLan": "Жергілікті желіге рұқсат ету",
+  "killSwitchStatusActive": "Бұғаттауда",
+  "killSwitchStatusArmed": "Іске қосылды",
+  "killSwitchStatusStandby": "TUN күтілуде",
+  "killSwitchNftMissing": "Kill switch үшін nftables пакетін орнатыңыз",
+  "killSwitchFirewallFailed": "Брандмауэр ережелерін қолдану мүмкін болмады",
+  "killSwitchHelperMissing": "Kill switch үшін Helper қажет. Орнату үшін TUN-ды бір рет қосыңыз.",
+  "killSwitchAlwaysConfirmTitle": "ReClash тоқтаған кезде интернетті бұғаттайсыз ба?",
+  "killSwitchAlwaysConfirmBody": "Helper алдын ала жойылмаса, ReClash TUN-ы іске қосылмаған кезде бұл компьютерде интернет болмайды, тіпті ReClash жойылғаннан кейін де.",
+  "killSwitchBlockingTitle": "Kill switch интернетті бұғаттап тұр",
+  "killSwitchBlockingBody": "ReClash TUN-мен іске қосылғанға дейін ReClash TUN-нан тыс трафик бұғатталады.",
+  "killSwitchUnblock": "Бұғатты алу",
+  "removeHelper": "Helper-ды жою",
+  "removeHelperDesc": "TUN-ды іске қосатын артықшылықты Helper-ды жою",
+  "removeHelperConfirmBody": "ReClash алдымен Helper арқылы жұмыс істеп тұрған Core-ды тоқтатады. Helper жойылғанда осы компьютердегі сайт бекіту мен kill switch да босатылады. Келесі жолы TUN Helper-ды қайта орнатуды сұрайды.",
+  "removeHelperDone": "Helper жойылды",
+  "removeHelperFailed": "Helper-ды жою мүмкін болмады"
+}

@@ -6,6 +6,7 @@ class SystemAction extends _$SystemAction {
 
   SystemExitCoordinator? _exitCoordinator;
   bool _resetPrepared = false;
+  bool _updateExit = false;
 
   @override
   void build() {}
@@ -42,6 +43,13 @@ class SystemAction extends _$SystemAction {
 
   Future<bool> requestInstalledAppsPermission() async {
     return await app?.requestInstalledAppsPermission() ?? false;
+  }
+
+  /// Quits to let an installed update relaunch: the kill switch stays armed
+  /// across it, unlike a quit the user asked for.
+  Future<void> handleUpdateExit() {
+    _updateExit = true;
+    return handleExit();
   }
 
   Future<void> handleExit([bool needSave = true]) {
@@ -101,6 +109,8 @@ class SystemAction extends _$SystemAction {
       ?saveOperation,
       bootGuard.markClosed(),
       if (systemDnsCoordinator != null) systemDnsCoordinator!.shutdown(),
+      if (!_updateExit)
+        ref.read(killSwitchHostStateProvider.notifier).disarmOnUserStop(),
       ?systemProxyQueue?.close(),
     ]);
   }

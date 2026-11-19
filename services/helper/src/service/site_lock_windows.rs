@@ -3,7 +3,7 @@
 
 use super::site_lock::{v4_mask, Addresses, SiteLockRequest};
 use std::collections::BTreeSet;
-use std::net::Ipv4Addr;
+use std::net::{Ipv4Addr, Ipv6Addr};
 
 pub(super) const RULE_PREFIX: &str = "{5c1d7e1a-0b5e-4e1a-9c1d-";
 pub(super) const LOCAL_RULES: &str =
@@ -13,6 +13,10 @@ pub(super) const POLICY_RULES: &str =
 // Windows reads at most 50 namespaces from one rule.
 const NAMES_PER_RULE: usize = 50;
 const CONDITIONS_PER_FILTER: usize = 128;
+// Ethernet, Wi-Fi and PPP. Wintun and other VPN adapters report other types, so a parallel
+// VPN handing out the same fake-ip range keeps working.
+pub(super) const PHYSICAL_INTERFACE_TYPES: [u32; 3] = [6, 71, 23];
+const MAX_LISTED: usize = 50;
 // Without a TUN address locked names still go here; the filters block it off the TUN,
 // so their lookups fail instead of reaching a resolver outside the tunnel.
 pub(super) const FALLBACK_RESOLVER: Ipv4Addr = Ipv4Addr::new(198, 18, 0, 2);
@@ -51,42 +55,151 @@ pub(super) fn resolver(tun_address: Option<(u32, u8)>) -> Ipv4Addr {
 pub(super) struct FilterPlan {
     pub(super) v4: Vec<(u32, u32)>,
     pub(super) v6: Vec<([u8; 16], u8)>,
+    pub(super) fake_v4: Vec<(u32, u32)>,
+    pub(super) fake_v6: Vec<([u8; 16], u8)>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub(super) enum Ranges<'a> {
+    V4(&'a [(u32, u32)]),
+    V6(&'a [([u8; 16], u8)]),
+}
+
+/// One block filter; empty interface types match every interface.
+#[derive(Debug, PartialEq, Eq)]
+pub(super) struct Block<'a> {
+    pub(super) ranges: Ranges<'a>,
+    pub(super) interface_types: &'static [u32],
+}
+
+fn v4_ranges(addresses: &Addresses) -> Vec<(u32, u32)> {
+    addresses
+        .v4
+        .iter()
+        .map(|&(address, prefix)| (address, v4_mask(prefix)))
+        .collect()
+}
+
+fn v6_ranges(addresses: &Addresses) -> Vec<([u8; 16], u8)> {
+    addresses
+        .v6
+        .iter()
+        .map(|&(address, prefix)| (address.to_be_bytes(), prefix))
+        .collect()
 }
 
 impl FilterPlan {
     pub(super) fn new(addresses: &Addresses, resolver: Option<Ipv4Addr>) -> Self {
-        let mut v4: Vec<_> = addresses
-            .v4
-            .iter()
-            .map(|&(address, prefix)| (address, v4_mask(prefix)))
-            .collect();
+        let mut v4 = v4_ranges(addresses);
         if let Some(resolver) = resolver.map(u32::from) {
             if !v4.iter().any(|&(address, mask)| resolver & mask == address) {
                 v4.push((resolver, u32::MAX));
             }
         }
-        let v6 = addresses
-            .v6
-            .iter()
-            .map(|&(address, prefix)| (address.to_be_bytes(), prefix))
-            .collect();
-        Self { v4, v6 }
+        Self {
+            v4,
+            v6: v6_ranges(addresses),
+            ..Self::default()
+        }
+    }
+
+    pub(super) fn with_fake(mut self, fake: &Addresses) -> Self {
+        self.fake_v4 = v4_ranges(fake);
+        self.fake_v6 = v6_ranges(fake);
+        self
+    }
+
+    pub(super) fn blocks(&self) -> Vec<Block<'_>> {
+        let fake_size = CONDITIONS_PER_FILTER - PHYSICAL_INTERFACE_TYPES.len();
+        let mut blocks = Vec::new();
+        let mut push = |ranges, interface_types: &'static [u32]| {
+            blocks.push(Block {
+                ranges,
+                interface_types,
+            })
+        };
+        for chunk in self.v4.chunks(CONDITIONS_PER_FILTER) {
+            push(Ranges::V4(chunk), &[]);
+        }
+        for chunk in self.v6.chunks(CONDITIONS_PER_FILTER) {
+            push(Ranges::V6(chunk), &[]);
+        }
+        for chunk in self.fake_v4.chunks(fake_size) {
+            push(Ranges::V4(chunk), &PHYSICAL_INTERFACE_TYPES);
+        }
+        for chunk in self.fake_v6.chunks(fake_size) {
+            push(Ranges::V6(chunk), &PHYSICAL_INTERFACE_TYPES);
+        }
+        blocks
     }
 
     pub(super) fn filters(&self, permits: bool) -> usize {
-        self.v4.chunks(CONDITIONS_PER_FILTER).len()
-            + self.v6.chunks(CONDITIONS_PER_FILTER).len()
-            + if permits { 2 } else { 0 }
+        self.blocks().len() + if permits { 2 } else { 0 }
     }
+
+    /// The filters as GET /site-lock lists them; `tun` names the permitted TUN.
+    pub(super) fn summary(&self, tun: Option<&str>) -> Vec<String> {
+        let mut lines = Vec::new();
+        if let Some(tun) = tun {
+            lines.push(format!("permit every connection on ReClash ({tun})"));
+        }
+        let locked = ranges_text(&self.v4, &self.v6);
+        if !locked.is_empty() {
+            lines.push(format!("block {locked} on every interface except ReClash"));
+        }
+        let fake = ranges_text(&self.fake_v4, &self.fake_v6);
+        if !fake.is_empty() {
+            lines.push(format!(
+                "block {fake} on ethernet, Wi-Fi and PPP interfaces"
+            ));
+        }
+        lines
+    }
+}
+
+pub(super) fn ranges_text(v4: &[(u32, u32)], v6: &[([u8; 16], u8)]) -> String {
+    let v4 = v4
+        .iter()
+        .map(|&(address, mask)| format!("{}/{}", Ipv4Addr::from(address), mask.leading_ones()));
+    let v6 = v6
+        .iter()
+        .map(|&(address, prefix)| format!("{}/{prefix}", Ipv6Addr::from(address)));
+    listed(&v4.chain(v6).collect::<Vec<_>>())
+}
+
+fn listed(items: &[String]) -> String {
+    if items.len() <= MAX_LISTED {
+        return items.join(", ");
+    }
+    format!(
+        "{}, … {} more",
+        items[..MAX_LISTED].join(", "),
+        items.len() - MAX_LISTED
+    )
+}
+
+/// The NRPT rules as GET /site-lock lists them, one line per rule.
+pub(super) fn rule_summary(namespaces: &[String], resolver: Ipv4Addr, policy: bool) -> Vec<String> {
+    let label = if policy {
+        "NRPT and Group Policy NRPT"
+    } else {
+        "NRPT"
+    };
+    namespaces
+        .chunks(NAMES_PER_RULE)
+        .map(|names| format!("{label}: {} -> {resolver}", listed(names)))
+        .collect()
 }
 
 #[cfg(windows)]
 pub(super) use system::WindowsLayer;
 
 #[cfg(windows)]
-mod system {
+pub(super) mod system {
     use super::*;
-    use crate::service::site_lock::{HostError, HostLayer};
+    use crate::service::site_lock::{
+        fake_prefixes, readable_listing, HostError, HostLayer, HostState,
+    };
     use crate::service::site_lock_dns::Matcher;
     use std::ffi::c_void;
     use std::mem::zeroed;
@@ -118,23 +231,26 @@ mod system {
         SERVICE_CONTROL_PARAMCHANGE, SERVICE_PAUSE_CONTINUE,
     };
 
-    const PROVIDER: GUID = GUID::from_u128(0x5c1d7e1a_0b5e_4e1a_9c1d_000000000001);
-    const SUBLAYER: GUID = GUID::from_u128(0x5c1d7e1a_0b5e_4e1a_9c1d_000000000002);
-    const LAYERS: [GUID; 2] = [
+    const SITE_LOCK: WfpObjects = WfpObjects {
+        provider: GUID::from_u128(0x5c1d7e1a_0b5e_4e1a_9c1d_000000000001),
+        sublayer: GUID::from_u128(0x5c1d7e1a_0b5e_4e1a_9c1d_000000000002),
+        name: "ReClash site lock",
+        weight: u16::MAX,
+    };
+    pub(in crate::service) const LAYERS: [GUID; 2] = [
         FWPM_LAYER_ALE_AUTH_CONNECT_V4,
         FWPM_LAYER_ALE_AUTH_CONNECT_V6,
     ];
-    const DISPLAY_NAME: &str = "ReClash site lock";
     const PERMIT_WEIGHT: u8 = 15;
     const BLOCK_WEIGHT: u8 = 1;
     // Group Policy refresh flag that reapplies policies even when they did not change.
     const RP_FORCE: u32 = 1;
 
-    fn wide(value: &str) -> Vec<u16> {
+    pub(in crate::service) fn wide(value: &str) -> Vec<u16> {
         value.encode_utf16().chain(Some(0)).collect()
     }
 
-    fn check(code: u32, action: &str) -> Result<(), String> {
+    pub(in crate::service) fn check(code: u32, action: &str) -> Result<(), String> {
         if code == ERROR_SUCCESS {
             Ok(())
         } else {
@@ -150,7 +266,7 @@ mod system {
         }
     }
 
-    fn tun_luid(tun: &str) -> Option<u64> {
+    pub(in crate::service) fn tun_luid(tun: &str) -> Option<u64> {
         if tun.is_empty() {
             return None;
         }
@@ -185,19 +301,30 @@ mod system {
         }
     }
 
-    struct Engine(HANDLE);
+    /// The WFP objects that own a set of filters; each feature has its own.
+    pub(in crate::service) struct WfpObjects {
+        pub(in crate::service) provider: GUID,
+        pub(in crate::service) sublayer: GUID,
+        pub(in crate::service) name: &'static str,
+        pub(in crate::service) weight: u16,
+    }
+
+    pub(in crate::service) struct Engine(HANDLE, &'static WfpObjects);
 
     impl Engine {
-        fn open() -> Result<Self, String> {
+        pub(in crate::service) fn open(objects: &'static WfpObjects) -> Result<Self, String> {
             let mut handle: HANDLE = 0;
             // SAFETY: a local engine with the default session; handle is an out parameter.
             let code =
                 unsafe { FwpmEngineOpen0(null(), RPC_C_AUTHN_WINNT, null(), null(), &mut handle) };
             check(code, "opening the filtering engine")?;
-            Ok(Self(handle))
+            Ok(Self(handle, objects))
         }
 
-        fn transaction<T>(&self, work: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
+        pub(in crate::service) fn transaction<T>(
+            &self,
+            work: impl FnOnce() -> Result<T, String>,
+        ) -> Result<T, String> {
             // SAFETY: self.0 is an open engine handle in every call below.
             check(
                 unsafe { FwpmTransactionBegin0(self.0, 0) },
@@ -216,13 +343,13 @@ mod system {
             }
         }
 
-        fn ensure_objects(&self) -> Result<(), String> {
-            let mut name = wide(DISPLAY_NAME);
-            let mut provider_key = PROVIDER;
+        pub(in crate::service) fn ensure_objects(&self) -> Result<(), String> {
+            let mut name = wide(self.1.name);
+            let mut provider_key = self.1.provider;
             // SAFETY: the structures and the name they point to outlive both calls.
             unsafe {
                 let mut provider: FWPM_PROVIDER0 = zeroed();
-                provider.providerKey = PROVIDER;
+                provider.providerKey = self.1.provider;
                 provider.displayData.name = name.as_mut_ptr();
                 provider.flags = FWPM_PROVIDER_FLAG_PERSISTENT;
                 let code = FwpmProviderAdd0(self.0, &provider, null_mut());
@@ -231,11 +358,11 @@ mod system {
                     "adding the WFP provider",
                 )?;
                 let mut sublayer: FWPM_SUBLAYER0 = zeroed();
-                sublayer.subLayerKey = SUBLAYER;
+                sublayer.subLayerKey = self.1.sublayer;
                 sublayer.displayData.name = name.as_mut_ptr();
                 sublayer.flags = FWPM_SUBLAYER_FLAG_PERSISTENT;
                 sublayer.providerKey = &mut provider_key;
-                sublayer.weight = u16::MAX;
+                sublayer.weight = self.1.weight;
                 let code = FwpmSubLayerAdd0(self.0, &sublayer, null_mut());
                 check(
                     tolerated(code, &[FWP_E_ALREADY_EXISTS]),
@@ -246,7 +373,7 @@ mod system {
 
         fn filters(&self, layer: GUID) -> Result<Vec<u64>, String> {
             const PAGE: u32 = 256;
-            let mut provider = PROVIDER;
+            let mut provider = self.1.provider;
             let mut ids = Vec::new();
             // SAFETY: the template outlives the enumeration, every page is freed with
             // FwpmFreeMemory0, and the handle is destroyed on every path.
@@ -283,7 +410,7 @@ mod system {
             }
         }
 
-        fn delete_filters(&self) -> Result<(), String> {
+        pub(in crate::service) fn delete_filters(&self) -> Result<(), String> {
             for layer in LAYERS {
                 for id in self.filters(layer)? {
                     // SAFETY: id names a filter of this engine.
@@ -297,14 +424,14 @@ mod system {
             Ok(())
         }
 
-        fn add_filter(
+        pub(in crate::service) fn add_filter(
             &self,
             layer: GUID,
             permit: bool,
             conditions: &mut [FWPM_FILTER_CONDITION0],
         ) -> Result<(), String> {
-            let mut name = wide(DISPLAY_NAME);
-            let mut provider = PROVIDER;
+            let mut name = wide(self.1.name);
+            let mut provider = self.1.provider;
             // SAFETY: the filter, its name and its conditions outlive the call.
             unsafe {
                 let mut filter: FWPM_FILTER0 = zeroed();
@@ -312,11 +439,13 @@ mod system {
                 filter.flags = FWPM_FILTER_FLAG_PERSISTENT;
                 filter.providerKey = &mut provider;
                 filter.layerKey = layer;
-                filter.subLayerKey = SUBLAYER;
+                filter.subLayerKey = self.1.sublayer;
                 filter.weight.r#type = FWP_UINT8;
                 filter.weight.Anonymous.uint8 = if permit { PERMIT_WEIGHT } else { BLOCK_WEIGHT };
                 filter.numFilterConditions = conditions.len() as u32;
-                filter.filterCondition = conditions.as_mut_ptr();
+                if !conditions.is_empty() {
+                    filter.filterCondition = conditions.as_mut_ptr();
+                }
                 filter.action.r#type = if permit {
                     FWP_ACTION_PERMIT
                 } else {
@@ -345,46 +474,57 @@ mod system {
                         self.add_filter(layer, true, std::slice::from_mut(&mut condition))?;
                     }
                 }
-                for chunk in plan.v4.chunks(CONDITIONS_PER_FILTER) {
-                    let mut masks: Vec<_> = chunk
-                        .iter()
-                        .map(|&(addr, mask)| FWP_V4_ADDR_AND_MASK { addr, mask })
-                        .collect();
-                    let mut conditions: Vec<_> = masks
-                        .iter_mut()
-                        .map(|mask| remote(FWP_V4_ADDR_MASK, |value| value.v4AddrMask = mask))
-                        .collect();
-                    self.add_filter(LAYERS[0], false, &mut conditions)?;
-                }
-                for chunk in plan.v6.chunks(CONDITIONS_PER_FILTER) {
-                    let mut masks: Vec<_> = chunk
-                        .iter()
-                        .map(|&(addr, prefix)| FWP_V6_ADDR_AND_MASK {
-                            addr,
-                            prefixLength: prefix,
-                        })
-                        .collect();
-                    let mut conditions: Vec<_> = masks
-                        .iter_mut()
-                        .map(|mask| remote(FWP_V6_ADDR_MASK, |value| value.v6AddrMask = mask))
-                        .collect();
-                    self.add_filter(LAYERS[1], false, &mut conditions)?;
+                for block in plan.blocks() {
+                    let (mut v4, mut v6): (Vec<_>, Vec<_>) = match block.ranges {
+                        Ranges::V4(chunk) => (
+                            chunk
+                                .iter()
+                                .map(|&(addr, mask)| FWP_V4_ADDR_AND_MASK { addr, mask })
+                                .collect(),
+                            Vec::new(),
+                        ),
+                        Ranges::V6(chunk) => (
+                            Vec::new(),
+                            chunk
+                                .iter()
+                                .map(|&(addr, prefix)| FWP_V6_ADDR_AND_MASK {
+                                    addr,
+                                    prefixLength: prefix,
+                                })
+                                .collect(),
+                        ),
+                    };
+                    let layer = LAYERS[usize::from(v4.is_empty())];
+                    let mut conditions: Vec<_> =
+                        v4.iter_mut()
+                            .map(|mask| remote(FWP_V4_ADDR_MASK, |value| value.v4AddrMask = mask))
+                            .chain(v6.iter_mut().map(|mask| {
+                                remote(FWP_V6_ADDR_MASK, |value| value.v6AddrMask = mask)
+                            }))
+                            .chain(
+                                block
+                                    .interface_types
+                                    .iter()
+                                    .map(|&kind| interface_type(kind)),
+                            )
+                            .collect();
+                    self.add_filter(layer, false, &mut conditions)?;
                 }
                 Ok(())
             })
         }
 
-        fn lift(&self) -> Result<(), String> {
+        pub(in crate::service) fn lift(&self) -> Result<(), String> {
             self.transaction(|| {
                 self.delete_filters()?;
                 // SAFETY: the keys are constants; absent objects are tolerated.
                 unsafe {
-                    let code = FwpmSubLayerDeleteByKey0(self.0, &SUBLAYER);
+                    let code = FwpmSubLayerDeleteByKey0(self.0, &self.1.sublayer);
                     check(
                         tolerated(code, &[FWP_E_SUBLAYER_NOT_FOUND, FWP_E_IN_USE]),
                         "deleting the WFP sublayer",
                     )?;
-                    let code = FwpmProviderDeleteByKey0(self.0, &PROVIDER);
+                    let code = FwpmProviderDeleteByKey0(self.0, &self.1.provider);
                     check(
                         tolerated(code, &[FWP_E_PROVIDER_NOT_FOUND, FWP_E_IN_USE]),
                         "deleting the WFP provider",
@@ -393,7 +533,7 @@ mod system {
             })
         }
 
-        fn count(&self) -> Result<usize, String> {
+        pub(in crate::service) fn count(&self) -> Result<usize, String> {
             Ok(self.filters(LAYERS[0])?.len() + self.filters(LAYERS[1])?.len())
         }
     }
@@ -405,7 +545,7 @@ mod system {
         }
     }
 
-    fn remote(
+    pub(in crate::service) fn remote(
         kind: FWP_DATA_TYPE,
         set: impl FnOnce(&mut FWP_CONDITION_VALUE0_0),
     ) -> FWPM_FILTER_CONDITION0 {
@@ -415,6 +555,16 @@ mod system {
         condition.matchType = FWP_MATCH_EQUAL;
         condition.conditionValue.r#type = kind;
         set(&mut condition.conditionValue.Anonymous);
+        condition
+    }
+
+    fn interface_type(kind: u32) -> FWPM_FILTER_CONDITION0 {
+        // SAFETY: an all-zero condition is valid before its fields are set.
+        let mut condition: FWPM_FILTER_CONDITION0 = unsafe { zeroed() };
+        condition.fieldKey = FWPM_CONDITION_INTERFACE_TYPE;
+        condition.matchType = FWP_MATCH_EQUAL;
+        condition.conditionValue.r#type = FWP_UINT32;
+        condition.conditionValue.Anonymous.uint32 = kind;
         condition
     }
 
@@ -630,6 +780,7 @@ mod system {
         filters: usize,
         rules: usize,
         policy: bool,
+        summary: Vec<String>,
     }
 
     #[derive(Default)]
@@ -656,8 +807,8 @@ mod system {
             let mut applied = self.applied.lock().unwrap_or_else(|e| e.into_inner());
             *applied = None;
             let (luid, namespaces, resolver) = Self::target(request);
-            let plan = FilterPlan::new(addresses, resolver);
-            Engine::open()
+            let plan = FilterPlan::new(addresses, resolver).with_fake(&fake_prefixes(request));
+            Engine::open(&SITE_LOCK)
                 .and_then(|engine| engine.apply(&plan, luid))
                 .map_err(|message| HostError::Failed("firewallFailed", message))?;
             let policy = match resolver {
@@ -665,6 +816,10 @@ mod system {
                 None => lift_rules().map(|()| false),
             }
             .map_err(|message| HostError::Failed("dnsPolicyFailed", message))?;
+            let mut summary = plan.summary(luid.map(|_| request.tun.as_str()));
+            if let Some(resolver) = resolver {
+                summary.extend(rule_summary(&namespaces, resolver, policy));
+            }
             *applied = Some(Applied {
                 request: request.clone(),
                 luid,
@@ -672,6 +827,7 @@ mod system {
                 filters: plan.filters(luid.is_some()),
                 rules: namespaces.chunks(NAMES_PER_RULE).len(),
                 policy,
+                summary,
             });
             Ok(())
         }
@@ -688,14 +844,44 @@ mod system {
             let rules_hold = ours(LOCAL_RULES)? == applied.rules
                 && policy_rules()? == applied.policy
                 && (!applied.policy || ours(POLICY_RULES)? == applied.rules);
-            Ok(rules_hold && Engine::open()?.count()? == applied.filters)
+            Ok(rules_hold && Engine::open(&SITE_LOCK)?.count()? == applied.filters)
+        }
+
+        fn state(&self, request: Option<&SiteLockRequest>) -> HostState {
+            let applied = self.applied.lock().unwrap_or_else(|e| e.into_inner());
+            let filters = Engine::open(&SITE_LOCK).and_then(|engine| engine.count());
+            let rules = ours(LOCAL_RULES).unwrap_or_default();
+            let expected = applied.as_ref().map(|applied| applied.filters);
+            let failed = match &filters {
+                Ok(count) => request.is_some() && expected != Some(*count),
+                Err(_) => true,
+            };
+            let present = filters.as_ref().is_ok_and(|&count| count > 0) || rules > 0;
+            let ruleset = present.then(|| {
+                let lines = match applied.as_ref() {
+                    Some(applied) => applied.summary.clone(),
+                    None => vec![format!(
+                        "{} WFP filters and {rules} NRPT rules left by an earlier start",
+                        filters.as_ref().copied().unwrap_or_default()
+                    )],
+                };
+                readable_listing(&lines.join("\n"))
+            });
+            HostState {
+                layer: "wfp",
+                problem: failed.then_some("wfpFailed"),
+                table: None,
+                dns_queue: None,
+                dns_filter: rules > 0,
+                ruleset,
+            }
         }
 
         fn lift(&self) -> Result<(), HostError> {
             let mut applied = self.applied.lock().unwrap_or_else(|e| e.into_inner());
             *applied = None;
             lift_rules().map_err(|message| HostError::Failed("dnsPolicyFailed", message))?;
-            Engine::open()
+            Engine::open(&SITE_LOCK)
                 .and_then(|engine| engine.lift())
                 .map_err(|message| HostError::Failed("firewallFailed", message))
         }
@@ -711,6 +897,7 @@ mod tests {
         SiteLockRequest {
             tun: "Meta".to_string(),
             addresses: Vec::new(),
+            fake: Vec::new(),
             names,
             guarded,
         }
@@ -812,5 +999,141 @@ mod tests {
             v6: Vec::new(),
         };
         assert_eq!(FilterPlan::new(&addresses, None).filters(false), 3);
+    }
+
+    fn v4_range(index: u32) -> (u32, u8) {
+        (index << 8, 24)
+    }
+
+    #[test]
+    fn locked_ranges_block_every_interface_while_fake_ranges_only_physical_ones() {
+        let locked = Addresses {
+            v4: vec![(u32::from(Ipv4Addr::new(203, 0, 113, 0)), 24)],
+            v6: vec![(0x2001_0db8 << 96, 32)],
+        };
+        let fake = Addresses {
+            v4: vec![(u32::from(Ipv4Addr::new(198, 18, 0, 0)), 16)],
+            v6: vec![(0xfc00 << 112, 18)],
+        };
+        let plan = FilterPlan::new(&locked, None).with_fake(&fake);
+        let blocks = plan.blocks();
+        assert_eq!(blocks.len(), 4);
+        assert_eq!(blocks[0].ranges, Ranges::V4(&plan.v4));
+        assert_eq!(blocks[0].interface_types, &[] as &[u32]);
+        assert_eq!(blocks[1].ranges, Ranges::V6(&plan.v6));
+        assert_eq!(blocks[1].interface_types, &[] as &[u32]);
+        assert_eq!(blocks[2].ranges, Ranges::V4(&plan.fake_v4));
+        assert_eq!(blocks[2].interface_types, PHYSICAL_INTERFACE_TYPES);
+        assert_eq!(blocks[3].ranges, Ranges::V6(&plan.fake_v6));
+        assert_eq!(blocks[3].interface_types, PHYSICAL_INTERFACE_TYPES);
+    }
+
+    #[test]
+    fn the_resolver_is_checked_only_against_locked_addresses() {
+        let fake = Addresses {
+            v4: vec![(u32::from(Ipv4Addr::new(198, 18, 0, 0)), 16)],
+            v6: Vec::new(),
+        };
+        let empty = Addresses {
+            v4: Vec::new(),
+            v6: Vec::new(),
+        };
+        let plan = FilterPlan::new(&empty, Some(FALLBACK_RESOLVER)).with_fake(&fake);
+        assert_eq!(plan.v4, vec![(u32::from(FALLBACK_RESOLVER), u32::MAX)]);
+    }
+
+    #[test]
+    fn fake_ranges_split_into_chunks_of_125_per_filter() {
+        let fake = Addresses {
+            v4: (0..126).map(v4_range).collect(),
+            v6: Vec::new(),
+        };
+        let plan = FilterPlan::new(
+            &Addresses {
+                v4: Vec::new(),
+                v6: Vec::new(),
+            },
+            None,
+        )
+        .with_fake(&fake);
+        let fake_blocks = plan
+            .blocks()
+            .iter()
+            .filter(|block| block.interface_types == PHYSICAL_INTERFACE_TYPES)
+            .count();
+        assert_eq!(fake_blocks, 2);
+        assert_eq!(plan.filters(true), plan.blocks().len() + 2);
+    }
+
+    #[test]
+    fn the_summary_names_the_permit_and_both_block_scopes() {
+        let locked = Addresses {
+            v4: vec![(u32::from(Ipv4Addr::new(203, 0, 113, 0)), 24)],
+            v6: Vec::new(),
+        };
+        let fake = Addresses {
+            v4: vec![(u32::from(Ipv4Addr::new(198, 18, 0, 0)), 16)],
+            v6: Vec::new(),
+        };
+        let plan = FilterPlan::new(&locked, None).with_fake(&fake);
+        assert_eq!(
+            plan.summary(Some("Meta")),
+            strings(&[
+                "permit every connection on ReClash (Meta)",
+                "block 203.0.113.0/24 on every interface except ReClash",
+                "block 198.18.0.0/16 on ethernet, Wi-Fi and PPP interfaces",
+            ])
+        );
+        assert!(FilterPlan::default().summary(None).is_empty());
+    }
+
+    #[test]
+    fn ipv6_ranges_render_with_their_prefix() {
+        let locked = Addresses {
+            v4: Vec::new(),
+            v6: vec![(0x2001_0db8 << 96, 32)],
+        };
+        let plan = FilterPlan::new(&locked, None);
+        assert_eq!(
+            plan.summary(None),
+            strings(&["block 2001:db8::/32 on every interface except ReClash"])
+        );
+    }
+
+    #[test]
+    fn more_than_fifty_ranges_are_elided_in_the_summary() {
+        let locked = Addresses {
+            v4: (0..60).map(v4_range).collect(),
+            v6: Vec::new(),
+        };
+        let plan = FilterPlan::new(&locked, None);
+        let line = plan.summary(None).remove(0);
+        assert!(line.starts_with("block 0.0.0.0/24, 0.0.1.0/24, "));
+        assert!(line.ends_with(", … 10 more on every interface except ReClash"));
+        assert_eq!(line.matches('/').count(), 50);
+    }
+
+    #[test]
+    fn rule_lines_list_the_names_and_the_resolver() {
+        assert_eq!(
+            rule_summary(
+                &strings(&["claude.ai", ".claude.ai"]),
+                FALLBACK_RESOLVER,
+                false
+            ),
+            strings(&["NRPT: claude.ai, .claude.ai -> 198.18.0.2"])
+        );
+        let names: Vec<String> = (0..120)
+            .map(|index| format!("name{index}.example"))
+            .collect();
+        assert_eq!(rule_summary(&names, FALLBACK_RESOLVER, false).len(), 3);
+    }
+
+    #[test]
+    fn the_policy_rule_label_names_group_policy() {
+        assert_eq!(
+            rule_summary(&strings(&["claude.ai"]), FALLBACK_RESOLVER, true),
+            strings(&["NRPT and Group Policy NRPT: claude.ai -> 198.18.0.2"])
+        );
     }
 }

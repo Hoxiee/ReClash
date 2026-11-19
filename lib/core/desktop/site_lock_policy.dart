@@ -8,7 +8,7 @@ import 'package:reclash/models/site_lock.dart';
 enum SiteLockHostStatus { inactive, applied, helperUnavailable, failed }
 
 /// Keeps the privileged host's firewall policy in step with the Core's
-/// lock addresses. The Helper persists the policy, so a stopped or crashed
+/// lock addresses and fake-ip ranges. The Helper persists the policy, so a stopped or crashed
 /// Core leaves it in place; only the user disabling every lock lifts it.
 final class SiteLockHostPolicy {
   final Future<SiteLockPolicy?> Function(String known) _fetch;

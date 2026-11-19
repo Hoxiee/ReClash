@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "Пока kill switch включён, весь трафик вне TUN ReClash блокируется, в том числе адреса, которые TUN исключает. Доступны только сам Core и, если разрешено, локальная сеть. Он включается при каждом запуске TUN и выключается, когда вы отключаете TUN или прокси либо закрываете ReClash.",
+  "killSwitchAlwaysMode": "Блокировать также, когда ReClash остановлен",
+  "killSwitchAllowLan": "Разрешить локальную сеть",
+  "killSwitchStatusActive": "Блокировка",
+  "killSwitchStatusArmed": "Включён",
+  "killSwitchStatusStandby": "Ожидание TUN",
+  "killSwitchNftMissing": "Установите пакет nftables, чтобы использовать kill switch",
+  "killSwitchFirewallFailed": "Не удалось применить правила брандмауэра",
+  "killSwitchHelperMissing": "Для kill switch нужен Helper. Включите TUN один раз, чтобы его настроить.",
+  "killSwitchAlwaysConfirmTitle": "Блокировать интернет, пока ReClash остановлен?",
+  "killSwitchAlwaysConfirmBody": "Пока TUN ReClash не запущен, на этом компьютере не будет интернета, даже после удаления ReClash, если сначала не удалить Helper.",
+  "killSwitchBlockingTitle": "Kill switch блокирует интернет",
+  "killSwitchBlockingBody": "Трафик вне TUN ReClash блокируется, пока ReClash не запустится с TUN.",
+  "killSwitchUnblock": "Разблокировать",
+  "removeHelper": "Удалить Helper",
+  "removeHelperDesc": "Удалить привилегированный Helper, который запускает TUN",
+  "removeHelperConfirmBody": "ReClash сначала остановит Core, запущенное через Helper. Удаление Helper также снимает блокировку сайтов и kill switch на этом компьютере. В следующий раз TUN предложит настроить Helper заново.",
+  "removeHelperDone": "Helper удалён",
+  "removeHelperFailed": "Не удалось удалить Helper"
+}

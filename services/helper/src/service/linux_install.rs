@@ -1,3 +1,4 @@
+use super::kill_switch::{KillSwitchService, NftKillSwitch};
 use super::linux::Owner;
 use super::site_lock::{Scope, SiteLockService, SystemNft};
 use anyhow::{bail, Context, Result};
@@ -1193,6 +1194,11 @@ fn uninstall_owner(
             SiteLockService::new(state_path(owner), Scope::of(owner.uid), Box::new(SystemNft));
         if let Err(error) = site_lock.clear() {
             eprintln!("Helper stopped; site lock cleanup failed: {error}");
+        }
+        let layer = NftKillSwitch::new(owner.uid, Box::new(SystemNft), None);
+        let kill_switch = KillSwitchService::new(state_path(owner), None, Box::new(layer));
+        if let Err(error) = kill_switch.clear() {
+            eprintln!("Helper stopped; kill switch cleanup failed: {error}");
         }
     }
     systemd

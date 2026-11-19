@@ -696,7 +696,9 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           state = state.copyWith(phase: UpdatePhase.vpnActive);
         case ApkInstallResult.started:
           if (_runtime.desktop) {
-            unawaited(ref.read(systemActionProvider.notifier).handleExit());
+            unawaited(
+              ref.read(systemActionProvider.notifier).handleUpdateExit(),
+            );
             return;
           }
           _attachObservers();
@@ -891,7 +893,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         relaunch: relaunch,
       );
       if (relaunch) {
-        unawaited(ref.read(systemActionProvider.notifier).handleExit());
+        unawaited(ref.read(systemActionProvider.notifier).handleUpdateExit());
       }
       return true;
     } catch (error) {

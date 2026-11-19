@@ -139,7 +139,8 @@ abstract class SiteLockGuardedNames with _$SiteLockGuardedNames {
 }
 
 /// What the host firewall keeps off every path but the TUN (empty when TUN is
-/// off): locked addresses and names. `unchanged` answers a query whose known
+/// off): locked addresses and names. `fakeRanges` are the profile's fake-ip
+/// ranges, kept off physical interfaces only. `unchanged` answers a query whose known
 /// revision is still current.
 @freezed
 abstract class SiteLockPolicy with _$SiteLockPolicy {
@@ -148,6 +149,7 @@ abstract class SiteLockPolicy with _$SiteLockPolicy {
     @Default(false) bool unchanged,
     @Default('') String tun,
     @Default([]) List<String> addresses,
+    @Default([]) List<String> fakeRanges,
     @Default(SiteLockNames()) SiteLockNames names,
     @Default([]) List<SiteLockGuardedNames> guarded,
   }) = _SiteLockPolicy;

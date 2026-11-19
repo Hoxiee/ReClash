@@ -80,7 +80,7 @@ func TestSiteLockOutranksAListenerProxyButNotTheInnerListener(t *testing.T) {
 	}
 }
 
-func TestSiteLockPolicyHoldsFakeAddressesOnlyWhileNamesAreLocked(t *testing.T) {
+func TestSiteLockPolicyHoldsFakeRangesOnlyWhileNamesAreLocked(t *testing.T) {
 	withSiteLockTunnel(t)
 	configMu.Lock()
 	saved := currentConfig
@@ -102,8 +102,11 @@ func TestSiteLockPolicyHoldsFakeAddressesOnlyWhileNamesAreLocked(t *testing.T) {
 	lock.Match = append([]string{"IP-CIDR,198.51.100.7/24"}, lock.Match...)
 	setSiteLocks([]sitelock.Lock{lock})
 	policy := siteLockPolicy("")
-	if want := []string{"198.18.0.0/16", "198.51.100.0/24", "fc00::/18"}; !slices.Equal(policy.Addresses, want) {
+	if want := []string{"198.51.100.0/24"}; !slices.Equal(policy.Addresses, want) {
 		t.Errorf("addresses %v, want %v", policy.Addresses, want)
+	}
+	if want := []string{"198.18.0.0/16", "fc00::/18"}; !slices.Equal(policy.FakeRanges, want) {
+		t.Errorf("fake ranges %v, want %v", policy.FakeRanges, want)
 	}
 	if !slices.Equal(policy.Names.Suffix, []string{"chatgpt.com"}) {
 		t.Errorf("names %+v, want the chatgpt.com suffix", policy.Names)
@@ -118,11 +121,15 @@ func TestSiteLockPolicyHoldsFakeAddressesOnlyWhileNamesAreLocked(t *testing.T) {
 	if again := siteLockPolicy(policy.Revision); again.Unchanged {
 		t.Error("a changed policy keeps its revision")
 	}
-	if got := siteLockPolicy("").Addresses; !slices.Equal(got, []string{"198.51.100.0/24"}) {
-		t.Errorf("address-only locks hold %v, want no fake ranges", got)
+	addressOnly := siteLockPolicy("")
+	if !slices.Equal(addressOnly.Addresses, []string{"198.51.100.0/24"}) || len(addressOnly.FakeRanges) != 0 {
+		t.Errorf("address-only locks hold %v and %v, want no fake ranges", addressOnly.Addresses, addressOnly.FakeRanges)
+	}
+	if addressOnly.Revision == policy.Revision {
+		t.Error("the revision ignores the fake ranges")
 	}
 	setSiteLocks(nil)
-	if got := siteLockPolicy(""); got == nil || len(got.Addresses) != 0 || !got.Names.Empty() {
+	if got := siteLockPolicy(""); got == nil || len(got.Addresses) != 0 || len(got.FakeRanges) != 0 || !got.Names.Empty() {
 		t.Errorf("lifted locks keep %+v", got)
 	}
 }

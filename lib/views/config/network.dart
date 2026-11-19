@@ -9,7 +9,10 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/kill_switch.dart';
 import 'package:reclash/features/doctor/sensors/device.dart';
 import 'package:reclash/plugins/doctor.dart';
 import 'package:reclash/providers/action.dart';
@@ -301,13 +304,27 @@ class KillSwitchItem extends StatelessWidget {
   }
 }
 
+class HostKillSwitchItem extends StatelessWidget {
+  const HostKillSwitchItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingTarget(
+      spec: networkToolSettings[22],
+      child: const KillSwitchTile(),
+    );
+  }
+}
+
 /// Android's always-on VPN lockdown for this app, opening the system VPN
-/// settings on tap.
+/// settings on tap; on Linux and Windows the Helper's host block.
 class KillSwitchTile extends ConsumerWidget {
   const KillSwitchTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (killSwitchHostLayer) return const _HostKillSwitchTile();
+    if (!system.isAndroid) return const SizedBox.shrink();
     final l = context.appLocalizations;
     final state = ref.watch(
       deviceDoctorStateProvider.select((state) => state.value?.killSwitch),
@@ -615,6 +632,112 @@ List<Widget> networkOptionsItems({
   ];
 }
 
+void _setKillSwitch(WidgetRef ref, KillSwitchMode? mode) => ref
+    .read(networkSettingProvider.notifier)
+    .update((state) => state.copyWith(killSwitch: mode));
+
+class _HostKillSwitchTile extends ConsumerWidget {
+  const _HostKillSwitchTile();
+
+  String? _status(AppLocalizations l, WidgetRef ref, bool enabled) {
+    final snapshot = ref.watch(killSwitchHostStateProvider);
+    if (snapshot == null) return null;
+    if (snapshot.readiness != HelperReadiness.ready) {
+      return l.killSwitchHelperMissing;
+    }
+    final info = snapshot.info;
+    if (info == null || !enabled) return null;
+    return switch (info.problem) {
+      'nftMissing' => l.killSwitchNftMissing,
+      final String _ => l.killSwitchFirewallFailed,
+      null when ref.watch(killSwitchBlockingProvider) =>
+        l.killSwitchStatusActive,
+      null when info.armed => l.killSwitchStatusArmed,
+      null => l.killSwitchStatusStandby,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final enabled = ref.watch(
+      networkSettingProvider.select((state) => state.killSwitch != null),
+    );
+    final status = _status(l, ref, enabled);
+    return ListItem.toggle(
+      title: Text(l.killSwitch),
+      subtitle: status == null ? null : Text(status),
+      value: enabled,
+      onChanged: (value) =>
+          _setKillSwitch(ref, value ? KillSwitchMode.standard : null),
+    );
+  }
+}
+
+class KillSwitchAlwaysTile extends ConsumerWidget {
+  const KillSwitchAlwaysTile({super.key});
+
+  Future<void> _enable(BuildContext context, WidgetRef ref) async {
+    final l = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      title: l.killSwitchAlwaysConfirmTitle,
+      message: TextSpan(text: l.killSwitchAlwaysConfirmBody),
+      destructive: true,
+    );
+    if (confirmed == true) _setKillSwitch(ref, KillSwitchMode.always);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final always = ref.watch(
+      networkSettingProvider.select(
+        (state) => state.killSwitch == KillSwitchMode.always,
+      ),
+    );
+    return ListItem.toggle(
+      title: Text(context.appLocalizations.killSwitchAlwaysMode),
+      value: always,
+      onChanged: (value) => value
+          ? unawaited(_enable(context, ref))
+          : _setKillSwitch(ref, KillSwitchMode.standard),
+    );
+  }
+}
+
+class KillSwitchAllowLanTile extends StatelessWidget {
+  const KillSwitchAllowLanTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _networkToggle(
+      title: (l) => l.killSwitchAllowLan,
+      select: (state) => state.killSwitchAllowLan,
+      update: (state, value) => state.copyWith(killSwitchAllowLan: value),
+    );
+  }
+}
+
+class HostKillSwitchSection extends ConsumerWidget {
+  const HostKillSwitchSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      networkSettingProvider.select((state) => state.killSwitch != null),
+    );
+    return generateAnimatedSection(
+      items: [
+        const HostKillSwitchItem(),
+        if (enabled) ...const [
+          KillSwitchAlwaysTile(),
+          KillSwitchAllowLanTile(),
+        ],
+      ],
+      footer: context.appLocalizations.killSwitchDescDesktop,
+    );
+  }
+}
+
 class VpnSections extends ConsumerWidget {
   const VpnSections({super.key});
 
@@ -770,6 +893,7 @@ class NetworkListView extends StatelessWidget {
         if (system.isAndroid) const VpnSections(),
         if (system.isDesktop) const SystemProxySection(),
         const NetworkOptionsSection(),
+        if (killSwitchHostLayer) const HostKillSwitchSection(),
         TunSection(
           isDesktop: system.isDesktop,
           isLinux: system.isLinux,
@@ -940,5 +1064,12 @@ final networkToolSettings = <SettingSpec>[
     title: (l) => l.killSwitch,
     keywords: ['killSwitch', 'always-on', 'lockdown'],
     condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'network.hostKillSwitch',
+    page: ToolPage.network,
+    title: (l) => l.killSwitch,
+    keywords: ['killSwitch', 'firewall', 'leak'],
+    condition: SettingCondition.linuxOrWindows,
   ),
 ];

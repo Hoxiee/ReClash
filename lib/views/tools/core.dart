@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/linux_helper.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -157,6 +158,8 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
   bool _loading = false;
   bool _failed = false;
   int _generation = 0;
+  final _helperInstaller = LinuxHelperInstaller();
+  bool _removing = false;
 
   @override
   void initState() {
@@ -164,6 +167,52 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
     ref.listenManual(coreStatusProvider, (previous, next) {
       if (previous != next) unawaited(_refresh());
     }, fireImmediately: true);
+  }
+
+  Future<void> _removeHelper() async {
+    if (_removing) return;
+    final l10n = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      context: sheetNavigatorOf(context).context,
+      title: l10n.removeHelper,
+      message: TextSpan(text: l10n.removeHelperConfirmBody),
+      destructive: true,
+    );
+    if (!mounted || confirmed != true) return;
+    setState(() => _removing = true);
+    try {
+      if (ref.read(coreHandlerProvider).processOwner ==
+          CoreProcessOwner.helper) {
+        await ref.read(setupActionProvider.notifier).setTunEnabled(false);
+      }
+      final result = await _helperInstaller.uninstall();
+      await ref.read(killSwitchHostStateProvider.notifier).refresh();
+      ref.invalidate(siteLockHostInfoProvider);
+      if (!mounted) return;
+      switch (result) {
+        case LinuxHelperInstallResult.ready:
+          context.showNotifier(l10n.removeHelperDone);
+        case LinuxHelperInstallResult.cancelled:
+          break;
+        default:
+          final detail = _helperInstaller.lastDiagnostic;
+          context.showNotifier(
+            detail == null
+                ? l10n.removeHelperFailed
+                : '${l10n.removeHelperFailed}\n$detail',
+            level: MessageLevel.error,
+          );
+      }
+    } catch (error) {
+      if (mounted) {
+        context.showNotifier(
+          userFacingErrorMessage(error, l10n),
+          level: MessageLevel.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _removing = false);
+    }
   }
 
   Future<void> _refresh() async {
@@ -331,6 +380,16 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                 ),
               ],
             ),
+            if (system.isLinux && _helperInstaller.systemdAvailable)
+              generateSection(
+                items: [
+                  ListItem(
+                    title: Text(l10n.removeHelper),
+                    subtitle: Text(l10n.removeHelperDesc),
+                    onTap: _removing ? null : _removeHelper,
+                  ),
+                ],
+              ),
           ],
         ),
       ),

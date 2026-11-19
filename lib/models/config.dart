@@ -570,6 +570,8 @@ abstract class NetworkProps with _$NetworkProps {
     @Default(false) bool appendSystemDns,
     @Default(false) bool blockBrowserDoh,
     @Default(defaultAuthenticationProps) AuthenticationProps authentication,
+    KillSwitchMode? killSwitch,
+    @Default(true) bool killSwitchAllowLan,
   }) = _NetworkProps;
 
   factory NetworkProps.fromJson(Map<String, Object?>? json) =>

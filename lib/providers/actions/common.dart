@@ -14,7 +14,13 @@ class CommonAction extends _$CommonAction {
     if (ref.read(isStartProvider) && ref.read(suspendProvider)) {
       return ref.read(onDemandOverrideProvider.notifier).setPaused(false);
     }
-    return setRunning(!(_pendingToggleRunning ?? ref.read(isStartProvider)));
+    final running = !(_pendingToggleRunning ?? ref.read(isStartProvider));
+    if (!running) {
+      unawaited(
+        ref.read(killSwitchHostStateProvider.notifier).disarmOnUserStop(),
+      );
+    }
+    return setRunning(running);
   }
 
   Future<void> setRunning(bool running) async {

@@ -990,6 +990,9 @@ class SetupAction extends _$SetupAction {
     if (!enabled) {
       _core.revokePrivilegePrompt();
       ref.read(tunPrivilegeSetupProvider.notifier).clear();
+      unawaited(
+        ref.read(killSwitchHostStateProvider.notifier).disarmOnUserStop(),
+      );
     }
     ref
         .read(patchClashConfigProvider.notifier)

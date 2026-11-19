@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "キルスイッチが有効な間、ReClashのTUN以外のすべての通信がブロックされます。TUNが除外するアドレスも対象です。ブロックされず使えるのはCore自身と、許可した場合はローカルネットワークだけです。TUNを開始するたびに有効になり、TUNまたはプロキシをオフにするかReClashを終了すると無効になります。",
+  "killSwitchAlwaysMode": "ReClashが停止中もブロックする",
+  "killSwitchAllowLan": "ローカルネットワークを許可",
+  "killSwitchStatusActive": "ブロック中",
+  "killSwitchStatusArmed": "有効",
+  "killSwitchStatusStandby": "TUNを待機中",
+  "killSwitchNftMissing": "キルスイッチを使うには nftables パッケージをインストールしてください",
+  "killSwitchFirewallFailed": "ファイアウォールのルールを適用できませんでした",
+  "killSwitchHelperMissing": "キルスイッチには Helper が必要です。一度 TUN をオンにして設定してください。",
+  "killSwitchAlwaysConfirmTitle": "ReClashの停止中はインターネットをブロックしますか？",
+  "killSwitchAlwaysConfirmBody": "ReClashのTUNが動いていない間、このコンピューターはインターネットに接続できなくなります。ReClashをアンインストールした後も同じです。先に Helper を削除しない限り続きます。",
+  "killSwitchBlockingTitle": "キルスイッチがインターネットをブロックしています",
+  "killSwitchBlockingBody": "ReClashがTUNで動作するまで、ReClashのTUN以外の通信はブロックされます。",
+  "killSwitchUnblock": "ブロック解除",
+  "removeHelper": "Helper を削除",
+  "removeHelperDesc": "TUNを動かす特権 Helper をアンインストールします",
+  "removeHelperConfirmBody": "ReClashは、Helper経由で動いているCoreをまず停止します。Helperを削除すると、このコンピューターのサイトロックとキルスイッチも解除されます。次回、TUNはHelperの再設定を求めます。",
+  "removeHelperDone": "Helper を削除しました",
+  "removeHelperFailed": "Helper を削除できませんでした"
+}

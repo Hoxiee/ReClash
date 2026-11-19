@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
@@ -71,8 +72,7 @@ bool siteLockActive(Ref ref) => ref.watch(
 );
 
 /// The prefixes the Android TUN must always route while a lock is on: the
-/// Core's locked addresses plus the fake-ip ranges, the list the desktop host
-/// policy gets. A Core that cannot answer yet keeps the last list.
+/// Core's locked addresses plus the fake-ip ranges. A Core that cannot answer yet keeps the last list.
 @Riverpod(keepAlive: true)
 class SiteLockRoutes extends _$SiteLockRoutes {
   @override
@@ -84,8 +84,19 @@ class SiteLockRoutes extends _$SiteLockRoutes {
     final previous = state.value ?? const <String>[];
     if (ref.watch(coreStatusProvider) != CoreStatus.connected) return previous;
     final policy = await ref.read(coreHandlerProvider).siteLockPolicy();
-    return policy?.addresses ?? previous;
+    if (policy == null) return previous;
+    return {...policy.addresses, ...policy.fakeRanges}.toList();
   }
+}
+
+/// The Helper's live site lock state; null where no Helper host layer exists
+/// or it is not ready. A failing query surfaces as the error state.
+@riverpod
+Future<HelperSiteLock?> siteLockHostInfo(Ref ref) async {
+  if (!system.isLinux && !system.isWindows) return null;
+  final readiness = await helperClient.readiness(logFailure: false);
+  if (readiness != HelperReadiness.ready) return null;
+  return helperClient.siteLock();
 }
 
 /// What the Helper's host policy last reported.

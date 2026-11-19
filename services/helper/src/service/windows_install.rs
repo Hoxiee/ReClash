@@ -1,3 +1,4 @@
+use crate::service::kill_switch::KillSwitchService;
 use crate::service::owner::{configured_owner_sid, owner_sid_arguments};
 use crate::service::peer::{process_sid, sid_to_string};
 use crate::service::site_lock::SiteLockService;
@@ -104,6 +105,9 @@ pub(super) fn uninstall() -> Result<()> {
     if let Err(error) = SiteLockService::system().clear() {
         eprintln!("ReClash Service stopped; site lock cleanup failed: {error}");
     }
+    if let Err(error) = KillSwitchService::system().clear() {
+        eprintln!("ReClash Service stopped; kill switch cleanup failed: {error}");
+    }
     let root = install_root_path().context(InstallFailure::BundleInvalid)?;
     match fs::symlink_metadata(&root) {
         Err(error) if error.kind() == ErrorKind::NotFound => return Ok(()),
@@ -114,7 +118,8 @@ pub(super) fn uninstall() -> Result<()> {
     fs::remove_dir_all(&root).context("remove the installed ReClash Service")
 }
 
-/// The way out when the Helper is gone or broken and its persistent site lock stays.
+/// The way out when the Helper is gone or broken and its persistent site lock or
+/// kill switch stays.
 pub(super) fn lift_site_lock() -> Result<()> {
     let _lock = InstallLock::acquire(INSTALL_MUTEX)?;
     let manager = open_manager(ServiceManagerAccess::CONNECT)?;
@@ -126,7 +131,10 @@ pub(super) fn lift_site_lock() -> Result<()> {
     }
     SiteLockService::system()
         .clear()
-        .map_err(|error| anyhow!("site lock cleanup failed: {error}"))
+        .map_err(|error| anyhow!("site lock cleanup failed: {error}"))?;
+    KillSwitchService::system()
+        .clear()
+        .map_err(|error| anyhow!("kill switch cleanup failed: {error}"))
 }
 
 fn install_for(owner_sid: &str) -> Result<()> {

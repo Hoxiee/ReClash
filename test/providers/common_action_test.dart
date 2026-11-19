@@ -9,6 +9,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/kill_switch.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/on_demand.dart';
 import 'package:reclash/state.dart';
@@ -20,6 +21,27 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../helpers/test_profiles.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+class _DisarmRecordingHost extends KillSwitchHostState {
+  int disarmOnUserStops = 0;
+
+  @override
+  Future<void> disarmOnUserStop() async {
+    disarmOnUserStops++;
+  }
+}
+
+class _DisarmHelper extends KillSwitchHostState {
+  int disarms = 0;
+  Error? error;
+
+  @override
+  Future<void> disarm() async {
+    disarms++;
+    final failure = error;
+    if (failure != null) throw failure;
+  }
+}
 
 class _SetupRunRecorder extends SetupAction {
   int revision = 0;
@@ -371,6 +393,102 @@ void main() {
       await expectLater(
         container.read(commonActionProvider.notifier).autoCheckUpdate(),
         completion(isFalse),
+      );
+    });
+  });
+
+  group('CommonAction turns a standard kill switch off on a user stop', () {
+    test('turning the run off disarms once', () async {
+      final host = _DisarmRecordingHost();
+      final setup = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          killSwitchHostStateProvider.overrideWith(() => host),
+          setupActionProvider.overrideWith(() => setup),
+          isStartProvider.overrideWithValue(true),
+        ],
+      );
+
+      await container.read(commonActionProvider.notifier).toggleRunning();
+
+      expect(host.disarmOnUserStops, 1);
+      expect(setup.calls, [(running: false, initialize: false)]);
+    });
+
+    test('turning the run on never disarms', () async {
+      final host = _DisarmRecordingHost();
+      final setup = _SetupRunRecorder();
+      final coreAction = _CoreStartRecorder();
+      final container = buildContainer(
+        overrides: [
+          killSwitchHostStateProvider.overrideWith(() => host),
+          setupActionProvider.overrideWith(() => setup),
+          coreActionProvider.overrideWith(() => coreAction),
+        ],
+      );
+
+      await container.read(commonActionProvider.notifier).toggleRunning();
+
+      expect(setup.calls, [(running: true, initialize: true)]);
+      expect(host.disarmOnUserStops, 0);
+    });
+  });
+
+  group('KillSwitchHostState.disarmOnUserStop', () {
+    ProviderContainer hostContainer(
+      _DisarmHelper helper,
+      KillSwitchMode? mode,
+    ) {
+      return buildContainer(
+        overrides: [
+          killSwitchHostStateProvider.overrideWith(() => helper),
+          networkSettingProvider.overrideWithBuild(
+            (_, _) => NetworkProps(killSwitch: mode),
+          ),
+        ],
+      );
+    }
+
+    test('a standard block is lifted only on the host layer', () async {
+      final helper = _DisarmHelper();
+      final container = hostContainer(helper, KillSwitchMode.standard);
+
+      await container
+          .read(killSwitchHostStateProvider.notifier)
+          .disarmOnUserStop();
+
+      expect(helper.disarms, killSwitchHostLayer ? 1 : 0);
+    });
+
+    test('an always block is never lifted by a user stop', () async {
+      final helper = _DisarmHelper();
+      final container = hostContainer(helper, KillSwitchMode.always);
+
+      await container
+          .read(killSwitchHostStateProvider.notifier)
+          .disarmOnUserStop();
+
+      expect(helper.disarms, 0);
+    });
+
+    test('without a kill switch nothing is disarmed', () async {
+      final helper = _DisarmHelper();
+      final container = hostContainer(helper, null);
+
+      await container
+          .read(killSwitchHostStateProvider.notifier)
+          .disarmOnUserStop();
+
+      expect(helper.disarms, 0);
+    });
+
+    test('a failing disarm is logged and does not escape', () async {
+      final helper = _DisarmHelper()..error = StateError('helper down');
+      final container = hostContainer(helper, KillSwitchMode.standard);
+
+      await expectLater(
+        container.read(killSwitchHostStateProvider.notifier).disarmOnUserStop(),
+        completes,
       );
     });
   });

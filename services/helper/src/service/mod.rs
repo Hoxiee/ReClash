@@ -1,4 +1,9 @@
 pub mod hub;
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+mod kill_switch;
+#[cfg(any(windows, test))]
+#[cfg_attr(not(all(windows, feature = "windows-service")), allow(dead_code))]
+mod kill_switch_windows;
 #[cfg(target_os = "linux")]
 pub mod linux;
 #[cfg(target_os = "linux")]

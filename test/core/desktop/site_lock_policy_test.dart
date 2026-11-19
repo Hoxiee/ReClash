@@ -13,6 +13,7 @@ final class _Host {
     revision: 'r1',
     tun: 'tun0',
     addresses: ['203.0.113.9/32'],
+    fakeRanges: ['198.18.0.0/16'],
   );
   final known = <String>[];
   final puts_ = <SiteLockPolicy>[];
@@ -37,7 +38,10 @@ final class _Host {
     },
     put: (policy) async {
       puts_.add(policy);
-      calls.add('put ${policy.tun} ${policy.addresses.join(',')}');
+      calls.add(
+        'put ${policy.tun} ${policy.addresses.join(',')} '
+        '${policy.fakeRanges.join(',')}',
+      );
       if (putError != null) throw putError!;
     },
     delete: () async {
@@ -68,7 +72,7 @@ void main() {
       async.flushMicrotasks();
       async.elapse(_tick * 2);
 
-      expect(host.puts, ['put tun0 203.0.113.9/32']);
+      expect(host.puts, ['put tun0 203.0.113.9/32 198.18.0.0/16']);
       expect(host.statuses, [SiteLockHostStatus.applied]);
     });
   });
@@ -80,7 +84,10 @@ void main() {
       host.wanted = const SiteLockPolicy(revision: 'r2', tun: 'tun0');
       async.elapse(_tick);
 
-      expect(host.puts, ['put tun0 203.0.113.9/32', 'put tun0 ']);
+      expect(host.puts, [
+        'put tun0 203.0.113.9/32 198.18.0.0/16',
+        'put tun0  ',
+      ]);
       expect(host.known, ['', 'r1']);
     });
   });

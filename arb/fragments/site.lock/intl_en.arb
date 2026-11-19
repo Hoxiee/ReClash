@@ -100,5 +100,27 @@
     }
   },
   "siteLockSelectedAppsBody": "The VPN covers only the apps selected in access control, so every other app reaches locked sites without the lock.",
-  "siteLockKillSwitchDesc": "Block connections without VPN stops all traffic while the VPN is off, not only locked sites. Apps excluded from the VPN may lose network access under it."
+  "siteLockKillSwitchDesc": "Block connections without VPN stops all traffic while the VPN is off, not only locked sites. Apps excluded from the VPN may lose network access under it.",
+  "siteLockFromPreset": "From preset",
+  "siteLockPresetsFooter": "These services check that the account always comes from the same IP. The lock keeps them on the server you choose.",
+  "siteLockPersistenceNote": "On Linux and Windows the system firewall enforces the lock through the Helper. It keeps working while ReClash is closed or has crashed, and from boot, and is lifted only by turning every lock off. DEB and RPM packages and the Windows uninstaller remove the Helper and its rules. For an AppImage or a manual install, use Remove Helper on the Core page in Tools first, or turn the locks off before deleting the app.",
+  "siteLockKillSwitchDescDesktop": "The kill switch blocks all traffic outside ReClash's TUN, not only locked sites, so nothing leaks while the Core restarts or after a crash.",
+  "siteLockHostTitle": "System firewall",
+  "siteLockHostMechanism": "Mechanism",
+  "siteLockHostStatus": "Status",
+  "siteLockHostActive": "Active",
+  "siteLockHostIdle": "No rules loaded",
+  "siteLockHostAddresses": "Blocked addresses",
+  "siteLockHostNames": "Names filtered by DNS",
+  "siteLockHostFake": "Fake-ip ranges kept off physical networks",
+  "siteLockHostFilterOn": "Filter running",
+  "siteLockHostFilterOff": "Filter stopped",
+  "siteLockHostNftMissing": "nftables (the nft command) is not installed. Install the nftables package; ufw, firewalld and iptables keep working beside it, ReClash adds its own table and does not change theirs.",
+  "siteLockHostRefused": "The system firewall refused the rules",
+  "siteLockHostQueueStopped": "The DNS filter is not answering; DNS outside the TUN is blocked until the Helper restarts it",
+  "siteLockHostShowRules": "Show rules",
+  "siteLockHostRulesTitle": "Firewall rules",
+  "siteLockHostRulesEmpty": "No rules are loaded.",
+  "siteLockHostInspect": "To inspect them yourself, run:",
+  "siteLockHostFooter": "Locked addresses are rejected on every interface except the ReClash TUN. DNS queries for locked names outside the TUN are redirected into it or dropped, so another VPN can run in parallel but cannot open a locked site."
 }

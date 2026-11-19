@@ -285,6 +285,54 @@ final class LinuxHelperInstaller {
     return operation;
   }
 
+  /// Runs the installed Helper's own `uninstall`; [LinuxHelperInstallResult.ready]
+  /// means it is gone.
+  Future<LinuxHelperInstallResult> uninstall() {
+    final current = _operation;
+    if (current != null) return current.then((_) => uninstall());
+    final operation = _uninstall();
+    _operation = operation;
+    unawaited(
+      operation.then((_) {
+        if (identical(_operation, operation)) _operation = null;
+      }),
+    );
+    return operation;
+  }
+
+  Future<LinuxHelperInstallResult> _uninstall() async {
+    _lastDiagnostic = null;
+    if (!_isLinux) return LinuxHelperInstallResult.unsupported;
+    if (!_hasSystemd()) return LinuxHelperInstallResult.systemdUnavailable;
+    try {
+      final ProcessResult result;
+      try {
+        result = await _runProcess('/usr/bin/pkexec', [
+          '--disable-internal-agent',
+          await _env.installedHelperPath(),
+          'uninstall',
+        ]);
+      } on ProcessException catch (error) {
+        _recordDiagnostic('pkexec launch failed: $error');
+        return error.errorCode == 2
+            ? LinuxHelperInstallResult.pkexecUnavailable
+            : LinuxHelperInstallResult.failed;
+      }
+      if (result.exitCode == 0) return LinuxHelperInstallResult.ready;
+      _recordDiagnostic('pkexec exit=${result.exitCode}; ${result.stderr}');
+      if (result.exitCode == 126) return LinuxHelperInstallResult.cancelled;
+      if (result.exitCode == 127) {
+        return '${result.stderr}'.toLowerCase().contains('authentication agent')
+            ? LinuxHelperInstallResult.agentUnavailable
+            : LinuxHelperInstallResult.denied;
+      }
+      return LinuxHelperInstallResult.failed;
+    } on Object catch (error) {
+      _recordDiagnostic('Helper removal failed: $error');
+      return LinuxHelperInstallResult.failed;
+    }
+  }
+
   Future<LinuxHelperInstallResult> _install() async {
     _lastDiagnostic = null;
     final readiness = await ensureReady();

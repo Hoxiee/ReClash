@@ -186,12 +186,15 @@ func withNames(state *siteLockState) *siteLockState {
 // addresses and names that may leave only through Tun (empty while TUN is off).
 // A host that already holds Revision gets it back Unchanged, without the rest.
 type SiteLockPolicy struct {
-	Revision  string                  `json:"revision"`
-	Unchanged bool                    `json:"unchanged,omitempty"`
-	Tun       string                  `json:"tun"`
-	Addresses []string                `json:"addresses"`
-	Names     *sitelock.Names         `json:"names,omitempty"`
-	Guarded   []sitelock.GuardedNames `json:"guarded,omitempty"`
+	Revision  string   `json:"revision"`
+	Unchanged bool     `json:"unchanged,omitempty"`
+	Tun       string   `json:"tun"`
+	Addresses []string `json:"addresses"`
+	// FakeRanges are the profile's fake-ip ranges, rejected on physical
+	// interfaces only so another tunnel may hand out the same range.
+	FakeRanges []string                `json:"fakeRanges,omitempty"`
+	Names      *sitelock.Names         `json:"names,omitempty"`
+	Guarded    []sitelock.GuardedNames `json:"guarded,omitempty"`
 }
 
 type siteLockPolicyParams struct {
@@ -204,25 +207,29 @@ func siteLockPolicy(known string) *SiteLockPolicy {
 	if state == nil {
 		return nil
 	}
-	prefixes := state.set.Prefixes()
+	addresses := maskedPrefixes(state.set.Prefixes())
+	var fakeRanges []string
 	if !state.names.Empty() || len(state.guarded) > 0 {
-		prefixes = append(prefixes, fakeIPRanges()...)
+		fakeRanges = maskedPrefixes(fakeIPRanges())
 	}
-	addresses := make([]string, 0, len(prefixes))
-	for _, prefix := range prefixes {
-		addresses = append(addresses, prefix.Masked().String())
-	}
-	slices.Sort(addresses)
-	addresses = slices.Compact(addresses)
 	tun := siteLockTun()
 	digest := sha256.New()
-	digest.Write([]byte(tun + "\x00" + strings.Join(addresses, ",") + "\x00"))
+	digest.Write([]byte(tun + "\x00" + strings.Join(addresses, ",") + "\x00" + strings.Join(fakeRanges, ",") + "\x00"))
 	digest.Write(state.namesSum[:])
 	revision := hex.EncodeToString(digest.Sum(nil))
 	if revision == known {
 		return &SiteLockPolicy{Revision: revision, Unchanged: true}
 	}
-	return &SiteLockPolicy{Revision: revision, Tun: tun, Addresses: addresses, Names: &state.names, Guarded: state.guarded}
+	return &SiteLockPolicy{Revision: revision, Tun: tun, Addresses: addresses, FakeRanges: fakeRanges, Names: &state.names, Guarded: state.guarded}
+}
+
+func maskedPrefixes(prefixes []netip.Prefix) []string {
+	masked := make([]string, 0, len(prefixes))
+	for _, prefix := range prefixes {
+		masked = append(masked, prefix.Masked().String())
+	}
+	slices.Sort(masked)
+	return slices.Compact(masked)
 }
 
 func siteLockTun() string {

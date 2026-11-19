@@ -1,3 +1,4 @@
+use crate::service::kill_switch::{self, KillSwitchService};
 use crate::service::site_lock::{self, SiteLockService};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
@@ -510,7 +511,11 @@ fn launch_failure_response(error: &Error) -> warp::reply::Response {
     )
 }
 
-fn start(start_params: StartParams, caller: Caller) -> warp::reply::Response {
+fn start(
+    start_params: StartParams,
+    caller: Caller,
+    kill_switch: &KillSwitchService,
+) -> warp::reply::Response {
     if !is_allowed_core_address(&start_params.address) {
         return error_response(
             "invalidRequest",
@@ -529,10 +534,17 @@ fn start(start_params: StartParams, caller: Caller) -> warp::reply::Response {
     if let Err(error) = super::linux::ensure_owner_socket(&start_params.address) {
         return error_response("invalidRequest", error.to_string(), StatusCode::BAD_REQUEST);
     }
-    match core_arguments(&start_params, caller) {
-        Ok(arguments) => launch(start_params.session_id, arguments),
-        Err((code, message, status)) => error_response(code, message, status),
+    let arguments = match core_arguments(&start_params, caller) {
+        Ok(arguments) => arguments,
+        Err((code, message, status)) => return error_response(code, message, status),
+    };
+    let response = launch(start_params.session_id, arguments);
+    if response.status().is_success() {
+        if let Err(error) = kill_switch.arm() {
+            log_message(format!("Helper could not arm the kill switch: {error}"));
+        }
     }
+    response
 }
 
 type StartRefusal = (&'static str, &'static str, StatusCode);
@@ -795,18 +807,39 @@ fn ping(ping_params: PingParams) -> warp::reply::Response {
 
 async fn start_request(
     caller: Caller,
+    kill_switch: Arc<KillSwitchService>,
     start_params: StartParams,
 ) -> Result<warp::reply::Response, Infallible> {
-    Ok(
-        match tokio::task::spawn_blocking(move || start(start_params, caller)).await {
+    let armed = kill_switch.clone();
+    let response =
+        match tokio::task::spawn_blocking(move || start(start_params, caller, &armed)).await {
             Ok(response) => response,
             Err(error) => error_response(
                 "internalError",
                 format!("Core start task failed: {error}"),
                 StatusCode::INTERNAL_SERVER_ERROR,
             ),
-        },
-    )
+        };
+    #[cfg(windows)]
+    if response.status().is_success() {
+        tokio::spawn(follow_tun(kill_switch));
+    }
+    #[cfg(not(windows))]
+    drop(kill_switch);
+    Ok(response)
+}
+
+/// WFP permits the TUN by its LUID, which exists only once the Core has opened the
+/// adapter, so the block armed at start re-syncs quickly instead of on the next heal.
+#[cfg(windows)]
+async fn follow_tun(kill_switch: Arc<KillSwitchService>) {
+    for _ in 0..40 {
+        tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+        let service = kill_switch.clone();
+        if let Ok(Ok(true)) = tokio::task::spawn_blocking(move || service.heal()).await {
+            return;
+        }
+    }
 }
 
 async fn stop_request(stop_params: StopParams) -> Result<warp::reply::Response, Infallible> {
@@ -946,14 +979,31 @@ pub(super) fn caller_routes(
 #[cfg(target_os = "linux")]
 pub(super) fn routes_with(
     site_lock: Arc<SiteLockService>,
+    kill_switch: Arc<KillSwitchService>,
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
-    caller_routes_with(Caller::default(), site_lock)
+    host_routes(Caller::default(), site_lock, kill_switch)
 }
 
+#[cfg(any(
+    test,
+    not(any(
+        all(feature = "windows-service", target_os = "windows"),
+        target_os = "linux"
+    ))
+))]
 pub(super) fn caller_routes_with(
     caller: Caller,
     site_lock: Arc<SiteLockService>,
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+    host_routes(caller, site_lock, Arc::new(KillSwitchService::system()))
+}
+
+pub(super) fn host_routes(
+    caller: Caller,
+    site_lock: Arc<SiteLockService>,
+    kill_switch: Arc<KillSwitchService>,
+) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+    let start_kill_switch = kill_switch.clone();
     let native_client = warp::header::optional::<String>("origin")
         .and(warp::header::optional::<String>("host"))
         .and_then(|origin: Option<String>, host: Option<String>| async move {
@@ -983,6 +1033,7 @@ pub(super) fn caller_routes_with(
         .and(warp::path::end())
         .and(warp::post())
         .and(warp::any().map(move || caller.clone()))
+        .and(warp::any().map(move || start_kill_switch.clone()))
         .and(warp::body::content_length_limit(MAX_REQUEST_BODY_BYTES))
         .and(warp::body::json())
         .and_then(start_request);
@@ -1005,7 +1056,8 @@ pub(super) fn caller_routes_with(
                 .or(api_start)
                 .or(api_stop)
                 .or(api_logs)
-                .or(site_lock::routes(site_lock)),
+                .or(site_lock::routes(site_lock))
+                .or(kill_switch::routes(kill_switch)),
         )
         .recover(handle_rejection)
 }

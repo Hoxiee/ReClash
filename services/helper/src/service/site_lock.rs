@@ -1,4 +1,5 @@
 use super::hub::{error_response, json_response, log_message};
+use super::kill_switch::KillSwitchService;
 use super::site_lock_dns::{
     validate_names, DnsQueue, GuardedNames, Matcher, Names, NoQueue, SystemQueue, LOCKED_MARK,
 };
@@ -12,6 +13,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -26,6 +28,10 @@ const MAX_ERROR_ENTRY_CHARS: usize = 64;
 // 8192 IPv6 CIDRs plus the largest escaped name list.
 const MAX_BODY_BYTES: u64 = 16 * 1024 * 1024;
 const HEAL_INTERVAL: Duration = Duration::from_secs(10);
+const MAX_LISTED_ELEMENTS: usize = 50;
+const MAX_LISTING_BYTES: usize = 64 * 1024;
+// ARPHRD_NONE: the device type of TUN devices, ReClash's and any other VPN's.
+const TUNNEL_IFTYPE: u16 = 65534;
 #[cfg(target_os = "linux")]
 const NFT_PATHS: [&str; 3] = ["/usr/sbin/nft", "/usr/bin/nft", "/sbin/nft"];
 
@@ -34,6 +40,8 @@ const NFT_PATHS: [&str; 3] = ["/usr/sbin/nft", "/usr/bin/nft", "/sbin/nft"];
 pub(super) struct SiteLockRequest {
     pub(super) tun: String,
     pub(super) addresses: Vec<String>,
+    #[serde(default)]
+    pub(super) fake: Vec<String>,
     #[serde(default)]
     pub(super) names: Names,
     #[serde(default)]
@@ -65,6 +73,10 @@ pub(super) trait NftRunner: Send + Sync {
     fn apply(&self, ruleset: &str) -> Result<(), NftError>;
     /// The stored ruleset as nft prints it, or `None` while the table is absent.
     fn stored(&self, table: &str) -> Result<Option<String>, NftError>;
+    /// Like `stored`, but a listing failure other than an absent table is an error.
+    fn listing(&self, table: &str) -> Result<Option<String>, NftError> {
+        self.stored(table)
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -79,7 +91,7 @@ impl Addresses {
     }
 }
 
-fn validate_tun(tun: &str) -> Result<(), String> {
+pub(super) fn validate_tun(tun: &str) -> Result<(), String> {
     let valid = tun.len() <= MAX_TUN_LENGTH
         && tun
             .bytes()
@@ -146,12 +158,22 @@ fn normalize(request: &SiteLockRequest) -> Result<Addresses, String> {
                 .flat_map(|lock| [&lock.names, &lock.except]),
         ),
     )?;
-    if request.addresses.len() > MAX_ADDRESSES {
+    if request.addresses.len() + request.fake.len() > MAX_ADDRESSES {
         return Err(format!("at most {MAX_ADDRESSES} addresses are allowed"));
     }
+    prefixes(&request.fake)?;
+    prefixes(&request.addresses)
+}
+
+/// The fake-ip ranges of a request `normalize` accepted.
+pub(super) fn fake_prefixes(request: &SiteLockRequest) -> Addresses {
+    prefixes(&request.fake).unwrap_or_default()
+}
+
+fn prefixes(entries: &[String]) -> Result<Addresses, String> {
     let mut v4 = BTreeSet::new();
     let mut v6 = BTreeSet::new();
-    for entry in &request.addresses {
+    for entry in entries {
         match parse_entry(entry) {
             Some(Network::V4(address, prefix)) => {
                 v4.insert((address, prefix));
@@ -184,7 +206,7 @@ fn set_block(name: &str, kind: &str, elements: Vec<String>) -> String {
 /// never replace each other's rules or compete for one queue.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct Scope {
-    table: String,
+    pub(super) table: String,
     queue: u16,
 }
 
@@ -227,7 +249,7 @@ fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> St
         through_tun.push_str(&format!("    oifname \"{tun}\" accept\n"));
     }
     if redirect {
-        // The redirected query now targets the TUN's own subnet, which @v4 holds.
+        // The redirected query now targets the TUN's own subnet, which @fake4 holds.
         through_tun.push_str(&format!(
             "    meta mark {LOCKED_MARK:#x} ct status dnat accept\n"
         ));
@@ -242,7 +264,11 @@ fn chain_block(name: &str, queue: u16, tun: &str, dns: Option<&DnsFilter>) -> St
          meta l4proto tcp ip daddr @v4 reject with tcp reset\n    \
          ip daddr @v4 reject with icmpx admin-prohibited\n    \
          meta l4proto tcp ip6 daddr @v6 reject with tcp reset\n    \
-         ip6 daddr @v6 reject with icmpx admin-prohibited\n  }}\n"
+         ip6 daddr @v6 reject with icmpx admin-prohibited\n    \
+         meta oiftype != {TUNNEL_IFTYPE} meta l4proto tcp ip daddr @fake4 reject with tcp reset\n    \
+         meta oiftype != {TUNNEL_IFTYPE} ip daddr @fake4 reject with icmpx admin-prohibited\n    \
+         meta oiftype != {TUNNEL_IFTYPE} meta l4proto tcp ip6 daddr @fake6 reject with tcp reset\n    \
+         meta oiftype != {TUNNEL_IFTYPE} ip6 daddr @fake6 reject with icmpx admin-prohibited\n  }}\n"
     )
 }
 
@@ -355,8 +381,7 @@ pub(super) fn subnet_peer(address: u32, mask: u32) -> Option<Ipv4Addr> {
     (peer != network).then(|| Ipv4Addr::from(peer))
 }
 
-fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilter>) -> String {
-    let table = &scope.table;
+fn elements(addresses: &Addresses) -> (Vec<String>, Vec<String>) {
     let v4 = addresses
         .v4
         .iter()
@@ -381,10 +406,27 @@ fn ruleset(scope: &Scope, tun: &str, addresses: &Addresses, dns: Option<&DnsFilt
             }
         })
         .collect();
+    (v4, v6)
+}
+
+// Locked addresses are rejected on every other interface; the fake-ip range only on
+// physical ones, so another VPN handing out the same range keeps working.
+fn ruleset(
+    scope: &Scope,
+    tun: &str,
+    addresses: &Addresses,
+    fake: &Addresses,
+    dns: Option<&DnsFilter>,
+) -> String {
+    let table = &scope.table;
+    let (v4, v6) = elements(addresses);
+    let (fake4, fake6) = elements(fake);
     format!(
-        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}{}{}}}\n",
+        "add table inet {table}\ndelete table inet {table}\ntable inet {table} {{\n{}{}{}{}{}{}{}{}}}\n",
         set_block("v4", "ipv4_addr", v4),
         set_block("v6", "ipv6_addr", v6),
+        set_block("fake4", "ipv4_addr", fake4),
+        set_block("fake6", "ipv6_addr", fake6),
         queue_block(scope.queue, tun, dns),
         chain_block("output", scope.queue, tun, dns),
         chain_block("forward", scope.queue, tun, dns),
@@ -469,6 +511,16 @@ impl NftRunner for SystemNft {
             Err(NftError::Missing) => Err(NftError::Missing),
         }
     }
+
+    fn listing(&self, table: &str) -> Result<Option<String>, NftError> {
+        match Self::run(&["list", "table", "inet", table], None) {
+            Ok(listing) => Ok(Some(String::from_utf8_lossy(&listing).into_owned())),
+            Err(NftError::Failed(message)) if message.contains("No such file or directory") => {
+                Ok(None)
+            }
+            Err(error) => Err(error),
+        }
+    }
 }
 
 #[cfg(not(target_os = "linux"))]
@@ -479,6 +531,85 @@ impl NftRunner for SystemNft {
 
     fn stored(&self, _table: &str) -> Result<Option<String>, NftError> {
         Err(NftError::Missing)
+    }
+}
+
+/// An `nft list` text for a reader: long element lists cut short, the whole capped.
+pub(super) fn readable_listing(listing: &str) -> String {
+    const OPEN: &str = "elements = {";
+    let mut text = String::new();
+    let mut rest = listing;
+    while let Some(start) = rest.find(OPEN) {
+        let open = start + OPEN.len();
+        let Some(length) = rest[open..].find('}') else {
+            break;
+        };
+        text.push_str(&rest[..open]);
+        let elements: Vec<&str> = rest[open..open + length]
+            .split(',')
+            .map(str::trim)
+            .collect();
+        if elements.len() > MAX_LISTED_ELEMENTS {
+            text.push_str(&format!(
+                " {}, … {} more ",
+                elements[..MAX_LISTED_ELEMENTS].join(", "),
+                elements.len() - MAX_LISTED_ELEMENTS
+            ));
+        } else {
+            text.push_str(&rest[open..open + length]);
+        }
+        rest = &rest[open + length..];
+    }
+    text.push_str(rest);
+    if text.len() > MAX_LISTING_BYTES {
+        let mut end = MAX_LISTING_BYTES;
+        while !text.is_char_boundary(end) {
+            end -= 1;
+        }
+        text.truncate(end);
+    }
+    text
+}
+
+/// The Helper's own cgroup, which holds the Core.
+#[cfg(target_os = "linux")]
+pub(super) fn own_cgroup() -> Option<String> {
+    fs::read_to_string("/proc/self/cgroup")
+        .ok()
+        .and_then(|contents| cgroup_path(&contents))
+}
+
+#[cfg(target_os = "linux")]
+pub(super) fn system_state_dir(owner: super::linux::Owner) -> PathBuf {
+    std::env::var("STATE_DIRECTORY")
+        .ok()
+        .and_then(|value| value.split(':').next().map(PathBuf::from))
+        .filter(|path| path.is_absolute())
+        .unwrap_or_else(|| super::linux_install::state_path(owner))
+}
+
+/// Replaces `name` in `directory` with `bytes` so a crash leaves the old file or the new one.
+pub(super) fn write_atomic(directory: &Path, name: &str, bytes: &[u8]) -> std::io::Result<()> {
+    fs::create_dir_all(directory)?;
+    let temporary = directory.join(format!("{name}.tmp"));
+    let _ = fs::remove_file(&temporary);
+    let mut options = OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    options.mode(0o600);
+    let mut file = options.open(&temporary)?;
+    file.write_all(bytes)?;
+    file.sync_all()?;
+    fs::rename(&temporary, directory.join(name))?;
+    #[cfg(unix)]
+    fs::File::open(directory)?.sync_all()?;
+    Ok(())
+}
+
+pub(super) fn remove_optional(path: &Path) -> std::io::Result<()> {
+    match fs::remove_file(path) {
+        Err(error) if error.kind() != ErrorKind::NotFound => Err(error),
+        _ => Ok(()),
     }
 }
 
@@ -529,6 +660,26 @@ pub(super) trait HostLayer: Send + Sync {
     /// Whether the system still holds what applying the request made.
     fn holds(&self, request: &SiteLockRequest, addresses: &Addresses) -> Result<bool, String>;
     fn lift(&self) -> Result<(), HostError>;
+    /// What GET reports about the layer; `request` is the persisted one.
+    fn state(&self, _request: Option<&SiteLockRequest>) -> HostState {
+        HostState {
+            layer: "wfp",
+            problem: None,
+            table: None,
+            dns_queue: None,
+            dns_filter: false,
+            ruleset: None,
+        }
+    }
+}
+
+pub(super) struct HostState {
+    pub(super) layer: &'static str,
+    pub(super) problem: Option<&'static str>,
+    pub(super) table: Option<String>,
+    pub(super) dns_queue: Option<u16>,
+    pub(super) dns_filter: bool,
+    pub(super) ruleset: Option<String>,
 }
 
 struct NftLayer {
@@ -536,6 +687,7 @@ struct NftLayer {
     runner: Box<dyn NftRunner>,
     queue: Arc<dyn DnsQueue>,
     cgroup: Option<String>,
+    failed: AtomicBool,
 }
 
 impl NftLayer {
@@ -558,7 +710,13 @@ impl NftLayer {
             cgroup: self.cgroup.as_deref(),
             redirect: tun_peer(&request.tun),
         });
-        ruleset(&self.scope, &request.tun, addresses, dns.as_ref())
+        ruleset(
+            &self.scope,
+            &request.tun,
+            addresses,
+            &fake_prefixes(request),
+            dns.as_ref(),
+        )
     }
 
     // The queue is started by a policy with names, and a restart rebinds it; a rule
@@ -580,14 +738,14 @@ impl HostLayer for NftLayer {
         let previous = self
             .prepare_dns(request, matcher)
             .map_err(|message| HostError::Failed("dnsFilterFailed", message))?;
-        self.runner
-            .apply(&self.render(request, addresses))
-            .map_err(|error| {
-                if let (true, Some(previous)) = (strict, previous) {
-                    self.queue.set_matcher(previous);
-                }
-                error.into()
-            })
+        let applied = self.runner.apply(&self.render(request, addresses));
+        self.failed.store(applied.is_err(), Ordering::SeqCst);
+        applied.map_err(|error| {
+            if let (true, Some(previous)) = (strict, previous) {
+                self.queue.set_matcher(previous);
+            }
+            error.into()
+        })
     }
 
     fn holds(&self, request: &SiteLockRequest, addresses: &Addresses) -> Result<bool, String> {
@@ -602,8 +760,35 @@ impl HostLayer for NftLayer {
 
     fn lift(&self) -> Result<(), HostError> {
         self.runner.apply(&delete_ruleset(&self.scope))?;
+        self.failed.store(false, Ordering::SeqCst);
         self.queue.set_matcher(Arc::default());
         Ok(())
+    }
+
+    fn state(&self, request: Option<&SiteLockRequest>) -> HostState {
+        let listing = self.runner.listing(&self.scope.table);
+        let running = self.queue.running();
+        let problem = match &listing {
+            Err(NftError::Missing) => Some("nftMissing"),
+            Err(NftError::Failed(_)) => Some("nftFailed"),
+            Ok(stored) => request.and_then(|request| {
+                if stored.is_none() || self.failed.load(Ordering::SeqCst) {
+                    Some("nftFailed")
+                } else if request.name_count() > 0 && !running {
+                    Some("queueStopped")
+                } else {
+                    None
+                }
+            }),
+        };
+        HostState {
+            layer: "nftables",
+            problem,
+            table: Some(format!("inet {}", self.scope.table)),
+            dns_queue: Some(self.scope.queue),
+            dns_filter: running,
+            ruleset: listing.ok().flatten().map(|text| readable_listing(&text)),
+        }
     }
 }
 
@@ -630,6 +815,7 @@ impl SiteLockService {
             runner,
             queue,
             cgroup,
+            failed: AtomicBool::new(false),
         };
         Self::with_layer(state_dir, Box::new(layer))
     }
@@ -649,14 +835,8 @@ impl SiteLockService {
             uid: unsafe { libc::getuid() },
             gid: unsafe { libc::getgid() },
         };
-        let state_dir = std::env::var("STATE_DIRECTORY")
-            .ok()
-            .and_then(|value| value.split(':').next().map(PathBuf::from))
-            .filter(|path| path.is_absolute())
-            .unwrap_or_else(|| super::linux_install::state_path(owner));
-        let cgroup = fs::read_to_string("/proc/self/cgroup")
-            .ok()
-            .and_then(|contents| cgroup_path(&contents));
+        let state_dir = system_state_dir(owner);
+        let cgroup = own_cgroup();
         let scope = Scope::of(owner.uid);
         let queue = SystemQueue::shared(scope.queue);
         Self::with_dns(state_dir, scope, Box::new(SystemNft), queue, cgroup)
@@ -692,27 +872,11 @@ impl SiteLockService {
     }
 
     fn persist(&self, request: &SiteLockRequest) -> std::io::Result<()> {
-        fs::create_dir_all(&self.state_dir)?;
-        let temporary = self.state_dir.join(format!("{STATE_FILE}.tmp"));
-        let _ = fs::remove_file(&temporary);
-        let mut options = OpenOptions::new();
-        options.write(true).create_new(true);
-        #[cfg(unix)]
-        options.mode(0o600);
-        let mut file = options.open(&temporary)?;
-        file.write_all(&serde_json::to_vec(request)?)?;
-        file.sync_all()?;
-        fs::rename(&temporary, self.state_file())?;
-        #[cfg(unix)]
-        fs::File::open(&self.state_dir)?.sync_all()?;
-        Ok(())
+        write_atomic(&self.state_dir, STATE_FILE, &serde_json::to_vec(request)?)
     }
 
     fn remove_state(&self) -> std::io::Result<()> {
-        match fs::remove_file(self.state_file()) {
-            Err(error) if error.kind() != ErrorKind::NotFound => Err(error),
-            _ => Ok(()),
-        }
+        remove_optional(&self.state_file())
     }
 
     /// Re-applies the persisted lock; a missing file is not an error.
@@ -821,30 +985,36 @@ impl SiteLockService {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
         let state = self.load().and_then(|request| {
             request
-                .map(|request| {
-                    let count = request.name_count();
-                    normalize(&request).map(|addresses| (request.tun, addresses, count))
-                })
+                .map(|request| normalize(&request).map(|addresses| (request, addresses)))
                 .transpose()
         });
-        match state {
-            Ok(Some((tun, addresses, names))) => json_response(
-                &serde_json::json!({
-                    "active": true,
-                    "tun": tun,
-                    "addresses": addresses.count(),
-                    "names": names,
-                }),
-                StatusCode::OK,
-            ),
-            Ok(None) => json_response(
-                &serde_json::json!({"active": false, "tun": null, "addresses": 0, "names": 0}),
-                StatusCode::OK,
-            ),
+        let state = match state {
+            Ok(state) => state,
             Err(message) => {
-                error_response("internalError", message, StatusCode::INTERNAL_SERVER_ERROR)
+                return error_response("internalError", message, StatusCode::INTERNAL_SERVER_ERROR)
             }
-        }
+        };
+        let host = self.layer.state(state.as_ref().map(|(request, _)| request));
+        let mut body = match &state {
+            Some((request, addresses)) => serde_json::json!({
+                "active": true,
+                "tun": request.tun,
+                "addresses": addresses.count(),
+                "names": request.name_count(),
+                "fake": fake_prefixes(request).count(),
+            }),
+            None => serde_json::json!({
+                "active": false, "tun": null, "addresses": 0, "names": 0, "fake": 0,
+            }),
+        };
+        let fields = body.as_object_mut().expect("an object literal");
+        fields.insert("layer".into(), host.layer.into());
+        fields.insert("problem".into(), host.problem.into());
+        fields.insert("table".into(), host.table.into());
+        fields.insert("dnsQueue".into(), host.dns_queue.into());
+        fields.insert("dnsFilter".into(), host.dns_filter.into());
+        fields.insert("ruleset".into(), host.ruleset.into());
+        json_response(&body, StatusCode::OK)
     }
 }
 
@@ -853,7 +1023,7 @@ const SUPPORTED: bool = cfg!(any(
     all(windows, feature = "windows-service")
 ));
 
-fn host_response(error: HostError) -> warp::reply::Response {
+pub(super) fn host_response(error: HostError) -> warp::reply::Response {
     match error {
         HostError::Missing => error_response(
             "nftMissing",
@@ -874,15 +1044,36 @@ fn unsupported() -> warp::reply::Response {
     )
 }
 
-/// Re-applies a lock the system lost and retries a restore that failed at boot.
-/// A repeated error is logged once.
-pub(super) async fn keep_healed(site_lock: Arc<SiteLockService>) {
+/// Re-applies a lock or kill switch block the system lost and retries a restore that
+/// failed at boot. A repeated error is logged once.
+pub(super) async fn keep_healed_with(
+    site_lock: Arc<SiteLockService>,
+    kill_switch: Option<Arc<KillSwitchService>>,
+) {
     let mut interval = tokio::time::interval(HEAL_INTERVAL);
     interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
     interval.tick().await;
     let mut reported: Option<String> = None;
+    let mut kill_switch_reported: Option<String> = None;
     loop {
         interval.tick().await;
+        if let Some(kill_switch) = kill_switch.clone() {
+            if let Ok(outcome) = tokio::task::spawn_blocking(move || kill_switch.heal()).await {
+                match outcome {
+                    Ok(healed) => {
+                        if healed {
+                            log_message("Helper re-synced the kill switch block".to_string());
+                        }
+                        kill_switch_reported = None;
+                    }
+                    Err(error) if kill_switch_reported.as_ref() != Some(&error) => {
+                        log_message(format!("Helper could not re-sync the kill switch: {error}"));
+                        kill_switch_reported = Some(error);
+                    }
+                    Err(_) => {}
+                }
+            }
+        }
         let service = site_lock.clone();
         let Ok(outcome) = tokio::task::spawn_blocking(move || service.heal()).await else {
             continue;
@@ -1009,6 +1200,7 @@ mod tests {
         calls: Mutex<Vec<String>>,
         outcome: Mutex<Option<NftError>>,
         stored: Mutex<Option<String>>,
+        stored_failure: Mutex<Option<NftError>>,
     }
 
     impl FakeNft {
@@ -1036,7 +1228,11 @@ mod tests {
         }
 
         fn stored(&self, _table: &str) -> Result<Option<String>, NftError> {
-            Ok(self.0.stored.lock().unwrap().clone())
+            match &*self.0.stored_failure.lock().unwrap() {
+                Some(NftError::Missing) => Err(NftError::Missing),
+                Some(NftError::Failed(message)) => Err(NftError::Failed(message.clone())),
+                None => Ok(self.0.stored.lock().unwrap().clone()),
+            }
         }
     }
 
@@ -1101,6 +1297,7 @@ mod tests {
         SiteLockRequest {
             tun: tun.to_string(),
             addresses: addresses.iter().map(|value| value.to_string()).collect(),
+            fake: Vec::new(),
             names: Names::default(),
             guarded: Vec::new(),
         }
@@ -1114,7 +1311,13 @@ mod tests {
 
     fn rules(tun: &str, addresses: &[&str]) -> String {
         let request = request(tun, addresses);
-        ruleset(&Scope::of(UID), tun, &normalize(&request).unwrap(), None)
+        ruleset(
+            &Scope::of(UID),
+            tun,
+            &normalize(&request).unwrap(),
+            &fake_prefixes(&request),
+            None,
+        )
     }
 
     fn dns_rules(tun: &str, cgroup: Option<&str>) -> String {
@@ -1127,6 +1330,7 @@ mod tests {
             &Scope::of(UID),
             tun,
             &normalize(&request).unwrap(),
+            &fake_prefixes(&request),
             Some(&filter),
         )
     }
@@ -1150,7 +1354,11 @@ mod tests {
                  meta l4proto tcp ip daddr @v4 reject with tcp reset\n    \
                  ip daddr @v4 reject with icmpx admin-prohibited\n    \
                  meta l4proto tcp ip6 daddr @v6 reject with tcp reset\n    \
-                 ip6 daddr @v6 reject with icmpx admin-prohibited\n  }}\n"
+                 ip6 daddr @v6 reject with icmpx admin-prohibited\n    \
+                 meta oiftype != 65534 meta l4proto tcp ip daddr @fake4 reject with tcp reset\n    \
+                 meta oiftype != 65534 ip daddr @fake4 reject with icmpx admin-prohibited\n    \
+                 meta oiftype != 65534 meta l4proto tcp ip6 daddr @fake6 reject with tcp reset\n    \
+                 meta oiftype != 65534 ip6 daddr @fake6 reject with icmpx admin-prohibited\n  }}\n"
             )));
         }
         assert!(text.ends_with("}\n"));
@@ -1198,7 +1406,13 @@ mod tests {
             ]
         );
         assert_eq!(addresses.v6.len(), 2);
-        let text = ruleset(&Scope::of(UID), "tun0", &addresses, None);
+        let text = ruleset(
+            &Scope::of(UID),
+            "tun0",
+            &addresses,
+            &Addresses::default(),
+            None,
+        );
         assert!(text.contains("elements = { 10.0.0.0/8, 192.0.2.1, 198.51.100.0/24 }"));
         assert!(text.contains("elements = { ::1, 2001:db8::/32 }"));
     }
@@ -1286,11 +1500,25 @@ mod tests {
         assert_eq!(mode & 0o777, 0o600);
         assert!(!fixture.directory.join("site-lock.json.tmp").exists());
 
+        let listing = rules("tun0", &["10.0.0.0/8", "2001:db8::1"]);
+        *fixture.fake.stored.lock().unwrap() = Some(listing.clone());
         let (status, body) = fixture.send("GET", None).await;
         assert_eq!(status, StatusCode::OK);
         assert_eq!(
             body,
-            json!({"active": true, "tun": "tun0", "addresses": 2, "names": 0})
+            json!({
+                "active": true,
+                "tun": "tun0",
+                "addresses": 2,
+                "names": 0,
+                "fake": 0,
+                "layer": "nftables",
+                "problem": null,
+                "table": "inet reclash_sitelock_1000",
+                "dnsQueue": 33768,
+                "dnsFilter": false,
+                "ruleset": listing,
+            })
         );
     }
 
@@ -1347,7 +1575,19 @@ mod tests {
         let (_, body) = fixture.send("GET", None).await;
         assert_eq!(
             body,
-            json!({"active": false, "tun": null, "addresses": 0, "names": 0})
+            json!({
+                "active": false,
+                "tun": null,
+                "addresses": 0,
+                "names": 0,
+                "fake": 0,
+                "layer": "nftables",
+                "problem": null,
+                "table": "inet reclash_sitelock_1000",
+                "dnsQueue": 33768,
+                "dnsFilter": false,
+                "ruleset": null,
+            })
         );
         let (status, _) = fixture.send("DELETE", None).await;
         assert_eq!(status, StatusCode::OK);
@@ -1683,5 +1923,183 @@ mod tests {
     fn unknown_name_kinds_are_rejected() {
         let body = json!({"tun": "tun0", "addresses": [], "names": {"glob": ["a"]}});
         assert!(serde_json::from_value::<SiteLockRequest>(body).is_err());
+    }
+
+    #[test]
+    fn fake_ranges_get_their_own_sets_and_are_rejected_only_off_the_tun() {
+        let mut request = request("tun0", &["203.0.113.0/24", "2001:db8::/32"]);
+        request.fake = vec!["198.18.0.0/16".into(), "fc00::/18".into()];
+        let text = ruleset(
+            &Scope::of(UID),
+            "tun0",
+            &normalize(&request).unwrap(),
+            &fake_prefixes(&request),
+            None,
+        );
+        assert!(text.contains(
+            "set v4 { type ipv4_addr; flags interval; auto-merge; elements = { 203.0.113.0/24 }; }"
+        ));
+        assert!(text.contains(
+            "set fake4 { type ipv4_addr; flags interval; auto-merge; elements = { 198.18.0.0/16 }; }"
+        ));
+        assert!(text.contains(
+            "set fake6 { type ipv6_addr; flags interval; auto-merge; elements = { fc00::/18 }; }"
+        ));
+        assert!(text.contains("    meta l4proto tcp ip daddr @v4 reject with tcp reset\n"));
+        assert!(text.contains(
+            "meta oiftype != 65534 meta l4proto tcp ip daddr @fake4 reject with tcp reset\n"
+        ));
+        assert!(text.contains(
+            "meta oiftype != 65534 ip6 daddr @fake6 reject with icmpx admin-prohibited\n"
+        ));
+        assert!(!text.contains("oiftype != 65534 meta l4proto tcp ip daddr @v4"));
+        assert!(!text.contains("oiftype != 65534 ip daddr @v4"));
+        assert!(!text.contains("oiftype != 65534 ip6 daddr @v6"));
+    }
+
+    #[test]
+    fn redirect_exemption_precedes_the_fake_range_rejects_in_output() {
+        let text = dns_rules("tun0", Some(CGROUP));
+        let output = text
+            .split("  chain output {")
+            .nth(1)
+            .and_then(|rest| rest.split("  chain forward {").next())
+            .unwrap();
+        let exemption = output
+            .find(&format!("meta mark {LOCKED_MARK:#x} ct status dnat accept"))
+            .unwrap();
+        assert!(exemption < output.find("@fake4 reject").unwrap());
+    }
+
+    #[test]
+    fn fake_entries_count_toward_the_address_limit_and_must_parse() {
+        let mut at_limit = request("tun0", &[]);
+        at_limit.addresses = (0..MAX_ADDRESSES - 1)
+            .map(|i| format!("10.0.{}.{}", i / 256, i % 256))
+            .collect();
+        at_limit.fake = vec!["198.18.0.0/16".into()];
+        assert!(normalize(&at_limit).is_ok());
+        at_limit.fake.push("198.19.0.0/16".into());
+        assert!(normalize(&at_limit).is_err());
+
+        let mut invalid = request("tun0", &[]);
+        invalid.fake = vec!["example.com".into()];
+        let error = normalize(&invalid).unwrap_err();
+        assert!(error.contains("\"example.com\""), "{error}");
+    }
+
+    #[tokio::test]
+    async fn state_saved_before_fake_ranges_restores_without_them() {
+        let fixture = Fixture::new("old-state");
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"Meta","addresses":["203.0.113.0/24"]}"#,
+        )
+        .unwrap();
+        fixture.service.restore().unwrap();
+        assert_eq!(
+            fixture.fake.calls(),
+            vec![rules("Meta", &["203.0.113.0/24"])]
+        );
+    }
+
+    #[tokio::test]
+    async fn get_reports_the_stored_table_and_the_fake_count() {
+        let fixture = Fixture::new("get-stored");
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"tun0","addresses":["10.0.0.0/8"],"fake":["198.18.0.0/16","fc00::/18"]}"#,
+        )
+        .unwrap();
+        let listing = rules("tun0", &["10.0.0.0/8"]);
+        *fixture.fake.stored.lock().unwrap() = Some(listing.clone());
+        let (status, body) = fixture.send("GET", None).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(
+            body,
+            json!({
+                "active": true,
+                "tun": "tun0",
+                "addresses": 1,
+                "names": 0,
+                "fake": 2,
+                "layer": "nftables",
+                "problem": null,
+                "table": "inet reclash_sitelock_1000",
+                "dnsQueue": 33768,
+                "dnsFilter": false,
+                "ruleset": listing,
+            })
+        );
+    }
+
+    #[tokio::test]
+    async fn get_reports_a_missing_nft_binary_as_a_problem_not_an_error() {
+        let fixture = Fixture::new("get-missing-nft");
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"tun0","addresses":[]}"#,
+        )
+        .unwrap();
+        *fixture.fake.stored_failure.lock().unwrap() = Some(NftError::Missing);
+        let (status, body) = fixture.send("GET", None).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["active"], true);
+        assert_eq!(body["problem"], "nftMissing");
+        assert!(body["ruleset"].is_null());
+    }
+
+    #[tokio::test]
+    async fn get_reports_a_persisted_lock_whose_table_is_absent() {
+        let fixture = Fixture::new("get-absent");
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            r#"{"tun":"tun0","addresses":[]}"#,
+        )
+        .unwrap();
+        let (status, body) = fixture.send("GET", None).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["problem"], "nftFailed");
+    }
+
+    #[tokio::test]
+    async fn get_reports_a_stopped_queue_when_names_are_locked() {
+        let fixture = Fixture::new("get-queue-stopped");
+        let request = named("tun0", &["chatgpt.com"]);
+        fs::write(
+            fixture.directory.join(STATE_FILE),
+            serde_json::to_vec(&request).unwrap(),
+        )
+        .unwrap();
+        *fixture.fake.stored.lock().unwrap() = Some(rules("tun0", &["203.0.113.0/24"]));
+        let (status, body) = fixture.send("GET", None).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["problem"], "queueStopped");
+        assert_eq!(body["dnsFilter"], false);
+        assert_eq!(body["names"], 1);
+    }
+
+    #[test]
+    fn readable_listing_shortens_long_element_lists() {
+        let elements: Vec<String> = (1..=120).map(|i| format!("10.0.0.{i}")).collect();
+        let listing = format!(
+            "table inet t {{\n  set s {{ elements = {{ {} }}; }}\n}}\n",
+            elements.join(", ")
+        );
+        let shown = readable_listing(&listing);
+        assert!(shown.contains("10.0.0.1, 10.0.0.2, "));
+        assert!(shown.contains("10.0.0.50, … 70 more"));
+        assert!(!shown.contains("10.0.0.51"));
+        assert!(shown.ends_with("}; }\n}\n"));
+    }
+
+    #[test]
+    fn readable_listing_caps_the_text_at_64_kib() {
+        let capped = readable_listing(&"x".repeat(70_000));
+        assert!(capped.len() <= 64 * 1024);
+        assert_eq!(capped.len(), MAX_LISTING_BYTES);
+        let wide = readable_listing(&"é".repeat(40_000));
+        assert!(wide.len() <= 64 * 1024);
+        assert!(wide.chars().all(|c| c == 'é'));
     }
 }

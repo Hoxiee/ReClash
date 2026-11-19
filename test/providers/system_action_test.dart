@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui' show Brightness, Color;
 
 import 'package:reclash/common/app_ports.dart';
@@ -15,12 +16,16 @@ import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/kill_switch.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/preferences.dart';
+import '../helpers/test_profiles.dart';
 
 class TestSystemAction extends SystemAction {
   final List<String> calls = [];
@@ -96,6 +101,42 @@ class _TunSetupAction extends SetupAction {
     return allowPrompt
         ? DesktopPrivilegeDecision.restartRequired
         : DesktopPrivilegeDecision.authorizationRequired;
+  }
+}
+
+class _DisarmRecordingHost extends KillSwitchHostState {
+  int disarmOnUserStops = 0;
+
+  @override
+  Future<void> disarmOnUserStop() async {
+    disarmOnUserStops++;
+  }
+}
+
+class _NoopAppUpdateAction extends AppUpdateAction {
+  @override
+  Future<void> applyOnExit() async {}
+}
+
+class _ExitSystemAction extends SystemAction {
+  final calls = <String>[];
+
+  @override
+  Future<void> savePreferences() async {}
+
+  @override
+  Future<void> closeWindow() async {
+    calls.add('window');
+  }
+
+  @override
+  Future<void> closeCore() async {
+    calls.add('core');
+  }
+
+  @override
+  Future<void> exitApplication() async {
+    calls.add('exit');
   }
 }
 
@@ -565,6 +606,47 @@ void main() {
       container.read(systemActionProvider.notifier).updateAutoLaunch();
 
       expect(container.read(appSettingProvider).autoLaunch, !before);
+    });
+  });
+
+  group('SystemAction kill switch on exit', () {
+    late Directory appDir;
+    late _DisarmRecordingHost host;
+    late ProviderContainer container;
+
+    setUpAll(() async {
+      appDir = await Directory.systemTemp.createTemp('system_exit_test');
+      await useAppPaths(appDir);
+    });
+
+    tearDownAll(() => appDir.delete(recursive: true));
+
+    setUp(() {
+      host = _DisarmRecordingHost();
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          appUpdateActionProvider.overrideWith(_NoopAppUpdateAction.new),
+          systemActionProvider.overrideWith(_ExitSystemAction.new),
+          killSwitchHostStateProvider.overrideWith(() => host),
+        ],
+      );
+      globalState.container = container;
+      container.read(systemActionProvider.notifier);
+    });
+
+    tearDown(() => container.dispose());
+
+    test('a normal quit disarms once', () async {
+      await container.read(systemActionProvider.notifier).handleExit();
+
+      expect(host.disarmOnUserStops, 1);
+    });
+
+    test('an update relaunch keeps the block', () async {
+      await container.read(systemActionProvider.notifier).handleUpdateExit();
+
+      expect(host.disarmOnUserStops, 0);
     });
   });
 }

@@ -1,0 +1,29 @@
+v: 1
+kind: feature
+state: active
+risk: critical
+why: On Linux and Windows nothing leaves the computer outside ReClash's TUN while the kill switch is armed, so a crashed or restarting Core never leaks traffic.
+must:
+  strict-block: An armed kill switch rejects every connection outside the ReClash TUN, including addresses the TUN excludes, and lets through only loopback, the Helper's own cgroup or the Core and service executables, DHCP and link-local traffic, and the local network when allowed.
+  arm-lifecycle: Standard mode is armed by every Core start the Helper performs and by a TUN that comes up beside a running Core, survives crashes, restarts, recovery and update relaunches, and is disarmed only by a deliberate user stop or a normal quit, or by a reboot; always mode blocks whenever it is configured.
+  own-layer: The kill switch lives in its own nft table or WFP provider and sublayer, so the site lock never removes it and it never removes the site lock.
+  heal-and-restore: The Helper restores an armed block before it reports ready and re-applies one the system lost; uninstalling the Helper or the Windows lift-site-lock command lifts it.
+  live-setting: Changing the mode, the TUN device or the local network permission patches the Helper live and never re-applies the profile or restarts the Core.
+  visible-block: While the Helper reports an armed, active block and no TUN is running, the app says the internet is blocked and offers to connect and, in standard mode, to unblock.
+  android-untouched: Android keeps the system always-on VPN tile.
+watch:
+  - services/helper/src/service/kill_switch.rs
+  - services/helper/src/service/kill_switch_windows.rs
+  - services/helper/src/service/hub.rs
+  - lib/core/desktop/kill_switch_policy.dart
+  - lib/providers/kill_switch.dart
+  - lib/widgets/kill_switch_notice.dart
+  - lib/views/config/network.dart
+  - lib/providers/actions/common.dart
+  - lib/providers/actions/setup.dart
+  - lib/providers/actions/system.dart
+  - lib/providers/actions/app_update.dart
+checks:
+  site-lock-host: [strict-block, arm-lifecycle, own-layer, heal-and-restore]
+  kill-switch-app: [arm-lifecycle, live-setting, visible-block, android-untouched]
+drop: Upstream FlClash ships a desktop kill switch with the same lifecycle.

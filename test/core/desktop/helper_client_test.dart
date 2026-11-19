@@ -8,6 +8,7 @@ import 'package:reclash/common/constant.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/lifecycle.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/site_lock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -695,6 +696,7 @@ void main() {
         await client.putSiteLock(
           tun: 'tun0',
           addresses: ['198.51.100.0/24'],
+          fake: ['198.18.0.0/16'],
           names: const SiteLockNames(suffix: ['example.com']),
           guarded: const [
             SiteLockGuardedNames(
@@ -709,6 +711,7 @@ void main() {
         expect(seen.data, {
           'tun': 'tun0',
           'addresses': ['198.51.100.0/24'],
+          'fake': ['198.18.0.0/16'],
           'names': {
             'full': <String>[],
             'suffix': ['example.com'],
@@ -749,6 +752,151 @@ void main() {
 
       expect(seen.method, 'DELETE');
       expect(seen.path, endsWith('/site-lock'));
+    });
+
+    test(
+      'siteLock parses the extended state and defaults absent fields',
+      () async {
+        var body = <String, Object?>{
+          'active': true,
+          'tun': 'tun0',
+          'addresses': 3,
+          'names': 2,
+          'fake': 1,
+          'layer': 'nftables',
+          'problem': 'queueStopped',
+          'table': 'inet reclash_sitelock_1000',
+          'dnsQueue': 7,
+          'dnsFilter': true,
+          'ruleset': 'table inet x {}',
+        };
+        final client = _client(_ResponseAdapter((_) => _jsonResponse(body)));
+
+        final full = await client.siteLock();
+        expect(full.names, 2);
+        expect(full.fake, 1);
+        expect(full.layer, 'nftables');
+        expect(full.problem, 'queueStopped');
+        expect(full.table, 'inet reclash_sitelock_1000');
+        expect(full.dnsQueue, 7);
+        expect(full.dnsFilter, isTrue);
+        expect(full.ruleset, 'table inet x {}');
+
+        body = {'active': true, 'addresses': 3};
+        final bare = await client.siteLock();
+        expect(bare.names, 0);
+        expect(bare.fake, 0);
+        expect(bare.layer, '');
+        expect(bare.problem, isNull);
+        expect(bare.dnsQueue, isNull);
+        expect(bare.dnsFilter, isFalse);
+        expect(bare.ruleset, isNull);
+
+        body = {'active': true, 'addresses': 3, 'fake': 'many'};
+        await expectLater(
+          client.siteLock(),
+          throwsA(
+            isA<HelperException>().having(
+              (e) => e.code,
+              'code',
+              'invalidResponse',
+            ),
+          ),
+        );
+      },
+    );
+
+    test('killSwitch parses the state and rejects wrong types', () async {
+      var body = <String, Object?>{
+        'configured': true,
+        'mode': 'always',
+        'allowLan': true,
+        'tun': 'tun0',
+        'armed': true,
+        'active': true,
+        'layer': 'wfp',
+        'problem': 'wfpFailed',
+        'ruleset': 'filters',
+      };
+      late RequestOptions seen;
+      final client = _client(
+        _ResponseAdapter((options) {
+          seen = options;
+          return _jsonResponse(body);
+        }),
+      );
+
+      final state = await client.killSwitch();
+      expect(seen.method, 'GET');
+      expect(seen.path, endsWith('/kill-switch'));
+      expect(state.configured, isTrue);
+      expect(state.mode, KillSwitchMode.always);
+      expect(state.allowLan, isTrue);
+      expect(state.tun, 'tun0');
+      expect(state.armed, isTrue);
+      expect(state.active, isTrue);
+      expect(state.layer, 'wfp');
+      expect(state.problem, 'wfpFailed');
+      expect(state.ruleset, 'filters');
+
+      body = {'configured': false, 'mode': null, 'tun': null};
+      final bare = await client.killSwitch();
+      expect(bare.mode, isNull);
+      expect(bare.allowLan, isFalse);
+      expect(bare.armed, isFalse);
+
+      for (final bad in [
+        {'configured': 'yes'},
+        {'configured': true, 'mode': 'sometimes'},
+        {'configured': true, 'armed': 1},
+      ]) {
+        body = bad;
+        await expectLater(
+          client.killSwitch(),
+          throwsA(
+            isA<HelperException>().having(
+              (e) => e.code,
+              'code',
+              'invalidResponse',
+            ),
+          ),
+        );
+      }
+    });
+
+    test('kill switch writes use the contract paths and body', () async {
+      final seen = <RequestOptions>[];
+      final client = _client(
+        _ResponseAdapter((options) {
+          seen.add(options);
+          return _jsonResponse({'ok': true, 'armed': false});
+        }),
+      );
+
+      await client.putKillSwitch(
+        mode: KillSwitchMode.standard,
+        tun: 'tun0',
+        allowLan: true,
+      );
+      await client.deleteKillSwitch();
+      final armed = await client.disarmKillSwitch();
+      await client.armKillSwitch();
+
+      expect(seen[0].method, 'PUT');
+      expect(seen[0].path, endsWith('/kill-switch'));
+      expect(seen[0].data, {
+        'mode': 'standard',
+        'tun': 'tun0',
+        'allowLan': true,
+      });
+      expect(seen[0].receiveTimeout, HelperClient.siteLockTimeout);
+      expect(seen[1].method, 'DELETE');
+      expect(seen[1].path, endsWith('/kill-switch'));
+      expect(seen[2].method, 'POST');
+      expect(seen[2].path, endsWith('/kill-switch/disarm'));
+      expect(armed, isFalse);
+      expect(seen[3].method, 'POST');
+      expect(seen[3].path, endsWith('/kill-switch/arm'));
     });
 
     test('siteLock parses the reported state', () async {

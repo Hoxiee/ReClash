@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "Kill switch işjeň wagty ReClash-iň TUN-dan daşary ähli trafik bloklanýar, TUN-yň çykarýan adresleri hem goşmak bilen. Diňe Core özi we rugsat berilen bolsa, ýerli tor elýeterli bolup galýar. Her TUN başlananda işjeňleşýär, TUN ýa-da proksini öçürende ýa-da ReClash-den çykanda öçýär.",
+  "killSwitchAlwaysMode": "ReClash togtadylan wagty-da hem bloklamak",
+  "killSwitchAllowLan": "Ýerli tora rugsat ber",
+  "killSwitchStatusActive": "Bloklanýar",
+  "killSwitchStatusArmed": "Işjeň",
+  "killSwitchStatusStandby": "TUN garaşylýar",
+  "killSwitchNftMissing": "Kill switch-i ulanmak üçin nftables paketini gurnaň",
+  "killSwitchFirewallFailed": "Otag diwary düzgünleri ulanyp bolmady",
+  "killSwitchHelperMissing": "Kill switch Helper-i talap edýär. Sazlamak üçin TUN-ы bir gezek açyň.",
+  "killSwitchAlwaysConfirmTitle": "ReClash togtadylan wagty internet bloklansynmy?",
+  "killSwitchAlwaysConfirmBody": "Helper-i ilki bilen aýyrmasaňyz, ReClash-iň TUN-y işlemeýän wagtyna, ReClash aýrylandan soň hem bu kompýuterde internet bolmaz.",
+  "killSwitchBlockingTitle": "Kill switch internedi bloklaýar",
+  "killSwitchBlockingBody": "ReClash TUN bilen işlänçe, ReClash-iň TUN-dan daşary trafik bloklanýar.",
+  "killSwitchUnblock": "Blokdan çykarmak",
+  "removeHelper": "Helper-i aýyrmak",
+  "removeHelperDesc": "TUN-y işledýän rugsatly Helper-i aýyrmak",
+  "removeHelperConfirmBody": "ReClash ilki bilen Helper arkaly işleýän Core-ny togtadýar. Helper-i aýyrmak bu kompýuterdäki sahypa bloklaryny we kill switch-i hem aýyrýar. Indiki gezek TUN Helper-i täzeden gurmagy soraýar.",
+  "removeHelperDone": "Helper aýryldy",
+  "removeHelperFailed": "Helper-i aýyryp bolmady"
+}

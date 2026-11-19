@@ -78,6 +78,14 @@ void main() {
       },
     });
     expect(policy.addresses, isEmpty);
+    expect(policy.fakeRanges, isEmpty);
+    expect(
+      SiteLockPolicy.fromJson({
+        'revision': 'r',
+        'fakeRanges': ['198.18.0.0/16'],
+      }).fakeRanges,
+      ['198.18.0.0/16'],
+    );
     expect(policy.names.suffix, ['a.com']);
     expect(policy.names.full, isEmpty);
     expect(

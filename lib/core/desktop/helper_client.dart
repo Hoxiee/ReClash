@@ -42,11 +42,51 @@ final class HelperSiteLock {
   final bool active;
   final String? tun;
   final int addresses;
+  final int names;
+  final int fake;
+  final String layer;
+  final String? problem;
+  final String? table;
+  final int? dnsQueue;
+  final bool dnsFilter;
+  final String? ruleset;
 
   const HelperSiteLock({
     required this.active,
     required this.tun,
     required this.addresses,
+    this.names = 0,
+    this.fake = 0,
+    this.layer = '',
+    this.problem,
+    this.table,
+    this.dnsQueue,
+    this.dnsFilter = false,
+    this.ruleset,
+  });
+}
+
+final class HelperKillSwitch {
+  final bool configured;
+  final KillSwitchMode? mode;
+  final bool allowLan;
+  final String? tun;
+  final bool armed;
+  final bool active;
+  final String layer;
+  final String? problem;
+  final String? ruleset;
+
+  const HelperKillSwitch({
+    required this.configured,
+    required this.mode,
+    required this.allowLan,
+    required this.tun,
+    required this.armed,
+    required this.active,
+    this.layer = '',
+    this.problem,
+    this.ruleset,
   });
 }
 
@@ -383,6 +423,7 @@ final class HelperClient {
   Future<void> putSiteLock({
     required String tun,
     required List<String> addresses,
+    List<String> fake = const [],
     required SiteLockNames names,
     List<SiteLockGuardedNames> guarded = const [],
   }) async {
@@ -392,6 +433,7 @@ final class HelperClient {
         data: {
           'tun': tun,
           'addresses': addresses,
+          'fake': fake,
           'names': names.toJson(),
           'guarded': [
             for (final lock in guarded)
@@ -444,9 +486,25 @@ final class HelperClient {
       final active = data['active'];
       final tun = data['tun'];
       final addresses = data['addresses'];
+      final names = data['names'] ?? 0;
+      final fake = data['fake'] ?? 0;
+      final layer = data['layer'] ?? '';
+      final problem = data['problem'];
+      final table = data['table'];
+      final dnsQueue = data['dnsQueue'];
+      final dnsFilter = data['dnsFilter'] ?? false;
+      final ruleset = data['ruleset'];
       if (active is! bool ||
           (tun != null && tun is! String) ||
-          addresses is! int) {
+          addresses is! int ||
+          names is! int ||
+          fake is! int ||
+          layer is! String ||
+          (problem != null && problem is! String) ||
+          (table != null && table is! String) ||
+          (dnsQueue != null && dnsQueue is! int) ||
+          dnsFilter is! bool ||
+          (ruleset != null && ruleset is! String)) {
         throw const HelperException(
           code: 'invalidResponse',
           message: 'Helper returned an invalid site lock response',
@@ -456,6 +514,14 @@ final class HelperClient {
         active: active,
         tun: tun as String?,
         addresses: addresses,
+        names: names,
+        fake: fake,
+        layer: layer,
+        problem: problem as String?,
+        table: table as String?,
+        dnsQueue: dnsQueue as int?,
+        dnsFilter: dnsFilter,
+        ruleset: ruleset as String?,
       );
     } on HelperException {
       rethrow;
@@ -465,6 +531,141 @@ final class HelperClient {
       throw HelperException(
         code: 'transportError',
         message: 'Unable to read the site lock through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  Future<void> putKillSwitch({
+    required KillSwitchMode mode,
+    required String tun,
+    required bool allowLan,
+  }) async {
+    try {
+      final response = await _dio.put<Object?>(
+        '$baseUrl/kill-switch',
+        data: {'mode': mode.name, 'tun': tun, 'allowLan': allowLan},
+        options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
+      );
+      _responseMap(response, operation: 'kill switch');
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'kill switch');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to apply the kill switch through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  Future<void> deleteKillSwitch() async {
+    try {
+      final response = await _dio.delete<Object?>(
+        '$baseUrl/kill-switch',
+        options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
+      );
+      _responseMap(response, operation: 'kill switch');
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'kill switch');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to lift the kill switch through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  /// Returns whether the kill switch is armed afterwards.
+  Future<bool> armKillSwitch() => _postKillSwitch('arm');
+
+  /// Returns whether the kill switch is still armed afterwards.
+  Future<bool> disarmKillSwitch() => _postKillSwitch('disarm');
+
+  Future<bool> _postKillSwitch(String action) async {
+    try {
+      final response = await _dio.post<Object?>(
+        '$baseUrl/kill-switch/$action',
+        options: _options(ResponseType.json, receiveTimeout: siteLockTimeout),
+      );
+      final armed = _responseMap(response, operation: 'kill switch')['armed'];
+      if (armed is! bool) {
+        throw const HelperException(
+          code: 'invalidResponse',
+          message: 'Helper returned an invalid kill switch response',
+        );
+      }
+      return armed;
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'kill switch');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to $action the kill switch through Helper',
+        details: error.toString(),
+      );
+    }
+  }
+
+  Future<HelperKillSwitch> killSwitch() async {
+    try {
+      final response = await _dio.get<Object?>(
+        '$baseUrl/kill-switch',
+        options: _options(ResponseType.json),
+      );
+      final data = _responseMap(response, operation: 'kill switch');
+      final configured = data['configured'];
+      final modeName = data['mode'];
+      final allowLan = data['allowLan'] ?? false;
+      final tun = data['tun'];
+      final armed = data['armed'] ?? false;
+      final active = data['active'] ?? false;
+      final layer = data['layer'] ?? '';
+      final problem = data['problem'];
+      final ruleset = data['ruleset'];
+      final mode = modeName is String
+          ? KillSwitchMode.values.asNameMap()[modeName]
+          : null;
+      if (configured is! bool ||
+          (modeName != null && mode == null) ||
+          allowLan is! bool ||
+          (tun != null && tun is! String) ||
+          armed is! bool ||
+          active is! bool ||
+          layer is! String ||
+          (problem != null && problem is! String) ||
+          (ruleset != null && ruleset is! String)) {
+        throw const HelperException(
+          code: 'invalidResponse',
+          message: 'Helper returned an invalid kill switch response',
+        );
+      }
+      return HelperKillSwitch(
+        configured: configured,
+        mode: mode,
+        allowLan: allowLan,
+        tun: tun as String?,
+        armed: armed,
+        active: active,
+        layer: layer,
+        problem: problem as String?,
+        ruleset: ruleset as String?,
+      );
+    } on HelperException {
+      rethrow;
+    } on DioException catch (error) {
+      throw _mapDioException(error, operation: 'kill switch');
+    } catch (error) {
+      throw HelperException(
+        code: 'transportError',
+        message: 'Unable to read the kill switch through Helper',
         details: error.toString(),
       );
     }

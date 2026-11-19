@@ -12,6 +12,8 @@ import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/chains/issues.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/site_lock_editor.dart';
+import 'package:reclash/views/site_lock_host.dart';
+import 'package:reclash/views/site_lock_presets.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 
@@ -73,8 +75,21 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
     _write(withSiteLock(ref.read(siteLocksProvider), edited));
   }
 
-  Future<void> _add() =>
-      _edit(SiteLock(id: snowflake.id.toString(), enabled: true), isNew: true);
+  Future<void> _add({SiteLockPreset? preset}) => _edit(
+    SiteLock(
+      id: snowflake.id.toString(),
+      enabled: true,
+      name: preset?.name ?? '',
+      match: preset?.match ?? const [],
+    ),
+    isNew: true,
+  );
+
+  Future<void> _addFromPreset() async {
+    final preset = await showSiteLockPresetSheet(context);
+    if (preset == null || !mounted) return;
+    await _add(preset: preset);
+  }
 
   void _toggle(SiteLock lock, bool enabled) => _write([
     for (final item in ref.read(siteLocksProvider))
@@ -229,6 +244,8 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final host = widget.hostFirewall ?? (system.isLinux || system.isWindows);
+    final android = widget.androidVpn ?? system.isAndroid;
     final locks = ref.watch(siteLocksProvider);
     final report = ref.watch(siteLockReportStateProvider);
     final gap = listHeaderPaddingOf(context).top;
@@ -249,6 +266,15 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
         tooltip: l.siteLockNew,
         onPressed: locks.length >= _maxLocks ? null : () => unawaited(_add()),
       ),
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.sparkle,
+          tooltip: l.siteLockFromPreset,
+          onPressed: locks.length >= _maxLocks
+              ? null
+              : () => unawaited(_addFromPreset()),
+        ),
+      ],
       body: NullStatusSwitcher(
         isEmpty: visible.isEmpty,
         isSearching: _query.isNotEmpty,
@@ -278,12 +304,17 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
                   ),
                 generateSection(
                   items: [for (final lock in visible) _row(l, lock, report)],
-                  footer: l.siteLockFooter,
+                  footer: host
+                      ? '${l.siteLockFooter}\n\n${l.siteLockPersistenceNote}'
+                      : l.siteLockFooter,
                 ),
-                if (widget.androidVpn ?? system.isAndroid)
+                if (host) const SiteLockHostGroup(),
+                if (android || host)
                   generateSection(
                     items: const [KillSwitchTile()],
-                    footer: l.siteLockKillSwitchDesc,
+                    footer: android
+                        ? l.siteLockKillSwitchDesc
+                        : l.siteLockKillSwitchDescDesktop,
                   ),
               ],
             ),

@@ -3,6 +3,7 @@ use crate::service::hub::{
     begin_shutdown, ensure_core_sha256_configured, log_message,
     release_managed_core_on_shutdown_confirmed, routes_with,
 };
+use crate::service::kill_switch::KillSwitchService;
 use crate::service::site_lock::{self, SiteLockService};
 use anyhow::{bail, Context, Result};
 use std::ffi::{OsStr, OsString};
@@ -229,7 +230,14 @@ fn run_service() -> Result<()> {
         if let Err(error) = site_lock.restore() {
             log_message(format!("Helper could not restore the site lock: {error}"));
         }
-        tokio::spawn(site_lock::keep_healed(site_lock.clone()));
+        let kill_switch = Arc::new(KillSwitchService::system());
+        if let Err(error) = kill_switch.restore() {
+            log_message(format!("Helper could not restore the kill switch: {error}"));
+        }
+        tokio::spawn(site_lock::keep_healed_with(
+            site_lock.clone(),
+            Some(kill_switch.clone()),
+        ));
         notify_systemd(b"READY=1")?;
         let shutdown = async move {
             tokio::select! {
@@ -239,7 +247,7 @@ fn run_service() -> Result<()> {
             begin_shutdown();
             let _ = notify_systemd(b"STOPPING=1");
         };
-        warp::serve(routes_with(site_lock))
+        warp::serve(routes_with(site_lock, kill_switch))
             .serve_incoming_with_graceful_shutdown(incoming, shutdown)
             .await;
         release_managed_core_on_shutdown_confirmed()?;

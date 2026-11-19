@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "Mientras el kill switch está armado, todo el tráfico fuera del TUN de ReClash queda bloqueado, incluidas las direcciones que el TUN excluye. Solo el propio Core y, si se permite, la red local siguen accesibles. Se arma en cada inicio de TUN y se desarma cuando apagas TUN o el proxy o cierras ReClash.",
+  "killSwitchAlwaysMode": "Bloquear también mientras ReClash está detenido",
+  "killSwitchAllowLan": "Permitir red local",
+  "killSwitchStatusActive": "Bloqueando",
+  "killSwitchStatusArmed": "Armado",
+  "killSwitchStatusStandby": "Esperando TUN",
+  "killSwitchNftMissing": "Instala el paquete nftables para usar el kill switch",
+  "killSwitchFirewallFailed": "No se pudieron aplicar las reglas del cortafuegos",
+  "killSwitchHelperMissing": "El kill switch necesita el Helper. Activa TUN una vez para configurarlo.",
+  "killSwitchAlwaysConfirmTitle": "¿Bloquear internet mientras ReClash está detenido?",
+  "killSwitchAlwaysConfirmBody": "Este equipo no tendrá internet siempre que el TUN de ReClash no esté en marcha, incluso después de desinstalar ReClash, a menos que antes elimines el Helper.",
+  "killSwitchBlockingTitle": "El kill switch está bloqueando internet",
+  "killSwitchBlockingBody": "El tráfico fuera del TUN de ReClash queda bloqueado hasta que ReClash se ejecute con TUN.",
+  "killSwitchUnblock": "Desbloquear",
+  "removeHelper": "Quitar Helper",
+  "removeHelperDesc": "Desinstala el Helper privilegiado que ejecuta TUN",
+  "removeHelperConfirmBody": "ReClash detiene primero un Core que se ejecute a través del Helper. Al quitar el Helper también se levantan los bloqueos de sitios y el kill switch de este equipo. La próxima vez, TUN pedirá configurar el Helper de nuevo.",
+  "removeHelperDone": "Helper eliminado",
+  "removeHelperFailed": "No se pudo quitar el Helper"
+}

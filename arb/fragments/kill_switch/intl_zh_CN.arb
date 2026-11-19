@@ -1,0 +1,21 @@
+{
+  "killSwitchDescDesktop": "断网保护启用期间，ReClash 的 TUN 之外的所有流量都会被阻断，包括 TUN 排除的地址。只有 Core 本身以及在允许时的局域网可以访问。每次启动 TUN 时启用，关闭 TUN 或代理或退出 ReClash 时解除。",
+  "killSwitchAlwaysMode": "ReClash 停止时也保持阻断",
+  "killSwitchAllowLan": "允许局域网",
+  "killSwitchStatusActive": "阻断中",
+  "killSwitchStatusArmed": "已启用",
+  "killSwitchStatusStandby": "等待 TUN",
+  "killSwitchNftMissing": "请安装 nftables 软件包以使用断网保护",
+  "killSwitchFirewallFailed": "无法应用防火墙规则",
+  "killSwitchHelperMissing": "断网保护需要 Helper。请先开启一次 TUN 完成设置。",
+  "killSwitchAlwaysConfirmTitle": "ReClash 停止时阻断网络吗？",
+  "killSwitchAlwaysConfirmBody": "除非先移除 Helper，否则只要 ReClash 的 TUN 未运行，这台电脑就没有网络，即使卸载 ReClash 之后也是如此。",
+  "killSwitchBlockingTitle": "断网保护正在阻断网络",
+  "killSwitchBlockingBody": "在 ReClash 以 TUN 运行之前，TUN 之外的流量都会被阻断。",
+  "killSwitchUnblock": "解除阻断",
+  "removeHelper": "移除 Helper",
+  "removeHelperDesc": "卸载运行 TUN 的特权 Helper",
+  "removeHelperConfirmBody": "ReClash 会先停止通过 Helper 运行的 Core。移除 Helper 还会解除本机的站点锁定和断网保护。下次开启 TUN 时会再次要求设置 Helper。",
+  "removeHelperDone": "Helper 已移除",
+  "removeHelperFailed": "无法移除 Helper"
+}

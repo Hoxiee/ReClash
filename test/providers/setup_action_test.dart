@@ -20,6 +20,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/kill_switch.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/web_dashboard.dart';
@@ -49,6 +50,24 @@ class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
     required bool tunEnabled,
     bool allowPrompt = false,
   }) async => DesktopPrivilegeDecision.notRequired;
+}
+
+class _DisarmRecordingHost extends KillSwitchHostState {
+  int disarmOnUserStops = 0;
+
+  @override
+  Future<void> disarmOnUserStop() async {
+    disarmOnUserStops++;
+  }
+}
+
+class _KillSwitchSetupAction extends TestSetupAction {
+  int updates = 0;
+
+  @override
+  Future<void> updateConfig() async {
+    updates++;
+  }
 }
 
 class _NoopProxiesAction extends ProxiesAction {
@@ -2780,5 +2799,58 @@ void main() {
         verify(() => core.setupConfig(any())).called(1);
       },
     );
+  });
+
+  group('kill switch disarm seam', () {
+    late _DisarmRecordingHost host;
+    late ProviderContainer scoped;
+
+    setUp(() {
+      host = _DisarmRecordingHost();
+      scoped = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
+          profilesProvider.overrideWith(TestProfiles.new),
+          setupActionProvider.overrideWith(_KillSwitchSetupAction.new),
+          commonActionProvider.overrideWith(TestCommonAction.new),
+          killSwitchHostStateProvider.overrideWith(() => host),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      globalState.container = scoped;
+      scoped.read(initProvider.notifier).value = true;
+    });
+
+    SetupAction setup() => scoped.read(setupActionProvider.notifier);
+
+    test('restarting the VPN never disarms', () async {
+      await setup().setRunning(true);
+      await setup().restartVpn();
+
+      expect(scoped.read(isStartProvider), isTrue);
+      expect(host.disarmOnUserStops, 0);
+    });
+
+    test('stopping through setRunning never disarms', () async {
+      await setup().setRunning(true);
+      await setup().setRunning(false);
+
+      expect(host.disarmOnUserStops, 0);
+    });
+
+    test('turning TUN off disarms once', () async {
+      await setup().setTunEnabled(false);
+
+      expect(host.disarmOnUserStops, 1);
+    });
+
+    test('turning TUN on never disarms', () async {
+      await setup().setTunEnabled(true);
+
+      expect(host.disarmOnUserStops, 0);
+      expect((setup() as _KillSwitchSetupAction).updates, 1);
+    });
   });
 }

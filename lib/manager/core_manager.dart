@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/kill_switch_policy.dart';
 import 'package:reclash/core/desktop/site_lock_policy.dart';
 import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/enum/enum.dart';
@@ -13,6 +14,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/kill_switch.dart';
 import 'package:reclash/providers/route_state.dart';
 import 'package:reclash/providers/routing.dart';
 import 'package:reclash/providers/setup.dart';
@@ -41,6 +43,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   bool get _setupActive => ref.read(setupSessionProvider).active;
 
   SiteLockHostPolicy? _hostPolicy;
+  KillSwitchHostPolicy? _killSwitchPolicy;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +123,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     });
     if (system.isLinux || system.isWindows) {
       _startHostPolicy();
+      _startKillSwitchPolicy();
     }
   }
 
@@ -129,6 +133,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       put: (policy) => helperClient.putSiteLock(
         tun: policy.tun,
         addresses: policy.addresses,
+        fake: policy.fakeRanges,
         names: policy.names,
         guarded: policy.guarded,
       ),
@@ -144,6 +149,34 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     ref.listenManual(siteLocksProvider, (_, _) => sync());
     ref.listenManual(coreStatusProvider, (_, _) => sync());
     sync();
+  }
+
+  void _startKillSwitchPolicy() {
+    final policy = _killSwitchPolicy = KillSwitchHostPolicy(
+      readiness: () => helperClient.readiness(logFailure: false),
+      read: helperClient.killSwitch,
+      put: (config) => helperClient.putKillSwitch(
+        mode: config.mode,
+        tun: config.tun,
+        allowLan: config.allowLan,
+      ),
+      delete: helperClient.deleteKillSwitch,
+      arm: helperClient.armKillSwitch,
+      onSnapshot: (snapshot) =>
+          ref.read(killSwitchHostStateProvider.notifier).set(snapshot),
+    );
+    ref.listenManual(
+      killSwitchWantedProvider,
+      (_, next) => policy.update(next),
+      fireImmediately: true,
+    );
+    void observeTun() => policy.observeTun(
+      up:
+          ref.read(coreStatusProvider) == CoreStatus.connected &&
+          ref.read(tunAppliedProvider),
+    );
+    ref.listenManual(coreStatusProvider, (_, _) => observeTun());
+    ref.listenManual(tunAppliedProvider, (_, _) => observeTun());
   }
 
   Future<void> _pushSiteLocks(List<SiteLock> locks) async {
@@ -211,6 +244,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   void dispose() {
     coreEventManager.removeListener(this);
     _hostPolicy?.dispose();
+    _killSwitchPolicy?.dispose();
     super.dispose();
   }
 

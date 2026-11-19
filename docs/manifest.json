@@ -115,7 +115,8 @@
             "zh-CN": "指南"
           },
           "pages": [
-            "README.md"
+            "README.md",
+            "kill-switch.md"
           ]
         }
       ]

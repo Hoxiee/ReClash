@@ -4,6 +4,7 @@ export 'app_update.dart';
 export 'config.dart';
 export 'core.dart';
 export 'database.dart';
+export 'kill_switch.dart';
 export 'on_demand.dart';
 export 'profile_brand.dart';
 export 'provider_settings.dart';
