@@ -20,12 +20,23 @@ class ScriptsAction extends _$ScriptsAction {
     }
   }
 
-  void _applyIfInUse(int scriptId) {
+  void deleteScript(int id) {
+    final inUse = _isInUse(id);
+    ref.read(scriptsProvider.notifier).del(id);
+    if (inUse) _applyProfile();
+  }
+
+  bool _isInUse(int scriptId) {
     final profile = ref.read(currentProfileProvider);
-    if (profile?.extendType != ExtendType.script ||
-        profile?.scriptId != scriptId) {
-      return;
-    }
+    return profile?.extendType == ExtendType.script &&
+        profile?.scriptId == scriptId;
+  }
+
+  void _applyIfInUse(int scriptId) {
+    if (_isInUse(scriptId)) _applyProfile();
+  }
+
+  void _applyProfile() {
     ref.read(setupActionProvider.notifier).applyProfileDebounce(silence: true);
   }
 }

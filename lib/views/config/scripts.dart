@@ -45,7 +45,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     if (res != true || !mounted) {
       return;
     }
-    ref.read(scriptsProvider.notifier).del(script.id);
+    _scriptsAction.deleteScript(script.id);
     unawaited(_clearEffect(script.id));
   }
 
