@@ -74,13 +74,29 @@
 - Android: плитка в быстрых настройках, прокси для отдельных приложений, системный kill switch, варианты значка и
   Android TV. Компьютер: меню в трее и глобальные горячие клавиши.
 
-## Скриншоты
+## Короткий обзор
+
+<p align="center">
+  <img alt="Обзор ReClash на компьютере" src="snapshots/tour-desktop.gif" width="100%">
+  <br><sub>Компьютер: обычная подписка, затем Ember Line и Halo в оформлении своих провайдеров</sub>
+</p>
+
+<p align="center">
+  <img alt="Обзор ReClash на телефоне" src="snapshots/tour-mobile.gif" width="300">
+  <br><sub>То же на телефоне</sub>
+</p>
+
+Подписки, серверы и адреса на скриншотах выдуманы.
+
+<details>
+<summary><b>Больше скриншотов</b></summary>
+<br>
 
 <table>
   <tr>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Простой главный экран на телефоне" src="snapshots/screens/mobile-dashboard-light.webp"></picture><br><sub>Одна кнопка</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-widgets-dark.webp"><img alt="Вкладка виджетов с объявлениями провайдера на телефоне" src="snapshots/screens/mobile-widgets-light.webp"></picture><br><sub>Объявления провайдера</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="Главный экран в оформлении провайдера на телефоне" src="snapshots/screens/mobile-branded-light.webp"></picture><br><sub>Клиент в цветах провайдера</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="Вкладка виджетов с объявлениями провайдера на телефоне" src="snapshots/screens/mobile-widgets-dark.webp"><br><sub>Объявления провайдера</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="Главный экран в оформлении провайдера на телефоне" src="snapshots/screens/mobile-branded-dark.webp"><br><sub>Клиент в цветах провайдера</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Подписки с трафиком и сроком на телефоне" src="snapshots/screens/mobile-profiles-light.webp"></picture><br><sub>Подписки как карты</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Избранное, цепочки и серверы с задержкой на телефоне" src="snapshots/screens/mobile-proxies-light.webp"></picture><br><sub>Избранное и цепочки</sub></td>
   </tr>
@@ -88,12 +104,12 @@
 
 <table>
   <tr>
-    <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="Главный экран в оформлении провайдера на компьютере" src="snapshots/screens/desktop-branded-light.webp"></picture><br><sub>Оформление провайдера на компьютере</sub></td>
+    <td width="50%" align="center" valign="top"><img alt="Главный экран в оформлении провайдера на компьютере" src="snapshots/screens/desktop-branded-dark.webp"><br><sub>Оформление провайдера на компьютере</sub></td>
     <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Подписки с трафиком и сроком на компьютере" src="snapshots/screens/desktop-profiles-light.webp"></picture><br><sub>Все подписки в одном месте</sub></td>
   </tr>
 </table>
 
-Подписки, серверы и адреса на скриншотах выдуманы.
+</details>
 
 ## Скачать
 

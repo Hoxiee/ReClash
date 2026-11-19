@@ -20,8 +20,10 @@ SS = 4  # supersampling for antialiased shapes
 THEMES = ('light', 'dark')
 OTHER = {'light': 'dark', 'dark': 'light'}
 
+# Provider wallpapers are drawn for a dark theme, so these keep only theirs.
+DARK_ONLY = {'mobile-widgets', 'mobile-branded', 'desktop-branded'}
+
 SCREENS = [
-    'desktop-dashboard',
     'desktop-profiles',
     'desktop-branded',
     'mobile-dashboard',
@@ -356,7 +358,8 @@ def main():
     (out / 'screens').mkdir(parents=True, exist_ok=True)
     only = sys.argv[3] if len(sys.argv) > 3 else None
     for stale in (out / 'screens').glob('*.webp'):
-        if stale.stem.rsplit('-', 1)[0] not in SCREENS:
+        name, theme = stale.stem.rsplit('-', 1)
+        if name not in SCREENS or (name in DARK_ONLY and theme == 'light'):
             stale.unlink()
     for theme in THEMES:
         suffix = '' if theme == 'light' else '-dark'
@@ -364,6 +367,8 @@ def main():
         if only == 'overview':
             continue
         for name in SCREENS:
+            if name in DARK_ONLY and theme == 'light':
+                continue
             shot = raw_shot(raw, name, theme)
             if name.startswith('desktop'):
                 framed = card(mac_window(shot, 1600, theme), 48, 20, 0.32)

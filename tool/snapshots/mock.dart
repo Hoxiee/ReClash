@@ -48,9 +48,19 @@ int _expiresIn(Duration duration) =>
 
 final _env = Platform.environment;
 
-/// `SNAPSHOT_BRAND=1` makes the current profile deliver the Halo
-/// customization the way a subscription with a provider config does.
-final branded = _env['SNAPSHOT_BRAND'] == '1';
+/// `SNAPSHOT_BRAND=halo` (or `1`) or `ember` makes that subscription current,
+/// delivering its customization the way a subscription with a provider config does.
+final _brand = switch (_env['SNAPSHOT_BRAND']) {
+  'ember' => 'ember',
+  '1' || 'halo' => 'halo',
+  _ => null,
+};
+final branded = _brand != null;
+final _currentId = switch (_brand) {
+  'ember' => 2,
+  'halo' => 3,
+  _ => 1,
+};
 
 /// The demo brand of the website mock; `SNAPSHOT_BRAND_ASSETS` points at its
 /// `public/assets/mock` directory.
@@ -69,57 +79,31 @@ Uint8List _asset(String name) {
 String _dataUri(String name) =>
     'data:image/svg+xml;base64,${base64Encode(_asset(name))}';
 
-final _mainGroup = branded ? 'Halo' : 'Proxy';
+final _mainGroup = switch (_brand) {
+  'ember' => 'Ember Select',
+  'halo' => 'Halo',
+  _ => 'Proxy',
+};
+const _emberWallpaperUrl = 'https://cdn.ember.example/bg-ember.svg';
 const _haloWallpaperUrl = 'https://cdn.halo.example/halo-wallpaper.svg';
 
-ProviderLogo _mark(String body) => ProviderLogo(
-  svg: true,
-  bytes: utf8.encode(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">$body</svg>',
-  ),
+final _haloBrand = ProviderBrand(
+  source: ProviderBrandSource.manifest,
+  resolvedAt: DateTime.now(),
+  color: 0xFF3FD8C2,
+  logo: ProviderLogo(bytes: _asset('halo-logo.svg'), svg: true),
+  logoDark: ProviderLogo(bytes: _asset('halo-logo-dark.svg'), svg: true),
 );
 
-final _brands = <int, ProviderBrand>{
-  if (!branded)
-    1: ProviderBrand(
-      source: ProviderBrandSource.manifest,
-      resolvedAt: DateTime.now(),
-      color: 0xFF7C5CFF,
-      logo: _mark(
-        '<circle cx="32" cy="32" r="24" fill="none" stroke="#7C5CFF" '
-        'stroke-width="8"/><circle cx="32" cy="32" r="9" fill="#B9A6FF"/>',
-      ),
-    ),
-  2: ProviderBrand(
-    source: ProviderBrandSource.manifest,
-    resolvedAt: DateTime.now(),
-    color: 0xFF18B38A,
-    logo: _mark(
-      '<path d="M8 46 C20 14 44 14 56 46" fill="none" stroke="#18B38A" '
-      'stroke-width="8" stroke-linecap="round"/>'
-      '<path d="M20 46 C28 28 36 28 44 46" fill="none" stroke="#7BE0C0" '
-      'stroke-width="7" stroke-linecap="round"/>',
-    ),
-  ),
-  3: ProviderBrand(
-    source: ProviderBrandSource.manifest,
-    resolvedAt: DateTime.now(),
-    color: 0xFFF2A81D,
-    logo: _mark(
-      '<circle cx="32" cy="32" r="13" fill="#F2A81D"/>'
-      '<path d="M32 6v10M32 48v10M6 32h10M48 32h10M14 14l7 7M43 43l7 7M50 14l-7 7M21 43l-7 7" '
-      'stroke="#F7C95C" stroke-width="5" stroke-linecap="round"/>',
-    ),
-  ),
-  if (branded)
-    1: ProviderBrand(
-      source: ProviderBrandSource.manifest,
-      resolvedAt: DateTime.now(),
-      color: 0xFF3FD8C2,
-      logo: ProviderLogo(bytes: _asset('halo-logo.svg'), svg: true),
-      logoDark: ProviderLogo(bytes: _asset('halo-logo-dark.svg'), svg: true),
-    ),
-};
+final _emberBrand = ProviderBrand(
+  source: ProviderBrandSource.manifest,
+  resolvedAt: DateTime.now(),
+  color: 0xFFFF6B1A,
+  logo: ProviderLogo(bytes: _asset('logo-ember.svg'), svg: true),
+  logoDark: ProviderLogo(bytes: _asset('logo-ember-dark.svg'), svg: true),
+);
+
+final _brands = <int, ProviderBrand>{2: _emberBrand, 3: _haloBrand};
 
 final _haloMetadata = SubscriptionMetadata({
   'provider.name': 'Halo',
@@ -185,8 +169,62 @@ ProviderHints _haloHints() {
   return ProviderHints(_haloMetadata, config: parsed.config);
 }
 
+final _emberMetadata = SubscriptionMetadata({
+  'provider.name': 'Ember Line',
+  'provider.logo': _dataUri('logo-ember.svg'),
+  'provider.logoDark': _dataUri('logo-ember-dark.svg'),
+  'provider.announce':
+      'Ember Line: provider styling from wallpaper to the connect button.',
+  'provider.announceUrl': 'https://example.com/ember/news',
+  'provider.notice': 'Maintenance at 02:00 UTC. Connections may drop.',
+  'provider.noticeUrl': 'https://example.com/ember/status',
+  'subscription.type': 'test',
+});
+
+/// The Ember Line mock of the website, minus the cards whose images a render
+/// cannot fetch.
+final _emberConfig = jsonEncode({
+  'version': 1,
+  'view': {
+    'app': {
+      'color': '#FF6B1A',
+      'color-dark': '#FFA66B',
+      'style': 'vivid',
+      'black': true,
+      'glass': 'ultra',
+      'navbar': 'floating',
+    },
+  },
+  'power-button': {
+    'shape': ['sharpBurst', 'puffyDiamond', 'clover8Leaf'],
+    'type': 'tonal',
+  },
+  'wallpaper': {'url': _emberWallpaperUrl, 'opacity': 22},
+  'widgets': [
+    'currentOutbound',
+    'health',
+    'outboundMode',
+    'serviceStatus',
+    'profiles',
+    'proxyGroups',
+  ],
+  'power-labels': {
+    'off': 'Tap to ignite',
+    'on': ['The fire is lit'],
+    'connecting': {'title': 'Connecting to {server}', 'hint': 'Just a moment'},
+  },
+});
+
+ProviderHints _emberHints() {
+  final parsed = parseProviderConfig(_emberConfig, 'en');
+  if (parsed.config == null || parsed.warnings.isNotEmpty) {
+    throw StateError('Ember Line config: ${parsed.warnings}');
+  }
+  return ProviderHints(_emberMetadata, config: parsed.config);
+}
+
 String get _wallpaperFile =>
-    '${md5.convert(utf8.encode(_haloWallpaperUrl))}.svg';
+    '${md5.convert(utf8.encode(_brand == 'ember' ? _emberWallpaperUrl : _haloWallpaperUrl))}.svg';
 
 /// A week of daily use at roughly 3 GB a day, ending with a partial today.
 List<UsageDay> _usage() {
@@ -200,65 +238,81 @@ List<UsageDay> _usage() {
   ];
 }
 
+SubscriptionSnapshot? _snapshot(int id) => switch (id) {
+  _ when id != _currentId => null,
+  2 => SubscriptionSnapshot(
+    metadata: _emberMetadata,
+    receivedAt: DateTime.now(),
+  ),
+  3 => SubscriptionSnapshot(
+    metadata: _haloMetadata,
+    receivedAt: DateTime.now(),
+  ),
+  _ => null,
+};
+
+Profile _subscription(
+  int id,
+  String label,
+  String url, {
+  required Duration updated,
+  required int used,
+  required int total,
+  required Duration left,
+}) => Profile.normal(label: label, url: url).copyWith(
+  id: id,
+  lastUpdateDate: DateTime.now().subtract(updated),
+  selectedMap: id == _currentId ? {_mainGroup: '🇳🇱 Amsterdam 01'} : {},
+  unfoldSet: id == _currentId ? {_mainGroup} : {},
+  favoriteSet: id == _currentId ? {'🇩🇪 Frankfurt 02', '🇯🇵 Tokyo 03'} : {},
+  subscriptionSnapshot: _snapshot(id),
+  subscriptionInfo: SubscriptionInfo(
+    upload: used ~/ 10,
+    download: used - used ~/ 10,
+    total: total,
+    expire: _expiresIn(left),
+  ),
+);
+
 final profiles = [
-  Profile.normal(
-    label: branded ? 'Halo' : 'Nebula Cloud',
-    url: branded
-        ? 'https://sub.halo.example/clash'
-        : 'https://sub.nebula.example/clash',
-  ).copyWith(
-    id: 1,
-    lastUpdateDate: DateTime.now().subtract(const Duration(hours: 2)),
-    selectedMap: {_mainGroup: '🇳🇱 Amsterdam 01'},
-    unfoldSet: {_mainGroup},
-    favoriteSet: {'🇩🇪 Frankfurt 02', '🇯🇵 Tokyo 03'},
-    subscriptionSnapshot: branded
-        ? SubscriptionSnapshot(
-            metadata: _haloMetadata,
-            receivedAt: DateTime.now(),
-          )
-        : null,
-    subscriptionInfo: branded
-        ? SubscriptionInfo(
-            upload: 1 * _gb,
-            download: 20 * _gb,
-            total: 100 * _gb,
-            expire: _expiresIn(const Duration(days: 30)),
-          )
-        : SubscriptionInfo(
-            upload: 6 * _gb,
-            download: 36 * _gb,
-            total: 100 * _gb,
-            expire: _expiresIn(const Duration(days: 23)),
-          ),
+  _subscription(
+    1,
+    'Nebula Cloud',
+    'https://sub.nebula.example/clash',
+    updated: const Duration(hours: 2),
+    used: 42 * _gb,
+    total: 100 * _gb,
+    left: const Duration(days: 23),
   ),
-  Profile.normal(
-    label: 'Aurora Mesh',
-    url: 'https://aurora.example/api/v1/sub',
-  ).copyWith(
-    id: 2,
-    lastUpdateDate: DateTime.now().subtract(const Duration(days: 1)),
-    subscriptionInfo: SubscriptionInfo(
-      download: 212 * _gb,
-      total: 500 * _gb,
-      expire: _expiresIn(const Duration(days: 148)),
-    ),
+  _subscription(
+    2,
+    'Ember Line',
+    'https://sub.emberline.example/clash',
+    updated: const Duration(hours: 5),
+    used: 21 * _gb,
+    total: 100 * _gb,
+    left: const Duration(days: 29),
   ),
-  Profile.normal(
-    label: 'Lumen VPN',
-    url: 'https://lumen.example/s/3f9c2a',
-  ).copyWith(
-    id: 3,
-    lastUpdateDate: DateTime.now().subtract(const Duration(hours: 9)),
-    subscriptionInfo: SubscriptionInfo(
-      upload: 2 * _gb,
-      download: 17 * _gb,
-      total: 50 * _gb,
-      expire: _expiresIn(const Duration(days: 4)),
-    ),
+  _subscription(
+    3,
+    'Halo',
+    'https://sub.halo.example/clash',
+    updated: const Duration(minutes: 40),
+    used: 21 * _gb,
+    total: 100 * _gb,
+    left: const Duration(days: 30),
+  ),
+  _subscription(
+    4,
+    'Aurora Mesh',
+    'https://aurora.example/api/v1/sub',
+    updated: const Duration(days: 1),
+    used: 212 * _gb,
+    total: 500 * _gb,
+    left: const Duration(days: 148),
   ),
   Profile.normal(label: 'Home server').copyWith(
-    id: 4,
+    id: 5,
     lastUpdateDate: DateTime.now().subtract(const Duration(days: 6)),
   ),
 ];
@@ -494,7 +548,7 @@ class _Battery extends BatteryOptimizationIgnored {
 /// by the same code that applies a real one.
 Config _config(DashboardStyle dashboard, ProviderHints? hints) {
   final base = Config(
-    currentProfileId: 1,
+    currentProfileId: _currentId,
     themeProps: defaultThemeProps,
     appSettingProps: AppSettingProps(
       dashboardStyle: dashboard,
@@ -510,7 +564,11 @@ Config _config(DashboardStyle dashboard, ProviderHints? hints) {
 }
 
 List<Override> overrides({DashboardStyle dashboard = DashboardStyle.detailed}) {
-  final hints = branded ? _haloHints() : null;
+  final hints = switch (_brand) {
+    'ember' => _emberHints(),
+    'halo' => _haloHints(),
+    _ => null,
+  };
   final config = _config(dashboard, hints);
   return [
     initProvider.overrideWithBuild((_, _) => true),
@@ -518,12 +576,16 @@ List<Override> overrides({DashboardStyle dashboard = DashboardStyle.detailed}) {
     if (hints != null) ...[
       providerHintsProvider.overrideWithValue(hints),
       effectiveWallpaperImageProvider.overrideWithValue(
-        SvgWallpaperSource(SvgBytesLoader(_asset('halo-wallpaper.svg'))),
+        SvgWallpaperSource(
+          SvgBytesLoader(
+            _asset(_brand == 'ember' ? 'bg-ember.svg' : 'halo-wallpaper.svg'),
+          ),
+        ),
       ),
     ],
     for (final MapEntry(:key, :value) in _brands.entries)
       profileBrandProvider(key).overrideWith((_) async => value),
-    for (final id in [1, 2, 3])
+    for (final id in [1, 2, 3, 4])
       trafficUsageProvider(id).overrideWith((_) => Stream.value(_usage())),
     networkWatchProvider.overrideWithValue(_Network()),
     deviceDoctorStateProvider.overrideWith((_) => const Stream.empty()),
@@ -534,7 +596,9 @@ List<Override> overrides({DashboardStyle dashboard = DashboardStyle.detailed}) {
     profilesProvider.overrideWith(() => TestProfiles(profiles)),
     groupsProvider.overrideWithBuild((_, _) => groups),
     chainReportsProvider.overrideWith(_ChainReports.new),
-    profileChainsProvider(1).overrideWith((_) => Stream.value(_chains)),
+    profileChainsProvider(
+      _currentId,
+    ).overrideWith((_) => Stream.value(_chains)),
     delayDataSourceProvider.overrideWithBuild(
       (_, _) => {
         defaultTestUrl: {

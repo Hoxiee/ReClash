@@ -68,13 +68,29 @@
   以及从手机到桌面自适应的布局。
 - Android：快捷设置磁贴、分应用代理、系统 kill switch、可选的启动器图标和 Android TV。桌面端：托盘菜单和全局快捷键。
 
-## 截图
+## 快速导览
+
+<p align="center">
+  <img alt="ReClash 桌面端导览" src="snapshots/tour-desktop.gif" width="100%">
+  <br><sub>桌面端：先是普通订阅，再是 Ember Line 和 Halo 各自的服务商外观</sub>
+</p>
+
+<p align="center">
+  <img alt="ReClash 手机端导览" src="snapshots/tour-mobile.gif" width="300">
+  <br><sub>手机端同样如此</sub>
+</p>
+
+截图中的订阅、服务器和地址均为虚构。
+
+<details>
+<summary><b>更多截图</b></summary>
+<br>
 
 <table>
   <tr>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="手机上的简洁仪表盘" src="snapshots/screens/mobile-dashboard-light.webp"></picture><br><sub>一键连接</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-widgets-dark.webp"><img alt="手机上带服务商公告的小组件页" src="snapshots/screens/mobile-widgets-light.webp"></picture><br><sub>服务商公告</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-light.webp"></picture><br><sub>服务商的外观</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="手机上带服务商公告的小组件页" src="snapshots/screens/mobile-widgets-dark.webp"><br><sub>服务商公告</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="手机上由服务商定制的仪表盘" src="snapshots/screens/mobile-branded-dark.webp"><br><sub>服务商的外观</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="手机上显示流量与到期时间的订阅" src="snapshots/screens/mobile-profiles-light.webp"></picture><br><sub>卡包式订阅</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="手机上的收藏、链式代理与带延迟的服务器" src="snapshots/screens/mobile-proxies-light.webp"></picture><br><sub>收藏与链式代理</sub></td>
   </tr>
@@ -82,12 +98,12 @@
 
 <table>
   <tr>
-    <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-light.webp"></picture><br><sub>桌面端同样有服务商外观</sub></td>
+    <td width="50%" align="center" valign="top"><img alt="桌面端由服务商定制的仪表盘" src="snapshots/screens/desktop-branded-dark.webp"><br><sub>桌面端同样有服务商外观</sub></td>
     <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="桌面端显示流量与到期时间的订阅" src="snapshots/screens/desktop-profiles-light.webp"></picture><br><sub>所有订阅一目了然</sub></td>
   </tr>
 </table>
 
-截图中的订阅、服务器和地址均为虚构。
+</details>
 
 ## 下载
 

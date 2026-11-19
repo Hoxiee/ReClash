@@ -73,13 +73,29 @@ Build the manifest on the [website](https://reclash.pages.dev) and read the
 - Android: Quick Settings tile, per-app proxy, the system kill switch, launcher icon variants and Android TV. Desktop: tray
   menu and global hotkeys.
 
-## Screenshots
+## A quick tour
+
+<p align="center">
+  <img alt="A tour of ReClash on the desktop" src="snapshots/tour-desktop.gif" width="100%">
+  <br><sub>Desktop: a plain subscription, then Ember Line and Halo with their providers' styling</sub>
+</p>
+
+<p align="center">
+  <img alt="A tour of ReClash on a phone" src="snapshots/tour-mobile.gif" width="300">
+  <br><sub>The same on a phone</sub>
+</p>
+
+The subscriptions, servers and addresses in the screenshots are made up.
+
+<details>
+<summary><b>More screenshots</b></summary>
+<br>
 
 <table>
   <tr>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-dashboard-dark.webp"><img alt="Simple dashboard on a phone" src="snapshots/screens/mobile-dashboard-light.webp"></picture><br><sub>One button</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-widgets-dark.webp"><img alt="Widgets tab with provider announcements on a phone" src="snapshots/screens/mobile-widgets-light.webp"></picture><br><sub>Provider announcements</sub></td>
-    <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-branded-dark.webp"><img alt="Dashboard customized by a provider on a phone" src="snapshots/screens/mobile-branded-light.webp"></picture><br><sub>The provider's look</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="Widgets tab with provider announcements on a phone" src="snapshots/screens/mobile-widgets-dark.webp"><br><sub>Provider announcements</sub></td>
+    <td width="20%" align="center" valign="top"><img alt="Dashboard customized by a provider on a phone" src="snapshots/screens/mobile-branded-dark.webp"><br><sub>The provider's look</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on a phone" src="snapshots/screens/mobile-profiles-light.webp"></picture><br><sub>Wallet cards</sub></td>
     <td width="20%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/mobile-proxies-dark.webp"><img alt="Favorites, chains and servers with latency on a phone" src="snapshots/screens/mobile-proxies-light.webp"></picture><br><sub>Favorites and chains</sub></td>
   </tr>
@@ -87,12 +103,12 @@ Build the manifest on the [website](https://reclash.pages.dev) and read the
 
 <table>
   <tr>
-    <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-branded-dark.webp"><img alt="Dashboard customized by a provider on the desktop" src="snapshots/screens/desktop-branded-light.webp"></picture><br><sub>Provider branding on the desktop</sub></td>
+    <td width="50%" align="center" valign="top"><img alt="Dashboard customized by a provider on the desktop" src="snapshots/screens/desktop-branded-dark.webp"><br><sub>Provider branding on the desktop</sub></td>
     <td width="50%" align="center" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="snapshots/screens/desktop-profiles-dark.webp"><img alt="Subscriptions with traffic and expiry on the desktop" src="snapshots/screens/desktop-profiles-light.webp"></picture><br><sub>Every subscription in one place</sub></td>
   </tr>
 </table>
 
-The subscriptions, servers and addresses in the screenshots are made up.
+</details>
 
 ## Download
 
