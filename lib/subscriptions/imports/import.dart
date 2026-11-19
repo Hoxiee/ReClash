@@ -295,14 +295,8 @@ void _checkValueLimits(Object? root) {
   while (pending.isNotEmpty) {
     final value = pending.removeLast();
     if (value is List) {
-      if (value.length > maxSubscriptionImportNodes) {
-        throw const SubscriptionImportException('Import exceeds node limit');
-      }
       pending.addAll(value);
     } else if (value is Map) {
-      if (value.length > maxSubscriptionImportNodes) {
-        throw const SubscriptionImportException('Import exceeds node limit');
-      }
       pending.addAll(value.values);
     }
     visited++;

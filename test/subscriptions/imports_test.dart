@@ -251,18 +251,24 @@ void main() {
       );
     });
 
-    test('bounds total bytes and parsed node counts', () {
+    test('bounds total bytes', () {
       expect(
         () => convertSubscriptionImport(
           Uint8List(maxSubscriptionImportBytes + 1),
         ),
         throwsA(isA<SubscriptionImportException>()),
       );
-      final items = List.filled(maxSubscriptionImportNodes + 1, '{}').join(',');
-      expect(
-        () => convertSubscriptionImport(_bytes('{"items":[$items]}')),
-        throwsA(isA<SubscriptionImportException>()),
+    });
+
+    test('accepts large inline lists outside the node sections', () {
+      final rules = List.filled(
+        maxSubscriptionImportNodes + 1,
+        '  - DOMAIN,example.com,DIRECT',
+      ).join('\n');
+      final result = convertSubscriptionImport(
+        _bytes('proxies:\n  - name: edge\nrules:\n$rules'),
       );
+      expect(result.format, SubscriptionFormat.clash);
     });
 
     test('does not expose source credentials in conversion errors', () {
