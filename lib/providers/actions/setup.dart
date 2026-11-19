@@ -57,6 +57,7 @@ class SetupAction extends _$SetupAction {
   bool _profileApplyDebounced = false;
   bool _allowPrivilegePrompt = false;
   int _privilegeIntentRevision = 0;
+  int _privilegeSetupEpoch = 0;
   String _appliedWebDashboardDirectory = '';
   DateTime? _lastCoreCrash;
 
@@ -1120,6 +1121,7 @@ class SetupAction extends _$SetupAction {
       _core.inspectPrivilege(tunEnabled: true);
 
   Future<void> _requestPrivilegeSetup({required bool explicit}) async {
+    final epoch = _privilegeSetupEpoch;
     final DesktopPrivilegeSetup setup;
     try {
       setup = await inspectPrivilege();
@@ -1131,6 +1133,12 @@ class SetupAction extends _$SetupAction {
       return;
     }
     if (!ref.mounted || !ref.read(patchClashConfigProvider).tun.enable) return;
+    // Several starts inspect at once; a result read before an authorization
+    // finished describes the service as it was and would reopen the prompt.
+    if (epoch != _privilegeSetupEpoch ||
+        isPrivilegedCoreOwner(_core.processOwner)) {
+      return;
+    }
     switch (setup) {
       case DesktopPrivilegeSetup.install ||
           DesktopPrivilegeSetup.update ||
@@ -1150,6 +1158,7 @@ class SetupAction extends _$SetupAction {
   /// Helper or service, and moves the Core onto it. Returns the failure that
   /// kept TUN off, or null once the privileged Core runs.
   Future<Object?> authorizeTun() async {
+    _privilegeSetupEpoch++;
     ref.read(tunPrivilegeSetupProvider.notifier).clear();
     _core.allowPrivilegeInstall();
     final coreAction = ref.read(coreActionProvider.notifier);

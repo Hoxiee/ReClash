@@ -91,7 +91,8 @@ class _TunPrivilegeSetupDialogState
 
   List<(Glyph, String)> _points(AppLocalizations l) =>
       switch (widget.platform) {
-        _ when !_actionable => const [],
+        _ when !_actionable || _setup == DesktopPrivilegeSetup.update =>
+          const [],
         'linux' => [
           (AppGlyphs.lock, l.tunSetupOncePassword),
           (AppGlyphs.bolt, l.tunSetupInstantStart),
@@ -122,10 +123,11 @@ class _TunPrivilegeSetupDialogState
             onPressed: _busy ? null : _later,
             child: Text(_actionable ? l.tunSetupLater : l.close),
           ),
-          TextButton(
-            onPressed: _busy ? null : _withoutTun,
-            child: Text(l.tunSetupWithoutTun),
-          ),
+          if (_setup != DesktopPrivilegeSetup.update)
+            TextButton(
+              onPressed: _busy ? null : _withoutTun,
+              child: Text(l.tunSetupWithoutTun),
+            ),
           if (_actionable)
             TextButton(
               onPressed: _busy ? null : _authorize,

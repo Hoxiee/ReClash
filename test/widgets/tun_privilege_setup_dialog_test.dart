@@ -94,6 +94,32 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Update'), findsOneWidget);
   });
 
+  testWidgets('a Windows update hides Without TUN and the one-time point', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      setup: DesktopPrivilegeSetup.update,
+      platform: 'windows',
+    );
+    expect(find.text('Without TUN'), findsNothing);
+    expect(
+      find.text('Windows asks for confirmation once for this version'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('a Windows install keeps Without TUN and the one-time point', (
+    tester,
+  ) async {
+    await open(tester, platform: 'windows');
+    expect(find.text('Without TUN'), findsOneWidget);
+    expect(
+      find.text('Windows asks for confirmation once for this version'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('confirming locks the dialog until the setup settles', (
     tester,
   ) async {

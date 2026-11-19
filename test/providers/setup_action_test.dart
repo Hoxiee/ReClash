@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
@@ -42,6 +43,9 @@ import '../helpers/preferences.dart';
 import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
+  @override
+  CoreProcessOwner? processOwner;
+
   @override
   Future<CoreInfo?> getCoreInfo() async => null;
 
@@ -204,9 +208,11 @@ class TestSetupAction extends SetupAction {
     return await pendingAuthorization?.future ?? authorizeResult;
   }
 
+  Completer<DesktopPrivilegeSetup>? pendingInspection;
+
   @override
   Future<DesktopPrivilegeSetup> inspectPrivilege() async =>
-      DesktopPrivilegeSetup.install;
+      await pendingInspection?.future ?? DesktopPrivilegeSetup.install;
 
   @override
   Future<bool> setCoreRunning(bool running) async {
@@ -265,14 +271,16 @@ void main() {
   });
 
   late TestSetupAction action;
+  late _MockCoreHandlerInterface coreHandler;
   late ProviderContainer container;
 
   setUp(() {
     action = TestSetupAction();
+    coreHandler = _MockCoreHandlerInterface();
     container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(
-          CoreController.scoped(_MockCoreHandlerInterface()),
+          CoreController.scoped(coreHandler),
         ),
         profilesProvider.overrideWith(TestProfiles.new),
         setupActionProvider.overrideWith(() => action),
@@ -1075,6 +1083,37 @@ void main() {
         container.read(authorizedTunEnableProvider),
         TunAuthorizationState.none,
       );
+    });
+
+    test(
+      'a stale inspection cannot reopen the prompt once an authorization ran',
+      () async {
+        final inspection = Completer<DesktopPrivilegeSetup>();
+        action.pendingInspection = inspection;
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith.tun(enable: true));
+        action.authorizeResult = DesktopPrivilegeDecision.authorizationRequired;
+        expect(await action.requestAdmin(true), isTrue);
+        await action.authorizeTun();
+        inspection.complete(DesktopPrivilegeSetup.update);
+        await pumpEventQueue();
+        expect(container.read(tunPrivilegeSetupProvider), isNull);
+      },
+    );
+
+    test('a Core already privileged is not offered an update prompt', () async {
+      final inspection = Completer<DesktopPrivilegeSetup>();
+      action.pendingInspection = inspection;
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(enable: true));
+      action.authorizeResult = DesktopPrivilegeDecision.authorizationRequired;
+      expect(await action.requestAdmin(true), isTrue);
+      coreHandler.processOwner = CoreProcessOwner.helper;
+      inspection.complete(DesktopPrivilegeSetup.update);
+      await pumpEventQueue();
+      expect(container.read(tunPrivilegeSetupProvider), isNull);
     });
   });
 
