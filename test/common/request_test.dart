@@ -100,6 +100,10 @@ class _StalledHttpClient extends Fake implements HttpClient {
   String Function(Uri url)? findProxy;
 
   @override
+  bool Function(X509Certificate cert, String host, int port)?
+  badCertificateCallback;
+
+  @override
   Future<HttpClientRequest> openUrl(String method, Uri url) =>
       Completer<HttpClientRequest>().future;
 }
@@ -299,7 +303,7 @@ void main() {
 
     _ScriptedAdapter serve(ResponseBody Function(_Exchange exchange) respond) {
       final adapter = _ScriptedAdapter(respond);
-      client.dio.httpClientAdapter = adapter;
+      client.updateDio.httpClientAdapter = adapter;
       return adapter;
     }
 
@@ -1022,7 +1026,7 @@ void main() {
 
   group('latestRelease', () {
     Request requestAnswering(Map<String, ResponseBody Function()> byHost) {
-      return Request()..dio.httpClientAdapter = _HostAdapter(byHost);
+      return Request()..updateDio.httpClientAdapter = _HostAdapter(byHost);
     }
 
     test('reads the release from the API', () async {

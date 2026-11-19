@@ -19,7 +19,9 @@ class Request {
   static final _updateDownloads = <String>{};
 
   late final Dio dio;
+  late final Dio updateDio;
   late final Dio _clashDio;
+  late final Dio _updateFileDio;
   String? userAgent;
   late final List<AppUpdateSource> updateSources;
   final _updateCache = UpdateResponseCache();
@@ -28,7 +30,7 @@ class Request {
 
   @visibleForTesting
   set updateDownloadAdapter(HttpClientAdapter adapter) {
-    _clashDio.httpClientAdapter = adapter;
+    _updateFileDio.httpClientAdapter = adapter;
   }
 
   void attach(ProviderReader read) {
@@ -37,23 +39,35 @@ class Request {
 
   Request() {
     dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
-    _clashDio = Dio();
-    _clashDio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final client = HttpClient();
-        client.findProxy = (Uri uri) {
-          client.userAgent = globalState.ua;
-          final read = _read;
-          if (read == null) {
-            return 'DIRECT';
-          }
-          return ReClashHttpOverrides.findProxyForReader(read, uri);
-        };
-        return client;
-      },
+    updateDio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
+    updateDio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: _strictClient,
     );
-    updateSources = [GitHubUpdateSource(dio, _updateCache)];
+    _clashDio = Dio()..httpClientAdapter = _clashAdapter(HttpClient.new);
+    _updateFileDio = Dio()..httpClientAdapter = _clashAdapter(_strictClient);
+    updateSources = [GitHubUpdateSource(updateDio, _updateCache)];
   }
+
+  IOHttpClientAdapter _clashAdapter(HttpClient Function() create) =>
+      IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = create();
+          client.findProxy = (Uri uri) {
+            client.userAgent = globalState.ua;
+            final read = _read;
+            if (read == null) {
+              return 'DIRECT';
+            }
+            return ReClashHttpOverrides.findProxyForReader(read, uri);
+          };
+          return client;
+        },
+      );
+
+  /// Update traffic ignores the user's "Check certificate" opt-out: a forged
+  /// release with a matching hash must not be accepted.
+  static HttpClient _strictClient() =>
+      HttpClient()..badCertificateCallback = (_, _, _) => false;
 
   Future<Response<T>> _download<T>(String url, ResponseType responseType) {
     final target = downloadTarget(url);
@@ -110,7 +124,7 @@ class Request {
     StackTrace? lastStack;
     final installed = globalState.packageInfo.version;
     for (final source in [
-      if (mirror != null) MirrorUpdateSource(dio, mirror, _updateCache),
+      if (mirror != null) MirrorUpdateSource(updateDio, mirror, _updateCache),
       ...updateSources,
     ]) {
       try {
@@ -153,7 +167,7 @@ class Request {
   }
 
   AppUpdateSource? updateSource(String id) => id == mirrorUpdateSourceId
-      ? MirrorUpdateSource(dio, null, _updateCache)
+      ? MirrorUpdateSource(updateDio, null, _updateCache)
       : updateSources.where((source) => source.id == id).firstOrNull;
 
   Future<String?> downloadUpdateFile(
@@ -170,7 +184,7 @@ class Request {
       return 'Update download is already in progress';
     }
     final transfer = _UpdateFileTransfer(
-      dio: _clashDio,
+      dio: _updateFileDio,
       uri: uri,
       target: File(path),
       onProgress: onProgress,
@@ -199,7 +213,7 @@ class Request {
   @visibleForTesting
   Future<Map<String, dynamic>> latestRelease() async {
     try {
-      final response = await dio.get<Map<String, dynamic>>(
+      final response = await updateDio.get<Map<String, dynamic>>(
         'https://api.github.com/repos/$repository/releases/latest',
         options: Options(responseType: ResponseType.json),
       );
@@ -210,7 +224,7 @@ class Request {
         logLevel: LogLevel.warning,
       );
     }
-    final response = await dio.get<void>(
+    final response = await updateDio.get<void>(
       'https://github.com/$repository/releases/latest',
       options: Options(
         followRedirects: false,
@@ -251,6 +265,7 @@ class _UpdateFileTransfer {
   late final File _metadataFile = File('${target.path}.tmp.json');
   late _UpdateResumeMetadata _metadata;
   CancelToken? _networkToken;
+  Timer? _idleTimer;
   bool _timedOut = false;
   bool _rangeRestarted = false;
   int _received = 0;
@@ -259,10 +274,7 @@ class _UpdateFileTransfer {
     final digest = expectedSha256 == null
         ? null
         : parseAssetSha256('sha256:$expectedSha256');
-    final timer = Timer(_updateDownloadTimeout, () {
-      _timedOut = true;
-      _networkToken?.cancel('Update download timed out');
-    });
+    _armIdleTimer();
     unawaited(
       cancelToken.whenCancel.then((error) => _networkToken?.cancel(error)),
     );
@@ -293,10 +305,18 @@ class _UpdateFileTransfer {
       _ensureActive();
       rethrow;
     } finally {
-      timer.cancel();
+      _idleTimer?.cancel();
       _networkToken?.cancel();
       _networkToken = null;
     }
+  }
+
+  void _armIdleTimer() {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(_updateDownloadTimeout, () {
+      _timedOut = true;
+      _networkToken?.cancel('Update download timed out');
+    });
   }
 
   Future<void> _restorePartial() async {
@@ -469,6 +489,7 @@ class _UpdateFileTransfer {
           }
           await file.writeFrom(chunk);
           _received = next;
+          _armIdleTimer();
           onProgress(_received, total ?? -1);
         }
       } finally {
