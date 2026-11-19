@@ -13,10 +13,12 @@ class SiteLockPreset {
 
 const siteLockPresets = [
   SiteLockPreset('Claude', [
+    'GEOSITE,anthropic',
     'DOMAIN-SUFFIX,anthropic.com',
     'DOMAIN-SUFFIX,claude.ai',
     'DOMAIN-SUFFIX,claude.com',
     'DOMAIN-SUFFIX,claudeusercontent.com',
+    'DOMAIN-SUFFIX,claudemcpclient.com',
     'DOMAIN-SUFFIX,claudemcpcontent.com',
     'DOMAIN-SUFFIX,clau.de',
     // Telemetry and error reports of Claude Code, sent from the same IP.
