@@ -54,7 +54,7 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
       unawaited(ref.read(siteLockReportStateProvider.notifier).refresh());
 
   String _label(SiteLock lock) =>
-      lock.name.isNotEmpty ? lock.name : lock.match.firstOrNull ?? lock.id;
+      lock.name.isNotEmpty ? lock.name : lock.entries.firstOrNull ?? lock.id;
 
   String _names(List<SiteLock> locks, List<String> ids) => [
     for (final lock in locks)
@@ -80,7 +80,7 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
       id: snowflake.id.toString(),
       enabled: true,
       name: preset?.name ?? '',
-      match: preset?.match ?? const [],
+      preset: preset?.id ?? '',
     ),
     isNew: true,
   );
@@ -253,7 +253,7 @@ class _SiteLockViewState extends ConsumerState<SiteLockView> {
         ? locks
         : [
             for (final lock in locks)
-              if (_query.matches([_label(lock), ...lock.match])) lock,
+              if (_query.matches([_label(lock), ...lock.entries])) lock,
           ];
     return CommonScaffold(
       title: l.siteLockTitle,

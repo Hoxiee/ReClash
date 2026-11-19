@@ -1002,7 +1002,7 @@ abstract class CoreHandlerInterface with CoreInterface {
   Future<SiteLockReport?> setSiteLocks(List<SiteLock> locks) async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.setSiteLocks,
-      arguments: locks.map((lock) => lock.toJson()).toList(),
+      arguments: siteLocksToCore(locks),
     );
     return data == null ? null : SiteLockReport.fromJson(data);
   }

@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "Reglas del firewall",
   "siteLockHostRulesEmpty": "No hay reglas cargadas.",
   "siteLockHostInspect": "Para verlas tú mismo, ejecuta:",
-  "siteLockHostFooter": "Las direcciones bloqueadas se rechazan en todas las interfaces salvo el TUN de ReClash. Las consultas DNS de nombres bloqueados fuera del TUN se redirigen a él o se descartan, así que otra VPN puede funcionar en paralelo pero no puede abrir un sitio bloqueado."
+  "siteLockHostFooter": "Las direcciones bloqueadas se rechazan en todas las interfaces salvo el TUN de ReClash. Las consultas DNS de nombres bloqueados fuera del TUN se redirigen a él o se descartan, así que otra VPN puede funcionar en paralelo pero no puede abrir un sitio bloqueado.",
+  "siteLockPresetTitle": "Preajuste",
+  "siteLockPresetFooter": "Sus entradas se actualizan con ReClash; los sitios de abajo se añaden a ellas. Mantén pulsado o haz clic derecho para desvincularlo y copiar sus entradas en Sitios.",
+  "siteLockPresetUnlink": "Desvincular y copiar entradas"
 }

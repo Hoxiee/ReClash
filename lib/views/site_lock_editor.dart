@@ -116,6 +116,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     text: widget.lock.except.join('\n'),
   );
   late List<SiteLockExit> _exits = widget.lock.exits;
+  late String _preset = widget.lock.preset;
   List<SiteLockExitCandidate>? _candidates;
   bool _loaded = false;
   bool _attempted = false;
@@ -155,7 +156,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
 
   void _check() {
     final l = context.appLocalizations;
-    final count = normalizeSiteLockEntries(_match.text).length;
+    final count = _draft.entries.length;
     (_Field, String)? problem;
     if (count == 0) {
       problem = (_Field.match, l.siteLockErrorMatchEmpty);
@@ -167,6 +168,14 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     _invalid = problem?.$1;
     _error = problem?.$2;
   }
+
+  SiteLock get _draft => widget.lock.copyWith(
+    name: _name.text.trim(),
+    match: normalizeSiteLockEntries(_match.text),
+    except: normalizeSiteLockEntries(_except.text),
+    exits: _exits,
+    preset: _preset,
+  );
 
   void _changed() {
     if (_attempted) _check();
@@ -180,12 +189,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
       _check();
     });
     if (_error != null) return;
-    final edited = widget.lock.copyWith(
-      name: _name.text.trim(),
-      match: normalizeSiteLockEntries(_match.text),
-      except: normalizeSiteLockEntries(_except.text),
-      exits: _exits,
-    );
+    final edited = _draft;
     if (ref.read(coreStatusProvider) == CoreStatus.connected) {
       setState(() => _saving = true);
       final report = await ref
@@ -218,7 +222,7 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
     final [field, ...rest] = problem.field.split('.');
     final index = rest.isEmpty ? null : int.tryParse(rest.first);
     final entries = switch (field) {
-      'match' => edited.match,
+      'match' => edited.entries,
       'except' => edited.except,
       _ => const <String>[],
     };
@@ -263,6 +267,44 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
             decoration: InputDecoration.collapsed(
               border: const NoInputBorder(),
               hintText: hint,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _presetSection(AppLocalizations l, SiteLockPreset preset) {
+    return generateSection(
+      title: l.siteLockPresetTitle,
+      footer: l.siteLockPresetFooter,
+      items: [
+        ContextMenuRegion(
+          menuItems: [
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.copy,
+              label: l.siteLockPresetUnlink,
+              onPressed: () => setState(() {
+                _match.text = {
+                  ...normalizeSiteLockEntries(_match.text),
+                  ...preset.match,
+                }.join('\n');
+                _preset = '';
+                _changed();
+              }),
+            ),
+          ],
+          child: ListItem(
+            leading: const GlyphIcon(AppGlyphs.sparkle),
+            title: Text(preset.name),
+            subtitle: Text(
+              preset.match.join(', '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .toJetBrainsMono
+                  .copyWith(color: context.colorScheme.tertiary),
             ),
           ),
         ),
@@ -354,6 +396,8 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
             ),
           ],
         ),
+        if (siteLockPresetOf(_preset) case final preset?)
+          _presetSection(l, preset),
         _entries(
           title: l.siteLockMatchTitle,
           hint: l.siteLockMatchHint,

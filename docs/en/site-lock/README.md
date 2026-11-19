@@ -32,7 +32,7 @@ A lock holds up to 128 entries and 16 exit servers, and you can keep up to 32 lo
 
 ## Presets
 
-The page header has **From preset** with Claude, ChatGPT, Gemini, Grok, Perplexity, DeepSeek and Cursor. Picking one fills **Sites** with the service's geosite lists or domain suffixes and opens the editor so you can choose the exit servers. These services flag accounts whose IP address changes; the lock keeps them on the server you choose.
+The page header has **From preset** with Claude, ChatGPT, Gemini, Grok, Perplexity, DeepSeek and Cursor. Picking one creates a lock that follows the preset and opens the editor so you can choose the exit servers. The editor shows the preset above **Sites**: its geosite lists, domain suffixes and address ranges update with ReClash, and entries you add under **Sites** apply on top of them. A long press or right click on the preset unlinks it and copies its entries into **Sites**, where you can edit them; the lock then no longer receives updates. These services flag accounts whose IP address changes; the lock keeps them on the server you choose.
 
 ## Status
 

@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "Règles du pare-feu",
   "siteLockHostRulesEmpty": "Aucune règle n’est chargée.",
   "siteLockHostInspect": "Pour les inspecter vous-même, exécutez :",
-  "siteLockHostFooter": "Les adresses verrouillées sont rejetées sur toutes les interfaces sauf le TUN de ReClash. Les requêtes DNS pour les noms verrouillés hors du TUN sont redirigées vers lui ou abandonnées : un autre VPN peut donc tourner en parallèle, mais ne peut pas ouvrir un site verrouillé."
+  "siteLockHostFooter": "Les adresses verrouillées sont rejetées sur toutes les interfaces sauf le TUN de ReClash. Les requêtes DNS pour les noms verrouillés hors du TUN sont redirigées vers lui ou abandonnées : un autre VPN peut donc tourner en parallèle, mais ne peut pas ouvrir un site verrouillé.",
+  "siteLockPresetTitle": "Préréglage",
+  "siteLockPresetFooter": "Ses entrées sont mises à jour avec ReClash ; les sites ci-dessous s’y ajoutent. Appuyez longuement ou faites un clic droit pour le dissocier et copier ses entrées dans Sites.",
+  "siteLockPresetUnlink": "Dissocier et copier les entrées"
 }

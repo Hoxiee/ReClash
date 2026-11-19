@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "防火墙规则",
   "siteLockHostRulesEmpty": "未加载任何规则。",
   "siteLockHostInspect": "要自行查看，请运行：",
-  "siteLockHostFooter": "被锁定的地址会在除 ReClash TUN 之外的所有接口上被拒绝。TUN 之外针对被锁定名称的 DNS 查询会被重定向到 TUN 或被丢弃，因此可以并行运行另一个 VPN，但它打不开被锁定的网站。"
+  "siteLockHostFooter": "被锁定的地址会在除 ReClash TUN 之外的所有接口上被拒绝。TUN 之外针对被锁定名称的 DNS 查询会被重定向到 TUN 或被丢弃，因此可以并行运行另一个 VPN，但它打不开被锁定的网站。",
+  "siteLockPresetTitle": "预设",
+  "siteLockPresetFooter": "其条目随 ReClash 更新，下方站点会追加到其中。长按或右键点击可解除关联，并将其条目复制到“站点”。",
+  "siteLockPresetUnlink": "解除关联并复制条目"
 }

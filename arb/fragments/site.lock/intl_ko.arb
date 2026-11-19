@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "방화벽 규칙",
   "siteLockHostRulesEmpty": "불러온 규칙이 없습니다.",
   "siteLockHostInspect": "직접 확인하려면 다음을 실행하세요:",
-  "siteLockHostFooter": "잠긴 주소는 ReClash TUN을 제외한 모든 인터페이스에서 거부됩니다. TUN 밖에서 나가는 잠긴 이름의 DNS 질의는 TUN으로 리디렉션되거나 버려지므로, 다른 VPN을 병행해서 쓸 수는 있어도 잠긴 사이트는 열 수 없습니다."
+  "siteLockHostFooter": "잠긴 주소는 ReClash TUN을 제외한 모든 인터페이스에서 거부됩니다. TUN 밖에서 나가는 잠긴 이름의 DNS 질의는 TUN으로 리디렉션되거나 버려지므로, 다른 VPN을 병행해서 쓸 수는 있어도 잠긴 사이트는 열 수 없습니다.",
+  "siteLockPresetTitle": "프리셋",
+  "siteLockPresetFooter": "항목은 ReClash와 함께 업데이트되며, 아래 사이트가 여기에 추가됩니다. 길게 누르거나 마우스 오른쪽 버튼을 클릭하면 연결을 해제하고 항목을 사이트로 복사합니다.",
+  "siteLockPresetUnlink": "연결 해제 후 항목 복사"
 }

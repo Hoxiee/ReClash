@@ -57,6 +57,7 @@ abstract class SiteLock with _$SiteLock {
     @Default([]) List<String> match,
     @Default([]) List<String> except,
     @Default([]) List<SiteLockExit> exits,
+    @Default('') String preset,
   }) = _SiteLock;
 
   factory SiteLock.fromJson(Map<String, Object?> json) =>
@@ -157,3 +158,72 @@ abstract class SiteLockPolicy with _$SiteLockPolicy {
   factory SiteLockPolicy.fromJson(Map<String, Object?> json) =>
       _$SiteLockPolicyFromJson(json);
 }
+
+/// A service whose account checks tie it to one IP; [name] is a proper noun.
+/// A lock keeps its [id], so entries added here in a release reach the lock.
+class SiteLockPreset {
+  const SiteLockPreset(this.id, this.name, this.match);
+
+  final String id;
+  final String name;
+  final List<String> match;
+}
+
+const siteLockPresets = [
+  SiteLockPreset('claude', 'Claude', [
+    'GEOSITE,anthropic',
+    'DOMAIN-SUFFIX,anthropic.com',
+    'DOMAIN-SUFFIX,claude.ai',
+    'DOMAIN-SUFFIX,claude.com',
+    'DOMAIN-SUFFIX,claudeusercontent.com',
+    'DOMAIN-SUFFIX,claudemcpclient.com',
+    'DOMAIN-SUFFIX,claudemcpcontent.com',
+    'DOMAIN-SUFFIX,clau.de',
+    // Telemetry and error reports of Claude Code, sent from the same IP.
+    'DOMAIN,http-intake.logs.us5.datadoghq.com',
+    'DOMAIN,browser-intake-us5-datadoghq.com',
+    'DOMAIN,o1158394.ingest.us.sentry.io',
+    // Anthropic's published ranges catch connections made without a name.
+    'IP-CIDR,160.79.104.0/21,no-resolve',
+    'IP-CIDR,153.61.208.0/20,no-resolve',
+    'IP-CIDR,153.61.224.0/22,no-resolve',
+    'IP-CIDR6,2607:6bc0::/48,no-resolve',
+  ]),
+  SiteLockPreset('chatgpt', 'ChatGPT', [
+    'GEOSITE,openai',
+    'DOMAIN-SUFFIX,chatgpt.com',
+    'DOMAIN-SUFFIX,oaistatic.com',
+    'DOMAIN-SUFFIX,oaiusercontent.com',
+    'DOMAIN-SUFFIX,openai.com',
+  ]),
+  SiteLockPreset('gemini', 'Gemini', ['GEOSITE,google-gemini']),
+  SiteLockPreset('grok', 'Grok', [
+    'DOMAIN-SUFFIX,x.ai',
+    'DOMAIN-SUFFIX,grok.com',
+  ]),
+  SiteLockPreset('perplexity', 'Perplexity', ['GEOSITE,perplexity']),
+  SiteLockPreset('deepseek', 'DeepSeek', ['GEOSITE,deepseek']),
+  SiteLockPreset('cursor', 'Cursor', ['GEOSITE,cursor']),
+];
+
+SiteLockPreset? siteLockPresetOf(String id) {
+  for (final preset in siteLockPresets) {
+    if (preset.id == id) return preset;
+  }
+  return null;
+}
+
+extension SiteLockEntries on SiteLock {
+  /// The lock's own entries, then its preset's: the list the core checks and
+  /// indexes its problems by.
+  List<String> get entries {
+    final found = siteLockPresetOf(preset);
+    return found == null ? match : {...match, ...found.match}.toList();
+  }
+
+  SiteLock get forCore =>
+      preset.isEmpty ? this : copyWith(match: entries, preset: '');
+}
+
+List<Map<String, Object?>>? siteLocksToCore(List<SiteLock>? locks) =>
+    locks?.map((lock) => lock.forCore.toJson()).toList();

@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "Brandmauer düzgünleri",
   "siteLockHostRulesEmpty": "Ýüklenen düzgün ýok.",
   "siteLockHostInspect": "Özüňiz görmek üçin muny ýerine ýetiriň:",
-  "siteLockHostFooter": "Gulplanan salgylar ReClash TUN-dan başga ähli interfeýslerde ret edilýär. Gulplanan atlar üçin TUN-dan daşardaky DNS soraglary oňa gönükdirilýär ýa-da taşlanýar, şonuň üçin başga VPN ýanaşyk işläp biler, ýöne gulplanan saýty aça bilmez."
+  "siteLockHostFooter": "Gulplanan salgylar ReClash TUN-dan başga ähli interfeýslerde ret edilýär. Gulplanan atlar üçin TUN-dan daşardaky DNS soraglary oňa gönükdirilýär ýa-da taşlanýar, şonuň üçin başga VPN ýanaşyk işläp biler, ýöne gulplanan saýty aça bilmez.",
+  "siteLockPresetTitle": "Taýýar sazlama",
+  "siteLockPresetFooter": "Onuň ýazgylary ReClash bilen täzelenýär, aşakdaky saýtlar olara goşulýar. Baglanyşygy aýyrmak we ýazgylaryny Saýtlara göçürmek üçin uzak basyň ýa-da sag düwme bilen basyň.",
+  "siteLockPresetUnlink": "Aýyryp, ýazgylary göçürmek"
 }

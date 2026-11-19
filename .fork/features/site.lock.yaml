@@ -6,6 +6,7 @@ why: Chosen sites are reachable only through the exits the user allows; without 
 must:
   before-rules: The core claims a locked connection before mode and rules, and sends it through a live exit or refuses it; groups and built-ins never qualify as exits.
   exits-by-definition: An exit is a server by its definition without the name, falling back to the name at the same type, server and port once a refresh changes it, so renames and rotated credentials keep the lock, a server moved under its old name does not, and one address serving many exits stays apart.
+  presets-by-reference: A lock made from a preset keeps the preset id, and Flutter expands it after the lock's own entries before the core sees the lock, so a release that changes a preset updates every lock that follows it.
   atomic-apply: A rejected lock list leaves the previous one in force and reports every problem.
   fail-closed-host: On Linux the Helper blocks locked addresses off the TUN and the fake-ip ranges on physical interfaces only, so another VPN handing out the same range keeps working, and queues off-TUN DNS without bypass, so a dead Helper or core stops locked names instead of leaking them, through any interface. On Windows persistent WFP filters block the same addresses plus the tunnel resolver off the TUN and the fake-ip ranges on Ethernet, Wi-Fi and PPP interfaces, and NRPT sends locked names only to that resolver, so they fail closed without the core or the Helper.
   core-dns-exempt: Only the Helper's own cgroup, which holds the core, resolves off the TUN past the DNS filter.
@@ -30,5 +31,5 @@ watch:
 checks:
   site-lock-core: [before-rules, exits-by-definition, atomic-apply, core-only-warning, untouched]
   site-lock-host: [fail-closed-host, core-dns-exempt]
-  site-lock-app: [atomic-apply, fail-closed-host, host-visible, android-vpn]
+  site-lock-app: [presets-by-reference, atomic-apply, fail-closed-host, host-visible, android-vpn]
 drop: Upstream mihomo ships per-destination exit pinning with an OS-level kill switch.

@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "Xavfsizlik devori qoidalari",
   "siteLockHostRulesEmpty": "Yuklangan qoidalar yo‘q.",
   "siteLockHostInspect": "O‘zingiz ko‘rish uchun quyidagini bajaring:",
-  "siteLockHostFooter": "Qulflangan manzillar ReClash TUN’dan boshqa barcha interfeyslarda rad etiladi. Qulflangan nomlar uchun TUN’dan tashqaridagi DNS so‘rovlari unga yo‘naltiriladi yoki tashlab yuboriladi, shuning uchun boshqa VPN parallel ishlashi mumkin, lekin qulflangan saytni ocha olmaydi."
+  "siteLockHostFooter": "Qulflangan manzillar ReClash TUN’dan boshqa barcha interfeyslarda rad etiladi. Qulflangan nomlar uchun TUN’dan tashqaridagi DNS so‘rovlari unga yo‘naltiriladi yoki tashlab yuboriladi, shuning uchun boshqa VPN parallel ishlashi mumkin, lekin qulflangan saytni ocha olmaydi.",
+  "siteLockPresetTitle": "Andoza",
+  "siteLockPresetFooter": "Uning yozuvlari ReClash bilan birga yangilanadi, quyidagi saytlar ularga qo‘shiladi. Bog‘lanishni uzib, yozuvlarini Saytlarga nusxalash uchun uzoq bosing yoki o‘ng tugmani bosing.",
+  "siteLockPresetUnlink": "Uzish va yozuvlarni nusxalash"
 }

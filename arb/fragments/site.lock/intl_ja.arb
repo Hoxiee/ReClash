@@ -70,5 +70,8 @@
   "siteLockHostRulesTitle": "ファイアウォールのルール",
   "siteLockHostRulesEmpty": "読み込まれているルールはありません。",
   "siteLockHostInspect": "自分で確認するには、次を実行します:",
-  "siteLockHostFooter": "ロックされたアドレスは、ReClash の TUN 以外のすべてのインターフェースで拒否されます。TUN 外でのロック対象名の DNS クエリは TUN に転送されるか破棄されるため、別の VPN を並行して使えますが、ロックされたサイトは開けません。"
+  "siteLockHostFooter": "ロックされたアドレスは、ReClash の TUN 以外のすべてのインターフェースで拒否されます。TUN 外でのロック対象名の DNS クエリは TUN に転送されるか破棄されるため、別の VPN を並行して使えますが、ロックされたサイトは開けません。",
+  "siteLockPresetTitle": "プリセット",
+  "siteLockPresetFooter": "エントリは ReClash とともに更新され、下のサイトはそれに追加されます。長押しまたは右クリックでリンクを解除し、エントリを「サイト」にコピーします。",
+  "siteLockPresetUnlink": "リンクを解除してエントリをコピー"
 }

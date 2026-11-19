@@ -17,6 +17,37 @@ void main() {
     expect(wire['except'], ['skip.example.com']);
   });
 
+  test('a preset lock reaches the core with its own entries first', () {
+    const lock = SiteLock(
+      id: 'a',
+      preset: 'claude',
+      match: ['example.com', 'DOMAIN-SUFFIX,claude.ai'],
+    );
+    final claude = siteLockPresetOf('claude')!.match;
+    final sent = lock.forCore;
+    expect(sent.preset, isEmpty);
+    expect(sent.match.take(2), ['example.com', 'DOMAIN-SUFFIX,claude.ai']);
+    expect(sent.match.toSet(), {...lock.match, ...claude});
+    expect(sent.match.length, sent.match.toSet().length);
+    expect(lock.entries, sent.match);
+  });
+
+  test('setup params send preset locks expanded', () {
+    const params = SetupParams(
+      selectedMap: {},
+      testUrl: '',
+      siteLocks: [SiteLock(id: 'a', preset: 'cursor')],
+    );
+    final wire = jsonDecode(jsonEncode(params)) as Map<String, Object?>;
+    final locks = wire['site-locks']! as List<Object?>;
+    expect((locks.single! as Map)['match'], ['GEOSITE,cursor']);
+  });
+
+  test('a lock without a preset reaches the core unchanged', () {
+    const lock = SiteLock(id: 'a', match: ['example.com']);
+    expect(lock.forCore, same(lock));
+  });
+
   test('SiteLock defaults fill missing fields', () {
     final lock = SiteLock.fromJson({'id': 'a'});
     expect(lock.enabled, isTrue);

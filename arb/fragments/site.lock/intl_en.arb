@@ -122,5 +122,8 @@
   "siteLockHostRulesTitle": "Firewall rules",
   "siteLockHostRulesEmpty": "No rules are loaded.",
   "siteLockHostInspect": "To inspect them yourself, run:",
-  "siteLockHostFooter": "Locked addresses are rejected on every interface except the ReClash TUN. DNS queries for locked names outside the TUN are redirected into it or dropped, so another VPN can run in parallel but cannot open a locked site."
+  "siteLockHostFooter": "Locked addresses are rejected on every interface except the ReClash TUN. DNS queries for locked names outside the TUN are redirected into it or dropped, so another VPN can run in parallel but cannot open a locked site.",
+  "siteLockPresetTitle": "Preset",
+  "siteLockPresetFooter": "Its entries update with ReClash; sites below add to them. Long press or right-click to unlink it and copy its entries into Sites.",
+  "siteLockPresetUnlink": "Unlink and copy entries"
 }
