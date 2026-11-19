@@ -341,10 +341,13 @@ impl Drop for PublishedPort {
     }
 }
 
+/// A logoff ends the session a standard kill switch guarded, and Fast Startup keeps
+/// the boot identity across the shutdown that follows, so it disarms here instead.
 pub(super) async fn serve_until<F, S>(
     owner_sid: String,
     shutdown: F,
     on_started: S,
+    mut logoffs: tokio::sync::mpsc::UnboundedReceiver<()>,
 ) -> anyhow::Result<()>
 where
     F: Future<Output = ()> + Send + 'static,
@@ -373,6 +376,19 @@ where
         site_lock.clone(),
         Some(kill_switch.clone()),
     ));
+    let logoff_kill_switch = kill_switch.clone();
+    let disarming = tokio::spawn(async move {
+        while logoffs.recv().await.is_some() {
+            let kill_switch = logoff_kill_switch.clone();
+            match tokio::task::spawn_blocking(move || kill_switch.disarm_standard()).await {
+                Ok(Ok(_)) => {}
+                Ok(Err(error)) => log_message(format!(
+                    "Helper could not disarm the kill switch at logoff: {error}"
+                )),
+                Err(error) => log_message(format!("Kill switch logoff task failed: {error}")),
+            }
+        }
+    });
     on_started()?;
     let incoming = AuthorizedIncoming {
         listener,
@@ -396,6 +412,7 @@ where
         log_message(format!("Helper server stopped: {error}"));
     }
     healing.abort();
+    disarming.abort();
     drop(published);
     release_managed_core_on_shutdown();
 

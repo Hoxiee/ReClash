@@ -22,7 +22,7 @@ The block is strict. While the kill switch is armed, all traffic outside ReClash
 
 ## When it is armed
 
-In the standard mode the kill switch arms when TUN comes up during a run, not when the Core starts or ReClash launches. Once armed it stays armed through a crash, a Core restart, recovery and the relaunch after an app update. It is lifted when you stop deliberately: turn the proxy off, turn TUN off, or quit ReClash normally. A reboot lifts it too.
+In the standard mode the kill switch arms when TUN comes up during a run, not when the Core starts or ReClash launches. Once armed it stays armed through a crash, a Core restart, recovery and the relaunch after an app update. It is lifted when you stop deliberately: turn the proxy off, turn TUN off, or quit ReClash normally. A reboot lifts it too, and on Windows so does signing out, since Fast Startup keeps the session across a shutdown.
 
 A stop through a URL scheme link or the diagnostics stop action does not lift it; use **Unblock**.
 

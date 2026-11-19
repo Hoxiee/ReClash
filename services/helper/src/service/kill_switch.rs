@@ -382,32 +382,35 @@ impl KillSwitchService {
         json_response(&serde_json::json!({"armed": armed}), StatusCode::OK)
     }
 
+    /// Drops the standard arm flag and lifts its block; true when an always block stays.
+    pub(super) fn disarm_standard(&self) -> Result<bool, DisarmError> {
+        let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
+        let config = self.config().map_err(DisarmError::State)?;
+        if config.is_some_and(|config| config.mode == Mode::Always) {
+            return Ok(true);
+        }
+        self.remove_files(&[ARM_FILE]).map_err(|error| {
+            DisarmError::State(format!(
+                "kill switch arm flag could not be removed: {error}"
+            ))
+        })?;
+        match self.layer.lift() {
+            Ok(()) | Err(HostError::Missing) => Ok(false),
+            Err(error) => Err(DisarmError::Host(error)),
+        }
+    }
+
     fn disarm(&self) -> warp::reply::Response {
         if !SUPPORTED {
             return unsupported();
         }
-        let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
-        let config = match self.config() {
-            Ok(config) => config,
-            Err(message) => {
-                return error_response("internalError", message, StatusCode::INTERNAL_SERVER_ERROR)
+        match self.disarm_standard() {
+            Ok(armed) => json_response(&serde_json::json!({"armed": armed}), StatusCode::OK),
+            Err(DisarmError::State(message)) => {
+                error_response("internalError", message, StatusCode::INTERNAL_SERVER_ERROR)
             }
-        };
-        if config.is_some_and(|config| config.mode == Mode::Always) {
-            return json_response(&serde_json::json!({"armed": true}), StatusCode::OK);
+            Err(DisarmError::Host(error)) => host_response(error),
         }
-        if let Err(error) = self.remove_files(&[ARM_FILE]) {
-            return error_response(
-                "internalError",
-                format!("kill switch arm flag could not be removed: {error}"),
-                StatusCode::INTERNAL_SERVER_ERROR,
-            );
-        }
-        match self.layer.lift() {
-            Ok(()) | Err(HostError::Missing) => {}
-            Err(error) => return host_response(error),
-        }
-        json_response(&serde_json::json!({"armed": false}), StatusCode::OK)
     }
 
     fn get(&self) -> warp::reply::Response {
@@ -468,6 +471,20 @@ async fn blocking(
                 StatusCode::INTERNAL_SERVER_ERROR,
             )
         }))
+}
+
+pub(super) enum DisarmError {
+    State(String),
+    Host(HostError),
+}
+
+impl std::fmt::Display for DisarmError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::State(message) => f.write_str(message),
+            Self::Host(error) => write!(f, "{error}"),
+        }
+    }
 }
 
 pub(super) fn routes(

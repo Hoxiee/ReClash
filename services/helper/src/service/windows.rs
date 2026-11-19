@@ -13,7 +13,10 @@ use tokio::sync::watch;
 
 use windows_service::{
     define_windows_service,
-    service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus},
+    service::{
+        ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus,
+        SessionChangeReason,
+    },
     service_control_handler::{self, ServiceControlHandlerResult},
     service_dispatcher,
 };
@@ -57,6 +60,7 @@ fn run_windows_service() -> Result<()> {
         .cloned()
         .context("the helper service has no owner")?;
     let (shutdown_tx, mut shutdown_rx) = watch::channel(false);
+    let (logoff_tx, logoff_rx) = tokio::sync::mpsc::unbounded_channel();
     let status_handle = service_control_handler::register(
         SERVICE_NAME,
         move |event| -> ServiceControlHandlerResult {
@@ -64,6 +68,12 @@ fn run_windows_service() -> Result<()> {
                 ServiceControl::Interrogate => ServiceControlHandlerResult::NoError,
                 ServiceControl::Stop => {
                     let _ = shutdown_tx.send(true);
+                    ServiceControlHandlerResult::NoError
+                }
+                ServiceControl::SessionChange(change)
+                    if change.reason == SessionChangeReason::SessionLogoff =>
+                {
+                    let _ = logoff_tx.send(());
                     ServiceControlHandlerResult::NoError
                 }
                 _ => ServiceControlHandlerResult::NotImplemented,
@@ -116,13 +126,14 @@ fn run_windows_service() -> Result<()> {
             running_status_handle
                 .set_service_status(service_status(
                     ServiceState::Running,
-                    ServiceControlAccept::STOP,
+                    ServiceControlAccept::STOP | ServiceControlAccept::SESSION_CHANGE,
                     0,
                     Duration::default(),
                     0,
                 ))
                 .context("report helper service running")
         },
+        logoff_rx,
     ));
     let exit_code = u32::from(service_result.is_err());
     let status_result = status_handle.set_service_status(service_status(
