@@ -241,5 +241,13 @@
   "simpleEggHold": "Maintenez…",
   "simpleEggAlmost": "Presque là",
   "simpleEggFire": "Feu !",
-  "simpleEggGreeting": "{provider} vous dit bonjour"
+  "simpleEggGreeting": "{provider} vous dit bonjour",
+  "usageSheetTitle": "Consommation de données",
+  "usagePeriodToday": "Aujourd'hui",
+  "usagePeriodWeek": "7 jours",
+  "usagePeriodMonth": "Mois",
+  "usagePeriodAll": "Tout",
+  "usageUsed": "Utilisé",
+  "usageLeft": "Restant",
+  "usagePlanEnds": "Fin du forfait"
 }

@@ -241,5 +241,13 @@
   "simpleEggHold": "Держите…",
   "simpleEggAlmost": "Ещё секунду",
   "simpleEggFire": "Огонь!",
-  "simpleEggGreeting": "{provider} передаёт привет"
+  "simpleEggGreeting": "{provider} передаёт привет",
+  "usageSheetTitle": "Расход трафика",
+  "usagePeriodToday": "Сегодня",
+  "usagePeriodWeek": "7 дней",
+  "usagePeriodMonth": "Месяц",
+  "usagePeriodAll": "Всё",
+  "usageUsed": "Израсходовано",
+  "usageLeft": "Осталось",
+  "usagePlanEnds": "Тариф до"
 }

@@ -241,5 +241,13 @@
   "simpleEggHold": "Ұстап тұрыңыз…",
   "simpleEggAlmost": "Азырақ қалды",
   "simpleEggFire": "Жалын!",
-  "simpleEggGreeting": "{provider} сәлем айтады"
+  "simpleEggGreeting": "{provider} сәлем айтады",
+  "usageSheetTitle": "Трафик шығыны",
+  "usagePeriodToday": "Бүгін",
+  "usagePeriodWeek": "7 күн",
+  "usagePeriodMonth": "Ай",
+  "usagePeriodAll": "Барлығы",
+  "usageUsed": "Жұмсалды",
+  "usageLeft": "Қалды",
+  "usagePlanEnds": "Тариф аяқталады"
 }

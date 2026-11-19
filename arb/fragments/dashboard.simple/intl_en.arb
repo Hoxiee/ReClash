@@ -451,5 +451,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "usageSheetTitle": "Data usage",
+  "usagePeriodToday": "Today",
+  "usagePeriodWeek": "7 days",
+  "usagePeriodMonth": "Month",
+  "usagePeriodAll": "All",
+  "usageUsed": "Used",
+  "usageLeft": "Left",
+  "usagePlanEnds": "Plan ends"
 }

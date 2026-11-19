@@ -241,5 +241,13 @@
   "simpleEggHold": "Mantén…",
   "simpleEggAlmost": "Casi listo",
   "simpleEggFire": "¡Fuego!",
-  "simpleEggGreeting": "{provider} te saluda"
+  "simpleEggGreeting": "{provider} te saluda",
+  "usageSheetTitle": "Uso de datos",
+  "usagePeriodToday": "Hoy",
+  "usagePeriodWeek": "7 días",
+  "usagePeriodMonth": "Mes",
+  "usagePeriodAll": "Todo",
+  "usageUsed": "Usado",
+  "usageLeft": "Restante",
+  "usagePlanEnds": "El plan termina"
 }

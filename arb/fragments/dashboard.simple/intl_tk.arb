@@ -241,5 +241,13 @@
   "simpleEggHold": "Basyp duruň…",
   "simpleEggAlmost": "Az galdy",
   "simpleEggFire": "Ot!",
-  "simpleEggGreeting": "{provider} salam aýdýar"
+  "simpleEggGreeting": "{provider} salam aýdýar",
+  "usageSheetTitle": "Trafik sarpy",
+  "usagePeriodToday": "Şu gün",
+  "usagePeriodWeek": "7 gün",
+  "usagePeriodMonth": "Aý",
+  "usagePeriodAll": "Hemmesi",
+  "usageUsed": "Sarp edildi",
+  "usageLeft": "Galdy",
+  "usagePlanEnds": "Tarif gutarýar"
 }

@@ -241,5 +241,13 @@
   "simpleEggHold": "계속 누르세요…",
   "simpleEggAlmost": "거의 다 됐어요",
   "simpleEggFire": "불꽃!",
-  "simpleEggGreeting": "{provider}의 인사입니다"
+  "simpleEggGreeting": "{provider}의 인사입니다",
+  "usageSheetTitle": "데이터 사용량",
+  "usagePeriodToday": "오늘",
+  "usagePeriodWeek": "7일",
+  "usagePeriodMonth": "이번 달",
+  "usagePeriodAll": "전체",
+  "usageUsed": "사용됨",
+  "usageLeft": "남음",
+  "usagePlanEnds": "요금제 종료"
 }

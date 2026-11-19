@@ -241,5 +241,13 @@
   "simpleEggHold": "Bosib turing…",
   "simpleEggAlmost": "Oz qoldi",
   "simpleEggFire": "Olov!",
-  "simpleEggGreeting": "{provider} salom yo‘llaydi"
+  "simpleEggGreeting": "{provider} salom yo‘llaydi",
+  "usageSheetTitle": "Trafik sarfi",
+  "usagePeriodToday": "Bugun",
+  "usagePeriodWeek": "7 kun",
+  "usagePeriodMonth": "Oy",
+  "usagePeriodAll": "Hammasi",
+  "usageUsed": "Sarflandi",
+  "usageLeft": "Qoldi",
+  "usagePlanEnds": "Tarif tugaydi"
 }

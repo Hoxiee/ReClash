@@ -13,7 +13,7 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
-import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
+import 'package:reclash/views/dashboard/simple/traffic_sheet.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 const _barWidth = 12.0;
@@ -37,15 +37,12 @@ class SimpleTrafficCard extends ConsumerWidget {
         ? const <UsageDay>[]
         : ref.watch(trafficUsageProvider(profile.id)).value ??
               const <UsageDay>[];
-    final topUp = switch (metadata.text('provider.buyTrafficUrl')) {
-      final value? => safeSubscriptionLink(value),
-      null => null,
-    };
+    final topUp = trafficTopUpLink(metadata);
     return DashboardCard(
       semanticLabel: appLocalizations.simpleForecastTitle,
       onTap: profile == null || info == null
           ? null
-          : () => showProfileDetailSheet(context),
+          : () => unawaited(showTrafficUsageSheet(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
@@ -77,6 +74,69 @@ class SimpleTrafficCard extends ConsumerWidget {
   }
 }
 
+Uri? trafficTopUpLink(SubscriptionMetadata metadata) =>
+    switch (metadata.text('provider.buyTrafficUrl')) {
+      final value? => safeSubscriptionLink(value),
+      null => null,
+    };
+
+typedef TrafficForecastReading = ({
+  String figure,
+  List<String> lines,
+  bool alarming,
+});
+
+TrafficForecastReading readTrafficForecast(
+  BuildContext context, {
+  required SubscriptionInfo info,
+  required SubscriptionMetadata metadata,
+  required List<UsageDay> days,
+  bool pace = true,
+}) {
+  final appLocalizations = context.appLocalizations;
+  final now = DateTime.now();
+  final unlimited = metadata.unlimited || info.total <= 0;
+  final forecast = unlimited
+      ? TrafficForecast(
+          TrafficForecastKind.plenty,
+          perDay: usagePace(days, usageDayOf(now)),
+        )
+      : forecastTraffic(
+          days: days,
+          used: info.upload + info.download,
+          total: info.total,
+          expiry: metadata.perpetual ? null : info.expireDate,
+          now: now,
+        );
+  final perDay = forecast.perDay;
+  final runsOut = forecast.runsOut;
+  final figure = switch (forecast.kind) {
+    _ when unlimited => appLocalizations.simpleForecastUnlimited,
+    TrafficForecastKind.gathering => appLocalizations.simpleForecastGathering,
+    TrafficForecastKind.depleted => appLocalizations.simpleForecastDepleted,
+    TrafficForecastKind.plenty => appLocalizations.simpleForecastPlenty,
+    TrafficForecastKind.lasts => appLocalizations.simpleForecastLasts,
+    TrafficForecastKind.until ||
+    TrafficForecastKind.early => appLocalizations.simpleForecastUntil(
+      MaterialLocalizations.of(context).formatShortMonthDay(runsOut!),
+    ),
+  };
+  return (
+    figure: figure,
+    lines: [
+      if (forecast.kind == TrafficForecastKind.gathering)
+        appLocalizations.simpleForecastGatheringHint,
+      if (pace && perDay != null && perDay > 0)
+        appLocalizations.simpleForecastPace(
+          dashboardTraffic(perDay).replaceAll(' ', ' '),
+        ),
+      if (forecast.kind == TrafficForecastKind.early)
+        appLocalizations.simpleForecastEarly(forecast.daysEarly),
+    ],
+    alarming: forecast.kind == TrafficForecastKind.depleted,
+  );
+}
+
 class _Forecast extends StatelessWidget {
   const _Forecast({
     required this.info,
@@ -90,46 +150,13 @@ class _Forecast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
     final colors = DashboardColors.of(context);
-    final now = DateTime.now();
-    final unlimited = metadata.unlimited || info.total <= 0;
-    final forecast = unlimited
-        ? TrafficForecast(
-            TrafficForecastKind.plenty,
-            perDay: usagePace(days, usageDayOf(now)),
-          )
-        : forecastTraffic(
-            days: days,
-            used: info.upload + info.download,
-            total: info.total,
-            expiry: metadata.perpetual ? null : info.expireDate,
-            now: now,
-          );
-    final perDay = forecast.perDay;
-    final runsOut = forecast.runsOut;
-    final figure = switch (forecast.kind) {
-      _ when unlimited => appLocalizations.simpleForecastUnlimited,
-      TrafficForecastKind.gathering => appLocalizations.simpleForecastGathering,
-      TrafficForecastKind.depleted => appLocalizations.simpleForecastDepleted,
-      TrafficForecastKind.plenty => appLocalizations.simpleForecastPlenty,
-      TrafficForecastKind.lasts => appLocalizations.simpleForecastLasts,
-      TrafficForecastKind.until ||
-      TrafficForecastKind.early => appLocalizations.simpleForecastUntil(
-        MaterialLocalizations.of(context).formatShortMonthDay(runsOut!),
-      ),
-    };
-    final lines = [
-      if (forecast.kind == TrafficForecastKind.gathering)
-        appLocalizations.simpleForecastGatheringHint,
-      if (perDay != null && perDay > 0)
-        appLocalizations.simpleForecastPace(
-          dashboardTraffic(perDay).replaceAll(' ', ' '),
-        ),
-      if (forecast.kind == TrafficForecastKind.early)
-        appLocalizations.simpleForecastEarly(forecast.daysEarly),
-    ];
-    final alarming = forecast.kind == TrafficForecastKind.depleted;
+    final (:figure, :lines, :alarming) = readTrafficForecast(
+      context,
+      info: info,
+      metadata: metadata,
+      days: days,
+    );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 16,
@@ -154,7 +181,7 @@ class _Forecast extends StatelessWidget {
             ],
           ),
         ),
-        _WeekBars(days: days, today: usageDayOf(now)),
+        _WeekBars(days: days, today: usageDayOf(DateTime.now())),
       ],
     );
   }

@@ -241,5 +241,13 @@
   "simpleEggHold": "继续按住…",
   "simpleEggAlmost": "马上就好",
   "simpleEggFire": "火力全开！",
-  "simpleEggGreeting": "{provider} 向你问好"
+  "simpleEggGreeting": "{provider} 向你问好",
+  "usageSheetTitle": "流量使用",
+  "usagePeriodToday": "今日",
+  "usagePeriodWeek": "近 7 天",
+  "usagePeriodMonth": "本月",
+  "usagePeriodAll": "全部",
+  "usageUsed": "已用",
+  "usageLeft": "剩余",
+  "usagePlanEnds": "套餐到期"
 }

@@ -241,5 +241,13 @@
   "simpleEggHold": "そのまま…",
   "simpleEggAlmost": "もう少し",
   "simpleEggFire": "ファイヤー！",
-  "simpleEggGreeting": "{provider} からごあいさつ"
+  "simpleEggGreeting": "{provider} からごあいさつ",
+  "usageSheetTitle": "データ使用量",
+  "usagePeriodToday": "今日",
+  "usagePeriodWeek": "7日間",
+  "usagePeriodMonth": "今月",
+  "usagePeriodAll": "すべて",
+  "usageUsed": "使用済み",
+  "usageLeft": "残り",
+  "usagePlanEnds": "プラン終了"
 }
