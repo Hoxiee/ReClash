@@ -400,10 +400,10 @@ end;
 // windows/runner/Runner.rc.
 procedure RemoveUserData;
 begin
-  DelTree(ExpandConstant('{userappdata}\com.follow\clash'), True, True, True);
-  DelTree(ExpandConstant('{localappdata}\com.follow\clash'), True, True, True);
-  RemoveDir(ExpandConstant('{userappdata}\com.follow'));
-  RemoveDir(ExpandConstant('{localappdata}\com.follow'));
+  DelTree(ExpandConstant('{userappdata}\Hoxiee\ReClash'), True, True, True);
+  DelTree(ExpandConstant('{localappdata}\Hoxiee\ReClash'), True, True, True);
+  RemoveDir(ExpandConstant('{userappdata}\Hoxiee'));
+  RemoveDir(ExpandConstant('{localappdata}\Hoxiee'));
 end;
 
 procedure RemoveReClashServiceElevated;
