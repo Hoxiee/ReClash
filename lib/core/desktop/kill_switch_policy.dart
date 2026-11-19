@@ -12,9 +12,8 @@ typedef KillSwitchHostSnapshot = ({
 });
 
 /// Keeps the Helper's kill switch configuration in step with the setting.
-/// The Helper arms on every Core start it performs; a TUN that comes up
-/// without one, such as TUN turned back on beside a running Core, is armed
-/// here. Each tick re-reads the Helper, so one reinstalled or restarted
+/// A standard block is armed here when the TUN comes up during a run; the
+/// Helper's Core start does not arm it. Each tick re-reads the Helper, so one reinstalled or restarted
 /// without its state is configured again.
 final class KillSwitchHostPolicy {
   final Future<HelperReadiness> Function() _readiness;

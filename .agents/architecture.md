@@ -1991,7 +1991,7 @@ element lists elided and capped at 64 KiB.
 
 The desktop kill switch is a second, independent table, `reclash_killswitch_<uid>`, kept by `kill_switch.rs`. `PUT
 /kill-switch` persists `kill-switch.json` (mode, TUN, `allowLan`) next to the site lock state. `always` is armed
-whenever configured; `standard` is armed by every successful `/start` and records the boot in
+whenever configured; `standard` is armed when the TUN comes up during a run (the app asks, a Core `/start` alone does not) and records the boot in
 `kill-switch-armed.json`, so it survives Core exits and Helper restarts but not a reboot, and only
 `/kill-switch/disarm` or `DELETE` ends it. While armed, output and forward reject everything but `lo`, the TUN, the
 Helper's own cgroup (the Core's upstream connections, output only), DHCP, ICMPv6 ND, link-local and multicast, and the

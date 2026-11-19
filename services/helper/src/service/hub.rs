@@ -511,11 +511,7 @@ fn launch_failure_response(error: &Error) -> warp::reply::Response {
     )
 }
 
-fn start(
-    start_params: StartParams,
-    caller: Caller,
-    kill_switch: &KillSwitchService,
-) -> warp::reply::Response {
+fn start(start_params: StartParams, caller: Caller) -> warp::reply::Response {
     if !is_allowed_core_address(&start_params.address) {
         return error_response(
             "invalidRequest",
@@ -538,13 +534,7 @@ fn start(
         Ok(arguments) => arguments,
         Err((code, message, status)) => return error_response(code, message, status),
     };
-    let response = launch(start_params.session_id, arguments);
-    if response.status().is_success() {
-        if let Err(error) = kill_switch.arm() {
-            log_message(format!("Helper could not arm the kill switch: {error}"));
-        }
-    }
-    response
+    launch(start_params.session_id, arguments)
 }
 
 type StartRefusal = (&'static str, &'static str, StatusCode);
@@ -810,16 +800,14 @@ async fn start_request(
     kill_switch: Arc<KillSwitchService>,
     start_params: StartParams,
 ) -> Result<warp::reply::Response, Infallible> {
-    let armed = kill_switch.clone();
-    let response =
-        match tokio::task::spawn_blocking(move || start(start_params, caller, &armed)).await {
-            Ok(response) => response,
-            Err(error) => error_response(
-                "internalError",
-                format!("Core start task failed: {error}"),
-                StatusCode::INTERNAL_SERVER_ERROR,
-            ),
-        };
+    let response = match tokio::task::spawn_blocking(move || start(start_params, caller)).await {
+        Ok(response) => response,
+        Err(error) => error_response(
+            "internalError",
+            format!("Core start task failed: {error}"),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ),
+    };
     #[cfg(windows)]
     if response.status().is_success() {
         tokio::spawn(follow_tun(kill_switch));
@@ -830,7 +818,7 @@ async fn start_request(
 }
 
 /// WFP permits the TUN by its LUID, which exists only once the Core has opened the
-/// adapter, so the block armed at start re-syncs quickly instead of on the next heal.
+/// adapter, so a block that is already armed re-syncs quickly instead of on the next heal.
 #[cfg(windows)]
 async fn follow_tun(kill_switch: Arc<KillSwitchService>) {
     for _ in 0..40 {

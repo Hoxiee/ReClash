@@ -23,7 +23,7 @@ const SUPPORTED: bool = cfg!(any(
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub(super) enum Mode {
-    /// Armed by every Core start until disarmed.
+    /// Armed when the TUN comes up during a run, until disarmed.
     Standard,
     /// Armed whenever configured, from boot.
     Always,
@@ -121,9 +121,16 @@ impl KillSwitchLayer for NftKillSwitch {
     }
 
     fn apply(&self, config: &KillSwitchConfig) -> Result<(), HostError> {
+        let cgroup = self.cgroup.as_deref().ok_or_else(|| {
+            HostError::Failed(
+                "nftFailed",
+                "the Helper's cgroup is unknown, so the Core could not be exempted from the block"
+                    .to_string(),
+            )
+        })?;
         Ok(self
             .runner
-            .apply(&ruleset(&self.table, config, self.cgroup.as_deref()))?)
+            .apply(&ruleset(&self.table, config, Some(cgroup)))?)
     }
 
     fn listing(&self) -> Result<Option<String>, HostError> {
@@ -246,7 +253,7 @@ impl KillSwitchService {
         self.layer.listing().map(|listing| listing.is_some())
     }
 
-    /// Arms a standard kill switch after a Core start and applies any armed block.
+    /// Arms a standard kill switch and applies any armed block.
     pub(super) fn arm(&self) -> Result<(), String> {
         let _guard = self.guard.lock().unwrap_or_else(|e| e.into_inner());
         let Some(config) = self.config()? else {
@@ -885,6 +892,16 @@ mod tests {
         assert_eq!(status, StatusCode::OK);
         assert_eq!(response["problem"], "nftMissing");
         assert_eq!(response["active"], false);
+    }
+
+    #[tokio::test]
+    async fn a_block_is_never_installed_without_the_core_exemption() {
+        let fake = Arc::new(FakeNft::default());
+        let layer = NftKillSwitch::new(1000, Box::new(SharedNft(fake.clone())), None);
+        let error = layer.apply(&config(Mode::Always, false)).unwrap_err();
+        assert!(matches!(error, HostError::Failed("nftFailed", _)));
+        assert!(fake.calls().is_empty());
+        assert!(layer.lift().is_ok());
     }
 
     #[tokio::test]

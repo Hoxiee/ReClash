@@ -22,7 +22,7 @@ The block is strict. While the kill switch is armed, all traffic outside ReClash
 
 ## When it is armed
 
-In the standard mode the kill switch arms on every Core start and when TUN is turned on. It stays armed through a crash, a Core restart, recovery and the relaunch after an app update. It is lifted when you stop deliberately: turn the proxy off, turn TUN off, or quit ReClash normally. A reboot lifts it too.
+In the standard mode the kill switch arms when TUN comes up during a run, not when the Core starts or ReClash launches. Once armed it stays armed through a crash, a Core restart, recovery and the relaunch after an app update. It is lifted when you stop deliberately: turn the proxy off, turn TUN off, or quit ReClash normally. A reboot lifts it too.
 
 A stop through a URL scheme link or the diagnostics stop action does not lift it; use **Unblock**.
 
@@ -39,6 +39,8 @@ The Helper keeps the rules in its own nftables table `inet reclash_killswitch_<u
 ```sh
 sudo nft list table inet reclash_killswitch_<uid>
 ```
+
+If the Helper cannot determine its own cgroup, it refuses to install the block and the status reports a firewall failure, rather than blocking the Core too.
 
 A restarted Helper restores the table before ReClash connects to it; after a reboot only the always mode blocks from boot. If something wipes the firewall, the Helper applies the table again within about 10 seconds.
 

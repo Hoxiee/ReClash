@@ -47,13 +47,20 @@ class KillSwitchHostState extends _$KillSwitchHostState {
             KillSwitchMode.standard) {
       return;
     }
-    try {
-      await disarm().timeout(const Duration(seconds: 2));
-    } catch (error) {
-      commonPrint.log(
-        'Kill switch disarm failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
+    for (var attempt = 1; ; attempt++) {
+      try {
+        await disarm().timeout(const Duration(seconds: 2));
+        return;
+      } catch (error) {
+        if (attempt < 2) {
+          continue;
+        }
+        commonPrint.log(
+          'Kill switch disarm failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+        return;
+      }
     }
   }
 
