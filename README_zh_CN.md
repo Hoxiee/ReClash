@@ -14,9 +14,13 @@
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)
 [![License](https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square)](LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ReClashApp)
 
 [网站](https://reclash.pages.dev) · [下载](#下载) · [文档](#文档) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
+
+<a href="https://t.me/ReClashApp"><img alt="Telegram 频道" src="https://img.shields.io/badge/%E9%A2%91%E9%81%93-%E7%89%88%E6%9C%AC%E4%B8%8E%E6%96%B0%E9%97%BB-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+<a href="https://t.me/+YcBp-q29GIU5ODcy"><img alt="Telegram 群组" src="https://img.shields.io/badge/%E7%BE%A4%E7%BB%84-%E6%8F%90%E9%97%AE%E4%B8%8E%E4%BA%A4%E6%B5%81-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+
+新版本会第一时间发布在频道；提问、配置和建议请到群组。
 
 </div>
 
@@ -175,7 +179,7 @@ dart setup.dart android   # 或 windows、macos、linux
 
 ## 支持
 
-给仓库点一个 Star 是支持项目最简单的方式。更新通知请关注 [Telegram 频道](https://t.me/ReClashApp)，
+给仓库点一个 Star 是支持项目最简单的方式。更新通知请关注 [Telegram 频道](https://t.me/ReClashApp)，提问与配置帮助请到 [Telegram 群组](https://t.me/+YcBp-q29GIU5ODcy)，
 Bug 与功能建议请提交到 [GitHub Issues](https://github.com/Hoxiee/ReClash/issues)。
 
 ## 致谢

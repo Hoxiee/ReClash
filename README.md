@@ -14,10 +14,14 @@ Free, open source and ad-free.
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)
 [![License](https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square)](LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ReClashApp)
 
 [Website](https://reclash.pages.dev) · [Download](#download) · [Documentation](#documentation) · [Changelog](CHANGELOG.md) ·
 [Build from source](#build-from-source)
+
+<a href="https://t.me/ReClashApp"><img alt="Telegram channel" src="https://img.shields.io/badge/Channel-releases_%26_news-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+<a href="https://t.me/+YcBp-q29GIU5ODcy"><img alt="Telegram chat" src="https://img.shields.io/badge/Chat-questions_%26_ideas-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+
+New releases land in the channel first. Questions, setups and ideas go to the chat.
 
 </div>
 
@@ -184,9 +188,9 @@ The screenshots are rendered from mock data with `tool/snapshots/render.sh`.
 
 ## Support
 
-Starring the repository is the easiest way to support the project. Announcements go to the
-[Telegram channel](https://t.me/ReClashApp); bugs and feature requests go to
-[GitHub Issues](https://github.com/Hoxiee/ReClash/issues).
+Starring the repository is the easiest way to support the project. Releases and news go to the
+[Telegram channel](https://t.me/ReClashApp), questions and setup help to the [Telegram chat](https://t.me/+YcBp-q29GIU5ODcy); bugs and
+feature requests go to [GitHub Issues](https://github.com/Hoxiee/ReClash/issues).
 
 ## Acknowledgements
 

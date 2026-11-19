@@ -14,10 +14,14 @@
 [![Release](https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square&label=release)](https://github.com/Hoxiee/ReClash/releases)
 [![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/total?style=flat-square&logo=github)](https://github.com/Hoxiee/ReClash/releases)
 [![License](https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square)](LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ReClashApp)
 
 [Сайт](https://reclash.pages.dev) · [Скачать](#скачать) · [Документация](#документация) · [Список изменений](CHANGELOG.md) ·
 [Сборка из исходников](#сборка-из-исходников)
+
+<a href="https://t.me/ReClashApp"><img alt="Telegram-канал" src="https://img.shields.io/badge/%D0%9A%D0%B0%D0%BD%D0%B0%D0%BB-%D1%80%D0%B5%D0%BB%D0%B8%D0%B7%D1%8B_%D0%B8_%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+<a href="https://t.me/+YcBp-q29GIU5ODcy"><img alt="Telegram-чат" src="https://img.shields.io/badge/%D0%A7%D0%B0%D1%82-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B_%D0%B8_%D0%B8%D0%B4%D0%B5%D0%B8-26A5E4?style=for-the-badge&logo=telegram&logoColor=white"></a>
+
+Новые версии сначала появляются в канале. Вопросы, настройки и идеи — в чате.
 
 </div>
 
@@ -186,8 +190,9 @@ dart setup.dart android   # или windows, macos, linux
 
 ## Поддержка
 
-Проще всего поддержать проект звездой репозитория. Новости — в [Telegram-канале](https://t.me/ReClashApp); ошибки и
-пожелания — в [GitHub Issues](https://github.com/Hoxiee/ReClash/issues).
+Проще всего поддержать проект звездой репозитория. Релизы и новости — в [Telegram-канале](https://t.me/ReClashApp), вопросы и помощь
+с настройкой — в [Telegram-чате](https://t.me/+YcBp-q29GIU5ODcy); ошибки и пожелания — в
+[GitHub Issues](https://github.com/Hoxiee/ReClash/issues).
 
 ## Благодарности
 
