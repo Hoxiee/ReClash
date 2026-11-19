@@ -109,6 +109,12 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     super.onWindowShouldTerminate();
   }
 
+  @override
+  Future<void> onWindowEndSession() async {
+    await ref.read(systemActionProvider.notifier).handleSessionEnd();
+    super.onWindowShouldTerminate();
+  }
+
   void _scheduleWindowGeometryCapture() {
     final revision = ++_windowGeometryRevision;
     _windowGeometryTimer?.cancel();

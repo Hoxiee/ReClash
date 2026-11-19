@@ -27,6 +27,10 @@ abstract mixin class WindowListener {
 
   void onWindowShouldTerminate() {}
 
+  /// The session is ending or the installer asked the app to quit; listeners
+  /// that do not tell the two apart get a plain terminate request.
+  void onWindowEndSession() => onWindowShouldTerminate();
+
   void onWindowActivate() {}
 
   void onWindowEvent(WindowEvent event) {}

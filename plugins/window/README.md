@@ -58,7 +58,7 @@ return `null`.
 
 `close`, `focus`, `blur`, `show`, `hide`, `maximize`, `unmaximize`,
 `minimize`, `restore`, `geometry-changed`, `enter-full-screen`,
-`leave-full-screen`, `should-terminate`, `activate`.
+`leave-full-screen`, `should-terminate`, `end-session`, `activate`.
 
 - `geometry-changed` fires once the window's position or size has settled,
   whether the user or `setBounds` changed it. Each platform coalesces the raw
@@ -75,6 +75,8 @@ return `null`.
   raises them itself from `setFullScreen`.
 - `should-terminate` (macOS) is forwarded by the application delegate from
   `applicationShouldTerminate`.
+- `end-session` (Windows) is raised by the runner on `WM_ENDSESSION` and when
+  the installer asks the running app to quit.
 - `activate` is raised by the runner when another launch, or a Dock reopen,
   asks the running instance to show its window. Nothing is shown natively.
 

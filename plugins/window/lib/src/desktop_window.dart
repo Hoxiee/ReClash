@@ -81,6 +81,8 @@ class DesktopWindow {
         listener.onWindowLeaveFullScreen();
       case WindowEvent.shouldTerminate:
         listener.onWindowShouldTerminate();
+      case WindowEvent.endSession:
+        listener.onWindowEndSession();
       case WindowEvent.activate:
         listener.onWindowActivate();
     }

@@ -62,7 +62,7 @@ void FlutterWindow::RequestTerminate() {
       &flutter::StandardMethodCodec::GetInstance());
   flutter::EncodableMap args;
   args[flutter::EncodableValue("name")] =
-      flutter::EncodableValue("should-terminate");
+      flutter::EncodableValue("end-session");
   channel.InvokeMethod("onEvent",
                        std::make_unique<flutter::EncodableValue>(args));
 }

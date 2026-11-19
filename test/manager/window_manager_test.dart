@@ -33,6 +33,11 @@ class _RecordingSystemAction extends SystemAction {
   Future<void> handleExit([bool needSave = true]) async {
     calls.add('exit');
   }
+
+  @override
+  Future<void> handleSessionEnd() async {
+    calls.add('session-end');
+  }
 }
 
 typedef _BlurRequest = ({bool enabled, Brightness brightness, Color tint});
@@ -195,6 +200,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(_RecordingSystemAction.calls, ['exit']);
+  });
+
+  testWidgets('a session end is delegated as an unattended exit', (
+    tester,
+  ) async {
+    final listener = await pumpWindowManager(tester);
+
+    listener.onWindowEndSession();
+    await tester.pumpAndSettle();
+
+    expect(_RecordingSystemAction.calls, ['session-end']);
   });
 
   testWidgets('a terminate signal exits like a terminate request', (

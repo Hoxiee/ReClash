@@ -170,7 +170,7 @@ void main() {
         'windows/runner/flutter_window.cpp',
       ).readAsStringSync();
       expect(runner, contains('ReClash.InstalledProductMaintenance'));
-      expect(runner, contains('"should-terminate"'));
+      expect(runner, contains('"end-session"'));
       expect(runner, isNot(contains('TerminateProcess')));
       expect(installer, contains("CustomMessage('CloseInstalledApp')"));
       expect(

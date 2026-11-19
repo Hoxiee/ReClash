@@ -7,6 +7,7 @@ class SystemAction extends _$SystemAction {
   SystemExitCoordinator? _exitCoordinator;
   bool _resetPrepared = false;
   bool _updateExit = false;
+  bool _unattendedExit = false;
 
   @override
   void build() {}
@@ -52,6 +53,13 @@ class SystemAction extends _$SystemAction {
     return handleExit();
   }
 
+  /// Quits for a Windows session end or an installer's quit request, where no
+  /// installer may be launched.
+  Future<void> handleSessionEnd() {
+    _unattendedExit = true;
+    return handleExit();
+  }
+
   Future<void> handleExit([bool needSave = true]) {
     ref.read(webDashboardActionProvider.notifier).cancel();
     ref.read(webDashboardAccessProvider.notifier).end();
@@ -92,7 +100,7 @@ class SystemAction extends _$SystemAction {
 
   @protected
   Future<void> cleanupExitResources(bool needSave) async {
-    if (needSave) {
+    if (needSave && !_unattendedExit) {
       await ref.read(appUpdateActionProvider.notifier).applyOnExit();
     }
     final saveOperation = needSave ? _savePreferencesSafely() : null;

@@ -114,8 +114,10 @@ class _DisarmRecordingHost extends KillSwitchHostState {
 }
 
 class _NoopAppUpdateAction extends AppUpdateAction {
+  static int applyOnExits = 0;
+
   @override
-  Future<void> applyOnExit() async {}
+  Future<void> applyOnExit() async => applyOnExits++;
 }
 
 class _ExitSystemAction extends SystemAction {
@@ -622,6 +624,7 @@ void main() {
     tearDownAll(() => appDir.delete(recursive: true));
 
     setUp(() {
+      _NoopAppUpdateAction.applyOnExits = 0;
       host = _DisarmRecordingHost();
       container = ProviderContainer(
         overrides: [
@@ -640,6 +643,18 @@ void main() {
     test('a normal quit disarms once', () async {
       await container.read(systemActionProvider.notifier).handleExit();
 
+      expect(host.disarmOnUserStops, 1);
+    });
+
+    test('only a normal quit applies a ready update', () async {
+      await container.read(systemActionProvider.notifier).handleExit();
+      expect(_NoopAppUpdateAction.applyOnExits, 1);
+    });
+
+    test('a session end applies no update but still disarms', () async {
+      await container.read(systemActionProvider.notifier).handleSessionEnd();
+
+      expect(_NoopAppUpdateAction.applyOnExits, 0);
       expect(host.disarmOnUserStops, 1);
     });
 
