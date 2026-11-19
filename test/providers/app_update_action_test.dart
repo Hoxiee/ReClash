@@ -562,6 +562,31 @@ void main() {
     },
   );
 
+  test('the build default channel is stored as unset', () async {
+    final buildDefault = defaultUpdateChannel(isPreBuild: globalState.isPre);
+    final other = buildDefault == UpdateChannel.pre
+        ? UpdateChannel.release
+        : UpdateChannel.pre;
+
+    await action.savePreferences(
+      check: true,
+      preload: false,
+      install: false,
+      channel: other,
+    );
+    expect(container.read(appSettingProvider).updateChannel, other);
+    expect(runtime.savedConfig!.appSettingProps.updateChannel, other);
+
+    await action.savePreferences(
+      check: true,
+      preload: false,
+      install: false,
+      channel: buildDefault,
+    );
+    expect(container.read(appSettingProvider).updateChannel, isNull);
+    expect(runtime.savedConfig!.appSettingProps.updateChannel, isNull);
+  });
+
   test(
     'automatic policy starts only after the consent save has finished',
     () async {

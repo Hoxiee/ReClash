@@ -292,6 +292,10 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     required UpdateChannel channel,
     bool? desktopAuto,
   }) async {
+    final stored =
+        channel == defaultUpdateChannel(isPreBuild: globalState.isPre)
+        ? null
+        : channel;
     final settings = ref
         .read(appSettingProvider)
         .copyWith(
@@ -300,7 +304,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           autoInstallUpdate: install,
           desktopAutoUpdate:
               desktopAuto ?? ref.read(appSettingProvider).desktopAutoUpdate,
-          updateChannel: channel,
+          updateChannel: stored,
         );
     final saved = await _runtime.saveConfig(
       ref.read(configProvider).copyWith(appSettingProps: settings),
@@ -314,7 +318,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
               autoDownloadUpdate: preload,
               autoInstallUpdate: install,
               desktopAutoUpdate: desktopAuto ?? value.desktopAutoUpdate,
-              updateChannel: channel,
+              updateChannel: stored,
             ),
           );
     }
