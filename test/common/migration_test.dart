@@ -392,6 +392,24 @@ void main() {
         expect((await upgrade(5)).first.preset, isEmpty);
       });
 
+      test('applies the steps after a marker to a restored config', () {
+        final config = Config.realFromJson(
+          _createConfigMap(),
+        ).copyWith(themeProps: defaultThemeProps.copyWith(sidebarBlur: true));
+
+        expect(
+          Migration.applyUpgrades(config, from: 0).themeProps.sidebarBlur,
+          isFalse,
+        );
+        expect(
+          Migration.applyUpgrades(
+            config,
+            from: Migration.upgradeVersion,
+          ).themeProps.sidebarBlur,
+          isTrue,
+        );
+      });
+
       test('a new install only records it', () async {
         final store = _FakeMigrationStore(
           configMap: null,

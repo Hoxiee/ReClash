@@ -116,6 +116,16 @@ class Migration {
     return _upgrade(config, installed: configMap != null, from: upgrade);
   }
 
+  /// Runs the steps after [from] over a config that came from elsewhere, such
+  /// as a backup; a [from] of 0 runs them all.
+  static Config applyUpgrades(Config config, {required int from}) {
+    var upgraded = config;
+    for (var version = from + 1; version <= upgradeVersion; version++) {
+      upgraded = _upgrades[version]!(upgraded);
+    }
+    return upgraded;
+  }
+
   Future<Config> _upgrade(
     Config config, {
     required bool installed,
@@ -124,12 +134,7 @@ class Migration {
     if (from >= upgradeVersion) {
       return config;
     }
-    var upgraded = config;
-    if (installed) {
-      for (var version = from + 1; version <= upgradeVersion; version++) {
-        upgraded = _upgrades[version]!(upgraded);
-      }
-    }
+    final upgraded = installed ? applyUpgrades(config, from: from) : config;
     if (upgraded != config && !await _store.saveConfig(upgraded)) {
       return config;
     }

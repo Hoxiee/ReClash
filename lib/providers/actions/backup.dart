@@ -71,6 +71,7 @@ class BackupAction extends _$BackupAction {
     ).wait;
     final configMap = ref.read(configProvider).toJson();
     configMap['version'] = await preferences.getVersion();
+    configMap['upgradeVersion'] = await preferences.getUpgradeVersion();
     final archivePath = join(workDir, 'backup.zip');
     await backupTask((
       archivePath: archivePath,
@@ -96,7 +97,7 @@ class BackupAction extends _$BackupAction {
     final configMap = data.configMap;
     final config = option == RestoreOption.onlyProfiles || configMap == null
         ? null
-        : Config.fromJson(configMap);
+        : upgradedBackupConfig(configMap);
     final isOverride =
         ref.read(appSettingProvider).restoreStrategy ==
         RestoreStrategy.override;

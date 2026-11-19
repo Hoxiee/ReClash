@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/migration.dart';
 import 'package:archive/archive.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
@@ -478,6 +479,48 @@ void main() {
             'proxyGroups belongs in the guard that decides whether the batch '
             'runs, not only in the batch body',
       );
+    });
+  });
+
+  group('applyRestore upgrades the restored settings', () {
+    Future<ThemeProps> restoreWith(int? upgradeVersion) async {
+      final configMap = configMapOf(buildContainer());
+      (configMap['themeProps']! as Map<String, Object?>)['sidebarBlur'] = true;
+      if (upgradeVersion != null) configMap['upgradeVersion'] = upgradeVersion;
+      final target = buildContainer();
+      await actionOf(
+        target,
+      ).applyRestore(MigrationData(configMap: configMap), RestoreOption.all);
+      return target.read(themeSettingProvider);
+    }
+
+    test('runs the steps a backup without a marker has not seen', () async {
+      expect((await restoreWith(null)).sidebarBlur, isFalse);
+    });
+
+    test('runs only the steps after the marker the backup carries', () async {
+      expect((await restoreWith(3)).sidebarBlur, isFalse);
+      expect((await restoreWith(Migration.upgradeVersion)).sidebarBlur, isTrue);
+    });
+
+    test('a new backup carries the current marker', () async {
+      await mockPreferences({
+        'version': 1,
+        'upgradeVersion': Migration.upgradeVersion,
+      });
+      final container = buildContainer();
+      late Map<String, Object?> configMap;
+      final home = Directory.systemTemp.createTempSync('reclash-marker-');
+      addTearDown(() => home.deleteSync(recursive: true));
+      await actionOf(container).backup((path) async {
+        final archive = readBackupArchive(
+          archivePath: path,
+          stagingDirPath: join(home.path, 'staging'),
+        );
+        configMap = (await archive).configMap!;
+        return true;
+      });
+      expect(configMap['upgradeVersion'], Migration.upgradeVersion);
     });
   });
 

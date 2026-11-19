@@ -77,6 +77,16 @@ abstract final class BackupEntries {
   }
 }
 
+/// A backup carries the `upgradeVersion` of the app that made it; one without
+/// the marker predates every one-off upgrade step.
+Config upgradedBackupConfig(Map<String, Object?> configMap) {
+  final carried = configMap['upgradeVersion'];
+  return Migration.applyUpgrades(
+    Config.fromJson(configMap),
+    from: carried is int ? carried : 0,
+  );
+}
+
 typedef BackupArchiveRequest = ({
   String archivePath,
   Map<String, Object?> configMap,
