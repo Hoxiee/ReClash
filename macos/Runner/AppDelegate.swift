@@ -10,8 +10,11 @@ class AppDelegate: FlutterAppDelegate {
     }
     
     override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        WindowPlugin.instance?.handleShouldTerminate()
-        return .terminateCancel
+        guard let plugin = WindowPlugin.instance else { return .terminateNow }
+        plugin.handleShouldTerminate()
+        // Cancel would veto a logout or shutdown; Dart's exit cleanup ends the
+        // process itself, which completes the pending termination.
+        return .terminateLater
     }
 
     override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
