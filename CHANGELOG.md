@@ -2,6 +2,52 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.11
+
+Site lock pins sites to exits, and the auto routing editor is reworked.
+
+### New
+
+- **Site lock**: pin sites to the exit servers you choose, picked from a searchable list. A built-in kill switch covers
+  just those sites: they stay blocked outside the tunnel, even after the core stops on Linux or across reboots on
+  Windows. On Android it closes the VPN bypass gaps while a lock is on. Domain entries also catch browsers that use
+  their own DNS, and the Claude preset covers Anthropic telemetry and IP ranges.
+- **Seasonal backgrounds**: seasonal effects behind the app, on by default and frozen with reduced motion.
+- **Provider favorites**: a provider can mark nodes as favorites and describe them. Favorites sit in their own band
+  above chains.
+- **Provider chains**: a provider can offer ready-made proxy chains. They are read-only, and you can switch them off or
+  copy them.
+- **Provider update mirrors**: providers can serve signed update mirrors, and checks against GitHub are faster and
+  lighter.
+- **Provider settings**: providers can switch seasonal backgrounds or add dated ones, and subscription header names
+  other clients use are accepted.
+
+### Improved
+
+- **Auto routing editor**: reworked into one page under Tools with plainer labels. Each group is edited in one sheet
+  that opens on the current server, with advanced controls behind a switch.
+- **Updates**: the simple dashboard offers an update from a header button on phones and a card on wide screens, an
+  Android update installs from a single tap, and the update sheet can be dragged taller.
+- **Application settings**: connection recovery and logs are separate groups.
+- **Histories**: speed test, connection path and smart group histories open in header sheets.
+
+### Fixed
+
+- The smart power button no longer keeps refreshing a subscription the provider still serves past its end date, or
+  stops the VPN on a short failure.
+- The smart power button turns green again on its own after a short failure and no longer marks slow servers as
+  broken.
+- The VPN restart tip no longer appears for options the running service already uses.
+- Returning from a page opened inside a Tools page no longer flashes the back button.
+- Presses land on the right level when a sub menu folds.
+- The update button glyph on the dashboard is drawn filled.
+- The tray icon previews show on Windows.
+- The duplicate automatic update check toggle is gone from settings.
+
+### Known issues
+
+- Browsers using their own DNS over HTTPS can bypass the Linux site lock after a core crash.
+
 ## v0.1.0-pre.10
 
 Network leak protection, per-profile favorites and a macOS launch fix.

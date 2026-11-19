@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.11",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Site lock and a reworked auto routing editor",
+      "spotlight": {
+        "title": "Site lock",
+        "description": "Pin sites to the exits you choose. A built-in kill switch keeps just those sites from leaking outside the tunnel.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Auto routing editor",
+          "description": "One page under Tools, each group edited in a single sheet, advanced controls behind a switch.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Seasonal backgrounds",
+          "description": "Seasonal effects behind the app.",
+          "kind": "wallpaper"
+        },
+        {
+          "title": "Easier updates",
+          "description": "Update from the dashboard, and install on Android with one tap.",
+          "kind": "update"
+        },
+        {
+          "title": "Smart power button fixes",
+          "description": "It no longer stops the VPN on a short failure and turns green again on its own.",
+          "kind": "speed"
+        },
+        {
+          "title": "Provider chains and favorites",
+          "description": "Providers can offer ready-made proxy chains and mark favorite nodes.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Provider update mirrors",
+          "description": "Providers can serve signed update mirrors, and update checks are lighter.",
+          "kind": "update"
+        },
+        {
+          "title": "Provider appearance settings",
+          "description": "Providers can switch seasonal backgrounds or add dated ones.",
+          "kind": "wallpaper"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Привязка сайтов и новый редактор автомаршрутизации",
+      "spotlight": {
+        "title": "Привязка сайтов",
+        "description": "Привязывайте сайты к выбранным выходам. Встроенный kill switch не даёт утечь мимо туннеля именно им.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Редактор автомаршрутизации",
+          "description": "Одна страница в «Инструментах», каждая группа правится в одном листе, расширенные настройки за переключателем.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Сезонные фоны",
+          "description": "Сезонные эффекты за интерфейсом.",
+          "kind": "wallpaper"
+        },
+        {
+          "title": "Обновления удобнее",
+          "description": "Обновляйтесь с дашборда, а на Android ставьте одним нажатием.",
+          "kind": "update"
+        },
+        {
+          "title": "Исправления умной кнопки включения",
+          "description": "Она больше не выключает VPN при коротком сбое и сама снова зеленеет.",
+          "kind": "speed"
+        },
+        {
+          "title": "Цепочки и избранное от провайдера",
+          "description": "Провайдер может предложить готовые цепочки прокси и отметить избранные узлы.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Зеркала обновлений от провайдера",
+          "description": "Провайдер может отдавать подписанные зеркала обновлений, а проверки обновлений стали легче.",
+          "kind": "update"
+        },
+        {
+          "title": "Внешний вид от провайдера",
+          "description": "Провайдер может включать сезонные фоны или добавлять свои даты.",
+          "kind": "wallpaper"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
