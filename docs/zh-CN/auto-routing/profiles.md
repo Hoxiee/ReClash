@@ -1,552 +1,220 @@
-# 配置
+# 配置档
 
-**配置**是某个智能组的策略：允许使用哪些服务器、优先顺序、如何排序，以及引擎在多大程度上主动切换。它是一个不超过 64 KiB 的 YAML 文档。
+RCX 配置档格式参考:键、默认值、继承、绑定与限制。
 
-标有 `# fragment` 的示例有意不完整；其他示例均为完整配置，并可通过 [`rcxlint`](sharing.md#rcxlint-工具) 检查。
+## 文档
 
-目录：[最简配置](#最简配置) · [键参考](#键参考) · [键详解](#键详解) · [默认值](#默认值一览) · [限制](#限制) · [继承](#extends) · [内置配置](#内置配置)
+配置档是一个 YAML 映射;未知键会报错。应用将配置档称为行为。
 
-## 最简配置
-
-```yaml
+```yaml title="bypass-de.rcx.yaml"
 rcx: 1
-title: Anything that works
-```
-
-未设置 `prefer` 时，配置只有一个步骤“Working”（条件 `not dead`），组会保留任何可用服务器。其他键用于进一步调整行为。
-
-## 键参考
-
-未知键会报错，因此拼写错误会在导入时发现，而不会被忽略。
-
-| 键 | 类型 | 默认值 | 作用 |
-| --- | --- | --- | --- |
-| `rcx` | 整数 | 外部文档必填 | 格式版本。当前为 `1`；更高版本会因应用不支持而拒绝。 |
-| `title` | 字符串 | 无 | 列表中显示的名称。 |
-| `description` | 字符串 | 无 | 一到两句话说明用途和适用场景。 |
-| `level` | `simple` 或 `advanced` | `simple` | 复杂度标签及请求预算级别（每小时 30 或 80 次）。 |
-| `extends` | 配置 ID | 无 | 继承其他配置，最多 4 层。 |
-| `pool` | `{include, exclude}` | 所有服务器 | 组可以使用的服务器。 |
-| `tags` | 名称 → 条件映射 | 无 | 可在 `pool` 和 `prefer` 中以 `tag(name)` 使用的命名条件，最多 32 个。 |
-| `prefer` | 步骤列表 | 单步 `not dead` | 服务器顺序，最多 16 步。 |
-| `rank` | `{by, tolerance}` | `latency`、0 | 同一步骤内的服务器排序方式。 |
-| `switch` | 对象 | `balanced` 预设 | 何时从可用服务器切换。 |
-| `stranded` | 字符串 | `hold` | 没有服务器符合条件时的操作。 |
-| `energy` | `eco`、`balanced`、`precise` | `balanced` | 允许执行多少检查。 |
-| `checks` | ID → 检查映射 | 无 | `passes(id)` / `fails(id)` 使用的命名测试，最多 8 个。 |
-| `network` | `{diagnose, kinds}` | 无 | 网络探测和网络类型。 |
-| `on` | 类型 → 覆盖项映射 | 无 | 按网络类型覆盖设置，最多 8 种。 |
-| `direct-split` | 条件 | 关闭 | 何时将本地流量直连。仅限用户层。 |
-| `egress-verify` | `{echo, agree}` | Cloudflare 和 ipinfo，2 | 如何验证出口国家。 |
-| `l10n` | 语言 → 字符串映射 | 无 | 标题、说明和标签的翻译。 |
-
-## 键详解
-
-### `rcx`
-
-格式版本。
-
-```yaml
-rcx: 1
-title: Versioned
-```
-
-值高于 `1` 时会报错：“profile format N is newer than this app understands”。
-
-### `title` 和 `description`
-
-显示在行为列表中的纯文本。标题和说明通过 `l10n` 翻译。
-
-```yaml
-rcx: 1
-title: Quiet Europe
-description: Keeps one European server and rarely changes it. Good for a laptop on battery.
-pool:
-  include: country in [DE, NL, FI]
-```
-
-### `level`
-
-`simple`（默认）或 `advanced`。简单配置每小时最多 30 个请求，进阶配置最多 80 个（参见[能耗](engine.md#检查何时运行与能耗预算)）。包含检查和诊断的内置配置为 `advanced`。
-
-```yaml
-rcx: 1
-title: Checked
+title: Germany first
+description: Prefers servers that exit in Germany and open the test page.
 level: advanced
-checks:
-  chat: { http: 'https://api.telegram.org/', expect: [200, 301, 302, 404] }
-prefer:
-  - label: Opens chat
-    when: passes(chat)
-  - label: Anything
-    when: not dead
-```
-
-### `extends`
-
-按 ID 继承其他配置：`builtin/x`、`provider/x` 或 `user/x`。不带前缀的名称表示 `provider/x`。继承链最多 4 层。
-
-```yaml
-rcx: 1
-title: Stable, Norway first
-extends: builtin/stable
-prefer:
-  - label: Norway
-    when: country = NO
-  - label: Anything
-    when: not dead
-```
-
-合并规则见下文 [Extends](#extends)。
-
-### `pool`
-
-服务器要可用，`include` 必须成立且 `exclude` 不成立。两者都使用[条件](conditions.md)。若事实未知，条件会允许服务器通过。各层只能缩小节点池：子配置的 `include` 与父配置通过 `and` 组合，`exclude` 通过 `or` 组合。
-
-```yaml
-rcx: 1
-title: Europe, no test servers
-pool:
-  include: country in [DE, NL, SE, FI, NO]
-  exclude: name ~ /(?i)test|demo/
-```
-
-### `tags`
-
-为可重复使用的条件命名。通过 `tag(name)` 引用标签。标签条件本身不能调用 `tag()`，因此标签之间不能相互依赖。
-
-```yaml
-rcx: 1
-title: Prefer mobile-friendly
+pool: { exclude: 'type = http' }
 tags:
-  lte: 'name ~ /(?i)lte|mobile/'
-prefer:
-  - label: LTE nodes
-    when: tag(lte) and not dead
-  - label: Anything
-    when: not dead
-```
-
-### `prefer`
-
-服务器顺序。每一步包含 `label`（在应用中显示；无标签时显示为“Tier N”）、`when` 条件和可选的 `last-resort` 标记。第一个包含可用服务器的步骤获胜；若其中服务器都不可用，则进入下一步。
-
-```yaml
-rcx: 1
-title: Starred, then Finland, then any
-prefer:
-  - label: Starred
-    when: name ~ /\*/ and not dead
-  - label: Finland
-    when: country = FI
-  - label: Anything
-    when: not dead
-    last-resort: true
-```
-
-`last-resort: true` 会将步骤标为最终回退项。只有其他所有步骤都没有可用服务器时才会采用它，即使其他步骤写在它之后也一样：引擎会在编译时将最后回退步骤移到其他步骤之后，并保持它们之间的顺序。此类步骤为空时，工作台也不会警告。
-
-用户或场景的 `prefer` 会替换该组的此列表（参见[服务器顺序优先级](scenarios.md#服务器顺序优先级)）。
-
-### `rank`
-
-同一优先步骤内的服务器排序方式。
-
-| 字段 | 值 | 默认值 | 含义 |
-| --- | --- | --- | --- |
-| `by` | `latency`、`stability` | `latency` | `latency` 优先速度；`stability` 会更重地惩罚波动和历史故障（参见[得分](engine.md#第四步排序)）。 |
-| `tolerance` | 整数，单位 ms | `0` | 当前服务器获得此容差，因此挑战节点必须明显更好。 |
-
-```yaml
-rcx: 1
-title: Steady
-rank:
-  by: stability
-  tolerance: 100
-```
-
-### `switch`
-
-引擎何时可以离开一个*可用*服务器。故障服务器始终会被替换。
-
-| 字段 | 类型 | 含义 |
-| --- | --- | --- |
-| `improve` | 布尔值，默认 `false` | 是否可从可用服务器切换到同一步骤内表现更好的服务器。为 false 时仅故障切换。 |
-| `feel` | `calm`、`balanced`、`eager` | 下表其余五项的预设，默认 `balanced`。 |
-| `dwell` | 时长（`10m`、`1h30m`） | 主动切换之间的最短间隔。 |
-| `min-gain-ms` | 整数 | 挑战节点至少快这么多毫秒。 |
-| `min-gain-pct` | 整数 | ……且至少比当前得分好这么多百分比。 |
-| `confirm` | 整数 | 切换前必须有多少条新鲜测量超过门槛。 |
-| `max-per-hour` | 整数 | 每小时主动切换次数上限。 |
-
-| feel | dwell | min-gain-ms | min-gain-pct | confirm | max-per-hour |
-| --- | --- | --- | --- | --- | --- |
-| `calm` | 30 分钟 | 60 | 30 | 3 | 2 |
-| `balanced` | 10 分钟 | 30 | 20 | 2 | 4 |
-| `eager` | 2 分钟 | 15 | 10 | 2 | 8 |
-
-显式指定的值会覆盖预设。
-
-```yaml
-rcx: 1
-title: Eager but not twitchy
-switch:
-  improve: true
-  feel: eager
-  max-per-hour: 3
-```
-
-### `stranded`
-
-没有服务器符合条件时的操作：`hold`（保留当前服务器，默认）、`direct`（使用 `DIRECT`）或 `group:<name>`（使用另一个组）。
-
-```yaml
-rcx: 1
-title: Fall back to direct
-stranded: direct
-```
-
-### `energy`
-
-`eco`、`balanced`（默认）或 `precise`，设置每小时检查额度（参见[预算](engine.md#预算)）。
-
-```yaml
-rcx: 1
-title: Frugal
-energy: eco
-```
-
-### `checks`
-
-命名测试。每项必须且只能指定 `http`、`tcp`、`tls` 之一，并可带其他字段。
-
-| 字段 | 适用类型 | 含义 |
-| --- | --- | --- |
-| `http` | HTTP | `http://` 或 `https://` URL。 |
-| `tcp` | TCP | 用于连接的 `host:port`。 |
-| `tls` | TLS | 用于 TLS 握手的 `host:port`。 |
-| `sni` | TLS | 要发送的服务器名称。 |
-| `expect` | 仅 HTTP | 接受的状态码列表，范围为 100–599。 |
-| `optional` | 全部 | 失败视为“软失败”：检查既不算通过，也不算失败。 |
-
-使用 `passes(id)` 和 `fails(id)` 引用检查。最多 8 项。
-
-```yaml
-rcx: 1
-title: Must open the video site
-level: advanced
+  premium: 'name ~ /premium|vip/i'
 checks:
-  video: { http: 'https://www.youtube.com/generate_204', expect: [204] }
-  chat: { tcp: 'api.telegram.org:443', optional: true }
+  page: { http: 'https://example.com/', expect: [200] }
 prefer:
-  - label: Opens video and chat
-    when: passes(video) and passes(chat)
-  - label: Opens video
-    when: passes(video)
-  - label: Anything
-    when: not dead
-```
-
-每项检查对每个成员都会消耗一次请求，应尽量少用，并将额外检查设为 `optional`。
-
-### `network`
-
-为行为不同的网络（如强制门户、移动网络白名单）声明探测和网络类型。
-
-`diagnose` 将名称映射到一组同类型目标（`http`、`tcp` 或 `tls`）。任意目标响应即视为诊断成功。最多 8 项诊断，每项最多 4 个目标。诊断名称须为小写，符合 `[a-z0-9-]`，长度 1–24 个字符。
-
-`kinds` 是自上而下检查的列表；第一个成立的 `when` 会确定当前网络类型。设置 `pause: true` 的类型会暂停组。最多 8 种类型。
-
-```yaml
-rcx: 1
-title: Knows about whitelists
-level: advanced
-network:
-  diagnose:
-    home: { tcp: ['77.88.8.8:443', '77.88.8.1:443'] }
-    foreign: { tls: ['1.1.1.1:443', '9.9.9.9:443'] }
-  kinds:
-    - { kind: portal, when: network.portal, pause: true }
-    - { kind: whitelist, when: 'home ok and foreign fail' }
-    - { kind: open, when: 'foreign ok' }
-```
-
-### `on`
-
-按网络类型覆盖设置。允许项：`pool`、`prefer`、`rank`、`switch`、`stranded`、`energy`。类型必须在 `network.kinds` 中声明，否则配置会被拒绝。
-
-```yaml
-rcx: 1
-title: Different on a whitelist network
-network:
-  diagnose:
-    home: { tcp: ['77.88.8.8:443'] }
-    foreign: { tls: ['1.1.1.1:443'] }
-  kinds:
-    - { kind: whitelist, when: 'home ok and foreign fail' }
-prefer:
-  - label: Anything
-    when: not dead
-on:
-  whitelist:
-    prefer:
-      - label: Bypass node
-        when: name ~ /(?i)bypass|whitelist/ and not dead
-      - label: Anything
-        when: not dead
-```
-
-### `direct-split`
-
-网络条件。条件成立时，第一个由用户启用直连分流的智能组会将本地流量直连。只有用户层可以启用；服务商配置不能开启。参见[直连分流](engine.md#直连分流)。
-
-```yaml
-rcx: 1
-title: Split when only home works
-network:
-  diagnose:
-    home: { tcp: ['77.88.8.8:443'] }
-    foreign: { tls: ['1.1.1.1:443'] }
-direct-split: 'home fail and foreign ok'
-```
-
-### `egress-verify`
-
-`exit.country` 出口国家验证方式。
-
-| 字段 | 默认值 | 含义 |
-| --- | --- | --- |
-| `echo` | `https://www.cloudflare.com/cdn-cgi/trace`、`https://ipinfo.io/json` | HTTP(S) echo 服务，最多 4 个。 |
-| `agree` | `2` | 必须报告相同国家的来源数：1–3。 |
-
-```yaml
-rcx: 1
-title: Verified exit
-level: advanced
-egress-verify:
-  echo:
-    - https://www.cloudflare.com/cdn-cgi/trace
-    - https://ipinfo.io/json
-  agree: 2
-prefer:
-  - label: Really abroad
-    when: exit.country != RU and not dead
-  - label: Anything
-    when: not dead
-```
-
-如果自定义 echo 主机由服务商提供，则需要用户授权（参见[授权](engine.md#服务商配置的授权)）。
-
-### `l10n`
-
-按语言标签（`ru`、`zh-CN`）指定翻译。每项将*源文本*（英文标题、说明或步骤标签）映射到翻译。最多 16 种语言，每种最多 64 个字符串，每个字符串最多 160 个字符。应用显示用户所用语言，没有翻译时使用源文本。
-
-```yaml
-rcx: 1
-title: Fast Germany
-prefer:
-  - label: Germany
-    when: country = DE
-  - label: Anything
-    when: not dead
-l10n:
-  ru:
-    Fast Germany: Быстрая Германия
-    Germany: Германия
-    Anything: Любой
-```
-
-## 默认值一览
-
-| 设置 | 默认值 |
-| --- | --- |
-| `level` | `simple` |
-| `prefer` | 单步“Working”，条件 `not dead` |
-| `rank.by` | `latency`，容差 `0` |
-| `switch.feel` | `balanced`，`improve` 为 false |
-| `stranded` | `hold` |
-| `energy` | `balanced` |
-| `egress-verify.agree` | `2` |
-| 未选择其他配置时的组配置 | `builtin/simple` |
-
-## 限制
-
-| 限制项 | 数值 |
-| --- | --- |
-| 配置大小 | 64 KiB |
-| 条件长度 | 2048 个字符，嵌套深度 16 |
-| 正则表达式 | 512 个字符 |
-| `prefer` 步骤 | 16 |
-| 标签 | 32 |
-| 检查 | 8 |
-| 网络诊断数 / 每项目标数 | 8 / 4 |
-| 网络类型、`on` 类型 | 8 |
-| Echo 服务 | 4 |
-| 语言 / 每种语言字符串数 / 字符串长度 | 16 / 64 / 160 |
-| `extends` 深度 | 4 |
-| 组绑定中的 chips | 12 |
-
-## Extends
-
-子配置从父配置开始，只更改它显式声明的内容。
-
-| 键 | 合并规则 |
-| --- | --- |
-| `pool` | `include` 以 `and` 合并，`exclude` 以 `or` 合并：子配置只能缩小节点池。 |
-| `tags` | 按名称合并；冲突时子配置优先。 |
-| `prefer` | 子配置的列表整体替换父配置列表。 |
-| `switch` | 子配置中的 `feel` 会将其他切换设置重置为该预设值。 |
-| `checks`、`network.diagnose`、`on`、`l10n` | 按键合并。 |
-| `network.kinds` | 整体替换。 |
-| 其他所有键 | 若子配置设置了值，则采用子配置的值。 |
-
-## 层与绑定
-
-配置通过 ID 归属某个层级：`builtin/x`、`provider/x`、`user/x`。组的**绑定**（由服务商或用户设置）会选择配置，也可添加以下设置：
-
-| 绑定键 | 含义 |
-| --- | --- |
-| `profiles` | 为该组提供的配置 ID 列表。 |
-| `default` | 用户选择前使用的配置。 |
-| `profile` | 用户的选择。 |
-| `pool`、`feel`、`energy` | 覆盖项；用户设置会替换服务商设置。 |
-| `prefer` | 替换配置服务器顺序的规则。 |
-| `chips` | 最多 12 个 `{label, include}` 快速筛选器，在应用中显示。 |
-
-服务商如何提供这些内容，参见[共享](sharing.md)。
-
-## 内置配置
-
-内置配置随应用发布，包含所有支持语言的翻译，并始终可通过 `builtin/<name>` 使用。
-
-| ID | 用途 |
-| --- | --- |
-| `builtin/simple` | 保持使用可用服务器；故障时切换。 |
-| `builtin/fastest` | 追求最低延迟，积极切换。 |
-| `builtin/stable` | 优先稳定服务器，很少切换。 |
-| `builtin/from-list` | 与 simple 相同；供服务商手动排序的组使用。 |
-| `builtin/bypass-ru` | 俄罗斯：优先选择可访问被屏蔽网站的境外服务器。 |
-| `builtin/bypass-ir` | 伊朗：相同思路，并检查 YouTube。 |
-| `builtin/bypass-cn` | 中国：相同思路，并检查 Google。 |
-| `builtin/whitelist-ru` | 俄罗斯移动网络白名单：继承 `bypass-ru` 并增加绕过节点步骤。 |
-
-### `builtin/simple`
-
-```yaml
-rcx: 1
-title: Simple
-level: simple
-prefer:
-  - label: Working
-    when: not dead
-rank:
-  by: latency
-  tolerance: 50
-switch:
-  improve: false
-  feel: calm
-stranded: hold
-energy: balanced
-```
-
-（实际文件还包含 `description` 和 `l10n`。）保持使用可用服务器。在可用服务器中优先选择延迟最低者，但 `improve: false` 表示只有当前服务器故障时才切换。
-
-### `builtin/fastest`
-
-```yaml
-rcx: 1
-title: Fastest
-rank:
-  by: latency
-  tolerance: 20
-switch:
-  improve: true
-  feel: balanced
-```
-
-切换到明显更快的服务器（至少快 30 ms 且提升 20%）；须连续确认两次，每小时最多切换 4 次，且距上次切换至少 10 分钟。
-
-### `builtin/stable`
-
-```yaml
-rcx: 1
-title: Stable
-rank:
-  by: stability
-  tolerance: 100
-switch:
-  improve: true
-  feel: calm
-```
-
-稳定性得分会大幅惩罚波动和历史故障，`calm` 使切换较少发生。
-
-### `builtin/from-list`
-
-```yaml
-rcx: 1
-title: From the list
-extends: builtin/simple
-```
-
-### `builtin/bypass-ru` 注释示例
-
-```yaml
-rcx: 1
-title: Russia · bypass blocks
-description: "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort."
-level: advanced
-checks:
-  open: { http: 'https://api.telegram.org/', expect: [200, 301, 302, 404] }
-network:
-  diagnose:
-    home: { tcp: ['77.88.8.8:443', '77.88.8.1:443'] }
-    foreign: { tls: ['1.1.1.1:443', '9.9.9.9:443'] }
-  kinds:
-    - { kind: portal, when: network.portal, pause: true }
-    - { kind: open, when: 'foreign ok' }
-prefer:
-  - { label: Opens blocked, when: 'passes(open) and exit.country != RU' }
-  - { label: Abroad, when: 'not dead and exit.country != RU' }
-  - { label: Home exit, when: 'not dead', last-resort: true }
+  - { label: German exit, when: 'exit.country = DE and passes(page)' }
+  - { label: Premium, when: 'tag(premium) and not dead' }
+  - { label: Any working, when: 'not dead', last-resort: true }
 rank: { by: latency, tolerance: 40 }
-switch: { improve: true, feel: calm }
-stranded: hold
-direct-split: 'home fail and foreign ok'
+switch: { improve: true, feel: calm, max-per-hour: 1 }
+stranded: direct
 energy: balanced
 ```
 
-- `checks.open` 通过每台服务器访问 Telegram API。状态码为 200、301、302 或 404 时，表示服务器可访问在俄罗斯被屏蔽的网站。
-- `network.diagnose` 不经过隧道，检查 Yandex DNS（`home`）是否响应，以及能否通过 TLS 访问 Cloudflare 和 Quad9（`foreign`）。
-- 网络类型 `portal` 在强制门户出现时暂停组；`open` 表示境外互联网可访问。
-- 服务器顺序依次尝试：可访问受限网站且已验证出口不在俄罗斯的服务器；任意可用的境外服务器；最后任意可用服务器。
-- `exit.country` 在验证前为未知，因此尚未查询的服务器会处于待处理状态，规划器会安排查询。
-- 如果用户启用了直连分流，当 `home fail and foreign ok` 条件成立时，会将本地流量直连。
+## 键
 
-`builtin/bypass-ir` 和 `builtin/bypass-cn` 结构相同。不同点包括检查 URL（伊朗使用 `https://www.youtube.com/generate_204` 并期望 204；中国使用 `https://www.google.com/generate_204` 并期望 204）、排除的国家代码（`IR`、`CN`），以及仅保留 `portal` 类型、不包含诊断和 `direct-split`。
+| 键 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `rcx` | integer | 1 | 格式版本;大于 1 会被拒绝。 |
+| `title` | string | id | 显示名称。 |
+| `description` | string | — | 选择器中的一行摘要。 |
+| `level` | `simple` \| `advanced` | `simple` | 编辑器暴露多少内容。 |
+| `extends` | 配置档 id | — | 基础配置档;参见[继承](#inheritance)。 |
+| `pool` | `{include, exclude}` | 所有成员 | 收窄成员的服务器条件。 |
+| `tags` | 名称 → 服务器条件的映射 | — | 供 `tag(name)` 使用的命名服务器集合。 |
+| `checks` | id → 检查的映射 | — | 供 `passes(id)` 和 `fails(id)` 使用的请求。 |
+| `prefer` | 层级列表 | 一个步骤 `Working`(`not dead`) | 有序的服务器层级。 |
+| `rank.by` | `latency` \| `stability` | `latency` | 评分公式;参见[评分](engine.md#score)。 |
+| `rank.tolerance` | 整数 ms | 0 | 给当前服务器的加成。 |
+| `switch.feel` | `calm` \| `balanced` \| `eager` | `balanced` | `switch` 字段的预设。 |
+| `switch.improve` | boolean | `false` | 切换到同一层级中更快的服务器。 |
+| `switch.dwell` | 时长 | 预设 | 两次改进切换之间的最短时间。 |
+| `switch.min-gain-ms` | integer | 预设 | 最小增益(毫秒)。 |
+| `switch.min-gain-pct` | integer | 预设 | 最小增益,占当前评分的百分比。 |
+| `switch.confirm` | integer | 预设 | 候选必须连续胜出的新鲜样本数。 |
+| `switch.max-per-hour` | integer | 预设 | 每小时的改进切换次数。 |
+| `stranded` | `hold` \| `direct` \| `group:<name>` | `hold` | 没有合格成员时的动作。 |
+| `energy` | `eco` \| `balanced` \| `precise` | `balanced` | 探测预算;参见[预算](engine.md#budgets)。 |
+| `network.diagnose` | 名称 → 诊断的映射 | — | 用于网络条件的直连探测。 |
+| `network.kinds` | 类型规则列表 | — | 网络类型;第一个匹配者胜出。 |
+| `on` | 类型 → 层的映射 | — | 在某一网络类型上的变更。 |
+| `direct-split` | 网络条件 | — | 直连分流何时可以激活。 |
+| `egress-verify.echo` | URL 列表 | 两个内置服务 | 出口国家回显服务。 |
+| `egress-verify.agree` | 0–3 | 2(0 表示 2) | 所需的相互一致的不同来源数。 |
+| `l10n` | 语言 → 来源 → 文本的映射 | — | 配置档自身字符串的翻译。 |
 
-### `builtin/whitelist-ru` 注释示例
+时长使用 Go 语法(`90s`、`1h30m`),不能为负。参见[手感预设](engine.md#feel-presets)。
+
+## 池
+
+`include` 和 `exclude` 是[服务器条件](conditions.md)。除非 `include` 为假或 `exclude` 为真,否则成员被保留,因此未知的事实既不放行也不移除成员。非服务器(`DIRECT`、`REJECT` 及类似项)永远不合格。
+
+## 层级
+
+应用将层级显示为**服务器顺序**;每个层级是一个步骤,`last-resort` 层级是**回退**。
 
 ```yaml
-rcx: 1
-title: Russia · mobile whitelists
-level: advanced
-extends: builtin/bypass-ru
-tags:
-  bypass: 'name ~ /(?i)lte|bypass|whitelist|обход|белы[ей]/'
+# fragment
+prefer:
+  - { label: Fast home, when: 'country = NL and latency < 80ms' }
+  - { label: Any, when: 'not dead' }
+  - { label: Fallback, when: 'not dead', last-resort: true }
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `label` | string | 在应用中显示;为空时显示为 `Tier N`,N 为位置。 |
+| `when` | 服务器条件 | 条件为真的成员加入该层级。 |
+| `last-resort` | boolean | 该层级让位于所有其他层级,无论其列在何处。 |
+
+成员加入第一个条件为真的层级。只有当某层级中的每个服务器都被排除或死亡时,选择才会转移到下一层级。
+
+## 检查
+
+```yaml
+# fragment
+checks:
+  web: { http: 'https://example.com/generate_204', expect: [204] }
+  port: { tcp: 'example.net:443', optional: true }
+  hello: { tls: '203.0.113.7:443', sni: example.org }
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `http` | URL | 通过服务器发出 `HEAD` 请求;不跟随重定向。 |
+| `tcp` | `host:port` | 通过服务器建立 TCP 连接。 |
+| `tls` | `host:port` | 通过服务器进行 TLS 握手;不验证证书。 |
+| `sni` | string | `tls` 使用的服务器名称;若主机是名称则默认为该主机。 |
+| `expect` | 100–599 的列表 | 仅限 `http`;未设置时任何响应都算通过。 |
+| `optional` | boolean | 失败为软失败:`passes(id)` 和 `fails(id)` 都保持为假。 |
+
+`http`、`tcp` 或 `tls` 必须恰好有一个。检查仅在有条件使用它时才运行,作为成功探测上的附加项。当配置档来自提供者时,位于提供者域名和内置端点之外的主机需要用户同意;参见[同意](sharing.md#consent)。
+
+## 网络
+
+```yaml
+# fragment
 network:
+  diagnose:
+    home: { tcp: ['77.88.8.8:443', '77.88.8.1:443'] }
+    foreign: { tls: ['1.1.1.1:443'] }
   kinds:
     - { kind: portal, when: network.portal, pause: true }
     - { kind: whitelist, when: 'home ok and foreign fail' }
-    - { kind: open, when: 'foreign ok' }
+```
+
+诊断是一个命名的 `http` URL 或 `tcp`/`tls` `host:port` 目标列表,通过 `DIRECT` 出站直接探测。任一目标应答时 `<name> ok` 成立;每个目标都已尝试且均未应答时 `<name> fail` 成立。
+
+| 类型字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `kind` | 名称 | `[a-z0-9-]`,1–24 个字符。 |
+| `when` | 网络条件 | 识别该类型。 |
+| `pause` | boolean | 在此类型上保持当前服务器并停止检查。 |
+
+识别规则见[网络类型](engine.md#network-kinds)。
+
+## 按网络变更
+
+```yaml
+# fragment
 on:
   whitelist:
     prefer:
       - { label: Bypass node, when: 'tag(bypass) and not dead' }
-      - { label: Opens blocked, when: 'passes(open)' }
-      - { label: Any working, when: 'not dead', last-resort: true }
+    switch: { feel: eager }
 ```
 
-- 继承 `bypass-ru` 的所有设置，并为名称中看起来像绕过节点的服务器添加 `bypass` 标签。
-- 在 *whitelist* 网络（本地可用、境外互联网不可用）中，服务器顺序会变为：先选绕过节点，再选通过检查的任意节点，最后选任何可用节点。
-- `network.kinds` 会整体替换父配置列表，因此需重新声明 `portal` 和 `open`。
+`on.<kind>` 可以设置 `pool`、`prefer`、`rank`、`switch`、`stranded` 和 `energy`。该类型必须已在 `network.kinds` 中声明,否则编译会失败并报 `the profile declares no network kind <kind>`。该层像[继承](#inheritance)中的子配置档一样合并到配置档上;用户的绑定在其之后应用。
+
+## 直连分流
+
+`direct-split` 是网络条件。当它为真且用户启用了**直连网站经由此组**时,匹配了显式 `DIRECT` 规则的连接会改走该组。例外与状态:[直连分流](engine.md#direct-split)。
+
+## 翻译
+
+```yaml
+# fragment
+l10n:
+  ru: { Germany first: Сначала Германия, German exit: Выход в Германии }
+```
+
+键是配置档自己的源字符串:标题、描述和层级标签。应用显示用户语言的文本,否则显示源文本。语言标签为 2–3 个小写字母,可选地后跟 2–8 个字母或数字的地区(`ru`、`zh-CN`)。
+
+## 继承
+
+`extends` 指定一个基础配置档;链最多 4 层深,且不能成环。
+
+| 键 | 合并规则 |
+| --- | --- |
+| 标量(`title`、`level`、`rank.by`、`stranded`、`energy` 等) | 子配置档设置时以其为准;`rank.tolerance: 0` 无法覆盖。 |
+| `pool` | 收窄:include 用 `and` 连接,exclude 用 `or` 连接。 |
+| `tags`、`checks`、`network.diagnose`、`l10n` | 按键合并;`l10n` 按语言和字符串合并。 |
+| `prefer` | 子配置档有任何层级时整体替换。 |
+| `switch` | 子配置档的 `feel` 会将其他字段重置为该预设(`improve` 保留);显式字段随后覆盖。 |
+| `on` | 按类型合并;子配置档的 `on.<kind>` 替换父配置档的。 |
+| `network.kinds`、`egress-verify.echo` | 整体替换。 |
+| `egress-verify.agree` | 设置时以子配置档为准。 |
+
+错误:`extends itself`、`extends more than 4 levels deep`、`profile <id> not found`。
+
+## 绑定
+
+绑定将配置档附加到一个 select 组。订阅将其作为组上的 `rcx:` 写入;应用按订阅保存用户的绑定。
+
+```yaml
+# fragment
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies: [NL 1, NL 2, DE 1]
+    rcx:
+      profiles: [fast, builtin/stable]
+      default: fast
+      pool: { exclude: 'name ~ /test/' }
+      chips:
+        - { label: Netherlands, include: 'country = NL' }
+```
+
+| 键 | 类型 | 说明 |
+| --- | --- | --- |
+| `profiles` | id 列表 | 为该组提供的配置档。 |
+| `default` | id | 当 `profile` 为空或缺失时使用。 |
+| `profile` | id | 所选配置档。 |
+| `pool` | `{include, exclude}` | 收窄配置档的池。 |
+| `prefer` | 层级列表 | 替换该组使用的配置档顺序。 |
+| `feel` | feel | 将 switch 字段重置为该预设。 |
+| `energy` | energy | 覆盖配置档的 energy。 |
+| `chips` | `{label, include}` 列表,最多 12 个 | **从中选择**下的一键池;无效的 chip 会被丢弃。 |
+
+用户的绑定会替换 `profile`、`pool`、`feel` 和 `energy`,在非空时替换 `prefer`,并将其 chips 加到提供者的 chips 之上。订阅无法开启直连分流。配置档 id 按以下顺序解析:`profile`、`default`、`builtin/simple`;缺失的 `profile` 会报告为 `profile.missing`。场景程序叠加在其上;参见[程序](scenarios.md#programs)。当配置档自己的 `on.<kind>` 为当前网络类型设置了 `prefer` 时,该顺序优先于两者。
+
+## 限制
+
+| 项目 | 限制 |
+| --- | --- |
+| 文档 | 64 KiB |
+| 层级 | 16 |
+| 标签 | 32 |
+| 检查 | 8 |
+| 诊断 | 8,每个含 1–4 个目标 |
+| 网络类型、`on` 条目 | 各 8 |
+| 回显服务 | 4,`http(s)` URL |
+| `extends` 深度 | 4 |
+| Chips | 12 |
+| `l10n` | 16 种语言,每种 64 个字符串,每个字符串 1–160 个字符 |
+| 条件 | 2048 个字符;参见[限制](conditions.md#limits) |
