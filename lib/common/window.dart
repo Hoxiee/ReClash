@@ -8,6 +8,7 @@ import 'package:reclash/models/config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:screen_retriever/screen_retriever.dart';
+import 'package:tray/tray.dart';
 import 'package:window/window.dart';
 
 class Window implements WindowPort {
@@ -199,8 +200,15 @@ class Window implements WindowPort {
     await desktopWindow.focus();
   }
 
-  Future<void> _hideWindow() async {
+  /// Without a StatusNotifier host there is no tray icon to bring a hidden
+  /// window back from, so it only minimizes and keeps its taskbar entry.
+  Future<bool> _hideWindow() async {
+    if (system.isLinux && !await Tray.instance.isHostAvailable()) {
+      await desktopWindow.minimize();
+      return false;
+    }
     await desktopWindow.hide();
+    return true;
   }
 
   Future<bool> _isWindowVisible() async {
@@ -276,7 +284,7 @@ class _InitFailureWindowListener with WindowListener {
 class WindowVisibilityController {
   WindowVisibilityController({
     required Future<void> Function() showWindow,
-    required Future<void> Function() hideWindow,
+    required Future<bool> Function() hideWindow,
     required Future<bool> Function() isWindowVisible,
     required Future<void> Function(bool skip) setSkipTaskbar,
     required this.dockSettleDuration,
@@ -286,7 +294,9 @@ class WindowVisibilityController {
        _setSkipTaskbar = setSkipTaskbar;
 
   final Future<void> Function() _showWindow;
-  final Future<void> Function() _hideWindow;
+
+  /// Resolves false when the window stayed on the taskbar instead of hiding.
+  final Future<bool> Function() _hideWindow;
   final Future<bool> Function() _isWindowVisible;
   final Future<void> Function(bool skip) _setSkipTaskbar;
   final Duration dockSettleDuration;
@@ -331,7 +341,9 @@ class WindowVisibilityController {
   }
 
   Future<void> _hide() async {
-    await _hideWindow();
+    if (!await _hideWindow()) {
+      return;
+    }
     if (_dockSettleTimer?.isActive ?? false) {
       _dockHidePending = true;
       return;

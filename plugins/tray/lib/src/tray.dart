@@ -16,6 +16,7 @@ const String _methodShow = 'show';
 const String _methodHide = 'hide';
 const String _methodSetTitle = 'setTitle';
 const String _methodOpenMenu = 'openMenu';
+const String _methodIsHostAvailable = 'isHostAvailable';
 
 const String _eventIconActivated = 'onIconActivated';
 const String _eventMenuRequested = 'onMenuRequested';
@@ -59,6 +60,21 @@ final class Tray {
 
   Future<void> hide() {
     return _serialize(_hide);
+  }
+
+  /// Whether something will display the tray icon. Only Linux can lack a host
+  /// (a desktop without a StatusNotifier watcher); elsewhere the OS shows it.
+  Future<bool> isHostAvailable() async {
+    if (defaultTargetPlatform != TargetPlatform.linux) {
+      return capabilities.supported;
+    }
+    try {
+      return await _channel.invokeMethod<bool>(_methodIsHostAvailable) ?? false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
+    }
   }
 
   Future<void> openMenu() {

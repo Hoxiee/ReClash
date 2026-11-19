@@ -20,6 +20,7 @@ class _FakeNativeWindow {
         calls.add('hide');
         await hideGate?.future;
         visible = false;
+        return true;
       },
       isWindowVisible: () async => visible,
       setSkipTaskbar: (skip) async {
@@ -137,7 +138,10 @@ void main() {
         }
         calls.add('show');
       },
-      hideWindow: () async => calls.add('hide'),
+      hideWindow: () async {
+        calls.add('hide');
+        return true;
+      },
       isWindowVisible: () async => false,
       setSkipTaskbar: (skip) async => calls.add(skip ? 'dock:off' : 'dock:on'),
       dockSettleDuration: Duration.zero,

@@ -51,6 +51,13 @@ void main() {
     Tray.instance.resetForTesting();
   });
 
+  test('host availability is true off Linux and queried on Linux', () async {
+    expect(await Tray.instance.isHostAvailable(), isTrue);
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    expect(await Tray.instance.isHostAvailable(), isTrue);
+    expect(calls.last.method, 'isHostAvailable');
+  });
+
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, null);

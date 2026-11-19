@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/window.dart';
 import 'package:reclash/models/config.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 
 const _windowChannel = MethodChannel('window');
+const _trayChannel = MethodChannel('tray');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +20,15 @@ void main() {
   late bool isFullScreen;
   late bool isMinimized;
   late Rect bounds;
+  late bool trayHost;
 
   setUp(() {
+    trayHost = true;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          _trayChannel,
+          (call) async => call.method == 'isHostAvailable' ? trayHost : null,
+        );
     calls = <String>[];
     methodCalls = <MethodCall>[];
     isVisible = true;
@@ -49,8 +58,10 @@ void main() {
   });
 
   tearDown(() {
+    debugDefaultTargetPlatformOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_windowChannel, null);
+      ..setMockMethodCallHandler(_windowChannel, null)
+      ..setMockMethodCallHandler(_trayChannel, null);
   });
 
   test('is a singleton so every caller drives the same window', () {
@@ -70,10 +81,27 @@ void main() {
   });
 
   test('hide drops the window off the taskbar', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+
     await Window().hide();
 
     expect(calls, containsAllInOrder(<String>['hide', 'setSkipTaskbar']));
   });
+
+  test(
+    'without a tray host hide minimizes and keeps the taskbar entry',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      trayHost = false;
+
+      await Window().hide();
+
+      expect(calls, contains('minimize'));
+      expect(calls, isNot(contains('hide')));
+      expect(calls, isNot(contains('setSkipTaskbar')));
+    },
+    skip: !Platform.isLinux,
+  );
 
   // Runs before any probe succeeds: the singleton caches a supported effect.
   test('an unsupported probe is retried the next time blur is on', () async {
@@ -166,6 +194,8 @@ void main() {
   testWidgets('toggle hides a visible window and shows a hidden one', (
     tester,
   ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
     await Window().toggle();
 
     expect(

@@ -215,6 +215,31 @@ static FlMethodResponse* handle_hide(TrayPlugin* self) {
   return respond(true);
 }
 
+static FlMethodResponse* handle_is_host_available() {
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GDBusConnection) bus =
+      g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, &error);
+  if (bus == nullptr) {
+    return respond(false);
+  }
+  // Fails when nothing owns the watcher name; NO_AUTO_START keeps the probe
+  // from launching a watcher that would not be a real host.
+  g_autoptr(GVariant) reply = g_dbus_connection_call_sync(
+      bus, "org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher",
+      "org.freedesktop.DBus.Properties", "Get",
+      g_variant_new("(ss)", "org.kde.StatusNotifierWatcher",
+                    "IsStatusNotifierHostRegistered"),
+      G_VARIANT_TYPE("(v)"), G_DBUS_CALL_FLAGS_NO_AUTO_START, 500, nullptr,
+      &error);
+  if (reply == nullptr) {
+    return respond(false);
+  }
+  g_autoptr(GVariant) boxed = nullptr;
+  g_variant_get(reply, "(v)", &boxed);
+  return respond(g_variant_is_of_type(boxed, G_VARIANT_TYPE_BOOLEAN) &&
+                 g_variant_get_boolean(boxed));
+}
+
 static void tray_plugin_handle_method_call(TrayPlugin* self,
                                            FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = nullptr;
@@ -228,6 +253,8 @@ static void tray_plugin_handle_method_call(TrayPlugin* self,
     response = handle_set_title(self, args);
   } else if (strcmp(method, "hide") == 0) {
     response = handle_hide(self);
+  } else if (strcmp(method, "isHostAvailable") == 0) {
+    response = handle_is_host_available();
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
