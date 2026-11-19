@@ -39,6 +39,10 @@ void main() {
     );
     expect(siteLockCandidateOf(exit, [_nl, _de]), same(_de));
     expect(siteLockCandidateOf(exit.copyWith(name: 'US'), [_nl, _de]), isNull);
+    expect(
+      siteLockCandidateOf(exit.copyWith(server: '9.9.9.9'), [_nl, _de]),
+      isNull,
+    );
   });
 
   test('an exit without a route matches by address', () {

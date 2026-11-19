@@ -17,7 +17,7 @@ enum SiteLockStatus {
 }
 
 /// [route] fingerprints the server's whole definition but its name; [name]
-/// finds it once a subscription rotates its credentials.
+/// finds it at the same address once a subscription rotates its credentials.
 @freezed
 abstract class SiteLockExit with _$SiteLockExit {
   const factory SiteLockExit({

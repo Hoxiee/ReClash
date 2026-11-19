@@ -41,7 +41,8 @@ type Lock struct {
 // Exit names a server by its definition without the name (Route), which
 // survives renames. Providers that serve many exits from one address tell
 // them apart only by credentials, so the address alone is no identity; Name
-// takes over once a refresh rotates those credentials.
+// takes over once a refresh rotates those credentials, but only at the same
+// address, so a server moved under its old name is no exit.
 type Exit struct {
 	Type   string `json:"type"`
 	Server string `json:"server"`
@@ -302,7 +303,7 @@ func candidates(all map[string]C.Proxy, exit Exit) []C.Proxy {
 			}
 		case routeOf(proxy) == exit.Route:
 			byRoute = append(byRoute, proxy)
-		case exit.Name != "" && name == exit.Name:
+		case exit.Name != "" && name == exit.Name && atAddress(proxy, exit):
 			byName = append(byName, proxy)
 		}
 	}

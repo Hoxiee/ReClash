@@ -18,18 +18,21 @@ String _kind(String type) {
   };
 }
 
+bool _atAddress(SiteLockExit exit, SiteLockExitCandidate candidate) =>
+    exit.server.toLowerCase() == candidate.server.toLowerCase() &&
+    exit.port == candidate.port;
+
 bool _sameDefinition(SiteLockExit exit, SiteLockExitCandidate candidate) {
   if (_kind(exit.type) != _kind(candidate.type)) return false;
   if (exit.route.isNotEmpty) return exit.route == candidate.route;
-  return exit.server.toLowerCase() == candidate.server.toLowerCase() &&
-      exit.port == candidate.port;
+  return _atAddress(exit, candidate);
 }
 
 String siteLockExitLabel(SiteLockExit exit) =>
     exit.name.isEmpty ? '${exit.server}:${exit.port}' : exit.name;
 
-/// The candidate the core resolves [exit] to: its definition, or its name
-/// once a refresh changed the definition.
+/// The candidate the core resolves [exit] to: its definition, or its name at
+/// the same address once a refresh changed the definition.
 SiteLockExitCandidate? siteLockCandidateOf(
   SiteLockExit exit,
   List<SiteLockExitCandidate> candidates,
@@ -40,6 +43,7 @@ SiteLockExitCandidate? siteLockCandidateOf(
   if (exit.route.isEmpty || exit.name.isEmpty) return null;
   for (final candidate in candidates) {
     if (_kind(exit.type) == _kind(candidate.type) &&
+        _atAddress(exit, candidate) &&
         candidate.names.contains(exit.name)) {
       return candidate;
     }

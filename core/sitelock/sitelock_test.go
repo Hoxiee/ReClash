@@ -201,6 +201,19 @@ func TestShadowsocksExitMatchesItsConfigType(t *testing.T) {
 	}
 }
 
+func TestNameFallbackStaysAtTheExitAddress(t *testing.T) {
+	lock := chatgpt
+	lock.Exits = []Exit{{Type: "socks5", Server: "10.0.0.1", Port: 1080, Route: "route-v1:old", Name: "pinned"}}
+	set := compileOK(t, lock)
+
+	if got := claimName(set, host("chatgpt.com"), C.RuleMatchHelper{}, testEnv(nil, socks(t, "pinned", "10.0.0.1", 1080, true))); got != "pinned" {
+		t.Errorf("rotated credentials at the same address claimed by %q, want pinned", got)
+	}
+	if got := claimName(set, host("chatgpt.com"), C.RuleMatchHelper{}, testEnv(nil, socks(t, "pinned", "10.0.0.9", 1080, true))); got != refusal.Name() {
+		t.Errorf("a server moved under the old name claimed by %q, want the refusal", got)
+	}
+}
+
 func TestDisabledLockClaimsNothing(t *testing.T) {
 	lock := chatgpt
 	lock.Enabled = false
