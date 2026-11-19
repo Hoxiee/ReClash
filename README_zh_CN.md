@@ -93,8 +93,8 @@
 | 平台 | 安装包 | 说明 |
 | --- | --- | --- |
 | Android 7 及以上 | `arm64-v8a`、`armeabi-v7a`、`x86_64` 的 APK | 大多数手机选 `arm64-v8a`。 |
-| Windows 10 及以上 | 安装程序（`-setup.exe`）或便携版 `.zip`，x64 与 ARM64 | 骁龙等 ARM 笔记本请选 ARM64。 |
-| macOS 12 及以上 | Apple 芯片（`arm64`）与 Intel（`amd64`）的 DMG | 非 App Store 版本：首次请通过右键菜单 →「打开」启动。 |
+| Windows 10 及以上 | 安装程序（`-setup.exe`）或便携版 `.zip`，x64 与 ARM64 | 骁龙等 ARM 笔记本请选 ARM64。安装包未经代码签名，SmartScreen 或智能应用控制可能会警告或拦截：在 SmartScreen 中选择“更多信息”→“仍要运行”。 |
+| macOS 12 及以上 | Apple 芯片（`arm64`）与 Intel（`amd64`）的 DMG | 非 App Store 版本。macOS 15 及以上版本中，右键菜单“打开”不再能绕过 Gatekeeper：先尝试打开一次，然后前往系统设置 → 隐私与安全性 → “仍要打开”。 |
 | Linux | x64 与 ARM64 的 `.deb`、`.rpm`、Arch `.pkg.tar.xz`；x64 的 AppImage | 见下方托盘说明。 |
 
 <p>
