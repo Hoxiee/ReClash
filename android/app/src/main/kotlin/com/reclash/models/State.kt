@@ -2,7 +2,7 @@ package com.reclash.models
 
 import com.reclash.service.models.VpnOptions
 import com.reclash.service.models.NotificationSettings
-import com.google.gson.annotations.SerializedName
+import com.google.gson.JsonObject
 
 data class SharedState(
     val startTip: String = "Starting VPN...",
@@ -19,20 +19,6 @@ data class SharedState(
     val notificationTrafficText: String = "Session traffic",
     val notificationServerGroup: String? = null,
     val vpnOptions: VpnOptions? = null,
-    val setupParams: SetupParams? = null,
-)
-
-data class SetupParams(
-    @SerializedName("test-url")
-    val testUrl: String,
-    @SerializedName("selected-map")
-    val selectedMap: Map<String, String>,
-    @SerializedName("skip-cert-verify")
-    val skipCertVerify: Boolean = false,
-    @SerializedName("no-global")
-    val noGlobal: Boolean? = null,
-    @SerializedName("vpn-enabled")
-    val vpnEnabled: Boolean? = null,
-    @SerializedName("excluded-apps")
-    val excludedApps: List<String>? = null,
+    // Opaque on purpose: Dart owns the keys and the Core must receive them untouched.
+    val setupParams: JsonObject? = null,
 )

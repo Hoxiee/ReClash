@@ -1,13 +1,13 @@
 package com.reclash
 
 import com.reclash.common.AccessControlMode
-import com.reclash.models.SetupParams
 import com.reclash.models.SharedState
 import com.reclash.service.models.AccessControlProps
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.PhysicalNetworks
 import com.reclash.service.models.VpnOptions
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
@@ -40,7 +40,9 @@ private fun vpnOptions(enable: Boolean = true, stack: String = "gvisor") = VpnOp
 
 private fun configuredState(enable: Boolean = true, stack: String = "gvisor") = SharedState(
     vpnOptions = vpnOptions(enable, stack),
-    setupParams = SetupParams(testUrl = "https://example.com", selectedMap = emptyMap()),
+    setupParams = JsonParser.parseString(
+        """{"test-url":"https://example.com","selected-map":{},"site-locks":[]}""",
+    ).asJsonObject,
 )
 
 private const val STARTED_AT = 1_700_000_000_000L
