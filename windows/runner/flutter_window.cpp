@@ -15,6 +15,10 @@ UINT MaintenanceMessage() {
       ::RegisterWindowMessageW(L"ReClash.InstalledProductMaintenance");
   return message;
 }
+
+// Windows ends the process once WM_ENDSESSION returns and shows its "this app
+// is preventing shutdown" screen after about five seconds.
+constexpr ULONGLONG kEndSessionBudgetMs = 4500;
 }  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
@@ -52,6 +56,17 @@ bool FlutterWindow::OnCreate() {
   return true;
 }
 
+void FlutterWindow::RequestTerminate() {
+  flutter::MethodChannel<flutter::EncodableValue> channel(
+      flutter_controller_->engine()->messenger(), "window",
+      &flutter::StandardMethodCodec::GetInstance());
+  flutter::EncodableMap args;
+  args[flutter::EncodableValue("name")] =
+      flutter::EncodableValue("should-terminate");
+  channel.InvokeMethod("onEvent",
+                       std::make_unique<flutter::EncodableValue>(args));
+}
+
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
@@ -66,14 +81,33 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               LPARAM const lparam) noexcept {
   if (flutter_controller_ && MaintenanceMessage() != 0 &&
       message == MaintenanceMessage()) {
-    flutter::MethodChannel<flutter::EncodableValue> channel(
-        flutter_controller_->engine()->messenger(), "window",
-        &flutter::StandardMethodCodec::GetInstance());
-    flutter::EncodableMap args;
-    args[flutter::EncodableValue("name")] =
-        flutter::EncodableValue("should-terminate");
-    channel.InvokeMethod("onEvent",
-                         std::make_unique<flutter::EncodableValue>(args));
+    RequestTerminate();
+    return 0;
+  }
+
+  // The quit path runs in Dart and answers through this thread's message
+  // queue, so it is pumped here until the app exits or the budget runs out.
+  if (flutter_controller_ && message == WM_ENDSESSION && wparam == TRUE) {
+    RequestTerminate();
+    const ULONGLONG deadline = ::GetTickCount64() + kEndSessionBudgetMs;
+    MSG msg;
+    while (flutter_controller_) {
+      const ULONGLONG now = ::GetTickCount64();
+      if (now >= deadline) {
+        break;
+      }
+      ::MsgWaitForMultipleObjects(0, nullptr, FALSE,
+                                  static_cast<DWORD>(deadline - now),
+                                  QS_ALLINPUT);
+      while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        if (msg.message == WM_QUIT) {
+          ::PostQuitMessage(static_cast<int>(msg.wParam));
+          return 0;
+        }
+        ::TranslateMessage(&msg);
+        ::DispatchMessage(&msg);
+      }
+    }
     return 0;
   }
 

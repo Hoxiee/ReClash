@@ -23,6 +23,9 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  // Asks Dart to run the app's quit path through the window plugin channel.
+  void RequestTerminate();
+
   // The project to run.
   flutter::DartProject project_;
 
