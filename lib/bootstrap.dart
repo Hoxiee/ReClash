@@ -13,6 +13,10 @@ import 'package:reclash/common/tray.dart';
 import 'package:reclash/common/window.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/doctor/environment/reader.dart'
+    show isLoopbackHost;
+import 'package:reclash/features/doctor/environment/scanner.dart'
+    show environmentReaderProvider;
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -241,6 +245,7 @@ class Bootstrap {
       await Future<void>.delayed(const Duration(seconds: 2));
       await coreAction.startCore();
     }
+    unawaited(_releaseStaleSystemProxy());
     if (!_bootDecision.isDegraded) {
       await _container.read(setupActionProvider.notifier).initStatus();
     }
@@ -253,6 +258,23 @@ class Bootstrap {
         _container.read(commonActionProvider.notifier).autoCheckUpdate(),
       );
     }
+  }
+
+  /// A run that set the system proxy, starting now, takes it over; otherwise
+  /// one a crash or forced quit left pointing at a dead port is released.
+  Future<void> _releaseStaleSystemProxy() async {
+    final queue = systemProxyQueue;
+    final reader = _container.read(environmentReaderProvider);
+    if (queue == null || reader == null) return;
+    final autoRun =
+        !_bootDecision.isDegraded &&
+        _container.read(appSettingProvider).autoRun;
+    if (autoRun && _container.read(networkSettingProvider).systemProxy) return;
+    await queue.releaseStale((port) async {
+      final live = await reader.systemProxy();
+      if (live == null) return null;
+      return live.enabled && isLoopbackHost(live.host) && live.port == port;
+    });
   }
 
   Future<void> _showCrashRecoveryTip() async {

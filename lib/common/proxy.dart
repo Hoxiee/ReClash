@@ -99,6 +99,32 @@ class SystemProxyQueue {
     return cleared;
   }
 
+  /// Clears the proxy a crashed or killed run left behind, unless this run
+  /// already set one. [isSet] answers whether the live proxy still points at
+  /// the recorded port, or null when the OS gave nothing usable.
+  Future<bool> releaseStale(Future<bool?> Function(int port) isSet) async {
+    var released = false;
+    await _enqueue(() async {
+      final port = await _record?.read();
+      if (_closed || _applied || port == null) {
+        return;
+      }
+      final stale = await isSet(port);
+      if (stale == null || _applied) {
+        return;
+      }
+      if (stale) {
+        if (!await _proxy.stopProxy()) {
+          _logFailure();
+          return;
+        }
+        released = true;
+      }
+      await _remember(null);
+    });
+    return released;
+  }
+
   Future<void> _stop() async {
     if (!_applied) {
       return;

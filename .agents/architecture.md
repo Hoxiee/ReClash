@@ -1753,7 +1753,10 @@ NDK version stands in for the hook's cache.
   before any engine starts, and it turns off only a proxy still set to ReClash's `127.0.0.1:<port>` with nothing
   listening on that port. In the app `SystemProxyQueue` sets the system proxy when the Core starts with it on, and
   stops it on a stop or exit only when this run set it, since a stop also clears a proxy, PAC or auto-detect setting
-  someone else made. Nothing is stored, so a launch leaves alone the proxy a crashed run left.
+  someone else made. The port it set is recorded; at launch, unless auto-run is about to set the proxy, a live proxy
+  still at `127.0.0.1:<recorded port>` is one a crashed or killed run left, and `releaseStale` clears it. On Windows
+  `WM_ENDSESSION` sends the window plugin's `should-terminate` event and pumps messages for up to 4.5 s, so the normal
+  quit path clears the proxy and disarms a standard kill switch before logoff ends the process.
 - `rust_api`: runtime Flutter Rust Bridge FFI package built through Native Assets. See below.
 - `tray`: system tray for Linux, macOS and Windows. Written for FlClash; replaced the `tray_manager` fork.
 - `window`: desktop window control for Linux, macOS and Windows. Written for FlClash; replaced the
