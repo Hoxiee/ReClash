@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Runtime-конфиг",
   "coreOpenRuntimeConfig": "Открыть runtime-конфиг",
   "coreRuntimeConfigDescription": "Итоговая конфигурация после настроек и скриптов. Только просмотр.",
-  "coreRuntimeConfigReadFailed": "Не удалось прочитать runtime-конфиг"
+  "coreRuntimeConfigReadFailed": "Не удалось прочитать runtime-конфиг",
+  "unexpectedErrorTip": "Не удалось выполнить действие: {detail}"
 }

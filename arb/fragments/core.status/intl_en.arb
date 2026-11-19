@@ -18,5 +18,14 @@
   "coreRuntimeConfig": "Runtime configuration",
   "coreOpenRuntimeConfig": "Open runtime configuration",
   "coreRuntimeConfigDescription": "Generated configuration after settings and scripts. Read-only.",
-  "coreRuntimeConfigReadFailed": "Could not read the runtime configuration"
+  "coreRuntimeConfigReadFailed": "Could not read the runtime configuration",
+  "unexpectedErrorTip": "Could not complete the action: {detail}",
+  "@unexpectedErrorTip": {
+    "description": "Generic message for an unrecognized error, followed by the technical detail",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Орындалу конфигурациясы",
   "coreOpenRuntimeConfig": "Орындалу конфигурациясын ашу",
   "coreRuntimeConfigDescription": "Баптаулар мен скрипттерден кейінгі қорытынды конфигурация. Тек оқуға арналған.",
-  "coreRuntimeConfigReadFailed": "Орындалу конфигурациясын оқу мүмкін болмады"
+  "coreRuntimeConfigReadFailed": "Орындалу конфигурациясын оқу мүмкін болмады",
+  "unexpectedErrorTip": "Әрекетті орындау мүмкін болмады: {detail}"
 }

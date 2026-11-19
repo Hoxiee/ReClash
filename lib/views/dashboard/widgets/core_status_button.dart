@@ -78,7 +78,13 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     try {
       await ref.read(coreActionProvider.notifier).restartCore();
     } catch (error) {
-      dialogs.showNotifier(error.toString(), level: MessageLevel.error);
+      if (!mounted) {
+        return;
+      }
+      dialogs.showNotifier(
+        userFacingErrorMessage(error, context.appLocalizations),
+        level: MessageLevel.error,
+      );
     }
   }
 

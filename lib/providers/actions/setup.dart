@@ -949,7 +949,10 @@ class SetupAction extends _$SetupAction {
         null => res.yaml,
       };
     } catch (e) {
-      dialogs.showNotifier(e.toString(), level: MessageLevel.error);
+      dialogs.showNotifier(
+        userFacingErrorMessage(e, currentAppLocalizations),
+        level: MessageLevel.error,
+      );
     }
     return '';
   }

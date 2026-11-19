@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Configuración en tiempo de ejecución",
   "coreOpenRuntimeConfig": "Abrir configuración en tiempo de ejecución",
   "coreRuntimeConfigDescription": "Configuración generada tras aplicar los ajustes y scripts. Solo lectura.",
-  "coreRuntimeConfigReadFailed": "No se pudo leer la configuración en tiempo de ejecución"
+  "coreRuntimeConfigReadFailed": "No se pudo leer la configuración en tiempo de ejecución",
+  "unexpectedErrorTip": "No se pudo completar la acción: {detail}"
 }

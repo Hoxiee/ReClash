@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:reclash/common/app_localizations.dart';
+import 'package:reclash/common/exception.dart';
 import 'package:reclash/common/network_error.dart';
 import 'package:reclash/common/webdav.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
@@ -74,6 +75,17 @@ void main() {
         appLocalizations,
       ),
       appLocalizations.subscriptionDeviceLimit,
+    );
+  });
+
+  test('unknown errors get a localized sentence with the compact detail', () {
+    expect(
+      userFacingErrorMessage(StateError('boom'), appLocalizations),
+      appLocalizations.unexpectedErrorTip(StateError('boom').toString()),
+    );
+    expect(
+      userFacingErrorMessage(const MessageException('plain'), appLocalizations),
+      'plain',
     );
   });
 
@@ -304,7 +316,7 @@ void main() {
       );
     });
 
-    test('leaves other start failures on the raw description', () {
+    test('wraps other start failures in the generic sentence', () {
       smartAppControlStateReader = () => SmartAppControlState.on;
       const timedOut = DesktopCoreFailure(
         code: 'start_failed',
@@ -318,7 +330,7 @@ void main() {
 
       expect(
         userFacingErrorMessage(timedOut, appLocalizations),
-        timedOut.toString(),
+        appLocalizations.unexpectedErrorTip(timedOut.toString()),
       );
     });
   });

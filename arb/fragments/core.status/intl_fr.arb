@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Configuration d’exécution",
   "coreOpenRuntimeConfig": "Ouvrir la configuration d’exécution",
   "coreRuntimeConfigDescription": "Configuration générée après application des paramètres et scripts. Lecture seule.",
-  "coreRuntimeConfigReadFailed": "Impossible de lire la configuration d’exécution"
+  "coreRuntimeConfigReadFailed": "Impossible de lire la configuration d’exécution",
+  "unexpectedErrorTip": "Impossible de terminer l’action : {detail}"
 }

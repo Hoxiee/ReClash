@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Iş wagty konfigurasiýasy",
   "coreOpenRuntimeConfig": "Iş wagty konfigurasiýasyny açmak",
   "coreRuntimeConfigDescription": "Sazlamalar we skriptler ulanylandan soňky jemleýji konfigurasiýa. Diňe okamak üçin.",
-  "coreRuntimeConfigReadFailed": "Iş wagty konfigurasiýasyny okap bolmady"
+  "coreRuntimeConfigReadFailed": "Iş wagty konfigurasiýasyny okap bolmady",
+  "unexpectedErrorTip": "Hereket ýerine ýetirilip bilinmedi: {detail}"
 }

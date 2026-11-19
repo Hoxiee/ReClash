@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "実行時設定",
   "coreOpenRuntimeConfig": "実行時設定を開く",
   "coreRuntimeConfigDescription": "設定とスクリプトを適用して生成された設定です。読み取り専用。",
-  "coreRuntimeConfigReadFailed": "実行時設定を読み込めませんでした"
+  "coreRuntimeConfigReadFailed": "実行時設定を読み込めませんでした",
+  "unexpectedErrorTip": "操作を完了できませんでした: {detail}"
 }

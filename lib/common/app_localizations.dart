@@ -1,6 +1,7 @@
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/exception.dart';
 import 'package:reclash/common/network_error.dart';
+import 'package:reclash/common/print.dart';
 import 'package:reclash/common/url_scheme.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/privilege.dart';
@@ -54,7 +55,8 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
         CoreMethodException(code: 'rule_set_invalid') =>
           appLocalizations.ruleSetInvalidTip,
         CoreMethodException(:final message) => message,
-        _ => error.toString(),
+        MessageException(:final message) => message,
+        _ => appLocalizations.unexpectedErrorTip(compactError(error)),
       };
 }
 

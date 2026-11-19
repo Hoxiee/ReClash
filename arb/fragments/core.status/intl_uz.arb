@@ -18,5 +18,6 @@
   "coreRuntimeConfig": "Ishlash konfiguratsiyasi",
   "coreOpenRuntimeConfig": "Ishlash konfiguratsiyasini ochish",
   "coreRuntimeConfigDescription": "Sozlamalar va skriptlardan keyingi yakuniy konfiguratsiya. Faqat oʻqish uchun.",
-  "coreRuntimeConfigReadFailed": "Ishlash konfiguratsiyasini oʻqib boʻlmadi"
+  "coreRuntimeConfigReadFailed": "Ishlash konfiguratsiyasini oʻqib boʻlmadi",
+  "unexpectedErrorTip": "Amalni bajarib boʻlmadi: {detail}"
 }
