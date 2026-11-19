@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "Abrir configuración en tiempo de ejecución",
   "coreRuntimeConfigDescription": "Configuración generada tras aplicar los ajustes y scripts. Solo lectura.",
   "coreRuntimeConfigReadFailed": "No se pudo leer la configuración en tiempo de ejecución",
-  "unexpectedErrorTip": "No se pudo completar la acción: {detail}"
+  "unexpectedErrorTip": "No se pudo completar la acción: {detail}",
+  "coreCrashStoppedTitle": "Conexión detenida",
+  "coreCrashStoppedBody": "El Core se detuvo inesperadamente y no volvió a funcionar tras reiniciarlo. ReClash desactivó la conexión y liberó el proxy del sistema. Vuelve a iniciarla cuando quieras."
 }

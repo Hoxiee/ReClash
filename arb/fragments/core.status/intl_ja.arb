@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "実行時設定を開く",
   "coreRuntimeConfigDescription": "設定とスクリプトを適用して生成された設定です。読み取り専用。",
   "coreRuntimeConfigReadFailed": "実行時設定を読み込めませんでした",
-  "unexpectedErrorTip": "操作を完了できませんでした: {detail}"
+  "unexpectedErrorTip": "操作を完了できませんでした: {detail}",
+  "coreCrashStoppedTitle": "接続が停止しました",
+  "coreCrashStoppedBody": "コアが予期せず停止し、再起動後も復帰しませんでした。ReClash は接続をオフにし、システムプロキシを解除しました。準備ができたら再度開始してください。"
 }

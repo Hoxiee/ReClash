@@ -27,5 +27,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "coreCrashStoppedTitle": "Connection stopped",
+  "coreCrashStoppedBody": "The core stopped unexpectedly and did not come back after a restart. ReClash turned the connection off and released the system proxy. Start it again when you are ready."
 }

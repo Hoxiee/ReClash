@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "런타임 설정 열기",
   "coreRuntimeConfigDescription": "설정과 스크립트를 적용한 최종 설정입니다. 읽기 전용입니다.",
   "coreRuntimeConfigReadFailed": "런타임 설정을 읽을 수 없습니다",
-  "unexpectedErrorTip": "작업을 완료하지 못했습니다: {detail}"
+  "unexpectedErrorTip": "작업을 완료하지 못했습니다: {detail}",
+  "coreCrashStoppedTitle": "연결이 중지됨",
+  "coreCrashStoppedBody": "코어가 예기치 않게 중지되었고 다시 시작한 후에도 복구되지 않았습니다. ReClash가 연결을 끄고 시스템 프록시를 해제했습니다. 준비되면 다시 시작하세요."
 }

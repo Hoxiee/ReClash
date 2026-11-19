@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "Iş wagty konfigurasiýasyny açmak",
   "coreRuntimeConfigDescription": "Sazlamalar we skriptler ulanylandan soňky jemleýji konfigurasiýa. Diňe okamak üçin.",
   "coreRuntimeConfigReadFailed": "Iş wagty konfigurasiýasyny okap bolmady",
-  "unexpectedErrorTip": "Hereket ýerine ýetirilip bilinmedi: {detail}"
+  "unexpectedErrorTip": "Hereket ýerine ýetirilip bilinmedi: {detail}",
+  "coreCrashStoppedTitle": "Baglanyşyk saklandy",
+  "coreCrashStoppedBody": "Ýadro garaşylmadyk ýagdaýda saklandy we täzeden başlatmakdan soň-da dikeldilmedi. ReClash baglanyşygy öçürdi we ulgamyň proksisini boşatdy. Taýyn bolanyňyzda ony ýene açyň."
 }

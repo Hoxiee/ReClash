@@ -58,6 +58,7 @@ class SetupAction extends _$SetupAction {
   bool _allowPrivilegePrompt = false;
   int _privilegeIntentRevision = 0;
   String _appliedWebDashboardDirectory = '';
+  DateTime? _lastCoreCrash;
 
   int get runIntentRevision => _runIntentRevision;
 
@@ -254,6 +255,63 @@ class SetupAction extends _$SetupAction {
     ref.read(runningVpnOptionsProvider.notifier).value = options;
     _setLocalRunning(true);
     return true;
+  }
+
+  @protected
+  Duration get coreCrashBackoff => const Duration(seconds: 2);
+
+  @protected
+  DateTime coreCrashTime() => DateTime.now();
+
+  /// Restarts a run whose desktop Core died. A failed restart, or a second
+  /// crash within a minute, stops the run instead so the system proxy does
+  /// not keep pointing at a dead port. The kill switch stays armed: its block
+  /// is what holds traffic meanwhile. A user stop, or a stop and new start,
+  /// changes the run's start time and ends the recovery.
+  Future<void> recoverFromCoreCrash() async {
+    final startedAt = _startTime;
+    if (startedAt == null || !ref.read(isStartProvider)) return;
+    final now = coreCrashTime();
+    final previous = _lastCoreCrash;
+    _lastCoreCrash = now;
+    bool sameRun() => ref.mounted && _startTime == startedAt;
+    if (previous == null ||
+        now.difference(previous) >= const Duration(minutes: 1)) {
+      await Future<void>.delayed(coreCrashBackoff);
+      if (!sameRun()) return;
+      try {
+        final restarted = await ref
+            .read(coreActionProvider.notifier)
+            .restartCore(silence: true);
+        if (restarted) return;
+      } catch (error) {
+        commonPrint.log(
+          'Core crash recovery failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+      }
+      if (!sameRun()) return;
+    }
+    try {
+      await setRunning(false, silence: true);
+    } catch (error) {
+      commonPrint.log(
+        'Stopping the run after a Core crash: ${compactError(error)}',
+        logLevel: LogLevel.info,
+      );
+    }
+    if (ref.mounted) showCoreCrashStopped();
+  }
+
+  @protected
+  void showCoreCrashStopped() {
+    final l = currentAppLocalizations;
+    unawaited(
+      dialogs.showAlert(
+        title: l.coreCrashStoppedTitle,
+        message: TextSpan(text: l.coreCrashStoppedBody),
+      ),
+    );
   }
 
   Future<void> initStatus() async {

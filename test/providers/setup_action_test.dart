@@ -61,6 +61,40 @@ class _DisarmRecordingHost extends KillSwitchHostState {
   }
 }
 
+class _CrashRecoverySetupAction extends TestSetupAction {
+  Duration backoff = Duration.zero;
+  DateTime? clock;
+  int crashAlerts = 0;
+
+  @override
+  void showCoreCrashStopped() {
+    crashAlerts++;
+  }
+
+  @override
+  Duration get coreCrashBackoff => backoff;
+
+  @override
+  DateTime coreCrashTime() => clock ?? DateTime.now();
+}
+
+class _RestartRecordingCoreAction extends CoreAction {
+  final List<bool> restarts = [];
+  bool result = true;
+  Error? error;
+
+  @override
+  Future<bool> restartCore({
+    bool silence = false,
+    bool allowPrompt = false,
+  }) async {
+    restarts.add(silence);
+    final failure = error;
+    if (failure != null) throw failure;
+    return result;
+  }
+}
+
 class _KillSwitchSetupAction extends TestSetupAction {
   int updates = 0;
 
@@ -2851,6 +2885,139 @@ void main() {
 
       expect(host.disarmOnUserStops, 0);
       expect((setup() as _KillSwitchSetupAction).updates, 1);
+    });
+  });
+
+  group('core crash recovery', () {
+    late _CrashRecoverySetupAction crashAction;
+    late _RestartRecordingCoreAction core;
+    late _DisarmRecordingHost host;
+    late ProviderContainer scoped;
+
+    setUp(() {
+      crashAction = _CrashRecoverySetupAction();
+      core = _RestartRecordingCoreAction();
+      host = _DisarmRecordingHost();
+      scoped = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
+          profilesProvider.overrideWith(TestProfiles.new),
+          setupActionProvider.overrideWith(() => crashAction),
+          commonActionProvider.overrideWith(TestCommonAction.new),
+          coreActionProvider.overrideWith(() => core),
+          killSwitchHostStateProvider.overrideWith(() => host),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      globalState.container = scoped;
+      scoped.read(initProvider.notifier).value = true;
+    });
+
+    SetupAction setup() => scoped.read(setupActionProvider.notifier);
+
+    test('a crash while not running does nothing', () async {
+      await setup().recoverFromCoreCrash();
+
+      expect(core.restarts, isEmpty);
+      expect(crashAction.coreRunningCalls, isEmpty);
+    });
+
+    test(
+      'a first crash restarts the core silently and keeps the run',
+      () async {
+        await setup().setRunning(true);
+
+        await setup().recoverFromCoreCrash();
+
+        expect(core.restarts, [true]);
+        expect(scoped.read(isStartProvider), isTrue);
+        expect(scoped.read(runTimeProvider), isNotNull);
+        expect(crashAction.crashAlerts, 0);
+        expect(host.disarmOnUserStops, 0);
+      },
+    );
+
+    test('a first crash waits out the backoff before restarting', () async {
+      crashAction.backoff = const Duration(milliseconds: 50);
+      await setup().setRunning(true);
+
+      final recovery = setup().recoverFromCoreCrash();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(core.restarts, isEmpty);
+
+      await recovery;
+      expect(core.restarts, [true]);
+    });
+
+    test('a failed restart stops the run', () async {
+      await setup().setRunning(true);
+      core.result = false;
+
+      await setup().recoverFromCoreCrash();
+      expect(crashAction.crashAlerts, 1);
+
+      expect(core.restarts, [true]);
+      expect(scoped.read(isStartProvider), isFalse);
+      expect(scoped.read(runTimeProvider), isNull);
+      expect(host.disarmOnUserStops, 0);
+    });
+
+    test('a restart that throws stops the run', () async {
+      await setup().setRunning(true);
+      core.error = StateError('restart failed');
+
+      await setup().recoverFromCoreCrash();
+      expect(crashAction.crashAlerts, 1);
+
+      expect(scoped.read(isStartProvider), isFalse);
+      expect(scoped.read(runTimeProvider), isNull);
+    });
+
+    test('a second crash within a minute stops without restarting', () async {
+      final crashedAt = DateTime(2026, 1, 1, 12);
+      await setup().setRunning(true);
+      crashAction.clock = crashedAt;
+      await setup().recoverFromCoreCrash();
+      expect(crashAction.crashAlerts, 0);
+
+      crashAction.clock = crashedAt.add(const Duration(seconds: 10));
+      await setup().recoverFromCoreCrash();
+      expect(crashAction.crashAlerts, 1);
+
+      expect(core.restarts, [true]);
+      expect(scoped.read(isStartProvider), isFalse);
+      expect(scoped.read(runTimeProvider), isNull);
+    });
+
+    test('a crash more than a minute after the last restarts again', () async {
+      final crashedAt = DateTime(2026, 1, 1, 12);
+      await setup().setRunning(true);
+      crashAction.clock = crashedAt;
+      await setup().recoverFromCoreCrash();
+
+      crashAction.clock = crashedAt.add(const Duration(seconds: 61));
+      await setup().recoverFromCoreCrash();
+
+      expect(core.restarts, [true, true]);
+      expect(scoped.read(isStartProvider), isTrue);
+    });
+
+    test('a user stop during the backoff cancels the restart', () async {
+      crashAction.backoff = const Duration(milliseconds: 50);
+      await setup().setRunning(true);
+      final stopsBefore = crashAction.coreRunningCalls.length;
+
+      final recovery = setup().recoverFromCoreCrash();
+      await setup().setRunning(false);
+      await recovery;
+
+      expect(core.restarts, isEmpty);
+      expect(crashAction.crashAlerts, 0);
+      expect(crashAction.coreRunningCalls.length, stopsBefore + 1);
+      expect(crashAction.coreRunningCalls.last, isFalse);
+      expect(scoped.read(isStartProvider), isFalse);
     });
   });
 }

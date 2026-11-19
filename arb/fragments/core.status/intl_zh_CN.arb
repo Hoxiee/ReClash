@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "打开运行时配置",
   "coreRuntimeConfigDescription": "应用设置和脚本后生成的配置。只读。",
   "coreRuntimeConfigReadFailed": "无法读取运行时配置",
-  "unexpectedErrorTip": "无法完成操作：{detail}"
+  "unexpectedErrorTip": "无法完成操作：{detail}",
+  "coreCrashStoppedTitle": "连接已停止",
+  "coreCrashStoppedBody": "内核意外停止，重启后也未能恢复。ReClash 已关闭连接并释放系统代理。准备好后请重新启动。"
 }

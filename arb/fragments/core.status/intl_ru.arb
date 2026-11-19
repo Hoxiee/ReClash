@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "Открыть runtime-конфиг",
   "coreRuntimeConfigDescription": "Итоговая конфигурация после настроек и скриптов. Только просмотр.",
   "coreRuntimeConfigReadFailed": "Не удалось прочитать runtime-конфиг",
-  "unexpectedErrorTip": "Не удалось выполнить действие: {detail}"
+  "unexpectedErrorTip": "Не удалось выполнить действие: {detail}",
+  "coreCrashStoppedTitle": "Соединение остановлено",
+  "coreCrashStoppedBody": "Ядро неожиданно остановилось и не вернулось после перезапуска. ReClash отключил соединение и освободил системный прокси. Запустите его снова, когда будете готовы."
 }

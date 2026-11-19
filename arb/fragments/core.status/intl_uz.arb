@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "Ishlash konfiguratsiyasini ochish",
   "coreRuntimeConfigDescription": "Sozlamalar va skriptlardan keyingi yakuniy konfiguratsiya. Faqat oʻqish uchun.",
   "coreRuntimeConfigReadFailed": "Ishlash konfiguratsiyasini oʻqib boʻlmadi",
-  "unexpectedErrorTip": "Amalni bajarib boʻlmadi: {detail}"
+  "unexpectedErrorTip": "Amalni bajarib boʻlmadi: {detail}",
+  "coreCrashStoppedTitle": "Ulanish toʻxtatildi",
+  "coreCrashStoppedBody": "Yadro kutilmaganda toʻxtadi va qayta ishga tushirilgandan keyin ham tiklanmadi. ReClash ulanishni oʻchirdi va tizim proksisini boʻshatdi. Tayyor boʻlganingizda uni qayta ishga tushiring."
 }

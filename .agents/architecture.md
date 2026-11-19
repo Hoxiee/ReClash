@@ -317,6 +317,10 @@ choose one for a new setting.
   best-effort basis because the application is exiting.
 - An unexpected disconnect or transport failure while running is converted to `DesktopCoreFailure`, the owned process is
   cleaned up, and `CoreService` emits a Core crash event for the normal UI recovery path.
+- That path is `SetupAction.recoverFromCoreCrash`: during a started run it waits a short backoff, then restarts through
+  `CoreAction.restartCore`, whose lifecycle restart waits for the crash cleanup and reapplies the run. A failed restart,
+  or a second crash within a minute, stops the run, which releases the system proxy, and leaves an alert; the kill switch
+  stays armed. A user stop changes the run's start time and ends the recovery.
 
 Direct launch is used whenever TUN is off, and whenever TUN has no usable privileged backend without a prompt: an
 unregistered or outdated Helper or service, a background start, or a privileged start that just failed. TUN then stays

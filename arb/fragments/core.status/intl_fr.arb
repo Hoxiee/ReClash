@@ -19,5 +19,7 @@
   "coreOpenRuntimeConfig": "Ouvrir la configuration d’exécution",
   "coreRuntimeConfigDescription": "Configuration générée après application des paramètres et scripts. Lecture seule.",
   "coreRuntimeConfigReadFailed": "Impossible de lire la configuration d’exécution",
-  "unexpectedErrorTip": "Impossible de terminer l’action : {detail}"
+  "unexpectedErrorTip": "Impossible de terminer l’action : {detail}",
+  "coreCrashStoppedTitle": "Connexion arrêtée",
+  "coreCrashStoppedBody": "Le Core s’est arrêté de façon inattendue et n’a pas repris après un redémarrage. ReClash a désactivé la connexion et libéré le proxy système. Relancez-la quand vous êtes prêt."
 }
