@@ -13,6 +13,8 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 part 'clash_providers.dart';
 part 'converter.dart';
@@ -62,14 +64,54 @@ part 'traffic_usage.dart';
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
+  static const _schemaVersion = 26;
+
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => _schemaVersion;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final databaseFile = File(await appPath.databasePath);
+      backUpBeforeUpgrade(databaseFile, _schemaVersion);
       return NativeDatabase.createInBackground(databaseFile);
     });
+  }
+
+  /// Copies the file to `<name>.pre-v<old>.bak` when opening it would upgrade
+  /// its schema, and drops earlier copies. Drift runs `onUpgrade` inside a
+  /// transaction, where `VACUUM INTO` is refused, so the stored version is
+  /// read first; going through SQLite also folds in a pending WAL, which a
+  /// plain file copy would miss. A failed copy never blocks the upgrade.
+  @visibleForTesting
+  static String? backUpBeforeUpgrade(File databaseFile, int schemaVersion) {
+    if (!databaseFile.existsSync()) return null;
+    try {
+      final raw = sqlite.sqlite3.open(databaseFile.path);
+      try {
+        final old = raw.select('PRAGMA user_version').first.values.first;
+        if (old is! int || old == 0 || old >= schemaVersion) return null;
+        final target = '${databaseFile.path}.pre-v$old.bak';
+        final targetFile = File(target);
+        if (targetFile.existsSync()) targetFile.deleteSync();
+        raw.execute('VACUUM INTO ?', [target]);
+        final prefix = '${p.basename(databaseFile.path)}.pre-v';
+        for (final entity in databaseFile.parent.listSync()) {
+          final name = p.basename(entity.path);
+          if (entity.path != target &&
+              name.startsWith(prefix) &&
+              name.endsWith('.bak')) {
+            entity.deleteSync();
+          }
+        }
+        commonPrint.log('database backed up to $target before upgrade');
+        return target;
+      } finally {
+        raw.close();
+      }
+    } catch (error) {
+      commonPrint.log('database backup before upgrade failed: $error');
+      return null;
+    }
   }
 
   @override

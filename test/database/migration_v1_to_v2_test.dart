@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:reclash/database/database.dart' as fl;
 import 'package:reclash/enum/enum.dart';
@@ -277,6 +279,63 @@ void main() {
     await database.customSelect('SELECT 1').get();
     return database;
   }
+
+  group('safety copy before an upgrade', () {
+    late Directory directory;
+    late File file;
+
+    setUp(() async {
+      directory = Directory.systemTemp.createTempSync('reclash-db-backup-');
+      file = File('${directory.path}/database.sqlite');
+      final seed = fl.Database(NativeDatabase(file));
+      await seed.customSelect('SELECT 1').get();
+      await seed.close();
+    });
+
+    tearDown(() => directory.deleteSync(recursive: true));
+
+    void setVersion(int version) {
+      final db = sqlite3.open(file.path);
+      db.execute('PRAGMA user_version = $version');
+      db.close();
+    }
+
+    List<String> copies() => [
+      for (final entity in directory.listSync())
+        if (entity.path.endsWith('.bak')) entity.path.split('/').last,
+    ];
+
+    test('copies an older database and keeps only the latest copy', () {
+      setVersion(20);
+      expect(
+        fl.Database.backUpBeforeUpgrade(file, 26),
+        endsWith('.pre-v20.bak'),
+      );
+      expect(copies(), ['database.sqlite.pre-v20.bak']);
+
+      setVersion(23);
+      fl.Database.backUpBeforeUpgrade(file, 26);
+      expect(copies(), ['database.sqlite.pre-v23.bak']);
+    });
+
+    test('the copy opens at the version it was taken from', () {
+      setVersion(24);
+      final copy = fl.Database.backUpBeforeUpgrade(file, 26)!;
+      final raw = sqlite3.open(copy);
+      addTearDown(raw.close);
+      expect(_userVersion(raw), 24);
+      expect(_hasTable(raw, 'profiles'), isTrue);
+    });
+
+    test('leaves a current or empty database alone', () {
+      expect(fl.Database.backUpBeforeUpgrade(file, 26), isNull);
+      expect(
+        fl.Database.backUpBeforeUpgrade(File('${directory.path}/none'), 26),
+        isNull,
+      );
+      expect(copies(), isEmpty);
+    });
+  });
 
   test('a v1 database is left at the current schema version', () async {
     _downgradeToV1(raw);
