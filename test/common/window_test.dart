@@ -195,7 +195,6 @@ void main() {
     tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-    addTearDown(() => debugDefaultTargetPlatformOverride = null);
     await Window().toggle();
 
     expect(
@@ -212,6 +211,8 @@ void main() {
       containsAllInOrder(<String>['isVisible', 'show', 'setSkipTaskbar']),
     );
     await tester.pump(const Duration(seconds: 1));
+    // Flutter 3.47 checks debug variables before tear-down callbacks run.
+    debugDefaultTargetPlatformOverride = null;
   });
 
   test(
