@@ -503,6 +503,9 @@ extension ProfileExtension on Profile {
       locale: locale,
     );
     final fetcher = transport ?? SubscriptionTransport();
+    // Host only: the path and query carry the account token.
+    final logHost = Uri.tryParse(url)?.host ?? '';
+    final negotiationClock = Stopwatch()..start();
     final negotiation =
         await negotiateSubscriptionClients<PreparedSubscriptionUpdate>(
           attempts: attempts,
@@ -693,6 +696,12 @@ extension ProfileExtension on Profile {
                     ),
               );
             } on SubscriptionException catch (error) {
+              commonPrint.log(
+                'subscription $logHost via ${preset.name}: '
+                '${error.failure.name}${error.status == null ? '' : ' (${error.status})'} '
+                'after ${attemptClock.elapsed.inSeconds}s',
+                logLevel: LogLevel.warning,
+              );
               return SubscriptionClientRejected(_retryReason(error));
             } on SubscriptionImportException {
               return const SubscriptionClientRejected(
@@ -714,8 +723,15 @@ extension ProfileExtension on Profile {
       SubscriptionNegotiationFailed(:final reason)
           when reason == SubscriptionRetryReason.cancelled =>
         throw const SubscriptionUpdateCancelled(),
-      SubscriptionNegotiationFailed(:final reason) =>
-        throw SubscriptionUpdateRejected(reason),
+      SubscriptionNegotiationFailed(:final reason) => () {
+        commonPrint.log(
+          'subscription $logHost rejected: ${reason.name} '
+          'after ${negotiationClock.elapsed.inSeconds}s '
+          'of ${attempts.length} client(s)',
+          logLevel: LogLevel.warning,
+        );
+        throw SubscriptionUpdateRejected(reason);
+      }(),
     };
   }
 

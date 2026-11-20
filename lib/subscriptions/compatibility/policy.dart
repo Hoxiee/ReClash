@@ -3,7 +3,9 @@ import 'dart:async';
 import 'clients.dart';
 
 const maxAutomaticSubscriptionAttempts = 8;
-const subscriptionNegotiationBudget = Duration(seconds: 20);
+// Some providers build a large config for clash user agents and send the
+// first byte only after ~16 s, so the shared budget must outlast that.
+const subscriptionNegotiationBudget = Duration(seconds: 45);
 
 Duration remainingSubscriptionAttemptTimeout(
   Duration elapsed, {

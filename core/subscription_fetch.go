@@ -357,7 +357,7 @@ func fetchSubscriptionHop(ctx context.Context, connector subscriptionConnector, 
 			return nil, err
 		}
 		return &subscriptionWireConn{Conn: conn, total: wire}, nil
-	}, TLSHandshakeTimeout: 15 * time.Second, ResponseHeaderTimeout: 15 * time.Second, MaxResponseHeaderBytes: subscriptionFetchHeaderLimit, DisableCompression: true, DisableKeepAlives: true}
+	}, TLSHandshakeTimeout: 15 * time.Second, MaxResponseHeaderBytes: subscriptionFetchHeaderLimit, DisableCompression: true, DisableKeepAlives: true}
 	defer transport.CloseIdleConnections()
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, target.String(), nil)
 	if err != nil {

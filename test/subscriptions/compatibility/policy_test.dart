@@ -9,14 +9,14 @@ void main() {
     test('spends one shared budget across attempts', () {
       expect(
         remainingSubscriptionAttemptTimeout(const Duration(seconds: 7)),
-        const Duration(seconds: 13),
+        const Duration(seconds: 38),
       );
       expect(
-        remainingSubscriptionAttemptTimeout(const Duration(seconds: 20)),
+        remainingSubscriptionAttemptTimeout(const Duration(seconds: 45)),
         Duration.zero,
       );
       expect(
-        remainingSubscriptionAttemptTimeout(const Duration(seconds: 21)),
+        remainingSubscriptionAttemptTimeout(const Duration(seconds: 46)),
         Duration.zero,
       );
     });
