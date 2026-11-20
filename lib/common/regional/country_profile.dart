@@ -8,6 +8,7 @@ class CountryProfile {
     this.bypassDomains = const [],
     this.defaultServiceIds = const [],
     this.directRules = const [],
+    this.ipSourceIds,
   });
 
   final int tunMtu;
@@ -17,6 +18,9 @@ class CountryProfile {
   /// Added at the top of the rules, so an IP match must not resolve a domain
   /// before the profile's own rules have seen it.
   final List<String> directRules;
+
+  /// The IP lookup services on by default; null keeps every one.
+  final List<String>? ipSourceIds;
 }
 
 const otherCountryProfile = CountryProfile(
@@ -41,6 +45,7 @@ const _profiles = <String, CountryProfile>{
   'RU': CountryProfile(
     defaultServiceIds: ['youtube', 'discord', 'chatgpt', 'claude'],
     directRules: ['GEOSITE,category-ru,DIRECT', 'GEOIP,RU,DIRECT,no-resolve'],
+    ipSourceIds: ['ipApiCom', 'ipInfo', 'ipQuery', 'seeIp', 'identMe'],
   ),
   'IR': CountryProfile(
     defaultServiceIds: ['youtube', 'chatgpt', 'claude'],

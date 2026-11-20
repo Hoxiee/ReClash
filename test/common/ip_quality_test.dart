@@ -75,6 +75,7 @@ class _Adapter implements HttpClientAdapter {
   Map<String, _Reply> replies, {
   Duration timeout = const Duration(seconds: 8),
   Duration hedge = const Duration(seconds: 1),
+  Set<IpQualitySource>? sources,
 }) {
   final adapter = _Adapter(replies);
   final dio = Dio()..httpClientAdapter = adapter;
@@ -87,6 +88,7 @@ class _Adapter implements HttpClientAdapter {
       cancelToken: CancelToken(),
       timeout: timeout,
       hedge: hedge,
+      sources: sources,
     ),
   );
 }
@@ -394,5 +396,18 @@ void main() {
             ]),
       ),
     );
+  });
+
+  test('asks only the sources it is given', () async {
+    final lookup = _lookup(
+      {
+        for (final MapEntry(:key, :value) in samples.entries)
+          _hosts[key]!: _ok(value.$1),
+      },
+      sources: {IpQualitySource.ipLocate},
+    );
+
+    expect(await lookup.result, samples[IpQualitySource.ipLocate]!.$2);
+    expect(lookup.adapter.requested.map((uri) => uri.host), ['iplocate.io']);
   });
 }

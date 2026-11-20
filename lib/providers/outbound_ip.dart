@@ -3,6 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'core.dart';
+import 'ip_quality.dart';
 import 'route_state.dart';
 import 'routed_probe.dart';
 
@@ -27,6 +28,7 @@ class OutboundIpProbe extends _$OutboundIpProbe
     final result = await lookupOutboundIp(
       ref.read(coreHandlerProvider),
       proxyName,
+      sources: ref.read(enabledIpSourcesProvider),
     );
     final value = parseOutboundIp(result);
     final hits = result?.hits ?? const <RouteHit>[];

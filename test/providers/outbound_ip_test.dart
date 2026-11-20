@@ -1,3 +1,4 @@
+import 'package:reclash/common/ip_sources.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
@@ -64,7 +65,9 @@ void main() {
 
       final params = await asked();
       expect(params.proxyName, isEmpty);
-      expect(params.urls, ipInfoSources.keys.toList());
+      expect(params.urls, [
+        for (final source in IpSource.values) ?source.echoUrl,
+      ]);
       final entry = container
           .read(outboundIpProbeProvider)
           .entryOf(routedOutbound);

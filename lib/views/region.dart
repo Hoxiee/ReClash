@@ -1,11 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/ip_sources.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/ip_quality.dart';
 import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
@@ -52,6 +54,21 @@ List<(Glyph, String)> regionChanges(
     enabled: services.enabled.toSet(),
     disabled: services.disabled.toSet(),
   );
+  final ipSources = ref.watch(
+    appSettingProvider.select(
+      (state) => (
+        order: state.ipSourceOrder,
+        enabled: state.enabledIpSources,
+        disabled: state.disabledIpSources,
+      ),
+    ),
+  );
+  final targetIpSources = enabledIpSourcesForRegion(
+    regionCode: target,
+    order: ipSources.order,
+    enabled: ipSources.enabled.toSet(),
+    disabled: ipSources.disabled.toSet(),
+  );
   final nextConfig = next.patchConfig;
   return [
     if (!_equality.equals(next.bypassDomain, bypassDomain))
@@ -63,6 +80,8 @@ List<(Glyph, String)> regionChanges(
       targetServices,
     ))
       (AppGlyphs.verified, l.regionChangeServices),
+    if (!_equality.equals(ref.watch(enabledIpSourcesProvider), targetIpSources))
+      (AppGlyphs.search, l.ipSources),
   ];
 }
 

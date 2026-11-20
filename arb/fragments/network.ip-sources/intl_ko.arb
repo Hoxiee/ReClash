@@ -1,0 +1,6 @@
+{
+  "ipSources": "IP 조회 서비스",
+  "ipSourceAddress": "주소",
+  "ipSourceQuality": "품질",
+  "ipSourcesFooter": "주소는 위에서부터 차례로 조회하며 가장 먼저 온 응답을 사용합니다. 스위치를 바꾸기 전까지는 앱 지역에 맞춰 구성됩니다."
+}

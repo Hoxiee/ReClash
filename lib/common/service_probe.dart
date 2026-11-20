@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/ip_sources.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/models/models.dart';
@@ -191,27 +192,31 @@ IpInfo Function(String) _json(IpInfo Function(Map<String, dynamic>) parse) {
   return (body) => parse(jsonDecode(body) as Map<String, dynamic>);
 }
 
-final Map<String, IpInfo Function(String)> ipInfoSources = {
-  'https://www.cloudflare.com/cdn-cgi/trace': IpInfo.fromCloudflareTrace,
-  'https://api.ip.sb/geoip': _json(IpInfo.fromIpSbJson),
-  'https://ipinfo.io/json': _json(IpInfo.fromIpInfoIoJson),
-  'https://ipwho.is': _json(IpInfo.fromIpWhoIsJson),
-  'https://get.geojs.io/v1/ip/geo.json': _json(IpInfo.fromGeoJsJson),
-  'https://api.country.is': _json(IpInfo.fromCountryIsJson),
-  'https://api.ipquery.io/?format=json': _json(IpInfo.fromIpQueryJson),
-  'https://ident.me/json': _json(IpInfo.fromIdentMeJson),
+final Map<IpSource, IpInfo Function(String)> _ipInfoParsers = {
+  IpSource.cloudflare: IpInfo.fromCloudflareTrace,
+  IpSource.ipSb: _json(IpInfo.fromIpSbJson),
+  IpSource.ipInfo: _json(IpInfo.fromIpInfoIoJson),
+  IpSource.ipWhoIs: _json(IpInfo.fromIpWhoIsJson),
+  IpSource.geoJs: _json(IpInfo.fromGeoJsJson),
+  IpSource.countryIs: _json(IpInfo.fromCountryIsJson),
+  IpSource.ipQuery: _json(IpInfo.fromIpQueryJson),
+  IpSource.identMe: _json(IpInfo.fromIdentMeJson),
+  IpSource.ipApiCom: _json(IpInfo.fromIpApiComJson),
+  IpSource.seeIp: _json(IpInfo.fromSeeIpJson),
 };
 
 /// Raw so the route stamp survives; [parseOutboundIp] reads the address.
+/// The Core asks [sources] in their order.
 Future<OutboundIpResult?> lookupOutboundIp(
   CoreController core,
   String proxyName, {
+  List<IpSource> sources = IpSource.values,
   Duration timeout = outboundIpTimeoutDuration,
 }) {
   return core.outboundIp(
     OutboundIpParams(
       proxyName: proxyName,
-      urls: ipInfoSources.keys.toList(),
+      urls: [for (final source in sources) ?source.echoUrl],
       timeout: timeout.inMilliseconds,
     ),
   );
@@ -221,7 +226,8 @@ IpInfo? parseOutboundIp(OutboundIpResult? result) {
   if (result == null || result.error != null || result.body.isEmpty) {
     return null;
   }
-  final parse = ipInfoSources[result.url];
+  final source = IpSource.byEchoUrl(result.url);
+  final parse = source == null ? null : _ipInfoParsers[source];
   if (parse == null) return null;
   try {
     return parse(result.body);

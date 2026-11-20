@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'ip_quality_text.dart';
+import 'ip_source_manage_view.dart';
 import 'labels.dart';
 
 Future<void> showIpQualitySheet(BuildContext context, {required String ip}) {
@@ -37,6 +38,15 @@ class _IpQualitySheet extends ConsumerWidget {
     return CommonScaffold(
       title: localizations.outboundIp,
       actions: [
+        AppBarActionButton(
+          data: IconButtonData(
+            glyph: AppGlyphs.sliders,
+            tooltip: localizations.ipSources,
+            onPressed: () => Navigator.of(
+              context,
+            ).push(PagedSheetRoute(builder: (_) => const IpSourceManageView())),
+          ),
+        ),
         AppBarActionButton(
           data: IconButtonData(
             glyph: AppGlyphs.refresh,

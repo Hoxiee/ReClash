@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/ip_sources.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
@@ -286,7 +287,9 @@ void main() {
         await lookupOutboundIp(controller, 'HK-01'),
       );
 
-      expect(sent.urls, ipInfoSources.keys.toList());
+      expect(sent.urls, [
+        for (final source in IpSource.values) ?source.echoUrl,
+      ]);
       expect(sent.proxyName, 'HK-01');
       expect(sent.timeout, outboundIpTimeoutDuration.inMilliseconds);
       expect(ipInfo, const IpInfo(ip: '203.0.113.7', countryCode: 'US'));
@@ -305,6 +308,43 @@ void main() {
       );
 
       expect(ipInfo, const IpInfo(ip: '198.51.100.4', countryCode: 'DE'));
+    });
+
+    test('asks only the given sources, in their order', () async {
+      late OutboundIpParams sent;
+      when(() => core.outboundIp(any())).thenAnswer((invocation) async {
+        sent = invocation.positionalArguments.single as OutboundIpParams;
+        return OutboundIpResult(
+          url: IpSource.ipApiCom.echoUrl!,
+          body: jsonEncode({
+            'status': 'success',
+            'countryCode': 'NL',
+            'query': '192.0.2.8',
+          }),
+        );
+      });
+
+      final ipInfo = parseOutboundIp(
+        await lookupOutboundIp(
+          controller,
+          'NL-01',
+          sources: const [IpSource.seeIp, IpSource.ipLocate, IpSource.ipApiCom],
+        ),
+      );
+
+      expect(sent.urls, [IpSource.seeIp.echoUrl, IpSource.ipApiCom.echoUrl]);
+      expect(ipInfo, const IpInfo(ip: '192.0.2.8', countryCode: 'NL'));
+    });
+
+    test('reads the seeip.org answer', () {
+      final ipInfo = parseOutboundIp(
+        OutboundIpResult(
+          url: IpSource.seeIp.echoUrl!,
+          body: jsonEncode({'ip': '192.0.2.9', 'country_code': 'BE'}),
+        ),
+      );
+
+      expect(ipInfo, const IpInfo(ip: '192.0.2.9', countryCode: 'BE'));
     });
 
     test('gives up on an error, an empty body or an unparseable one', () async {

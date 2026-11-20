@@ -1,0 +1,6 @@
+{
+  "ipSources": "Servicios de consulta de IP",
+  "ipSourceAddress": "Dirección",
+  "ipSourceQuality": "Calidad",
+  "ipSourcesFooter": "La dirección se consulta de arriba abajo y gana la primera respuesta. Hasta que cambies un interruptor, la selección sigue la región de la app."
+}

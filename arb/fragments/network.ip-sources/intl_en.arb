@@ -1,0 +1,6 @@
+{
+  "ipSources": "IP lookup services",
+  "ipSourceAddress": "Address",
+  "ipSourceQuality": "Quality",
+  "ipSourcesFooter": "Address lookups go from the top down, and the first answer wins. Until you change a switch, the set follows the app region."
+}

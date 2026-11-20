@@ -3,14 +3,45 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ip_quality.dart';
+import 'package:reclash/common/ip_sources.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'config.dart';
 
 part 'generated/ip_quality.g.dart';
 
 Duration? _noRetry(int retryCount, Object error) => null;
+
+@riverpod
+List<IpSource> ipSources(Ref ref) {
+  return orderIpSources(
+    ref.watch(appSettingProvider.select((state) => state.ipSourceOrder)),
+  );
+}
+
+@riverpod
+List<IpSource> enabledIpSources(Ref ref) {
+  final settings = ref.watch(
+    appSettingProvider.select(
+      (state) => (
+        regionCode: state.regionCode,
+        order: state.ipSourceOrder,
+        enabled: state.enabledIpSources,
+        disabled: state.disabledIpSources,
+      ),
+    ),
+  );
+  return enabledIpSourcesForRegion(
+    regionCode: settings.regionCode,
+    order: settings.order,
+    enabled: settings.enabled.toSet(),
+    disabled: settings.disabled.toSet(),
+  );
+}
 
 @Riverpod(keepAlive: true)
 Duration ipQualityFailureCooldown(Ref ref) => const Duration(minutes: 5);
@@ -39,6 +70,10 @@ Future<IpQuality> ipQuality(Ref ref, String ip) async {
       request.dio,
       ip,
       cancelToken: cancelToken,
+      sources: {
+        for (final source in ref.read(enabledIpSourcesProvider))
+          ?source.quality,
+      },
     );
     final checkedAt = DateTime.now();
     await _orNull(

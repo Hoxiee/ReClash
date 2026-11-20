@@ -344,6 +344,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default([]) List<String> serviceOrder,
     @Default([]) List<String> enabledServices,
     @Default([]) List<String> disabledServices,
+    @Default([]) List<String> ipSourceOrder,
+    @Default([]) List<String> enabledIpSources,
+    @Default([]) List<String> disabledIpSources,
     @Default({}) Map<String, Map<String, double>> tableColumnWidths,
     @Default(WebDashboardFlavor.zashboard)
     @JsonKey(unknownEnumValue: WebDashboardFlavor.zashboard)

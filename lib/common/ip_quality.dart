@@ -34,24 +34,40 @@ const _waves = [
   [IpQualitySource.proxyCheck],
 ];
 
+/// Only [sources] are asked, null asks every one.
 Future<IpQuality> lookupIpQuality(
   Dio dio,
   String ip, {
   required CancelToken cancelToken,
+  Set<IpQualitySource>? sources,
   Duration timeout = const Duration(seconds: 8),
   Duration hedge = const Duration(seconds: 1),
 }) {
-  return _Lookup(dio, ip, cancelToken, timeout, hedge).run();
+  final waves = [
+    for (final wave in _waves)
+      if (wave.where((it) => sources?.contains(it) ?? true).toList()
+          case final asked when asked.isNotEmpty)
+        asked,
+  ];
+  return _Lookup(dio, ip, cancelToken, timeout, hedge, waves).run();
 }
 
 class _Lookup {
-  _Lookup(this.dio, this.ip, this.cancelToken, this.timeout, this.hedge);
+  _Lookup(
+    this.dio,
+    this.ip,
+    this.cancelToken,
+    this.timeout,
+    this.hedge,
+    this.waves,
+  );
 
   final Dio dio;
   final String ip;
   final CancelToken cancelToken;
   final Duration timeout;
   final Duration hedge;
+  final List<List<IpQualitySource>> waves;
 
   final _completer = Completer<IpQuality>();
   final _failures = <IpQualityFailure>[];
@@ -70,11 +86,11 @@ class _Lookup {
     if (_completer.isCompleted) {
       return;
     }
-    if (_wave == _waves.length) {
+    if (_wave == waves.length) {
       _settle();
       return;
     }
-    final sources = _waves[_wave++];
+    final sources = waves[_wave++];
     _inFlight += sources.length;
     for (final source in sources) {
       unawaited(
@@ -87,7 +103,7 @@ class _Lookup {
         ).then(_onAnswer, onError: (Object error) => _onError(source, error)),
       );
     }
-    if (_wave < _waves.length) {
+    if (_wave < waves.length) {
       _timer = Timer(hedge, _launch);
     }
   }

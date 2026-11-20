@@ -1,0 +1,6 @@
+{
+  "ipSources": "IP 確認サービス",
+  "ipSourceAddress": "アドレス",
+  "ipSourceQuality": "品質",
+  "ipSourcesFooter": "アドレスは上から順に問い合わせ、最初の応答を採用します。スイッチを変更するまでは、アプリの地域に合わせた構成になります。"
+}

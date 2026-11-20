@@ -581,6 +581,26 @@ abstract class IpInfo with _$IpInfo {
     };
   }
 
+  static IpInfo fromIpApiComJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        'status': 'success',
+        'query': final String ip,
+        'countryCode': final String countryCode,
+      } =>
+        IpInfo(ip: ip, countryCode: countryCode),
+      _ => throw const FormatException('invalid json'),
+    };
+  }
+
+  static IpInfo fromSeeIpJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {'ip': final String ip, 'country_code': final String countryCode} =>
+        IpInfo(ip: ip, countryCode: countryCode),
+      _ => throw const FormatException('invalid json'),
+    };
+  }
+
   static IpInfo fromIdentMeJson(Map<String, dynamic> json) {
     return switch (json) {
       {'ip': final String ip, 'cc': final String countryCode} => IpInfo(

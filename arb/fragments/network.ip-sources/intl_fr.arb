@@ -1,0 +1,6 @@
+{
+  "ipSources": "Services de vérification d'IP",
+  "ipSourceAddress": "Adresse",
+  "ipSourceQuality": "Qualité",
+  "ipSourcesFooter": "L'adresse est demandée de haut en bas ; la première réponse l'emporte. Tant que vous ne touchez à aucun interrupteur, la sélection suit la région de l'app."
+}
