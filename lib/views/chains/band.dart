@@ -54,10 +54,7 @@ List<ProxyBandSlice> splitProxyBands(
   ];
 }
 
-/// A group that is only servers needs no label over them.
-bool proxyBandsLabelled(List<ProxyBandSlice> bands) =>
-    bands.length > 1 ||
-    (bands.isNotEmpty && bands.first.band != ProxyBand.servers);
+bool proxyBandsLabelled(List<ProxyBandSlice> bands) => bands.isNotEmpty;
 
 /// A label over one band of a group, with the way to every chain beside the
 /// chains and a delay test of just the favorites beside them.
@@ -116,8 +113,45 @@ class ProxyBandLabel extends StatelessWidget {
               ),
             if (band == ProxyBand.favorites && proxies.isNotEmpty)
               _FavoritesDelayTest(proxies: proxies, testUrl: testUrl),
+            if (band == ProxyBand.servers && proxies.isNotEmpty)
+              _AliveCount(proxies: proxies, testUrl: testUrl),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Hidden until one of [proxies] has been tested.
+class _AliveCount extends ConsumerWidget {
+  const _AliveCount({required this.proxies, required this.testUrl});
+
+  final List<Proxy> proxies;
+  final String? testUrl;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    var tested = 0;
+    var alive = 0;
+    for (final proxy in proxies) {
+      final delay = ref.watch(
+        delayProvider(proxyName: proxy.name, testUrl: testUrl),
+      );
+      if (delay == null) continue;
+      tested++;
+      if (delay > 0) alive++;
+    }
+    if (tested == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        '$alive/${proxies.length}',
+        style: AppTextStyle.footnote
+            .of(context, emphasized: true)
+            .copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
       ),
     );
   }

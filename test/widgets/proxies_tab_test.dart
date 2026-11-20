@@ -7,6 +7,7 @@ import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/chains/band.dart';
 import 'package:reclash/views/proxies/card.dart';
 import 'package:reclash/views/proxies/group_tabs.dart';
 import 'package:reclash/views/proxies/proxies.dart';
@@ -255,16 +256,28 @@ void main() {
         .set(_tabState([_group('A'), group]));
     final key = await pumpTabView(tester);
     await tester.pumpAndSettle();
-    final firstRowTop = tester
-        .getRect(find.text('B-0', findRichText: true).first)
+    final gridTop = tester
+        .getRect(
+          find.descendant(
+            of: find.byType(ProxyGroupView),
+            matching: find.byType(CustomScrollView),
+          ),
+        )
         .top;
 
     key.currentState?.scrollToGroupSelected();
     await tester.pumpAndSettle();
 
     expect(
-      tester.getRect(find.text('B-41', findRichText: true).first).top,
-      firstRowTop,
+      tester
+          .getRect(
+            find.ancestor(
+              of: find.text('B-41', findRichText: true).first,
+              matching: find.byType(ProxyCard),
+            ),
+          )
+          .top,
+      gridTop,
     );
   });
 
@@ -290,7 +303,11 @@ void main() {
     );
 
     expect(grid.top, tabs.bottom + 16);
-    expect(tester.getRect(find.byType(ProxyCard).first).top, grid.top);
+    expect(tester.getRect(find.byType(ProxyBandLabel)).top, grid.top);
+    expect(
+      tester.getRect(find.byType(ProxyCard).first).top,
+      grid.top + proxyBandLabelExtent,
+    );
   });
 
   testWidgets('a long press on a card offers to select it and to add it to '
