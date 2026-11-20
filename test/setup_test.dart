@@ -167,6 +167,24 @@ hooks:
       },
     );
 
+    test('macOS packaging builds the requested slice', () {
+      expect(
+        setup.createPackageProcessEnvironment(
+          rootDir: '/repo',
+          platform: 'macos',
+          macosArch: 'amd64',
+        )['FLUTTER_XCODE_ARCHS'],
+        'x86_64',
+      );
+      expect(
+        setup.createPackageProcessEnvironment(
+          rootDir: '/repo',
+          platform: 'linux',
+        ),
+        isNot(contains('FLUTTER_XCODE_ARCHS')),
+      );
+    });
+
     test('Windows PATH keeps semicolon-separated directories', () {
       final env = setup.createPackageProcessEnvironment(
         rootDir: '/repo',

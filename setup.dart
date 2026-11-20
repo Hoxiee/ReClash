@@ -77,17 +77,26 @@ Future<void> main(List<String> args) async {
     );
     exit(1);
   }
-  final arch = _detectArch();
+  final requestedArch = results['arch'] as String?;
+  if (platform == 'macos' && requestedArch == 'arm') {
+    stderr.writeln('macOS builds arm64 or amd64, not arm.');
+    exit(64);
+  }
+  final arch = platform == 'macos'
+      ? requestedArch ?? _detectArch()
+      : _detectArch();
   final targets = createPackageTargets(
     platform,
     results['targets'],
     arch: arch,
   );
-  final androidArch = results['arch'] as String?;
+  final androidArch = platform == 'android' ? requestedArch : null;
   final verbose = results['verbose'] as bool;
 
-  final prepared = await prepareProject(rootDir);
-  if (prepared != 0) exit(prepared);
+  if (results['prepare'] as bool) {
+    final prepared = await prepareProject(rootDir);
+    if (prepared != 0) exit(prepared);
+  }
 
   final exitCode = await _package(
     platform,
@@ -118,7 +127,12 @@ ArgParser createSetupArgParser() {
       'arch',
       valueHelp: 'arm,arm64,amd64',
       allowed: ['arm', 'arm64', 'amd64'],
-      help: 'Target architecture (Android only)',
+      help: 'Target architecture (Android, or the macOS slice)',
+    )
+    ..addFlag(
+      'prepare',
+      defaultsTo: true,
+      help: 'Resolve dependencies and generate sources before packaging',
     )
     ..addFlag(
       'verbose',
@@ -248,6 +262,7 @@ Future<int> _package(
       rootDir: rootDir,
       platform: platform,
       androidArch: androidArch,
+      macosArch: platform == 'macos' ? arch : null,
     ),
     workingDirectory: rootDir,
     runInShell: Platform.isWindows,
@@ -368,6 +383,7 @@ Map<String, String> createPackageProcessEnvironment({
   required String rootDir,
   required String platform,
   String? androidArch,
+  String? macosArch,
 }) {
   final path = [
     if (platform == 'linux')
@@ -375,7 +391,13 @@ Map<String, String> createPackageProcessEnvironment({
     _pubCacheBin(),
     Platform.environment['PATH'] ?? '',
   ].join(platform == 'windows' ? ';' : ':');
-  return {'ANDROID_ARCH': ?androidArch, 'PATH': path};
+  return {
+    'ANDROID_ARCH': ?androidArch,
+    // flutter_tools passes FLUTTER_XCODE_* to xcodebuild as build settings.
+    if (macosArch != null)
+      'FLUTTER_XCODE_ARCHS': macosArch == 'amd64' ? 'x86_64' : 'arm64',
+    'PATH': path,
+  };
 }
 
 /// Renames the maker's `.pacman` output to the manifest's `.pkg.tar.xz`.
