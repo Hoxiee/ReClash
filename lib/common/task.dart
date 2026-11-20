@@ -198,6 +198,9 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
       rawConfig['interface-name'] = realPatchConfig.interfaceName;
   }
   rawConfig['external-ui-url'] = '';
+  // mihomo leaves unified-delay off, which adds the proxy handshakes to every
+  // delay; a profile that does not choose gets the app's default instead.
+  rawConfig['unified-delay'] ??= defaultClashConfig.unifiedDelay;
   rawConfig.addAll(realPatchConfig.generalOverrideJson);
   rawConfig['log-level'] = realPatchConfig.logLevel.name;
   rawConfig['port'] = 0;

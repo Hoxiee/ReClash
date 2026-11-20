@@ -11,12 +11,15 @@ const _profile = <String, dynamic>{
   'geodata-loader': 'standard',
 };
 
-Future<YamlMap> _configOf(PatchClashConfig patchConfig) async {
+Future<YamlMap> _configOf(
+  PatchClashConfig patchConfig, {
+  Map<String, dynamic> profile = _profile,
+}) async {
   final result = await makeRealProfileTask(
     MakeRealProfileState(
       profilesPath: '/profiles',
       profileId: 1,
-      rawConfig: _profile,
+      rawConfig: profile,
       realPatchConfig: patchConfig,
       overrides: const ProfileOverrides(),
       appendSystemDns: false,
@@ -54,6 +57,12 @@ void main() {
     expect(config['geodata-loader'], 'memconservative');
     expect(config['unified-delay'], false);
     expect(config['ipv6'], true);
+  });
+
+  test('turns unified delay on when the profile leaves it unset', () async {
+    final config = await _configOf(const PatchClashConfig(), profile: {});
+
+    expect(config['unified-delay'], true);
   });
 
   test('keeps the test URL out of the profile', () async {
