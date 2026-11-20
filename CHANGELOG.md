@@ -2,6 +2,55 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.12
+
+Site lock presets now follow their updates, and sign-outs and shutdowns leave nothing behind.
+
+### New
+
+- **Data usage**: the traffic card on the dashboard opens a data usage sheet that leads with your quota and charts the
+  last 7 days, 30 days or all time.
+- **IP lookup services**: choose the services that look up and rate the outbound IP. Switches you leave untouched
+  follow the app region.
+- **Favorites delay test**: test the delay of every favorite at once from the favorites band label.
+
+### Improved
+
+- **Connection recovery**: on desktop an interrupted connection restarts on its own while the kill switch stays armed;
+  if it stops again within a minute, ReClash ends it and releases the system proxy. A system proxy left behind by an
+  unexpected exit is cleared at the next launch.
+- **Site lock presets**: locks made from a preset stay linked to it, so preset changes in a release reach them, and your
+  own entries beyond the preset are kept. Existing full copies of a released preset are linked too; partial copies stay
+  as typed. The Claude preset also covers the Anthropic domain list and claudemcpclient.com.
+- **Delay tests**: every group shows how many servers answered beside its servers label.
+- **Subscription import**: slow providers get more time to answer, and the log says why an import failed without
+  recording the subscription URL.
+- **Database upgrades**: the database is copied aside before a schema upgrade.
+- **Errors**: unexpected errors show a short message instead of raw exception text.
+
+### Fixed
+
+- Delays no longer include the proxy handshake when the profile leaves unified delay unset.
+- The kill switch no longer blocks traffic before the TUN is up.
+- On Windows, signing out or shutting down, Fast Startup included, clears the system proxy and the kill switch and no
+  longer starts a downloaded update.
+- On macOS ReClash no longer cancels a logout, restart or shutdown.
+- On Linux desktops without a tray, closing the window keeps it on the taskbar.
+- On Android, starts from the tile, shortcuts or always-on VPN keep site locks and provider locks.
+- Site lock refuses locked traffic when a pinned server moves to another address under its old name.
+- Subscriptions with more than 20000 inline rules import and update again.
+- Deleting the override script of the current profile takes effect at once.
+- App updates always verify TLS certificates, and slow update downloads no longer fail every 10 minutes.
+- Choosing the build's own update channel no longer pins it after the next release.
+- Restoring an older backup applies the config upgrades it missed.
+- The TUN service update prompt no longer reappears after you confirm it, and it is shorter.
+- On Windows uninstalling with data removal deletes ReClash's data, not FlClash's.
+- On Windows extensions no longer open a console window when the Core starts them.
+
+### Known issues
+
+- Browsers using their own DNS over HTTPS can bypass the Linux site lock after the connection stops unexpectedly.
+
 ## v0.1.0-pre.11
 
 Site lock pins sites to exits, and the auto routing editor is reworked.

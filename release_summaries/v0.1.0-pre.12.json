@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.12",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Site lock presets that follow updates, and clean shutdowns",
+      "spotlight": {
+        "title": "Site lock presets follow updates",
+        "description": "Locks made from a preset pick up its changes with each release and keep your own entries.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Connection recovery",
+          "description": "An interrupted connection restarts on its own while the kill switch stays armed.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "title": "Clean sign-outs and shutdowns",
+          "description": "Windows and macOS sessions end without a stuck proxy, kill switch or update.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos"
+          ]
+        },
+        {
+          "title": "IP lookup services",
+          "description": "Choose the services that look up and rate the outbound IP.",
+          "kind": "link"
+        },
+        {
+          "title": "Data usage",
+          "description": "The traffic card opens a data usage sheet.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Favorites delay test",
+          "description": "Test every favorite at once from its band label.",
+          "kind": "speed"
+        },
+        {
+          "title": "Large subscriptions import again",
+          "description": "Subscriptions with more than 20000 inline rules import and update, and slow providers get more time.",
+          "kind": "update"
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Пресеты привязки сайтов обновляются сами, а выключение проходит чисто",
+      "spotlight": {
+        "title": "Пресеты привязки сайтов обновляются",
+        "description": "Привязки из пресета получают его изменения с каждым релизом и сохраняют ваши записи.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Восстановление соединения",
+          "description": "Прерванное соединение перезапускается само, а kill switch остаётся включённым.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "title": "Чистый выход и выключение",
+          "description": "Сеанс в Windows и macOS завершается без зависшего прокси, kill switch или обновления.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos"
+          ]
+        },
+        {
+          "title": "Сервисы определения IP",
+          "description": "Выбирайте сервисы, которые определяют и оценивают внешний IP.",
+          "kind": "link"
+        },
+        {
+          "title": "Расход трафика",
+          "description": "Карточка трафика открывает лист с расходом данных.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Проверка задержки избранного",
+          "description": "Проверяйте всё избранное сразу из заголовка его полосы.",
+          "kind": "speed"
+        },
+        {
+          "title": "Большие подписки снова импортируются",
+          "description": "Подписки с более чем 20000 встроенных правил импортируются и обновляются, а медленным провайдерам даётся больше времени.",
+          "kind": "update"
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
