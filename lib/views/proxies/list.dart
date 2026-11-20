@@ -313,9 +313,10 @@ final class _HintRow extends _BandRow {
 }
 
 final class _LabelRow extends _BandRow {
-  const _LabelRow(this.band);
+  const _LabelRow(this.band, this.proxies);
 
   final ProxyBand band;
+  final List<Proxy> proxies;
 }
 
 final class _CardsRow extends _BandRow {
@@ -352,7 +353,7 @@ class _GroupLayout {
 
     if (hintExtent != null) add(const _HintRow(), hintExtent);
     for (final (:band, :proxies) in bands) {
-      if (labelled) add(_LabelRow(band), proxyBandLabelExtent);
+      if (labelled) add(_LabelRow(band, proxies), proxyBandLabelExtent);
       for (final chunk in proxies.chunks(columns)) {
         add(_CardsRow(chunk), rowExtent);
       }
@@ -479,9 +480,13 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
       padding: EdgeInsets.symmetric(horizontal: _headerInset),
       child: ChainHintCard(),
     ),
-    _LabelRow(:final band) => Padding(
+    _LabelRow(:final band, :final proxies) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: _headerInset),
-      child: ProxyBandLabel(band: band),
+      child: ProxyBandLabel(
+        band: band,
+        proxies: proxies,
+        testUrl: widget.group.testUrl,
+      ),
     ),
     _CardsRow(:final proxies) => _buildRow(context, proxies),
   };

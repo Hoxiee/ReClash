@@ -60,11 +60,18 @@ bool proxyBandsLabelled(List<ProxyBandSlice> bands) =>
     (bands.isNotEmpty && bands.first.band != ProxyBand.servers);
 
 /// A label over one band of a group, with the way to every chain beside the
-/// chains.
+/// chains and a delay test of just the favorites beside them.
 class ProxyBandLabel extends StatelessWidget {
-  const ProxyBandLabel({super.key, required this.band});
+  const ProxyBandLabel({
+    super.key,
+    required this.band,
+    this.proxies = const [],
+    this.testUrl,
+  });
 
   final ProxyBand band;
+  final List<Proxy> proxies;
+  final String? testUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -107,8 +114,58 @@ class ProxyBandLabel extends StatelessWidget {
                   ],
                 ),
               ),
+            if (band == ProxyBand.favorites && proxies.isNotEmpty)
+              _FavoritesDelayTest(proxies: proxies, testUrl: testUrl),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FavoritesDelayTest extends ConsumerStatefulWidget {
+  const _FavoritesDelayTest({required this.proxies, required this.testUrl});
+
+  final List<Proxy> proxies;
+  final String? testUrl;
+
+  @override
+  ConsumerState<_FavoritesDelayTest> createState() =>
+      _FavoritesDelayTestState();
+}
+
+class _FavoritesDelayTestState extends ConsumerState<_FavoritesDelayTest> {
+  var _testing = false;
+
+  Future<void> _test() async {
+    setState(() => _testing = true);
+    try {
+      await ref
+          .read(proxiesActionProvider.notifier)
+          .delayTest(widget.proxies, widget.testUrl);
+    } finally {
+      if (mounted) setState(() => _testing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: _testing ? null : _test,
+      style: TextButton.styleFrom(
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          if (_testing)
+            const CommonCircleLoading(size: 14)
+          else
+            const GlyphIcon(AppGlyphs.speed, size: 16),
+          Text(context.appLocalizations.chainsTest),
+        ],
       ),
     );
   }

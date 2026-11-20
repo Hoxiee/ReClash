@@ -345,7 +345,11 @@ class ProxyGroupView extends ConsumerWidget {
                         top: index == 0 ? 0 : proxyGridSpacing,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: ProxyBandLabel(band: band),
+                        child: ProxyBandLabel(
+                          band: band,
+                          proxies: proxies,
+                          testUrl: group.testUrl,
+                        ),
                       ),
                     ),
                   grid(proxies),
