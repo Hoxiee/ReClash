@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' show isAbsolute, join;
 
+import 'src/changelog/card.dart';
 import 'src/changelog/digest.dart';
 import 'src/changelog/git.dart';
 import 'src/changelog/notes.dart';
@@ -63,7 +64,7 @@ int _digest(String root, ArgResults command) {
 int _render(String root, ArgResults command) {
   final rest = command.rest;
   if (rest.isEmpty) {
-    _fail('render needs a target: release or telegram');
+    _fail('render needs a target: release, telegram or card');
   }
   final tag = _tag(root, command).name;
   final summary = readReleaseSummary(root, tag);
@@ -75,6 +76,10 @@ int _render(String root, ArgResults command) {
     ),
     'telegram' => renderTelegram(
       summary ?? _fail('$releaseSummariesDirectory/$tag.json is missing'),
+    ),
+    'card' => renderReleaseCard(
+      summary ?? _fail('$releaseSummariesDirectory/$tag.json is missing'),
+      root: root,
     ),
     _ => _fail('Unknown render target: ${rest.first}'),
   };
@@ -135,7 +140,7 @@ Usage: dart run tool/changelog.dart <command> [options]
 
 Commands:
   digest [--tag vX]     Commits and earlier notes to author the notes from.
-  render <release|telegram> [--tag vX] [--out file]
+  render <release|telegram|card> [--tag vX] [--out file]
   changelog             Rewrite CHANGELOG.md from release_notes/.
   verify                Check notes, summaries and CHANGELOG.md.
 

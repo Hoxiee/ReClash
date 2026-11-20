@@ -343,10 +343,12 @@ GitHub release; prerelease tags publish a GitHub prerelease without changing the
 Homebrew and F-Droid publishing require their configured secrets and remain stable-only; manual builds never publish.
 Telegram announcements use the public Bot API with `TELEGRAM_BOT_TOKEN` only. The bot must be a channel administrator
 with permission to post. `TELEGRAM_CHAT_ID` is an optional Actions variable (default `@ReClashApp`). No API ID, API hash,
-local Bot API container, Python dependencies, or file uploads are needed. Each announcement includes versioned direct
-asset buttons, full release notes, and SHA256SUMS, and runs only after GitHub release assets have been published.
-Preview without sending: `TAG=v0.1.0-pre.1 python3 -I release_telegram.py --dry-run` (requires `telegram.md` and the
-complete release asset set plus SHA256SUMS in `dist/`). Offline tests run with
+local Bot API container, or Python dependencies are needed. Each announcement is a `sendPhoto` post: a 1280x720 release
+card (`render card` writes the SVG, the pinned resvg CLI rasterizes it to `card.png`) with a caption of at most 1024
+characters (`telegram.md` plus heading and links, highlights in an expandable quote), one button row (All files plus
+Report a bug on prereleases or Download on stable), and runs only after GitHub release assets have been published.
+Preview without sending: `TAG=v0.1.0-pre.1 python3 -I release_telegram.py --dry-run` (requires `telegram.md`,
+`card.png`, and the complete release asset set plus SHA256SUMS in `dist/`). Offline tests run with
 `python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py`.
 
 Release text is authored, not derived from commits. Every tag ships `release_notes/<tag>.md`, which CI renders between
@@ -362,6 +364,7 @@ dart run tool/changelog.dart changelog          # regenerate CHANGELOG.md from r
 dart run tool/changelog.dart verify             # what CI checks on every push
 dart run tool/changelog.dart render release --tag vX --out release.md
 dart run tool/changelog.dart render telegram --tag vX --out telegram.md
+dart run tool/changelog.dart render card --tag vX --out card.svg
 tool/release.sh tag --dry-run                   # checks and the body the tag would ship
 tool/release.sh tag --push                      # tag the prepare commit, push branch and tag
 ```

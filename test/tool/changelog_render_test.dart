@@ -129,7 +129,13 @@ void main() {
 
       expect(text, startsWith('<b>An authored release</b>\n'));
       expect(text, contains('<b>Spotlight</b>\nSpotlight text.'));
-      expect(text, contains('• New navigation'));
+      expect(
+        text,
+        contains(
+          '<blockquote expandable><b>Also in this release</b>\n'
+          '• New navigation</blockquote>',
+        ),
+      );
       expect(
         text,
         contains(
@@ -145,7 +151,7 @@ void main() {
       expect(text, contains('<b>Fix &lt;script&gt; &amp; more</b>'));
     });
 
-    test('refuses text longer than the caption limit', () {
+    test('refuses text that would overflow the photo caption', () {
       final long = summary(
         highlights: [
           for (var index = 0; index < 40; index++)

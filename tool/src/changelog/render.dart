@@ -5,7 +5,8 @@ import 'notes.dart';
 const releaseBeginMarker = '<!-- reclash:changelog:begin -->';
 const releaseEndMarker = '<!-- reclash:changelog:end -->';
 
-const _telegramLimit = 3000;
+// Telegram caps a photo caption at 1024; release_telegram.py adds up to 117 more.
+const _telegramLimit = 900;
 
 /// Continuation lines are joined because the update sheet renders each line alone.
 String renderRelease(ReleaseNotes notes, {ReleaseSummary? summary}) {
@@ -36,9 +37,12 @@ String renderTelegram(ReleaseSummary summary) {
     '',
     '<b>${escapeTelegramHtml(content.spotlight.title)}</b>',
     escapeTelegramHtml(content.spotlight.description),
-    if (content.highlights.isNotEmpty) '',
-    for (final highlight in content.highlights)
-      '• ${escapeTelegramHtml(highlight.title)}',
+    if (content.highlights.isNotEmpty) ...[
+      '',
+      '<blockquote expandable><b>Also in this release</b>',
+      for (final (index, highlight) in content.highlights.indexed)
+        '• ${escapeTelegramHtml(highlight.title)}${index == content.highlights.length - 1 ? '</blockquote>' : ''}',
+    ],
     for (final warning in content.warnings) ...[
       '',
       '<blockquote>⚠️ <b>${escapeTelegramHtml(warning.title)}</b>\n${escapeTelegramHtml(warning.description)}</blockquote>',

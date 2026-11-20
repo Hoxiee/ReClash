@@ -4,9 +4,9 @@ import json
 import os
 import re
 import sys
+import uuid
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 
@@ -14,15 +14,17 @@ REPOSITORY = 'Hoxiee/ReClash'
 TAG_PATTERN = re.compile(r'v\d+\.\d+\.\d+(?:-pre\.[1-9]\d*)?')
 
 
-def download_rows():
-    return [
-        [('Android · ARM64', 'android-arm64-v8a.apk')],
-        [('Windows · x64', 'windows-amd64-setup.exe'),
-         ('Portable · x64', 'windows-amd64.zip')],
-        [('macOS · Apple Silicon', 'macos-arm64.dmg'),
-         ('macOS · Intel', 'macos-amd64.dmg')],
-        [('Linux · AppImage x64', 'linux-amd64.AppImage')],
-    ]
+CAPTION_LIMIT = 1024
+ISSUES_URL = f'https://github.com/{REPOSITORY}/issues/new/choose'
+DOWNLOAD_PAGE_URL = 'https://reclash.pages.dev/en/download'
+ASSET_SUFFIXES = [
+    'android-arm64-v8a.apk',
+    'windows-amd64-setup.exe',
+    'windows-amd64.zip',
+    'macos-arm64.dmg',
+    'macos-amd64.dmg',
+    'linux-amd64.AppImage',
+]
 
 
 def visible_length(markup):
@@ -30,28 +32,29 @@ def visible_length(markup):
     return len(plain.encode('utf-16-le')) // 2
 
 
-def build_post(tag, notes, dist, chat_id):
+def build_post(tag, notes, dist, card, chat_id):
     if not TAG_PATTERN.fullmatch(tag):
         raise ValueError('Expected a release tag such as v0.1.0-pre.1')
     version = tag[1:]
     release_url = f'https://github.com/{REPOSITORY}/releases/tag/{tag}'
     download_url = f'https://github.com/{REPOSITORY}/releases/download/{tag}'
-    keyboard = []
-    for row in download_rows():
-        buttons = []
-        for label, suffix in row:
-            name = f'ReClash-{version}-{suffix}'
-            file = dist / name
-            if not file.is_file() or file.stat().st_size == 0:
-                raise ValueError(f'Missing or empty release asset: {name}')
-            buttons.append({'text': label, 'url': f'{download_url}/{quote(name)}'})
-        keyboard.append(buttons)
+    for suffix in ASSET_SUFFIXES:
+        name = f'ReClash-{version}-{suffix}'
+        file = dist / name
+        if not file.is_file() or file.stat().st_size == 0:
+            raise ValueError(f'Missing or empty release asset: {name}')
     checksums = dist / 'SHA256SUMS'
     if not checksums.is_file() or checksums.stat().st_size == 0:
         raise ValueError('Missing or empty release asset: SHA256SUMS')
-    keyboard.append([{'text': 'Other', 'url': release_url}])
+    if not card.is_file() or card.stat().st_size == 0:
+        raise ValueError(f'Missing or empty release card: {card}')
 
     prerelease = '-pre.' in version
+    if prerelease:
+        action = {'text': 'Report a bug', 'url': ISSUES_URL, 'style': 'danger'}
+    else:
+        action = {'text': 'Download', 'url': DOWNLOAD_PAGE_URL, 'style': 'success'}
+    keyboard = [[{'text': 'All files', 'url': release_url}, action]]
     status = '🧪 Pre-release' if prerelease else '✨ Stable release'
     heading = f'<b>ReClash</b> <code>{html.escape(version)}</code>'
     if prerelease:
@@ -66,23 +69,44 @@ def build_post(tag, notes, dist, chat_id):
         f'<a href="{repository_url}">GitHub</a>',
         f'<a href="{download_url}/SHA256SUMS">SHA256</a>',
     ])
-    text = f'{heading}\n\n{body}\n\n{links}'
-    if visible_length(text) > 4096:
-        raise ValueError('Telegram post exceeds the message limit')
+    caption = f'{heading}\n\n{body}\n\n{links}'
+    if visible_length(caption) > CAPTION_LIMIT:
+        raise ValueError('Telegram post exceeds the photo caption limit')
     return {
         'chat_id': chat_id,
-        'text': text,
+        'photo': str(card),
+        'caption': caption,
         'parse_mode': 'HTML',
-        'link_preview_options': {'is_disabled': True},
         'reply_markup': {'inline_keyboard': keyboard},
     }
 
 
+def encode_multipart(post):
+    boundary = uuid.uuid4().hex
+    parts = []
+    for name, value in post.items():
+        if name == 'photo':
+            continue
+        if not isinstance(value, str):
+            value = json.dumps(value)
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode('utf-8')
+        )
+    parts.append(
+        f'--{boundary}\r\nContent-Disposition: form-data; name="photo"; filename="card.png"\r\n'
+        'Content-Type: image/png\r\n\r\n'.encode('utf-8')
+    )
+    parts.append(Path(post['photo']).read_bytes())
+    parts.append(f'\r\n--{boundary}--\r\n'.encode('utf-8'))
+    return boundary, b''.join(parts)
+
+
 def send_post(token, post):
+    boundary, data = encode_multipart(post)
     request = Request(
-        f'https://api.telegram.org/bot{token}/sendMessage',
-        data=json.dumps(post).encode('utf-8'),
-        headers={'Content-Type': 'application/json'},
+        f'https://api.telegram.org/bot{token}/sendPhoto',
+        data=data,
+        headers={'Content-Type': f'multipart/form-data; boundary={boundary}'},
         method='POST',
     )
     try:
@@ -103,12 +127,14 @@ def main():
     parser.add_argument('--tag', default=os.getenv('TAG', ''))
     parser.add_argument('--notes', type=Path, default=Path('telegram.md'))
     parser.add_argument('--dist', type=Path, default=Path('dist'))
+    parser.add_argument('--card', type=Path, default=Path('card.png'))
     args = parser.parse_args()
     try:
         post = build_post(
             args.tag,
             args.notes.read_text(encoding='utf-8'),
             args.dist,
+            args.card,
             os.getenv('TELEGRAM_CHAT_ID', '@ReClashApp'),
         )
         if args.dry_run:

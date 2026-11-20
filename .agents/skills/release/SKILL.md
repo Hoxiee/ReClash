@@ -82,7 +82,7 @@ sed "s|VERSION|${tag#v}|g" .github/release_template.md >> release.md
 gh release edit "$tag" --notes-file release.md && rm release.md
 ```
 
-The update sheet reads the edited body on its next check; the Telegram post stays as sent.
+The update sheet reads the edited body on its next check; the Telegram post stays as sent. The post is a release card image plus a caption of at most 1024 characters, so keep the headline within three lines.
 
 ## Never
 

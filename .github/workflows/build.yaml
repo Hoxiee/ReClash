@@ -817,6 +817,21 @@ jobs:
         run: |
           dart run tool/changelog.dart render release --tag "$TAG" --out release.md
           dart run tool/changelog.dart render telegram --tag "$TAG" --out telegram.md
+          dart run tool/changelog.dart render card --tag "$TAG" --out card.svg
+
+      - name: Render release card
+        env:
+          RESVG_VERSION: v0.50.0
+          RESVG_SHA256: 5d1c9ffd43c82fb802d92cef8100055c612cd3e248d5a787c20079293a456e21
+        run: |
+          curl -fsSL -o resvg.tar.gz "https://github.com/linebender/resvg/releases/download/$RESVG_VERSION/resvg-linux-x86_64.tar.gz"
+          echo "$RESVG_SHA256  resvg.tar.gz" | sha256sum -c -
+          tar -xzf resvg.tar.gz resvg
+          ./resvg --skip-system-fonts \
+            --use-font-file tool/assets/release_card/Unbounded-800.ttf \
+            --use-font-file tool/assets/release_card/Manrope-700.ttf \
+            --use-font-file assets/fonts/JetBrainsMono-Regular.ttf \
+            card.svg card.png
 
       - name: Patch release.md
         env:
