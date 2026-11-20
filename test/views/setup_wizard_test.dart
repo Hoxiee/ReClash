@@ -29,6 +29,7 @@ import 'package:reclash/ui/card.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/list.dart';
 import 'package:reclash/ui/selection_mark.dart';
+import 'package:reclash/ui/stage_sheet.dart';
 import 'package:reclash/ui/switch.dart';
 import 'package:reclash/views/setup.dart';
 
@@ -403,7 +404,10 @@ Future<void> _startLinkImport(
 /// Accepts the preview sheet a link import opens before it downloads. The
 /// link is resolved in an isolate, which only advances in real time.
 Future<void> _confirmPreview(WidgetTester tester) async {
-  final accept = find.widgetWithText(TextButton, currentAppLocalizations.add);
+  final accept = find.descendant(
+    of: find.byType(StageSheetLayout),
+    matching: find.widgetWithText(FilledButton, currentAppLocalizations.add),
+  );
   for (var i = 0; i < 40 && accept.evaluate().isEmpty; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 25)),
@@ -769,7 +773,7 @@ void main() {
         harness.container.read(setupSessionProvider).draft.profileId,
         isNull,
       );
-      await _tap(tester, find.widgetWithText(TextButton, l.select));
+      await _tap(tester, find.widgetWithText(FilledButton, l.select));
 
       expect(
         harness.container.read(setupSessionProvider).draft.profileId,

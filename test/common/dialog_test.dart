@@ -363,8 +363,8 @@ void main() {
 
     expect(find.text(l10n.profileImportDownloading), findsOneWidget);
     expect(commitContext?.mounted, isTrue);
-    final add = find.widgetWithText(TextButton, l10n.add);
-    expect(tester.widget<TextButton>(add).onPressed, isNull);
+    final add = find.widgetWithText(FilledButton, l10n.add);
+    expect(tester.widget<FilledButton>(add).onPressed, isNull);
 
     gate.complete();
     await tester.pumpAndSettle();

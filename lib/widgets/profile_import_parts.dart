@@ -10,173 +10,160 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/subscription_kind_chip.dart';
 
-class ImportHero extends StatelessWidget {
-  const ImportHero({
+/// The provider's logo, its initial, or [glyph] in a stage badge whose ring
+/// spins while [loading] and otherwise shows [value].
+class ImportBadge extends StatelessWidget {
+  const ImportBadge({
     super.key,
     required this.monogram,
-    required this.logoBytes,
-    required this.logoIsSvg,
-    required this.account,
-    required this.kind,
     required this.glyph,
-    required this.loading,
-    required this.title,
-    required this.caption,
+    this.logoBytes,
+    this.logoIsSvg = false,
     this.logoBuilder,
+    this.loading = false,
+    this.value = 0,
+    this.color,
   });
 
-  static const _side = 104.0;
-  static const _well = 76.0;
+  static const _logo = 64.0;
 
   final String? monogram;
+  final Glyph glyph;
   final Uint8List? logoBytes;
   final bool logoIsSvg;
-  final String? account;
-  final SubscriptionKind? kind;
-  final Glyph glyph;
-  final bool loading;
-  final String title;
-  final String caption;
 
   /// Draws a logo there are no [logoBytes] for, over the monogram.
   final Widget Function(Widget fallback)? logoBuilder;
+  final bool loading;
+  final double value;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final tint = color ?? context.colorScheme.primary;
     final initial = monogram?.trim().characters.firstOrNull?.toUpperCase();
-    final fallback = Container(
-      width: _well,
-      height: _well,
-      alignment: Alignment.center,
-      color: initial == null
-          ? context.raisedSurfaceLevel.colorOf(colorScheme)
-          : colorScheme.primaryContainer,
-      child: initial == null
-          ? GlyphIcon(glyph, size: 34, color: colorScheme.onSurfaceVariant)
-          : Text(
-              initial,
-              style: AppTextStyle.title1
-                  .of(context, emphasized: true)
-                  .copyWith(color: colorScheme.onPrimaryContainer),
-            ),
-    );
-    final duration = context.motionDuration(commonDuration);
+    final Widget fallback = initial == null
+        ? GlyphIcon(glyph)
+        : Text(
+            initial,
+            style: AppTextStyle.title1
+                .of(context, emphasized: true)
+                .copyWith(color: tint),
+          );
     final logo = logoBytes;
-    final well = logo == null
-        ? KeyedSubtree(
-            key: ValueKey(initial ?? glyph),
-            child: logoBuilder?.call(fallback) ?? fallback,
-          )
-        : KeyedSubtree(
-            key: ObjectKey(logo),
+    final Widget content = switch (logo) {
+      null => KeyedSubtree(
+        key: ValueKey(initial ?? glyph),
+        child: switch (logoBuilder) {
+          null => fallback,
+          final builder => ClipOval(
+            child: SizedBox.square(
+              dimension: _logo,
+              child: builder(Center(child: fallback)),
+            ),
+          ),
+        },
+      ),
+      final logo => KeyedSubtree(
+        key: ObjectKey(logo),
+        child: ClipOval(
+          child: SizedBox.square(
+            dimension: _logo,
             child: logoIsSvg
                 ? SvgPicture.memory(
                     logo,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => fallback,
+                    errorBuilder: (_, _, _) => Center(child: fallback),
                   )
                 : Image.memory(
                     logo,
                     fit: BoxFit.contain,
-                    cacheWidth: (_well * MediaQuery.devicePixelRatioOf(context))
+                    cacheWidth: (_logo * MediaQuery.devicePixelRatioOf(context))
                         .round(),
-                    errorBuilder: (_, _, _) => fallback,
+                    errorBuilder: (_, _, _) => Center(child: fallback),
                   ),
-          );
-    final muted = AppTextStyle.subheadline
-        .of(context)
-        .copyWith(color: colorScheme.onSurfaceVariant);
-    return Padding(
-      padding: const EdgeInsets.only(top: 4, bottom: 8),
-      child: Column(
-        children: [
-          SizedBox.square(
-            dimension: _side,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedSwitcher(
-                  duration: duration,
-                  child: loading
-                      ? CommonCircleLoading(
-                          size: _side,
-                          color: colorScheme.primary,
-                        )
-                      : const SizedBox.square(dimension: _side),
-                ),
-                ClipPath(
-                  clipper: const ShapeBorderClipper(shape: AppShape.lg),
-                  child: SizedBox.square(
-                    dimension: _well,
-                    child: AnimatedSwitcher(
-                      duration: duration,
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, animation) => FadeTransition(
-                        opacity: animation,
-                        child: ScaleTransition(
-                          scale: Tween(begin: 0.8, end: 1.0).animate(animation),
-                          child: child,
-                        ),
-                      ),
-                      child: well,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
-          const SizedBox(height: 8),
-          AnimatedSize(
-            duration: duration,
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topCenter,
-            child: AnimatedSwitcher(
-              duration: duration,
-              layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topCenter,
-                children: [...previous, ?current],
-              ),
-              child: Column(
-                key: ValueKey((title, account, kind, caption)),
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyle.title2.of(context, emphasized: true),
-                  ),
-                  if (kind case final kind?) ...[
-                    const SizedBox(height: 6),
-                    SubscriptionKindChip(kind: kind),
-                  ],
-                  if (account case final account?) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      account,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyle.subheadline.of(context),
-                    ),
-                  ],
-                  if (caption.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      caption,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: muted,
-                    ),
-                  ],
-                ],
-              ),
-            ),
+        ),
+      ),
+    };
+    final duration = context.motionDuration(commonDuration);
+    return StageSheetBadge(
+      color: tint,
+      value: loading ? null : value,
+      child: AnimatedSwitcher(
+        duration: duration,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween(begin: 0.8, end: 1.0).animate(animation),
+            child: child,
           ),
-        ],
+        ),
+        child: content,
+      ),
+    );
+  }
+}
+
+/// What sits under the hero title: the plan kind, the account, where the
+/// profile comes from and what the sheet is doing.
+class ImportHeroDetails extends StatelessWidget {
+  const ImportHeroDetails({
+    super.key,
+    this.kind,
+    this.account,
+    this.caption = '',
+    this.status,
+  });
+
+  final SubscriptionKind? kind;
+  final String? account;
+  final String caption;
+  final String? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = context.motionDuration(commonDuration);
+    final account = this.account;
+    final status = this.status;
+    return AnimatedSize(
+      duration: duration,
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: duration,
+        layoutBuilder: (current, previous) => Stack(
+          alignment: Alignment.topCenter,
+          children: [...previous, ?current],
+        ),
+        child: Column(
+          key: ValueKey((kind, account, caption, status)),
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            if (kind case final kind?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: SubscriptionKindChip(kind: kind),
+              ),
+            if (account != null)
+              Text(
+                account,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: context.colorScheme.onSurface),
+              ),
+            if (caption.isNotEmpty)
+              Text(caption, maxLines: 2, overflow: TextOverflow.ellipsis),
+            if (status != null)
+              Text(
+                status,
+                style: TextStyle(color: context.colorScheme.primary),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -191,7 +178,7 @@ class ImportAnnounce extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(bottom: 12),
       child: DecoratedBox(
         decoration: ShapeDecoration(
           color: context.raisedSurfaceLevel.colorOf(colorScheme),
@@ -253,7 +240,7 @@ class ImportStats extends StatelessWidget {
         : DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
     final expired = expire?.isBeforeNow ?? false;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(bottom: 12),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,

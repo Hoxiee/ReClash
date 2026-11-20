@@ -720,7 +720,7 @@ class _ImportScreen extends StatelessWidget {
           shape: AppShape.top(AppCorner.xxl),
           clipBehavior: Clip.antiAlias,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -729,25 +729,26 @@ class _ImportScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: AppTextStyle.headline.of(context),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 24),
                 _Anchor(
                   path: 'provider',
-                  child: ImportHero(
-                    monogram: metadata.name,
-                    logoBytes: null,
-                    logoIsSvg: false,
-                    logoBuilder: logo.isEmpty
-                        ? null
-                        : (fallback) => _PreviewData.images.logo(
-                            logo,
-                            fallback: fallback,
-                          ),
-                    account: metadata.accountTitle,
-                    kind: metadata.kind,
-                    glyph: AppGlyphs.cloudDownload,
-                    loading: false,
+                  child: StageSheetHero(
+                    badge: ImportBadge(
+                      monogram: metadata.name,
+                      logoBuilder: logo.isEmpty
+                          ? null
+                          : (fallback) => _PreviewData.images.logo(
+                              logo,
+                              fallback: fallback,
+                            ),
+                      glyph: AppGlyphs.cloudDownload,
+                    ),
                     title: metadata.name ?? host,
-                    caption: metadata.hideUrl ? '' : host,
+                    subtitle: ImportHeroDetails(
+                      kind: metadata.kind,
+                      account: metadata.accountTitle,
+                      caption: metadata.hideUrl ? '' : host,
+                    ),
                   ),
                 ),
                 if (announce != null && announce.isNotEmpty)
@@ -756,14 +757,19 @@ class _ImportScreen extends StatelessWidget {
                     child: ImportAnnounce(text: announce),
                   ),
                 ImportStats(nodes: 24, usage: data.usage),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  spacing: 8,
-                  children: [
-                    TextButton(onPressed: () {}, child: Text(l10n.cancel)),
-                    TextButton(onPressed: () {}, child: Text(l10n.add)),
-                  ],
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 52,
+                  child: FilledButton(onPressed: () {}, child: Text(l10n.add)),
+                ),
+                SizedBox(
+                  height: 48,
+                  child: Center(
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(l10n.cancel),
+                    ),
+                  ),
                 ),
               ],
             ),

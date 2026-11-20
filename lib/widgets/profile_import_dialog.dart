@@ -34,7 +34,7 @@ Future<ProfileLinkImport?> showProfileImportDialog(
   ProfileLinkCommit? commit,
 }) async {
   TransitionRoute<Object?>? route;
-  final choice = await dialogs.showForm<ProfileLinkImport>(
+  final choice = await dialogs.showStage<ProfileLinkImport>(
     builder: (context) {
       route ??= ModalRoute.of(context);
       return _ProfileImportSheet(
@@ -53,7 +53,7 @@ Future<ProfileLinkImport?> showProfileImportDialog(
 Future<bool?> showProfilePreviewDialog(
   Profile profile, {
   required bool selected,
-}) => dialogs.showForm<bool>(
+}) => dialogs.showStage<bool>(
   builder: (_) => _ProfilePreviewSheet(profile: profile, selected: selected),
 );
 
@@ -83,61 +83,48 @@ class _ProfilePreviewSheet extends StatelessWidget {
               tooltip: l10n.subscriptionProviderSupport,
               onPressed: () => dialogs.openUrl(support.toString()),
             ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ).copyWith(top: context.contentTopPadding, bottom: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ImportHero(
-                    monogram: metadata?.name ?? profile.realLabel,
-                    logoBytes: null,
-                    logoIsSvg: false,
-                    account: metadata?.accountTitle,
-                    kind: metadata?.kind,
-                    glyph: isUrl ? AppGlyphs.cloudDownload : AppGlyphs.code,
-                    loading: false,
-                    title: profile.realLabel,
-                    caption: metadata?.hideUrl == true ? '' : host ?? '',
-                  ),
-                  if (announce != null && announce.isNotEmpty)
-                    ImportAnnounce(text: announce),
-                  if (info != null)
-                    ImportStats(
-                      nodes: null,
-                      usage: (
-                        used: info.upload + info.download,
-                        total: info.total,
-                        expire: info.expire,
-                      ),
-                    ),
-                ],
+      body: StageSheetLayout(
+        hero: StageSheetHero(
+          badge: ImportBadge(
+            monogram: metadata?.name ?? profile.realLabel,
+            glyph: isUrl ? AppGlyphs.cloudDownload : AppGlyphs.code,
+            value: selected ? 1 : 0,
+          ),
+          title: profile.realLabel,
+          subtitle: ImportHeroDetails(
+            kind: metadata?.kind,
+            account: metadata?.accountTitle,
+            caption: metadata?.hideUrl == true ? '' : host ?? '',
+          ),
+        ),
+        body: [
+          if (announce != null && announce.isNotEmpty)
+            ImportAnnounce(text: announce),
+          if (info != null)
+            ImportStats(
+              nodes: null,
+              usage: (
+                used: info.upload + info.download,
+                total: info.total,
+                expire: info.expire,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: AlertActions(
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.close),
-                ),
-                if (!selected)
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: Text(l10n.select),
-                  ),
-              ],
-            ),
-          ),
         ],
+        primary: selected
+            ? FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.close),
+              )
+            : FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l10n.select),
+              ),
+        secondary: selected
+            ? null
+            : TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.close),
+              ),
       ),
     );
   }
@@ -341,6 +328,14 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
     final supportUri = failure is SubscriptionException
         ? failure.supportUri
         : null;
+    final loading = state?.loading ?? false;
+    final status = duplicateOf != null
+        ? null
+        : _committing
+        ? l10n.profileImportDownloading
+        : loading
+        ? l10n.profileImportChecking
+        : null;
     final scaffold = CommonScaffold(
       title: source.url != null ? l10n.profileImportTitle : l10n.addProfile,
       primaryAction: support == null
@@ -350,183 +345,163 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
               tooltip: l10n.subscriptionProviderSupport,
               onPressed: () => dialogs.openUrl(support.toString()),
             ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ).copyWith(top: context.contentTopPadding, bottom: 8),
+      body: StageSheetLayout(
+        hero: StageSheetHero(
+          badge: ImportBadge(
+            monogram: metadata?.name,
+            logoBytes: current?.logoBytes,
+            logoIsSvg: current?.logoIsSvg ?? false,
+            glyph: source.bytes != null
+                ? AppGlyphs.code
+                : source.shareLink != null
+                ? AppGlyphs.link
+                : AppGlyphs.cloudDownload,
+            loading: loading || _committing,
+            value: duplicateOf != null || failure != null ? 1 : 0,
+            color: failure != null ? stageAlertColor(context) : null,
+          ),
+          title: title,
+          subtitle: ImportHeroDetails(
+            kind: metadata?.kind,
+            account: metadata?.accountTitle,
+            caption: caption,
+            status: status,
+          ),
+        ),
+        body: [
+          AnimatedEntries(
+            children: [
+              if (duplicateOf != null)
+                _Notice(
+                  key: const ValueKey('duplicate'),
+                  glyph: AppGlyphs.info,
+                  text: l10n.profileImportAlreadyAdded(duplicateOf),
+                )
+              else if (failure != null && !_committing)
+                _Notice(
+                  key: const ValueKey('commitFailure'),
+                  glyph: AppGlyphs.error,
+                  text: userFacingErrorMessage(failure, l10n),
+                  tone: _NoticeTone.error,
+                  action: supportUri == null
+                      ? null
+                      : (
+                          l10n.subscriptionProviderSupport,
+                          () => dialogs.openUrl(supportUri.toString()),
+                        ),
+                )
+              else if (_declined && !_committing)
+                _Notice(
+                  key: const ValueKey('declined'),
+                  glyph: AppGlyphs.swap,
+                  text: l10n.profileImportTryOtherFormat,
+                )
+              else if (state?.failure case final failure?)
+                _Notice(
+                  key: ValueKey(failure.runtimeType),
+                  glyph: failure is AgeSecretKeyRequiredException
+                      ? AppGlyphs.key
+                      : AppGlyphs.wifiOff,
+                  text: failure is AgeSecretKeyRequiredException
+                      ? l10n.profileImportEncrypted
+                      : l10n.profileImportPreviewFailed,
+                  action: failure is AgeSecretKeyRequiredException
+                      ? null
+                      : (l10n.retry, _retry),
+                ),
+              if (summary?.hasLosses == true)
+                _Notice(
+                  key: const ValueKey('losses'),
+                  glyph: AppGlyphs.warning,
+                  text: l10n.profileImportLosses,
+                  tone: _NoticeTone.warning,
+                ),
+              if (metadata?.announce case final announce?
+                  when announce.trim().isNotEmpty)
+                ImportAnnounce(
+                  key: const ValueKey('announce'),
+                  text: announce.trim(),
+                ),
+              if ((summary != null || current?.info != null) &&
+                  source.shareLink == null)
+                ImportStats(
+                  key: const ValueKey('stats'),
+                  nodes: summary?.nodes,
+                  usage: switch (current?.info) {
+                    final info? => (
+                      used: info.upload + info.download,
+                      total: info.total,
+                      expire: info.expire,
+                    ),
+                    null => null,
+                  },
+                ),
+            ],
+          ),
+          if (duplicateOf == null)
+            _Locked(
+              locked: _committing,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ImportHero(
-                    monogram: metadata?.name,
-                    logoBytes: current?.logoBytes,
-                    logoIsSvg: current?.logoIsSvg ?? false,
-                    account: metadata?.accountTitle,
-                    kind: metadata?.kind,
-                    glyph: source.bytes != null
-                        ? AppGlyphs.code
-                        : source.shareLink != null
-                        ? AppGlyphs.link
-                        : AppGlyphs.cloudDownload,
-                    loading: (state?.loading ?? false) || _committing,
-                    title: title,
-                    caption: caption,
-                  ),
-                  AnimatedEntries(
-                    children: [
-                      if (metadata?.announce case final announce?
-                          when announce.trim().isNotEmpty)
-                        ImportAnnounce(
-                          key: const ValueKey('announce'),
-                          text: announce.trim(),
+                  generateGroup([
+                    FormRow(
+                      title: l10n.name,
+                      trailing: FormRowTextField(
+                        controller: _nameController,
+                        hintText: host ?? l10n.unnamed,
+                        inputFormatters: TextInputLimits.limit(
+                          TextInputLimits.name,
                         ),
-                      if ((summary != null || current?.info != null) &&
-                          source.shareLink == null)
-                        ImportStats(
-                          key: const ValueKey('stats'),
-                          nodes: summary?.nodes,
-                          usage: switch (current?.info) {
-                            final info? => (
-                              used: info.upload + info.download,
-                              total: info.total,
-                              expire: info.expire,
-                            ),
-                            null => null,
-                          },
-                        ),
-                      if (duplicateOf != null)
-                        _Notice(
-                          key: const ValueKey('duplicate'),
-                          glyph: AppGlyphs.info,
-                          text: l10n.profileImportAlreadyAdded(duplicateOf),
-                        )
-                      else if (_committing)
-                        _Notice(
-                          key: const ValueKey('committing'),
-                          glyph: AppGlyphs.cloudDownload,
-                          text: l10n.profileImportDownloading,
-                        )
-                      else if (failure != null)
-                        _Notice(
-                          key: const ValueKey('commitFailure'),
-                          glyph: AppGlyphs.error,
-                          text: userFacingErrorMessage(failure, l10n),
-                          tone: _NoticeTone.error,
-                          action: supportUri == null
-                              ? (l10n.retry, () => unawaited(_submit()))
-                              : (
-                                  l10n.subscriptionProviderSupport,
-                                  () => dialogs.openUrl(supportUri.toString()),
-                                ),
-                        )
-                      else if (_declined)
-                        _Notice(
-                          key: const ValueKey('declined'),
-                          glyph: AppGlyphs.swap,
-                          text: l10n.profileImportTryOtherFormat,
-                        )
-                      else if (state?.loading == true)
-                        _Notice(
-                          key: const ValueKey('checking'),
-                          glyph: AppGlyphs.cloudSync,
-                          text: l10n.profileImportChecking,
-                        )
-                      else if (state?.failure case final failure?)
-                        _Notice(
-                          key: ValueKey(failure.runtimeType),
-                          glyph: failure is AgeSecretKeyRequiredException
-                              ? AppGlyphs.key
-                              : AppGlyphs.wifiOff,
-                          text: failure is AgeSecretKeyRequiredException
-                              ? l10n.profileImportEncrypted
-                              : l10n.profileImportPreviewFailed,
-                          action: failure is AgeSecretKeyRequiredException
-                              ? null
-                              : (l10n.retry, _retry),
-                        ),
-                      if (summary?.hasLosses == true)
-                        _Notice(
-                          key: const ValueKey('losses'),
-                          glyph: AppGlyphs.warning,
-                          text: l10n.profileImportLosses,
-                          tone: _NoticeTone.warning,
-                        ),
-                    ],
-                  ),
-                  if (duplicateOf == null) ...[
-                    const SizedBox(height: 12),
-                    _Locked(
-                      locked: _committing,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          generateGroup([
-                            FormRow(
-                              title: l10n.name,
-                              trailing: FormRowTextField(
-                                controller: _nameController,
-                                hintText: host ?? l10n.unnamed,
-                                inputFormatters: TextInputLimits.limit(
-                                  TextInputLimits.name,
-                                ),
-                                onChanged: (_) => _nameEdited = true,
-                              ),
-                            ),
-                          ]),
-                          if (source.preset case final native?)
-                            generateSection(
-                              title: l10n.profileImportFormat,
-                              items: [
-                                for (final preset in [
-                                  native,
-                                  SubscriptionClientPreset.auto,
-                                ])
-                                  _FormatOption(
-                                    title:
-                                        preset == SubscriptionClientPreset.auto
-                                        ? l10n.subscriptionClientReclash
-                                        : preset.label,
-                                    description:
-                                        preset == SubscriptionClientPreset.auto
-                                        ? l10n.profileImportFormatReclash
-                                        : l10n.profileImportFormatClient(
-                                            preset.label,
-                                          ),
-                                    selected: preset == _preset,
-                                    onPressed: () => _select(preset),
-                                  ),
-                              ],
-                            ),
-                        ],
+                        onChanged: (_) => _nameEdited = true,
                       ),
                     ),
-                  ],
+                  ]),
+                  if (source.preset case final native?)
+                    generateSection(
+                      title: l10n.profileImportFormat,
+                      items: [
+                        for (final preset in [
+                          native,
+                          SubscriptionClientPreset.auto,
+                        ])
+                          _FormatOption(
+                            title: preset == SubscriptionClientPreset.auto
+                                ? l10n.subscriptionClientReclash
+                                : preset.label,
+                            description: preset == SubscriptionClientPreset.auto
+                                ? l10n.profileImportFormatReclash
+                                : l10n.profileImportFormatClient(preset.label),
+                            selected: preset == _preset,
+                            onPressed: () => _select(preset),
+                          ),
+                      ],
+                    ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: AlertActions(
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(duplicateOf == null ? l10n.cancel : l10n.close),
-                ),
-                if (duplicateOf == null)
-                  TextButton(
-                    onPressed: _committing ? null : () => unawaited(_submit()),
-                    child: Text(l10n.add),
-                  ),
-              ],
-            ),
-          ),
         ],
+        primary: switch ((duplicateOf, failure)) {
+          (_?, _) => FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.close),
+          ),
+          (null, _?) when !_committing => FilledButton.icon(
+            onPressed: () => unawaited(_submit()),
+            icon: const GlyphIcon(AppGlyphs.refresh, fill: 1),
+            label: Text(l10n.retry),
+          ),
+          _ => FilledButton(
+            onPressed: _committing ? null : () => unawaited(_submit()),
+            child: Text(l10n.add),
+          ),
+        },
+        secondary: duplicateOf != null
+            ? null
+            : TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.cancel),
+              ),
       ),
     );
     return PopScope<Object?>(
@@ -574,26 +549,46 @@ class _Notice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final error = tone == _NoticeTone.error;
     final color = switch (tone) {
       _NoticeTone.plain => colorScheme.onSurfaceVariant,
       _NoticeTone.warning => colorScheme.warning,
-      _NoticeTone.error => colorScheme.error,
+      _NoticeTone.error => colorScheme.onErrorContainer,
     };
+    final action = this.action;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        spacing: 10,
-        children: [
-          GlyphIcon(glyph, size: 18, color: color),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTextStyle.footnote.of(context).copyWith(color: color),
-            ),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: error
+              ? colorScheme.errorContainer
+              : context.raisedSurfaceLevel.colorOf(colorScheme),
+          shape: AppShape.lg,
+        ),
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            14,
+            action == null ? 14 : 6,
+            action == null ? 14 : 6,
+            action == null ? 14 : 6,
           ),
-          if (action case (final label, final onPressed))
-            TextButton(onPressed: onPressed, child: Text(label)),
-        ],
+          child: Row(
+            spacing: 12,
+            children: [
+              GlyphIcon(glyph, size: 20, color: color),
+              Expanded(
+                child: Text(
+                  text,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: error ? color : null),
+                ),
+              ),
+              if (action case (final label, final onPressed))
+                TextButton(onPressed: onPressed, child: Text(label)),
+            ],
+          ),
+        ),
       ),
     );
   }
