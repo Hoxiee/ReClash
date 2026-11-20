@@ -245,9 +245,14 @@
   "usageSheetTitle": "Расход трафика",
   "usagePeriodToday": "Сегодня",
   "usagePeriodWeek": "7 дней",
-  "usagePeriodMonth": "Месяц",
+  "usagePeriodMonth": "30 дней",
   "usagePeriodAll": "Всё",
   "usageUsed": "Израсходовано",
   "usageLeft": "Осталось",
-  "usagePlanEnds": "Тариф до"
+  "usagePeriodTotal": "Всего",
+  "usageAverage": "В среднем",
+  "usagePeak": "Максимум",
+  "usageOfTotal": "из {total}",
+  "usageChange": "{change} к прошлому периоду",
+  "usagePlanEndsIn": "{days, plural, =0{Тариф заканчивается сегодня} one{Тариф до {date}, остался {days} день} few{Тариф до {date}, осталось {days} дня} many{Тариф до {date}, осталось {days} дней} other{Тариф до {date}, осталось {days} дня}}"
 }

@@ -245,9 +245,14 @@
   "usageSheetTitle": "Trafik sarpy",
   "usagePeriodToday": "Şu gün",
   "usagePeriodWeek": "7 gün",
-  "usagePeriodMonth": "Aý",
+  "usagePeriodMonth": "30 gün",
   "usagePeriodAll": "Hemmesi",
   "usageUsed": "Sarp edildi",
   "usageLeft": "Galdy",
-  "usagePlanEnds": "Tarif gutarýar"
+  "usagePeriodTotal": "Jemi",
+  "usageAverage": "Ortaça",
+  "usagePeak": "Iň köp",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "Öňki döwür bilen deňeşdirilende {change}",
+  "usagePlanEndsIn": "{days, plural, =0{Tarif şu gün gutarýar} other{Tarif {date} çenli, {days} gün galdy}}"
 }

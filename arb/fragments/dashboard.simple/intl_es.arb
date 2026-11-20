@@ -245,9 +245,14 @@
   "usageSheetTitle": "Uso de datos",
   "usagePeriodToday": "Hoy",
   "usagePeriodWeek": "7 días",
-  "usagePeriodMonth": "Mes",
+  "usagePeriodMonth": "30 días",
   "usagePeriodAll": "Todo",
   "usageUsed": "Usado",
   "usageLeft": "Restante",
-  "usagePlanEnds": "El plan termina"
+  "usagePeriodTotal": "Total",
+  "usageAverage": "Promedio",
+  "usagePeak": "Máximo",
+  "usageOfTotal": "de {total}",
+  "usageChange": "{change} frente al período anterior",
+  "usagePlanEndsIn": "{days, plural, =0{El plan termina hoy} =1{El plan termina el {date}, queda 1 día} other{El plan termina el {date}, quedan {days} días}}"
 }

@@ -245,9 +245,14 @@
   "usageSheetTitle": "Consommation de données",
   "usagePeriodToday": "Aujourd'hui",
   "usagePeriodWeek": "7 jours",
-  "usagePeriodMonth": "Mois",
+  "usagePeriodMonth": "30 jours",
   "usagePeriodAll": "Tout",
   "usageUsed": "Utilisé",
   "usageLeft": "Restant",
-  "usagePlanEnds": "Fin du forfait"
+  "usagePeriodTotal": "Total",
+  "usageAverage": "Moyenne",
+  "usagePeak": "Maximum",
+  "usageOfTotal": "sur {total}",
+  "usageChange": "{change} par rapport à la période précédente",
+  "usagePlanEndsIn": "{days, plural, =0{L’abonnement se termine aujourd’hui} =1{Abonnement jusqu’au {date}, 1 jour restant} other{Abonnement jusqu’au {date}, {days} jours restants}}"
 }

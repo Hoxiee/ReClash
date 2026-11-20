@@ -84,6 +84,7 @@ typedef TrafficForecastReading = ({
   String figure,
   List<String> lines,
   bool alarming,
+  TrafficForecastKind kind,
 });
 
 TrafficForecastReading readTrafficForecast(
@@ -134,6 +135,7 @@ TrafficForecastReading readTrafficForecast(
         appLocalizations.simpleForecastEarly(forecast.daysEarly),
     ],
     alarming: forecast.kind == TrafficForecastKind.depleted,
+    kind: forecast.kind,
   );
 }
 
@@ -151,7 +153,7 @@ class _Forecast extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = DashboardColors.of(context);
-    final (:figure, :lines, :alarming) = readTrafficForecast(
+    final (:figure, :lines, :alarming, kind: _) = readTrafficForecast(
       context,
       info: info,
       metadata: metadata,

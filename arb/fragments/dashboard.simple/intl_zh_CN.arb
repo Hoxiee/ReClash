@@ -245,9 +245,14 @@
   "usageSheetTitle": "流量使用",
   "usagePeriodToday": "今日",
   "usagePeriodWeek": "近 7 天",
-  "usagePeriodMonth": "本月",
+  "usagePeriodMonth": "30 天",
   "usagePeriodAll": "全部",
   "usageUsed": "已用",
   "usageLeft": "剩余",
-  "usagePlanEnds": "套餐到期"
+  "usagePeriodTotal": "合计",
+  "usageAverage": "平均",
+  "usagePeak": "峰值",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "较上一周期 {change}",
+  "usagePlanEndsIn": "{days, plural, =0{套餐今天到期} other{套餐 {date} 到期，剩余 {days} 天}}"
 }

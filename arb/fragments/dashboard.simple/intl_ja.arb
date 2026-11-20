@@ -245,9 +245,14 @@
   "usageSheetTitle": "データ使用量",
   "usagePeriodToday": "今日",
   "usagePeriodWeek": "7日間",
-  "usagePeriodMonth": "今月",
+  "usagePeriodMonth": "30日間",
   "usagePeriodAll": "すべて",
   "usageUsed": "使用済み",
   "usageLeft": "残り",
-  "usagePlanEnds": "プラン終了"
+  "usagePeriodTotal": "合計",
+  "usageAverage": "平均",
+  "usagePeak": "最大",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "前の期間比 {change}",
+  "usagePlanEndsIn": "{days, plural, =0{契約は今日で終了します} other{契約終了 {date}（残り{days}日）}}"
 }

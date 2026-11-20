@@ -455,9 +455,38 @@
   "usageSheetTitle": "Data usage",
   "usagePeriodToday": "Today",
   "usagePeriodWeek": "7 days",
-  "usagePeriodMonth": "Month",
+  "usagePeriodMonth": "30 days",
   "usagePeriodAll": "All",
   "usageUsed": "Used",
   "usageLeft": "Left",
-  "usagePlanEnds": "Plan ends"
+  "usagePeriodTotal": "Total",
+  "usageAverage": "Average",
+  "usagePeak": "Peak",
+  "usageOfTotal": "of {total}",
+  "@usageOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "usageChange": "{change} vs previous period",
+  "@usageChange": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "usagePlanEndsIn": "{days, plural, =0{Plan ends today} =1{Plan ends {date}, 1 day left} other{Plan ends {date}, {days} days left}}",
+  "@usagePlanEndsIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

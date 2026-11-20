@@ -245,9 +245,14 @@
   "usageSheetTitle": "데이터 사용량",
   "usagePeriodToday": "오늘",
   "usagePeriodWeek": "7일",
-  "usagePeriodMonth": "이번 달",
+  "usagePeriodMonth": "30일",
   "usagePeriodAll": "전체",
   "usageUsed": "사용됨",
   "usageLeft": "남음",
-  "usagePlanEnds": "요금제 종료"
+  "usagePeriodTotal": "합계",
+  "usageAverage": "평균",
+  "usagePeak": "최대",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "이전 기간 대비 {change}",
+  "usagePlanEndsIn": "{days, plural, =0{요금제가 오늘 종료됩니다} other{요금제 종료 {date} ({days}일 남음)}}"
 }

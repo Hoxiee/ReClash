@@ -245,9 +245,14 @@
   "usageSheetTitle": "Трафик шығыны",
   "usagePeriodToday": "Бүгін",
   "usagePeriodWeek": "7 күн",
-  "usagePeriodMonth": "Ай",
+  "usagePeriodMonth": "30 күн",
   "usagePeriodAll": "Барлығы",
   "usageUsed": "Жұмсалды",
   "usageLeft": "Қалды",
-  "usagePlanEnds": "Тариф аяқталады"
+  "usagePeriodTotal": "Барлығы",
+  "usageAverage": "Орташа",
+  "usagePeak": "Ең көп",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "Алдыңғы кезеңмен салыстырғанда {change}",
+  "usagePlanEndsIn": "{days, plural, =0{Тариф бүгін бітеді} other{Тариф {date} дейін, {days} күн қалды}}"
 }

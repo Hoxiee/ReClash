@@ -245,9 +245,14 @@
   "usageSheetTitle": "Trafik sarfi",
   "usagePeriodToday": "Bugun",
   "usagePeriodWeek": "7 kun",
-  "usagePeriodMonth": "Oy",
+  "usagePeriodMonth": "30 kun",
   "usagePeriodAll": "Hammasi",
   "usageUsed": "Sarflandi",
   "usageLeft": "Qoldi",
-  "usagePlanEnds": "Tarif tugaydi"
+  "usagePeriodTotal": "Jami",
+  "usageAverage": "O‘rtacha",
+  "usagePeak": "Eng ko‘p",
+  "usageOfTotal": "/ {total}",
+  "usageChange": "Oldingi davrga nisbatan {change}",
+  "usagePlanEndsIn": "{days, plural, =0{Tarif bugun tugaydi} other{Tarif {date} gacha, {days} kun qoldi}}"
 }
