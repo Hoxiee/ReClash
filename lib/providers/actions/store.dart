@@ -39,6 +39,12 @@ class StoreAction extends _$StoreAction {
     });
   }
 
+  Future<void> savePreferencesNow() async {
+    if (_resetting) return;
+    debouncer.cancel(FunctionTag.savePreferences);
+    await preferences.saveConfig(ref.read(configProvider));
+  }
+
   Future<void> resetAllData() async {
     if (_resetting) return;
     _resetting = true;

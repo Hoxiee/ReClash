@@ -152,6 +152,17 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     super.dispose();
   }
 
+  Future<void> _savePreferences() async {
+    try {
+      await ref.read(storeActionProvider.notifier).savePreferencesNow();
+    } catch (error) {
+      commonPrint.log(
+        'Preferences save on background failed: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   void _updateVisible(AppLifecycleState? state) {
     ref.read(appVisibleProvider.notifier).value = switch (state) {
       null || AppLifecycleState.resumed || AppLifecycleState.inactive => true,
@@ -164,6 +175,11 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     _updateVisible(state);
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      unawaited(_savePreferences());
+    }
     if (state == AppLifecycleState.resumed) {
       unawaited(ref.read(locationPermissionsProvider.notifier).refresh());
       WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -240,6 +240,17 @@ void main() {
       );
     });
 
+    test('a lifecycle save flushes the pending preference write', () async {
+      final container = buildContainer();
+      final action = container.read(storeActionProvider.notifier);
+
+      action.savePreferencesDebounce();
+      await action.savePreferencesNow();
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      expect(await preferences.getConfigMap(), isNotNull);
+    });
+
     test('a pending preference save never lands after the clear', () async {
       final container = buildContainer();
       final action = container.read(storeActionProvider.notifier);
