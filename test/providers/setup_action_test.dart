@@ -516,6 +516,29 @@ void main() {
       expect(container.read(runningVpnOptionsProvider), isNull);
     });
 
+    test(
+      'a stop while the core is still connecting skips its listener',
+      () async {
+        markInitialized();
+        final setup = container.read(setupActionProvider.notifier);
+        await setup.setRunning(true);
+        when(() => coreHandler.stop()).thenAnswer(
+          (_) async => const CoreLifecycleResult(
+            revision: 0,
+            outcome: CoreLifecycleOutcome.applied,
+          ),
+        );
+        container.read(coreStatusProvider.notifier).value =
+            CoreStatus.connecting;
+        action.coreRunningCalls.clear();
+
+        await setup.setRunning(false);
+
+        expect(action.coreRunningCalls, isEmpty);
+        expect(container.read(isStartProvider), isFalse);
+      },
+    );
+
     test('a stop the core leaves unanswered fails but stays stopped', () async {
       markInitialized();
       final setup = container.read(setupActionProvider.notifier);

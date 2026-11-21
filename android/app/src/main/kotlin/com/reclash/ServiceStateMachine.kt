@@ -121,6 +121,16 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         startFromPreferences()
     }
 
+    /// A service Android started itself, such as always-on VPN after a user
+    /// stopped the app: do not undo the explicit stop.
+    suspend fun handleSystemStartAction() {
+        if (!isRunRequested && host.vpnStoppedByUser) {
+            host.log("Ignoring the system VPN restart after a user stop")
+            return
+        }
+        handleStartAction()
+    }
+
     suspend fun handleStopAction() {
         if (!isRunRequested) {
             return

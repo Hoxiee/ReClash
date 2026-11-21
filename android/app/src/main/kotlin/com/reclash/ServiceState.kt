@@ -70,6 +70,8 @@ object ServiceState {
 
     suspend fun handleStartAction() = machine.handleStartAction()
 
+    suspend fun handleSystemStartAction() = machine.handleSystemStartAction()
+
     suspend fun handleStopAction() = machine.handleStopAction()
 
     suspend fun handleVpnRevokeAction() = machine.handleVpnRevokeAction()

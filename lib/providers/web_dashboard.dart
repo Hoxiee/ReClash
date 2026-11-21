@@ -401,8 +401,11 @@ class WebDashboardAction extends _$WebDashboardAction {
             ref.read(safeModeProvider) ||
             ref.read(providerSecureNetworkProvider),
       );
-      if (!acquiredAccess.contains(owner) || config.secret.isEmpty) {
+      if (!acquiredAccess.contains(owner)) {
         throw const WebDashboardException(WebDashboardFailure.cancelled);
+      }
+      if (config.secret.isEmpty) {
+        throw const WebDashboardException(WebDashboardFailure.authentication);
       }
       final endpoint = WebDashboardEndpoint(
         controller: Uri.parse('http://${config.externalController.value}'),

@@ -27,12 +27,15 @@ class _RunRequest {
   final DateTime? previousStartTime;
   final Object? owner;
 
+  final bool cancelledStart;
+
   const _RunRequest({
     required this.running,
     required this.initialize,
     required this.resume,
     required this.previousStartTime,
     required this.owner,
+    this.cancelledStart = false,
   });
 }
 
@@ -363,6 +366,7 @@ class SetupAction extends _$SetupAction {
     Object? owner,
   }) {
     _runIntentRevision++;
+    var cancelledStart = false;
     if (running) {
       _allowPrivilegePrompt |= allowPrompt;
     } else {
@@ -371,6 +375,7 @@ class SetupAction extends _$SetupAction {
       _core.revokePrivilegePrompt();
       if (system.isDesktop &&
           ref.read(coreStatusProvider) == CoreStatus.connecting) {
+        cancelledStart = true;
         unawaited(ref.read(coreActionProvider.notifier).cancelCoreStart());
       }
     }
@@ -380,6 +385,7 @@ class SetupAction extends _$SetupAction {
       resume: resume,
       previousStartTime: _startTime,
       owner: owner,
+      cancelledStart: cancelledStart,
     );
     _latestRunRequest = request;
     _setLocalRunning(running);
@@ -465,6 +471,10 @@ class SetupAction extends _$SetupAction {
   }
 
   Future<bool> _setCoreRunning(_RunRequest request) {
+    if (!request.running && request.cancelledStart) {
+      ref.read(tunAppliedProvider.notifier).value = false;
+      return Future.value(true);
+    }
     return _listenerScheduler.run(() async {
       if (!_isCurrent(request)) {
         return true;
@@ -603,21 +613,30 @@ class SetupAction extends _$SetupAction {
   Future<void> updateConfig() async {
     if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
     await globalState.safeRun(() async {
-      final patchConfig = ref.read(patchClashConfigProvider);
-      final shouldContinueSetup = await requestAdmin(patchConfig.tun.enable);
+      final shouldContinueSetup = await requestAdmin(
+        ref.read(patchClashConfigProvider).tun.enable,
+      );
       if (!shouldContinueSetup) {
         await _restartCoreAfterAuthorization();
         return;
       }
-      final networkSetting = ref.read(networkSettingProvider);
-      final message = await _core.updateConfig(
-        _effectivePatchConfig(patchConfig).toUpdateParams(
-          authentication: networkSetting.authentication.credentials,
-          skipCertVerify: !ref.read(appSettingProvider).checkCertificate,
-        ),
-      );
-      if (message.isNotEmpty) throw MessageException(message);
-      await _syncTunApplied();
+      // Read after the prompt and inside the scheduler.
+      await _setupScheduler.run(() async {
+        if (!ref.mounted ||
+            ref.read(coreStatusProvider) != CoreStatus.connected) {
+          return;
+        }
+        final patchConfig = ref.read(patchClashConfigProvider);
+        final networkSetting = ref.read(networkSettingProvider);
+        final message = await _core.updateConfig(
+          _effectivePatchConfig(patchConfig).toUpdateParams(
+            authentication: networkSetting.authentication.credentials,
+            skipCertVerify: !ref.read(appSettingProvider).checkCertificate,
+          ),
+        );
+        if (message.isNotEmpty) throw MessageException(message);
+        await _syncTunApplied();
+      });
     });
   }
 

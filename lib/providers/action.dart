@@ -17,6 +17,7 @@ import 'package:reclash/common/boot_guard.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/migration.dart';
 import 'package:reclash/common/update.dart';
 import 'package:reclash/common/web_dashboard/access.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';

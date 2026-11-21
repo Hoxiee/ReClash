@@ -3,7 +3,7 @@ kind: integration
 state: active
 risk: critical
 must:
-  latest-intent: Desktop stop or close supersedes pending start and releases its lease. Android listener commands go directly to native arbitration without competing Core RPCs.
+  latest-intent: Desktop stop or close supersedes pending start and releases its lease. Android listener commands go directly to native arbitration without competing Core RPCs, and an always-on restart after an explicit user stop stays stopped until the user starts again. A live settings update and a profile apply serialize, and the update sends the settings current after the apply.
   protocol: Structured requests and events remain compatible with the shared protocol fixtures.
   source: The ReClash engine fork and pin are changed only after explicit compatibility review.
   controller: Typed controller requests retain validation and delegation behavior.

@@ -36,6 +36,7 @@ use windows_sys::Win32::System::Registry::{
     RegCloseKey, RegCreateKeyExW, RegDeleteKeyW, RegSetValueExW, HKEY, HKEY_LOCAL_MACHINE,
     KEY_SET_VALUE, REG_DWORD, REG_OPTION_VOLATILE,
 };
+use windows_sys::Win32::System::RemoteDesktop::ProcessIdToSessionId;
 use windows_sys::Win32::System::Threading::{
     GetProcessTimes, OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION,
 };
@@ -99,6 +100,14 @@ fn open_process(pid: u32) -> IoResult<Handle> {
         return Err(Error::last_os_error());
     }
     Ok(Handle(process))
+}
+
+/// The Windows session that owns [pid], so a logoff in another session cannot
+/// lift the owner's kill switch.
+pub(super) fn process_session(pid: u32) -> Option<u32> {
+    let mut session = 0;
+    // SAFETY: the out pointer is a live u32 for the duration of the call.
+    (unsafe { ProcessIdToSessionId(pid, &mut session) } != 0).then_some(session)
 }
 
 fn token_sid(process: &Handle) -> IoResult<String> {
@@ -347,7 +356,7 @@ pub(super) async fn serve_until<F, S>(
     owner_sid: String,
     shutdown: F,
     on_started: S,
-    mut logoffs: tokio::sync::mpsc::UnboundedReceiver<()>,
+    mut logoffs: tokio::sync::mpsc::UnboundedReceiver<u32>,
 ) -> anyhow::Result<()>
 where
     F: Future<Output = ()> + Send + 'static,
@@ -378,7 +387,13 @@ where
     ));
     let logoff_kill_switch = kill_switch.clone();
     let disarming = tokio::spawn(async move {
-        while logoffs.recv().await.is_some() {
+        while let Some(session) = logoffs.recv().await {
+            if !logoff_kill_switch.owns_session(session) {
+                log_message(format!(
+                    "Helper ignored a logoff in session {session}; its Core runs in another"
+                ));
+                continue;
+            }
             let kill_switch = logoff_kill_switch.clone();
             match tokio::task::spawn_blocking(move || kill_switch.disarm_standard()).await {
                 Ok(Ok(_)) => {}

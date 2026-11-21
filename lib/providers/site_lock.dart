@@ -52,8 +52,12 @@ class SiteLockReportState extends _$SiteLockReportState {
     try {
       final report = await ref.read(coreHandlerProvider).setSiteLocks(locks);
       if (!ref.mounted || revision != _revision) return report;
-      if (report?.applied ?? false) _applied = locks;
-      state = report;
+      // A timeout returns no report; the last one answers for the Core until
+      // the next refresh, and the next listener push retries the change.
+      if (report != null) {
+        if (report.applied) _applied = locks;
+        state = report;
+      }
       return report;
     } catch (error) {
       commonPrint.log(

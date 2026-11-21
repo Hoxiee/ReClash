@@ -60,7 +60,7 @@ fn run_windows_service() -> Result<()> {
         .cloned()
         .context("the helper service has no owner")?;
     let (shutdown_tx, mut shutdown_rx) = watch::channel(false);
-    let (logoff_tx, logoff_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (logoff_tx, logoff_rx) = tokio::sync::mpsc::unbounded_channel::<u32>();
     let status_handle = service_control_handler::register(
         SERVICE_NAME,
         move |event| -> ServiceControlHandlerResult {
@@ -73,7 +73,7 @@ fn run_windows_service() -> Result<()> {
                 ServiceControl::SessionChange(change)
                     if change.reason == SessionChangeReason::SessionLogoff =>
                 {
-                    let _ = logoff_tx.send(());
+                    let _ = logoff_tx.send(change.notification.session_id);
                     ServiceControlHandlerResult::NoError
                 }
                 _ => ServiceControlHandlerResult::NotImplemented,

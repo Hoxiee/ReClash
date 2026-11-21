@@ -197,7 +197,11 @@ class _SiteLockFormState extends ConsumerState<_SiteLockForm> {
           .push(withSiteLock(ref.read(siteLocksProvider), edited));
       if (!mounted) return;
       setState(() => _saving = false);
-      if (report != null && !report.applied) {
+      if (report == null) {
+        setState(() => _error = currentAppLocalizations.siteLockWaiting);
+        return;
+      }
+      if (!report.applied) {
         setState(() => _refuse(report.problems, edited));
         return;
       }

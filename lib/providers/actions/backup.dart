@@ -152,6 +152,9 @@ class BackupAction extends _$BackupAction {
       await putBack?.call();
       rethrow;
     }
+    if (config != null) {
+      await preferences.setUpgradeVersion(Migration.upgradeVersion);
+    }
     await _clearReplacedProviderCaches(previousProviders);
     await _clearOutdatedCompiledRuleSets(data.clashProviders);
     if (config != null) {

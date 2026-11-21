@@ -800,6 +800,14 @@ async fn start_request(
     kill_switch: Arc<KillSwitchService>,
     start_params: StartParams,
 ) -> Result<warp::reply::Response, Infallible> {
+    #[cfg(all(windows, feature = "windows-service"))]
+    if let Some(session) = caller
+        .host
+        .as_ref()
+        .and_then(|host| super::peer::process_session(host.pid))
+    {
+        kill_switch.note_owner_session(session);
+    }
     let response = match tokio::task::spawn_blocking(move || start(start_params, caller)).await {
         Ok(response) => response,
         Err(error) => error_response(

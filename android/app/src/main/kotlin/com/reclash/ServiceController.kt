@@ -72,6 +72,7 @@ object ServiceController {
     }
 
     suspend fun start(options: VpnOptions): Boolean = lock.withLock {
+        VpnUserStop.clear()
         ServiceConfig.updateVpnOptions(options)
         val nextIntent = if (options.enable) {
             VpnService::class.intent
@@ -146,6 +147,7 @@ object ServiceController {
     // after the process was killed — outlives every binding this process holds, so
     // unbinding alone leaves the tunnel up while the app reports it stopped.
     private fun stopServices() {
+        VpnUserStop.record()
         listOf(VpnService::class.intent, ProxyService::class.intent).forEach { intent ->
             runCatching { GlobalState.application.stopService(intent) }
                 .onFailure { error ->

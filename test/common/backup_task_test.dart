@@ -211,6 +211,50 @@ void main() {
       },
     );
 
+    test('mints the same ids when a failed migration reruns', () async {
+      final configMap = legacyConfig(
+        scripts: [
+          {'id': 'same', 'label': 'S', 'content': 'body'},
+        ],
+        rules: [
+          <String, Object?>{
+            'id': 'same-rule',
+            'value': 'DOMAIN,example.com,DIRECT',
+          },
+        ],
+        profiles: [
+          <String, Object?>{'id': 'same-profile', 'autoUpdateDuration': 0},
+        ],
+      );
+      final first = await migrateLegacyConfig(
+        configMap: configMap,
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+      final second = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          scripts: [
+            {'id': 'same', 'label': 'S', 'content': 'body'},
+          ],
+          rules: [
+            <String, Object?>{
+              'id': 'same-rule',
+              'value': 'DOMAIN,example.com,DIRECT',
+            },
+          ],
+          profiles: [
+            <String, Object?>{'id': 'same-profile', 'autoUpdateDuration': 0},
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(second.scripts.single.id, first.scripts.single.id);
+      expect(second.rules.single.id, first.rules.single.id);
+      expect(second.profiles.single.id, first.profiles.single.id);
+    });
+
     test('skips a script entry that is missing a required field', () async {
       final data = await migrateLegacyConfig(
         configMap: legacyConfig(

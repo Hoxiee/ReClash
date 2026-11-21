@@ -503,6 +503,21 @@ void main() {
       expect((await restoreWith(Migration.upgradeVersion)).sidebarBlur, isTrue);
     });
 
+    test(
+      'advances the local marker so the next launch skips the steps',
+      () async {
+        await preferences.setUpgradeVersion(0);
+        final configMap = configMapOf(buildContainer());
+        (configMap['themeProps']! as Map<String, Object?>)['sidebarBlur'] =
+            true;
+        await actionOf(
+          buildContainer(),
+        ).applyRestore(MigrationData(configMap: configMap), RestoreOption.all);
+
+        expect(await preferences.getUpgradeVersion(), Migration.upgradeVersion);
+      },
+    );
+
     test('a new backup carries the current marker', () async {
       await mockPreferences({
         'version': 1,

@@ -238,6 +238,9 @@ Future<MigrationData> readBackupArchive({
   }
 }
 
+const _maxRestoredBytes = 1 << 30;
+const _maxRestoredFileBytes = 256 << 20;
+
 Future<void> _extract(String archivePath, String stagingDirPath) async {
   await Directory(stagingDirPath).create(recursive: true);
   final input = InputFileStream(archivePath);
@@ -249,6 +252,7 @@ Future<void> _extract(String archivePath, String stagingDirPath) async {
       throw const BackupException(BackupFailure.invalid);
     }
     var wallpaperEntries = 0;
+    var restoredBytes = 0;
     for (final header in directory.fileHeaders) {
       final file = header.file;
       if (file == null) {
@@ -276,9 +280,13 @@ Future<void> _extract(String archivePath, String stagingDirPath) async {
       if (outPath == null) {
         continue;
       }
-      if (file.uncompressedSize < 0) {
+      final size = file.uncompressedSize;
+      if (size < 0 ||
+          size > _maxRestoredFileBytes ||
+          restoredBytes + size > _maxRestoredBytes) {
         throw const BackupException(BackupFailure.invalid);
       }
+      restoredBytes += size;
       await Directory(dirname(outPath)).create(recursive: true);
       final output = _VerifiedBackupOutput(outPath, file.uncompressedSize);
       try {

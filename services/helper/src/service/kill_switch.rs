@@ -160,6 +160,9 @@ pub(super) struct KillSwitchService {
     boot_id: Option<String>,
     layer: Box<dyn KillSwitchLayer>,
     guard: Mutex<()>,
+    /// The Core's session; a logoff elsewhere must not lift its block.
+    #[cfg(all(windows, feature = "windows-service"))]
+    owner_session: Mutex<Option<u32>>,
 }
 
 impl KillSwitchService {
@@ -173,7 +176,25 @@ impl KillSwitchService {
             boot_id,
             layer,
             guard: Mutex::new(()),
+            #[cfg(all(windows, feature = "windows-service"))]
+            owner_session: Mutex::new(None),
         }
+    }
+
+    #[cfg(all(windows, feature = "windows-service"))]
+    pub(super) fn note_owner_session(&self, session: u32) {
+        *self
+            .owner_session
+            .lock()
+            .unwrap_or_else(|error| error.into_inner()) = Some(session);
+    }
+
+    #[cfg(all(windows, feature = "windows-service"))]
+    pub(super) fn owns_session(&self, session: u32) -> bool {
+        self.owner_session
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .is_none_or(|owner| owner == session)
     }
 
     #[cfg(target_os = "linux")]
@@ -935,5 +956,24 @@ mod tests {
         assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
         assert_eq!(response["code"], "nftFailed");
         assert!(!fixture.directory.join(CONFIG_FILE).exists());
+    }
+}
+
+#[cfg(all(test, windows, feature = "windows-service"))]
+mod windows_session_tests {
+    use super::*;
+
+    #[test]
+    fn only_the_session_that_started_the_core_owns_its_block() {
+        let service = KillSwitchService::new(
+            PathBuf::new(),
+            None,
+            Box::new(super::super::kill_switch_windows::WindowsKillSwitch::default()),
+        );
+
+        assert!(service.owns_session(4));
+        service.note_owner_session(2);
+        assert!(service.owns_session(2));
+        assert!(!service.owns_session(4));
     }
 }

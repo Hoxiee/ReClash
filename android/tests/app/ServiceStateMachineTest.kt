@@ -104,6 +104,7 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     var duringSetup: (suspend () -> Unit)? = null
     var beforeStartService: (() -> Unit)? = null
     var lastStartOptions: VpnOptions? = null
+    override var vpnStoppedByUser = false
 
     override var runtime: ServiceRuntime? = null
     override val homeDirPath = "/data/user/0/com.reclash/files"
@@ -186,6 +187,20 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServiceStateMachineTest {
+
+    @Test
+    fun `an always-on restart stays down after the user stopped`() = runTest {
+        val host = FakeHost(this)
+        host.vpnStoppedByUser = true
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+
+        machine.handleSystemStartAction()
+
+        assertEquals(0, host.startCalls)
+        assertEquals(0, host.setupCalls)
+        assertTrue(host.logs.any { it.contains("user stop") })
+    }
 
     @Test
     fun `on demand pauses while keeping the run and resumes on another network`() = runTest {

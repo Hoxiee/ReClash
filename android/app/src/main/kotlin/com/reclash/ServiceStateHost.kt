@@ -50,6 +50,8 @@ internal interface ServiceStateHost {
 
     fun notifyStopped()
 
+    val vpnStoppedByUser: Boolean get() = false
+
     suspend fun quickSetup(initParams: String, setupParams: String): Result<String>
 
     suspend fun startService(options: VpnOptions): Boolean
@@ -147,6 +149,9 @@ internal object AndroidServiceStateHost : ServiceStateHost {
     override fun notifyStopped() {
         flutterEngine?.plugin<ServicePlugin>()?.notifyStopped()
     }
+
+    override val vpnStoppedByUser: Boolean
+        get() = VpnUserStop.stopped
 
     override suspend fun quickSetup(initParams: String, setupParams: String): Result<String> =
         ServiceController.quickSetup(initParams, setupParams)

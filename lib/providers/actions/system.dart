@@ -100,10 +100,12 @@ class SystemAction extends _$SystemAction {
 
   @protected
   Future<void> cleanupExitResources(bool needSave) async {
+    // The watchdog is already armed: start the authoritative save before a
+    // ready update's hash can hold it past the budget.
+    final saveOperation = needSave ? _savePreferencesSafely() : null;
     if (needSave && !_unattendedExit) {
       await ref.read(appUpdateActionProvider.notifier).applyOnExit();
     }
-    final saveOperation = needSave ? _savePreferencesSafely() : null;
     final tray = trayPort;
     if (tray != null) {
       await tray.shutdown().onError<Object>((error, stackTrace) {

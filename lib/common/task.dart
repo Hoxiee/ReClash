@@ -527,6 +527,15 @@ Future<MigrationData> _oldToNowTask(
   );
 }
 
+/// Keeps a retried legacy migration on the same ids.
+int _legacySnowflake(Object? value) {
+  if (value == null) {
+    return snowflake.id;
+  }
+  final id = int.parse(value.toString().toMd5().substring(0, 15), radix: 16);
+  return id == 0 ? 1 : id;
+}
+
 Future<MigrationData> migrateLegacyConfig({
   required Map<String, Object?> configMap,
   required String sourcePath,
@@ -567,7 +576,10 @@ Future<MigrationData> migrateLegacyConfig({
     if (id == null || content == null || label == null) {
       continue;
     }
-    final newId = idMap.updateCacheValue(rawScript['id'], () => snowflake.id);
+    final newId = idMap.updateCacheValue(
+      rawScript['id'],
+      () => _legacySnowflake(rawScript['id']),
+    );
     final path = BackupEntries.resolve(targetPath, BackupEntries.script(newId));
     final file = File(path);
     await file.safeWriteAsString(content);
@@ -579,7 +591,10 @@ Future<MigrationData> migrateLegacyConfig({
   final List<Rule> rules = [];
   final List<DisabledRule> disabledRules = [];
   for (final rawRule in rawRules) {
-    final id = idMap.updateCacheValue(rawRule['id'], () => snowflake.id);
+    final id = idMap.updateCacheValue(
+      rawRule['id'],
+      () => _legacySnowflake(rawRule['id']),
+    );
     rawRule['id'] = id;
     final value = rawRule['value'] ?? '';
     rules.add(Rule.parse(value, id: id));
@@ -591,7 +606,10 @@ Future<MigrationData> migrateLegacyConfig({
     if (rawId == null) {
       continue;
     }
-    final profileId = idMap.updateCacheValue(rawId, () => snowflake.id);
+    final profileId = idMap.updateCacheValue(
+      rawId,
+      () => _legacySnowflake(rawId),
+    );
     rawProfile['id'] = profileId;
     final overwrite = rawProfile['overwrite'] as Map?;
     if (overwrite != null) {
@@ -599,7 +617,10 @@ Future<MigrationData> migrateLegacyConfig({
       if (standardOverwrite != null) {
         final addedRules = standardOverwrite['addedRules'] as List? ?? [];
         for (final addRule in addedRules) {
-          final id = idMap.updateCacheValue(addRule['id'], () => snowflake.id);
+          final id = idMap.updateCacheValue(
+            addRule['id'],
+            () => _legacySnowflake(addRule['id']),
+          );
           final value = addRule['value'] ?? '';
           rules.add(Rule.parse(value, id: id).copyWith(profileId: profileId));
         }

@@ -10,7 +10,7 @@ must:
   readiness: Opening verifies the authenticated API, HTML and required same-panel scripts and styles under one deadline; missing, empty or mistyped assets never count as ready.
   access: Dashboard controller access is runtime-only, loopback and authenticated; saved controller settings win and Safe Mode never opens access.
   ownership: Embedded access belongs to its page; browser handoff keeps that owner until explicit end or exit; removal ends only owners of the removed panel.
-  failure: Failed apply, probe, launch, cancellation, disposal and stale results cannot retain unsuccessful access or close a newer session; every operation resets progress.
+  failure: Failed apply, probe, launch, cancellation, disposal and stale results cannot retain unsuccessful access or close a newer session; every operation resets progress, and a controller without a secret reports an authentication failure instead of closing silently.
   navigation: The dashboard remains a searchable child of General beside the external controller, not a root Tools tile; embedded navigation cannot enter Core API or external subframes, and back swipes are disabled without blocking explicit back actions.
   interface: Installation, update, delete, cancel and access actions use the app bar; loading, unavailable Core or profile, retry and deletion confirmation remain usable on phone widths.
   localization: Dashboard messages belong to one web.dashboard ARB fragment in every supported locale.
