@@ -22,6 +22,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/profile_brand.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -85,6 +86,13 @@ class _ProfileFilePicker extends FilePickerPlatform {
   }) async => file;
 }
 
+class _ThrowingBrandAction extends ProfileBrandAction {
+  @override
+  Future<void> forget(int profileId) async {
+    throw StateError('brand cleanup failed');
+  }
+}
+
 class _ImportReviewObserver extends NavigatorObserver {
   final opened = Completer<void>();
 
@@ -128,6 +136,31 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
+  });
+
+  test('deleting the current profile still selects the next one', () async {
+    final first = Profile.normal(label: 'First').copyWith(id: 701);
+    final second = Profile.normal(label: 'Second').copyWith(id: 702);
+    final local = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(() => TestProfiles([first, second])),
+        profileBrandActionProvider.overrideWith(_ThrowingBrandAction.new),
+        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+      ],
+    );
+    addTearDown(local.dispose);
+    final selection = local.listen<int?>(
+      currentProfileIdProvider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+    addTearDown(selection.close);
+    local.read(currentProfileIdProvider.notifier).value = first.id;
+
+    await local.read(profilesActionProvider.notifier).deleteProfile(first.id);
+
+    expect(local.read(profilesProvider), [second]);
+    expect(local.read(currentProfileIdProvider), second.id);
   });
 
   void decodesTo(String link, List<Map<String, dynamic>> proxies) {

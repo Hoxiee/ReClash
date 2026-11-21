@@ -66,9 +66,7 @@ class ProfilesAction extends _$ProfilesAction {
     _profileUpdateCancellations.remove(id)?.cancel();
     await serializeProfileMutation(id, () async {
       await ref.read(profilesProvider.notifier).del(id);
-      await clearEffect(id);
-      await const SubscriptionClientCache().forget(id);
-      await subscriptionReminder.forget(id);
+      await _cleanupDeletedProfile(id);
     });
     try {
       await (await DeviceIdentityStore.create()).setProfileSendOverride(
@@ -89,6 +87,27 @@ class ProfilesAction extends _$ProfilesAction {
         unawaited(ref.read(setupActionProvider.notifier).setRunning(false));
       }
     }
+  }
+
+  Future<void> _cleanupDeletedProfile(int id) async {
+    Future<void> attempt(String action, Future<void> Function() step) async {
+      try {
+        await step();
+      } catch (error) {
+        commonPrint.log(
+          'Could not clean up deleted profile $id ($action): '
+          '${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+      }
+    }
+
+    await attempt('effect', () => clearEffect(id));
+    await attempt(
+      'client cache',
+      () => const SubscriptionClientCache().forget(id),
+    );
+    await attempt('reminder', () => subscriptionReminder.forget(id));
   }
 
   Future<String> validateConfigWithData(List<int> data) async {
