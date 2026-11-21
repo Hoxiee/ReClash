@@ -109,9 +109,6 @@ final class KillSwitchHostPolicy {
       if (_disposed) return;
       if (readiness != HelperReadiness.ready) {
         _emit((readiness: readiness, info: null));
-        if (wanted == null && readiness == HelperReadiness.manifestMissing) {
-          _stopLifting();
-        }
         return;
       }
       var info = await _read();

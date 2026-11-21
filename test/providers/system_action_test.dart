@@ -371,6 +371,42 @@ void main() {
     expect(calls, ['cleanup', 'window', 'core', 'exit']);
   });
 
+  test('a failed exit can run again', () async {
+    final calls = <String>[];
+    var exitAttempts = 0;
+    final coordinator = SystemExitCoordinator(
+      watchdogDuration: const Duration(hours: 1),
+      closeWindow: () async => calls.add('window'),
+      closeCore: () async => calls.add('core'),
+      exitApplication: () async {
+        calls.add('exit');
+        if (exitAttempts++ == 0) throw StateError('exit failed');
+      },
+    );
+
+    await expectLater(
+      coordinator.exit(
+        cleanup: () async {
+          calls.add('first cleanup');
+          throw StateError('cleanup failed');
+        },
+      ),
+      throwsStateError,
+    );
+    await coordinator.exit(cleanup: () async => calls.add('second cleanup'));
+
+    expect(calls, [
+      'first cleanup',
+      'window',
+      'core',
+      'exit',
+      'second cleanup',
+      'window',
+      'core',
+      'exit',
+    ]);
+  });
+
   group('SystemAction exit orchestration', () {
     late TestSystemAction action;
     late ProviderContainer container;

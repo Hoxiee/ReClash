@@ -25,6 +25,12 @@ final class SystemExitCoordinator {
     }
     final operation = _run(cleanup);
     _operation = operation;
+    operation.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        if (identical(_operation, operation)) _operation = null;
+      },
+    );
     return operation;
   }
 
@@ -65,6 +71,14 @@ final class SystemExitCoordinator {
     }
     final operation = Future<void>.sync(exitApplication);
     _applicationExitOperation = operation;
+    operation.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        if (identical(_applicationExitOperation, operation)) {
+          _applicationExitOperation = null;
+        }
+      },
+    );
     return operation;
   }
 }

@@ -241,7 +241,7 @@ void main() {
     });
   });
 
-  test('a lift stops at a missing manifest without deleting', () {
+  test('a lift retries at a missing manifest and deletes once it returns', () {
     _run((async, helper) {
       helper.info = _configuredAs(_standard);
       helper.readiness = HelperReadiness.manifestMissing;
@@ -249,8 +249,14 @@ void main() {
       async.flushMicrotasks();
       async.elapse(_tick * 3);
 
-      expect(helper.readinessChecks, 1);
+      expect(helper.readinessChecks, greaterThanOrEqualTo(4));
       expect(helper.calls, isEmpty);
+
+      helper.readiness = HelperReadiness.ready;
+      async.elapse(_tick);
+
+      expect(helper.calls, ['read', 'delete', 'read']);
+      expect(helper.snapshots.last.info!.configured, isFalse);
     });
   });
 
