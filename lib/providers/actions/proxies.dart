@@ -39,7 +39,7 @@ class ProxiesAction extends _$ProxiesAction {
 
   Timer? _delayFlushTimer;
 
-  final Map<String, String> _pendingSelectedRollback = {};
+  final Map<(int?, String), String> _pendingSelectedRollback = {};
   final Map<String, int> _changingGroups = {};
   int _selectionRevision = 0;
 
@@ -127,11 +127,12 @@ class ProxiesAction extends _$ProxiesAction {
   }
 
   void changeProxyDebounce(String groupName, String proxyName) {
+    final profileId = ref.read(currentProfileIdProvider);
     _selectionRevision++;
-    _pendingSelectedRollback.putIfAbsent(
+    _pendingSelectedRollback.putIfAbsent((
+      profileId,
       groupName,
-      () => _currentSelectedName(groupName),
-    );
+    ), () => _currentSelectedName(groupName));
     ref
         .read(profilesActionProvider.notifier)
         .updateCurrentSelectedMap(groupName, proxyName);
@@ -139,6 +140,10 @@ class ProxiesAction extends _$ProxiesAction {
       String groupName,
       String proxyName,
     ) async {
+      if (ref.read(currentProfileIdProvider) != profileId) {
+        _pendingSelectedRollback.remove((profileId, groupName));
+        return;
+      }
       await changeProxy(groupName: groupName, proxyName: proxyName);
       updateGroupsDebounce();
     }, args: [groupName, proxyName]);
@@ -238,7 +243,7 @@ class ProxiesAction extends _$ProxiesAction {
       }
       final profiles = ref.read(profilesActionProvider.notifier);
       for (final entry in lostPins.entries) {
-        if (!_pendingSelectedRollback.containsKey(entry.key) &&
+        if (!_pendingSelectedRollback.containsKey((profileId, entry.key)) &&
             !_changingGroups.containsKey(entry.key) &&
             _currentSelectedName(entry.key) == entry.value) {
           profiles.updateCurrentSelectedMap(entry.key, '');
@@ -297,8 +302,9 @@ class ProxiesAction extends _$ProxiesAction {
     bool silence = false,
   }) async {
     final profilesAction = ref.read(profilesActionProvider.notifier);
+    final profileId = ref.read(currentProfileIdProvider);
     final rollbackName =
-        _pendingSelectedRollback.remove(groupName) ??
+        _pendingSelectedRollback.remove((profileId, groupName)) ??
         _currentSelectedName(groupName);
     profilesAction.updateCurrentSelectedMap(groupName, proxyName);
     final ChangeProxyResult result;

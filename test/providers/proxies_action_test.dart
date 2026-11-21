@@ -767,6 +767,41 @@ void main() {
       verifyNever(() => core.changeProxy(any()));
     });
 
+    test('drops a queued pick after the profile switches', () async {
+      final first = _selectedProfile('HK-00').copyWith(id: 11);
+      final second = _selectedProfile('HK-00').copyWith(id: 12);
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          profilesProvider.overrideWith(() => TestProfiles([first, second])),
+        ],
+      );
+      addTearDown(container.dispose);
+      final selection = container.listen<int?>(
+        currentProfileIdProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      addTearDown(selection.close);
+      container.read(currentProfileIdProvider.notifier).value = first.id;
+      final local = actionOf(container);
+
+      local.changeProxyDebounce('Proxy', 'HK-01');
+      container.read(currentProfileIdProvider.notifier).value = second.id;
+      debouncer.flush((FunctionTag.changeProxy, 'Proxy'));
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(() => core.changeProxy(any()));
+      expect(
+        container.read(profilesProvider).getProfile(first.id)?.selectedMap,
+        {'Proxy': 'HK-01'},
+      );
+      expect(
+        container.read(profilesProvider).getProfile(second.id)?.selectedMap,
+        {'Proxy': 'HK-00'},
+      );
+    });
+
     test(
       'clears each lost computed pin without restoring another one',
       () async {

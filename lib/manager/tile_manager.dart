@@ -18,8 +18,13 @@ class TileManager extends ConsumerStatefulWidget {
 }
 
 class _TileContainerState extends ConsumerState<TileManager> with TileListener {
+  bool _pendingStart = false;
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(initProvider, (_, ready) {
+      if (ready && _pendingStart) _start();
+    });
     return widget.child;
   }
 
@@ -30,9 +35,18 @@ class _TileContainerState extends ConsumerState<TileManager> with TileListener {
     if (isStart && ref.read(coreStatusProvider) == CoreStatus.connected) {
       return;
     }
+    if (!ref.read(initProvider)) {
+      _pendingStart = true;
+      return;
+    }
+    _start();
+    super.onStart();
+  }
+
+  void _start() {
+    _pendingStart = false;
     unawaited(ref.read(setupActionProvider.notifier).setRunning(true));
     unawaited(app?.tip(currentAppLocalizations.startVpn));
-    super.onStart();
   }
 
   @override
