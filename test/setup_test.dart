@@ -185,6 +185,34 @@ hooks:
       );
     });
 
+    test('macOS packaging signs with the release identity', () {
+      final env = setup.createPackageProcessEnvironment(
+        rootDir: '/repo',
+        platform: 'macos',
+        macosTeamId: 'TEAM123456',
+        macosSigningIdentity: 'Developer ID Application',
+      );
+
+      expect(env['FLUTTER_XCODE_DEVELOPMENT_TEAM'], 'TEAM123456');
+      expect(
+        env['FLUTTER_XCODE_CODE_SIGN_IDENTITY'],
+        'Developer ID Application',
+      );
+      expect(env['FLUTTER_XCODE_CODE_SIGN_STYLE'], 'Manual');
+    });
+
+    test('macOS packaging stays ad-hoc without an identity', () {
+      final env = setup.createPackageProcessEnvironment(
+        rootDir: '/repo',
+        platform: 'macos',
+        macosTeamId: '',
+        macosSigningIdentity: '',
+      );
+
+      expect(env, isNot(contains('FLUTTER_XCODE_DEVELOPMENT_TEAM')));
+      expect(env, isNot(contains('FLUTTER_XCODE_CODE_SIGN_IDENTITY')));
+    });
+
     test('Windows PATH keeps semicolon-separated directories', () {
       final env = setup.createPackageProcessEnvironment(
         rootDir: '/repo',

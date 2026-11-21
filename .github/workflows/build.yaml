@@ -582,6 +582,31 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
           xcodebuild -version
 
+      # A stable tag must not publish an ad-hoc DMG without TUN.
+      - name: Import macOS signing certificate
+        if: matrix.platform == 'macos' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          if [[ -z "$CERTIFICATE" || -z "$CERTIFICATE_PASSWORD" || -z "$TEAM_ID" || -z "$SIGNING_IDENTITY" ]]; then
+            echo '::error::Release tags require MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, MACOS_TEAM_ID and MACOS_SIGNING_IDENTITY.'
+            exit 1
+          fi
+          keychain="$RUNNER_TEMP/reclash-signing.keychain-db"
+          security create-keychain -p actions "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p actions "$keychain"
+          printf '%s' "$CERTIFICATE" | openssl base64 -d -out "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions "$keychain"
+          existing="$(security list-keychains -d user | tr -d '"')"
+          security list-keychains -d user -s "$keychain" $existing
+          security default-keychain -d user -s "$keychain"
+          rm -f "$RUNNER_TEMP/cert.p12"
+
       - name: Setup NDK
         if: startsWith(matrix.platform,'android')
         uses: nttld/setup-ndk@v1
@@ -628,6 +653,8 @@ jobs:
       - name: Setup
         env:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
+          RECLASH_MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          RECLASH_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
         run: dart setup.dart ${{ matrix.platform }} --no-prepare ${{ matrix.platform == 'macos' && format('--arch {0}', matrix.arch) || '' }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
       - name: Upload

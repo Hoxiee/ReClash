@@ -384,6 +384,8 @@ Map<String, String> createPackageProcessEnvironment({
   required String platform,
   String? androidArch,
   String? macosArch,
+  String? macosTeamId,
+  String? macosSigningIdentity,
 }) {
   final path = [
     if (platform == 'linux')
@@ -391,11 +393,23 @@ Map<String, String> createPackageProcessEnvironment({
     _pubCacheBin(),
     Platform.environment['PATH'] ?? '',
   ].join(platform == 'windows' ? ';' : ':');
+  final team = macosTeamId ?? Platform.environment['RECLASH_MACOS_TEAM_ID'];
+  final identity =
+      macosSigningIdentity ??
+      Platform.environment['RECLASH_MACOS_SIGNING_IDENTITY'];
   return {
     'ANDROID_ARCH': ?androidArch,
     // flutter_tools passes FLUTTER_XCODE_* to xcodebuild as build settings.
     if (macosArch != null)
       'FLUTTER_XCODE_ARCHS': macosArch == 'amd64' ? 'x86_64' : 'arm64',
+    if (team != null &&
+        team.isNotEmpty &&
+        identity != null &&
+        identity.isNotEmpty) ...{
+      'FLUTTER_XCODE_DEVELOPMENT_TEAM': team,
+      'FLUTTER_XCODE_CODE_SIGN_IDENTITY': identity,
+      'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+    },
     'PATH': path,
   };
 }
