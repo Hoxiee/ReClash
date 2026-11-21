@@ -119,7 +119,7 @@ Get the latest build from [GitHub Releases](https://github.com/Hoxiee/ReClash/re
 | --- | --- | --- |
 | Android 7 and later | APK for `arm64-v8a`, `armeabi-v7a` and `x86_64` | Most phones use `arm64-v8a`. |
 | Windows 10 and later | Installer (`-setup.exe`) or portable `.zip`, for x64 and ARM64 | Pick ARM64 on Snapdragon and other ARM laptops. Builds are not code-signed, so SmartScreen or Smart App Control may warn or block: in SmartScreen choose More info → Run anyway. |
-| macOS 12 and later | DMG for Apple Silicon (`arm64`) and Intel (`amd64`) | Not from the App Store. Release DMGs are signed with a Developer ID but not notarized. On macOS 15 and later the context-menu Open no longer bypasses Gatekeeper: try to open the app once, then go to System Settings → Privacy & Security → Open Anyway. |
+| macOS 12 and later | DMG for Apple Silicon (`arm64`) and Intel (`amd64`) | Not from the App Store. DMGs are Developer ID signed and not notarized once the signing certificate is configured; until then the build is ad-hoc and has no TUN. On macOS 15 and later the context-menu Open no longer bypasses Gatekeeper: try to open the app once, then go to System Settings → Privacy & Security → Open Anyway. |
 | Linux | `.deb`, `.rpm` and Arch `.pkg.tar.xz` for x64 and ARM64; AppImage for x64 | See the tray note below. |
 
 <p>
