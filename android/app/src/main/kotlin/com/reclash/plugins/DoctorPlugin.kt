@@ -156,6 +156,15 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
         events = sink
         lastPublished = null
         publish()
+        // Device facts describe the network under the tunnel, so a Wi-Fi to
+        // mobile handover has to republish them; the request used to filter
+        // for VPN networks, which no handover touches.
+        connectivityManager.registerNetworkCallback(
+            NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                .build(),
+            networkCallback,
+        )
         connectivityManager.registerNetworkCallback(
             NetworkRequest.Builder()
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
@@ -333,6 +342,7 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
             null
         }
         val host = dns?.privateDnsServerName
+        val portal = networks.firstOrNull { it.first == underlying }?.second
         return mapOf(
             "vpnPermission" to vpnPermission(),
             "otherVpn" to otherVpn,
@@ -347,9 +357,12 @@ class DoctorPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAwa
                 else -> "off"
             },
             "privateDnsHost" to host,
+            // Mobile carriers run a billing portal on data with no balance;
+            // the system notification owns that sign-in, so only Wi-Fi raises
+            // the prompt this app can act on.
             "captivePortal" to (
-                networks.firstOrNull { it.first == underlying }?.second
-                    ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL) == true
+                portal?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true &&
+                    portal.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
                 ),
         )
     }

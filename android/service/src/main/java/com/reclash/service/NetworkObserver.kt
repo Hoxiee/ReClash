@@ -177,7 +177,7 @@ object NetworkObserver {
 
     private fun networkPriority(entry: Map.Entry<Network, NetworkInfo>): Int {
         val capabilities = connectivity?.getNetworkCapabilities(entry.key)
-        return when {
+        val transport = when {
             capabilities == null -> 100
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> 90
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> 0
@@ -191,7 +191,14 @@ object NetworkObserver {
                 capabilities.hasTransport(TRANSPORT_SATELLITE) -> 5
 
             else -> 20
-        } + entry.value.priorityPenalty
+        }
+        // Android keeps traffic on the validated network. One that a portal or
+        // a failed probe holds back still ranks by transport only where no
+        // validated network exists.
+        val unvalidated =
+            capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) != true
+        return transport + entry.value.priorityPenalty +
+            if (unvalidated) UNVALIDATED_PENALTY else 0
     }
 
     @Synchronized
@@ -292,6 +299,10 @@ private const val DNS_PORT = 53
 private const val DNS_UPDATE_DELAY_MILLIS = 200L
 private const val REGISTRATION_RETRY_MILLIS = 2_000L
 private const val LOCATION_PERMISSION_POLL_MILLIS = 30_000L
+
+// Outweighs the transport ranks and the losing penalty, so among the networks
+// Android can route through, a validated one wins.
+private const val UNVALIDATED_PENALTY = 50
 
 private fun InetAddress.asSocketAddressText(port: Int): String = when (this) {
     is Inet6Address -> "[$hostAddress]:$port"
