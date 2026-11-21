@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.13",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "Quieter diagnostics, cleaner stops and starts",
+      "spotlight": {
+        "title": "No Wi-Fi sign-in on mobile data",
+        "description": "ReClash no longer asks you to sign in to a Wi-Fi network when your carrier shows a portal on mobile data, and follows a network switch at once.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "No Wi-Fi sign-in on mobile data",
+          "description": "The sign-in prompt stays on Wi-Fi and no longer follows you onto mobile data.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Settings saved in the background",
+          "description": "Changes are saved when the app goes to the background, not only on a clean close.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Tile starts keep your pick",
+          "description": "A start from the quick-settings tile uses the server you selected.",
+          "kind": "link",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Profile deletion always finishes",
+          "description": "Deleting a profile completes and selects the next one; Android backups stay free of credentials.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Always-on VPN stays stopped",
+          "description": "On Android, stopping an always-on VPN keeps it stopped.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Sign-off keeps the kill switch",
+          "description": "On Windows, signing off in another session no longer disarms the owner's kill switch.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "title": "macOS TUN is off in this build",
+          "description": "The DMG is ad-hoc signed until the Developer ID certificate is configured, so the privileged Helper and the TUN do not start.",
+          "kind": "shield",
+          "platforms": [
+            "macos"
+          ]
+        }
+      ]
+    },
+    "ru": {
+      "headline": "Спокойная диагностика, чистая остановка и запуск",
+      "spotlight": {
+        "title": "Без входа в Wi-Fi на мобильной сети",
+        "description": "ReClash больше не просит войти в Wi-Fi, если оператор показывает портал на мобильной сети, и сразу учитывает смену сети.",
+        "kind": "shield"
+      },
+      "highlights": [
+        {
+          "title": "Без входа в Wi-Fi на мобильной сети",
+          "description": "Подсказка входа остаётся на Wi-Fi и больше не переходит на мобильную сеть.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Настройки сохраняются в фоне",
+          "description": "Изменения сохраняются при уходе в фон, а не только при закрытии.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Запуск с плитки сохраняет выбор",
+          "description": "Запуск с плитки быстрых настроек использует выбранный сервер.",
+          "kind": "link",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Удаление профиля всегда завершается",
+          "description": "Профиль удаляется до конца и выбирается следующий; резервные копии Android остаются без доступа к подписке.",
+          "kind": "dashboard"
+        },
+        {
+          "title": "Always-on VPN остаётся выключенным",
+          "description": "На Android остановленный always-on VPN не включается сам.",
+          "kind": "shield",
+          "platforms": [
+            "android"
+          ]
+        },
+        {
+          "title": "Выход сохраняет kill switch",
+          "description": "На Windows выход из другой сессии больше не снимает kill switch владельца.",
+          "kind": "shield",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "warnings": [
+        {
+          "title": "TUN на macOS выключен в этой сборке",
+          "description": "DMG подписан ad-hoc, пока не настроен сертификат Developer ID, поэтому привилегированный помощник и TUN не запускаются.",
+          "kind": "shield",
+          "platforms": [
+            "macos"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -2,6 +2,34 @@
 
 <!-- Generated from release_notes/ by `dart run tool/changelog.dart changelog`. Edit the notes, not this file. -->
 
+## v0.1.0-pre.13
+
+A round of fixes for starts, stops, settings and cleanup, so the app keeps its own state across handovers, restores
+and backgrounding.
+
+### Fixed
+
+- On Android, ReClash no longer asks you to sign in to a Wi-Fi network while you are on mobile data, and the
+  diagnostics follow a switch between Wi-Fi and mobile data at once.
+- Settings you change are saved when the app goes to the background instead of waiting for a clean close.
+- A start from the Android quick-settings tile uses the server you picked, even when the start races the app's
+  initialization.
+- Deleting a profile finishes its cleanup and selects the next profile even when one step fails, and Android no
+  longer includes subscription credentials or profile data in cloud backups.
+- An always-on VPN on Android stays stopped after you stop it yourself.
+- On Windows, signing off in another session no longer disarms the kill switch of the session that owns it.
+- On macOS, a logout or shutdown waits for the exit watchdog when the app's interface never starts.
+- A block left behind by the kill switch is lifted after the privileged Helper is restored, and a quit that failed
+  once can finish its cleanup on the next try.
+- Restoring an older backup applies the config upgrades it missed, and a retried migration keeps the same ids.
+- Site lock keeps its last report when the Core times out, and a missing dashboard secret is reported as an
+  authentication problem.
+
+### Known issues
+
+- macOS builds are ad-hoc until the Developer ID certificate is configured, so the privileged Helper and the TUN do
+  not start on this prerelease.
+
 ## v0.1.0-pre.12
 
 Site lock presets now follow their updates, and sign-outs and shutdowns leave nothing behind.
