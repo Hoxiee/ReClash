@@ -79,7 +79,7 @@
   "updateSkippedVersions": "Промежуточные версии",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "Спасибо, что тестируете ReClash",
-  "preReleaseNoticeBody": "Вы запускаете предварительную сборку {version}. Она выходит раньше стабильной, поэтому в ней могут встречаться ошибки и незавершённые функции. Сообщения о проблемах помогают сделать релиз лучше.",
+  "preReleaseNoticeBody": "Сборка выходит раньше стабильной, поэтому в ней возможны ошибки и незавершённые функции. Сообщения о проблемах помогают сделать релиз лучше.",
   "preReleaseNoticeTelegramChat": "Telegram-чат",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

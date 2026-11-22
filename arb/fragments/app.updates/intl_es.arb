@@ -79,7 +79,7 @@
   "updateSkippedVersions": "Versiones intermedias",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "Gracias por probar ReClash",
-  "preReleaseNoticeBody": "Estás usando la versión preliminar {version}. Se publica antes que la estable, así que puede contener errores y funciones sin terminar. Informar de los problemas ayuda a mejorar la versión.",
+  "preReleaseNoticeBody": "Esta compilación se publica antes que la estable, así que puede contener errores y funciones sin terminar. Informar de los problemas ayuda a mejorar la versión.",
   "preReleaseNoticeTelegramChat": "Chat de Telegram",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

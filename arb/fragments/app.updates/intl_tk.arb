@@ -79,7 +79,7 @@
   "updateSkippedVersions": "Aradaky wersiýalar",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "ReClash-y synap göreniňiz üçin sag boluň",
-  "preReleaseNoticeBody": "Siz {version} deslapky relizini işledýärsiňiz. Ol durnukly wersiýadan öň çykýar, şonuň üçin ýalňyşlyklar we tamamlanmadyk aýratynlyklar bolup biler. Meseleler barada habar bermek goýberilişi gowulaşdyrmaga kömek edýär.",
+  "preReleaseNoticeBody": "Bu gurnama durnukly wersiýadan öň çykýar, şonuň üçin ýalňyşlyklar we tamamlanmadyk aýratynlyklar bolup biler. Meseleler barada habar bermek goýberilişi gowulaşdyrmaga kömek edýär.",
   "preReleaseNoticeTelegramChat": "Telegram söhbeti",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

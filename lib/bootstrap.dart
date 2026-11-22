@@ -21,11 +21,10 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/ui/dialog.dart' show CommonDialog;
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/views/navigation.dart';
+import 'package:reclash/widgets/pre_release_notice_dialog.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_color_utilities/palettes/tonal_palette.dart';
@@ -307,20 +306,8 @@ class Bootstrap {
     } catch (error) {
       commonPrint.log('Pre-release notice: $error', logLevel: LogLevel.warning);
     }
-    final l10n = currentAppLocalizations;
     await dialogs.showCommonDialog<void>(
-      child: CommonDialog(
-        title: l10n.preReleaseNoticeTitle,
-        actions: [
-          Builder(
-            builder: (context) => TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.updateGotIt),
-            ),
-          ),
-        ],
-        child: _PreReleaseNoticeBody(version: version),
-      ),
+      child: PreReleaseNoticeDialog(version: version),
     );
   }
 
@@ -400,56 +387,3 @@ class Bootstrap {
 }
 
 final bootstrap = Bootstrap();
-
-class _PreReleaseNoticeBody extends StatefulWidget {
-  const _PreReleaseNoticeBody({required this.version});
-
-  final String version;
-
-  @override
-  State<_PreReleaseNoticeBody> createState() => _PreReleaseNoticeBodyState();
-}
-
-class _PreReleaseNoticeBodyState extends State<_PreReleaseNoticeBody> {
-  late final TapGestureRecognizer _telegram = TapGestureRecognizer()
-    ..onTap = () => unawaited(dialogs.openUrl(telegramChatUrl));
-  late final TapGestureRecognizer _issues = TapGestureRecognizer()
-    ..onTap = () => unawaited(dialogs.openUrl(repositoryIssuesUrl));
-
-  @override
-  void dispose() {
-    _telegram.dispose();
-    _issues.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final primary = Theme.of(context).colorScheme.primary;
-    final linkStyle = TextStyle(
-      color: primary,
-      decoration: TextDecoration.underline,
-      decorationColor: primary,
-    );
-    return SelectableText.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: '${l10n.preReleaseNoticeBody(widget.version)}\n\n'),
-          TextSpan(
-            text: l10n.preReleaseNoticeTelegramChat,
-            recognizer: _telegram,
-            style: linkStyle,
-          ),
-          const TextSpan(text: '  ·  '),
-          TextSpan(
-            text: l10n.preReleaseNoticeGithubIssues,
-            recognizer: _issues,
-            style: linkStyle,
-          ),
-        ],
-      ),
-      style: const TextStyle(overflow: TextOverflow.visible),
-    );
-  }
-}

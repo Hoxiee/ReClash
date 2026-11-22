@@ -117,14 +117,7 @@
   "updateSkippedVersions": "Versions in between",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "Thanks for testing ReClash",
-  "preReleaseNoticeBody": "You are running pre-release build {version}. It ships before stable, so it may contain bugs and unfinished features. Reporting problems helps make the release better.",
-  "@preReleaseNoticeBody": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
+  "preReleaseNoticeBody": "This build ships before stable, so expect bugs and unfinished features. Reporting problems helps make the release better.",
   "preReleaseNoticeTelegramChat": "Telegram chat",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

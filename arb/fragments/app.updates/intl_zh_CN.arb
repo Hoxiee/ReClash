@@ -79,7 +79,7 @@
   "updateSkippedVersions": "中间版本",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "感谢测试 ReClash",
-  "preReleaseNoticeBody": "您正在运行预发布版 {version}。它比稳定版更早发布，因此可能包含错误和未完成的功能。反馈问题有助于改进正式版本。",
+  "preReleaseNoticeBody": "此版本比稳定版更早发布，可能包含错误和未完成的功能。反馈问题有助于改进正式版本。",
   "preReleaseNoticeTelegramChat": "Telegram 群组",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

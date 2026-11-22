@@ -79,7 +79,7 @@
   "updateSkippedVersions": "間のバージョン",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "ReClash のテストにご協力いただきありがとうございます",
-  "preReleaseNoticeBody": "プレリリース版 {version} を実行しています。安定版より先に公開されるため、不具合や未完成の機能が含まれる場合があります。問題を報告していただくと、リリースの改善につながります。",
+  "preReleaseNoticeBody": "このビルドは安定版より先に公開されるため、不具合や未完成の機能が含まれる場合があります。問題を報告していただくと、リリースの改善につながります。",
   "preReleaseNoticeTelegramChat": "Telegram チャット",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

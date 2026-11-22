@@ -79,7 +79,7 @@
   "updateSkippedVersions": "Oraliq versiyalar",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "ReClashni sinab koʻrganingiz uchun rahmat",
-  "preReleaseNoticeBody": "Siz {version} dastlabki relizini ishga tushirmoqdasiz. U barqaror versiyadan oldin chiqadi, shuning uchun xatolar va tugallanmagan funksiyalar boʻlishi mumkin. Muammolar haqida xabar berish nashrni yaxshilashga yordam beradi.",
+  "preReleaseNoticeBody": "Bu yigʻma barqaror versiyadan oldin chiqadi, shuning uchun xatolar va tugallanmagan funksiyalar boʻlishi mumkin. Muammolar haqida xabar berish nashrni yaxshilashga yordam beradi.",
   "preReleaseNoticeTelegramChat": "Telegram chat",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

@@ -79,7 +79,7 @@
   "updateSkippedVersions": "중간 버전",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "ReClash 테스트에 참여해 주셔서 감사합니다",
-  "preReleaseNoticeBody": "{version} 사전 릴리스 빌드를 실행하고 있습니다. 안정판보다 먼저 배포되므로 버그와 미완성 기능이 있을 수 있습니다. 문제를 알려주시면 릴리스 개선에 도움이 됩니다.",
+  "preReleaseNoticeBody": "이 빌드는 안정판보다 먼저 배포되므로 버그와 미완성 기능이 있을 수 있습니다. 문제를 알려주시면 릴리스 개선에 도움이 됩니다.",
   "preReleaseNoticeTelegramChat": "Telegram 채팅",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

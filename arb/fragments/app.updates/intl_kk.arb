@@ -79,7 +79,7 @@
   "updateSkippedVersions": "Аралық нұсқалар",
   "autoCheckUpdate": null,
   "preReleaseNoticeTitle": "ReClash-ты сынап көргеніңізге рахмет",
-  "preReleaseNoticeBody": "Сіз {version} алдын ала шығарылымын іске қосып отырсыз. Ол тұрақты нұсқадан бұрын шығады, сондықтан қателер мен аяқталмаған функциялар болуы мүмкін. Мәселелер туралы хабарлау шығарылымды жақсартуға көмектеседі.",
+  "preReleaseNoticeBody": "Бұл құрастырма тұрақты нұсқадан бұрын шығады, сондықтан қателер мен аяқталмаған функциялар болуы мүмкін. Мәселелер туралы хабарлау шығарылымды жақсартуға көмектеседі.",
   "preReleaseNoticeTelegramChat": "Telegram чаты",
   "preReleaseNoticeGithubIssues": "GitHub Issues"
 }
