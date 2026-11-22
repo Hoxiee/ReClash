@@ -54,7 +54,7 @@ void main() {
     test('default value has enable true', () {
       final value = container.read(vpnSettingProvider);
       expect(value.enable, true);
-      expect(value.systemProxy, true);
+      expect(value.systemProxy, false);
     });
 
     test('can update state', () {
@@ -68,7 +68,7 @@ void main() {
   group('NetworkSetting provider', () {
     test('default values', () {
       final value = container.read(networkSettingProvider);
-      expect(value.systemProxy, true);
+      expect(value.systemProxy, false);
       expect(value.bypassDomain, defaultBypassDomain);
     });
 
@@ -188,7 +188,7 @@ void main() {
       expect(config.appSettingProps.onlyStatisticsProxy, false);
       expect(config.windowProps.width, 0);
       expect(config.vpnProps.enable, true);
-      expect(config.networkProps.systemProxy, true);
+      expect(config.networkProps.systemProxy, false);
       expect(config.currentProfileId, null);
       expect(config.hotKeyActions, isEmpty);
       expect(config.patchClashConfig, const PatchClashConfig());

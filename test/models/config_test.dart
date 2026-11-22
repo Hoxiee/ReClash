@@ -546,9 +546,9 @@ void main() {
     test('default values', () {
       const props = VpnProps();
       expect(props.enable, true);
-      expect(props.systemProxy, true);
-      expect(props.ipv6, false);
-      expect(props.allowBypass, true);
+      expect(props.systemProxy, false);
+      expect(props.ipv6, true);
+      expect(props.allowBypass, false);
       expect(props.dnsHijacking, false);
       expect(props.accessControlProps.enable, false);
     });
@@ -579,7 +579,7 @@ void main() {
   group('NetworkProps JSON round-trip', () {
     test('default values', () {
       const props = NetworkProps();
-      expect(props.systemProxy, true);
+      expect(props.systemProxy, false);
       expect(props.bypassDomain, defaultBypassDomain);
       expect(props.bypassPrivateRoute, true);
       expect(props.autoSetSystemDns, true);
@@ -1049,9 +1049,26 @@ void main() {
       const config = Config(themeProps: ThemeProps());
       final restored = roundTrip(() => config.toJson(), Config.fromJson);
       expect(restored.currentProfileId, null);
-      expect(restored.networkProps.systemProxy, true);
+      expect(restored.networkProps.systemProxy, false);
       expect(restored.vpnProps.enable, true);
       expect(restored.hotKeyActions, isEmpty);
+    });
+
+    test('macOS starts on the system proxy, other platforms do not', () {
+      final previous = system.debugOperatingSystem;
+      addTearDown(() => system.debugOperatingSystem = previous);
+      for (final (os, expected) in [
+        ('macos', true),
+        ('windows', false),
+        ('linux', false),
+      ]) {
+        system.debugOperatingSystem = os;
+        expect(Config.realFromJson(null).networkProps.systemProxy, expected);
+        expect(
+          Config.fromJson(const <String, Object?>{}).networkProps.systemProxy,
+          expected,
+        );
+      }
     });
 
     test('a legacy bypass-private route mode drops the routes it ignored', () {
@@ -1203,7 +1220,7 @@ void main() {
       expect(config.currentProfileId, isNull);
       expect(config.appSettingProps.locale, isNull);
       expect(config.appSettingProps.acceptedDisclaimerVersion, 3);
-      expect(config.vpnProps.ipv6, false);
+      expect(config.vpnProps.ipv6, true);
       expect(config.vpnProps.accessControlProps.enable, true);
       expect(
         config.vpnProps.accessControlProps.mode,

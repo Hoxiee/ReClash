@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
@@ -62,7 +63,12 @@ void main() {
 
   setUp(() {
     container = ProviderContainer(
-      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        networkSettingProvider.overrideWithBuild(
+          (_, _) => const NetworkProps(systemProxy: true),
+        ),
+      ],
     );
     globalState.container = container;
     container.read(viewSizeProvider.notifier).value = const Size(400, 800);

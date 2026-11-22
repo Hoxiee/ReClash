@@ -1061,6 +1061,9 @@ void main() {
   test('local authentication withholds the VPN system proxy', () async {
     await AppLocalizations.load(const Locale('en'));
     container.listen(sharedStateProvider, (_, _) {});
+    container
+        .read(vpnSettingProvider.notifier)
+        .update((state) => state.copyWith(systemProxy: true));
     await container.read(vpnOptionsProvider.future);
     expect(container.read(sharedStateProvider).vpnOptions?.systemProxy, true);
 
@@ -1142,6 +1145,10 @@ void main() {
     container.listen(appSettingProvider, (_, _) {});
     container.listen(patchClashConfigProvider, (_, _) {});
     container.listen(networkSettingProvider, (_, _) {});
+    container.listen(vpnSettingProvider, (_, _) {});
+    container
+        .read(vpnSettingProvider.notifier)
+        .update((state) => state.copyWith(systemProxy: true));
     final rawPatchConfig = container.read(patchClashConfigProvider);
     container.listen(setupPatchProvider, (_, _) {});
     final setupPatch = container.read(setupPatchProvider);
@@ -1309,6 +1316,7 @@ void main() {
         ],
       );
       scoped.listen(siteLocksProvider, (_, _) {});
+      scoped.listen(vpnSettingProvider, (_, _) {});
       addTearDown(scoped.dispose);
       return scoped;
     }

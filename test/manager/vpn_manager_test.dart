@@ -52,6 +52,11 @@ void main() {
         networkSettingProvider.overrideWithBuild(
           (_, _) => const NetworkProps(bypassPrivateRoute: false),
         ),
+        // The restart tests cover what the service reads; a proxy port is one
+        // of those fields only while the VPN declares the system proxy.
+        vpnSettingProvider.overrideWithBuild(
+          (_, _) => const VpnProps(systemProxy: true),
+        ),
       ],
     );
     globalState.container = container;

@@ -855,7 +855,7 @@ void main() {
       expect(settings.regionCode, isNull);
       expect(
         harness.container.read(networkSettingProvider).systemProxy,
-        isTrue,
+        isFalse,
       );
       expect(fake.directRules, isEmpty);
       expect(fake.startCalls, 0);

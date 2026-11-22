@@ -509,9 +509,9 @@ extension WindowPropsExt on WindowProps {
 abstract class VpnProps with _$VpnProps {
   const factory VpnProps({
     @Default(true) bool enable,
-    @Default(true) bool systemProxy,
-    @Default(false) bool ipv6,
-    @Default(true) bool allowBypass,
+    @Default(false) bool systemProxy,
+    @Default(true) bool ipv6,
+    @Default(false) bool allowBypass,
     @Default(false) bool dnsHijacking,
     @Default(defaultAccessControlProps) AccessControlProps accessControlProps,
     @Default(true) bool onDemandEnabled,
@@ -566,7 +566,7 @@ abstract class TelegramProxyProps with _$TelegramProxyProps {
 @freezed
 abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
-    @Default(true) bool systemProxy,
+    @Default(false) bool systemProxy,
     @Default(defaultBypassDomain) List<String> bypassDomain,
     @Default(true) bool bypassPrivateRoute,
     @Default(true) bool autoSetSystemDns,
@@ -731,8 +731,11 @@ abstract class Config with _$Config {
       decodeSalvaging('config', json, Config.strictFromJson);
 
   factory Config.strictFromJson(Map<String, Object?> json) =>
-      _withLegacyOverrideDns(
-        _$ConfigFromJson(_withLegacyTestUrl(_withLegacyRouteMode(json))),
+      _withPlatformSystemProxy(
+        _withLegacyOverrideDns(
+          _$ConfigFromJson(_withLegacyTestUrl(_withLegacyRouteMode(json))),
+          json,
+        ),
         json,
       );
 
@@ -741,6 +744,7 @@ abstract class Config with _$Config {
       return Config(
         themeProps: defaultThemeProps,
         hotKeyActions: defaultHotKeyActions,
+        networkProps: NetworkProps(systemProxy: system.isMacOS),
         appSettingProps: AppSettingProps(
           dashboardWidgets: platformDefaultDashboardWidgets,
         ),
@@ -748,6 +752,13 @@ abstract class Config with _$Config {
     }
     return Config.fromJson(json);
   }
+}
+
+Config _withPlatformSystemProxy(Config config, Map<String, Object?> json) {
+  final network = json['networkProps'];
+  if (network is Map && network.containsKey('systemProxy')) return config;
+  if (config.networkProps.systemProxy == system.isMacOS) return config;
+  return config.copyWith.networkProps(systemProxy: system.isMacOS);
 }
 
 const _legacyOverrideDnsKey = 'overrideDns';
