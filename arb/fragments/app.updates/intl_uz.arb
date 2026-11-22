@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClash yangilanishlarni fonda yuklab oladi va ilova ishga tushganda, yopilganda yoki kompyuter bo‘sh turganda o‘rnatadi. Faol ulanish o‘zi tiklanadi.",
   "updateRestartNow": "Yangilash uchun qayta ishga tushirish",
   "updateSkippedVersions": "Oraliq versiyalar",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "ReClashni sinab koʻrganingiz uchun rahmat",
+  "preReleaseNoticeBody": "Siz {version} dastlabki relizini ishga tushirmoqdasiz. U barqaror versiyadan oldin chiqadi, shuning uchun xatolar va tugallanmagan funksiyalar boʻlishi mumkin. Muammolar haqida xabar berish nashrni yaxshilashga yordam beradi.",
+  "preReleaseNoticeTelegramChat": "Telegram chat",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

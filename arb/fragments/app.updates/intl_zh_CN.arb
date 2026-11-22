@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClash 在后台下载更新，并在启动、退出或电脑空闲时安装。活动连接会自动恢复。",
   "updateRestartNow": "重启以更新",
   "updateSkippedVersions": "中间版本",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "感谢测试 ReClash",
+  "preReleaseNoticeBody": "您正在运行预发布版 {version}。它比稳定版更早发布，因此可能包含错误和未完成的功能。反馈问题有助于改进正式版本。",
+  "preReleaseNoticeTelegramChat": "Telegram 群组",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

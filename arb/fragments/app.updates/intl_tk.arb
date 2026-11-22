@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClash täzelemeleri arka planda ýükleýär we başlananda, çykanda ýa-da kompýuter boş duranda gurnaýar. Işjeň birikme özi dikelýär.",
   "updateRestartNow": "Täzelemek üçin gaýtadan işletmek",
   "updateSkippedVersions": "Aradaky wersiýalar",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "ReClash-y synap göreniňiz üçin sag boluň",
+  "preReleaseNoticeBody": "Siz {version} deslapky relizini işledýärsiňiz. Ol durnukly wersiýadan öň çykýar, şonuň üçin ýalňyşlyklar we tamamlanmadyk aýratynlyklar bolup biler. Meseleler barada habar bermek goýberilişi gowulaşdyrmaga kömek edýär.",
+  "preReleaseNoticeTelegramChat": "Telegram söhbeti",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

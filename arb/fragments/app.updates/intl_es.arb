@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClash descarga las actualizaciones en segundo plano y las instala al iniciar o cerrar la aplicación, o cuando el equipo está inactivo. Una conexión activa se restablece sola.",
   "updateRestartNow": "Reiniciar para actualizar",
   "updateSkippedVersions": "Versiones intermedias",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "Gracias por probar ReClash",
+  "preReleaseNoticeBody": "Estás usando la versión preliminar {version}. Se publica antes que la estable, así que puede contener errores y funciones sin terminar. Informar de los problemas ayuda a mejorar la versión.",
+  "preReleaseNoticeTelegramChat": "Chat de Telegram",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

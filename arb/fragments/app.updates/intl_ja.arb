@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClashは更新をバックグラウンドでダウンロードし、起動時、終了時、またはコンピューターのアイドル時にインストールします。有効な接続は自動的に復帰します。",
   "updateRestartNow": "再起動して更新",
   "updateSkippedVersions": "間のバージョン",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "ReClash のテストにご協力いただきありがとうございます",
+  "preReleaseNoticeBody": "プレリリース版 {version} を実行しています。安定版より先に公開されるため、不具合や未完成の機能が含まれる場合があります。問題を報告していただくと、リリースの改善につながります。",
+  "preReleaseNoticeTelegramChat": "Telegram チャット",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }

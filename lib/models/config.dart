@@ -314,6 +314,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,
     @Default(0) int acceptedDisclaimerVersion,
+    String? preReleaseNoticeVersion,
     bool? setupCompleted,
     @Default(0) int setupStep,
     int? setupProfileId,

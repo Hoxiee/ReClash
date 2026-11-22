@@ -23,6 +23,17 @@ bool isPrereleaseRelease({
   return tryParseAppVersion(tag)?.isPreRelease ?? false;
 }
 
+/// A pre build tells the user once per installed version that it is for
+/// testing, even when first-run setup is still active.
+bool shouldShowPreReleaseNotice({
+  required String appEnv,
+  required String version,
+  required String? acknowledgedVersion,
+}) {
+  if (appEnv != 'pre' || acknowledgedVersion == version) return false;
+  return tryParseAppVersion(version)?.isPreRelease ?? false;
+}
+
 bool _eligibleUpdate(
   Map<String, dynamic> release, {
   required String installedVersion,

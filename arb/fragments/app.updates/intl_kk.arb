@@ -77,5 +77,9 @@
   "updateDesktopAutoDescription": "ReClash жаңартуларды фонда жүктеп, қолданба іске қосылғанда, жабылғанда немесе компьютер бос тұрғанда орнатады. Белсенді қосылым өздігінен қалпына келеді.",
   "updateRestartNow": "Жаңарту үшін қайта іске қосу",
   "updateSkippedVersions": "Аралық нұсқалар",
-  "autoCheckUpdate": null
+  "autoCheckUpdate": null,
+  "preReleaseNoticeTitle": "ReClash-ты сынап көргеніңізге рахмет",
+  "preReleaseNoticeBody": "Сіз {version} алдын ала шығарылымын іске қосып отырсыз. Ол тұрақты нұсқадан бұрын шығады, сондықтан қателер мен аяқталмаған функциялар болуы мүмкін. Мәселелер туралы хабарлау шығарылымды жақсартуға көмектеседі.",
+  "preReleaseNoticeTelegramChat": "Telegram чаты",
+  "preReleaseNoticeGithubIssues": "GitHub Issues"
 }
