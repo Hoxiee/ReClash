@@ -78,5 +78,6 @@
   "findProcessAlways": "Hemişe",
   "findProcessStrict": "Düzgünler talap edende",
   "findProcessOff": "Öçürilen",
-  "findProcessModeDesc": "Proses gözlegi: «Hemişe» her bir birikme üçin; «Düzgünler talap edende» (strict) diňe düzgünlere gerek bolanda; «Öçürilen» gözlegi öçürýär."
+  "findProcessModeDesc": "Proses gözlegi: «Hemişe» her bir birikme üçin; «Düzgünler talap edende» (strict) diňe düzgünlere gerek bolanda; «Öçürilen» gözlegi öçürýär.",
+  "autoLaunchFailed": "Awtomatiki işe girizmegi üýtgedip bolmady. Ulgamyňyzyň başlangyç programmalara rugsat berýändigini barlaň."
 }

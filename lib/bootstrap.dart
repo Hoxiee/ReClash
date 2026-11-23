@@ -196,9 +196,7 @@ class Bootstrap {
   Future<void> _afterSetup() async {
     await bootGuard.markRunning();
     unawaited(_container.read(systemActionProvider.notifier).updateTray());
-    unawaited(
-      autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
-    );
+    await _syncAutoLaunch();
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
     );
@@ -211,6 +209,18 @@ class Bootstrap {
         _container.read(commonActionProvider.notifier).autoCheckUpdate(),
       );
     }
+  }
+
+  /// Applies the stored login-item preference and keeps the setting honest
+  /// when the platform refuses the change.
+  Future<void> _syncAutoLaunch() async {
+    final handle = autoLaunch;
+    if (handle == null) return;
+    final desired = _container.read(appSettingProvider).autoLaunch;
+    if (await handle.reconcile(desired)) return;
+    _container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(autoLaunch: !desired));
   }
 
   ProviderContainer get _container => globalState.container;
@@ -228,9 +238,7 @@ class Bootstrap {
         .applyAtLaunch()) {
       return;
     }
-    unawaited(
-      autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
-    );
+    await _syncAutoLaunch();
     if (!_container.read(appSettingProvider).silentLaunch) {
       unawaited(window?.show());
     } else {

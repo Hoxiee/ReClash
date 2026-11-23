@@ -289,7 +289,11 @@ The coordinator is idempotent, continues later cleanup steps after an earlier er
 caller, and uses a three-second watchdog as an emergency application-exit path. Full data reset first confirms a Core
 stop, cleans up host resources, and terminally closes Core before deleting local data. It preserves ZIP archives and
 the live instance lock, blocks preference writes until exit, and never sweeps the shared desktop temporary directory.
-Autostart removal is wired through `disableAutoLaunchPort` at bootstrap so shared actions do not import desktop plugins. `Application.dispose()` and
+Autostart removal is wired through `disableAutoLaunchPort` at bootstrap so shared actions do not import desktop plugins.
+`lib/common/launch.dart` registers Windows and macOS through `launch_at_startup`, and Linux through the XDG entry managed
+by `lib/common/launch_linux.dart`; each backend is followed by a read-back, so a rejected write flips the setting back
+instead of leaving a checkbox that lies. Boot reconciliation leaves an entry disabled by the desktop's own startup
+editor off, while an explicit toggle in ReClash overwrites it. `Application.dispose()` and
 `CoreManager.onCrash()` do not independently destroy Core; this avoids competing shutdown owners.
 
 ### Applying Setting Changes

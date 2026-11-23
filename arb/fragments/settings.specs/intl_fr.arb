@@ -78,5 +78,6 @@
   "findProcessAlways": "Toujours",
   "findProcessStrict": "Si les règles l’exigent",
   "findProcessOff": "Désactivé",
-  "findProcessModeDesc": "Recherche du processus : Toujours recherche pour chaque connexion ; Si les règles l’exigent (strict) recherche uniquement en cas de besoin ; Désactivé désactive la recherche."
+  "findProcessModeDesc": "Recherche du processus : Toujours recherche pour chaque connexion ; Si les règles l’exigent (strict) recherche uniquement en cas de besoin ; Désactivé désactive la recherche.",
+  "autoLaunchFailed": "Impossible de modifier le démarrage automatique. Vérifiez que votre système autorise les applications au démarrage."
 }

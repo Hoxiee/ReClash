@@ -78,5 +78,6 @@
   "findProcessAlways": "常に",
   "findProcessStrict": "ルールで必要な場合",
   "findProcessOff": "無効",
-  "findProcessModeDesc": "プロセスの検索：「常に」はすべての接続を検索し、「ルールで必要な場合」（strict）は必要なときだけ検索します。「無効」は検索を行いません。"
+  "findProcessModeDesc": "プロセスの検索：「常に」はすべての接続を検索し、「ルールで必要な場合」（strict）は必要なときだけ検索します。「無効」は検索を行いません。",
+  "autoLaunchFailed": "自動起動を変更できませんでした。システムがスタートアップアプリを許可しているか確認してください。"
 }

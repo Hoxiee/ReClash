@@ -78,5 +78,6 @@
   "findProcessAlways": "Har doim",
   "findProcessStrict": "Qoidalar talab qilganda",
   "findProcessOff": "Oʻchirilgan",
-  "findProcessModeDesc": "Jarayonni aniqlash: «Har doim» — har bir ulanish uchun; «Qoidalar talab qilganda» (strict) — faqat qoidalarga kerak boʻlganda; «Oʻchirilgan» — aniqlash oʻchiriladi."
+  "findProcessModeDesc": "Jarayonni aniqlash: «Har doim» — har bir ulanish uchun; «Qoidalar talab qilganda» (strict) — faqat qoidalarga kerak boʻlganda; «Oʻchirilgan» — aniqlash oʻchiriladi.",
+  "autoLaunchFailed": "Avtomatik ishga tushirishni o‘zgartirib bo‘lmadi. Tizim ishga tushish ilovalariga ruxsat berishini tekshiring."
 }

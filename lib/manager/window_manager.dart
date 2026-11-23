@@ -49,8 +49,19 @@ class _WindowContainerState extends ConsumerState<WindowManager>
       next,
     ) {
       if (prev != next) {
-        debouncer.call(FunctionTag.autoLaunch, () {
-          autoLaunch?.updateStatus(next);
+        debouncer.call(FunctionTag.autoLaunch, () async {
+          final handle = autoLaunch;
+          if (handle == null) return;
+          if (await handle.updateStatus(next)) return;
+          if (!mounted) return;
+          if (ref.read(appSettingProvider).autoLaunch != next) return;
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(autoLaunch: !next));
+          context.showNotifier(
+            context.appLocalizations.autoLaunchFailed,
+            level: MessageLevel.warning,
+          );
         });
       }
     });
