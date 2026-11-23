@@ -109,6 +109,31 @@ func SelfTest(ctx context.Context, proxyAddress string, secret []byte, dcIndex i
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
 	}
+	return selfTestOn(conn, secret, dcIndex, started)
+}
+
+// SelfTestFakeTLS drives the ee handshake a Telegram client uses behind a TLS middlebox.
+func SelfTestFakeTLS(ctx context.Context, proxyAddress string, secret []byte, dcIndex int16) (time.Duration, error) {
+	started := time.Now()
+	var dialer net.Dialer
+	conn, err := dialer.DialContext(ctx, "tcp", proxyAddress)
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close()
+	if deadline, ok := ctx.Deadline(); ok {
+		_ = conn.SetDeadline(deadline)
+	}
+	if _, err := conn.Write(clientHello(secret)); err != nil {
+		return 0, err
+	}
+	if err := consumeServerHello(conn); err != nil {
+		return 0, err
+	}
+	return selfTestOn(&fakeTLSConn{conn: conn}, secret, dcIndex, started)
+}
+
+func selfTestOn(conn net.Conn, secret []byte, dcIndex int16, started time.Time) (time.Duration, error) {
 	header, peer := newHeader(tagPadded, dcIndex, secret)
 	packet, nonce := reqPQPacket()
 	peer.send.XORKeyStream(packet, packet)

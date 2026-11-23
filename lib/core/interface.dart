@@ -247,6 +247,11 @@ Map<String, Object?> telegramProxyArguments(TelegramProxyProps props) => {
   'secret': props.secret,
   'endpoints': props.endpoints,
   'cfDomains': props.cfDomains,
+  'cfWorkerDomains': props.cfWorkerDomains,
+  'fakeTlsDomain': props.fakeTlsDomain,
+  'proxyProtocol': props.proxyProtocol,
+  'targets': props.targets,
+  'disableSecure': props.disableSecure,
   'outbound': props.outbound,
 };
 

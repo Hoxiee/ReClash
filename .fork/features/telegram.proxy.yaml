@@ -2,12 +2,15 @@ v: 1
 kind: feature
 state: active
 risk: critical
-why: Telegram works without a VPN or profile by relaying MTProto over Telegram's own WebSocket addresses.
+why: Telegram reaches its data centres over Telegram's WebSocket addresses, Cloudflare and its own MTProto servers, with the profile only as an opt-in cascade.
 must:
   independent: The relay runs with no profile, TUN or listener, and a run, profile or setting patch never restarts it.
   loopback: The listener binds to loopback only; the random per-install secret is stored like other secrets and is never logged.
-  transport-chain: Every DC walks verified wss, then ws on port 80, then Cloudflare proxy domains, then raw MTProto TCP; MTProto stays end-to-end encrypted, so plaintext wrappers are allowed but TLS is never sent unverified.
-  cf-domains: Cloudflare proxy bases come from the built-in list, its periodic refresh and the user's own domain; a refresh failure keeps the last good list.
+  transport-chain: Every DC walks verified wss, then ws on port 80, then a Cloudflare Worker, then Cloudflare proxy domains, then raw MTProto TCP; MTProto stays end-to-end encrypted, so plaintext wrappers are allowed but TLS is never sent unverified.
+  cf-domains: Cloudflare proxy bases come from the built-in list, its periodic refresh and the user's own domains; a 429 parks only that base for its Retry-After, blocked DNS is resolved over DoH, and a refresh failure keeps the last good list.
+  fake-tls: An ee secret accepts a Telegram FakeTLS ClientHello authenticated by HMAC and carries MTProto inside TLS records; an unauthenticated handshake is forwarded to the masking domain and a plain connection gets an HTTP redirect.
+  cascade: The profile is a user-selected last resort after the direct and Cloudflare steps; the relay never spends subscription traffic unless that route is chosen.
+  test-dc: Telegram's test numbering, test addresses and /apiws_test path are supported without weakening the verified production path.
   routing: The last route that worked for a DC is tried first; the profile outbound is used only after the user picks it.
   latest-intent: A stale setTelegramProxy call never overrides a newer one.
   android-process: A dedicated foreground service holds the relay across Flutter engine loss and boot autostart, and the notification stop wins over the stored intent.
@@ -16,11 +19,16 @@ watch:
   - core/telegram/**
   - core/cmd/tgrelay/**
   - core/telegram_proxy.go
+  - core/telegram_proxy_test.go
   - android/service/src/main/java/com/reclash/service/TelegramProxyService.kt
   - lib/views/telegram_proxy.dart
+  - lib/models/config.dart
+  - lib/models/core.dart
+  - lib/core/interface.dart
+  - arb/fragments/telegram.proxy/**
   - lib/manager/core_manager.dart
   - lib/features/doctor/probes/telegram.dart
 checks:
-  telegram-proxy-core: [independent, loopback, transport-chain, cf-domains, routing, latest-intent]
+  telegram-proxy-core: [independent, loopback, transport-chain, cf-domains, fake-tls, cascade, test-dc, routing, latest-intent]
   telegram-proxy-ui: [desktop-restart, android-process]
-drop: Telegram becomes reachable without a relay, or upstream ships an equivalent proxy.
+drop: Telegram becomes reachable without a relay, or Telegram ships an equivalent proxy.

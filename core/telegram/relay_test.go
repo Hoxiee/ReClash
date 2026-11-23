@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -34,11 +35,14 @@ type fakeTelegram struct {
 
 	mu       sync.Mutex
 	hosts    []string
+	paths    []string
 	headers  []int16
 	frames   []int
 	received []byte
 
 	refuseHost string
+	statuses   []int
+	retryAfter string
 	silent     bool
 	pingFirst  bool
 	pongs      atomic.Int32
@@ -168,7 +172,17 @@ func (f *fakeTelegram) serve(conn net.Conn) {
 	}
 	f.mu.Lock()
 	f.hosts = append(f.hosts, request.Host)
+	f.paths = append(f.paths, request.URL.RequestURI())
+	status := 0
+	if len(f.statuses) > 0 {
+		status, f.statuses = f.statuses[0], f.statuses[1:]
+	}
 	f.mu.Unlock()
+	if status != 0 {
+		_, _ = io.WriteString(conn, "HTTP/1.1 "+strconv.Itoa(status)+" Status\r\nContent-Length: 0\r\n"+
+			"Retry-After: "+f.retryAfter+"\r\n\r\n")
+		return
+	}
 	if request.Host == f.refuseHost {
 		_, _ = io.WriteString(conn, "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
 		return
@@ -231,6 +245,12 @@ func (f *fakeTelegram) seenHosts() []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return append([]string(nil), f.hosts...)
+}
+
+func (f *fakeTelegram) seenPaths() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return append([]string(nil), f.paths...)
 }
 
 // loopbackOnly keeps a test off the network: Telegram's and Cloudflare's addresses fail at once.
@@ -907,7 +927,7 @@ func TestCloudflareStepNamesTheKwsHostUnderTheBase(t *testing.T) {
 
 func TestChainOrderStartsAtTheStickyStep(t *testing.T) {
 	got := chainOrder(stepCloudflare, true)
-	want := []step{stepCloudflare, stepWSS, stepWS, stepTCP, stepOutbound}
+	want := []step{stepCloudflare, stepWSS, stepWS, stepCFWorker, stepTCP, stepOutbound}
 	if len(got) != len(want) {
 		t.Fatalf("%v", got)
 	}

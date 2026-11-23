@@ -109,17 +109,27 @@ type target struct {
 	index int16
 	dc    int
 	media bool
+	test  bool
 	// hostDC names the kws host; CDN DC 203 is served by DC 2's.
 	hostDC int
 }
 
+// resolveTarget unwraps Telegram's test numbering (10000 + DC) before mapping the DC.
 func resolveTarget(index int16) (target, bool) {
 	dc := int(index)
 	media := dc < 0
 	if media {
 		dc = -dc
 	}
-	t := target{index: index, dc: dc, media: media, hostDC: dc}
+	test := dc >= 10000
+	if test {
+		dc -= 10000
+	}
+	signed := dc
+	if media {
+		signed = -dc
+	}
+	t := target{index: int16(signed), dc: dc, media: media, test: test, hostDC: dc}
 	switch dc {
 	case 1, 2, 3, 4, 5:
 	case 203:
@@ -143,4 +153,17 @@ var dcAddresses = map[int][]string{
 	4:   {"149.154.167.91:443"},
 	5:   {"149.154.171.5:443", "91.108.56.130:443"},
 	203: {"91.105.192.100:443"},
+}
+
+var testDCAddresses = map[int][]string{
+	1: {"149.154.175.10:443"},
+	2: {"149.154.167.40:443"},
+	3: {"149.154.175.117:443"},
+}
+
+func dcAddressesFor(dest target) []string {
+	if dest.test {
+		return testDCAddresses[dest.dc]
+	}
+	return dcAddresses[dest.dc]
 }

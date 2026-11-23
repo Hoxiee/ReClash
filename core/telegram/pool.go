@@ -22,6 +22,7 @@ const (
 type poolKey struct {
 	hostDC int
 	media  bool
+	test   bool
 }
 
 type pooledSocket struct {
@@ -54,6 +55,7 @@ type wsPool struct {
 	maxAge time.Duration
 	tick   time.Duration
 	hits   atomic.Int64
+	misses atomic.Int64
 }
 
 func newWSPool(r *Relay) *wsPool {
@@ -91,7 +93,7 @@ func (p *wsPool) run() {
 
 // note records the step and address that just carried a connection and keeps the key active.
 func (p *wsPool) note(dest target, s step, address string, e *endpoint) {
-	key := poolKey{dest.hostDC, dest.media}
+	key := poolKey{hostDC: dest.hostDC, media: dest.media, test: dest.test}
 	var stale []pooledSocket
 	p.mu.Lock()
 	ks := p.keys[key]
@@ -110,12 +112,13 @@ func (p *wsPool) note(dest target, s step, address string, e *endpoint) {
 
 // take returns the newest live socket of the key, or false to fall through to the chain.
 func (p *wsPool) take(dest target, s step) (*webSocket, *endpoint, bool) {
-	key := poolKey{dest.hostDC, dest.media}
+	key := poolKey{hostDC: dest.hostDC, media: dest.media, test: dest.test}
 	for {
 		p.mu.Lock()
 		ks := p.keys[key]
 		if ks == nil || ks.step != s || len(ks.idle) == 0 {
 			p.mu.Unlock()
+			p.misses.Add(1)
 			return nil, nil, false
 		}
 		now := p.r.now()
@@ -198,8 +201,8 @@ func (p *wsPool) maintain() {
 }
 
 func (p *wsPool) refill(ctx context.Context, key poolKey, s step, address string) {
-	hosts := kwsHosts(target{hostDC: key.hostDC, media: key.media})
-	ws, _, err := p.r.dialEndpoint(ctx, address, hosts, s == stepWSS, attemptBudget)
+	hosts := kwsHosts(target{hostDC: key.hostDC, media: key.media, test: key.test})
+	ws, _, err := p.r.dialEndpoint(ctx, address, hosts, s == stepWSS, attemptBudget, wsPathFor(key.test))
 	p.mu.Lock()
 	ks := p.keys[key]
 	current := ctx.Err() == nil && ks != nil

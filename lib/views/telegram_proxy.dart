@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +17,39 @@ import 'package:url_launcher/url_launcher.dart';
 const _pollInterval = Duration(seconds: 1);
 const _dataCenters = [1, 2, 3, 4, 5];
 
-String telegramProxyLink(TelegramProxyProps props) =>
-    'tg://proxy?server=127.0.0.1&port=${props.port}&secret=dd${props.secret}';
+String telegramProxyLink(TelegramProxyProps props) {
+  final secret = props.fakeTlsDomain.isEmpty
+      ? 'dd${props.secret}'
+      : 'ee${props.secret}${_hexUtf8(props.fakeTlsDomain)}';
+  return 'tg://proxy?server=127.0.0.1&port=${props.port}&secret=$secret';
+}
+
+String _hexUtf8(String value) => utf8
+    .encode(value)
+    .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+    .join();
+
+String? _validateTelegramTarget(String? value, AppLocalizations l) {
+  final text = value ?? '';
+  final colon = text.indexOf(':');
+  if (colon <= 0) {
+    return l.telegramProxyInvalidTarget;
+  }
+  final dc = int.tryParse(text.substring(0, colon));
+  if (dc == null || !const {1, 2, 3, 4, 5, 203}.contains(dc.abs())) {
+    return l.telegramProxyInvalidTarget;
+  }
+  var host = text.substring(colon + 1);
+  final port = host.lastIndexOf(':');
+  if (port > 0) {
+    final parsed = int.tryParse(host.substring(port + 1));
+    if (parsed == null || parsed < 1 || parsed > 65535) {
+      return l.telegramProxyInvalidTarget;
+    }
+    host = host.substring(0, port);
+  }
+  return validateHost(host, l);
+}
 
 /// A data center serves regular and media connections, which the core counts
 /// apart under a signed number. One that reaches Telegram at all is reachable.
@@ -36,7 +68,13 @@ TelegramProxyDc? mergeTelegramProxyDc(
   return connected.firstOrNull ?? used.firstOrNull ?? parts.first;
 }
 
-const _connectedRoutes = {'websocket', 'cloudflare', 'tcp', 'outbound'};
+const _connectedRoutes = {
+  'websocket',
+  'cloudflare',
+  'cloudflare-worker',
+  'tcp',
+  'outbound',
+};
 
 class TelegramProxyView extends ConsumerStatefulWidget {
   const TelegramProxyView({super.key});
@@ -143,6 +181,7 @@ class _TelegramProxyViewState extends ConsumerState<TelegramProxyView>
     final route = switch (dc?.route) {
       'websocket' => l.telegramProxyRouteDirect,
       'cloudflare' => l.telegramProxyRouteCloudflare,
+      'cloudflare-worker' => l.telegramProxyRouteCloudflareWorker,
       'tcp' => l.telegramProxyRouteTcp,
       'outbound' => l.telegramProxyRouteOutbound(_state?.outboundName ?? ''),
       'unavailable' => l.telegramProxyRouteUnavailable,
@@ -266,6 +305,17 @@ class _TelegramProxyViewState extends ConsumerState<TelegramProxyView>
             onChanged: (_, value) =>
                 _update((props) => props.copyWith(port: int.parse(value))),
           ),
+          ConfigTextItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.fakeTlsDomain,
+            ),
+            title: (l) => l.telegramProxyFakeTlsDomain,
+            validator: validateHost,
+            allowEmpty: true,
+            normalize: (value) => value.trim().toLowerCase(),
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(fakeTlsDomain: value)),
+          ),
           ConfigListEditItem(
             selector: telegramProxySettingProvider.select(
               (props) => props.endpoints,
@@ -283,6 +333,40 @@ class _TelegramProxyViewState extends ConsumerState<TelegramProxyView>
             itemValidator: validateHost,
             onChanged: (_, value) =>
                 _update((props) => props.copyWith(cfDomains: value)),
+          ),
+          ConfigListEditItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.cfWorkerDomains,
+            ),
+            title: (l) => l.telegramProxyCfWorkerDomains,
+            itemValidator: validateHost,
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(cfWorkerDomains: value)),
+          ),
+          ConfigListEditItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.targets,
+            ),
+            title: (l) => l.telegramProxyTargets,
+            itemValidator: _validateTelegramTarget,
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(targets: value)),
+          ),
+          ConfigToggleItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.proxyProtocol,
+            ),
+            title: (l) => l.telegramProxyProxyProtocol,
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(proxyProtocol: value)),
+          ),
+          ConfigToggleItem(
+            selector: telegramProxySettingProvider.select(
+              (props) => props.disableSecure,
+            ),
+            title: (l) => l.telegramProxyDisableSecure,
+            onChanged: (_, value) =>
+                _update((props) => props.copyWith(disableSecure: value)),
           ),
         ],
       ],

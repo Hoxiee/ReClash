@@ -2,9 +2,11 @@ package telegram
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -17,14 +19,15 @@ type step int
 const (
 	stepWSS step = iota
 	stepWS
+	stepCFWorker
 	stepCloudflare
 	stepTCP
 	stepOutbound
 	stepCount
 )
 
-var stepRoutes = [stepCount]Route{RouteWebSocket, RouteWebSocket, RouteCloudflare, RouteTCP, RouteOutbound}
-var stepNames = [stepCount]string{"wss", "ws", "cloudflare", "tcp", "outbound"}
+var stepRoutes = [stepCount]Route{RouteWebSocket, RouteWebSocket, RouteCloudflareWorker, RouteCloudflare, RouteTCP, RouteOutbound}
+var stepNames = [stepCount]string{"wss", "ws", "cf-worker", "cloudflare", "tcp", "outbound"}
 
 const (
 	stepBudget        = 12 * time.Second
@@ -37,7 +40,29 @@ const (
 	plainPort         = "80"
 	secureDirectPort  = "443"
 	cfBasesPerConnect = 2
+	cfGlobalParallel  = 4
+	wsFailCooldown    = time.Minute
+	ipFailCooldown    = time.Hour
 )
+
+var errWSRedirected = errors.New("telegram: every websocket host redirected")
+
+func isRedirect(err error) bool {
+	var handshake *handshakeError
+	if !errors.As(err, &handshake) {
+		return false
+	}
+	switch handshake.status {
+	case 301, 302, 303, 307, 308:
+		return true
+	}
+	return false
+}
+
+func isTimeout(err error) bool {
+	var netErr net.Error
+	return errors.As(err, &netErr) && netErr.Timeout()
+}
 
 // chainOrder starts from the step that worked last and falls back to the whole chain. The outbound
 // is never sticky: it is the last resort, and the direct steps are cheap to skip while closed.
@@ -82,15 +107,28 @@ func (r *Relay) connect(ctx context.Context, dest target, state *dcState) (upstr
 			noOutbound = true
 			continue
 		}
+		if dest.test && (s == stepCFWorker || s == stepCloudflare) {
+			continue
+		}
+		state.mu.Lock()
+		blocked := state.wsBlocked && (s == stepWSS || s == stepWS)
+		state.mu.Unlock()
+		if blocked {
+			skipped = true
+			continue
+		}
 		state.mu.Lock()
 		trial := state.steps[s].failures > 0
+		if (s == stepWSS || s == stepWS) && !state.wsFailUntil.IsZero() && r.now().Before(state.wsFailUntil) {
+			trial = true
+		}
 		allowed := state.steps[s].allow(r.now())
 		state.mu.Unlock()
 		if !allowed {
 			skipped = true
 			continue
 		}
-		up, used, err := r.attempt(ctx, s, dest, trial)
+		up, used, err := r.attempt(ctx, s, dest, trial, state)
 		state.mu.Lock()
 		switch {
 		case err == nil:
@@ -99,6 +137,9 @@ func (r *Relay) connect(ctx context.Context, dest target, state *dcState) (upstr
 				state.sticky, state.hasSticky = s, true
 			}
 		case errors.Is(err, ErrNoOutbound):
+			state.steps[s].succeed()
+		case errors.Is(err, errWSRedirected) && (s == stepWSS || s == stepWS):
+			state.wsBlocked = true
 			state.steps[s].succeed()
 		default:
 			state.steps[s].fail(r.now(), backoffMax)
@@ -128,16 +169,19 @@ func (r *Relay) connect(ctx context.Context, dest target, state *dcState) (upstr
 	return nil, "", nil, ctx.Err()
 }
 
-func (r *Relay) attempt(ctx context.Context, s step, dest target, trial bool) (upstream, *endpoint, error) {
+func (r *Relay) attempt(ctx context.Context, s step, dest target, trial bool, state *dcState) (upstream, *endpoint, error) {
 	budget := attemptBudget
 	if trial {
 		budget = trialBudget
 	}
 	switch s {
 	case stepWSS:
-		return r.connectWebSocket(ctx, dest, true, budget)
+		return r.connectWebSocket(ctx, dest, true, budget, state)
 	case stepWS:
-		return r.connectWebSocket(ctx, dest, false, budget)
+		return r.connectWebSocket(ctx, dest, false, budget, state)
+	case stepCFWorker:
+		up, err := r.connectWorker(ctx, dest, budget)
+		return up, nil, err
 	case stepCloudflare:
 		up, err := r.connectCloudflare(ctx, dest, budget)
 		return up, nil, err
@@ -158,10 +202,18 @@ func directStep(secure bool) step {
 
 func kwsHosts(dest target) []string {
 	main := "kws" + strconv.Itoa(dest.hostDC) + ".web.telegram.org"
+	media := "kws" + strconv.Itoa(dest.hostDC) + "-1.web.telegram.org"
 	if dest.media {
-		return []string{"kws" + strconv.Itoa(dest.hostDC) + "-1.web.telegram.org", main}
+		return []string{media, main}
 	}
-	return []string{main}
+	return []string{main, media}
+}
+
+func wsPathFor(test bool) string {
+	if test {
+		return wsPathTest
+	}
+	return wsPath
 }
 
 func withPort(address, port string) string {
@@ -172,9 +224,16 @@ func withPort(address, port string) string {
 	return net.JoinHostPort(host, port)
 }
 
+func withDefaultPort(address, port string) string {
+	if _, _, err := net.SplitHostPort(address); err == nil {
+		return address
+	}
+	return net.JoinHostPort(address, port)
+}
+
 // connectWebSocket reaches the kws hosts through the endpoint set and then the DC's own addresses.
 // The plain variant uses port 80; it never touches endpoint scoring, which rates the TLS path.
-func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, budget time.Duration) (upstream, *endpoint, error) {
+func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, budget time.Duration, state *dcState) (upstream, *endpoint, error) {
 	ctx, cancel := context.WithTimeout(ctx, stepBudget)
 	defer cancel()
 	hosts := kwsHosts(dest)
@@ -185,14 +244,58 @@ func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, 
 		ranked = r.endpoints.ranked()
 	}
 	var lastErr error
+	sawRedirect, sawOther := false, false
+	record := func(err error) {
+		if err == nil {
+			return
+		}
+		lastErr = err
+		if isRedirect(err) {
+			sawRedirect = true
+		} else {
+			sawOther = true
+		}
+		if isTimeout(err) {
+			state.mu.Lock()
+			state.wsFailUntil = r.now().Add(wsFailCooldown)
+			state.mu.Unlock()
+		}
+	}
 	tried := make(map[string]bool)
+	port := secureDirectPort
+	if !secure {
+		port = plainPort
+	}
+	if targetAddress := r.targetOverride(dest); targetAddress != "" {
+		state.mu.Lock()
+		cooling := state.ipFailUntil[targetAddress].After(r.now())
+		state.mu.Unlock()
+		if !cooling {
+			address := withDefaultPort(targetAddress, port)
+			tried[address] = true
+			ws, _, err := r.dialEndpoint(ctx, address, hosts, secure, budget, wsPathFor(dest.test))
+			if err == nil {
+				r.pool.note(dest, directStep(secure), address, nil)
+				return ws, nil, nil
+			}
+			record(err)
+			if isTimeout(err) {
+				state.mu.Lock()
+				if state.ipFailUntil == nil {
+					state.ipFailUntil = make(map[string]time.Time)
+				}
+				state.ipFailUntil[targetAddress] = r.now().Add(ipFailCooldown)
+				state.mu.Unlock()
+			}
+		}
+	}
 	for i, e := range ranked {
 		address := e.address
 		if !secure {
 			address = withPort(address, plainPort)
 		}
 		tried[address] = true
-		ws, latency, err := r.dialEndpoint(ctx, address, hosts, secure, budget)
+		ws, latency, err := r.dialEndpoint(ctx, address, hosts, secure, budget, wsPathFor(dest.test))
 		if err == nil {
 			if !secure {
 				r.pool.note(dest, stepWS, address, nil)
@@ -205,7 +308,7 @@ func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, 
 			}
 			return ws, e, nil
 		}
-		lastErr = err
+		record(err)
 		if secure {
 			r.endpoints.reportFailure(e, r.now(), err)
 			r.config.Logf("endpoint %s: %v", e.address, err)
@@ -215,7 +318,7 @@ func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, 
 			return nil, nil, lastErr
 		}
 	}
-	for _, own := range dcAddresses[dest.dc] {
+	for _, own := range dcAddressesFor(dest) {
 		port := secureDirectPort
 		if !secure {
 			port = plainPort
@@ -224,12 +327,12 @@ func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, 
 		if tried[address] {
 			continue
 		}
-		ws, _, err := r.dialEndpoint(ctx, address, hosts, secure, budget)
+		ws, _, err := r.dialEndpoint(ctx, address, hosts, secure, budget, wsPathFor(dest.test))
 		if err == nil {
 			r.pool.note(dest, directStep(secure), address, nil)
 			return ws, nil, nil
 		}
-		lastErr = err
+		record(err)
 		if ctx.Err() != nil {
 			break
 		}
@@ -237,19 +340,26 @@ func (r *Relay) connectWebSocket(ctx context.Context, dest target, secure bool, 
 	if lastErr == nil {
 		return nil, nil, errNoRoute
 	}
+	if sawRedirect && !sawOther {
+		return nil, nil, fmt.Errorf("%w: %v", errWSRedirected, lastErr)
+	}
 	return nil, nil, lastErr
 }
 
-func (r *Relay) upgrade(ctx context.Context, raw net.Conn, host string, secure bool) (*webSocket, error) {
+func (r *Relay) upgrade(ctx context.Context, raw net.Conn, host string, secure bool, path string) (*webSocket, error) {
 	if !secure {
-		return upgradeWebSocketPath(ctx, raw, host, wsPath, nil)
+		return upgradeWebSocketPath(ctx, raw, host, path, nil)
 	}
-	return upgradeWebSocket(ctx, raw, host, r.config.TLS)
+	config := r.config.TLS
+	if config == nil {
+		config = &tls.Config{}
+	}
+	return upgradeWebSocketPath(ctx, raw, host, path, config)
 }
 
 // dialEndpoint opens TCP once and walks the hosts over fresh connections only when a host, rather
 // than the address, turned out to be the problem.
-func (r *Relay) dialEndpoint(ctx context.Context, address string, hosts []string, secure bool, budget time.Duration) (*webSocket, time.Duration, error) {
+func (r *Relay) dialEndpoint(ctx context.Context, address string, hosts []string, secure bool, budget time.Duration, path string) (*webSocket, time.Duration, error) {
 	ctx, cancel := context.WithTimeout(ctx, budget)
 	defer cancel()
 	started := r.now()
@@ -259,24 +369,78 @@ func (r *Relay) dialEndpoint(ctx context.Context, address string, hosts []string
 		if err != nil {
 			return nil, 0, fmt.Errorf("tcp after %d tries: %w", tries, err)
 		}
-		ws, err := r.upgrade(ctx, raw, host, secure)
+		ws, err := r.upgrade(ctx, raw, host, secure, path)
 		if err == nil {
 			return ws, r.now().Sub(started), nil
 		}
 		_ = raw.Close()
 		lastErr = err
 		var handshake *handshakeError
-		if !errors.As(err, &handshake) {
+		if !errors.As(err, &handshake) || handshake.tls {
 			break
 		}
 	}
 	return nil, 0, lastErr
 }
 
-// connectCloudflare reaches Telegram's kws host through a Cloudflare-proxied base domain. The host
-// is resolved by the dialer, and TLS is verified against that very name.
+func (r *Relay) connectWorker(ctx context.Context, dest target, budget time.Duration) (upstream, error) {
+	domains := r.workerDomains()
+	if len(domains) == 0 {
+		return nil, errors.New("no cloudflare worker domains")
+	}
+	dst := r.targetHost(dest)
+	if dst == "" {
+		return nil, errNoRoute
+	}
+	secure := !r.config.DisableSecure
+	path := "/apiws?dst=" + dst + "&dc=" + strconv.Itoa(dest.dc)
+	port := secureDirectPort
+	if !secure {
+		port = plainPort
+	}
+	ctx, cancel := context.WithTimeout(ctx, budget)
+	defer cancel()
+	var lastErr error
+	for _, domain := range domains {
+		raw, tries, err := dialHedged(ctx, r.config.Dial, net.JoinHostPort(domain, port), cfDialAttempts, dialStagger)
+		if err != nil {
+			lastErr = fmt.Errorf("%s tcp after %d tries: %w", domain, tries, err)
+			continue
+		}
+		ws, err := r.upgrade(ctx, raw, domain, secure, path)
+		if err == nil {
+			return ws, nil
+		}
+		_ = raw.Close()
+		lastErr = err
+	}
+	if lastErr == nil {
+		return nil, errNoRoute
+	}
+	return nil, lastErr
+}
+
+// targetHost is the DC address a CF worker should connect to, without its port.
+func (r *Relay) targetHost(dest target) string {
+	address := r.targetOverride(dest)
+	if address == "" {
+		addresses := dcAddressesFor(dest)
+		if len(addresses) == 0 {
+			return ""
+		}
+		address = addresses[0]
+	}
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return address
+	}
+	return host
+}
+
+// connectCloudflare reaches Telegram's kws host through a Cloudflare-proxied base domain. The
+// first base is tried alone, the rest in parallel, and a 429 parks the base instead of burning it.
 func (r *Relay) connectCloudflare(ctx context.Context, dest target, budget time.Duration) (upstream, error) {
-	bases := r.cf.ordered()
+	bases := r.cf.availableForDC(dest.dc, r.now())
 	if len(bases) == 0 {
 		return nil, errors.New("no cloudflare domains")
 	}
@@ -286,39 +450,83 @@ func (r *Relay) connectCloudflare(ctx context.Context, dest target, budget time.
 		host   string
 		secure bool
 	}
-	var plans []plan
-	for _, secure := range []bool{true, false} {
-		for _, base := range bases {
-			plans = append(plans, plan{base, "kws" + strconv.Itoa(dest.hostDC) + "." + base, secure})
+	path := wsPathFor(dest.test)
+	build := func(base string) []plan {
+		host := "kws" + strconv.Itoa(dest.hostDC) + "." + base
+		modes := []bool{true, false}
+		if r.config.DisableSecure {
+			modes = []bool{false, true}
 		}
+		return []plan{{base, host, modes[0]}, {base, host, modes[1]}}
 	}
-	tasks := make([]func(context.Context) (*webSocket, error), len(plans))
-	for i, p := range plans {
-		tasks[i] = func(ctx context.Context) (*webSocket, error) {
-			ctx, cancel := context.WithTimeout(ctx, budget)
-			defer cancel()
-			port := plainPort
-			if p.secure {
-				port = secureDirectPort
+	attempt := func(ctx context.Context, p plan) (*webSocket, error) {
+		select {
+		case r.cfSlots <- struct{}{}:
+			defer func() { <-r.cfSlots }()
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+		ctx, cancel := context.WithTimeout(ctx, budget)
+		defer cancel()
+		port := plainPort
+		if p.secure {
+			port = secureDirectPort
+		}
+		raw, tries, err := dialHedged(ctx, r.config.Dial, net.JoinHostPort(p.host, port), cfDialAttempts, dialStagger)
+		if err != nil {
+			if resolved := resolveDoH(ctx, p.host); resolved != "" {
+				raw, tries, err = dialHedged(ctx, r.config.Dial, net.JoinHostPort(resolved, port), cfDialAttempts, dialStagger)
 			}
-			raw, tries, err := dialHedged(ctx, r.config.Dial, net.JoinHostPort(p.host, port), cfDialAttempts, dialStagger)
 			if err != nil {
 				return nil, fmt.Errorf("%s tcp after %d tries: %w", p.host, tries, err)
 			}
-			ws, err := r.upgrade(ctx, raw, p.host, p.secure)
-			if err != nil {
-				_ = raw.Close()
+		}
+		ws, err := r.upgrade(ctx, raw, p.host, p.secure, path)
+		if err != nil {
+			_ = raw.Close()
+			var handshake *handshakeError
+			if errors.As(err, &handshake) && handshake.status == http.StatusTooManyRequests {
+				delay := r.cf.mark429(p.base, handshake.retryAfter(r.now()), r.now())
+				r.config.Logf("cloudflare %s: cooldown %s", p.base, delay.Round(time.Second))
 			}
-			return ws, err
+		}
+		return ws, err
+	}
+
+	first := build(bases[0])
+	var lastErr error
+	for _, p := range first {
+		ws, err := attempt(ctx, p)
+		if err == nil {
+			r.cf.markGood(dest.dc, p.base)
+			return ws, nil
+		}
+		lastErr = err
+		if ctx.Err() != nil {
+			return nil, lastErr
 		}
 	}
-	ws, index, err := firstWebSocket(ctx, cfParallel, tasks)
-	if err != nil {
-		r.cf.rotate(len(bases))
-		return nil, err
+	var plans []plan
+	for _, base := range bases[1:] {
+		plans = append(plans, build(base)...)
 	}
-	r.cf.markGood(plans[index].base)
-	return ws, nil
+	if len(plans) > 0 {
+		tasks := make([]func(context.Context) (*webSocket, error), len(plans))
+		for i, p := range plans {
+			tasks[i] = func(ctx context.Context) (*webSocket, error) { return attempt(ctx, p) }
+		}
+		if ws, index, err := firstWebSocket(ctx, cfParallel, tasks); err == nil {
+			r.cf.markGood(dest.dc, plans[index].base)
+			return ws, nil
+		} else {
+			lastErr = err
+		}
+	}
+	r.cf.rotate(len(bases))
+	if lastErr == nil {
+		lastErr = errors.New("no cloudflare domains answered")
+	}
+	return nil, lastErr
 }
 
 // firstWebSocket runs the tasks with a bounded parallelism and returns the first that connects;
@@ -371,14 +579,19 @@ func firstWebSocket(ctx context.Context, parallel int, tasks []func(context.Cont
 	return nil, 0, lastErr
 }
 
-// connectTCP speaks obfuscated MTProto straight to the DC. Port 80 first: it is the one most
-// networks that block 443 to Telegram still let through.
+// connectTCP speaks obfuscated MTProto straight to the DC. Plain port 80 comes first when the
+// configuration asks for it: it is the one most networks that block 443 to Telegram still let through.
 func (r *Relay) connectTCP(ctx context.Context, dest target) (upstream, error) {
 	ctx, cancel := context.WithTimeout(ctx, tcpBudget)
 	defer cancel()
+	addresses := dcAddressesFor(dest)
+	if target := r.targetOverride(dest); target != "" {
+		addresses = []string{target}
+	}
+	ports := []string{plainPort, secureDirectPort}
 	var lastErr error
-	for _, port := range []string{plainPort, secureDirectPort} {
-		for _, own := range dcAddresses[dest.dc] {
+	for _, port := range ports {
+		for _, own := range addresses {
 			conn, _, err := dialHedged(ctx, r.config.Dial, withPort(own, port), tcpDialAttempts, dialStagger)
 			if err == nil {
 				return &tcpUpstream{conn: conn}, nil
@@ -402,8 +615,13 @@ func (r *Relay) connectOutbound(ctx context.Context, dest target) (upstream, err
 	}
 	ctx, cancel := context.WithTimeout(ctx, outboundBudget)
 	defer cancel()
+	addresses := dcAddressesFor(dest)
+	if target := r.targetOverride(dest); target != "" {
+		addresses = []string{target}
+	}
 	var lastErr error
-	for _, address := range dcAddresses[dest.dc] {
+	for _, address := range addresses {
+		address = withDefaultPort(address, secureDirectPort)
 		conn, err := (*outbound)(ctx, address)
 		if err == nil {
 			return &tcpUpstream{conn: conn}, nil

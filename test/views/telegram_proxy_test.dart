@@ -21,6 +21,19 @@ void main() {
     );
   });
 
+  test('a FakeTLS domain switches the link to the ee secret', () {
+    const props = TelegramProxyProps(
+      port: 1443,
+      secret: 'ab12',
+      fakeTlsDomain: 'mask.example.org',
+    );
+    expect(
+      telegramProxyLink(props),
+      'tg://proxy?server=127.0.0.1&port=1443'
+      '&secret=eeab126d61736b2e6578616d706c652e6f7267',
+    );
+  });
+
   group('a data center merges its regular and media connections', () {
     const idle = TelegramProxyDc(dc: 2);
     const failed = TelegramProxyDc(dc: -2, route: 'unavailable');

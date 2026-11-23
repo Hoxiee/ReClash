@@ -1,7 +1,8 @@
 // tgrelay drives the Telegram relay without the app, for live measurements on a device.
 //
-//	tgrelay run [-listen 127.0.0.1:1443] [-secret hex] [-endpoints a,b] [-every 1s]
-//	tgrelay selftest [-listen addr] -secret hex [-dcs 2,4,-2,-4]
+//	tgrelay run [-listen 127.0.0.1:1443] [-secret hex] [-endpoints a,b] [-workers a,b]
+//	            [-fake-tls-domain host] [-targets 2:ip,-4:ip] [-proxy-protocol] [-test-dc]
+//	tgrelay selftest [-listen addr] -secret hex [-fake-tls-domain host] [-dcs 2,4,-2,-4]
 //	tgrelay probe [-dc 2] addr...
 package main
 
@@ -32,6 +33,12 @@ func main() {
 	listen := flags.String("listen", "127.0.0.1:1443", "listen address")
 	secretHex := flags.String("secret", "", "32 hex digits")
 	endpoints := flags.String("endpoints", "", "comma-separated addresses")
+	workers := flags.String("workers", "", "comma-separated Cloudflare Worker domains")
+	fakeTLSDomain := flags.String("fake-tls-domain", "", "FakeTLS masking domain")
+	targets := flags.String("targets", "", "dc:host overrides, comma-separated")
+	proxyProtocol := flags.Bool("proxy-protocol", false, "read PROXY protocol v1")
+	disableSecure := flags.Bool("disable-secure", false, "prefer port 80 for Cloudflare and workers")
+	testDC := flags.Bool("test-dc", false, "send every DC to Telegram's test environment")
 	every := flags.Duration("every", time.Second, "counter sample interval")
 	dcs := flags.String("dcs", "2,4,-2,-4", "DC indexes for selftest")
 	dc := flags.Int("dc", 2, "DC for probe")
@@ -39,9 +46,20 @@ func main() {
 
 	switch command {
 	case "run":
-		run(*listen, decodeSecret(*secretHex), *endpoints, *every)
+		run(telegram.Config{
+			Listen:          *listen,
+			Secret:          decodeSecret(*secretHex),
+			Endpoints:       splitList(*endpoints),
+			CFWorkerDomains: splitList(*workers),
+			FakeTLSDomain:   *fakeTLSDomain,
+			ProxyProtocol:   *proxyProtocol,
+			Targets:         parseTargets(*targets),
+			DisableSecure:   *disableSecure,
+			TestDC:          *testDC,
+			Logf:            log.Printf,
+		}, *every)
 	case "selftest":
-		selfTest(*listen, decodeSecret(*secretHex), *dcs)
+		selfTest(*listen, decodeSecret(*secretHex), *fakeTLSDomain, *dcs)
 	case "probe":
 		probe(flags.Args(), *dc)
 	default:
@@ -49,19 +67,45 @@ func main() {
 	}
 }
 
+func splitList(value string) []string {
+	if value == "" {
+		return nil
+	}
+	return strings.Split(value, ",")
+}
+
+func parseTargets(value string) map[int]string {
+	if value == "" {
+		return nil
+	}
+	targets := make(map[int]string)
+	for _, entry := range strings.Split(value, ",") {
+		number, address, ok := strings.Cut(entry, ":")
+		if !ok {
+			log.Fatalf("bad target %q, want dc:host", entry)
+		}
+		dc, err := strconv.Atoi(number)
+		if err != nil {
+			log.Fatalf("bad target %q: %v", entry, err)
+		}
+		targets[dc] = address
+	}
+	return targets
+}
+
 func decodeSecret(value string) []byte {
-	secret, err := hex.DecodeString(strings.TrimPrefix(value, "dd"))
+	value = strings.TrimPrefix(value, "dd")
+	if strings.HasPrefix(value, "ee") && len(value) >= 34 {
+		value = value[2:34]
+	}
+	secret, err := hex.DecodeString(value)
 	if err != nil || len(secret) != 16 {
 		log.Fatal("-secret must be 32 hex digits")
 	}
 	return secret
 }
 
-func run(listen string, secret []byte, endpoints string, every time.Duration) {
-	config := telegram.Config{Listen: listen, Secret: secret, Logf: log.Printf}
-	if endpoints != "" {
-		config.Endpoints = strings.Split(endpoints, ",")
-	}
+func run(config telegram.Config, every time.Duration) {
 	relay, err := telegram.Start(config)
 	if err != nil {
 		log.Fatal(err)
@@ -98,14 +142,19 @@ func dump(status telegram.Status) {
 	fmt.Println(string(encoded))
 }
 
-func selfTest(listen string, secret []byte, dcs string) {
+func selfTest(listen string, secret []byte, fakeTLSDomain, dcs string) {
 	for _, field := range strings.Split(dcs, ",") {
 		index, err := strconv.Atoi(field)
 		if err != nil {
 			log.Fatal(err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
-		latency, err := telegram.SelfTest(ctx, listen, secret, int16(index))
+		var latency time.Duration
+		if fakeTLSDomain != "" {
+			latency, err = telegram.SelfTestFakeTLS(ctx, listen, secret, int16(index))
+		} else {
+			latency, err = telegram.SelfTest(ctx, listen, secret, int16(index))
+		}
 		cancel()
 		if err != nil {
 			fmt.Printf("dc=%d FAIL: %v\n", index, err)

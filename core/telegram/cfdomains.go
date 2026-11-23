@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	mathrand "math/rand/v2"
 	"net/http"
 	"slices"
 	"strings"
@@ -17,8 +18,11 @@ const (
 	CFDomainsURL = "https://raw.githubusercontent.com/Flowseal/tg-ws-proxy/main/.github/cfproxy-domains.txt"
 
 	cfRefreshFirst    = 5 * time.Second
+	cfRefreshRetry    = 10 * time.Second
 	cfRefreshInterval = time.Hour
-	cfFetchTimeout    = 15 * time.Second
+	cfFetchTimeout    = 10 * time.Second
+	cf429Cooldown     = 45 * time.Second
+	cf429MaxCooldown  = 5 * time.Minute
 	cfMinRefreshed    = 3
 	cfMaxListBytes    = 64 << 10
 )
@@ -48,13 +52,22 @@ var builtinCFDomains = []string{
 
 type CFFetchFunc func(ctx context.Context) (string, error)
 
+func cacheBuster() string {
+	var tag [7]byte
+	for i := range tag {
+		tag[i] = byte('a' + mathrand.IntN(26))
+	}
+	return string(tag[:])
+}
+
 func fetchCFDomains(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, cfFetchTimeout)
 	defer cancel()
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, CFDomainsURL, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, CFDomainsURL+"?"+cacheBuster(), nil)
 	if err != nil {
 		return "", err
 	}
+	request.Header.Set("User-Agent", "tg-ws-proxy")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return "", err
@@ -143,11 +156,17 @@ func cleanUserDomains(domains []string) []string {
 	return out
 }
 
+type cfCooldown struct {
+	until   time.Time
+	strikes int
+}
+
 type cfList struct {
 	mu        sync.Mutex
 	user      []string
 	refreshed []string
-	good      string
+	chosen    map[int]string
+	cooldown  map[string]cfCooldown
 	offset    int
 }
 
@@ -157,7 +176,11 @@ func (l *cfList) setUser(domains []string) {
 	l.user = cleanUserDomains(domains)
 }
 
-func (l *cfList) ordered() []string {
+func (l *cfList) ordered() []string { return l.orderedForDC(0) }
+
+// orderedForDC puts the domain that last worked for this DC first. The rest rotate, so a failed
+// base is not the first one a later connection pays for.
+func (l *cfList) orderedForDC(dc int) []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	var out []string
@@ -171,17 +194,38 @@ func (l *cfList) ordered() []string {
 	if n := len(out); n > 0 {
 		out = slices.Concat(out[l.offset%n:], out[:l.offset%n])
 	}
-	if i := slices.Index(out, l.good); i > 0 {
-		out = slices.Concat([]string{l.good}, out[:i], out[i+1:])
+	if good := l.chosen[dc]; good != "" {
+		if i := slices.Index(out, good); i > 0 {
+			out = slices.Concat([]string{good}, out[:i], out[i+1:])
+		}
 	}
 	return out
 }
 
-func (l *cfList) markGood(base string) {
+// availableForDC is orderedForDC without bases in an HTTP 429 cooldown.
+func (l *cfList) availableForDC(dc int, now time.Time) []string {
+	ordered := l.orderedForDC(dc)
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.good = base
+	out := ordered[:0]
+	for _, base := range ordered {
+		if state, ok := l.cooldown[base]; ok && now.Before(state.until) {
+			continue
+		}
+		out = append(out, base)
+	}
+	return out
+}
+
+func (l *cfList) markGood(dc int, base string) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.chosen == nil {
+		l.chosen = make(map[int]string)
+	}
+	l.chosen[dc] = base
 	l.offset = 0
+	delete(l.cooldown, base)
 }
 
 // rotate moves past bases that just failed, so the next connection tries others.
@@ -189,7 +233,46 @@ func (l *cfList) rotate(n int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.offset += n
-	l.good = ""
+	clear(l.chosen)
+}
+
+func (l *cfList) cooldownRemaining(base string, now time.Time) time.Duration {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state, ok := l.cooldown[base]
+	if !ok || !now.Before(state.until) {
+		return 0
+	}
+	return state.until.Sub(now)
+}
+
+// mark429 raises the cooldown: Retry-After when the server sends one, otherwise 45 seconds
+// doubling per strike, capped at five minutes.
+func (l *cfList) mark429(base string, retryAfter time.Duration, now time.Time) time.Duration {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.cooldown == nil {
+		l.cooldown = make(map[string]cfCooldown)
+	}
+	previous := l.cooldown[base]
+	strikes := previous.strikes
+	if !previous.until.IsZero() && now.After(previous.until.Add(cf429MaxCooldown)) {
+		strikes = 0
+	}
+	delay := retryAfter
+	if delay <= 0 {
+		delay = cf429Cooldown
+		for range strikes {
+			delay *= 2
+			if delay >= cf429MaxCooldown {
+				delay = cf429MaxCooldown
+				break
+			}
+		}
+	}
+	delay = min(delay, cf429MaxCooldown)
+	l.cooldown[base] = cfCooldown{until: now.Add(delay), strikes: strikes + 1}
+	return delay
 }
 
 // refresh replaces the refreshed list; a failed or too short answer keeps the previous one.
@@ -209,16 +292,33 @@ func (l *cfList) refresh(ctx context.Context, fetch CFFetchFunc) error {
 }
 
 func (r *Relay) cfRefreshLoop() {
-	delay := cfRefreshFirst
-	for {
+	select {
+	case <-time.After(cfRefreshFirst):
+	case <-r.ctx.Done():
+		return
+	}
+	for range 3 {
+		if err := r.cf.refresh(r.ctx, r.config.CFFetch); err == nil {
+			break
+		} else {
+			r.config.Logf("cloudflare domain list: %v", err)
+		}
 		select {
-		case <-time.After(delay):
+		case <-time.After(cfRefreshRetry):
 		case <-r.ctx.Done():
 			return
 		}
-		if err := r.cf.refresh(r.ctx, r.config.CFFetch); err != nil {
-			r.config.Logf("cloudflare domain list: %v", err)
+	}
+	ticker := time.NewTicker(cfRefreshInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if err := r.cf.refresh(r.ctx, r.config.CFFetch); err != nil {
+				r.config.Logf("cloudflare domain list: %v", err)
+			}
+		case <-r.ctx.Done():
+			return
 		}
-		delay = cfRefreshInterval
 	}
 }

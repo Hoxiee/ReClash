@@ -1,8 +1,8 @@
 {
   "telegramProxyTitle": "Telegram proxy",
-  "telegramProxyEnable": "Telegram without VPN",
+  "telegramProxyEnable": "Enable local relay",
   "telegramProxyAutostart": "Start with the device",
-  "telegramProxyFooter": "Runs a local proxy on this device that carries Telegram over Telegram's own web addresses. It needs no VPN and no profile. Turning it off does not remove the proxy from Telegram: to go back to a direct connection, turn it off or delete it in Telegram under Settings → Data and Storage → Proxy.",
+  "telegramProxyFooter": "Runs a local MTProto proxy. It tries Telegram's WebSocket addresses and Cloudflare, then optionally your profile, but it is not a VPN: it does not hide your traffic and cannot open Telegram when those addresses are unreachable. Turning it off does not remove the proxy from Telegram.",
   "telegramProxyOpen": "Open in Telegram",
   "telegramProxyLink": "Proxy link",
   "telegramProxyCopyLink": "Copy proxy link",
@@ -53,15 +53,15 @@
   },
   "telegramProxyRouteUnavailable": "No route",
   "telegramProxyRouteIdle": "Not used yet",
-  "telegramProxyStatusFooter": "Telegram keeps data in five data centres. DC 2 and DC 4 work through Telegram's web addresses. DC 1, DC 3 and DC 5 need the route chosen below.",
-  "telegramProxyOutbound": "Route for other data centres",
+  "telegramProxyStatusFooter": "DC 2 and DC 4 use Telegram's web addresses. Other DCs, and any DC whose web addresses fail, try Cloudflare, a Cloudflare Worker, direct TCP, and then the cascade route if one is selected.",
+  "telegramProxyOutbound": "Cascade into profile",
   "telegramProxyByRules": "By profile rules",
-  "telegramProxyOutboundFooter": "By default, the proxy doesn't use your profile or spend subscription traffic. DC 1, DC 3 and DC 5 may then be unavailable: media stored there won't load, and an account that lives there may not sign in. If you choose a route, these DCs go through it, as do DC 2 and DC 4 when their web addresses fail, and that traffic counts against your subscription even with the VPN off.",
+  "telegramProxyOutboundFooter": "Off keeps the relay independent of your profile and spends no subscription traffic. A chosen route is tried after wss, ws, Cloudflare and TCP; that traffic counts against your subscription even with the VPN off.",
   "telegramProxyAdvanced": "Advanced",
   "telegramProxyPort": "Port",
   "telegramProxyInvalidPort": "Enter a port from 1024 to 65535",
   "telegramProxyEndpoints": "Telegram web addresses",
-  "telegramProxyAdvancedFooter": "After changing the port, add the proxy to Telegram again. Leave the lists empty to use the built-in addresses and Cloudflare domains.",
+  "telegramProxyAdvancedFooter": "After changing the port or FakeTLS domain, add the proxy to Telegram again. Empty lists use built-in values. A FakeTLS domain makes Telegram send the ee secret and hides the proxy as TLS from the network.",
   "telegramProxyNotificationTitle": "Telegram proxy is running",
   "telegramProxyNotificationStop": "Stop",
   "doctorTelegramProxyTitle": "Telegram proxy is not working",
@@ -73,8 +73,15 @@
       }
     }
   },
-  "telegramProxyOutboundOff": "Don't use the profile",
+  "telegramProxyOutboundOff": "Don't cascade",
   "telegramProxyRouteCloudflare": "Via Cloudflare",
   "telegramProxyRouteTcp": "Direct TCP",
-  "telegramProxyCfDomains": "Own Cloudflare domains"
+  "telegramProxyCfDomains": "Own Cloudflare domains",
+  "telegramProxyRouteCloudflareWorker": "Via Cloudflare Worker",
+  "telegramProxyFakeTlsDomain": "FakeTLS domain",
+  "telegramProxyCfWorkerDomains": "Cloudflare Worker domains",
+  "telegramProxyTargets": "Data centre addresses",
+  "telegramProxyProxyProtocol": "PROXY protocol v1",
+  "telegramProxyDisableSecure": "Prefer port 80 for Cloudflare",
+  "telegramProxyInvalidTarget": "Enter dc:host, for example 2:149.154.167.51"
 }

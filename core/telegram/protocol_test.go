@@ -119,27 +119,36 @@ func TestResolveTarget(t *testing.T) {
 		dc     int
 		host   int
 		media  bool
+		test   bool
 		viaWeb bool
 	}{
-		{2, true, 2, 2, false, true},
-		{-4, true, 4, 4, true, true},
-		{1, true, 1, 1, false, false},
-		{-5, true, 5, 5, true, false},
-		{203, true, 203, 2, false, true},
-		{-203, true, 203, 2, true, true},
-		{0, false, 0, 0, false, false},
-		{6, false, 0, 0, false, false},
-		{10002, false, 0, 0, false, false},
-		{-32768, false, 0, 0, false, false},
+		{2, true, 2, 2, false, false, true},
+		{-4, true, 4, 4, true, false, true},
+		{1, true, 1, 1, false, false, false},
+		{-5, true, 5, 5, true, false, false},
+		{203, true, 203, 2, false, false, true},
+		{-203, true, 203, 2, true, false, true},
+		{0, false, 0, 0, false, false, false},
+		{6, false, 0, 0, false, false, false},
+		{10002, true, 2, 2, false, true, true},
+		{-10004, true, 4, 4, true, true, true},
+		{-32768, false, 0, 0, false, false, false},
 	} {
 		got, ok := resolveTarget(test.index)
 		if ok != test.ok {
 			t.Fatalf("%d: ok=%v", test.index, ok)
 		}
-		if ok && (got.dc != test.dc || got.hostDC != test.host || got.media != test.media || got.overWebSocket() != test.viaWeb) {
+		if ok && (got.index != int16(test.dc*sign(test.media)) || got.dc != test.dc || got.hostDC != test.host || got.media != test.media || got.test != test.test || got.overWebSocket() != test.viaWeb) {
 			t.Fatalf("%d: %+v", test.index, got)
 		}
 	}
+}
+
+func sign(media bool) int {
+	if media {
+		return -1
+	}
+	return 1
 }
 
 func abridged(size int) []byte {

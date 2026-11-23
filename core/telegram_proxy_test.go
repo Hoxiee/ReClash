@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"core/telegram"
+	"encoding/hex"
 	"errors"
 	"net"
 	"strconv"
@@ -124,5 +125,41 @@ func TestTelegramProxyLeavesTheProfileUnusedUntilAsked(t *testing.T) {
 		if _, err := dial(context.Background(), telegramProbeAddress); !errors.Is(err, telegram.ErrNoOutbound) {
 			t.Fatalf("%q without a profile: %v", name, err)
 		}
+	}
+}
+
+func TestTelegramProxyAcceptsAnEESecret(t *testing.T) {
+	secret, err := decodeTelegramSecret("ee" + telegramTestSecret + "6d61736b")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hex.EncodeToString(secret) != telegramTestSecret {
+		t.Fatalf("secret %x", secret)
+	}
+}
+
+func TestTelegramProxyParsesTargetOverrides(t *testing.T) {
+	targets, err := parseTelegramTargets([]string{"2:149.154.167.51", "-4:149.154.167.91:8443", " "})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if targets[2] != "149.154.167.51" || targets[-4] != "149.154.167.91:8443" || len(targets) != 2 {
+		t.Fatalf("targets %v", targets)
+	}
+	if _, err := parseTelegramTargets([]string{"2"}); err == nil {
+		t.Fatal("a target without a host parsed")
+	}
+}
+
+func TestTelegramProxyRefusesAnInvalidFakeTLSDomain(t *testing.T) {
+	t.Cleanup(stopTelegramProxy)
+	state := applyTelegramProxy(TelegramProxyParams{
+		Enabled:       true,
+		Port:          freeTelegramPort(t),
+		Secret:        telegramTestSecret,
+		FakeTLSDomain: "not a host",
+	}, methodCallSeq.Add(1))
+	if state.Running || !strings.Contains(state.Error, "fake tls") {
+		t.Fatalf("state %+v", state)
 	}
 }

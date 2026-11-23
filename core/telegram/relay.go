@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,6 +26,8 @@ const (
 	stopWaitLimit        = 3 * time.Second
 	silentUpstreamMinAge = 3 * time.Second
 	unavailableHold      = 5 * time.Second
+	bridgeReadTimeout    = 2 * time.Minute
+	bridgePingInterval   = 30 * time.Second
 )
 
 // DefaultEndpoints is the tested list, best known first. Only addresses that answered a real
@@ -49,6 +52,18 @@ type Config struct {
 	TLS       *tls.Config
 	// CFDomains are the user's own Cloudflare base domains, tried before the built-in list.
 	CFDomains []string
+	// CFWorkerDomains serve /apiws?dst=&dc= and are tried before CF base domains.
+	CFWorkerDomains []string
+	// FakeTLSDomain enables the ee secret and masks unauthenticated TLS with this site.
+	FakeTLSDomain string
+	// ProxyProtocol reads a PROXY protocol v1 line before the MTProto header.
+	ProxyProtocol bool
+	// Targets overrides the IP a DC is dialled at; negative keys cover media connections.
+	Targets map[int]string
+	// TestDC sends every DC to Telegram's test infrastructure.
+	TestDC bool
+	// DisableSecure uses port 80 for Cloudflare and worker connections.
+	DisableSecure bool
 	// CFFetch downloads the hosted domain list; nil means CFDomainsURL over plain HTTPS.
 	CFFetch CFFetchFunc
 	Logf    func(format string, args ...any)
@@ -63,12 +78,13 @@ type Config struct {
 type Route string
 
 const (
-	RouteIdle        Route = "idle"
-	RouteWebSocket   Route = "websocket"
-	RouteCloudflare  Route = "cloudflare"
-	RouteTCP         Route = "tcp"
-	RouteOutbound    Route = "outbound"
-	RouteUnavailable Route = "unavailable"
+	RouteIdle             Route = "idle"
+	RouteWebSocket        Route = "websocket"
+	RouteCloudflare       Route = "cloudflare"
+	RouteCloudflareWorker Route = "cloudflare-worker"
+	RouteTCP              Route = "tcp"
+	RouteOutbound         Route = "outbound"
+	RouteUnavailable      Route = "unavailable"
 )
 
 type DCStatus struct {
@@ -99,6 +115,10 @@ type Status struct {
 	Port        int              `json:"port"`
 	Clients     int64            `json:"clients"`
 	BadSecrets  uint64           `json:"badSecrets"`
+	HTTPRejects uint64           `json:"httpRejects"`
+	Masked      uint64           `json:"masked"`
+	PoolHits    uint64           `json:"poolHits"`
+	PoolMisses  uint64           `json:"poolMisses"`
 	BytesUp     uint64           `json:"bytesUp"`
 	BytesDown   uint64           `json:"bytesDown"`
 	LastTraffic int64            `json:"lastTraffic"`
@@ -124,6 +144,9 @@ type dcState struct {
 	steps       [stepCount]backoff
 	sticky      step
 	hasSticky   bool
+	wsBlocked   bool
+	wsFailUntil time.Time
+	ipFailUntil map[string]time.Time
 }
 
 // Relay is one running proxy. Its lifetime is the caller's; it holds no global state.
@@ -132,6 +155,7 @@ type Relay struct {
 	listener  net.Listener
 	endpoints *endpointSet
 	cf        cfList
+	cfSlots   chan struct{}
 	pool      *wsPool
 	outbound  atomic.Pointer[OutboundFunc]
 	now       func() time.Time
@@ -144,9 +168,13 @@ type Relay struct {
 	sessions map[io.Closer]struct{}
 	held     map[net.Conn]struct{}
 	dcs      map[int]*dcState
+	targets  map[int]string
+	workers  []string
 
 	clients     atomic.Int64
 	badSecrets  atomic.Uint64
+	httpRejects atomic.Uint64
+	masked      atomic.Uint64
 	lastTraffic atomic.Int64
 	lastProbe   atomic.Int64
 	probing     atomic.Bool
@@ -166,6 +194,9 @@ func Start(config Config) (*Relay, error) {
 	if err := requireLoopback(config.Listen); err != nil {
 		return nil, err
 	}
+	if config.FakeTLSDomain != "" && !validHostname(config.FakeTLSDomain) {
+		return nil, fmt.Errorf("telegram: invalid fake tls domain %q", config.FakeTLSDomain)
+	}
 	addresses := config.Endpoints
 	if len(addresses) == 0 {
 		addresses = DefaultEndpoints
@@ -179,12 +210,15 @@ func Start(config Config) (*Relay, error) {
 		config:    config,
 		listener:  listener,
 		endpoints: newEndpointSet(normalizeEndpoints(addresses)),
+		cfSlots:   make(chan struct{}, cfGlobalParallel),
 		now:       time.Now,
 		ctx:       ctx,
 		cancel:    cancel,
 		sessions:  make(map[io.Closer]struct{}),
 		held:      make(map[net.Conn]struct{}),
 		dcs:       make(map[int]*dcState),
+		targets:   cloneTargets(config.Targets),
+		workers:   cleanUserDomains(config.CFWorkerDomains),
 	}
 	if config.clock != nil {
 		r.now = config.clock
@@ -248,6 +282,50 @@ func (r *Relay) SetCFDomains(domains []string) {
 	r.cf.setUser(domains)
 }
 
+func (r *Relay) SetCFWorkerDomains(domains []string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.workers = cleanUserDomains(domains)
+}
+
+func (r *Relay) workerDomains() []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]string(nil), r.workers...)
+}
+
+func (r *Relay) SetTargets(targets map[int]string) {
+	r.mu.Lock()
+	r.targets = cloneTargets(targets)
+	r.mu.Unlock()
+	r.pool.drain()
+}
+
+func cloneTargets(targets map[int]string) map[int]string {
+	if len(targets) == 0 {
+		return nil
+	}
+	out := make(map[int]string, len(targets))
+	for dc, address := range targets {
+		if address != "" {
+			out[dc] = address
+		}
+	}
+	return out
+}
+
+// targetOverride names the address a DC should be dialled at, preferring the media key.
+func (r *Relay) targetOverride(dest target) string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if dest.media {
+		if address := r.targets[-dest.dc]; address != "" {
+			return address
+		}
+	}
+	return r.targets[dest.dc]
+}
+
 // Stop ends the listener and every session.
 func (r *Relay) Stop() {
 	r.cancel()
@@ -275,6 +353,9 @@ func (r *Relay) ResetConnections() {
 		state.mu.Lock()
 		state.steps = [stepCount]backoff{}
 		state.hasSticky = false
+		state.wsBlocked = false
+		state.wsFailUntil = time.Time{}
+		state.ipFailUntil = nil
 		state.mu.Unlock()
 	}
 	r.mu.Unlock()
@@ -344,12 +425,65 @@ func (r *Relay) dc(number int) *dcState {
 }
 
 func (r *Relay) serve(client net.Conn) {
+	if r.config.ProxyProtocol && !r.readProxyLine(client) {
+		return
+	}
+	conn := client
+	if r.config.FakeTLSDomain != "" {
+		_ = client.SetReadDeadline(time.Now().Add(clientHeaderTimeout))
+		var first [1]byte
+		if _, err := io.ReadFull(client, first[:]); err != nil {
+			return
+		}
+		if first[0] != tlsRecordHandshake {
+			r.badSecrets.Add(1)
+			_ = client.SetWriteDeadline(time.Now().Add(clientHeaderTimeout))
+			_, _ = io.WriteString(client, "HTTP/1.1 301 Moved Permanently\r\nLocation: https://"+
+				r.config.FakeTLSDomain+"/\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+			return
+		}
+		var ok bool
+		if conn, ok = r.serveFakeTLS(client, first[0]); !ok {
+			return
+		}
+	}
+	r.serveStream(conn)
+}
+
+func (r *Relay) readProxyLine(client net.Conn) bool {
+	_ = client.SetReadDeadline(time.Now().Add(clientHeaderTimeout))
+	var line []byte
+	var one [1]byte
+	for len(line) <= 108 {
+		if _, err := io.ReadFull(client, one[:]); err != nil {
+			return false
+		}
+		line = append(line, one[0])
+		if one[0] == '\n' {
+			break
+		}
+	}
+	_ = client.SetReadDeadline(time.Time{})
+	fields := strings.Fields(string(line))
+	if len(fields) >= 6 && fields[0] == "PROXY" {
+		r.config.Logf("proxy protocol client %s:%s", fields[2], fields[4])
+	}
+	return true
+}
+
+func (r *Relay) serveStream(client net.Conn) {
 	_ = client.SetReadDeadline(time.Now().Add(clientHeaderTimeout))
 	var header [headerSize]byte
 	if _, err := io.ReadFull(client, header[:]); err != nil {
 		return
 	}
 	_ = client.SetReadDeadline(time.Time{})
+	if isHTTPTransport(header[:]) {
+		r.httpRejects.Add(1)
+		_ = client.SetWriteDeadline(time.Now().Add(clientHeaderTimeout))
+		_, _ = io.WriteString(client, "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n")
+		return
+	}
 	clientStreams, tag, index, err := openClientHeader(header[:], r.config.Secret)
 	if err != nil {
 		r.badSecrets.Add(1)
@@ -359,6 +493,9 @@ func (r *Relay) serve(client net.Conn) {
 	if !ok {
 		r.config.Logf("client asked for unknown dc %d", index)
 		return
+	}
+	if r.config.TestDC {
+		dest.test = true
 	}
 	state := r.dc(dest.dc)
 
@@ -401,6 +538,17 @@ func (r *Relay) serve(client net.Conn) {
 	r.pump(client, up, clientStreams, tag, dest, state, endpointUsed, started)
 }
 
+func isHTTPTransport(data []byte) bool {
+	if len(data) < 4 {
+		return false
+	}
+	switch string(data[:4]) {
+	case "POST", "HEAD", "OPTI":
+		return true
+	}
+	return string(data[:3]) == "GET"
+}
+
 // pump re-encrypts both directions until either side ends.
 func (r *Relay) pump(client net.Conn, up upstream, clientStreams streams, tag uint32, dest target, state *dcState, used *endpoint, started time.Time) {
 	header, telegram := newHeader(tag, dest.index, nil)
@@ -411,9 +559,15 @@ func (r *Relay) pump(client net.Conn, up upstream, clientStreams streams, tag ui
 	done := make(chan error, 2)
 	var sawDownlink atomic.Bool
 	var sentUp atomic.Bool
-	go func() { done <- r.pumpUp(client, up, clientStreams, telegram, tag, state, &sentUp) }()
-	go func() { done <- r.pumpDown(client, up, clientStreams, telegram, state, &sawDownlink) }()
+	var lastActivity atomic.Int64
+	lastActivity.Store(time.Now().UnixNano())
+	pumpCtx, stop := context.WithCancel(r.ctx)
+	defer stop()
+	go r.keepAlive(pumpCtx, up, &lastActivity)
+	go func() { done <- r.pumpUp(client, up, clientStreams, telegram, tag, state, &sentUp, &lastActivity) }()
+	go func() { done <- r.pumpDown(client, up, clientStreams, telegram, state, &sawDownlink, &lastActivity) }()
 	err := <-done
+	stop()
 	_ = client.Close()
 	_ = up.Close()
 	<-done
@@ -455,7 +609,31 @@ func (r *Relay) releaseHeld() {
 	}
 }
 
-func (r *Relay) pumpUp(client net.Conn, up upstream, clientStreams, telegram streams, tag uint32, state *dcState, sent *atomic.Bool) error {
+// keepAlive pings an idle WebSocket. A proxy path that stays open but silent is what mobile
+// networks and Cloudflare drop first, and a pong keeps the read deadline from expiring.
+func (r *Relay) keepAlive(ctx context.Context, up upstream, last *atomic.Int64) {
+	pinger, ok := up.(interface{ ping() error })
+	if !ok {
+		return
+	}
+	ticker := time.NewTicker(bridgePingInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			if time.Since(time.Unix(0, last.Load())) < bridgePingInterval {
+				continue
+			}
+			if err := pinger.ping(); err != nil {
+				return
+			}
+		}
+	}
+}
+
+func (r *Relay) pumpUp(client net.Conn, up upstream, clientStreams, telegram streams, tag uint32, state *dcState, sent *atomic.Bool, last *atomic.Int64) error {
 	_, unframed := up.(*tcpUpstream)
 	split := splitter{tag: tag, disabled: unframed}
 	emit := func(packet []byte) {
@@ -464,8 +642,10 @@ func (r *Relay) pumpUp(client net.Conn, up upstream, clientStreams, telegram str
 	}
 	buf := make([]byte, copyBufferSize)
 	for {
+		_ = client.SetReadDeadline(time.Now().Add(bridgeReadTimeout))
 		n, err := client.Read(buf)
 		if n > 0 {
+			last.Store(time.Now().UnixNano())
 			plain := buf[:n]
 			clientStreams.send.XORKeyStream(plain, plain)
 			split.feed(plain, emit)
@@ -481,11 +661,13 @@ func (r *Relay) pumpUp(client net.Conn, up upstream, clientStreams, telegram str
 	}
 }
 
-func (r *Relay) pumpDown(client net.Conn, up upstream, clientStreams, telegram streams, state *dcState, saw *atomic.Bool) error {
+func (r *Relay) pumpDown(client net.Conn, up upstream, clientStreams, telegram streams, state *dcState, saw *atomic.Bool, last *atomic.Int64) error {
 	buf := make([]byte, copyBufferSize)
 	for {
+		up.setDeadline(time.Now().Add(bridgeReadTimeout))
 		n, err := up.recv(buf)
 		if n > 0 {
+			last.Store(time.Now().UnixNano())
 			chunk := buf[:n]
 			telegram.recv.XORKeyStream(chunk, chunk)
 			clientStreams.recv.XORKeyStream(chunk, chunk)
@@ -509,6 +691,10 @@ func (r *Relay) Status() Status {
 		Port:        r.Port(),
 		Clients:     r.clients.Load(),
 		BadSecrets:  r.badSecrets.Load(),
+		HTTPRejects: r.httpRejects.Load(),
+		Masked:      r.masked.Load(),
+		PoolHits:    uint64(r.pool.hits.Load()),
+		PoolMisses:  uint64(r.pool.misses.Load()),
 		LastTraffic: r.lastTraffic.Load(),
 		HasOutbound: r.outbound.Load() != nil,
 		Endpoints:   r.endpoints.snapshot(),

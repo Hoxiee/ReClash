@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,12 +23,18 @@ import (
 const telegramSelfTestTimeout = 15 * time.Second
 
 type TelegramProxyParams struct {
-	Enabled   bool     `json:"enabled"`
-	Port      int      `json:"port"`
-	Secret    string   `json:"secret"`
-	Endpoints []string `json:"endpoints"`
-	CFDomains []string `json:"cfDomains"`
-	Outbound  string   `json:"outbound"`
+	Enabled         bool     `json:"enabled"`
+	Port            int      `json:"port"`
+	Secret          string   `json:"secret"`
+	Endpoints       []string `json:"endpoints"`
+	CFDomains       []string `json:"cfDomains"`
+	CFWorkerDomains []string `json:"cfWorkerDomains"`
+	FakeTLSDomain   string   `json:"fakeTlsDomain"`
+	ProxyProtocol   bool     `json:"proxyProtocol"`
+	Targets         []string `json:"targets"`
+	DisableSecure   bool     `json:"disableSecure"`
+	TestDC          bool     `json:"testDC"`
+	Outbound        string   `json:"outbound"`
 }
 
 type TelegramProxyState struct {
@@ -42,13 +49,18 @@ type TelegramProxyState struct {
 // isRunning or the listeners, so it needs neither a profile nor a TUN and
 // starting it never touches either.
 var telegramProxy struct {
-	mu         sync.Mutex
-	relay      *telegram.Relay
-	listenPort int
-	secret     string
-	outbound   string
-	lastError  string
-	appliedSeq uint64
+	mu            sync.Mutex
+	relay         *telegram.Relay
+	listenPort    int
+	secret        string
+	outbound      string
+	fakeTLSDomain string
+	proxyProtocol bool
+	disableSecure bool
+	testDC        bool
+	targets       []string
+	lastError     string
+	appliedSeq    uint64
 }
 
 func handleSetTelegramProxy(call *MethodCall) (any, error) {
@@ -72,15 +84,32 @@ func applyTelegramProxy(params TelegramProxyParams, seq uint64) TelegramProxySta
 		stopTelegramProxyLocked()
 		return telegramProxyStateLocked()
 	}
+	params.FakeTLSDomain = strings.ToLower(strings.TrimSpace(params.FakeTLSDomain))
 	secret, err := decodeTelegramSecret(params.Secret)
 	if err != nil {
 		stopTelegramProxyLocked()
 		p.lastError = err.Error()
 		return telegramProxyStateLocked()
 	}
-	if p.relay != nil && p.listenPort == params.Port && p.secret == params.Secret {
+	targets, err := parseTelegramTargets(params.Targets)
+	if err != nil {
+		stopTelegramProxyLocked()
+		p.lastError = err.Error()
+		return telegramProxyStateLocked()
+	}
+	same := p.relay != nil &&
+		p.listenPort == params.Port &&
+		p.secret == params.Secret &&
+		p.fakeTLSDomain == params.FakeTLSDomain &&
+		p.proxyProtocol == params.ProxyProtocol &&
+		p.disableSecure == params.DisableSecure &&
+		p.testDC == params.TestDC &&
+		slices.Equal(p.targets, params.Targets)
+	if same {
 		p.relay.SetEndpoints(params.Endpoints)
 		p.relay.SetCFDomains(params.CFDomains)
+		p.relay.SetCFWorkerDomains(params.CFWorkerDomains)
+		p.relay.SetTargets(targets)
 		if p.outbound != params.Outbound {
 			p.outbound = params.Outbound
 			p.relay.SetOutbound(dialTelegramOutbound(params.Outbound))
@@ -89,10 +118,16 @@ func applyTelegramProxy(params TelegramProxyParams, seq uint64) TelegramProxySta
 	}
 	stopTelegramProxyLocked()
 	relay, err := telegram.Start(telegram.Config{
-		Listen:    net.JoinHostPort("127.0.0.1", strconv.Itoa(params.Port)),
-		Secret:    secret,
-		Endpoints: params.Endpoints,
-		CFDomains: params.CFDomains,
+		Listen:          net.JoinHostPort("127.0.0.1", strconv.Itoa(params.Port)),
+		Secret:          secret,
+		Endpoints:       params.Endpoints,
+		CFDomains:       params.CFDomains,
+		CFWorkerDomains: params.CFWorkerDomains,
+		FakeTLSDomain:   params.FakeTLSDomain,
+		ProxyProtocol:   params.ProxyProtocol,
+		Targets:         targets,
+		DisableSecure:   params.DisableSecure,
+		TestDC:          params.TestDC,
 		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, address)
 		},
@@ -109,11 +144,51 @@ func applyTelegramProxy(params TelegramProxyParams, seq uint64) TelegramProxySta
 	p.listenPort = params.Port
 	p.secret = params.Secret
 	p.outbound = params.Outbound
+	p.fakeTLSDomain = params.FakeTLSDomain
+	p.proxyProtocol = params.ProxyProtocol
+	p.disableSecure = params.DisableSecure
+	p.testDC = params.TestDC
+	p.targets = append([]string(nil), params.Targets...)
 	return telegramProxyStateLocked()
 }
 
+func parseTelegramTargets(entries []string) (map[int]string, error) {
+	targets := make(map[int]string, len(entries))
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+		number, address, ok := strings.Cut(entry, ":")
+		if !ok {
+			return nil, fmt.Errorf("telegram proxy target %q must be dc:host", entry)
+		}
+		dc, err := strconv.Atoi(strings.TrimSpace(number))
+		if err != nil {
+			return nil, fmt.Errorf("telegram proxy target %q has no DC number", entry)
+		}
+		address = strings.TrimSpace(address)
+		if address == "" {
+			return nil, fmt.Errorf("telegram proxy target %q has no host", entry)
+		}
+		targets[dc] = address
+	}
+	if len(targets) == 0 {
+		return nil, nil
+	}
+	return targets, nil
+}
+
 func decodeTelegramSecret(value string) ([]byte, error) {
-	secret, err := hex.DecodeString(strings.TrimPrefix(value, "dd"))
+	value = strings.TrimPrefix(value, "dd")
+	if strings.HasPrefix(value, "ee") {
+		value = value[2:]
+		if len(value) < 32 {
+			return nil, errors.New("telegram proxy secret must be 32 hex digits")
+		}
+		value = value[:32]
+	}
+	secret, err := hex.DecodeString(value)
 	if err != nil || len(secret) != 16 {
 		return nil, errors.New("telegram proxy secret must be 32 hex digits")
 	}
@@ -224,7 +299,7 @@ func dialTelegramOutbound(name string) telegram.OutboundFunc {
 func handleTelegramProxySelfTest(dc int16) string {
 	p := &telegramProxy
 	p.mu.Lock()
-	relay, secretHex := p.relay, p.secret
+	relay, secretHex, fakeTLSDomain := p.relay, p.secret, p.fakeTLSDomain
 	p.mu.Unlock()
 	if relay == nil {
 		return "telegram proxy is not running"
@@ -236,8 +311,14 @@ func handleTelegramProxySelfTest(dc int16) string {
 	ctx, cancel := context.WithTimeout(context.Background(), telegramSelfTestTimeout)
 	defer cancel()
 	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(relay.Port()))
-	if _, err := telegram.SelfTest(ctx, address, secret, dc); err != nil {
-		return err.Error()
+	var testErr error
+	if fakeTLSDomain != "" {
+		_, testErr = telegram.SelfTestFakeTLS(ctx, address, secret, dc)
+	} else {
+		_, testErr = telegram.SelfTest(ctx, address, secret, dc)
+	}
+	if testErr != nil {
+		return testErr.Error()
 	}
 	return ""
 }

@@ -15,6 +15,7 @@ import (
 	mathrand "math/rand/v2"
 	"net"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -27,7 +28,9 @@ const (
 	opPong         = 0xa
 
 	wsPath               = "/apiws"
+	wsPathTest           = "/apiws_test"
 	upstreamWriteTimeout = 30 * time.Second
+	controlWriteTimeout  = 5 * time.Second
 	flushThreshold       = 64 << 10
 )
 
@@ -43,10 +46,32 @@ type upstream interface {
 
 // handshakeError marks a failure after TCP connected: the address is alive, but it does not serve
 // this host. Another host on the same address can still work.
-type handshakeError struct{ err error }
+type handshakeError struct {
+	err    error
+	status int
+	header http.Header
+	tls    bool
+}
 
 func (e *handshakeError) Error() string { return e.err.Error() }
 func (e *handshakeError) Unwrap() error { return e.err }
+
+func (e *handshakeError) retryAfter(now time.Time) time.Duration {
+	value := e.header.Get("Retry-After")
+	if value == "" {
+		return 0
+	}
+	if seconds, err := strconv.Atoi(value); err == nil {
+		if seconds > 0 {
+			return time.Duration(seconds) * time.Second
+		}
+		return 0
+	}
+	if when, err := http.ParseTime(value); err == nil && when.After(now) {
+		return when.Sub(now)
+	}
+	return 0
+}
 
 // appendFrame appends a masked client frame. Masking runs a word at a time: this is the only
 // per-byte work of the uplink besides AES.
@@ -119,7 +144,7 @@ func (w *webSocket) writeControl(opcode byte, payload []byte) error {
 	frame := appendFrame(make([]byte, 0, len(payload)+6), opcode, payload)
 	w.writeMu.Lock()
 	defer w.writeMu.Unlock()
-	_ = w.conn.SetWriteDeadline(time.Now().Add(upstreamWriteTimeout))
+	_ = w.conn.SetWriteDeadline(time.Now().Add(controlWriteTimeout))
 	_, err := w.conn.Write(frame)
 	return err
 }
@@ -185,6 +210,7 @@ func (w *webSocket) readFrameHeader() error {
 }
 
 func (w *webSocket) setDeadline(t time.Time) { _ = w.conn.SetDeadline(t) }
+func (w *webSocket) ping() error             { return w.writeControl(opPing, nil) }
 func (w *webSocket) Close() error            { return w.conn.Close() }
 
 // upgradeWebSocket runs TLS and the HTTP upgrade over an established TCP connection. The server's
@@ -211,7 +237,7 @@ func upgradeWebSocketPath(ctx context.Context, raw net.Conn, host, path string, 
 		config.NextProtos = []string{"http/1.1"}
 		tlsConn := tls.Client(raw, config)
 		if err := tlsConn.HandshakeContext(ctx); err != nil {
-			return nil, &handshakeError{fmt.Errorf("tls %s: %w", host, err)}
+			return nil, &handshakeError{err: fmt.Errorf("tls %s: %w", host, err), tls: true}
 		}
 		conn = tlsConn
 	}
@@ -223,18 +249,22 @@ func upgradeWebSocketPath(ctx context.Context, raw net.Conn, host, path string, 
 	request := "GET " + path + " HTTP/1.1\r\nHost: " + host + "\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n" +
 		"Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: " + key + "\r\nSec-WebSocket-Protocol: binary\r\n\r\n"
 	if _, err := io.WriteString(conn, request); err != nil {
-		return nil, &handshakeError{fmt.Errorf("upgrade %s: %w", host, err)}
+		return nil, &handshakeError{err: fmt.Errorf("upgrade %s: %w", host, err)}
 	}
 	reader := bufio.NewReaderSize(conn, 32<<10)
 	response, err := http.ReadResponse(reader, &http.Request{Method: http.MethodGet})
 	if err != nil {
-		return nil, &handshakeError{fmt.Errorf("upgrade %s: %w", host, err)}
+		return nil, &handshakeError{err: fmt.Errorf("upgrade %s: %w", host, err)}
 	}
 	if response.StatusCode != http.StatusSwitchingProtocols {
-		return nil, &handshakeError{fmt.Errorf("upgrade %s: status %d", host, response.StatusCode)}
+		return nil, &handshakeError{
+			err:    fmt.Errorf("upgrade %s: status %d", host, response.StatusCode),
+			status: response.StatusCode,
+			header: response.Header,
+		}
 	}
 	if response.Header.Get("Sec-WebSocket-Accept") != acceptKey(key) {
-		return nil, &handshakeError{fmt.Errorf("upgrade %s: bad accept key", host)}
+		return nil, &handshakeError{err: fmt.Errorf("upgrade %s: bad accept key", host)}
 	}
 	_ = raw.SetDeadline(time.Time{})
 	return &webSocket{conn: conn, reader: reader}, nil

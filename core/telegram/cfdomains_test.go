@@ -48,7 +48,7 @@ func TestCFListMergesUserThenRefreshedThenBuiltin(t *testing.T) {
 	if len(got) != 5+len(builtinCFDomains)-1 {
 		t.Fatalf("duplicates in %v", got)
 	}
-	l.markGood("fresh2.co.uk")
+	l.markGood(0, "fresh2.co.uk")
 	if l.ordered()[0] != "fresh2.co.uk" {
 		t.Fatal("last good base is not first")
 	}
