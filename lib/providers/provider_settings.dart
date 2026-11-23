@@ -71,6 +71,15 @@ final providerHintsProvider = Provider<ProviderHints?>((ref) {
       : ProviderHints(metadata, configPending: !loaded.hasError);
 });
 
+Future<ProviderHints?> readProviderUpdateHints(Ref ref) async {
+  final hints = ref.read(providerHintsProvider);
+  if (hints?.configPending != true || hints?.updateMirror == null) return hints;
+  try {
+    await ref.read(_providerConfigProvider.future);
+  } catch (_) {}
+  return ref.mounted ? ref.read(providerHintsProvider) : null;
+}
+
 class ProviderPowerButtonSelection extends Notifier<ProviderPowerButton> {
   ProviderPowerButtonSelection({math.Random? random})
     : _random = random ?? math.Random();

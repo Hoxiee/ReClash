@@ -159,8 +159,12 @@ List<String> createFlutterBuildArgs({
   return flutterBuildArgs;
 }
 
-Map<String, String> createBuildEnvironment(String env) {
-  return {'APP_ENV': env};
+Map<String, String> createBuildEnvironment(String env, {String? mirrorUrls}) {
+  return {
+    'APP_ENV': env,
+    if (mirrorUrls != null && mirrorUrls.isNotEmpty)
+      'UPDATE_MIRROR_URLS': mirrorUrls,
+  };
 }
 
 /// Packages whose build hook `pubspec.yaml` turns into a no-op.
@@ -205,7 +209,14 @@ Future<int> _package(
   required bool verbose,
 }) async {
   final file = File(p.join(rootDir, 'env.json'));
-  await file.writeAsString(jsonEncode(createBuildEnvironment(env)));
+  await file.writeAsString(
+    jsonEncode(
+      createBuildEnvironment(
+        env,
+        mirrorUrls: Platform.environment['UPDATE_MIRROR_URLS'],
+      ),
+    ),
+  );
 
   final flutterBuildArgs = createFlutterBuildArgs(
     platform: platform,

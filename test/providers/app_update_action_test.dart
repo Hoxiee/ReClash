@@ -17,6 +17,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/provider_config.dart';
 import 'package:riverpod/misc.dart' show Override;
 import 'package:riverpod/riverpod.dart';
 
@@ -50,9 +51,16 @@ class _CountingRuntime extends TestUpdateRuntime {
   int checks = 0;
 
   @override
-  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) {
+  Duration checkInterval = const Duration(hours: 1);
+
+  @override
+  Future<AppUpdateRelease?> check(
+    UpdateChannel channel, {
+    Uri? mirror,
+    bool preferMirror = false,
+  }) {
     checks++;
-    return super.check(channel, mirror: mirror);
+    return super.check(channel, mirror: mirror, preferMirror: preferMirror);
   }
 }
 
@@ -877,49 +885,72 @@ void main() {
 
     void start(FakeAsync async) {
       container.read(initProvider.notifier).value = true;
+      unawaited(action.checkOnEntry());
+      async.flushMicrotasks();
+    }
+
+    void resume(FakeAsync async) {
+      action.didChangeAppLifecycleState(AppLifecycleState.resumed);
       async.flushMicrotasks();
     }
 
     setUp(useCounting);
 
-    test('a failed check retries after 2 then 5 minutes', () {
+    test('failures retry on re-entry with increasing cooldowns', () {
       runtime.checkFailure = const FormatException('offline');
       fakeAsync((async) {
         start(async);
-        advance(async, const Duration(minutes: 1, seconds: 59));
-        expect(counting.checks, 0);
-        advance(async, const Duration(seconds: 1));
         expect(counting.checks, 1);
         advance(async, const Duration(minutes: 1, seconds: 59));
+        resume(async);
         expect(counting.checks, 1);
         advance(async, const Duration(seconds: 1));
+        expect(counting.checks, 1);
+        resume(async);
         expect(counting.checks, 2);
         advance(async, const Duration(minutes: 4, seconds: 59));
+        resume(async);
         expect(counting.checks, 2);
         advance(async, const Duration(seconds: 1));
+        expect(counting.checks, 2);
+        resume(async);
         expect(counting.checks, 3);
         container.dispose();
       });
     });
 
-    test('a successful check waits an hour before the next', () {
+    test('an open app does not poll again as time passes', () {
       fakeAsync((async) {
         start(async);
-        advance(async, const Duration(minutes: 2));
+        advance(async, const Duration(hours: 3));
         expect(counting.checks, 1);
-        advance(async, const Duration(minutes: 59));
-        expect(counting.checks, 1);
-        advance(async, const Duration(minutes: 1));
+        resume(async);
         expect(counting.checks, 2);
         container.dispose();
       });
     });
 
-    test('no timer runs while automatic checking is disabled', () {
+    test('a catalog-enabled build rechecks on entry after 15 minutes', () {
+      counting.checkInterval = const Duration(minutes: 15);
+      fakeAsync((async) {
+        start(async);
+        advance(async, const Duration(minutes: 14));
+        resume(async);
+        expect(counting.checks, 1);
+        advance(async, const Duration(minutes: 1));
+        expect(counting.checks, 1);
+        resume(async);
+        expect(counting.checks, 2);
+        container.dispose();
+      });
+    });
+
+    test('entry checks respect the automatic check setting', () {
       settings(const AppSettingProps(autoCheckUpdate: false));
       fakeAsync((async) {
         start(async);
         advance(async, const Duration(hours: 3));
+        resume(async);
         expect(counting.checks, 0);
         container.dispose();
       });
@@ -952,6 +983,28 @@ void main() {
       );
       await action.check();
       expect(runtime.checkedMirror, Uri.parse('https://m.example/u.json'));
+      expect(runtime.checkedPreferMirror, isFalse);
+    });
+
+    test('a hosted config can opt into mirror priority', () async {
+      useCounting(
+        overrides: [
+          providerHintsProvider.overrideWithValue(
+            ProviderHints(
+              const SubscriptionMetadata({
+                'updates.mirror': 'https://m.example/u.json',
+              }),
+              config: parseProviderConfig(
+                'version: 1\nupdates: {prefer-mirror: true}',
+                'en',
+              ).config,
+            ),
+          ),
+        ],
+      );
+      await action.check();
+      expect(runtime.checkedMirror, Uri.parse('https://m.example/u.json'));
+      expect(runtime.checkedPreferMirror, isTrue);
     });
 
     test('without provider hints no mirror is passed', () async {

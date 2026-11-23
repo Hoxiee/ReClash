@@ -434,6 +434,17 @@
         }
       }
     },
+    "updates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefer-mirror": {
+          "type": "boolean",
+          "default": false,
+          "description": "Checks the URL from the reclash-update header before the official release sources."
+        }
+      }
+    },
     "apps": {
       "type": "object",
       "additionalProperties": false,

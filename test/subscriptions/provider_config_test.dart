@@ -17,6 +17,20 @@ void main() {
 
   String doc(String body) => 'version: 1\n$body';
 
+  test('preferring an update mirror requires an explicit YAML boolean', () {
+    expect(parse(doc('')).config?.preferUpdateMirror, isFalse);
+    expect(
+      parse(doc('updates: {prefer-mirror: false}')).config?.preferUpdateMirror,
+      isFalse,
+    );
+    final enabled = parse(doc('updates: {prefer-mirror: true}'));
+    expect(enabled.config?.preferUpdateMirror, isTrue);
+    expect(enabled.warnings, isEmpty);
+    final invalid = parse(doc('updates: {prefer-mirror: "true"}'));
+    expect(invalid.config?.preferUpdateMirror, isFalse);
+    expect(invalid.warnings.single, contains('must be a boolean'));
+  });
+
   test('parses a complete document', () {
     final result = parse('''
 version: 1
@@ -482,6 +496,10 @@ widgets: [CurrentOutbound, serviceStatus]
       expect(schemaProperties('settings').keys.toSet(), {
         ...providerSettingKeys.keys,
       });
+      expect(
+        schemaProperties('updates')['prefer-mirror'],
+        containsPair('type', 'boolean'),
+      );
       final policy = schemaProperties('policy');
       expect(policy.keys.toSet(), providerPolicyValues.keys.toSet());
       for (final MapEntry(:key, :value) in providerPolicyValues.entries) {

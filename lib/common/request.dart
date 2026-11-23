@@ -14,6 +14,10 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
 
 const _updateDownloadTimeout = Duration(minutes: 10);
+const _mirrorDownloadTimeout = Duration(seconds: 25);
+const _updateProbeTimeout = Duration(seconds: 6);
+const _updateProbeBytes = 256 * 1024;
+const _gitHubCheckInterval = Duration(hours: 1);
 
 class Request {
   static final _updateDownloads = <String>{};
@@ -24,7 +28,17 @@ class Request {
   late final Dio _updateFileDio;
   String? userAgent;
   late final List<AppUpdateSource> updateSources;
+  final List<Uri> _releaseMirrors;
   final _updateCache = UpdateResponseCache();
+  final _gitHubChecks =
+      <
+        UpdateChannel,
+        ({DateTime at, Future<List<Map<String, dynamic>>> result})
+      >{};
+
+  Duration get updateCheckInterval => _releaseMirrors.isEmpty
+      ? _gitHubCheckInterval
+      : const Duration(minutes: 15);
 
   ProviderReader? _read;
 
@@ -37,7 +51,8 @@ class Request {
     _read = read;
   }
 
-  Request() {
+  Request({String mirrorUrls = updateMirrorUrls})
+    : _releaseMirrors = parseUpdateMirrorUrls(mirrorUrls) {
     dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
     updateDio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
     updateDio.httpClientAdapter = IOHttpClientAdapter(
@@ -45,7 +60,11 @@ class Request {
     );
     _clashDio = Dio()..httpClientAdapter = _clashAdapter(HttpClient.new);
     _updateFileDio = Dio()..httpClientAdapter = _clashAdapter(_strictClient);
-    updateSources = [GitHubUpdateSource(updateDio, _updateCache)];
+    updateSources = [
+      for (final mirror in _releaseMirrors)
+        OfficialUpdateSource(updateDio, mirror, _updateCache),
+      GitHubUpdateSource(updateDio, _updateCache),
+    ];
   }
 
   IOHttpClientAdapter _clashAdapter(HttpClient Function() create) =>
@@ -115,23 +134,25 @@ class Request {
   }
 
   /// Returns null only when a source answered and found no eligible release.
-  /// A provider's [mirror] answers in GitHub's place unless it fails.
+  /// The official sources answer first unless [preferMirror] is set.
   Future<AppUpdateRelease?> checkForUpdate({
     required UpdateChannel channel,
     Uri? mirror,
+    bool preferMirror = false,
   }) async {
     Object? lastError;
     StackTrace? lastStack;
     final installed = globalState.packageInfo.version;
+    final provider = mirror == null
+        ? null
+        : MirrorUpdateSource(updateDio, mirror, _updateCache);
     for (final source in [
-      if (mirror != null) MirrorUpdateSource(updateDio, mirror, _updateCache),
+      if (provider != null && preferMirror) provider,
       ...updateSources,
+      if (provider != null && !preferMirror) provider,
     ]) {
       try {
-        final releases = await source.fetchReleases(
-          channel: channel,
-          installedVersion: installed,
-        );
+        final releases = await _fetchUpdateReleases(source, channel, installed);
         final selected = selectUpdateRelease(
           releases,
           installedVersion: installed,
@@ -166,6 +187,31 @@ class Request {
     throw StateError('No app update sources configured');
   }
 
+  Future<List<Map<String, dynamic>>> _fetchUpdateReleases(
+    AppUpdateSource source,
+    UpdateChannel channel,
+    String installed,
+  ) {
+    if (source is! GitHubUpdateSource || _releaseMirrors.isEmpty) {
+      return source.fetchReleases(
+        channel: channel,
+        installedVersion: installed,
+      );
+    }
+    final now = DateTime.now();
+    final previous = _gitHubChecks[channel];
+    if (previous != null &&
+        now.difference(previous.at) < _gitHubCheckInterval) {
+      return previous.result;
+    }
+    final result = source.fetchReleases(
+      channel: channel,
+      installedVersion: installed,
+    );
+    _gitHubChecks[channel] = (at: now, result: result);
+    return result;
+  }
+
   AppUpdateSource? updateSource(String id) => id == mirrorUpdateSourceId
       ? MirrorUpdateSource(updateDio, null, _updateCache)
       : updateSources.where((source) => source.id == id).firstOrNull;
@@ -176,6 +222,7 @@ class Request {
     required ProgressCallback onProgress,
     required CancelToken cancelToken,
     bool resume = false,
+    bool useMirrors = false,
     String? expectedSha256,
     int? expectedSize,
   }) async {
@@ -183,19 +230,54 @@ class Request {
     if (!_updateDownloads.add(path)) {
       return 'Update download is already in progress';
     }
-    final transfer = _UpdateFileTransfer(
-      dio: _updateFileDio,
-      uri: uri,
-      target: File(path),
-      onProgress: onProgress,
-      cancelToken: cancelToken,
-      resume: resume,
-      expectedSha256: expectedSha256,
-      expectedSize: expectedSize,
-    );
     try {
-      await transfer.run();
-      return null;
+      final digest = parseAssetSha256('sha256:$expectedSha256');
+      final candidates =
+          useMirrors &&
+              digest != null &&
+              expectedSize != null &&
+              expectedSize > 0
+          ? updateDownloadUris(uri, digest, _releaseMirrors)
+          : [uri];
+      final sources = candidates.length == 1
+          ? Stream.value(uri)
+          : _rankUpdateSources(candidates, expectedSize!, cancelToken);
+      Object? lastError;
+      StackTrace? lastStack;
+      await for (final source in sources) {
+        final transfer = _UpdateFileTransfer(
+          dio: _updateFileDio,
+          uri: source,
+          target: File(path),
+          onProgress: onProgress,
+          cancelToken: cancelToken,
+          resume: resume,
+          expectedSha256: expectedSha256,
+          expectedSize: expectedSize,
+          candidates: candidates,
+        );
+        try {
+          await transfer.run();
+          return null;
+        } catch (error, stack) {
+          if (candidates.length == 1 ||
+              cancelToken.isCancelled ||
+              !(error is DioException ||
+                  error is HttpException ||
+                  error is TimeoutException ||
+                  error is UpdateDownloadVerificationException)) {
+            rethrow;
+          }
+          lastError = error;
+          lastStack = stack;
+          commonPrint.log(
+            'Update transfer via ${source.host} failed: ${compactError(error)}',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
+      if (lastError != null) Error.throwWithStackTrace(lastError, lastStack!);
+      throw StateError('No update download sources');
     } catch (error) {
       if (error is DioException && CancelToken.isCancel(error)) return '';
       commonPrint.log(
@@ -206,6 +288,101 @@ class Request {
       return compactError(error);
     } finally {
       _updateDownloads.remove(path);
+    }
+  }
+
+  Stream<Uri> _rankUpdateSources(
+    List<Uri> sources,
+    int size,
+    CancelToken cancelToken,
+  ) async* {
+    final probeToken = CancelToken();
+    unawaited(cancelToken.whenCancel.then(probeToken.cancel));
+    final failed = <Uri>{};
+    final samples = Stream.fromFutures([
+      for (final uri in sources)
+        _sampleUpdateSource(
+          uri,
+          size,
+          probeToken,
+        ).then((passed) => (uri, passed)),
+    ]);
+    try {
+      await for (final (uri, passed) in samples) {
+        if (passed) {
+          yield uri;
+        } else {
+          failed.add(uri);
+        }
+      }
+    } finally {
+      probeToken.cancel();
+    }
+    yield* Stream.fromIterable(sources.where(failed.contains));
+  }
+
+  Future<bool> _sampleUpdateSource(
+    Uri uri,
+    int size,
+    CancelToken cancelToken,
+  ) async {
+    final count = size < _updateProbeBytes ? size : _updateProbeBytes;
+    final token = CancelToken();
+    unawaited(cancelToken.whenCancel.then(token.cancel));
+    try {
+      await _readUpdateSample(
+        uri,
+        size,
+        count,
+        token,
+      ).timeout(_updateProbeTimeout);
+      return true;
+    } on Object {
+      return false;
+    } finally {
+      token.cancel();
+    }
+  }
+
+  Future<void> _readUpdateSample(
+    Uri uri,
+    int size,
+    int count,
+    CancelToken token,
+  ) async {
+    final response = await _updateFileDio.getUri<ResponseBody>(
+      uri,
+      cancelToken: token,
+      options: Options(
+        responseType: ResponseType.stream,
+        headers: {
+          HttpHeaders.acceptEncodingHeader: 'identity',
+          HttpHeaders.rangeHeader: 'bytes=0-${count - 1}',
+        },
+        validateStatus: (_) => true,
+      ),
+    );
+    final body = response.data!;
+    final range = _UpdateContentRange.parse(
+      response.headers.value(HttpHeaders.contentRangeHeader),
+    );
+    final encoding = response.headers.value(HttpHeaders.contentEncodingHeader);
+    if (response.statusCode != HttpStatus.partialContent ||
+        range == null ||
+        range.start != 0 ||
+        range.length != count ||
+        range.total != size ||
+        (encoding != null && encoding.toLowerCase() != 'identity')) {
+      await body.stream.listen(null, onError: (Object error) {}).cancel();
+      throw const HttpException('No matching update range');
+    }
+    var received = 0;
+    await for (final chunk in body.stream) {
+      received += chunk.length;
+      if (received >= count) break;
+    }
+    if (received != count) {
+      throw const HttpException('Invalid update sample length');
     }
   }
 
@@ -251,6 +428,7 @@ class _UpdateFileTransfer {
     required this.resume,
     required this.expectedSha256,
     required this.expectedSize,
+    required this.candidates,
   });
 
   final Dio dio;
@@ -261,6 +439,9 @@ class _UpdateFileTransfer {
   final bool resume;
   final String? expectedSha256;
   final int? expectedSize;
+  final List<Uri> candidates;
+  Duration get _timeout =>
+      candidates.length == 1 ? _updateDownloadTimeout : _mirrorDownloadTimeout;
   late final File _partial = File('${target.path}.tmp');
   late final File _metadataFile = File('${target.path}.tmp.json');
   late _UpdateResumeMetadata _metadata;
@@ -268,6 +449,7 @@ class _UpdateFileTransfer {
   Timer? _idleTimer;
   bool _timedOut = false;
   bool _rangeRestarted = false;
+  bool _resumedAcrossMirrors = false;
   int _received = 0;
 
   Future<void> run() async {
@@ -293,11 +475,22 @@ class _UpdateFileTransfer {
       );
       await _restorePartial();
       _ensureActive();
-      while (!await _receiveResponse()) {
-        _ensureActive();
+      while (true) {
+        try {
+          while (!await _receiveResponse()) {
+            _ensureActive();
+          }
+          _ensureActive();
+          await _publish();
+          return;
+        } on UpdateDownloadVerificationException {
+          if (!_resumedAcrossMirrors) rethrow;
+          _resumedAcrossMirrors = false;
+          _rangeRestarted = false;
+          await _discardPartial();
+          _metadata = _metadata.withoutResponse();
+        }
       }
-      _ensureActive();
-      await _publish();
     } catch (error) {
       if (!resume || error is UpdateDownloadVerificationException) {
         await _discardPartial();
@@ -313,7 +506,7 @@ class _UpdateFileTransfer {
 
   void _armIdleTimer() {
     _idleTimer?.cancel();
-    _idleTimer = Timer(_updateDownloadTimeout, () {
+    _idleTimer = Timer(_timeout, () {
       _timedOut = true;
       _networkToken?.cancel('Update download timed out');
     });
@@ -330,8 +523,16 @@ class _UpdateFileTransfer {
         );
         final length = await _partial.length();
         final total = saved.size ?? saved.total;
-        if (saved.matches(_metadata) && (total == null || length <= total)) {
-          _metadata = saved;
+        final sameUrl = saved.url == _metadata.url;
+        final knownMirror =
+            expectedSize != null &&
+            candidates.any((candidate) => candidate.toString() == saved.url);
+        if ((sameUrl || knownMirror) &&
+            saved.sha256 == _metadata.sha256 &&
+            saved.size == _metadata.size &&
+            (total == null || length <= total)) {
+          if (sameUrl) _metadata = saved;
+          _resumedAcrossMirrors = !sameUrl && length > 0;
           _received = length;
           return;
         }
@@ -383,6 +584,7 @@ class _UpdateFileTransfer {
           );
         }
         _rangeRestarted = true;
+        _resumedAcrossMirrors = false;
         await _discardPartial();
         _metadata = _metadata.withoutResponse();
         return false;
@@ -451,6 +653,7 @@ class _UpdateFileTransfer {
       if (status == HttpStatus.ok) {
         await _partial.safeDelete();
         _received = 0;
+        _resumedAcrossMirrors = false;
         _metadata = _metadata.withoutResponse();
       }
       _metadata = _metadata.withResponse(
@@ -554,10 +757,7 @@ class _UpdateFileTransfer {
 
   void _ensureActive() {
     if (_timedOut) {
-      throw TimeoutException(
-        'Update download timed out',
-        _updateDownloadTimeout,
-      );
+      throw TimeoutException('Update download timed out', _timeout);
     }
     if (cancelToken.cancelError case final error?) throw error;
   }
@@ -607,9 +807,6 @@ class _UpdateResumeMetadata {
   final String? lastModified;
 
   String? get validator => etag ?? lastModified;
-
-  bool matches(_UpdateResumeMetadata other) =>
-      url == other.url && sha256 == other.sha256 && size == other.size;
 
   _UpdateResumeMetadata withoutResponse() =>
       _UpdateResumeMetadata(url: url, sha256: sha256, size: size);

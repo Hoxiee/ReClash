@@ -76,6 +76,23 @@ the hooks again. The editor and IPC socket tests still need the Rust library: ke
 on, or point `FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR` at a directory that
 holds a `rust_api` library built from the same sources.
 
+## Official Update Mirror
+
+The GitHub release job uploads the same installers and signed release entries to R2. Configure these GitHub Actions
+repository variables and secrets before building a tag with the mirror enabled.
+
+- `UPDATE_MIRROR_URLS` contains comma-separated public HTTPS base URLs in catalog lookup order. Put the custom domain
+  of the R2 bucket first. Local packaging reads the same environment variable before writing `env.json`.
+- `UPDATE_R2_BUCKET` and `UPDATE_R2_ENDPOINT` select the bucket and its S3 API URL.
+- `UPDATE_R2_ACCESS_KEY_ID` and `UPDATE_R2_SECRET_ACCESS_KEY` grant the release job read and write access to that bucket.
+  `UPDATE_MANIFEST_KEY` is the existing release signing seed.
+
+The public domain must serve `update-manifest.json` with validators and a short cache lifetime. In Cloudflare, set a
+Cache Rule for the catalog that respects `Cache-Control`. Enable caching and byte ranges on `releases/*`, including
+AppImage. An independent mirror can serve the same catalog and objects at `releases/<tag>/<sha256>/<filename>`.
+Publish its catalog after copying the referenced installers. Keep the latest stable and prerelease assets when pruning
+older versions. The manifest and installer objects are public and the S3 credentials are used only by CI.
+
 ## Flutter Development
 
 Use the default Flutter SDK through the preparation entrypoint, or prepare once before direct Flutter commands:

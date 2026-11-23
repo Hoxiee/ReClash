@@ -9,6 +9,7 @@ import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/app_update.dart';
 import 'package:reclash/common/request.dart';
 import 'package:reclash/common/update.dart';
+import 'package:reclash/common/update_manifest.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -382,7 +383,7 @@ void main() {
       ]);
     });
 
-    test('a failing mirror falls back to GitHub', () async {
+    test('a failing preferred mirror falls back to GitHub', () async {
       final adapter = serve((exchange) {
         if (exchange.uri.host == 'mirror.example') return _json('not json');
         return history(exchange);
@@ -390,13 +391,33 @@ void main() {
       final release = await client.checkForUpdate(
         channel: UpdateChannel.release,
         mirror: Uri.parse('https://mirror.example/update-manifest.json'),
+        preferMirror: true,
       );
       expect(release?.tag, 'v0.3.0');
       expect(release?.source.id, 'github');
       expect(adapter.requests.first.uri.host, 'mirror.example');
     });
 
-    test('a mirror without a newer release is final', () async {
+    test('a preferred mirror without a newer release is final', () async {
+      client = Request(mirrorUrls: 'https://cdn.example');
+      final adapter = serve((exchange) {
+        if (exchange.uri.host == 'mirror.example') {
+          return _json('{"releases": []}');
+        }
+        return history(exchange);
+      });
+      final release = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+        mirror: Uri.parse('https://mirror.example/update-manifest.json'),
+        preferMirror: true,
+      );
+      expect(release, isNull);
+      expect(adapter.requests.map((request) => request.uri.host), [
+        'mirror.example',
+      ]);
+    });
+
+    test('a mirror without opt-in does not mask an official release', () async {
       final adapter = serve((exchange) {
         if (exchange.uri.host == 'mirror.example') {
           return _json('{"releases": []}');
@@ -407,17 +428,137 @@ void main() {
         channel: UpdateChannel.release,
         mirror: Uri.parse('https://mirror.example/update-manifest.json'),
       );
-      expect(release, isNull);
-      expect(adapter.requests.map((request) => request.uri.host), [
-        'mirror.example',
-      ]);
+      expect(release?.tag, 'v0.3.0');
+      expect(release?.source.id, 'github');
+      expect(adapter.count('mirror.example'), 0);
     });
+
+    test(
+      'a mirror without opt-in is a fallback for the official sources',
+      () async {
+        client = Request(mirrorUrls: 'https://cdn.example');
+        final adapter = serve(
+          (exchange) => exchange.uri.host == 'mirror.example'
+              ? _json('{"releases": []}')
+              : _json('unavailable', status: 503),
+        );
+        expect(
+          await client.checkForUpdate(
+            channel: UpdateChannel.pre,
+            mirror: Uri.parse('https://mirror.example/update-manifest.json'),
+          ),
+          isNull,
+        );
+        expect(adapter.requests.map((request) => request.uri.host), [
+          'cdn.example',
+          'api.github.com',
+          'mirror.example',
+        ]);
+      },
+    );
 
     test('updateSource resolves the mirror and GitHub, nothing else', () {
       expect(client.updateSource('mirror')?.id, 'mirror');
       expect(client.updateSource('github')?.id, 'github');
       expect(client.updateSource('unknown'), isNull);
     });
+
+    test('the signed catalog offers updates without querying GitHub', () async {
+      const mirror = 'https://cdn.example/update/';
+      const tag = 'v0.2.0';
+      const name = 'ReClash-0.2.0-android-arm64-v8a.apk';
+      const notes = 'Release notes';
+      final seed = List<int>.filled(32, 1);
+      final digest = _updateDigest('package');
+      final signature = await signUpdateManifestMessage(
+        updateManifestMessage(
+          tag: tag,
+          prerelease: false,
+          notes: notes,
+          assets: [(name: name, size: 7, sha256: digest)],
+        ),
+        seed,
+      );
+      client = Request(mirrorUrls: mirror);
+      client.updateSources[0] = OfficialUpdateSource(
+        client.updateDio,
+        Uri.parse(mirror),
+        UpdateResponseCache(),
+        keys: [await updateManifestPublicKey(seed)],
+      );
+      final adapter = serve((exchange) {
+        expect(exchange.uri.toString(), '$mirror$updateManifestFileName');
+        if (exchange.headers['if-none-match'] == 'abc') {
+          return _json('', status: 304);
+        }
+        return _json(
+          jsonEncode({
+            'releases': [
+              {
+                'tag': tag,
+                'prerelease': false,
+                'notes': notes,
+                'published_at': '2026-11-23T12:00:00Z',
+                'assets': [
+                  {
+                    'name': name,
+                    'size': 7,
+                    'sha256': digest,
+                    'url': 'https://arbitrary.example/package.apk',
+                  },
+                ],
+                'signature': signature,
+              },
+            ],
+          }),
+          etag: 'abc',
+        );
+      });
+
+      expect(client.updateCheckInterval, const Duration(minutes: 15));
+      final release = await client.checkForUpdate(
+        channel: UpdateChannel.release,
+      );
+      expect(release?.source.id, officialUpdateSourceId);
+      expect(release?.tag, tag);
+      expect(release?.data['published_at'], '2026-11-23T12:00:00Z');
+      expect(
+        release!.assets.single['browser_download_url'],
+        'https://github.com/$repository/releases/download/$tag/$name',
+      );
+      expect(
+        (await client.checkForUpdate(channel: UpdateChannel.release))?.tag,
+        tag,
+      );
+      expect(adapter.requests.last.headers['if-none-match'], 'abc');
+      expect(adapter.requests, hasLength(2));
+    });
+
+    test(
+      'catalog failures keep trying mirrors and reuse the GitHub fallback',
+      () async {
+        client = Request(
+          mirrorUrls: 'https://cdn.example, https://other.example',
+        );
+        final adapter = serve(
+          (exchange) => switch (exchange.uri.host) {
+            'cdn.example' => _json('unavailable', status: 503),
+            'other.example' => _json('{"releases": []}'),
+            _ => _json(_releaseJson('v0.1.0')),
+          },
+        );
+
+        for (var attempt = 0; attempt < 2; attempt++) {
+          expect(
+            await client.checkForUpdate(channel: UpdateChannel.release),
+            isNull,
+          );
+        }
+        expect(adapter.count('cdn.example'), 2);
+        expect(adapter.count('other.example'), 2);
+        expect(adapter.count(_latestUrl), 1);
+      },
+    );
   });
 
   group('downloadUpdateFile', () {
@@ -450,6 +591,76 @@ void main() {
       expect(await File(target).readAsString(), 'apk-bytes');
       expect(await File('$target.tmp').exists(), isFalse);
     });
+
+    for (final corrupt in [false, true]) {
+      test(
+        corrupt
+            ? 'a corrupt partial from a mirror is recovered from scratch'
+            : 'a faster mirror is tried first and GitHub resumes its failed download',
+        () async {
+          const complete = 'apk-bytes';
+          final head = corrupt ? 'bad-' : 'apk-';
+          final digest = _updateDigest(complete);
+          final origin = Uri.parse(
+            'https://github.com/$repository/releases/download/v1.0.0/app.apk',
+          );
+          final adapter = _UpdateAdapter((options) async {
+            final range = options.headers[HttpHeaders.rangeHeader];
+            final mirror = options.uri.host == 'cdn.example';
+            if (range == 'bytes=0-8') {
+              if (!mirror) {
+                await Future<void>.delayed(const Duration(milliseconds: 30));
+              }
+              return _updateResponse(
+                complete,
+                status: 206,
+                range: 'bytes 0-8/9',
+              );
+            }
+            if (mirror) {
+              expect(options.uri.path, '/releases/v1.0.0/$digest/app.apk');
+              expect(range, isNull);
+              return ResponseBody.fromString(
+                head,
+                200,
+                headers: {
+                  HttpHeaders.contentLengthHeader: ['9'],
+                  HttpHeaders.etagHeader: ['"mirror-etag"'],
+                },
+              );
+            }
+            if (range == null) {
+              expect(corrupt, isTrue);
+              return _updateResponse(complete);
+            }
+            expect(range, 'bytes=4-');
+            expect(options.headers[HttpHeaders.ifRangeHeader], isNull);
+            return _updateResponse('bytes', status: 206, range: 'bytes 4-8/9');
+          });
+          final client = Request(mirrorUrls: 'https://cdn.example')
+            ..updateDownloadAdapter = adapter;
+          final target = '${directory.path}/update-v1.apk';
+
+          final error = await client.downloadUpdateFile(
+            origin,
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            useMirrors: true,
+            expectedSha256: digest,
+            expectedSize: complete.length,
+          );
+          expect(error, isNull);
+          expect(await File(target).readAsString(), complete);
+          expect(adapter.requests.skip(2).map((request) => request.uri.host), [
+            'cdn.example',
+            'github.com',
+            if (corrupt) 'github.com',
+          ]);
+        },
+      );
+    }
 
     test('creates the destination directory without resume opt-in', () async {
       final target = '${directory.path}/new/cache/update-v1.apk';

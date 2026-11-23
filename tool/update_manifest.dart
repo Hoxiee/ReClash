@@ -9,7 +9,7 @@ const _usage = '''
 Usage:
   dart run tool/update_manifest.dart keygen --out <file>
   dart run tool/update_manifest.dart sign --tag <tag> --notes <file> --dist <dir> --base-url <url> [--prerelease] [--out <file>]
-  dart run tool/update_manifest.dart verify <manifest-file> --key <base64-public-key>...
+  dart run tool/update_manifest.dart verify <manifest-file> [--key <base64-public-key>...]
 
 sign reads the base64 Ed25519 seed from UPDATE_MANIFEST_KEY.''';
 
@@ -200,8 +200,7 @@ Future<int> _verify(_Options options) async {
   if (options.positional.length != 1) {
     throw const _UsageError('Expected one manifest file');
   }
-  final keys = options.values['key'];
-  if (keys == null) throw const _UsageError('Missing --key');
+  final keys = options.values['key'] ?? updateManifestKeys;
   try {
     final releases = await parseUpdateManifest(
       File(options.positional.single).readAsBytesSync(),

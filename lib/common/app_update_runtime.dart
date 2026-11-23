@@ -28,8 +28,17 @@ class AppUpdateRuntime {
 
   DateTime now() => DateTime.now();
 
-  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) =>
-      request.checkForUpdate(channel: channel, mirror: mirror);
+  Duration get checkInterval => request.updateCheckInterval;
+
+  Future<AppUpdateRelease?> check(
+    UpdateChannel channel, {
+    Uri? mirror,
+    bool preferMirror = false,
+  }) => request.checkForUpdate(
+    channel: channel,
+    mirror: mirror,
+    preferMirror: preferMirror,
+  );
 
   Future<Directory> directory() async {
     final value = Directory(join(await appPath.homeDirPath, 'app-updates'));
@@ -74,12 +83,14 @@ class AppUpdateRuntime {
     required ProgressCallback onProgress,
     required String sha256,
     int? size,
+    bool useMirrors = false,
   }) => request.downloadUpdateFile(
     uri,
     path,
     cancelToken: cancelToken,
     onProgress: onProgress,
     resume: true,
+    useMirrors: useMirrors,
     expectedSha256: sha256,
     expectedSize: size,
   );

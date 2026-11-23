@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/package.dart';
 import 'package:reclash/enum/enum.dart';
+
 import 'update_manifest.dart';
 import 'update_summary.dart';
 
@@ -18,6 +19,8 @@ const _releaseResponseLimit = 8 * 1024 * 1024;
 const _releaseHistorySize = 30;
 const _isolateDecodeThreshold = 50 * 1024;
 const mirrorUpdateSourceId = 'mirror';
+const officialUpdateSourceId = 'cdn';
+const updateMirrorUrls = String.fromEnvironment('UPDATE_MIRROR_URLS');
 
 abstract interface class AppUpdateSource {
   String get id;
@@ -126,6 +129,36 @@ Uri _gitHubReleasePage(String tag) => Uri(
   host: 'github.com',
   pathSegments: [...repository.split('/'), 'releases', 'tag', tag],
 );
+
+Uri _gitHubAssetUri(String tag, String name) =>
+    Uri.https('github.com', '/$repository/releases/download/$tag/$name');
+
+List<Uri> parseUpdateMirrorUrls(String value) => [
+  for (final url in value.split(','))
+    if (Uri.tryParse(url.trim()) case final uri?
+        when uri.isScheme('https') &&
+            uri.host.isNotEmpty &&
+            uri.userInfo.isEmpty &&
+            !uri.hasQuery &&
+            !uri.hasFragment)
+      uri.replace(path: '${uri.path.replaceFirst(RegExp(r'/+$'), '')}/'),
+];
+
+List<Uri> updateDownloadUris(Uri origin, String digest, List<Uri> mirrors) {
+  final segments = origin.pathSegments;
+  if (segments.length != 6 ||
+      tryParseAppVersion(segments[4]) == null ||
+      origin != _gitHubAssetUri(segments[4], segments[5]) ||
+      !RegExp(r'^[0-9A-Za-z._+-]+$').hasMatch(segments[5])) {
+    return [origin];
+  }
+  final tag = segments[4];
+  final name = Uri.encodeComponent(segments[5]);
+  return {
+    origin,
+    for (final mirror in mirrors) mirror.resolve('releases/$tag/$digest/$name'),
+  }.toList();
+}
 
 Uri _httpsAssetUri(String url) {
   final uri = Uri.tryParse(url);
@@ -284,12 +317,15 @@ class MirrorUpdateSource implements AppUpdateSource {
       throw const UpdateManifestException('not https');
     }
     final keys = this.keys;
+    final official = id == officialUpdateSourceId;
     return _cache.get(
       _dio,
       manifest,
       limit: updateManifestLimit,
-      parse: (bytes) =>
-          Isolate.run(() => parseUpdateManifest(bytes, keys: keys)),
+      parse: (bytes) => Isolate.run(() async {
+        final releases = await parseUpdateManifest(bytes, keys: keys);
+        return official ? _officialReleases(releases) : releases;
+      }),
     );
   }
 
@@ -298,6 +334,64 @@ class MirrorUpdateSource implements AppUpdateSource {
 
   @override
   Uri assetUri(String url) => _httpsAssetUri(url);
+}
+
+class OfficialUpdateSource extends MirrorUpdateSource {
+  OfficialUpdateSource(
+    Dio dio,
+    Uri base,
+    UpdateResponseCache cache, {
+    super.keys,
+  }) : super(dio, base.resolve(updateManifestFileName), cache);
+
+  @override
+  String get id => officialUpdateSourceId;
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchReleases({
+    required UpdateChannel channel,
+    required String installedVersion,
+  }) async {
+    final releases = await super.fetchReleases(
+      channel: channel,
+      installedVersion: installedVersion,
+    );
+    if (channel == UpdateChannel.release &&
+        releases.every(
+          (release) => isPrereleaseRelease(
+            tag: release['tag_name'] as String,
+            flaggedPrerelease: release['prerelease'] == true,
+          ),
+        )) {
+      throw const UpdateManifestException('no stable release in catalog');
+    }
+    return releases;
+  }
+}
+
+List<Map<String, dynamic>> _officialReleases(
+  List<Map<String, dynamic>> releases,
+) {
+  if (releases.isEmpty) {
+    throw const UpdateManifestException('empty release catalog');
+  }
+  return [
+    for (final release in releases)
+      {
+        ...release,
+        'assets': [
+          for (final asset
+              in (release['assets'] as List).cast<Map<String, dynamic>>())
+            {
+              ...asset,
+              'browser_download_url': _gitHubAssetUri(
+                release['tag_name'] as String,
+                asset['name'] as String,
+              ).toString(),
+            },
+        ],
+      },
+  ];
 }
 
 UpdateChannel defaultUpdateChannel({required bool isPreBuild}) =>

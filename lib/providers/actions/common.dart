@@ -138,7 +138,7 @@ class CommonAction extends _$CommonAction {
 
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
-    await ref.read(appUpdateActionProvider.notifier).check(automatic: true);
+    await ref.read(appUpdateActionProvider.notifier).checkOnEntry();
     return ref.read(appUpdateActionProvider).hasUpdate;
   }
 

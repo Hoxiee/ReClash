@@ -114,6 +114,7 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   AppUpdateRelease? available;
   Exception? checkFailure;
   Uri? checkedMirror;
+  bool checkedPreferMirror = false;
   DateTime clock = DateTime(2026);
   ApkInstallStatus nativeStatus = ApkInstallStatus.installing;
   Future<String?> Function(String, CancelToken, ProgressCallback)?
@@ -152,8 +153,13 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   Future<bool> windowHidden() async => hidden;
 
   @override
-  Future<AppUpdateRelease?> check(UpdateChannel channel, {Uri? mirror}) async {
+  Future<AppUpdateRelease?> check(
+    UpdateChannel channel, {
+    Uri? mirror,
+    bool preferMirror = false,
+  }) async {
     checkedMirror = mirror;
+    checkedPreferMirror = preferMirror;
     if (checkFailure case final error?) throw error;
     return available;
   }
@@ -189,6 +195,7 @@ class TestUpdateRuntime extends AppUpdateRuntime {
     required ProgressCallback onProgress,
     required String sha256,
     int? size,
+    bool useMirrors = false,
   }) async {
     downloads++;
     if (downloadOperation case final operation?) {

@@ -66,6 +66,9 @@ jobs:
       - name: Test Telegram release publishing
         run: python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py
 
+      - name: Test update mirror publishing
+        run: python3 -I -m unittest discover -s test/tool -p publish_update_mirror_test.py
+
       - name: Test git hooks
         run: bash tool/hooks/test.sh
 
@@ -656,6 +659,7 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
           RECLASH_MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
           RECLASH_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          UPDATE_MIRROR_URLS: ${{ vars.UPDATE_MIRROR_URLS }}
         run: dart setup.dart ${{ matrix.platform }} --no-prepare ${{ matrix.platform == 'macos' && format('--arch {0}', matrix.arch) || '' }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
       - name: Upload
@@ -902,6 +906,7 @@ jobs:
             sort -z | xargs -0 sha256sum > SHA256SUMS
 
       - name: Release
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           files: ./dist/*
@@ -989,3 +994,20 @@ jobs:
           TAG: ${{ github.ref_name }}
           TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID || '@ReClashApp' }}
         run: python3 -I release_telegram.py
+
+      - name: Publish signed update catalog and installers to R2
+        if: always() && steps.release.outcome == 'success' && vars.UPDATE_R2_BUCKET != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          UPDATE_R2_BUCKET: ${{ vars.UPDATE_R2_BUCKET }}
+          UPDATE_R2_ENDPOINT: ${{ vars.UPDATE_R2_ENDPOINT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.UPDATE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.UPDATE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          dart run tool/update_manifest.dart verify dist/update-manifest.json
+          published_at=$(gh release view "$TAG" --json publishedAt --jq .publishedAt)
+          UPDATE_PUBLISHED_AT="$published_at" python3 -I tool/publish_update_mirror.py dist

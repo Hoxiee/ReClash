@@ -111,8 +111,8 @@ reclash-update: https://updates.example.net/update-manifest.json
 
 A `url` that counts only as `https`. It names a provider-hosted copy of ReClash's signed update manifest and is read from the active profile's subscription response.
 
-- With the header set, ReClash asks the mirror instead of GitHub. GitHub is used only if the mirror fails: a network error, an invalid manifest or no entry that verifies.
-- A mirror that answers with no newer release means "no update". The provider controls when a release is offered.
+- By default ReClash checks the signed official catalog, then GitHub if the catalog fails. The provider's mirror is a fallback when the official sources fail.
+- Set [`updates.prefer-mirror: true`](manifest.md#updates) in the hosted provider config to check the provider's mirror first. In that order, a valid mirror response with no newer release means "no update". The official sources are used if the mirror fails.
 - The app picks its channel (stable or pre-release) and its platform asset from the entries itself. Asset URLs must be `https`.
 - A mirror is polled cheaply: ReClash sends `If-None-Match` and `If-Modified-Since`, so a static host that answers `304` costs nothing. Serve the file with `ETag` or `Last-Modified`.
 
@@ -134,7 +134,7 @@ Every ReClash release publishes `update-manifest.json` as a release asset:
 }
 ```
 
-An Ed25519 signature, made with a key ReClash holds and checked against public keys built into the app, covers the tag, the channel, the notes and each asset's `name`, `size` and `sha256`. It does not cover the URLs. A mirror may therefore rewrite `url` fields and combine entries of several manifests, such as the latest stable and the latest pre-release, into one `releases` array. Any other edit makes the entry fail verification and it is ignored. A tampered or foreign build can never be installed from a mirror.
+An Ed25519 signature, made with a key ReClash holds and checked against public keys built into the app, covers the tag, the channel, the notes and each asset's `name`, `size` and `sha256`. A mirror may rewrite `url` fields and combine entries of several manifests, such as the latest stable and the latest pre-release, into one `releases` array. The optional `published_at` field supplies the display date. The app ignores entries whose signed fields have changed.
 
 ```sh
 # Point every asset at the mirror
@@ -148,7 +148,9 @@ Maintainers with the repository can verify a file: `dart run tool/update_manifes
 
 ### Check timing
 
-ReClash checks at launch, every hour while running, and when the app returns to the foreground after an hour. After a failure it retries after 2, 5, 15 and 30 minutes, and right away when the VPN connects after a failed check.
+ReClash checks at launch and on return to the foreground. The minimum gap after a successful check is 15 minutes with a built-in release catalog and one hour without it. After a failure, the next foreground visit can retry after a gap of 2, 5, 15 or 30 minutes, and connecting the VPN can retry right away. With a built-in catalog, fallback checks contact GitHub at most once per hour per channel.
+
+When the same installer is available from GitHub and a built-in mirror, ReClash times a small download from each source. It starts with the fastest source, can switch on failure, and verifies the SHA-256 before installation.
 
 ## Device status
 

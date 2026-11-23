@@ -156,6 +156,7 @@ Future<Map<String, dynamic>?> _verifiedRelease(
       'tag_name': tag,
       'prerelease': prerelease,
       'body': notes,
+      if (entry case {'published_at': final String date}) 'published_at': date,
       'assets': [
         for (final (:asset, :url) in assets)
           {

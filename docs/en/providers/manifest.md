@@ -298,6 +298,18 @@ settings:
   close-connections: true
 ```
 
+### Updates
+
+The optional `updates.prefer-mirror` boolean puts the provider's [`reclash-update` mirror](headers.md#update-mirror) ahead of the official release sources.
+
+```yaml
+version: 1
+updates:
+  prefer-mirror: true
+```
+
+The subscription response still supplies the mirror URL. With `false` or the field omitted, ReClash tries the official sources first and uses the provider mirror only if those sources fail.
+
 ### Policy
 
 `policy` sets limits the user cannot lift. Every key is optional; the default leaves the user free. Details and the body side of each limit are in [Safety policy](policy.md).

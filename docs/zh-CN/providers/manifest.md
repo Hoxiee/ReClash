@@ -298,6 +298,18 @@ settings:
   close-connections: true
 ```
 
+### 应用更新
+
+可选布尔值 `updates.prefer-mirror` 让 ReClash 在官方发布源之前检查[`reclash-update` 指定的提供商镜像](headers.md#update-mirror)。
+
+```yaml
+version: 1
+updates:
+  prefer-mirror: true
+```
+
+订阅响应提供镜像地址。如果省略该设置或将其设为 `false`，ReClash 会先检查官方发布源，只有在这些来源均不可用时才尝试提供商镜像。
+
 ### Policy
 
 `policy` 设置用户无法解除的限制。每个键都是可选的；默认让用户自由选择。详情及各限制在正文一侧的写法见[安全策略](policy.md)。

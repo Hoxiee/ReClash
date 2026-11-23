@@ -1,7 +1,6 @@
 part of '../action.dart';
 
 const _pendingUpdateInstallFile = 'pending-install.json';
-const _updateCheckInterval = Duration(hours: 1);
 const _updateRetryDelays = [
   Duration(minutes: 2),
   Duration(minutes: 5),
@@ -19,7 +18,6 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   Future<void> _statusTail = Future.value();
   StreamSubscription<bool>? _wifiSubscription;
   StreamSubscription<ApkInstallStatus>? _installSubscription;
-  Timer? _checkTimer;
   Timer? _desktopApplyTimer;
   bool _resumeProxy = false;
   _PendingUpdate? _pending;
@@ -33,8 +31,6 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   bool _observerAttached = false;
   bool _installWhenReady = false;
   bool _promptOnConfirmation = false;
-  bool _mirrorChanged = false;
-  DateTime? _checkedAt;
   DateTime? _attemptedAt;
   int _checkFailures = 0;
   int _revision = 0;
@@ -57,27 +53,17 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           previous?.autoCheckUpdate != next.autoCheckUpdate) {
         unawaited(_applyPolicy());
       }
-      if (previous?.autoCheckUpdate != next.autoCheckUpdate) {
-        _scheduleCheck();
-        if (next.autoCheckUpdate) _checkIfDue();
+      if (previous?.autoCheckUpdate != next.autoCheckUpdate &&
+          next.autoCheckUpdate &&
+          ref.read(initProvider)) {
+        unawaited(checkOnEntry());
       }
     });
     ref.listen(isStartProvider, (_, running) {
       if (!running) {
         unawaited(_tryAutomaticInstall());
-      } else if (_checkFailures > 0) {
-        _checkIfDue(retryNow: true);
-      }
-    });
-    ref.listen(providerHintsProvider.select((hints) => hints?.updateMirror), (
-      previous,
-      next,
-    ) {
-      if (previous == next || _attemptedAt == null && !_checking) return;
-      if (_checking) {
-        _mirrorChanged = true;
-      } else {
-        unawaited(check(automatic: true));
+      } else if (_checkFailures > 0 && ref.read(initProvider)) {
+        unawaited(checkOnEntry(retryNow: true));
       }
     });
     ref.onDispose(() {
@@ -85,7 +71,6 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       _downloadToken?.cancel();
       unawaited(_wifiSubscription?.cancel());
       unawaited(_installSubscription?.cancel());
-      _checkTimer?.cancel();
       _desktopApplyTimer?.cancel();
       if (_observerAttached) WidgetsBinding.instance.removeObserver(this);
     });
@@ -94,7 +79,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   Future<void> _afterReady() async {
     if (!ref.mounted || _restoring) return;
-    if (_checkTimer == null && !_checking) _scheduleCheck();
+    _observeLifecycle();
     if (_resumeProxy) {
       _resumeProxy = false;
       if (!ref.read(isStartProvider) && !ref.read(appSettingProvider).autoRun) {
@@ -111,7 +96,6 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         state.busy ||
         _installing ||
         (_pending != null && state.hasUpdate && !_supersedable)) {
-      if (automatic) _scheduleCheck(_updateCheckInterval);
       return;
     }
     final setting = ref.read(appSettingProvider);
@@ -123,12 +107,15 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       state = const AppUpdateState(phase: UpdatePhase.checking);
     }
     try {
+      final hints = await readProviderUpdateHints(ref);
+      if (!_current(revision)) return;
       final release = await _runtime.check(
         effectiveUpdateChannel(
           configured: setting.updateChannel,
           isPreBuild: globalState.isPre,
         ),
-        mirror: ref.read(providerHintsProvider)?.updateMirror,
+        mirror: hints?.updateMirror,
+        preferMirror: hints?.config?.preferUpdateMirror ?? false,
       );
       answered = true;
       if (!_current(revision)) return;
@@ -153,75 +140,32 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       }
     } finally {
       _checking = false;
-      if (ref.mounted) _recordCheck(answered: answered);
+      if (ref.mounted) {
+        _attemptedAt = _runtime.now();
+        _checkFailures = answered ? 0 : _checkFailures + 1;
+      }
     }
   }
 
-  void _recordCheck({required bool answered}) {
-    final now = _runtime.now();
-    _attemptedAt = now;
-    if (answered) {
-      _checkedAt = now;
-      _checkFailures = 0;
-    } else {
-      _checkFailures++;
-    }
-    _scheduleCheck();
-    if (_mirrorChanged) {
-      _mirrorChanged = false;
-      unawaited(check(automatic: true));
-    }
-  }
-
-  Duration get _nextCheckDelay {
-    if (_checkFailures > 0) {
-      return _checkFailures <= _updateRetryDelays.length
-          ? _updateRetryDelays[_checkFailures - 1]
-          : _updateCheckInterval;
-    }
-    final checkedAt = _checkedAt;
-    if (checkedAt == null) return _updateRetryDelays.first;
-    final remaining =
-        _updateCheckInterval - _runtime.now().difference(checkedAt);
-    return remaining < _updateRetryDelays.first
-        ? _updateRetryDelays.first
-        : remaining;
-  }
-
-  void _scheduleCheck([Duration? delay]) {
-    _checkTimer?.cancel();
-    _checkTimer = null;
-    if (!ref.mounted ||
-        !ref.read(initProvider) ||
-        !ref.read(appSettingProvider).autoCheckUpdate) {
-      return;
-    }
-    _checkTimer = Timer(delay ?? _nextCheckDelay, () {
-      _checkTimer = null;
-      if (ref.mounted) unawaited(check(automatic: true));
-    });
-  }
-
-  /// Timers run on the monotonic clock, which stops while a phone sleeps, so
-  /// a return to the app compares wall-clock time instead.
-  void _checkIfDue({bool retryNow = false}) {
+  Future<void> checkOnEntry({bool retryNow = false}) async {
     if (!ref.mounted ||
         _checking ||
-        !ref.read(initProvider) ||
         !ref.read(appSettingProvider).autoCheckUpdate) {
       return;
     }
-    final now = _runtime.now();
-    final checkedAt = _checkedAt;
     final attemptedAt = _attemptedAt;
-    final due =
-        attemptedAt == null ||
-        (_checkFailures > 0
-            ? retryNow ||
-                  now.difference(attemptedAt) >= _updateRetryDelays.first
-            : checkedAt == null ||
-                  now.difference(checkedAt) >= _updateCheckInterval);
-    if (due) unawaited(check(automatic: true));
+    final failed = _checkFailures > 0;
+    final cooldown = failed
+        ? _updateRetryDelays[(_checkFailures - 1).clamp(
+            0,
+            _updateRetryDelays.length - 1,
+          )]
+        : _runtime.checkInterval;
+    if (attemptedAt == null ||
+        failed && retryNow ||
+        _runtime.now().difference(attemptedAt) >= cooldown) {
+      await check(automatic: true);
+    }
   }
 
   Future<void> offer(AppUpdateRelease release, {bool automatic = false}) async {
@@ -424,6 +368,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
           cancelToken: cancel,
           sha256: asset.sha256!,
           size: asset.size,
+          useMirrors: release.source.id != mirrorUpdateSourceId,
           onProgress: (received, total) {
             if (!ref.mounted || revision != _revision || cancel.isCancelled) {
               return;
@@ -435,7 +380,7 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
               return;
             }
             final seconds = (elapsed - lastEmit).inMicroseconds / 1000000;
-            final speed = seconds > 0 && lastBytes > 0
+            final speed = seconds > 0 && lastBytes > 0 && received >= lastBytes
                 ? (received - lastBytes) / seconds
                 : 0.0;
             lastEmit = elapsed;
@@ -944,16 +889,19 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         : setting.autoDownloadUpdate;
   }
 
+  void _observeLifecycle() {
+    if (_observerAttached) return;
+    WidgetsBinding.instance.addObserver(this);
+    _observerAttached = true;
+  }
+
   void _attachObservers() {
     if (_runtime.desktop) {
       _desktopApplyTimer ??= Timer.periodic(_desktopApplyInterval, (_) {
         if (ref.mounted) unawaited(_tryAutomaticInstall());
       });
     }
-    if (!_observerAttached) {
-      WidgetsBinding.instance.addObserver(this);
-      _observerAttached = true;
-    }
+    _observeLifecycle();
     _installSubscription ??= _runtime.installChanges.listen(
       (status) {
         unawaited(_queueInstallStatus(status));
@@ -1056,9 +1004,10 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
   }
 
   Future<void> _onResume() async {
-    _checkIfDue();
     try {
-      if (!ref.read(initProvider) || _installing) return;
+      if (!ref.read(initProvider)) return;
+      unawaited(checkOnEntry());
+      if (_installing) return;
       if (_permissionOpened) {
         await _resumePermission();
       } else if (_pending != null &&

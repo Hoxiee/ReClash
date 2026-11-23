@@ -25,6 +25,7 @@ class ProviderConfig {
     this.seasonal,
     this.widgets,
     this.fields = const {},
+    this.preferUpdateMirror = false,
     this.routing,
     this.chains = const [],
   });
@@ -46,6 +47,7 @@ class ProviderConfig {
   /// The valid manifest sections as snapshot metadata fields, keyed by
   /// registry path; text is resolved for the locale given to the parser.
   final Map<String, Object?> fields;
+  final bool preferUpdateMirror;
 
   /// The `routing` section when its shape is valid. The Core reads it from
   /// the stored source, so only its presence matters here.
@@ -98,6 +100,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
     var cards = const <ProviderCard>[];
     var labels = const <String, List<ProviderPowerLabel>>{};
     final fields = <String, Object?>{};
+    var preferUpdateMirror = false;
     Map<String, Object?>? routing;
     var chains = const <ProviderChain>[];
     for (final MapEntry(:key, :value) in plain.entries) {
@@ -143,6 +146,8 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         case 'routing':
           routing = _routing(value);
           if (routing == null) warnings.add('Invalid routing section');
+        case 'updates':
+          preferUpdateMirror = _preferUpdateMirror(value, warnings);
         case 'chains':
           final parsed = parseProviderChains(value, warnings);
           if (parsed == null) {
@@ -166,6 +171,7 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
         seasonal: seasonal,
         widgets: widgets == null ? null : List.unmodifiable(widgets),
         fields: Map.unmodifiable(fields),
+        preferUpdateMirror: preferUpdateMirror,
         routing: routing,
         chains: chains,
       ),
@@ -179,6 +185,21 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
       warnings: List.unmodifiable([...warnings, 'Config could not be read']),
     );
   }
+}
+
+bool _preferUpdateMirror(Object? value, List<String> warnings) {
+  if (value is! Map<String, Object?>) {
+    warnings.add('Invalid updates section: expected a map');
+    return false;
+  }
+  for (final key in value.keys) {
+    if (key != 'prefer-mirror') warnings.add('Unknown key $key in updates');
+  }
+  final prefer = value['prefer-mirror'];
+  if (value.containsKey('prefer-mirror') && prefer is! bool) {
+    warnings.add('Invalid updates section: prefer-mirror must be a boolean');
+  }
+  return prefer == true;
 }
 
 /// package:yaml resolves an alias to the node instance of its anchor, so a
