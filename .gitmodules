@@ -1,4 +1,7 @@
 [submodule "core/mihomo"]
 	path = core/mihomo
-	url = https://github.com/Hoxiee/mihomo.git
-	branch = ReClash
+	url = https://github.com/MetaCubeX/mihomo.git
+[submodule "core/mihomo-patches"]
+	path = core/mihomo-patches
+	url = https://github.com/Hoxiee/mihomo-patch-core.git
+	branch = main
