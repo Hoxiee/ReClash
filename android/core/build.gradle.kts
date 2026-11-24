@@ -61,20 +61,34 @@ val goExecutablePath =
 
 val dartExecutablePath =
     providers.provider {
-        val name = if (isWindows) "dart.bat" else "dart"
+        val name = if (isWindows) "dart.exe" else "dart"
         val home = System.getProperty("user.home")
-        val flutterRoot = System.getenv("FLUTTER_ROOT")
-        val searchPath =
-            System.getenv("PATH").orEmpty().split(File.pathSeparator) +
-                listOfNotNull(
-                    flutterRoot?.let { File(it, "bin").path },
-                    "/opt/homebrew/bin",
-                    "/usr/local/bin",
-                    "$home/flutter/bin",
-                )
-        searchPath
-            .filter { it.isNotEmpty() }
-            .map { File(it, name) }
+        val localProperties = rootProject.file("local.properties")
+        val localFlutterSdk =
+            if (localProperties.exists()) {
+                localProperties
+                    .readLines()
+                    .firstOrNull { it.startsWith("flutter.sdk=") }
+                    ?.substringAfter('=')
+                    ?.trim()
+            } else {
+                null
+            }
+        val flutterRoot = System.getenv("FLUTTER_ROOT") ?: localFlutterSdk
+        val sdkDart = flutterRoot?.let { File(File(it, "bin/cache/dart-sdk/bin"), name) }
+        val candidates =
+            listOfNotNull(sdkDart) +
+                (System.getenv("PATH").orEmpty().split(File.pathSeparator) +
+                        listOfNotNull(
+                            flutterRoot?.let { File(it, "bin").path },
+                            "/opt/homebrew/bin",
+                            "/usr/local/bin",
+                            "$home/flutter/bin",
+                        ))
+                    .filter { it.isNotEmpty() }
+                    .map { File(it, name) }
+                    .plus(listOfNotNull(flutterRoot?.let { File(File(it, "bin"), "dart.bat") }))
+        candidates
             .firstOrNull { it.canExecute() }
             ?.path
             ?: throw GradleException(
