@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
-
 const _profile = 'reclash';
 const _caBundle = 'component/ca/ca-certificates.crt';
 const _assetCa = 'assets/ca/ca-certificates.crt';
@@ -320,7 +318,14 @@ String _generatedStateHash() {
     '--untracked-files=all',
   ], cwd: _target.path).stdout.toString();
   final diff = _git(['diff', '--binary'], cwd: _target.path).stdout.toString();
-  return sha256.convert(utf8.encode('$status\n$diff')).toString();
+  // No package import here: this runs before `flutter pub get` on a fresh
+  // checkout. FNV-1a is enough to detect a changed generated tree.
+  var hash = 0xcbf29ce484222325;
+  for (final byte in utf8.encode('$status\n$diff')) {
+    hash ^= byte;
+    hash = (hash * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF;
+  }
+  return hash.toRadixString(16).padLeft(16, '0');
 }
 
 bool _sameBytes(List<int> a, List<int> b) {
