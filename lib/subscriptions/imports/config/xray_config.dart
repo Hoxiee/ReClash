@@ -215,6 +215,28 @@ class _XrayConversion {
         continue;
       }
       if (proxy == null) continue;
+      final mux = _asMap(outbound['mux']);
+      if (mux != null && mux['enabled'] == true) {
+        if (proxy['type'] == 'vless' &&
+            !(proxy['flow']?.toString().startsWith('xtls-rprx-vision') ??
+                false)) {
+          proxy['mux.cool'] = <String, Object?>{
+            'enabled': true,
+            if (mux['concurrency'] is num)
+              'max-concurrency': (mux['concurrency'] as num).toInt(),
+            if (mux['xudpConcurrency'] is num)
+              'xudp-concurrency': (mux['xudpConcurrency'] as num).toInt(),
+            if ((mux['xudpProxyUDP443'] ?? '').toString().isNotEmpty)
+              'xudp-proxy-udp443': mux['xudpProxyUDP443'].toString(),
+          };
+        } else {
+          proxy['x-import-losses'] = true;
+        }
+      }
+      if (_present(outbound['targetStrategy']) ||
+          _present(outbound['sendThrough'])) {
+        proxy['x-import-losses'] = true;
+      }
       if (proxy.remove('x-import-losses') == true) _otherLosses = true;
       final transport = proxy.remove('x-unsupported-transport')?.toString();
       if (transport != null) {

@@ -676,6 +676,45 @@ void main() {
       });
     });
 
+    test('maps Xray mux to mux.cool, except with Vision', () {
+      final plain = _vless('edge-a', 0);
+      final users =
+          ((((plain['settings']! as Map<String, Object?>)['vnext']! as List)
+                              .first
+                          as Map<String, Object?>)['users']!
+                      as List)
+                  .first
+              as Map<String, Object?>;
+      users.remove('flow');
+      plain['mux'] = {
+        'enabled': true,
+        'concurrency': 8,
+        'xudpConcurrency': 16,
+        'xudpProxyUDP443': 'allow',
+      };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [plain],
+        }),
+        'edge-a',
+      );
+      expect(proxy['mux.cool'], {
+        'enabled': true,
+        'max-concurrency': 8,
+        'xudp-concurrency': 16,
+        'xudp-proxy-udp443': 'allow',
+      });
+
+      final vision = _vless('edge-b', 1);
+      vision['mux'] = {'enabled': true, 'concurrency': 8};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [vision],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      expect(result.config, isNot(contains('mux.cool')));
+    });
+
     test('maps stream finalmask on VLESS and Trojan only', () {
       final raw = _vless('edge-a', 0);
       (raw['streamSettings']! as Map<String, Object?>)['finalmask'] = {

@@ -21,7 +21,7 @@ This note records the import entrypoints and route/error rules shared by the pro
 
 - The local importer accepts one Xray object or an array; Happ arrays and Incy full configs (`inbounds` + `outbounds`) share the same path. `inbounds`, foreign DNS and unrepresentable routing are reported, not passed to Core.
 - Xray 26 client fields map onto Core options: REALITY `publicKey`/`password`, `mldsa65Verify` (`pqv`), TLS `pinnedPeerCertSha256` (`pcs`), `verifyPeerCertByName` (`vcn`), `echConfigList` (`ech`), per-stream `finalmask` (`fm`), fragments, VLESS encryption, VMess KCP, wireguard MTU/reserved, and XHTTP session parameters (`sit`/`sil`).
-- `spiderX` has no Core equivalent and is a reported loss. Incy body directives (`://autorouting/...`, `#announce`, profile metadata) are reported as losses; they are not silently treated as nodes. `mux`, unsupported transports and unknown outbound protocols are skipped or reported through the existing loss review.
+- `spiderX` has no Core equivalent and is a reported loss. Incy body directives (`://autorouting/...`, `#announce`, profile metadata) are reported as losses; they are not silently treated as nodes. Xray `mux` on VLESS becomes `mux.cool`; mux with Vision or on another protocol is a loss. Unsupported transports and unknown outbound protocols are skipped or reported through the existing loss review.
 - Add a regression when a new Xray field has a Core counterpart; keep URI and JSON paths on the same mapping.
 
 ## Routing and retry
