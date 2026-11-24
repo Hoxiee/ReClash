@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:yaml/yaml.dart';
 
 Uint8List _bytes(String value) => Uint8List.fromList(utf8.encode(value));
 
@@ -29,7 +30,9 @@ void main() {
       const source = 'ss://YWVzLTI1Ni1nY206cGFzcw==@example.com:443#edge';
       final result = convertSubscriptionImport(_bytes(source));
       expect(result.format, SubscriptionFormat.shareLinks);
-      expect(utf8.decode(result.bytes), contains('type: "ss"'));
+      final doc = loadYaml(utf8.decode(result.bytes)) as YamlMap;
+      final proxy = (doc['proxies'] as YamlList).single as YamlMap;
+      expect(proxy['type'], 'ss');
       expect(result.summary.nodes, 1);
       expect(result.summary.hasLosses, isFalse);
     });
@@ -182,9 +185,11 @@ void main() {
       expect(result.format, SubscriptionFormat.xray);
       expect(result.summary.nodes, 1);
       expect(result.summary.ignoredSections, ['inbounds', 'dns']);
-      final text = utf8.decode(result.bytes);
-      expect(text, contains('public-key: "reality-key"'));
-      expect(text, contains('mldsa65-verify: "mldsa-key"'));
+      final doc = loadYaml(utf8.decode(result.bytes)) as YamlMap;
+      final proxy = (doc['proxies'] as YamlList).single as YamlMap;
+      final reality = proxy['reality-opts'] as YamlMap;
+      expect(reality['public-key'], 'reality-key');
+      expect(reality['mldsa65-verify'], 'mldsa-key');
     });
 
     test('converts sing-box nodes and records discarded config sections', () {

@@ -20,11 +20,13 @@ bool isXrayConfigInput(String body) {
 
 bool isXrayConfigValue(Object? decoded) => _configsOf(decoded).isNotEmpty;
 
-class _XrayConfigResult implements ConvertedSubscription, LossyConversion {
+class _XrayConfigResult
+    implements ConvertedSubscription, LossyConversion, SecurityLossyConversion {
   const _XrayConfigResult({
     required this.config,
     this.skipped = const [],
     this.hasOtherLosses = false,
+    this.hasSecurityLoss = false,
   });
 
   @override
@@ -35,6 +37,9 @@ class _XrayConfigResult implements ConvertedSubscription, LossyConversion {
 
   @override
   final bool hasOtherLosses;
+
+  @override
+  final bool hasSecurityLoss;
 }
 
 ConvertedSubscription? tryConvertXrayConfig(String body) =>
@@ -116,6 +121,7 @@ class _XrayConversion {
   final _names = <String, String>{};
   final _groupNames = <_Balancer, String>{};
   var _otherLosses = false;
+  var _securityLosses = false;
 
   ConvertedSubscription? run() {
     for (var index = 0; index < configs.length; index++) {
@@ -162,6 +168,7 @@ class _XrayConversion {
       ),
       skipped: _skipped.values.toList(growable: false),
       hasOtherLosses: _otherLosses,
+      hasSecurityLoss: _securityLosses,
     );
   }
 
@@ -217,15 +224,24 @@ class _XrayConversion {
       if (proxy == null) continue;
       final mux = _asMap(outbound['mux']);
       if (mux != null && mux['enabled'] == true) {
-        if (proxy['type'] == 'vless' &&
+        final concurrency = mux['concurrency'] is num
+            ? (mux['concurrency'] as num).toInt()
+            : null;
+        final xudp = mux['xudpConcurrency'] is num
+            ? (mux['xudpConcurrency'] as num).toInt()
+            : null;
+        if (concurrency != null && concurrency < 0) {
+          // Xray disables Mux entirely for a negative TCP concurrency.
+        } else if (proxy['type'] == 'vless' &&
             !(proxy['flow']?.toString().startsWith('xtls-rprx-vision') ??
                 false)) {
+          if (xudp != null && xudp < 0) {
+            proxy['x-import-losses'] = true;
+          }
           proxy['mux.cool'] = <String, Object?>{
             'enabled': true,
-            if (mux['concurrency'] is num)
-              'max-concurrency': (mux['concurrency'] as num).toInt(),
-            if (mux['xudpConcurrency'] is num)
-              'xudp-concurrency': (mux['xudpConcurrency'] as num).toInt(),
+            'max-concurrency': ?concurrency,
+            if (xudp != null && xudp >= 0) 'xudp-concurrency': xudp,
             if ((mux['xudpProxyUDP443'] ?? '').toString().isNotEmpty)
               'xudp-proxy-udp443': mux['xudpProxyUDP443'].toString(),
           };
@@ -237,6 +253,7 @@ class _XrayConversion {
           _present(outbound['sendThrough'])) {
         proxy['x-import-losses'] = true;
       }
+      if (proxy.remove('x-security-loss') == true) _securityLosses = true;
       if (proxy.remove('x-import-losses') == true) _otherLosses = true;
       final transport = proxy.remove('x-unsupported-transport')?.toString();
       if (transport != null) {
@@ -300,7 +317,7 @@ class _XrayConversion {
       if ((fragment['length'] ?? '').toString().isNotEmpty)
         'length': fragment['length'].toString(),
       if ((fragment['interval'] ?? '').toString().isNotEmpty)
-        'interval': fragment['interval'].toString(),
+        'delay': fragment['interval'].toString(),
       if ((fragment['maxSplit'] ?? '').toString().isNotEmpty)
         'max-split': fragment['maxSplit'].toString(),
     };
@@ -414,7 +431,11 @@ class _XrayConversion {
     for (final rule in rules) {
       if (rule is! Map<String, Object?>) continue;
       final type = rule['type'];
-      if (type == null || type == 'field') plan.rules.add(rule);
+      if (type == null || type == 'field') {
+        plan.rules.add(rule);
+      } else {
+        _otherLosses = true;
+      }
     }
   }
 
@@ -499,7 +520,10 @@ class _XrayConversion {
         if (_isCatchAll(rule)) break;
         final target = _ruleTarget(plan, rule);
         final fields = _rulePredicates(rule);
-        if (target == null || fields == null) continue;
+        if (target == null || fields == null) {
+          _otherLosses = true;
+          continue;
+        }
         for (final line in _ruleLines(fields, target, noResolve)) {
           if (seen.add(line)) result.add(line);
         }
@@ -939,13 +963,20 @@ Map<String, Object?>? _convertVless(
     'uuid': uuid,
     'udp': true,
   };
-  final flow = sanitizeVlessFlow(users['flow']?.toString() ?? '');
-  if (flow != null) proxy['flow'] = flow;
+  final rawFlow = users['flow']?.toString() ?? '';
+  final flow = sanitizeVlessFlow(rawFlow);
+  if (flow != null) {
+    proxy['flow'] = flow;
+  } else if (rawFlow.isNotEmpty) {
+    proxy['x-import-losses'] = true;
+  }
   final encryption = users['encryption']?.toString() ?? '';
-  if (encryption.isNotEmpty &&
-      encryption != 'none' &&
-      isValidVlessEncryption(encryption)) {
-    proxy['encryption'] = encryption;
+  if (encryption.isNotEmpty && encryption != 'none') {
+    if (isValidVlessEncryption(encryption)) {
+      proxy['encryption'] = encryption;
+    } else {
+      proxy['x-import-losses'] = true;
+    }
   }
 
   _applyStreamSettings(
@@ -1030,8 +1061,19 @@ Map<String, Object?>? _convertShadowsocks(
     credentialKey: 'password',
     extraKey: 'method',
   );
-  if (proxy != null && _asMap(outbound['streamSettings'])?.isNotEmpty == true) {
-    proxy['x-import-losses'] = true;
+  final stream = _asMap(outbound['streamSettings']);
+  if (proxy != null && stream != null) {
+    final unsupported = stream.entries.any((entry) {
+      final value = entry.value;
+      return switch (entry.key) {
+        'network' =>
+          value != null && !const {'tcp', 'raw', ''}.contains(value.toString()),
+        'security' =>
+          value != null && !const {'none', ''}.contains(value.toString()),
+        _ => _present(value),
+      };
+    });
+    if (unsupported) proxy['x-import-losses'] = true;
   }
   return proxy;
 }
@@ -1139,6 +1181,7 @@ Map<String, Object?>? _convertWireguardOutbound(
   final (server, port) = split;
 
   final allowedIps = peers?['allowedIPs'] ?? settings['allowedIPs'];
+  final reserved = settings['reserved'] ?? peers?['reserved'];
   final peer = <String, Object?>{
     'server': server,
     'port': port,
@@ -1148,10 +1191,8 @@ Map<String, Object?>? _convertWireguardOutbound(
       'allowed-ips': [for (final entry in allowedIps) entry.toString()]
     else
       'allowed-ips': ['0.0.0.0/0', '::/0'],
-    if (peers?['reserved'] is List && (peers!['reserved'] as List).isNotEmpty)
-      'reserved': [
-        for (final entry in peers['reserved'] as List) _toInt(entry) ?? 0,
-      ],
+    if (reserved is List && reserved.isNotEmpty)
+      'reserved': [for (final entry in reserved) _toInt(entry) ?? 0],
   };
 
   return <String, Object?>{
@@ -1181,8 +1222,10 @@ void _applyStreamSettings(
 }) {
   if (streamSettings is! Map<String, Object?>) return;
 
+  final network = streamSettings['network']?.toString() ?? 'tcp';
   if (applyXraySecurity(proxy, streamSettings, type: type)) {
     proxy['x-import-losses'] = true;
+    proxy['x-security-loss'] = true;
   }
   if (applyXraySockopt(proxy, streamSettings['sockopt'])) {
     proxy['x-import-losses'] = true;
@@ -1194,7 +1237,20 @@ void _applyStreamSettings(
       if (_present(supported.remove('quicParams'))) {
         proxy['x-import-losses'] = true;
       }
-      proxy['finalmask'] = supported;
+      final alpn = proxy['alpn'];
+      final alpnH3 =
+          alpn is List &&
+          alpn.length == 1 &&
+          alpn.single.toString().toLowerCase() == 'h3';
+      final keepUdp =
+          type == 'vless' &&
+          (network == 'xhttp' || network == 'splithttp') &&
+          alpnH3;
+      if (supported['udp'] != null && !keepUdp) {
+        supported.remove('udp');
+        proxy['x-import-losses'] = true;
+      }
+      if (supported.isNotEmpty) proxy['finalmask'] = supported;
     } else {
       proxy['x-import-losses'] = true;
     }
@@ -1205,7 +1261,6 @@ void _applyStreamSettings(
     proxy[xrayServerNameKey(type)] = fallbackSni;
   }
 
-  final network = streamSettings['network']?.toString() ?? 'tcp';
   if (!_applyXrayTransport(proxy, network, streamSettings)) {
     proxy['x-unsupported-transport'] = network;
   }
@@ -1218,7 +1273,9 @@ bool _applyXrayTransport(
 ) {
   switch (network) {
     case 'tcp' || 'raw':
-      final tcp = _asMap(streamSettings['tcpSettings']);
+      final tcp = _asMap(
+        streamSettings['rawSettings'] ?? streamSettings['tcpSettings'],
+      );
       final header = _asMap(tcp?['header']);
       final headerType = header?['type']?.toString() ?? 'none';
       if (headerType == 'http') {
@@ -1260,6 +1317,12 @@ bool _applyXrayTransport(
     case 'ws':
       final ws = _asMap(streamSettings['wsSettings']);
       final headers = _stringHeaders(ws?['headers']);
+      final tls = _asMap(streamSettings['tlsSettings']);
+      final wsHost = (ws?['host'] ?? tls?['serverName'] ?? '').toString();
+      if (wsHost.isNotEmpty &&
+          !headers.keys.any((key) => key.toLowerCase() == 'host')) {
+        headers['Host'] = wsHost;
+      }
       proxy['network'] = 'ws';
       proxy['ws-opts'] = {
         if ((ws?['path'] ?? '').toString().isNotEmpty)
@@ -1302,7 +1365,8 @@ bool _applyXrayTransport(
       proxy['h2-opts'] = {
         if ((h2?['path'] ?? '').toString().isNotEmpty)
           'path': h2!['path'].toString(),
-        if (host is List && host.isNotEmpty) 'host': [host.first.toString()],
+        if (host is List && host.isNotEmpty)
+          'host': [for (final entry in host) entry.toString()],
         if (host is String && host.isNotEmpty) 'host': [host],
       };
       for (final key in const ['method', 'headers']) {
@@ -1312,8 +1376,12 @@ bool _applyXrayTransport(
     case 'httpupgrade':
       final upgrade = _asMap(streamSettings['httpupgradeSettings']);
       final headers = _stringHeaders(upgrade?['headers']);
-      if ((upgrade?['host'] ?? '').toString().isNotEmpty) {
-        headers['Host'] = upgrade!['host'].toString();
+      final tls = _asMap(streamSettings['tlsSettings']);
+      final upgradeHost = (upgrade?['host'] ?? tls?['serverName'] ?? '')
+          .toString();
+      if (upgradeHost.isNotEmpty &&
+          !headers.keys.any((key) => key.toLowerCase() == 'host')) {
+        headers['Host'] = upgradeHost;
       }
       proxy['network'] = 'ws';
       proxy['ws-opts'] = {
@@ -1370,9 +1438,23 @@ bool _applyXrayTransport(
       );
       final options = converted.options;
       final headers = _stringHeaders(xhttp?['headers']);
-      if (headers.isNotEmpty) options['headers'] = headers;
-      for (final key in const ['sessionIDTable', 'sessionIDLength']) {
-        if (_present(xhttp?[key])) options[key] = xhttp![key];
+      final rawExtra = xhttp?['extra'];
+      final extraIsEmpty =
+          rawExtra == null || rawExtra is Map && rawExtra.isEmpty;
+      if (headers.isNotEmpty && extraIsEmpty) {
+        options['headers'] = headers;
+      }
+      final sessionTable = xhttp?['sessionIDTable'];
+      final sessionLength = xhttp?['sessionIDLength'];
+      if (_present(sessionTable) || _present(sessionLength)) {
+        if (xhttpSessionIdsSafe(sessionTable, sessionLength)) {
+          if (_present(sessionTable)) options['session-table'] = sessionTable;
+          if (_present(sessionLength)) {
+            options['session-length'] = sessionLength;
+          }
+        } else {
+          proxy['x-import-losses'] = true;
+        }
       }
       proxy['network'] = 'xhttp';
       proxy['xhttp-opts'] = options;

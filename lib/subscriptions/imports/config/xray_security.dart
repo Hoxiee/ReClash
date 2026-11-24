@@ -19,7 +19,7 @@ bool applyXraySecurity(
     proxy['tls'] = true;
     final options = <String, Object?>{};
     final password = _text(reality?['password']);
-    final publicKey = _text(reality?['publicKey']) ?? password;
+    final publicKey = password ?? _text(reality?['publicKey']);
     if (publicKey != null) options['public-key'] = publicKey;
     final shortId = _text(reality?['shortId']);
     if (shortId != null) options['short-id'] = shortId;

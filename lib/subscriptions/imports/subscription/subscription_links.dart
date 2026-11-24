@@ -11,6 +11,9 @@ import '../routing/skipped_node.dart';
 import '../transport/xhttp.dart';
 import 'extension_catalog.dart';
 
+const maxShareLinkNodes = 20000;
+const maxShareLinkSkips = 2000;
+
 const shareLinkSchemes = [
   'vmess',
   'vless',
@@ -46,6 +49,12 @@ abstract interface class ConvertedSubscription {
 
 abstract interface class LossyConversion implements ConvertedSubscription {
   bool get hasOtherLosses;
+}
+
+/// A conversion that lost something the user's security depends on, such as
+/// a TLS/REALITY check. Approval for ordinary losses must not cover it.
+abstract interface class SecurityLossyConversion {
+  bool get hasSecurityLoss;
 }
 
 class ShareLinksResult implements LossyConversion {
@@ -122,25 +131,45 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
   final seen = {...reservedProxyNames};
+  final nextSuffix = <String, int>{};
   final extensionCounts = <String, int>{};
   var hasOtherLosses = false;
+  var atNodeLimit = false;
 
   void addProxy(Map<String, Object?> proxy) {
-    var name = proxy['name']! as String;
-    if (reservedProxyNames.contains(name)) name = '$name node';
-    var suffix = 2;
-    while (seen.contains(name)) {
-      name = '${proxy['name']} $suffix';
-      suffix++;
+    if (proxies.length >= maxShareLinkNodes) {
+      hasOtherLosses = true;
+      atNodeLimit = true;
+      return;
+    }
+    final original = proxy['name']! as String;
+    var name = reservedProxyNames.contains(original)
+        ? '$original node'
+        : original;
+    if (seen.contains(name)) {
+      var suffix = nextSuffix[original] ?? 2;
+      do {
+        name = '$original $suffix';
+        suffix++;
+      } while (seen.contains(name));
+      nextSuffix[original] = suffix;
     }
     proxy['name'] = name;
     seen.add(name);
     proxies.add(proxy);
   }
 
+  void addSkipped(SkippedNode node) {
+    if (skipped.length >= maxShareLinkSkips) {
+      hasOtherLosses = true;
+      return;
+    }
+    skipped.add(node);
+  }
+
   void skip(String line, String scheme) {
     final hashIdx = line.indexOf('#');
-    skipped.add(
+    addSkipped(
       SkippedNode(
         name: hashIdx >= 0 ? _displayName(line.substring(hashIdx + 1)) : scheme,
         kind: scheme,
@@ -151,6 +180,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
 
   void addFrom(String text) {
     for (final line in text.split(RegExp(r'[\r\n]+'))) {
+      if (atNodeLimit) break;
       final trimmed = line.trim();
       final scheme = _nodeScheme(trimmed);
       if (scheme == null) {
@@ -163,7 +193,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           final (vpnProxies, vpnSkipped) = parseVpnLink(
             normalized.substring('vpn://'.length),
           );
-          skipped.addAll(vpnSkipped);
+          vpnSkipped.forEach(addSkipped);
           vpnProxies.forEach(addProxy);
           if (vpnProxies.isEmpty && vpnSkipped.isEmpty) {
             skip(normalized, scheme);
@@ -189,7 +219,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           if (scheme == 'amneziawg' || scheme == 'awg') hasOtherLosses = true;
         }
       } on _UnsupportedLink catch (error) {
-        skipped.add(error.node);
+        addSkipped(error.node);
       } catch (_) {
         skip(normalized, scheme);
       }
@@ -552,8 +582,19 @@ Map<String, Object?>? _parseVmess(
     );
   }
 
-  final tls = j['tls']?.toString();
-  if (tls == 'tls' || tls == 'reality') {
+  final tls = j['tls']?.toString() ?? '';
+  if (tls == 'reality' ||
+      (tls.isEmpty && (j['pbk']?.toString().isNotEmpty ?? false)) ||
+      (tls.isNotEmpty && tls != 'tls' && tls != 'reality')) {
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name.isEmpty ? server : name,
+        kind: 'reality',
+        reason: SkippedNodeReason.protocol,
+      ),
+    );
+  }
+  if (tls == 'tls') {
     proxy['tls'] = true;
     final sni = j['sni']?.toString();
     if (sni != null && sni.isNotEmpty) proxy['servername'] = sni;
@@ -619,13 +660,20 @@ Map<String, Object?>? _parseVless(
   } else if (security.isNotEmpty && security != 'none') {
     onLoss();
   }
-  final flow = sanitizeVlessFlow(params['flow'] ?? '');
-  if (flow != null) proxy['flow'] = flow;
+  final rawFlow = params['flow'] ?? '';
+  final flow = sanitizeVlessFlow(rawFlow);
+  if (flow != null) {
+    proxy['flow'] = flow;
+  } else if (rawFlow.isNotEmpty) {
+    onLoss();
+  }
   final encryption = params['encryption'] ?? '';
-  if (encryption.isNotEmpty &&
-      encryption != 'none' &&
-      isValidVlessEncryption(encryption)) {
-    proxy['encryption'] = encryption;
+  if (encryption.isNotEmpty && encryption != 'none') {
+    if (isValidVlessEncryption(encryption)) {
+      proxy['encryption'] = encryption;
+    } else {
+      onLoss();
+    }
   }
   _applyTlsExtras(
     proxy,
@@ -638,7 +686,12 @@ Map<String, Object?>? _parseVless(
         params['insecure'] == 'true',
     emulateXray: true,
   );
-  _applyIncySecurity(proxy, params, onLoss: onLoss);
+  _applyIncySecurity(
+    proxy,
+    params,
+    onLoss: onLoss,
+    keepFinalMaskUdp: _xhttpH3(params),
+  );
 
   final network = params['type'] ?? 'tcp';
   final transport = network == 'splithttp' ? 'xhttp' : network;
@@ -1285,8 +1338,12 @@ _splitUserinfoUri(String uri, {bool requireUserinfo = true}) {
   return (server, port);
 }
 
-String _mihomoNetwork(String network) =>
-    network == 'httpupgrade' ? 'ws' : network;
+String _mihomoNetwork(String network) => switch (network) {
+  'httpupgrade' => 'ws',
+  'http' => 'h2',
+  'raw' => 'tcp',
+  _ => network,
+};
 
 const reservedProxyNames = <String>{
   'PROXY',
@@ -1310,9 +1367,7 @@ String sanitizeVmessCipher(String cipher) {
 
 String? sanitizeVlessFlow(String flow) {
   if (flow.isEmpty) return null;
-  if (flow.length >= 16 && flow.substring(0, 16) != _vlessVisionFlow) {
-    return null;
-  }
+  if (flow.length < 16 || !flow.startsWith(_vlessVisionFlow)) return null;
   return flow;
 }
 
@@ -1349,7 +1404,7 @@ void _applyTransport(
       if (serviceName.isNotEmpty) {
         proxy['grpc-opts'] = {'grpc-service-name': serviceName};
       }
-    case 'h2':
+    case 'h2' || 'http':
       proxy['h2-opts'] = {
         if (path.isNotEmpty) 'path': path,
         if (host.isNotEmpty) 'host': [host],
@@ -1419,6 +1474,7 @@ void _applyIncySecurity(
   Map<String, Object?> proxy,
   Map<String, String> params, {
   required void Function() onLoss,
+  bool keepFinalMaskUdp = false,
 }) {
   final pin = params['pcs'] ?? params['pinSHA256'] ?? '';
   if (pin.isNotEmpty) proxy['fingerprint'] = pin;
@@ -1427,17 +1483,26 @@ void _applyIncySecurity(
   final ech = xrayEchOptions(params['ech'] ?? '');
   if (ech != null) proxy['ech-opts'] = ech;
   final finalmask = params['fm'] ?? '';
-  if (finalmask.isNotEmpty) _applyFinalMask(proxy, finalmask, onLoss);
+  if (finalmask.isNotEmpty) {
+    _applyFinalMask(proxy, finalmask, onLoss, keepUdp: keepFinalMaskUdp);
+  }
   if ((params['spx'] ?? '').isNotEmpty) onLoss();
   _applyFragment(proxy, params);
   if ((params['noises'] ?? '').isNotEmpty) onLoss();
+  final mlkem = params['support-x25519mlkem768'];
+  final reality = proxy['reality-opts'];
+  if (mlkem != null && mlkem.isNotEmpty && reality is Map<String, Object?>) {
+    reality['support-x25519mlkem768'] =
+        mlkem == '1' || mlkem.toLowerCase() == 'true';
+  }
 }
 
 void _applyFinalMask(
   Map<String, Object?> proxy,
   String raw,
-  void Function() onLoss,
-) {
+  void Function() onLoss, {
+  required bool keepUdp,
+}) {
   Object? decoded;
   try {
     decoded = jsonDecode(raw);
@@ -1454,8 +1519,23 @@ void _applyFinalMask(
     normalized[entry.key.toString()] = entry.value;
   }
   if (normalized.remove('quicParams') != null) onLoss();
+  if (normalized['udp'] != null && !keepUdp) {
+    normalized.remove('udp');
+    onLoss();
+  }
   if (normalized.isEmpty) return;
   proxy['finalmask'] = normalized;
+}
+
+bool _xhttpH3(Map<String, String> params) {
+  final type = params['type'] ?? '';
+  if (type != 'xhttp' && type != 'splithttp') return false;
+  final alpn = (params['alpn'] ?? '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .where((entry) => entry.isNotEmpty)
+      .toList();
+  return alpn.length == 1 && alpn.single == 'h3';
 }
 
 void _applyFragment(Map<String, Object?> proxy, Map<String, String> params) {
@@ -1473,7 +1553,7 @@ void _applyFragment(Map<String, Object?> proxy, Map<String, String> params) {
   final options = <String, Object?>{
     if (packets.isNotEmpty) 'packets': packets,
     if (length.isNotEmpty) 'length': length,
-    if (interval.isNotEmpty) 'interval': interval,
+    if (interval.isNotEmpty) 'delay': interval,
     if (maxSplit.isNotEmpty) 'max-split': maxSplit,
   };
   if (options.isNotEmpty) proxy['fragment-opts'] = options;
@@ -1534,6 +1614,7 @@ final _goDurationPart = RegExp(r'(\d+(?:\.\d+)?)(ns|us|µs|ms|s|m|h)');
 
 int? goDurationMilliseconds(Object? value) {
   final text = value?.toString().trim() ?? '';
+  if (text.length > 64) return null;
   final parts = _goDurationPart.allMatches(text).toList();
   if (parts.isEmpty ||
       parts.fold(0, (n, m) => n + m.end - m.start) != text.length) {
@@ -1642,10 +1723,11 @@ String emitProxiesConfig(
 String _emitMap(Map<dynamic, dynamic> map) {
   final parts = <String>[];
   map.forEach((key, value) {
+    final emittedKey = _yamlString(key.toString());
     if (value is Map) {
-      parts.add('$key: {${_emitMap(value)}}');
+      parts.add('$emittedKey: {${_emitMap(value)}}');
     } else {
-      parts.add('$key: ${_yamlString(value)}');
+      parts.add('$emittedKey: ${_yamlString(value)}');
     }
   });
   return parts.join(', ');

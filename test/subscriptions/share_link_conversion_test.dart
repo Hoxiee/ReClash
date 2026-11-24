@@ -97,7 +97,7 @@ void main() {
       expect(node['fragment-opts'], {
         'packets': 'tlshello',
         'length': '10-20',
-        'interval': '5-10',
+        'delay': '5-10',
       });
       final reality = node['reality-opts'] as YamlMap;
       expect(reality['public-key'], 'key');
@@ -141,7 +141,7 @@ void main() {
       expect(proxy['fragment-opts'], {
         'packets': 'tlshello',
         'length': '10-20',
-        'interval': '5-10',
+        'delay': '5-10',
         'max-split': '3-6',
       });
     });
@@ -175,6 +175,40 @@ void main() {
       expect(reality['support-x25519mlkem768'], isTrue);
     });
 
+    test('honors an explicit MLKEM opt-out', () {
+      final proxy = _one(
+        'vless://$_uuid@edge.example:443?security=reality&pbk=key'
+        '&support-x25519mlkem768=false#a',
+      );
+      final reality = proxy['reality-opts'] as YamlMap;
+      expect(reality['support-x25519mlkem768'], isFalse);
+    });
+
+    test('drops finalmask UDP masks that Core cannot use on TCP', () {
+      final fm = Uri.encodeComponent(
+        jsonEncode({
+          'tcp': [
+            {
+              'type': 'fragment',
+              'settings': {'packets': 'tlshello'},
+            },
+          ],
+          'udp': [
+            {'type': 'noise', 'settings': {}},
+          ],
+        }),
+      );
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@edge.example:443?security=tls&fm=$fm#a',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasOtherLosses, isTrue);
+      final node = (loadYaml(result.config) as YamlMap)['proxies'] as YamlList;
+      final mask = (node.single as YamlMap)['finalmask'] as YamlMap;
+      expect(mask.containsKey('udp'), isFalse);
+      expect(mask.containsKey('tcp'), isTrue);
+    });
+
     test('keeps other known fingerprints without the key share', () {
       final proxy = _one(
         'vless://$_uuid@edge.example:443?security=reality&pbk=key&fp=safari#a',
@@ -206,6 +240,56 @@ void main() {
     test('does not invent a fingerprint without TLS', () {
       final proxy = _one('vless://$_uuid@edge.example:80?security=none#a');
       expect(proxy.containsKey('client-fingerprint'), isFalse);
+    });
+
+    test('maps raw and http transports to Core names', () {
+      final raw = _one(
+        'vless://$_uuid@edge.example:443?security=tls&type=raw#raw',
+      );
+      expect(raw['network'], 'tcp');
+
+      final http = _one(
+        'vless://$_uuid@edge.example:443?security=tls&type=http'
+        '&host=front.example&path=/h2#http',
+      );
+      expect(http['network'], 'h2');
+      expect(http['h2-opts'], {
+        'path': '/h2',
+        'host': ['front.example'],
+      });
+    });
+
+    test('reports an invalid flow instead of emitting it', () {
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@edge.example:443?security=tls&flow=short#bad',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasOtherLosses, isTrue);
+      final node = (loadYaml(result.config) as YamlMap)['proxies'] as YamlList;
+      expect((node.single as YamlMap).containsKey('flow'), isFalse);
+    });
+
+    test('skips VMess REALITY instead of silently downgrading it', () {
+      final vmess = base64.encode(
+        utf8.encode(
+          jsonEncode({
+            'v': '2',
+            'ps': 'vm',
+            'add': 'edge.example',
+            'port': '443',
+            'id': _uuid,
+            'net': 'tcp',
+            'tls': 'reality',
+            'pbk': 'key',
+          }),
+        ),
+      );
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@good.example:443?security=tls#good\n'
+        'vmess://$vmess',
+      );
+      expect(result, isNotNull);
+      expect(result!.skipped.single.kind, 'reality');
     });
 
     test('defaults trojan and TLS vmess links to chrome', () {

@@ -179,6 +179,7 @@ class _XhttpConversion {
       hasLosses = true;
     }
     final security = source['security'] ?? 'none';
+    final downloadTls = map(source['tlsSettings']);
     if (security == 'tls' || security == 'reality') {
       result['tls'] = true;
       if (applyXraySecurity(result, source, type: 'vless')) hasLosses = true;
@@ -194,6 +195,10 @@ class _XhttpConversion {
         source['realitySettings'] != null) {
       hasLosses = true;
     }
+    // Core falls back to the proxy's skip-cert-verify when the download block
+    // leaves it nil. Xray's download leg is configured separately, so make
+    // its verification choice explicit even when it is the safe default.
+    result['skip-cert-verify'] = downloadTls?['allowInsecure'] == true;
     final xhttp = map(source['xhttpSettings'] ?? source['splithttpSettings']);
     if (xhttp != null) {
       checkKeys(xhttp, {'path', 'host', 'headers', 'extra'});
@@ -215,6 +220,14 @@ class _XhttpConversion {
     return result;
   }
 }
+
+/// Whether Core can build session IDs from [table] and [length].
+///
+/// Core rejects a session table that is not ASCII, a malformed range, or a
+/// range too small to make enough IDs, and that rejection fails the whole
+/// profile. The importer drops the fields instead and records a loss.
+bool xhttpSessionIdsSafe(Object? table, Object? length) =>
+    _sessionIdsSafe({'sessionIDTable': table, 'sessionIDLength': length});
 
 bool _sessionIdsSafe(Map<String, Object?> extra) {
   final table = extra['sessionIDTable']?.toString();
@@ -247,5 +260,8 @@ bool _sessionIdsSafe(Map<String, Object?> extra) {
   final min = int.tryParse(parts[0].trim());
   final max = int.tryParse(parts[1].trim());
   if (min == null || max == null || min < 0 || max < min) return null;
+  // Core's roomSize() expands every length in the range before it gives up.
+  // Keep an untrusted subscription from making config load run for minutes.
+  if (max > 4096) return null;
   return (min, max);
 }

@@ -287,6 +287,7 @@ void main() {
         'port': 8443,
         'tls': true,
         'reality-opts': {'public-key': ''},
+        'skip-cert-verify': false,
         'servername': 'cdn.example',
         'client-fingerprint': 'chrome',
         'alpn': ['h2'],
@@ -319,6 +320,7 @@ void main() {
       expect(options['download-settings'], {
         'tls': false,
         'reality-opts': {'public-key': ''},
+        'skip-cert-verify': false,
         'path': '',
         'host': '',
         'headers': <String, Object?>{},

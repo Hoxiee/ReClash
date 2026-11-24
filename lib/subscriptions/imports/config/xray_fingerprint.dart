@@ -12,7 +12,12 @@ const _mihomoFingerprints = {
   'random',
   'randomized',
   'chrome120',
+  'chrome133',
+  'chrome155',
   'firefox120',
+  'firefox148',
+  'firefox156',
+  'firefox160',
   'safari16',
   'chrome_psk',
   'chrome_psk_shuffle',
@@ -45,10 +50,17 @@ String? resolveClientFingerprint(String raw, {required bool reality}) {
       name == 'golang') {
     return reality ? 'chrome' : null;
   }
-  if (name == 'randomizednoalpn') return 'randomized';
+  if (name == 'randomizednoalpn' || name == 'randomizedalpn') {
+    return 'randomized';
+  }
   if (_mihomoFingerprints.contains(name)) return name;
   if (name == 'hellochrome_120') return 'chrome120';
+  if (name == 'hellochrome_133') return 'chrome133';
+  if (name == 'hellochrome_155') return 'chrome155';
   if (name == 'hellofirefox_120') return 'firefox120';
+  if (name == 'hellofirefox_148') return 'firefox148';
+  if (name == 'hellofirefox_156') return 'firefox156';
+  if (name == 'hellofirefox_160') return 'firefox160';
   if (name == 'hellosafari_16_0') return 'safari16';
   for (final (prefix, target) in _fingerprintFamilies) {
     if (name.startsWith(prefix)) return target;

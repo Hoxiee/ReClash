@@ -38,6 +38,7 @@ class SubscriptionImportSummary {
     this.ignoredSections = const [],
     this.hasLosses = false,
     this.hasOtherLosses = false,
+    this.hasSecurityLoss = false,
     this.rejectCoreFallback = false,
     this.excludedPackages = const [],
     this.includedPackages = const [],
@@ -52,6 +53,7 @@ class SubscriptionImportSummary {
   final List<String> ignoredSections;
   final bool hasLosses;
   final bool hasOtherLosses;
+  final bool hasSecurityLoss;
   final bool rejectCoreFallback;
 
   /// The Clash config's `tun.exclude-package` and `tun.include-package`.
@@ -179,6 +181,9 @@ SubscriptionImportResult _convert(Uint8List input, {required bool encrypted}) {
             format == SubscriptionFormat.wireguard ||
             format == SubscriptionFormat.amnezia ||
             converted is LossyConversion && converted.hasOtherLosses,
+        hasSecurityLoss: converted is SecurityLossyConversion
+            ? (converted as SecurityLossyConversion).hasSecurityLoss
+            : false,
       ),
     );
   } on SubscriptionImportException {
@@ -346,6 +351,7 @@ SubscriptionImportSummary _lossSummary(
   int groups = 0,
   int remoteProviders = 0,
   bool hasOtherLosses = false,
+  bool hasSecurityLoss = false,
 }) => SubscriptionImportSummary(
   nodes: nodes,
   groups: groups,
@@ -358,9 +364,38 @@ SubscriptionImportSummary _lossSummary(
         '${node.kind}: ${node.name}',
   ],
   ignoredSections: List.unmodifiable(ignored),
-  hasLosses: skipped.isNotEmpty || ignored.isNotEmpty || hasOtherLosses,
+  hasLosses:
+      skipped.isNotEmpty ||
+      ignored.isNotEmpty ||
+      hasOtherLosses ||
+      hasSecurityLoss,
   hasOtherLosses: hasOtherLosses,
+  hasSecurityLoss: hasSecurityLoss,
 );
+
+const _xrayIgnoredSections = {
+  'inbounds',
+  'dns',
+  'stats',
+  'policy',
+  'api',
+  'log',
+  'mux',
+  'browserForwarder',
+  'reverse',
+  'fakedns',
+};
+
+const _xrayKnownSections = {
+  ..._xrayIgnoredSections,
+  'outbounds',
+  'routing',
+  'observatory',
+  'burstObservatory',
+  'remarks',
+  'type',
+  'servers',
+};
 
 List<String> _ignoredSections(SubscriptionFormat format, Object? json) {
   if (format == SubscriptionFormat.wireguard ||
@@ -373,20 +408,11 @@ List<String> _ignoredSections(SubscriptionFormat format, Object? json) {
         : [if (json is Map) json];
     return {
       for (final config in configs) ...[
-        for (final key in [
-          'inbounds',
-          'dns',
-          'stats',
-          'policy',
-          'api',
-          'log',
-          'mux',
-          'browserForwarder',
-          'reverse',
-          'fakedns',
-        ])
+        for (final key in _xrayIgnoredSections)
           if (config.containsKey(key)) key,
         if (config.containsKey('routing')) 'routing (partial conversion)',
+        for (final key in config.keys)
+          if (!_xrayKnownSections.contains(key.toString())) key.toString(),
       ],
     }.toList();
   }

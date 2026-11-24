@@ -31,7 +31,7 @@ class SubscriptionImportPolicy {
   }) {
     if (!summary.hasLosses) return true;
     if (isEmpty || scope != sourceScope || format != sourceFormat) return false;
-    if (summary.nodes == 0) return false;
+    if (summary.nodes == 0 || summary.hasSecurityLoss) return false;
     if (!summary.ignoredSections.every(ignoredSections.contains)) return false;
     final partial =
         summary.skippedNodes.isNotEmpty || summary.skipped.isNotEmpty;

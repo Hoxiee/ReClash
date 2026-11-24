@@ -45,6 +45,13 @@ Map<String, Object?> _vless(
   },
 };
 
+Map<String, Object?> _vlessUsers(Map<String, Object?> outbound) =>
+    ((((outbound['settings']! as Map<String, Object?>)['vnext']! as List).first
+                    as Map<String, Object?>)['users']!
+                as List)
+            .first
+        as Map<String, Object?>;
+
 const _direct = {'tag': 'direct', 'protocol': 'freedom'};
 const _block = {'tag': 'block', 'protocol': 'blackhole'};
 
@@ -553,6 +560,7 @@ void main() {
       });
       expect(result, isA<LossyConversion>());
       expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      expect((result as SecurityLossyConversion).hasSecurityLoss, isTrue);
       expect(result.config, isNot(contains('spider-x')));
     });
 
@@ -582,7 +590,7 @@ void main() {
         node(
           outbound('hellochrome_133', security: 'tls'),
         )['client-fingerprint'],
-        'chrome',
+        'chrome133',
       );
       expect(
         node(outbound('bogus', security: 'tls'))['client-fingerprint'],
@@ -715,6 +723,95 @@ void main() {
       expect(result.config, isNot(contains('mux.cool')));
     });
 
+    test('maps raw to tcp and http to h2', () {
+      final raw = _vless('raw-node', 0);
+      final rawStream = raw['streamSettings']! as Map<String, Object?>;
+      rawStream
+        ..['network'] = 'raw'
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'serverName': 'raw.example'};
+      final rawProxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'raw-node',
+      );
+      expect(rawProxy.containsKey('network'), isFalse);
+
+      final http = _vless('http-node', 1);
+      final httpStream = http['streamSettings']! as Map<String, Object?>;
+      httpStream
+        ..['network'] = 'http'
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'serverName': 'http.example'}
+        ..['httpSettings'] = {
+          'path': '/h2',
+          'host': ['front.example'],
+        };
+      final httpProxy = _proxy(
+        _convert({
+          'outbounds': [http],
+        }),
+        'http-node',
+      );
+      expect(httpProxy['network'], 'h2');
+      expect(httpProxy['h2-opts'], {
+        'path': '/h2',
+        'host': ['front.example'],
+      });
+    });
+
+    test('drops an invalid xhttp session-length and records the loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'sessionIDTable': 'a',
+        'sessionIDLength': '0-2147483647',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final opts = proxy['xhttp-opts'] as YamlMap;
+      expect(opts.containsKey('session-table'), isFalse);
+      expect(opts.containsKey('session-length'), isFalse);
+    });
+
+    test('reports an invalid VLESS flow instead of emitting it', () {
+      final raw = _vless('edge-flow', 0);
+      final users = _vlessUsers(raw);
+      users['flow'] = 'short';
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-flow');
+      expect(proxy.containsKey('flow'), isFalse);
+    });
+
+    test('reports an invalid VLESS encryption instead of dropping it', () {
+      final raw = _vless('edge-encryption', 1);
+      final users = _vlessUsers(raw);
+      users['encryption'] = 'not-a-known-scheme';
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(
+        loadYaml(result.config) as YamlMap,
+        'edge-encryption',
+      );
+      expect(proxy.containsKey('encryption'), isFalse);
+    });
+
     test('maps stream finalmask on VLESS and Trojan only', () {
       final raw = _vless('edge-a', 0);
       (raw['streamSettings']! as Map<String, Object?>)['finalmask'] = {
@@ -739,6 +836,30 @@ void main() {
           },
         ],
       });
+    });
+
+    test('drops finalmask UDP masks that Core cannot use on TCP', () {
+      final raw = _vless('edge-a', 0);
+      (raw['streamSettings']! as Map<String, Object?>)['finalmask'] = {
+        'tcp': [
+          {
+            'type': 'fragment',
+            'settings': {'packets': 'tlshello'},
+          },
+        ],
+        'udp': [
+          {'type': 'noise', 'settings': {}},
+        ],
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final mask = proxy['finalmask'] as YamlMap;
+      expect(mask.containsKey('udp'), isFalse);
+      expect(mask.containsKey('tcp'), isTrue);
     });
 
     test('keeps TLS HTTP header, WS headers and source rules', () {
@@ -783,6 +904,142 @@ void main() {
         'AND,((SRC-IP-CIDR,10.0.0.0/8),(SRC-PORT,53)),DIRECT',
         'MATCH,PROXY',
       ]);
+    });
+
+    test('uses TLS serverName as the WS Host and reads rawSettings', () {
+      final ws = _vless('ws-node', 0);
+      final wsStream = ws['streamSettings']! as Map<String, Object?>;
+      wsStream
+        ..['network'] = 'ws'
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'serverName': 'front.example'}
+        ..['wsSettings'] = {'path': '/ws'};
+      final wsProxy = _proxy(
+        _convert({
+          'outbounds': [ws],
+        }),
+        'ws-node',
+      );
+      expect((wsProxy['ws-opts'] as YamlMap)['headers'], {
+        'Host': 'front.example',
+      });
+
+      final raw = _vless('raw-node', 1);
+      final rawStream = raw['streamSettings']! as Map<String, Object?>;
+      rawStream
+        ..['network'] = 'raw'
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'serverName': 'raw.example'}
+        ..['rawSettings'] = {
+          'header': {
+            'type': 'http',
+            'request': {
+              'path': ['/raw'],
+              'headers': {
+                'Host': ['front.example'],
+              },
+            },
+          },
+        };
+      final rawProxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'raw-node',
+      );
+      expect(rawProxy['network'], 'http');
+      expect((rawProxy['http-opts'] as YamlMap)['path'], ['/raw']);
+    });
+
+    test('keeps settings-level WireGuard reserved bytes', () {
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [
+            {
+              'tag': 'wg',
+              'protocol': 'wireguard',
+              'settings': {
+                'secretKey': 'secret',
+                'address': ['10.0.0.2/32'],
+                'reserved': [0, 0, 0],
+                'peers': [
+                  {'publicKey': 'public', 'endpoint': 'engage.example:2408'},
+                ],
+              },
+            },
+          ],
+        }),
+        'wg',
+      );
+      final peer = (proxy['peers'] as YamlList).single as YamlMap;
+      expect(peer['reserved'], [0, 0, 0]);
+    });
+
+    test('handles negative Xray mux concurrency', () {
+      final off = _vless('mux-off', 0);
+      _vlessUsers(off).remove('flow');
+      off['mux'] = {'enabled': true, 'concurrency': -1};
+      expect(
+        _proxy(
+          _convert({
+            'outbounds': [off],
+          }),
+          'mux-off',
+        ).containsKey('mux.cool'),
+        isFalse,
+      );
+
+      final udpOff = _vless('mux-udp-off', 1);
+      _vlessUsers(udpOff).remove('flow');
+      udpOff['mux'] = {'enabled': true, 'xudpConcurrency': -1};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [udpOff],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-udp-off');
+      expect(
+        (proxy['mux.cool'] as YamlMap).containsKey('xudp-concurrency'),
+        isFalse,
+      );
+    });
+
+    test('prefers the REALITY password over a stale public key', () {
+      final raw = _vless('edge-a', 0);
+      final reality =
+          ((raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+                as Map<String, Object?>)
+            ..['password'] = 'new-key';
+      reality['publicKey'] = 'old-key';
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'edge-a',
+      );
+      expect((proxy['reality-opts'] as YamlMap)['public-key'], 'new-key');
+    });
+
+    test('lets an xhttp extra headers block win over sibling headers', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'headers': {'X-Top': '1'},
+        'extra': {
+          'headers': {'X-Extra': '2'},
+        },
+      };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'edge-a',
+      );
+      expect((proxy['xhttp-opts'] as YamlMap)['headers'], {'X-Extra': '2'});
     });
   });
 }

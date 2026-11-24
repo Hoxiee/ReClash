@@ -90,6 +90,36 @@ void main() {
     );
   });
 
+  test('ordinary loss consent never covers a security loss', () {
+    const ordinary = SubscriptionImportSummary(
+      nodes: 2,
+      hasOtherLosses: true,
+      hasLosses: true,
+    );
+    final policy = SubscriptionImportPolicy.accepted(
+      scope: scope,
+      format: SubscriptionFormat.xray,
+      summary: ordinary,
+    );
+    expect(
+      policy.allows(SubscriptionFormat.xray, ordinary, sourceScope: scope),
+      true,
+    );
+    expect(
+      policy.allows(
+        SubscriptionFormat.xray,
+        const SubscriptionImportSummary(
+          nodes: 2,
+          hasOtherLosses: true,
+          hasSecurityLoss: true,
+          hasLosses: true,
+        ),
+        sourceScope: scope,
+      ),
+      false,
+    );
+  });
+
   test(
     'round-trips consent with the client settings without input secrets',
     () {

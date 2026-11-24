@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
+
 const _profile = 'reclash';
 const _caBundle = 'component/ca/ca-certificates.crt';
 const _assetCa = 'assets/ca/ca-certificates.crt';
@@ -72,7 +74,8 @@ void _apply() {
   final cachedCa = assetCa.existsSync() && assetCa.lengthSync() > 0
       ? assetCa.readAsBytesSync()
       : null;
-  if (_target.existsSync() && !_isRepository(_target)) {
+  if (_target.existsSync() &&
+      (!_isRepository(_target) || !_hasCommit(base.commit))) {
     _target.deleteSync(recursive: true);
   }
   if (!_target.existsSync()) {
@@ -114,6 +117,7 @@ void _apply() {
         'rev-parse',
         'HEAD',
       ], cwd: _patches.path).stdout.toString().trim(),
+      'diff_hash': _generatedStateHash(),
     }),
   );
   stdout.writeln(
@@ -136,7 +140,11 @@ bool _isPrepared(String base, List<String> patches) {
     final decoded = jsonDecode(_stateFile.readAsStringSync());
     if (decoded is! Map<String, dynamic>) return false;
     final state = decoded;
-    if (state['base'] != base || state['profile'] != _profile) return false;
+    if (state['base'] != base ||
+        state['profile'] != _profile ||
+        state['patches'] != patches.length) {
+      return false;
+    }
     if (state['patch_repo'] !=
         _git([
           'rev-parse',
@@ -144,6 +152,7 @@ bool _isPrepared(String base, List<String> patches) {
         ], cwd: _patches.path).stdout.toString().trim()) {
       return false;
     }
+    if (state['diff_hash'] != _generatedStateHash()) return false;
   } on FormatException {
     return false;
   }
@@ -161,13 +170,7 @@ bool _isPrepared(String base, List<String> patches) {
   final actual = targetCa.existsSync()
       ? targetCa.readAsBytesSync()
       : const <int>[];
-  if (!_sameBytes(expected, actual)) return false;
-  return _git(
-        ['apply', '--reverse', '--check', patches.last],
-        cwd: _target.path,
-        check: false,
-      ).exitCode ==
-      0;
+  return _sameBytes(expected, actual);
 }
 
 void _revert() {
@@ -175,12 +178,13 @@ void _revert() {
     stdout.writeln('mihomo: core/.mihomo is not prepared');
     return;
   }
-  if (!_isRepository(_target)) {
+  final base = _base();
+  if (!_isRepository(_target) || !_hasCommit(base.commit)) {
     _target.deleteSync(recursive: true);
     stdout.writeln('mihomo: removed an unprepared core/.mihomo');
     return;
   }
-  _reset(_base().commit);
+  _reset(base.commit);
   if (_stateFile.existsSync()) _stateFile.deleteSync();
   stdout.writeln('mihomo: core/.mihomo reset to the pinned upstream commit');
 }
@@ -299,6 +303,24 @@ List<String> _profilePatches() {
 void _reset(String commit) {
   _git(['reset', '--hard', '--quiet', commit], cwd: _target.path);
   _git(['clean', '-fdxq'], cwd: _target.path);
+}
+
+bool _hasCommit(String commit) =>
+    _git(
+      ['cat-file', '-e', '$commit^{commit}'],
+      cwd: _target.path,
+      check: false,
+    ).exitCode ==
+    0;
+
+String _generatedStateHash() {
+  final status = _git([
+    'status',
+    '--porcelain',
+    '--untracked-files=all',
+  ], cwd: _target.path).stdout.toString();
+  final diff = _git(['diff', '--binary'], cwd: _target.path).stdout.toString();
+  return sha256.convert(utf8.encode('$status\n$diff')).toString();
 }
 
 bool _sameBytes(List<int> a, List<int> b) {
