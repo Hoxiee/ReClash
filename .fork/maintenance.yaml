@@ -11,8 +11,8 @@ features:
   core.integration:
     owners:
       upstream: ['core/mihomo/**']
-      downstream: ['lib/core/**', 'core/*.go']
-      shared: [core/mihomo, .gitmodules, 'plugins/rust_api/**']
+      downstream: ['lib/core/**', 'core/*.go', tool/mihomo.dart, tool/test_core.dart]
+      shared: [core/mihomo, core/mihomo-patches, .gitmodules, core/go.mod, core/go.sum, 'plugins/setup/setup_hooks/**', android/core/build.gradle.kts, 'plugins/rust_api/**']
     evidence:
       source: [integration, security]
       protocol: [integration]
@@ -29,7 +29,7 @@ features:
   releases.identity:
     owners:
       downstream: [pubspec.yaml, CHANGELOG.md, 'release_notes/**', 'release_summaries/**']
-      shared: [android/app/build.gradle.kts, core/mihomo, .gitmodules]
+      shared: [android/app/build.gradle.kts, core/mihomo, core/mihomo-patches, .gitmodules, core/go.mod]
     evidence:
       metadata: [structural, integration]
       packages: [platform, security]

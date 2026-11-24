@@ -252,7 +252,7 @@ Global Git settings are not modified; per-command rerere autoupdate is disabled.
 block checkout; standard git-lfs filters are allowed with smudge downloads disabled.
 
 Normalization preserves modes, binaries, symlinks and upstream gitlink semantics. It may rename `core/Clash.Meta` to
-`core/mihomo`, but never substitutes our engine fork/branch/SHA. Core source changes require review even on clean merges.
+`core/mihomo`, but never substitutes our engine base commit or patch profile. Core source changes require review even on clean merges.
 Ownership policy restores our `CHANGELOG.md` and only the `pubspec.yaml` version field, not dependencies.
 Do not blanket-keep upstream manifests/workflows or invent branding replacements to hide behavioral changes.
 
@@ -342,20 +342,18 @@ account, F-Droid signing fingerprint, app store or update channel is actually pu
 No fixed sync schedule, new release topology, replay queue, release ledger, automatic agent fan-out or automatic
 publication is introduced. Root tests do not replace native builds on affected platforms.
 
-## Engine Fork (mihomo)
+## Engine Source (mihomo)
 
-The engine fork (`Hoxiee/mihomo`, branch `ReClash`) always has exactly this history, top first, regardless of what is
-patched or why:
+`core/mihomo` is the pristine upstream submodule. `core/mihomo-patches` is the separate patch repository:
+`base.env` pins the upstream commit, and `profiles/reclash.txt` selects the ReClash engine definition.
+`tool/mihomo.dart apply` clones that commit into the ignored `core/.mihomo` and applies the profile; the Go
+Core, gomobile and CI all build from that generated tree.
 
-```
-feat: support ReClash
-feat: support FlClash
-<upstream release tag>
-```
-
-New engine changes are folded into one of the two commits, never added as a third. An upstream bump rebases both
-commits onto the new release tag. After any history rewrite, check that `git log --oneline <tag>..HEAD` lists exactly two
-commits, keep a local backup branch, and push with `--force-with-lease` pinned to the previous remote SHA.
+Do not edit `core/mihomo`, `core/.mihomo`, or turn the patch repository back into a long-lived fork. Change the
+carried behavior in `core/mihomo-patches`; an upstream bump updates `base.env`, rebases the patches and moves the
+submodule gitlink. After any engine change, check that `base.env` matches the `core/mihomo` commit, that the
+profile applies to a clean checkout, and that both the desktop and Android Cores compile. Core-source review is
+separate from FlClash replay: a clean vendor merge never authorizes replacing the engine profile.
 
 ## Operator Quick Start
 

@@ -2,10 +2,12 @@
 
 ## Building
 
-Update submodules first. The ClashMeta Go core lives in `core/mihomo/`.
+Update submodules first. `core/mihomo/` is pristine upstream; the build uses the generated `core/.mihomo/`
+prepared from `core/mihomo-patches/` by `dart tool/mihomo.dart apply` (or any `dart tool/prepare.dart` run).
 
 ```bash
 git submodule update --init --recursive
+dart tool/mihomo.dart apply
 ```
 
 Full package build, including Go core, Flutter, and packaging, runs through `setup.dart`. Prepare a fresh checkout first;

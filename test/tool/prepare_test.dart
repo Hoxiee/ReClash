@@ -26,12 +26,14 @@ void main() {
   test('prepares every app source in dependency order', () async {
     expect(await prepare.prepareProject('checkout', run: record), 0);
     expect(calls.map((call) => call.$1), [
+      Platform.resolvedExecutable,
       'flutter',
       Platform.resolvedExecutable,
       Platform.resolvedExecutable,
       Platform.resolvedExecutable,
     ]);
     expect(calls.map((call) => call.$2), [
+      ['tool/mihomo.dart', 'apply'],
       ['pub', 'get'],
       ['run', 'tool/assemble_l10n.dart'],
       ['run', 'intl_utils:generate'],
@@ -40,7 +42,7 @@ void main() {
     expect(calls.every((call) => call.$3 == 'checkout' && !call.$4), true);
   });
 
-  for (var step = 1; step <= 4; step++) {
+  for (var step = 1; step <= 5; step++) {
     test('stops and preserves the exit code when step $step fails', () async {
       failureAt = step;
       expect(await prepare.prepareProject('checkout', run: record), 23);
@@ -58,8 +60,9 @@ void main() {
       ),
       0,
     );
-    expect(calls, hasLength(3));
+    expect(calls, hasLength(4));
     expect(calls.map((call) => call.$2), [
+      ['tool/mihomo.dart', 'apply'],
       ['run', 'tool/assemble_l10n.dart'],
       ['run', 'intl_utils:generate'],
       ['run', 'build_runner', 'build'],

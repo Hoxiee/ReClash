@@ -33,13 +33,11 @@ checks:
   generated-contracts:
     argv: [dart, run, tool/check_generated_contracts.dart]
   telegram-proxy-core:
-    argv: [go, test, -race, ./telegram, -run, .]
-    cwd: core
+    argv: [dart, tool/test_core.dart, -race, ./telegram, -run, .]
   telegram-proxy-ui:
     argv: [flutter, test, test/views/telegram_proxy_test.dart, test/features/doctor/rules_test.dart, test/views/tools_catalog_test.dart]
   site-lock-core:
-    argv: [go, test, ./sitelock, .]
-    cwd: core
+    argv: [dart, tool/test_core.dart, ./sitelock, .]
   site-lock-host:
     argv: [cargo, test]
     cwd: services/helper
@@ -82,7 +80,7 @@ checks:
   profiles:
     argv: [flutter, test, test/providers/profiles_action_test.dart, test/models/profile_test.dart, test/models/profile_save_test.dart]
   go-provider-policy:
-    argv: [go, -C, core, test, ., -run, 'ProviderPolicy|ProviderGlobal|ProviderApps|ProviderMode']
+    argv: [dart, tool/test_core.dart, ., -run, 'ProviderPolicy|ProviderGlobal|ProviderApps|ProviderMode']
   provider-controls:
     argv: [flutter, test, test/subscriptions/provider_settings_test.dart, test/subscriptions/provider_policy_test.dart, test/subscriptions/profile_update_test.dart, test/models/provider_apps_test.dart, test/providers/provider_restrictions_test.dart, test/views/access_test.dart]
   config:
@@ -92,8 +90,7 @@ checks:
   diagnostics-kernel:
     argv: [flutter, test, test/features/doctor, test/views/doctor]
   go-doctor:
-    argv: [go, test, -run, 'Classify|ClockSkew|Reach', .]
-    cwd: core
+    argv: [dart, tool/test_core.dart, -run, 'Classify|ClockSkew|Reach', .]
   simple-dashboard:
     argv: [flutter, test, test/views/dashboard/simple_dashboard_test.dart, test/views/dashboard/power_button_test.dart, test/providers/provider_power_button_test.dart, test/subscriptions/provider_settings_test.dart, test/providers/speed_test_test.dart, test/features/speed_test_engine_test.dart, test/views/speed_test_sheet_test.dart, test/models/config_test.dart]
   web-dashboard-storage:
@@ -123,7 +120,7 @@ checks:
   proxies-favorites:
     argv: [flutter, test, test/providers/proxies_action_test.dart, test/providers/state_derived_test.dart, test/database/migration_v1_to_v2_test.dart, test/models/references_test.dart]
   routing-engine:
-    argv: [go, -C, core, test, ., ./rcx/..., -run, ., -count=1]
+    argv: [dart, tool/test_core.dart, ., ./rcx/..., -run, ., -count=1]
   routing-ui:
     argv: [flutter, test, test/views/proxies/routing_test.dart, test/views/proxies/routing_hub_test.dart, test/views/proxies/routing_scenario_test.dart, test/views/proxies/routing_sheet_test.dart, test/views/proxies/routing_strategy_test.dart, test/widgets/proxies_actions_test.dart]
   fork-tests:
@@ -148,8 +145,9 @@ checks:
     host: macos
     argv: [flutter, build, macos, --debug]
   core-tests:
-    argv: [go, test, ./...]
-    cwd: core
+    argv: [dart, tool/test_core.dart]
+  engine-source:
+    argv: [dart, tool/mihomo.dart, verify]
 full: [pub, format, analyze, tests]
 sentinels:
   analysis_options.yaml: [meta.maintenance]

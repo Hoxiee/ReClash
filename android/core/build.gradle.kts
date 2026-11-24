@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.Exec
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.ByteArrayOutputStream
 import java.util.zip.ZipEntry
@@ -56,6 +57,29 @@ val goExecutablePath =
             .firstOrNull { it.canExecute() }
             ?.path
             ?: throw GradleException("The Android Core is built with gomobile, which needs Go on PATH")
+    }
+
+val dartExecutablePath =
+    providers.provider {
+        val name = if (isWindows) "dart.bat" else "dart"
+        val home = System.getProperty("user.home")
+        val flutterRoot = System.getenv("FLUTTER_ROOT")
+        val searchPath =
+            System.getenv("PATH").orEmpty().split(File.pathSeparator) +
+                listOfNotNull(
+                    flutterRoot?.let { File(it, "bin").path },
+                    "/opt/homebrew/bin",
+                    "/usr/local/bin",
+                    "$home/flutter/bin",
+                )
+        searchPath
+            .filter { it.isNotEmpty() }
+            .map { File(it, name) }
+            .firstOrNull { it.canExecute() }
+            ?.path
+            ?: throw GradleException(
+                "The patched mihomo source is prepared with dart, which is not on PATH",
+            )
     }
 
 val goModule = rootProject.layout.projectDirectory.dir("../core")
@@ -225,8 +249,17 @@ abstract class UnpackJniLibs : DefaultTask() {
     }
 }
 
+val prepareMihomo =
+    tasks.register<Exec>("prepareMihomo") {
+        workingDir(rootProject.projectDir.parentFile)
+        args("tool/mihomo.dart", "apply")
+        outputs.upToDateWhen { false }
+        doFirst { executable(dartExecutablePath.get()) }
+    }
+
 val bindCore =
     tasks.register<GomobileBind>("bindCore") {
+        dependsOn(prepareMihomo)
         sources.from(
             fileTree(goModule) {
                 exclude("**/*_test.go", "**/testdata/**", "cmd/**", "mihomo/.github/**")

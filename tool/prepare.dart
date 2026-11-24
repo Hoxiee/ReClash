@@ -52,6 +52,7 @@ Future<int> prepareProject(
   PrepareRunner run = runPreparationCommand,
 }) async {
   final commands = [
+    (Platform.resolvedExecutable, ['tool/mihomo.dart', 'apply']),
     if (pubGet) ('flutter', ['pub', 'get']),
     (Platform.resolvedExecutable, ['run', 'tool/assemble_l10n.dart']),
     (Platform.resolvedExecutable, ['run', 'intl_utils:generate']),

@@ -446,14 +446,14 @@ Go event delivery is intentionally non-blocking:
   the Flutter engine detaches while the service keeps the Core running; request and DNS events would otherwise be
   encoded per connection and per query for nobody.
 
-DNS query events come from the mihomo fork's `dns/patch.go` and are raised where mihomo writes its `[DNS]` debug
+DNS query events come from the mihomo patch series' `dns/patch.go` and are raised where mihomo writes its `[DNS]` debug
 log, so the DNS page lists the same resolutions: one event per cache hit, and one per upstream exchange however many
 callers singleflight merged into it, carrying the upstream whose answer was used. Fake-IP and hosts answers never reach
 a resolver and are not recorded. Queries from apps arrive with the `DNSContext` that `Service.ServeMsg` created and
 report `app`; other initiators come from `resolver.WithInitiator` at the call site (rule matching, DIRECT, proxy
 server dialing), and unlabeled queries report `other`.
 
-Dialer-loop events come from the fork's `component/proxydialer/patch.go`. mihomo follows a `dialer-proxy` that leads
+Dialer-loop events come from the patch series' `component/proxydialer/patch.go`. mihomo follows a `dialer-proxy` that leads
 back to its own proxy until the stack overflows, so a dial that asks the same `dialer-proxy` for an address it is
 already dialing through it fails with `ErrDialerLoop`. `core/hooks.go` reports each looping name at most once every
 three seconds as a priority event, which the app shows as an error notice whether or not logs are captured. The custom
@@ -1673,8 +1673,9 @@ English, Russian, Simplified Chinese and Korean; x64 runs on x64-compatible host
 Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Linux,
 a Rust helper:
 
-- Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and `core/mihomo`, module files, the
-  effective build configuration, `setup_hooks` sources, target flags and the Go toolchain.
+- Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and the generated `core/.mihomo`,
+  the `core/mihomo-patches` base/profile/patch files, module files, the effective build configuration,
+  `setup_hooks` sources, target flags and the Go toolchain.
   Helper fingerprints cover its Rust sources and manifests, Cargo/Rust toolchains and flags, and the expected Core
   SHA256.
 - A hit requires the fingerprint and every recorded output's path, size and modification state to match, and skips
@@ -1700,9 +1701,15 @@ Desktop artifact integrity:
 Build configuration defaults live in `plugins/setup/setup_hooks/lib/src/options.dart` and can be overridden via the root
 `build_config.yaml`.
 
-`core_version` in `build_config.yaml` is the mihomo release tag the `core/mihomo` fork is based on, and
-`plugins/setup/setup_hooks/test/build_config_test.dart` fails when a submodule bump leaves it behind. Upstream injects
-its version only from its own CI, so the fork alone reports the placeholder `1.10.0` in `/version` and in protocol
+`core/mihomo` is the pristine upstream submodule at the commit named by `core/mihomo-patches/base.env`; the Go core
+builds against the generated, ignored `core/.mihomo` tree. `tool/mihomo.dart apply` clones the pinned commit locally
+and applies the `reclash` profile from `core/mihomo-patches`; `dart tool/prepare.dart`, `GoBuilder` and the Android
+`prepareMihomo` task run it before compilation. A patch edit changes the generated tree without touching the upstream
+submodule, and the build fingerprint includes both the tree and the patch files.
+
+`core_version` in `build_config.yaml` is that upstream tag, and
+`plugins/setup/setup_hooks/test/build_config_test.dart` fails when the submodule pin leaves it behind. Upstream injects
+its version only from its own CI, so the base alone reports the placeholder `1.10.0` in `/version` and in protocol
 user agents; `GoBuilder` passes the value as `-X github.com/metacubex/mihomo/constant.Version=...` for every build,
 local and CI alike. Bump it whenever the submodule moves onto a new upstream release.
 
@@ -1726,7 +1733,9 @@ NDK version stands in for the hook's cache.
 - The ABIs come from the `target-platform` property Flutter passes, and default to all three for a Gradle build Flutter
   did not start. `ANDROID_HOME` and `ANDROID_NDK_HOME` are AGP's SDK and its `ndkVersion` NDK, so the Core and the app
   share one NDK, and `-androidapi` is the app's `minSdk`.
-- `tags`, `go_ldflags` and `core_version` come from `build_config.yaml`, the file the hook reads.
+- `tags`, `go_ldflags` and `core_version` come from `build_config.yaml`, the file the hook reads. The
+  `prepareMihomo` task runs `dart tool/mihomo.dart apply` before `bindCore`, so a direct Gradle build gets
+  `core/.mihomo` without the Flutter hook.
 - Both Cores take their GODEBUG defaults from the `go` line of `core/go.mod`, whatever toolchain builds them. The
   desktop Core gets them from the Go command because `core` is its main module. gomobile links the library as the main
   package of a module it generates, whose `go` line is the toolchain's, so `bindCore` hands the desktop Core's
@@ -1963,11 +1972,11 @@ All subscription entrypoints, route selection, cancellation, failure handling an
 ## Site Lock
 
 A site lock (`SiteLock` in `lib/models/site_lock.dart`, stored globally in `Config.siteLocks`) holds mihomo rule
-entries without a target to exits named by their definition without the name (the fork's `RouteFingerprint`), with
+entries without a target to exits named by their definition without the name (the ReClash patch's `RouteFingerprint`), with
 the proxy name as the fallback once a refresh changes it: one address can serve many exits that differ only in
 credentials. `CoreManager` pushes the whole list through
 `setSiteLocks` on every change and to each newly connected Core; a rejected list keeps the previous one in force and the
-report carries every problem. In the Core, `core/sitelock` compiles the list and a hook in the fork's
+report carries every problem. In the Core, `core/sitelock` compiles the list and a hook in the patched
 `resolveMetadata` claims a matching connection before mode and rules: it leaves through a live exit, else the first
 one, else is refused. Groups and built-ins never qualify as exits because they could lead back to DIRECT.
 `siteLockExits` lists the servers of the running config for the editor.

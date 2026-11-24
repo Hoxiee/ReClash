@@ -69,7 +69,7 @@ Dart is not stored in Git.
 
 A reproducible `nix build` application is intentionally not advertised. Completing
 it requires real Nix builds and fixed-output dependency materialization for Pub
-(including the remaining `launch_at_startup` Git pin), Go's local mihomo submodule,
+(including the remaining `launch_at_startup` Git pin), Go's local mihomo submodule, its generated patched tree and the patch submodule,
 and both Cargo lockfiles. Native hook downloads, including SQLite assets, must
 also be made sandbox-safe without disabling the editor's Rust code assets.
 

@@ -85,3 +85,6 @@ devtools_options.yaml
 
 # Local research docs, never committed.
 /project/
+
+# Generated patched mihomo source; see tool/mihomo.dart.
+/core/.mihomo/

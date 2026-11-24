@@ -256,6 +256,12 @@ jobs:
           cache: ${{ env.BRANCH_CACHE }}
           cache-dependency-path: core/go.sum
 
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Prepare patched Core sources
+        run: dart tool/mihomo.dart apply
+
       - name: Validate Go core wrapper
         working-directory: core
         env:
@@ -320,6 +326,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Prepare patched Core sources
+        run: dart tool/mihomo.dart apply
 
       - name: Setup NDK
         uses: nttld/setup-ndk@v1
@@ -447,7 +456,6 @@ jobs:
         run: cargo test --locked --manifest-path services/helper/Cargo.toml --features windows-service
 
       - name: Setup Dart
-        if: matrix.arch == 'amd64'
         uses: dart-lang/setup-dart@v1
 
       - name: Check Windows service imports
@@ -467,6 +475,9 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: ${{ env.BRANCH_CACHE }}
           cache-dependency-path: core/go.sum
+
+      - name: Prepare patched Core sources
+        run: dart tool/mihomo.dart apply
 
       - name: Validate Windows Core bootstrap
         working-directory: core
@@ -650,7 +661,7 @@ jobs:
           CA_BUNDLE: cacert-2026-09-25.pem
           CA_BUNDLE_SHA256: a41b5d356aea97a529fe27e0f7316d2f9d946d75927476cf9cf1b90637d00505
         run: |
-          bundle=core/mihomo/component/ca/ca-certificates.crt
+          bundle=core/.mihomo/component/ca/ca-certificates.crt
           curl -fsSL --retry 3 -o "$bundle" "https://curl.se/ca/$CA_BUNDLE"
           echo "$CA_BUNDLE_SHA256  $bundle" | sha256sum -c -
 

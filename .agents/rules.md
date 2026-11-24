@@ -173,11 +173,12 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
 
 ## Core API Safety
 
-- `core/mihomo` is a fork of mihomo, and changes to it are budgeted for features, not repairs. Fixing a bug there is
-  low priority even when the bug is real and the fix is small: every patch is one more thing to carry across an upstream
-  rebase. Solve it on the ReClash side of the boundary and note the mihomo behaviour you are working around. Reach into
-  the submodule only for a feature that has nowhere else to live, or when the problem is one the FlClash patches
-  themselves introduced — and say which of the two it is in the commit message.
+- `core/mihomo` is pristine upstream and `core/.mihomo` is generated; never edit either by hand. The carried engine
+  changes live in `core/mihomo-patches` and are budgeted for features, not repairs. Fixing a bug there is low priority
+  even when the bug is real and the fix is small: every patch is one more thing to carry across an upstream bump.
+  Solve it on the ReClash side of the boundary and note the mihomo behaviour you are working around. Add a patch only
+  for a feature that has nowhere else to live, or when the problem is one the FlClash or ReClash patches themselves
+  introduced — and say which of the two it is in the commit message.
 - Do not expose direct filesystem deletion APIs through Core or helper IPC; use
   a scope-specific cleanup API instead.
 - The desktop IPC socket in `plugins/rust_api` admits a Unix peer only when its effective uid is the app's own or root:

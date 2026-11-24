@@ -33,6 +33,7 @@ class GoBuilder {
   String get _outputPath => p.join(rootDir, config.outputDir);
 
   Future<BuildExecution> build(Target target) async {
+    _prepareMihomo();
     final outDir = p.join(_outputPath, target.platformDir);
     ensureDir(outDir);
 
@@ -71,6 +72,13 @@ class GoBuilder {
         }
       },
     );
+  }
+
+  void _prepareMihomo() {
+    runCommand(Platform.resolvedExecutable, [
+      p.join(rootDir, 'tool/mihomo.dart'),
+      'apply',
+    ], workingDirectory: rootDir);
   }
 
   Map<String, String> _buildEnvironment(Target target) => {
@@ -142,6 +150,13 @@ class GoBuilder {
       if (File(goWorkSum).existsSync()) inputs.add(goWorkSum);
     }
     inputs.addAll(harnessInputs);
+    inputs.add(p.join(rootDir, 'tool/mihomo.dart'));
+    inputs.addAll(
+      collectFiles(
+        p.join(rootDir, 'core', 'mihomo-patches'),
+        excludedDirectories: {'.git', '.github'},
+      ),
+    );
 
     builder.addFiles(inputs);
     return builder.finishWithInputs();
