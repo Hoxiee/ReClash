@@ -14,7 +14,7 @@ class ReClashHttpOverrides extends HttpOverrides {
 
   ReClashHttpOverrides(this._container);
 
-  static const _coreRootsAsset = 'core/mihomo/component/ca/ca-certificates.crt';
+  static const _coreRootsAsset = 'assets/ca/ca-certificates.crt';
 
   /// The bundle the core embeds; only release CI fills it.
   static Future<void> trustCoreRoots() async {

@@ -3,6 +3,7 @@ import 'dart:io';
 
 const _profile = 'reclash';
 const _caBundle = 'component/ca/ca-certificates.crt';
+const _assetCa = 'assets/ca/ca-certificates.crt';
 const _usage = '''
 Prepares the patched mihomo source used by the Go Core.
 
@@ -67,8 +68,9 @@ void _apply() {
   }
   _checkSource(base.commit);
   final ca = File(_join(_target.path, _caBundle));
-  final cachedCa = ca.existsSync() && ca.lengthSync() > 0
-      ? ca.readAsBytesSync()
+  final assetCa = File(_join(_root, _assetCa));
+  final cachedCa = assetCa.existsSync() && assetCa.lengthSync() > 0
+      ? assetCa.readAsBytesSync()
       : null;
   if (_target.existsSync() && !_isRepository(_target)) {
     _target.deleteSync(recursive: true);
@@ -151,6 +153,15 @@ bool _isPrepared(String base, List<String> patches) {
   ], cwd: _patches.path).stdout.toString().trim().isNotEmpty) {
     return false;
   }
+  final assetCa = File(_join(_root, _assetCa));
+  final targetCa = File(_join(_target.path, _caBundle));
+  final expected = assetCa.existsSync()
+      ? assetCa.readAsBytesSync()
+      : const <int>[];
+  final actual = targetCa.existsSync()
+      ? targetCa.readAsBytesSync()
+      : const <int>[];
+  if (!_sameBytes(expected, actual)) return false;
   return _git(
         ['apply', '--reverse', '--check', patches.last],
         cwd: _target.path,
@@ -288,6 +299,14 @@ List<String> _profilePatches() {
 void _reset(String commit) {
   _git(['reset', '--hard', '--quiet', commit], cwd: _target.path);
   _git(['clean', '-fdxq'], cwd: _target.path);
+}
+
+bool _sameBytes(List<int> a, List<int> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }
 
 bool _isRepository(Directory directory) {
