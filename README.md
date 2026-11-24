@@ -213,9 +213,10 @@ feature requests go to [GitHub Issues](https://github.com/Hoxiee/ReClash/issues)
 ReClash exists because of the work of these projects and maintainers:
 
 - [FlClash](https://github.com/chen08209/FlClash) by [chen08209](https://github.com/chen08209), the application ReClash is based on.
-- [FlClashX](https://github.com/pluralplay/FlClashX) by [pluralplay](https://github.com/pluralplay), whose provider-oriented work and ideas informed parts of ReClash.
-- [FlClash-Patched](https://github.com/chenx-dust/FlClash-Patched) by [chenx-dust](https://github.com/chenx-dust), for additional features adopted by ReClash.
-- [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application. ReClash ships a lightly patched [fork](https://github.com/Hoxiee/mihomo/tree/ReClash); see [what's changed](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.md).
+- [FlClashX](https://github.com/pluralplay/FlClashX) by [pluralplay](https://github.com/pluralplay), the client ReClash started from.
+- [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application. ReClash runs a patched build from [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core).
+- [Prizrak-Box](https://github.com/legiz-ru/Prizrak-Box) by [legiz-ru](https://github.com/legiz-ru), for inspiring the core work.
+- [Koala Clash](https://github.com/coolcoala/koala-clash) by [coolcoala](https://github.com/coolcoala), the client that introduced me to mihomo.
 
 ReClash is maintained independently. References to other projects describe technical lineage, compatibility, and dependencies; they do not imply endorsement.
 

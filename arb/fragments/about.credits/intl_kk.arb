@@ -1,13 +1,14 @@
 {
   "creditByeDpi": "DPI айналып өту",
   "creditFlClash": "Қолданбаның негізі",
-  "creditFlClashPatched": "Қосымша мүмкіндіктер",
-  "creditFlClashX": "Провайдер мүмкіндіктері мен идеялары",
+  "creditFlClashX": "ReClash басталған клиент",
   "creditMihomo": "Прокси ядросы",
   "gratitude": "Алғыс",
   "gratitudeDesc": "ReClash олардың еңбегі арқасында өмір сүреді",
   "license": "Лицензия",
   "licenses": "Лицензиялар",
   "licensesDesc": "Қолданбаға кіретін дестелер",
-  "maintainer": "Мейнтейнер"
+  "maintainer": "Мейнтейнер",
+  "creditPrizrakBox": "Ядроға шабыт",
+  "creditKoalaClash": "Мені mihomo-ны таныстырған клиент"
 }

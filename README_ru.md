@@ -215,10 +215,10 @@ dart setup.dart android   # или windows, macos, linux
 ReClash существует благодаря работе этих проектов и их мейнтейнеров:
 
 - [FlClash](https://github.com/chen08209/FlClash) от [chen08209](https://github.com/chen08209) — приложение, на котором основан ReClash.
-- [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — часть функций и идей для интеграции с провайдерами опирается на его работу.
-  > «Да не сплю я» — pluralplay
-- [FlClash-Patched](https://github.com/chenx-dust/FlClash-Patched) от [chenx-dust](https://github.com/chenx-dust) — за дополнительные функции, часть которых перенесена в ReClash.
-- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения. ReClash использует слегка доработанный [форк](https://github.com/Hoxiee/mihomo/tree/ReClash); подробнее — [что изменено](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.ru.md).
+- [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — клиент, с которого начался ReClash.
+- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения. ReClash использует сборку с патчами из [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core).
+- [Prizrak-Box](https://github.com/legiz-ru/Prizrak-Box) от [legiz-ru](https://github.com/legiz-ru) — за вдохновение в работе над ядром.
+- [Koala Clash](https://github.com/coolcoala/koala-clash) от [coolcoala](https://github.com/coolcoala) — клиент, который познакомил меня с mihomo.
 
 ReClash поддерживается независимо. Названия других проектов используются только для описания происхождения, совместимости и зависимостей и не означают одобрения ReClash их авторами.
 

@@ -3,11 +3,12 @@
   "gratitude": "致谢",
   "gratitudeDesc": "ReClash 建立在他们的工作之上",
   "creditFlClash": "应用基础",
-  "creditFlClashX": "机场功能与思路",
-  "creditFlClashPatched": "额外功能",
+  "creditFlClashX": "ReClash 的起点",
   "creditMihomo": "代理内核",
   "creditByeDpi": "DPI 绕过",
   "license": "许可证",
   "licenses": "开源许可",
-  "licensesDesc": "应用内置的软件包"
+  "licensesDesc": "应用内置的软件包",
+  "creditPrizrakBox": "内核的灵感",
+  "creditKoalaClash": "让我认识 mihomo 的客户端"
 }

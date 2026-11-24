@@ -72,18 +72,25 @@ class AboutView extends ConsumerWidget {
         link: 'https://github.com/pluralplay/FlClashX',
       ),
       _Credit(
-        avatar: 'assets/images/avatar/chenx-dust.jpg',
-        project: 'FlClash-Patched',
-        name: 'chenx-dust',
-        role: appLocalizations.creditFlClashPatched,
-        link: 'https://github.com/chenx-dust/FlClash-Patched',
-      ),
-      _Credit(
         avatar: 'assets/images/avatar/metacubex.jpg',
         project: 'mihomo',
         name: 'MetaCubeX',
         role: appLocalizations.creditMihomo,
         link: 'https://github.com/MetaCubeX/mihomo',
+      ),
+      _Credit(
+        avatar: 'assets/images/avatar/legiz-ru.jpg',
+        project: 'Prizrak-Box',
+        name: 'legiz-ru',
+        role: appLocalizations.creditPrizrakBox,
+        link: 'https://github.com/legiz-ru/Prizrak-Box',
+      ),
+      _Credit(
+        avatar: 'assets/images/avatar/coolcoala.jpg',
+        project: 'Koala Clash',
+        name: 'coolcoala',
+        role: appLocalizations.creditKoalaClash,
+        link: 'https://github.com/coolcoala/koala-clash',
       ),
       _Credit(
         avatar: 'assets/images/avatar/hufrea.jpg',
@@ -174,8 +181,8 @@ class AboutView extends ConsumerWidget {
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,
                 title: appLocalizations.core,
-                url: 'https://github.com/Hoxiee/mihomo/tree/ReClash',
-                label: 'github.com/Hoxiee/mihomo',
+                url: 'https://github.com/Hoxiee/mihomo-patch-core',
+                label: 'github.com/Hoxiee/mihomo-patch-core',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.send,

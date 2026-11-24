@@ -1,13 +1,14 @@
 {
   "creditByeDpi": "DPI chetlab oʻtish",
   "creditFlClash": "Ilova asosi",
-  "creditFlClashPatched": "Qoʻshimcha funksiyalar",
-  "creditFlClashX": "Provayder funksiyalari va gʻoyalari",
+  "creditFlClashX": "ReClash boshlangan mijoz",
   "creditMihomo": "Proksi yadrosi",
   "gratitude": "Minnatdorchilik",
   "gratitudeDesc": "ReClash ularning mehnati tufayli mavjud",
   "license": "Litsenziya",
   "licenses": "Litsenziyalar",
   "licensesDesc": "Ilova tarkibidagi paketlar",
-  "maintainer": "Meynteyner"
+  "maintainer": "Meynteyner",
+  "creditPrizrakBox": "Yadro uchun ilhom",
+  "creditKoalaClash": "Meni mihomo bilan tanishtirgan mijoz"
 }

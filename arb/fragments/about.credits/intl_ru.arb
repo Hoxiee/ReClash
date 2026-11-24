@@ -3,11 +3,12 @@
   "gratitude": "Благодарности",
   "gratitudeDesc": "ReClash существует благодаря их работе",
   "creditFlClash": "Основа приложения",
-  "creditFlClashX": "Функции и идеи для провайдеров",
-  "creditFlClashPatched": "Дополнительные функции",
+  "creditFlClashX": "Клиент, с которого начался ReClash",
   "creditMihomo": "Прокси-ядро",
   "creditByeDpi": "Обход DPI",
   "license": "Лицензия",
   "licenses": "Лицензии",
-  "licensesDesc": "Пакеты, входящие в приложение"
+  "licensesDesc": "Пакеты, входящие в приложение",
+  "creditPrizrakBox": "Вдохновение для ядра",
+  "creditKoalaClash": "Клиент, который познакомил меня с mihomo"
 }

@@ -1,13 +1,14 @@
 {
   "creditByeDpi": "DPI böwüsme",
   "creditFlClash": "Programmanyň binýady",
-  "creditFlClashPatched": "Goşmaça funksiýalar",
-  "creditFlClashX": "Üpjün edijilere degişli funksiýalar we pikirler",
+  "creditFlClashX": "ReClash-nyň başlangyjy",
   "creditMihomo": "Proksi çekirdegi",
   "gratitude": "Minnetdarlyk",
   "gratitudeDesc": "ReClash olaryň zähmeti sebäpli bar",
   "license": "Ygtyýarnama",
   "licenses": "Ygtyýarnamalar",
   "licensesDesc": "Programmä goşulan paketler",
-  "maintainer": "Meýnteýner"
+  "maintainer": "Meýnteýner",
+  "creditPrizrakBox": "Ýadro üçin ylham",
+  "creditKoalaClash": "Meni mihomo bilen tanyşdyran müşderi"
 }

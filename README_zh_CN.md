@@ -203,9 +203,10 @@ Bug 与功能建议请提交到 [GitHub Issues](https://github.com/Hoxiee/ReClas
 ReClash 的开发离不开以下项目及其维护者：
 
 - [FlClash](https://github.com/chen08209/FlClash)，由 [chen08209](https://github.com/chen08209) 维护，是 ReClash 的项目基础。
-- [FlClashX](https://github.com/pluralplay/FlClashX)，由 [pluralplay](https://github.com/pluralplay) 维护，其面向服务商的功能和设计思路为 ReClash 的部分实现提供了参考。
-- [FlClash-Patched](https://github.com/chenx-dust/FlClash-Patched)，由 [chenx-dust](https://github.com/chenx-dust) 维护，感谢其额外功能被引入 ReClash。
-- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用使用的代理核心。ReClash 使用经过少量修改的[分支](https://github.com/Hoxiee/mihomo/tree/ReClash)；改动说明见 [README.ReClash](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.md)。
+- [FlClashX](https://github.com/pluralplay/FlClashX)，由 [pluralplay](https://github.com/pluralplay) 维护，是 ReClash 的起点。
+- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用使用的代理核心。ReClash 使用来自 [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core) 的修补版本。
+- [Prizrak-Box](https://github.com/legiz-ru/Prizrak-Box)，由 [legiz-ru](https://github.com/legiz-ru) 维护，感谢其对内核工作的启发。
+- [Koala Clash](https://github.com/coolcoala/koala-clash)，由 [coolcoala](https://github.com/coolcoala) 维护，是让我认识 mihomo 的客户端。
 
 ReClash 由独立维护者维护。文中提及其他项目仅用于说明技术来源、兼容性和依赖关系，并不表示这些项目或其维护者认可 ReClash。
 

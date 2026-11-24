@@ -92,8 +92,9 @@ void main() {
     final credits = {
       'FlClash': 'chen08209',
       'FlClashX': 'pluralplay',
-      'FlClash-Patched': 'chenx-dust',
       'mihomo': 'MetaCubeX',
+      'Prizrak-Box': 'legiz-ru',
+      'Koala Clash': 'coolcoala',
       'ByeDPI': 'hufrea',
     };
     for (final credit in credits.entries) {
@@ -107,8 +108,9 @@ void main() {
       containsAll([
         'assets/images/avatar/chen08209.jpg',
         'assets/images/avatar/pluralplay.jpg',
-        'assets/images/avatar/chenx-dust.jpg',
         'assets/images/avatar/metacubex.jpg',
+        'assets/images/avatar/legiz-ru.jpg',
+        'assets/images/avatar/coolcoala.jpg',
         'assets/images/avatar/hufrea.jpg',
       ]),
     );
@@ -156,8 +158,9 @@ void main() {
         'Hoxiee': 'https://github.com/Hoxiee',
         'FlClash': 'https://github.com/chen08209/FlClash',
         'FlClashX': 'https://github.com/pluralplay/FlClashX',
-        'FlClash-Patched': 'https://github.com/chenx-dust/FlClash-Patched',
         'mihomo': 'https://github.com/MetaCubeX/mihomo',
+        'Prizrak-Box': 'https://github.com/legiz-ru/Prizrak-Box',
+        'Koala Clash': 'https://github.com/coolcoala/koala-clash',
         'ByeDPI': 'https://github.com/hufrea/byedpi',
       };
 

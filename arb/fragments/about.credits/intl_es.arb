@@ -3,11 +3,12 @@
   "gratitude": "Agradecimientos",
   "gratitudeDesc": "ReClash existe gracias a su trabajo",
   "creditFlClash": "Base del cliente",
-  "creditFlClashX": "Funciones e ideas para proveedores",
-  "creditFlClashPatched": "Funciones adicionales",
+  "creditFlClashX": "El cliente del que nació ReClash",
   "creditMihomo": "Núcleo proxy",
   "creditByeDpi": "Evasión de DPI",
   "license": "Licencia",
   "licenses": "Licencias",
-  "licensesDesc": "Paquetes incluidos en la aplicación"
+  "licensesDesc": "Paquetes incluidos en la aplicación",
+  "creditPrizrakBox": "Inspiración para el núcleo",
+  "creditKoalaClash": "El cliente que me presentó a mihomo"
 }
