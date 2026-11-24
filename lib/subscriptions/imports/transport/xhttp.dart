@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../config/xray_security.dart';
+
 ({Map<String, Object?> options, bool hasLosses}) convertXhttpOptions({
   String path = '',
   String host = '',
@@ -177,55 +179,18 @@ class _XhttpConversion {
       hasLosses = true;
     }
     final security = source['security'] ?? 'none';
-    if (source['security'] == 'none' || source['security'] == 'tls') {
-      result['reality-opts'] = <String, Object?>{'public-key': ''};
-      if (security == 'none') result['tls'] = false;
-    }
     if (security == 'tls' || security == 'reality') {
       result['tls'] = true;
-      final tls = map(source['tlsSettings']);
-      if (tls != null) {
-        checkKeys(tls, {'serverName', 'fingerprint', 'alpn', 'allowInsecure'});
-        result.addAll(
-          scalars(tls, const {
-            'serverName': 'servername',
-            'fingerprint': 'client-fingerprint',
-            'allowInsecure': 'skip-cert-verify',
-          }),
-        );
-        final alpn = tls['alpn'];
-        if (alpn is List && alpn.every((entry) => entry is String)) {
-          result['alpn'] = alpn.cast<String>();
-        } else if (alpn != null) {
-          hasLosses = true;
-        }
+      if (applyXraySecurity(result, source, type: 'vless')) hasLosses = true;
+      final reality = map(source['realitySettings']);
+      if (security == 'tls' && reality != null) hasLosses = true;
+      if (security == 'tls') {
+        result['reality-opts'] = <String, Object?>{'public-key': ''};
       }
-      if (security == 'reality') {
-        final reality = map(source['realitySettings']);
-        if (reality != null) {
-          checkKeys(reality, {
-            'publicKey',
-            'shortId',
-            'serverName',
-            'fingerprint',
-          });
-          result.addAll(
-            scalars(reality, const {
-              'serverName': 'servername',
-              'fingerprint': 'client-fingerprint',
-            }),
-          );
-          final options = scalars(reality, const {
-            'publicKey': 'public-key',
-            'shortId': 'short-id',
-          });
-          if (options.isNotEmpty) result['reality-opts'] = options;
-        }
-      } else if (source['realitySettings'] != null) {
-        hasLosses = true;
-      }
-    } else if (security != 'none' ||
-        source['tlsSettings'] != null ||
+    } else if (security == 'none') {
+      result['tls'] = false;
+      result['reality-opts'] = <String, Object?>{'public-key': ''};
+    } else if (source['tlsSettings'] != null ||
         source['realitySettings'] != null) {
       hasLosses = true;
     }

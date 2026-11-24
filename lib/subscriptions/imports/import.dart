@@ -373,7 +373,18 @@ List<String> _ignoredSections(SubscriptionFormat format, Object? json) {
         : [if (json is Map) json];
     return {
       for (final config in configs) ...[
-        for (final key in ['inbounds', 'dns', 'stats', 'policy', 'api', 'log'])
+        for (final key in [
+          'inbounds',
+          'dns',
+          'stats',
+          'policy',
+          'api',
+          'log',
+          'mux',
+          'browserForwarder',
+          'reverse',
+          'fakedns',
+        ])
           if (config.containsKey(key)) key,
         if (config.containsKey('routing')) 'routing (partial conversion)',
       ],

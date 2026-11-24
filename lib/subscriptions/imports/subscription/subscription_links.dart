@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import '../config/amnezia_config.dart';
+import '../config/xray_fingerprint.dart';
+import '../config/xray_security.dart';
 import '../routing/skipped_node.dart';
 import '../transport/xhttp.dart';
 import 'extension_catalog.dart';
@@ -68,6 +70,21 @@ bool _isLinkLine(String line) {
   return shareLinkSchemes.contains(scheme) ||
       extensionForScheme(scheme) != null;
 }
+
+bool _isIncyDirective(String line) =>
+    line.startsWith('://autorouting/') ||
+    line.startsWith('://routing/') ||
+    line.startsWith('://onadd/') ||
+    line.startsWith('#announce:') ||
+    line.startsWith('#announce-url:') ||
+    line.startsWith('#profile-title:') ||
+    line.startsWith('#profile-description:') ||
+    line.startsWith('#support-url:') ||
+    line.startsWith('#support-email:') ||
+    line.startsWith('#profile-update-interval:') ||
+    line.startsWith('#profile-web-page-url:') ||
+    line.startsWith('#homepage:') ||
+    line.startsWith('#hide-url:');
 
 String? _nodeScheme(String line) =>
     _linkScheme.firstMatch(line)?.group(1)?.toLowerCase();
@@ -136,7 +153,10 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
     for (final line in text.split(RegExp(r'[\r\n]+'))) {
       final trimmed = line.trim();
       final scheme = _nodeScheme(trimmed);
-      if (scheme == null) continue;
+      if (scheme == null) {
+        if (_isIncyDirective(trimmed)) hasOtherLosses = true;
+        continue;
+      }
       final normalized = '$scheme${trimmed.substring(scheme.length)}';
       try {
         if (scheme == 'vpn') {
@@ -237,11 +257,11 @@ List<Map<String, Object?>> _parseUri(
   if (uri.startsWith('mierus://')) return _parseMieru(uri, onLoss: onLoss);
   if (uri.startsWith('tt://')) return [?_parseTrustTunnel(uri, onLoss: onLoss)];
   final proxy = switch (_nodeScheme(uri)) {
-    'vmess' => _parseVmess(uri),
+    'vmess' => _parseVmess(uri, onLoss: onLoss),
     'vless' => _parseVless(uri, onLoss: onLoss),
     'ssr' => _parseShadowsocksR(uri),
     'ss' => _parseShadowsocks(uri),
-    'trojan' => _parseTrojan(uri),
+    'trojan' => _parseTrojan(uri, onLoss: onLoss),
     'hysteria2' ||
     'hy2' ||
     'hysteria2+realm' ||
@@ -458,7 +478,10 @@ Map<String, Object?>? _parseAmneziaWgLink(String uri) {
   return parseAwgConf(conf, name: displayName);
 }
 
-Map<String, Object?>? _parseVmess(String uri) {
+Map<String, Object?>? _parseVmess(
+  String uri, {
+  required void Function() onLoss,
+}) {
   final decoded = tryBase64Decode(uri.substring('vmess://'.length));
   if (decoded == null) return null;
   final Map<String, Object?> j;
@@ -492,6 +515,15 @@ Map<String, Object?>? _parseVmess(String uri) {
       SkippedNode(
         name: name.isEmpty ? server : name,
         kind: 'xhttp',
+        reason: SkippedNodeReason.transport,
+      ),
+    );
+  }
+  if (rawNet == 'quic') {
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name.isEmpty ? server : name,
+        kind: 'quic',
         reason: SkippedNodeReason.transport,
       ),
     );
@@ -533,6 +565,20 @@ Map<String, Object?>? _parseVmess(String uri) {
     allowInsecure: false,
     emulateXray: true,
   );
+  final params = <String, String>{
+    for (final key in const [
+      'pcs',
+      'vcn',
+      'ech',
+      'fragmentPackets',
+      'fragmentLength',
+      'fragmentInterval',
+    ])
+      if (j[key] != null && j[key].toString().isNotEmpty)
+        key: j[key].toString(),
+  };
+  _applyIncySecurity(proxy, params, onLoss: onLoss);
+  if ((j['fm'] ?? '').toString().isNotEmpty) onLoss();
   return proxy;
 }
 
@@ -559,12 +605,19 @@ Map<String, Object?>? _parseVless(
     proxy['tls'] = true;
     proxy['servername'] = sni;
     proxy['reality-opts'] = <String, Object?>{
-      'public-key': params['pbk'] ?? '',
+      'public-key': params['pbk'] ?? params['password'] ?? '',
       if ((params['sid'] ?? '').isNotEmpty) 'short-id': params['sid'],
+      if ((params['pqv'] ?? '').isNotEmpty) 'mldsa65-verify': params['pqv'],
+      if (const {'1', 'true'}.contains(params['support-x25519mlkem768']))
+        'support-x25519mlkem768': true,
     };
+    if ((params['spx'] ?? '').isNotEmpty) onLoss();
+    if ((params['pbk'] ?? params['password'] ?? '').isEmpty) onLoss();
   } else if (security == 'tls') {
     proxy['tls'] = true;
     proxy['servername'] = sni;
+  } else if (security.isNotEmpty && security != 'none') {
+    onLoss();
   }
   final flow = sanitizeVlessFlow(params['flow'] ?? '');
   if (flow != null) proxy['flow'] = flow;
@@ -578,19 +631,33 @@ Map<String, Object?>? _parseVless(
     proxy,
     fingerprint: params['fp'] ?? '',
     alpn: params['alpn'] ?? '',
-    allowInsecure: params['allowInsecure'] == '1',
+    allowInsecure:
+        params['allowInsecure'] == '1' ||
+        params['allowInsecure'] == 'true' ||
+        params['insecure'] == '1' ||
+        params['insecure'] == 'true',
     emulateXray: true,
   );
+  _applyIncySecurity(proxy, params, onLoss: onLoss);
 
   final network = params['type'] ?? 'tcp';
   final transport = network == 'splithttp' ? 'xhttp' : network;
+  if (transport == 'kcp' || transport == 'quic') {
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name,
+        kind: transport,
+        reason: SkippedNodeReason.transport,
+      ),
+    );
+  }
   if (transport == 'xhttp') {
     proxy['network'] = 'xhttp';
     final converted = convertXhttpOptions(
       path: params['path'] ?? '',
       host: params['host'] ?? '',
       mode: params['mode'] ?? '',
-      extra: params['extra'],
+      extra: _xhttpExtra(params),
     );
     proxy['xhttp-opts'] = converted.options;
     if (converted.hasLosses) onLoss();
@@ -711,7 +778,10 @@ Map<String, Object?>? _parseShadowsocksR(String uri) {
   };
 }
 
-Map<String, Object?>? _parseTrojan(String uri) {
+Map<String, Object?>? _parseTrojan(
+  String uri, {
+  required void Function() onLoss,
+}) {
   final parts = _splitUserinfoUri(uri);
   if (parts == null) return null;
   final (password, server, port, params, name) = parts;
@@ -724,21 +794,54 @@ Map<String, Object?>? _parseTrojan(String uri) {
     'password': password,
     'udp': true,
   };
+  final security = params['security'] ?? 'tls';
   final sni = params['sni'] ?? params['peer'] ?? server;
   if (sni.isNotEmpty) proxy['sni'] = sni;
+  if (security == 'reality') {
+    proxy['tls'] = true;
+    proxy['reality-opts'] = <String, Object?>{
+      'public-key': params['pbk'] ?? params['password'] ?? '',
+      if ((params['sid'] ?? '').isNotEmpty) 'short-id': params['sid'],
+      if ((params['pqv'] ?? '').isNotEmpty) 'mldsa65-verify': params['pqv'],
+      if (const {'1', 'true'}.contains(params['support-x25519mlkem768']))
+        'support-x25519mlkem768': true,
+    };
+    if ((params['spx'] ?? '').isNotEmpty) onLoss();
+    if ((params['pbk'] ?? params['password'] ?? '').isEmpty) onLoss();
+  } else if (security == 'tls') {
+    proxy['tls'] = true;
+  } else if (security == 'none') {
+    onLoss();
+  } else if (security.isNotEmpty && security != 'tls') {
+    onLoss();
+  }
   _applyTlsExtras(
     proxy,
     fingerprint: params['fp'] ?? '',
     alpn: params['alpn'] ?? '',
-    allowInsecure: params['allowInsecure'] == '1',
+    allowInsecure:
+        params['allowInsecure'] == '1' ||
+        params['allowInsecure'] == 'true' ||
+        params['insecure'] == '1' ||
+        params['insecure'] == 'true',
     emulateXray: true,
   );
+  _applyIncySecurity(proxy, params, onLoss: onLoss);
   final network = params['type'] ?? 'tcp';
   if (network == 'xhttp' || network == 'splithttp') {
     throw _UnsupportedLink(
       SkippedNode(
         name: name,
         kind: 'xhttp',
+        reason: SkippedNodeReason.transport,
+      ),
+    );
+  }
+  if (network == 'kcp' || network == 'quic') {
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name,
+        kind: network,
         reason: SkippedNodeReason.transport,
       ),
     );
@@ -764,7 +867,9 @@ Map<String, Object?>? _parseHysteria2(String uri) {
   final auth = _decodeComponent(link.userInfo);
   final name = _displayName(link.fragment);
   final realm = link.scheme.endsWith('+realm');
-  final ports = hopPorts.isNotEmpty ? hopPorts : (params['mport'] ?? '');
+  final ports = hopPorts.isNotEmpty
+      ? hopPorts
+      : (params['mport'] ?? params['ports'] ?? '');
   final proxy = <String, Object?>{
     'name': name.isEmpty ? server : name,
     'type': 'hysteria2',
@@ -790,7 +895,12 @@ Map<String, Object?>? _parseHysteria2(String uri) {
   final cleanPorts = ports.replaceAll(' ', '');
   if (cleanPorts.isNotEmpty && isValidPortHopping(cleanPorts)) {
     proxy['ports'] = cleanPorts;
-    final hopInterval = int.tryParse(params['hop-interval'] ?? '');
+    final hopInterval = int.tryParse(
+      params['hop-interval'] ??
+          params['mportHopInt'] ??
+          params['portHopInt'] ??
+          '',
+    );
     if (hopInterval != null && hopInterval >= 5) {
       proxy['hop-interval'] = hopInterval;
     }
@@ -1281,65 +1391,92 @@ String _withTopLevelEarlyData(String path, String ed, String eh) {
   );
 }
 
-const _mihomoFingerprints = {
-  'chrome',
-  'firefox',
-  'safari',
-  'ios',
-  'android',
-  'edge',
-  '360',
-  'qq',
-  'random',
-  'randomized',
-  'chrome120',
-  'firefox120',
-  'safari16',
-  'chrome_psk',
-  'chrome_psk_shuffle',
-  'chrome_padding_psk_shuffle',
-  'chrome_pq',
-  'chrome_pq_psk',
-};
-
-const _fingerprintFamilies = [
-  ('hellochrome', 'chrome'),
-  ('hellofirefox', 'firefox'),
-  ('hellosafari', 'safari'),
-  ('helloios', 'ios'),
-  ('helloedge', 'edge'),
-  ('hello360', '360'),
-  ('helloqq', 'qq'),
-  ('helloandroid', 'android'),
-  ('hellorandomized', 'randomized'),
-  ('randomized', 'randomized'),
-];
-
-// Xray reads an empty fingerprint as Chrome; mihomo reads it, and any name it
-// does not know, as Go TLS. REALITY needs uTLS, so only plain TLS keeps opt-outs.
-String? resolveClientFingerprint(String raw, {required bool reality}) {
-  final name = raw.trim().toLowerCase();
-  if (name.isEmpty) return 'chrome';
-  if (name == 'unsafe' || name == 'none') return reality ? 'chrome' : null;
-  if (_mihomoFingerprints.contains(name)) return name;
-  if (name == 'hellochrome_120') return 'chrome120';
-  if (name == 'hellofirefox_120') return 'firefox120';
-  if (name == 'hellosafari_16_0') return 'safari16';
-  for (final (prefix, target) in _fingerprintFamilies) {
-    if (name.startsWith(prefix)) return target;
+Object? _xhttpExtra(Map<String, String> params) {
+  final sit = params['sit'] ?? '';
+  final sil = params['sil'] ?? '';
+  if (sit.isEmpty && sil.isEmpty) return params['extra'];
+  final raw = params['extra'] ?? '';
+  Object? extra;
+  if (raw.isNotEmpty) {
+    try {
+      extra = jsonDecode(raw);
+    } on FormatException {
+      return raw;
+    }
   }
-  return 'chrome';
+  final map = <String, Object?>{};
+  if (extra is Map) {
+    for (final entry in extra.entries) {
+      map[entry.key.toString()] = entry.value;
+    }
+  }
+  if (sit.isNotEmpty) map['sessionIDTable'] = sit;
+  if (sil.isNotEmpty) map['sessionIDLength'] = sil;
+  return map;
 }
 
-void applyClientFingerprint(Map<String, Object?> proxy, String raw) {
-  final reality = proxy['reality-opts'];
-  final fingerprint = resolveClientFingerprint(raw, reality: reality is Map);
-  if (fingerprint == null) return;
-  proxy['client-fingerprint'] = fingerprint;
-  // mihomo strips X25519MLKEM768 from REALITY hellos unless this is set.
-  if (fingerprint == 'chrome' && reality is Map<String, Object?>) {
-    reality['support-x25519mlkem768'] = true;
+void _applyIncySecurity(
+  Map<String, Object?> proxy,
+  Map<String, String> params, {
+  required void Function() onLoss,
+}) {
+  final pin = params['pcs'] ?? params['pinSHA256'] ?? '';
+  if (pin.isNotEmpty) proxy['fingerprint'] = pin;
+  final verifyName = params['vcn'] ?? '';
+  if (verifyName.isNotEmpty) proxy['name-cert-verify'] = verifyName;
+  final ech = xrayEchOptions(params['ech'] ?? '');
+  if (ech != null) proxy['ech-opts'] = ech;
+  final finalmask = params['fm'] ?? '';
+  if (finalmask.isNotEmpty) _applyFinalMask(proxy, finalmask, onLoss);
+  if ((params['spx'] ?? '').isNotEmpty) onLoss();
+  _applyFragment(proxy, params);
+  if ((params['noises'] ?? '').isNotEmpty) onLoss();
+}
+
+void _applyFinalMask(
+  Map<String, Object?> proxy,
+  String raw,
+  void Function() onLoss,
+) {
+  Object? decoded;
+  try {
+    decoded = jsonDecode(raw);
+  } on FormatException {
+    onLoss();
+    return;
   }
+  if (decoded is! Map) {
+    onLoss();
+    return;
+  }
+  final normalized = <String, Object?>{};
+  for (final entry in decoded.entries) {
+    normalized[entry.key.toString()] = entry.value;
+  }
+  if (normalized.remove('quicParams') != null) onLoss();
+  if (normalized.isEmpty) return;
+  proxy['finalmask'] = normalized;
+}
+
+void _applyFragment(Map<String, Object?> proxy, Map<String, String> params) {
+  final legacy = (params['fragment'] ?? '').split(',');
+  final rawPackets =
+      params['fragmentPackets'] ?? (legacy.length > 2 ? legacy[2].trim() : '');
+  final packets = rawPackets.toLowerCase() == 'all'
+      ? '1-2147483647'
+      : rawPackets;
+  final length =
+      params['fragmentLength'] ?? (legacy.isNotEmpty ? legacy[0].trim() : '');
+  final interval =
+      params['fragmentInterval'] ?? (legacy.length > 1 ? legacy[1].trim() : '');
+  final maxSplit = legacy.length > 3 ? legacy[3].trim() : '';
+  final options = <String, Object?>{
+    if (packets.isNotEmpty) 'packets': packets,
+    if (length.isNotEmpty) 'length': length,
+    if (interval.isNotEmpty) 'interval': interval,
+    if (maxSplit.isNotEmpty) 'max-split': maxSplit,
+  };
+  if (options.isNotEmpty) proxy['fragment-opts'] = options;
 }
 
 void _applyTlsExtras(
@@ -1502,10 +1639,10 @@ String emitProxiesConfig(
   return buffer.toString();
 }
 
-String _emitMap(Map<String, Object?> map) {
+String _emitMap(Map<dynamic, dynamic> map) {
   final parts = <String>[];
   map.forEach((key, value) {
-    if (value is Map<String, Object?>) {
+    if (value is Map) {
       parts.add('$key: {${_emitMap(value)}}');
     } else {
       parts.add('$key: ${_yamlString(value)}');
@@ -1536,6 +1673,6 @@ String _yamlString(Object? value) {
 }
 
 String _yamlValue(Object? value) {
-  if (value is Map<String, Object?>) return '{${_emitMap(value)}}';
+  if (value is Map) return '{${_emitMap(value)}}';
   return _yamlString(value);
 }

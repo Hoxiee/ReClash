@@ -138,6 +138,55 @@ void main() {
       }
     });
 
+    test('converts an Incy-style full Xray config with modern security', () {
+      final source = jsonEncode({
+        'inbounds': [
+          {'port': 10808, 'protocol': 'socks'},
+        ],
+        'dns': {
+          'servers': ['1.1.1.1'],
+        },
+        'outbounds': [
+          {
+            'tag': 'edge',
+            'protocol': 'vless',
+            'settings': {
+              'vnext': [
+                {
+                  'address': 'edge.example',
+                  'port': 443,
+                  'users': [
+                    {
+                      'id': '11111111-1111-4111-8111-111111111111',
+                      'encryption': 'none',
+                    },
+                  ],
+                },
+              ],
+            },
+            'streamSettings': {
+              'network': 'tcp',
+              'security': 'reality',
+              'realitySettings': {
+                'serverName': 'front.example',
+                'password': 'reality-key',
+                'shortId': 'ab',
+                'mldsa65Verify': 'mldsa-key',
+                'fingerprint': 'chrome',
+              },
+            },
+          },
+        ],
+      });
+      final result = convertSubscriptionImport(_bytes(source));
+      expect(result.format, SubscriptionFormat.xray);
+      expect(result.summary.nodes, 1);
+      expect(result.summary.ignoredSections, ['inbounds', 'dns']);
+      final text = utf8.decode(result.bytes);
+      expect(text, contains('public-key: "reality-key"'));
+      expect(text, contains('mldsa65-verify: "mldsa-key"'));
+    });
+
     test('converts sing-box nodes and records discarded config sections', () {
       const source =
           '{"inbounds":[{"type":"mixed","tag":"local"}],"dns":{"servers":[]},"route":{"rules":[]},"outbounds":[{"type":"vless","tag":"edge","server":"edge.example","server_port":443,"uuid":"11111111-1111-4111-8111-111111111111"},{"type":"unsupported","tag":"skip","server":"bad.example","server_port":1}]}';

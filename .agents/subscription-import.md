@@ -17,6 +17,13 @@ This note records the import entrypoints and route/error rules shared by the pro
 | Setup wizard | `UrlSchemeAction` offers the original input to `SetupSession` | Setup owns review and consent. The ordinary profile importer does not run while setup is active. | Setup processes the offered link through its own session lifecycle. |
 | URL inspector | `resolveProfileLink` and local decoding only | No import confirmation and no subscription fetch. | A local preview of URL/wrapper structure or decoded data. |
 
+## Xray and Happ/Incy compatibility
+
+- The local importer accepts one Xray object or an array; Happ arrays and Incy full configs (`inbounds` + `outbounds`) share the same path. `inbounds`, foreign DNS and unrepresentable routing are reported, not passed to Core.
+- Xray 26 client fields map onto Core options: REALITY `publicKey`/`password`, `mldsa65Verify` (`pqv`), TLS `pinnedPeerCertSha256` (`pcs`), `verifyPeerCertByName` (`vcn`), `echConfigList` (`ech`), per-stream `finalmask` (`fm`), fragments, VLESS encryption, VMess KCP, wireguard MTU/reserved, and XHTTP session parameters (`sit`/`sil`).
+- `spiderX` has no Core equivalent and is a reported loss. Incy body directives (`://autorouting/...`, `#announce`, profile metadata) are reported as losses; they are not silently treated as nodes. `mux`, unsupported transports and unknown outbound protocols are skipped or reported through the existing loss review.
+- Add a regression when a new Xray field has a Core counterpart; keep URI and JSON paths on the same mapping.
+
 ## Routing and retry
 
 - With the app's own connection active, the ordinary HTTP route is attempted first.

@@ -6,6 +6,7 @@ import '../routing/skipped_node.dart';
 import '../subscription/subscription_links.dart';
 import '../transport/xhttp.dart';
 import 'amnezia_config.dart';
+import 'xray_security.dart';
 
 bool isXrayConfigInput(String body) {
   final trimmed = body.trimLeft();
@@ -181,6 +182,17 @@ class _XrayConversion {
     final outbounds = config['outbounds'];
     if (outbounds is! List) return plan;
     final roles = _roleTags(config);
+    final freedomFragments = <String, Map<String, Object?>>{};
+    for (final outbound in outbounds) {
+      if (outbound is! Map<String, Object?>) continue;
+      if (outbound['protocol'] != 'freedom') continue;
+      final tag = outbound['tag']?.toString() ?? '';
+      if (tag.isEmpty) continue;
+      final fragment = _xrayFragmentOptions(
+        _asMap(_asMap(outbound['settings'])?['fragment']),
+      );
+      if (fragment.isNotEmpty) freedomFragments[tag] = fragment;
+    }
     for (var position = 0; position < outbounds.length; position++) {
       final outbound = outbounds[position];
       if (outbound is! Map<String, Object?>) continue;
@@ -219,12 +231,13 @@ class _XrayConversion {
         continue;
       }
       final sockopt = _asMap(_asMap(outbound['streamSettings'])?['sockopt']);
-      final draft = _Draft(
-        tag,
-        proxy,
-        _isGenericTag(tag, roles),
-        sockopt?['dialerProxy']?.toString() ?? '',
-      );
+      var dialerTag = sockopt?['dialerProxy']?.toString() ?? '';
+      final fragment = freedomFragments[dialerTag];
+      if (fragment != null) {
+        proxy['fragment-opts'] = fragment;
+        dialerTag = '';
+      }
+      final draft = _Draft(tag, proxy, _isGenericTag(tag, roles), dialerTag);
       plan.drafts.add(draft);
       if (tag.isNotEmpty) plan.draftsByTag.putIfAbsent(tag, () => draft);
       if (position == 0) plan.firstDraft = draft;
@@ -255,6 +268,36 @@ class _XrayConversion {
       ));
     }
     return plan;
+  }
+
+  Map<String, Object?> _xrayFragmentOptions(Map<String, Object?>? fragment) {
+    if (fragment == null) return const {};
+    final options = <String, Object?>{
+      if ((fragment['packets'] ?? '').toString().isNotEmpty)
+        'packets': fragment['packets'].toString(),
+      if ((fragment['length'] ?? '').toString().isNotEmpty)
+        'length': fragment['length'].toString(),
+      if ((fragment['interval'] ?? '').toString().isNotEmpty)
+        'interval': fragment['interval'].toString(),
+      if ((fragment['maxSplit'] ?? '').toString().isNotEmpty)
+        'max-split': fragment['maxSplit'].toString(),
+    };
+    for (final key in const ['lengths', 'delays', 'maxSplit']) {
+      final value = fragment[key];
+      if (value is List && value.isNotEmpty) {
+        if (value.length == 1) {
+          options[key == 'lengths'
+              ? 'length'
+              : key == 'delays'
+              ? 'delay'
+              : 'max-split'] = value.first
+              .toString();
+        } else {
+          _otherLosses = true;
+        }
+      }
+    }
+    return options;
   }
 
   void _readAmnezia(_Plan plan) {
@@ -468,7 +511,14 @@ class _XrayConversion {
   }
 }
 
-const _ruleConditions = {'domain', 'ip', 'port', 'network'};
+const _ruleConditions = {
+  'domain',
+  'ip',
+  'port',
+  'network',
+  'source',
+  'sourcePort',
+};
 const _ruleMetadata = {
   'type',
   'outboundTag',
@@ -510,6 +560,8 @@ List<List<_Predicate>>? _rulePredicates(Map<String, Object?> rule) {
     ('ip', _ipPredicates),
     ('port', _portPredicates),
     ('network', _networkPredicates),
+    ('source', _sourcePredicates),
+    ('sourcePort', _sourcePortPredicates),
   ]) {
     final value = rule[entry.$1];
     if (value == null) continue;
@@ -593,6 +645,35 @@ _Predicate? _ipPredicate(String value) {
     return _Predicate(
       'IP-CIDR6,${value.contains('/') ? value : '$value/128'}',
       ip: true,
+    );
+  }
+  return null;
+}
+
+List<_Predicate> _sourcePortPredicates(Object? value) => [
+  for (final port in _splitList(value))
+    if (port.trim().isNotEmpty) _Predicate('SRC-PORT,${port.trim()}'),
+];
+
+List<_Predicate> _sourcePredicates(Object? value) {
+  if (value is! List) return const [];
+  return [for (final entry in value) ?_sourcePredicate(entry.toString())];
+}
+
+_Predicate? _sourcePredicate(String value) {
+  if (value.startsWith('geoip:')) {
+    final code = value.substring(6);
+    if (code.isEmpty || code.startsWith('!')) return null;
+    return _Predicate('SRC-GEOIP,${code == 'private' ? 'lan' : code}');
+  }
+  if (_ipv4Pattern.hasMatch(value)) {
+    return _Predicate(
+      'SRC-IP-CIDR,${value.contains('/') ? value : '$value/32'}',
+    );
+  }
+  if (_ipv6Pattern.hasMatch(value)) {
+    return _Predicate(
+      'SRC-IP-CIDR,${value.contains('/') ? value : '$value/128'}',
     );
   }
   return null;
@@ -838,8 +919,19 @@ Map<String, Object?>? _convertVless(
   };
   final flow = sanitizeVlessFlow(users['flow']?.toString() ?? '');
   if (flow != null) proxy['flow'] = flow;
+  final encryption = users['encryption']?.toString() ?? '';
+  if (encryption.isNotEmpty &&
+      encryption != 'none' &&
+      isValidVlessEncryption(encryption)) {
+    proxy['encryption'] = encryption;
+  }
 
-  _applyStreamSettings(proxy, outbound['streamSettings'], fallbackSni: server);
+  _applyStreamSettings(
+    proxy,
+    outbound['streamSettings'],
+    type: 'vless',
+    fallbackSni: server,
+  );
   return proxy;
 }
 
@@ -872,7 +964,16 @@ Map<String, Object?>? _convertVmess(
     'udp': true,
   };
 
-  _applyStreamSettings(proxy, outbound['streamSettings'], fallbackSni: server);
+  if (users['globalPadding'] == true) proxy['global-padding'] = true;
+  if (users['authenticatedLength'] == true) {
+    proxy['authenticated-length'] = true;
+  }
+  _applyStreamSettings(
+    proxy,
+    outbound['streamSettings'],
+    type: 'vmess',
+    fallbackSni: server,
+  );
   return proxy;
 }
 
@@ -890,6 +991,7 @@ Map<String, Object?>? _convertTrojan(
   _applyStreamSettings(
     proxy,
     outbound['streamSettings'],
+    type: 'trojan',
     fallbackSni: proxy['server']! as String,
   );
   return proxy;
@@ -906,19 +1008,36 @@ Map<String, Object?>? _convertShadowsocks(
     credentialKey: 'password',
     extraKey: 'method',
   );
+  if (proxy != null && _asMap(outbound['streamSettings']) != null) {
+    proxy['x-import-losses'] = true;
+  }
   return proxy;
 }
 
-Map<String, Object?>? _convertHttp(
-  Map<String, Object?> outbound,
-  String name,
-) => _fromServersList(outbound, name, 'http', credentialKey: null);
+Map<String, Object?>? _convertHttp(Map<String, Object?> outbound, String name) {
+  final proxy = _fromServersList(outbound, name, 'http', credentialKey: null);
+  if (proxy == null) return null;
+  _applyStreamSettings(
+    proxy,
+    outbound['streamSettings'],
+    type: 'http',
+    fallbackSni: proxy['server']! as String,
+  );
+  return proxy;
+}
 
 Map<String, Object?>? _convertSocks(
   Map<String, Object?> outbound,
   String name,
 ) {
   final proxy = _fromServersList(outbound, name, 'socks5', credentialKey: null);
+  if (proxy == null) return null;
+  _applyStreamSettings(
+    proxy,
+    outbound['streamSettings'],
+    type: 'socks5',
+    fallbackSni: proxy['server']! as String,
+  );
   return proxy;
 }
 
@@ -975,12 +1094,15 @@ Map<String, Object?>? _convertWireguardOutbound(
   if (settings is! Map<String, Object?>) return null;
 
   final addressList = settings['address'];
-  final address = addressList is List && addressList.isNotEmpty
-      ? addressList.first.toString()
+  final addressText = addressList is List
+      ? [for (final entry in addressList) entry.toString()].join(',')
       : addressList?.toString();
-  if (secretKeyOf(settings) == null || address == null || address.isEmpty) {
+  if (secretKeyOf(settings) == null ||
+      addressText == null ||
+      addressText.isEmpty) {
     return null;
   }
+  final address = splitWireguardAddresses(addressText);
   final secretKey = secretKeyOf(settings)!;
 
   final peers = _firstOf(settings['peers']);
@@ -994,12 +1116,20 @@ Map<String, Object?>? _convertWireguardOutbound(
   if (split == null) return null;
   final (server, port) = split;
 
+  final allowedIps = peers?['allowedIPs'] ?? settings['allowedIPs'];
   final peer = <String, Object?>{
     'server': server,
     'port': port,
     if ((publicKey ?? '').isNotEmpty) 'public-key': publicKey,
     if ((presharedKey ?? '').isNotEmpty) 'pre-shared-key': presharedKey,
-    'allowed-ips': ['0.0.0.0/0', '::/0'],
+    if (allowedIps is List && allowedIps.isNotEmpty)
+      'allowed-ips': [for (final entry in allowedIps) entry.toString()]
+    else
+      'allowed-ips': ['0.0.0.0/0', '::/0'],
+    if (peers?['reserved'] is List && (peers!['reserved'] as List).isNotEmpty)
+      'reserved': [
+        for (final entry in peers['reserved'] as List) _toInt(entry) ?? 0,
+      ],
   };
 
   return <String, Object?>{
@@ -1008,8 +1138,11 @@ Map<String, Object?>? _convertWireguardOutbound(
     'server': server,
     'port': port,
     'private-key': secretKey,
-    'ip': address,
-    'ipv6': '',
+    'ip': address['ip'],
+    'ipv6': address['ipv6'],
+    if (_toInt(settings['mtu']) case final mtu? when mtu > 0) 'mtu': mtu,
+    if (_toInt(settings['workers']) case final workers? when workers > 0)
+      'workers': workers,
     'peers': [peer],
     'udp': true,
   };
@@ -1021,53 +1154,38 @@ String? secretKeyOf(Map<String, Object?> settings) =>
 void _applyStreamSettings(
   Map<String, Object?> proxy,
   Object? streamSettings, {
+  required String type,
   required String fallbackSni,
 }) {
   if (streamSettings is! Map<String, Object?>) return;
 
-  final security = streamSettings['security']?.toString() ?? 'none';
-  final tlsSettings = _asMap(streamSettings['tlsSettings']);
-  final sni =
-      (tlsSettings?['serverName'] ??
-              streamSettings['servername'] ??
-              streamSettings['host'] ??
-              fallbackSni)
-          .toString();
-
-  if (security == 'reality') {
-    final reality = _asMap(streamSettings['realitySettings']);
-    final publicKey = reality?['publicKey']?.toString();
-    final shortId = reality?['shortId']?.toString();
-    proxy['tls'] = true;
-    proxy['servername'] = reality?['serverName']?.toString() ?? sni;
-    proxy['reality-opts'] = <String, Object?>{
-      'public-key': publicKey ?? '',
-      if ((shortId ?? '').isNotEmpty) 'short-id': shortId,
-    };
-    applyClientFingerprint(proxy, reality?['fingerprint']?.toString() ?? '');
-  } else if (security == 'tls') {
-    proxy['tls'] = true;
-    if (sni.isNotEmpty) proxy['servername'] = sni;
-    if (tlsSettings != null) {
-      final alpn = tlsSettings['alpn'];
-      if (alpn is List && alpn.isNotEmpty) {
-        proxy['alpn'] = [for (final entry in alpn) entry.toString()];
+  if (applyXraySecurity(proxy, streamSettings, type: type)) {
+    proxy['x-import-losses'] = true;
+  }
+  if (applyXraySockopt(proxy, streamSettings['sockopt'])) {
+    proxy['x-import-losses'] = true;
+  }
+  final finalmask = _asMap(streamSettings['finalmask']);
+  if (finalmask != null) {
+    if (type == 'vless' || type == 'trojan') {
+      final supported = <String, Object?>{...finalmask};
+      if (_present(supported.remove('quicParams'))) {
+        proxy['x-import-losses'] = true;
       }
-      if (tlsSettings['allowInsecure'] == true) {
-        proxy['skip-cert-verify'] = true;
-      }
+      proxy['finalmask'] = supported;
+    } else {
+      proxy['x-import-losses'] = true;
     }
-    applyClientFingerprint(
-      proxy,
-      tlsSettings?['fingerprint']?.toString() ?? '',
-    );
+  }
+  if (proxy['tls'] == true &&
+      proxy[xrayServerNameKey(type)] == null &&
+      fallbackSni.isNotEmpty) {
+    proxy[xrayServerNameKey(type)] = fallbackSni;
   }
 
   final network = streamSettings['network']?.toString() ?? 'tcp';
-  if (network != 'tcp') {
-    if (!_applyXrayTransport(proxy, network, streamSettings)) {
-      proxy['x-unsupported-transport'] = network;
-    }
+  if (!_applyXrayTransport(proxy, network, streamSettings)) {
+    proxy['x-unsupported-transport'] = network;
   }
 }
 
@@ -1077,16 +1195,62 @@ bool _applyXrayTransport(
   Map<String, Object?> streamSettings,
 ) {
   switch (network) {
+    case 'tcp' || 'raw':
+      final tcp = _asMap(streamSettings['tcpSettings']);
+      final header = _asMap(tcp?['header']);
+      final headerType = header?['type']?.toString() ?? 'none';
+      if (headerType == 'http') {
+        final request = _asMap(header?['request']);
+        proxy['network'] = 'http';
+        final rawPath = request?['path'];
+        final paths = switch (rawPath) {
+          final List<Object?> values => [
+            for (final entry in values)
+              if (entry.toString().isNotEmpty) entry.toString(),
+          ],
+          final String value when value.isNotEmpty => [value],
+          _ => const <String>[],
+        };
+        final rawHeaders = request?['headers'];
+        proxy['http-opts'] = {
+          if ((request?['method'] ?? '').toString().isNotEmpty)
+            'method': request!['method'].toString(),
+          if (paths.isNotEmpty) 'path': paths,
+          if (rawHeaders is Map && rawHeaders.isNotEmpty)
+            'headers': <String, Object?>{
+              for (final entry in rawHeaders.entries)
+                entry.key.toString(): switch (entry.value) {
+                  final List values => [
+                    for (final value in values) value.toString(),
+                  ],
+                  final value? => [value.toString()],
+                  null => const <String>[],
+                },
+            },
+        };
+      } else if (headerType != 'none') {
+        return false;
+      }
+      if (_present(tcp?['acceptProxyProtocol'])) {
+        proxy['x-import-losses'] = true;
+      }
+      return true;
     case 'ws':
       final ws = _asMap(streamSettings['wsSettings']);
-      final headers = _asMap(ws?['headers']);
+      final headers = _stringHeaders(ws?['headers']);
       proxy['network'] = 'ws';
       proxy['ws-opts'] = {
         if ((ws?['path'] ?? '').toString().isNotEmpty)
           'path': ws!['path'].toString(),
-        if (headers != null && (headers['Host'] ?? '').toString().isNotEmpty)
-          'headers': {'Host': headers['Host'].toString()},
+        if (headers.isNotEmpty) 'headers': headers,
+        if (ws?['maxEarlyData'] is num)
+          'max-early-data': (ws!['maxEarlyData'] as num).toInt(),
+        if ((ws?['earlyDataHeaderName'] ?? '').toString().isNotEmpty)
+          'early-data-header-name': ws!['earlyDataHeaderName'].toString(),
       };
+      for (final key in const ['useBrowserForwarding', 'ed']) {
+        if (_present(ws?[key])) proxy['x-import-losses'] = true;
+      }
       return true;
     case 'grpc':
       final grpc = _asMap(streamSettings['grpcSettings']);
@@ -1095,12 +1259,21 @@ bool _applyXrayTransport(
       if (serviceName.isNotEmpty) {
         proxy['grpc-opts'] = {'grpc-service-name': serviceName};
       }
+      for (final key in const [
+        'multiMode',
+        'idle_timeout',
+        'health_check_timeout',
+        'permit_without_stream',
+        'initial_windows_size',
+        'authority',
+        'user_agent',
+      ]) {
+        if (_present(grpc?[key])) proxy['x-import-losses'] = true;
+      }
       return true;
     case 'h2' || 'http':
       final h2 = _asMap(
-        streamSettings['httpSettings'] ??
-            streamSettings['h2Settings'] ??
-            streamSettings['kcpSettings'],
+        streamSettings['httpSettings'] ?? streamSettings['h2Settings'],
       );
       final host = h2?['host'];
       proxy['network'] = 'h2';
@@ -1110,16 +1283,44 @@ bool _applyXrayTransport(
         if (host is List && host.isNotEmpty) 'host': [host.first.toString()],
         if (host is String && host.isNotEmpty) 'host': [host],
       };
+      for (final key in const ['method', 'headers']) {
+        if (_present(h2?[key])) proxy['x-import-losses'] = true;
+      }
       return true;
     case 'httpupgrade':
       final upgrade = _asMap(streamSettings['httpupgradeSettings']);
+      final headers = _stringHeaders(upgrade?['headers']);
+      if ((upgrade?['host'] ?? '').toString().isNotEmpty) {
+        headers['Host'] = upgrade!['host'].toString();
+      }
       proxy['network'] = 'ws';
       proxy['ws-opts'] = {
         'v2ray-http-upgrade': true,
         if ((upgrade?['path'] ?? '').toString().isNotEmpty)
           'path': upgrade!['path'].toString(),
-        if ((upgrade?['host'] ?? '').toString().isNotEmpty)
-          'headers': {'Host': upgrade!['host'].toString()},
+        if (headers.isNotEmpty) 'headers': headers,
+      };
+      return true;
+    case 'kcp':
+      if (proxy['type'] != 'vmess') return false;
+      final kcp = _asMap(streamSettings['kcpSettings']);
+      final header = _asMap(kcp?['header']);
+      proxy['network'] = 'kcp';
+      proxy['mkcp-opts'] = {
+        if (_toInt(kcp?['mtu']) case final mtu? when mtu > 0) 'mtu': mtu,
+        if (_toInt(kcp?['tti']) case final tti? when tti > 0) 'tti': tti,
+        if (_toInt(kcp?['uplinkCapacity']) case final up? when up > 0)
+          'uplink-capacity': up,
+        if (_toInt(kcp?['downlinkCapacity']) case final down? when down > 0)
+          'downlink-capacity': down,
+        if (kcp?['congestion'] is bool) 'congestion': kcp!['congestion'],
+        if (_toInt(kcp?['readBufferSize']) case final read? when read > 0)
+          'read-buffer': read,
+        if (_toInt(kcp?['writeBufferSize']) case final write? when write > 0)
+          'write-buffer': write,
+        if ((kcp?['seed'] ?? '').toString().isNotEmpty) 'seed': kcp!['seed'],
+        if ((header?['type'] ?? '').toString().isNotEmpty)
+          'header': header!['type'],
       };
       return true;
     case 'xhttp' || 'splithttp':
@@ -1127,20 +1328,55 @@ bool _applyXrayTransport(
       final xhttp = _asMap(
         streamSettings['xhttpSettings'] ?? streamSettings['splithttpSettings'],
       );
+      var extra = xhttp?['extra'];
+      final topDownload = xhttp?['downloadSettings'];
+      if (topDownload != null) {
+        final merged = <String, Object?>{};
+        if (extra is Map) {
+          for (final entry in extra.entries) {
+            merged[entry.key.toString()] = entry.value;
+          }
+        }
+        merged['downloadSettings'] = topDownload;
+        extra = merged;
+      }
       final converted = convertXhttpOptions(
         path: xhttp?['path']?.toString() ?? '',
         host: xhttp?['host']?.toString() ?? '',
         mode: xhttp?['mode']?.toString() ?? '',
-        extra: xhttp?['extra'],
+        extra: extra,
       );
+      final options = converted.options;
+      final headers = _stringHeaders(xhttp?['headers']);
+      if (headers.isNotEmpty) options['headers'] = headers;
+      for (final key in const ['sessionIDTable', 'sessionIDLength']) {
+        if (_present(xhttp?[key])) options[key] = xhttp![key];
+      }
       proxy['network'] = 'xhttp';
-      proxy['xhttp-opts'] = converted.options;
+      proxy['xhttp-opts'] = options;
       if (converted.hasLosses) proxy['x-import-losses'] = true;
       return true;
     default:
       return false;
   }
 }
+
+Map<String, String> _stringHeaders(Object? value) {
+  final headers = _asMap(value);
+  if (headers == null) return {};
+  return {
+    for (final entry in headers.entries)
+      if (entry.value != null && entry.value.toString().isNotEmpty)
+        entry.key: entry.value.toString(),
+  };
+}
+
+bool _present(Object? value) => switch (value) {
+  null || '' || false => false,
+  List() => value.isNotEmpty,
+  Map() => value.isNotEmpty,
+  _ => true,
+};
 
 Map<String, Object?>? _asMap(Object? value) =>
     value is Map<String, Object?> ? value : null;

@@ -96,6 +96,20 @@ void main() {
     }
   });
 
+  test(
+    'reports Incy routing and metadata directives instead of hiding them',
+    () {
+      final result = _import(
+        '$_vless\n'
+        '://autorouting/onadd/https://example.com/routing.json\n'
+        '#announce: maintenance\n',
+      );
+      expect(result.format, SubscriptionFormat.shareLinks);
+      expect(result.summary.nodes, 1);
+      expect(result.summary.hasLosses, isTrue);
+    },
+  );
+
   test('subscription schemes include every direct Core share-link scheme', () {
     expect(shareLinkSchemes, containsAll(common.shareLinkSchemes));
   });
@@ -276,7 +290,6 @@ void main() {
         'servername': 'cdn.example',
         'client-fingerprint': 'chrome',
         'alpn': ['h2'],
-        'skip-cert-verify': false,
         'path': '/download',
         'host': 'cdn.example',
         'headers': {'X-Download': 'required'},

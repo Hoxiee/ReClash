@@ -39,7 +39,6 @@ Map<String, Object?> _vless(
       'serverName': 'cdn.example',
       'publicKey': 'pbk$server',
       'shortId': 'ab',
-      'spiderX': '/',
       'fingerprint': ?fingerprint,
     },
     'sockopt': ?sockopt,
@@ -367,7 +366,7 @@ void main() {
       expect(_group(doc, 'PROXY')['proxies'], ['Chained', 'DIRECT']);
     });
 
-    test('reports a freedom dialer as a loss', () {
+    test('maps a freedom fragment dialer to fragment-opts', () {
       final result = tryConvertXrayConfigValue({
         'remarks': 'Fragmented',
         'outbounds': [
@@ -381,9 +380,14 @@ void main() {
           },
         ],
       });
-      expect(result, isA<LossyConversion>());
-      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
       expect(result.config, isNot(contains('dialer-proxy')));
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'Fragmented');
+      expect(proxy['fragment-opts'], {
+        'packets': 'tlshello',
+        'length': '10-20',
+      });
     });
 
     test('is not a loss without dialers', () {
@@ -539,6 +543,19 @@ void main() {
       );
     });
 
+    test('reports spiderX as a conversion loss', () {
+      final proxy = _vless('edge-a', 0);
+      ((proxy['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>)['spiderX'] =
+          '/';
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [proxy],
+      });
+      expect(result, isA<LossyConversion>());
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      expect(result.config, isNot(contains('spider-x')));
+    });
+
     test('treats an empty fingerprint as chrome', () {
       expect(node(outbound(''))['client-fingerprint'], 'chrome');
     });
@@ -577,11 +594,156 @@ void main() {
       );
     });
 
-    test('applies chrome to TLS without tlsSettings fingerprint', () {
-      expect(
-        node(outbound(null, security: 'tls'))['client-fingerprint'],
-        'chrome',
+    test('maps TLS certificate pins, name verification and ECH', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {
+          'serverName': 'front.example',
+          'pinnedPeerCertSha256': 'AA:BB',
+          'verifyPeerCertByName': 'front.example,alt.example',
+          'echConfigList': 'udp://1.1.1.1',
+        };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'edge-a',
       );
+      expect(proxy['fingerprint'], 'AA:BB');
+      expect(proxy['name-cert-verify'], 'front.example,alt.example');
+      expect(proxy['ech-opts'], {
+        'enable': true,
+        'query-server': 'udp://1.1.1.1',
+      });
+    });
+
+    test('maps the new REALITY password and ML-DSA fields', () {
+      final raw = _vless('edge-a', 0);
+      final reality =
+          (raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>;
+      reality
+        ..remove('publicKey')
+        ..['password'] = 'new-public-key'
+        ..['mldsa65Verify'] = 'mldsa-key';
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'edge-a',
+      );
+      final options = proxy['reality-opts'] as YamlMap;
+      expect(options['public-key'], 'new-public-key');
+      expect(options['mldsa65-verify'], 'mldsa-key');
+    });
+
+    test('maps sockopt and WS headers, and reports keepalive loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream
+        ..['network'] = 'ws'
+        ..['wsSettings'] = {
+          'path': '/ws',
+          'headers': {'Host': 'front.example', 'X-Test': 'yes'},
+          'maxEarlyData': 2048,
+          'earlyDataHeaderName': 'Sec-WebSocket-Protocol',
+        }
+        ..['sockopt'] = {
+          'tcpFastOpen': true,
+          'tcpMptcp': true,
+          'mark': 123,
+          'interface': 'eth0',
+          'tcpKeepAliveInterval': 15,
+        };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      expect(proxy['tfo'], true);
+      expect(proxy['mptcp'], true);
+      expect(proxy['routing-mark'], 123);
+      expect(proxy['interface-name'], 'eth0');
+      expect(proxy['ws-opts'], {
+        'path': '/ws',
+        'headers': {'Host': 'front.example', 'X-Test': 'yes'},
+        'max-early-data': 2048,
+        'early-data-header-name': 'Sec-WebSocket-Protocol',
+      });
+    });
+
+    test('maps stream finalmask on VLESS and Trojan only', () {
+      final raw = _vless('edge-a', 0);
+      (raw['streamSettings']! as Map<String, Object?>)['finalmask'] = {
+        'tcp': [
+          {
+            'type': 'fragment',
+            'settings': {'packets': 'tlshello'},
+          },
+        ],
+      };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'edge-a',
+      );
+      expect(proxy['finalmask'], {
+        'tcp': [
+          {
+            'type': 'fragment',
+            'settings': {'packets': 'tlshello'},
+          },
+        ],
+      });
+    });
+
+    test('keeps TLS HTTP header, WS headers and source rules', () {
+      final raw = _vless('edge-a', 0);
+      (raw['streamSettings']! as Map<String, Object?>)
+        ..['network'] = 'tcp'
+        ..['tcpSettings'] = {
+          'header': {
+            'type': 'http',
+            'request': {
+              'method': 'POST',
+              'path': ['/upload'],
+              'headers': {
+                'Host': ['front.example'],
+              },
+            },
+          },
+        };
+      final doc = _convert({
+        'outbounds': [raw],
+        'routing': {
+          'rules': [
+            {
+              'type': 'field',
+              'source': ['10.0.0.0/8'],
+              'sourcePort': '53',
+              'outboundTag': 'direct',
+            },
+          ],
+        },
+      });
+      final proxy = _proxy(doc, 'edge-a');
+      expect(proxy['network'], 'http');
+      expect(proxy['http-opts'], {
+        'method': 'POST',
+        'path': ['/upload'],
+        'headers': {
+          'Host': ['front.example'],
+        },
+      });
+      expect(doc['rules'], [
+        'AND,((SRC-IP-CIDR,10.0.0.0/8),(SRC-PORT,53)),DIRECT',
+        'MATCH,PROXY',
+      ]);
     });
   });
 }

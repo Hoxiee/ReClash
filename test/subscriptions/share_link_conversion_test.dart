@@ -68,6 +68,94 @@ void main() {
     });
   });
 
+  group('Incy and Happ advanced parameters', () {
+    test('maps REALITY pins, ECH, fragments and finalmask', () {
+      final fm = Uri.encodeComponent(
+        jsonEncode({
+          'tcp': [
+            {'type': 'fragment', 'packets': 'tlshello', 'length': '10-20'},
+          ],
+        }),
+      );
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@edge.example:443?security=reality'
+        '&pbk=key&sid=ab&pqv=mldsa&pcs=AA%3ABB'
+        '&vcn=front.example&ech=${Uri.encodeComponent('udp://1.1.1.1')}'
+        '&fragmentPackets=tlshello&fragmentLength=10-20'
+        '&fragmentInterval=5-10&fm=$fm&spx=%2F#Edge',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasOtherLosses, isTrue);
+      final proxy = (loadYaml(result.config) as YamlMap)['proxies'] as YamlList;
+      final node = proxy.single as YamlMap;
+      expect(node['fingerprint'], 'AA:BB');
+      expect(node['name-cert-verify'], 'front.example');
+      expect(node['ech-opts'], {
+        'enable': true,
+        'query-server': 'udp://1.1.1.1',
+      });
+      expect(node['fragment-opts'], {
+        'packets': 'tlshello',
+        'length': '10-20',
+        'interval': '5-10',
+      });
+      final reality = node['reality-opts'] as YamlMap;
+      expect(reality['public-key'], 'key');
+      expect(reality['short-id'], 'ab');
+      expect(reality['mldsa65-verify'], 'mldsa');
+      expect(node['finalmask'], isA<YamlMap>());
+    });
+
+    test('maps Trojan REALITY and certificate verification', () {
+      final proxy = _one(
+        'trojan://pw@edge.example:443?security=reality&pbk=key&sid=ab'
+        '&pqv=mldsa&sni=front.example&vcn=front.example&pcs=AA%3ABB#T',
+      );
+      expect(proxy['tls'], isTrue);
+      expect(proxy['sni'], 'front.example');
+      expect(proxy['fingerprint'], 'AA:BB');
+      expect(proxy['name-cert-verify'], 'front.example');
+      final reality = proxy['reality-opts'] as YamlMap;
+      expect(reality['public-key'], 'key');
+      expect(reality['short-id'], 'ab');
+      expect(reality['mldsa65-verify'], 'mldsa');
+    });
+
+    test('maps XHTTP session parameters into extra', () {
+      final proxy = _one(
+        'vless://$_uuid@edge.example:443?type=xhttp&sit=uuid'
+        '&sil=16-32&path=%2Fx&host=front.example#X',
+      );
+      final options = proxy['xhttp-opts'] as YamlMap;
+      expect(options['path'], '/x');
+      expect(options['host'], 'front.example');
+      expect(options['session-table'], 'uuid');
+      expect(options['session-length'], '16-32');
+    });
+
+    test('maps the legacy Happ fragment tuple', () {
+      final proxy = _one(
+        'vless://$_uuid@edge.example:443?security=tls'
+        '&fragment=10-20,5-10,tlshello,3-6#F',
+      );
+      expect(proxy['fragment-opts'], {
+        'packets': 'tlshello',
+        'length': '10-20',
+        'interval': '5-10',
+        'max-split': '3-6',
+      });
+    });
+
+    test('accepts Hysteria2 port and hop aliases', () {
+      final proxy = _one(
+        'hysteria2://pw@edge.example:443?mport=443,5000-5010'
+        '&mportHopInt=30&sni=front.example#H',
+      );
+      expect(proxy['ports'], '443,5000-5010');
+      expect(proxy['hop-interval'], 30);
+    });
+  });
+
   group('TLS fingerprints', () {
     test('defaults a missing fp to chrome on TLS', () {
       final proxy = _one(
