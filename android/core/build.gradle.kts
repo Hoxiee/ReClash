@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.Exec
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.ByteArrayOutputStream
+import java.util.Properties
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
@@ -66,11 +67,9 @@ val dartExecutablePath =
         val localProperties = rootProject.file("local.properties")
         val localFlutterSdk =
             if (localProperties.exists()) {
-                localProperties
-                    .readLines()
-                    .firstOrNull { it.startsWith("flutter.sdk=") }
-                    ?.substringAfter('=')
-                    ?.trim()
+                Properties()
+                    .apply { localProperties.inputStream().use { load(it) } }
+                    .getProperty("flutter.sdk")
             } else {
                 null
             }
