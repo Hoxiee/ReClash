@@ -323,10 +323,24 @@ class ProfileItem extends ConsumerWidget {
     );
   }
 
-  void _handleInspect(BuildContext context, SubscriptionSnapshot snapshot) {
+  void _handleInspect(
+    BuildContext context,
+    WidgetRef ref,
+    SubscriptionSnapshot snapshot,
+  ) {
+    final reports = ref.read(currentProfileIdProvider) == profile.id
+        ? ref.read(rcxStatusStateProvider)?.strategies ??
+              const <String, RcxStrategyReport>{}
+        : const <String, RcxStrategyReport>{};
     showSheet<void>(
       context: context,
-      builder: (_) => SubscriptionInspectorSheet(snapshot: snapshot),
+      builder: (_) => SubscriptionInspectorSheet(
+        snapshot: snapshot,
+        strategyIssues: {
+          for (final MapEntry(:key, :value) in reports.entries)
+            if (value.issue.isNotEmpty) key: value.issue,
+        },
+      ),
     );
   }
 
@@ -514,7 +528,7 @@ class ProfileItem extends ConsumerWidget {
                 glyph: AppGlyphs.code,
                 label: appLocalizations.subscriptionInspector,
                 onPressed: () {
-                  _handleInspect(context, snapshot);
+                  _handleInspect(context, ref, snapshot);
                 },
               ),
             CommonPopupMenuItem(

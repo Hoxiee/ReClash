@@ -97,19 +97,13 @@ void main() {
       WidgetTester tester,
       Map<String, Object?> value, {
       Set<String> taken = const {},
-      bool advanced = false,
     }) async {
       tester.view.physicalSize = const Size(412, 1400);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
         TestApp(
-          overrides: [
-            rcxRoutingActionProvider.overrideWith(_FakeAction.new),
-            appSettingProvider.overrideWithBuild(
-              (_, _) => AppSettingProps(routingAdvanced: advanced),
-            ),
-          ],
+          overrides: [rcxRoutingActionProvider.overrideWith(_FakeAction.new)],
           homeBuilder: (_) => Builder(
             builder: (context) => TextButton(
               onPressed: () => editRoute(
@@ -227,7 +221,7 @@ void main() {
       await open(tester, const {
         'name': 'Video',
         'match': ['GEOSITE,youtube'],
-      }, advanced: true);
+      });
 
       await tester.tap(find.text(l.rcxHowToChoose));
       await _pumpFrames(tester);
@@ -241,7 +235,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('a route without a pool has no Servers row in simple mode', (
+    testWidgets('a route without a pool still offers its servers row', (
       tester,
     ) async {
       await open(tester, const {
@@ -252,8 +246,10 @@ void main() {
       await tester.tap(find.text(l.rcxHowToChoose));
       await _pumpFrames(tester);
 
-      expect(find.text(l.rcxServers), findsNothing);
-      expect(find.text(l.rcxPoolExclude), findsNothing);
+      expect(find.text(l.rcxServers), findsOneWidget);
+      await tester.tap(find.text(l.rcxServers));
+      await _pumpFrames(tester);
+      expect(find.text(l.rcxPoolExclude), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

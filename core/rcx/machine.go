@@ -38,6 +38,9 @@ type Topology struct {
 	// picker outside a smart group.
 	Leaves []string
 	Routes AppliedRoutes
+	// Strategies names every group whose selection a strategy owns; the
+	// engine leaves their bindings alone.
+	Strategies []string
 	// User, when set, arrives with the config it was applied with, so the
 	// routes it wants are never compared against an older config.
 	User *UserLayer
@@ -249,6 +252,10 @@ func (m *machine) rebuild(now time.Time) {
 		topo[g.Name] = g
 	}
 	m.applyScenario(bound, sources)
+	for _, name := range m.topology.Strategies {
+		delete(bound, name)
+		delete(sources, name)
+	}
 
 	var all []Node
 	for _, name := range slices.Sorted(maps.Keys(bound)) {

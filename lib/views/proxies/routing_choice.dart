@@ -14,7 +14,6 @@ import 'package:material_ui/material_ui.dart';
 import 'routing.dart';
 import 'routing_condition.dart';
 import 'routing_country.dart';
-import 'routing_advanced.dart';
 import 'routing_ladder.dart';
 import 'routing_route.dart' show RoutingLivePage;
 import 'routing_studio.dart';
@@ -261,8 +260,7 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
 
   bool _can(RcxChoiceField field) => _writer(field) >= 0;
 
-  bool _shown(RcxChoiceField field, bool advanced) =>
-      _can(field) && (advanced || _find(field) != null);
+  bool _shown(RcxChoiceField field) => _can(field);
 
   Object? _own(RcxChoiceField field) {
     final index = _writer(field);
@@ -485,15 +483,14 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
   List<Widget> _serversPage(AppLocalizations l) {
     final names = _servers();
     final include = _can(RcxChoiceField.include);
-    final advanced = ref.read(appSettingProvider).routingAdvanced;
     final conditions = [
-      if (_shown(RcxChoiceField.include, advanced))
+      if (_shown(RcxChoiceField.include))
         _conditionRow(
           RcxChoiceField.include,
           l.rcxPoolInclude,
           l.rcxCondAnyServer,
         ),
-      if (_shown(RcxChoiceField.exclude, advanced))
+      if (_shown(RcxChoiceField.exclude))
         _conditionRow(RcxChoiceField.exclude, l.rcxPoolExclude, l.none),
     ];
     return [
@@ -538,7 +535,6 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     ref.watch(rcxLibraryProvider);
-    final advanced = watchRoutingAdvanced(ref);
     return generateSection(
       title: widget.title,
       footer: widget.errors.values.firstOrNull ?? widget.footer,
@@ -557,7 +553,7 @@ class _RoutingChoiceSectionState extends ConsumerState<RoutingChoiceSection> {
               if (_can(RcxChoiceField.profile)) _behaviourRow(l),
               if (_can(RcxChoiceField.prefer)) _orderRow(l),
               if (_can(RcxChoiceField.include) ||
-                  _shown(RcxChoiceField.exclude, advanced))
+                  _shown(RcxChoiceField.exclude))
                 _serversRow(l),
               if (_can(RcxChoiceField.feel))
                 _optionsRow(l, RcxChoiceField.feel),

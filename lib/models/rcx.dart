@@ -73,7 +73,10 @@ abstract class RcxBinding with _$RcxBinding {
 @freezed
 abstract class RcxUserLayer with _$RcxUserLayer {
   const factory RcxUserLayer({
+    @Default('') String profileScope,
     @Default({}) Map<String, RcxBinding> groups,
+    @Default({}) Map<String, String> strategies,
+    @Default({}) Map<String, RcxLocalStrategyGroup> localGroups,
     @Default({}) Map<String, String> profiles,
     @Default({}) Map<String, String> scenarios,
     @JsonKey(includeIfNull: false) String? scenario,
@@ -96,6 +99,32 @@ abstract class RcxUserLayer with _$RcxUserLayer {
       return const RcxUserLayer();
     }
   }
+}
+
+@freezed
+abstract class RcxLocalStrategyGroup with _$RcxLocalStrategyGroup {
+  const factory RcxLocalStrategyGroup({
+    @Default(false) bool includeAll,
+    @Default([]) List<String> members,
+    @Default([]) List<String> providers,
+  }) = _RcxLocalStrategyGroup;
+
+  factory RcxLocalStrategyGroup.fromJson(Map<String, Object?> json) =>
+      _$RcxLocalStrategyGroupFromJson(json);
+}
+
+@freezed
+abstract class RcxStrategyReport with _$RcxStrategyReport {
+  const factory RcxStrategyReport({
+    @Default('') String source,
+    @Default('') String issue,
+    @Default(false) bool empty,
+    @Default(false) bool offered,
+    @Default('') String selected,
+  }) = _RcxStrategyReport;
+
+  factory RcxStrategyReport.fromJson(Map<String, Object?> json) =>
+      _$RcxStrategyReportFromJson(json);
 }
 
 @freezed
@@ -273,6 +302,8 @@ abstract class RcxStatus with _$RcxStatus {
   const factory RcxStatus({
     @Default(false) bool running,
     @Default('stopped') String mode,
+    @Default(false) bool strategySupport,
+    @Default({}) Map<String, RcxStrategyReport> strategies,
     @Default('') String network,
     @Default([]) List<RcxGroupStatus> groups,
     @Default(RcxEnergy()) RcxEnergy energy,
@@ -515,6 +546,7 @@ abstract class RcxStudioResult with _$RcxStudioResult {
     @Default('') String text,
     Map<String, Object?>? profile,
     Map<String, Object?>? scenario,
+    @Default([]) List<List<String>> strategyLevels,
     RcxProfileInfo? info,
     @Default([]) List<RcxIssue> errors,
     @Default([]) List<RcxIssue> warnings,

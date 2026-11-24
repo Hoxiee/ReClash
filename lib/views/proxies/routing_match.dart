@@ -8,8 +8,6 @@ import 'package:reclash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'routing_advanced.dart';
-
 /// A service a route can take in one tap; its [heads] are mihomo rule heads
 /// without a target, checked against the bundled GEOSITE and GEOIP data.
 class RcxTrafficPreset {
@@ -236,8 +234,6 @@ class _RouteTrafficSectionState extends ConsumerState<RouteTrafficSection> {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final custom = _customOf(match);
-    final advanced = watchRoutingAdvanced(ref);
-    final showCustom = advanced || custom.isNotEmpty;
     final footer = widget.footer ?? l.rcxMatchHint;
     final presets = [
       for (final (index, preset) in rcxTrafficPresets.indexed)
@@ -247,7 +243,7 @@ class _RouteTrafficSectionState extends ConsumerState<RouteTrafficSection> {
       children: [
         generateSection(
           title: l.rcxMatchServices,
-          footer: showCustom ? null : footer,
+          footer: custom.isEmpty ? footer : null,
           items: [
             Wrap(
               spacing: 8,
@@ -270,24 +266,20 @@ class _RouteTrafficSectionState extends ConsumerState<RouteTrafficSection> {
             ),
           ],
         ),
-        if (showCustom)
-          generateAnimatedSection(
-            title: l.rcxMatchCustom,
-            footer: footer,
-            items: [
-              for (final head in custom)
-                _entryRow(context, l, head, match.indexOf(head)),
-              if (advanced)
-                FormRow(
-                  key: const ValueKey('add'),
-                  title: l.rcxMatchAdd,
-                  leading: EntryButton.add(
-                    onPressed: () => _edit(context, null),
-                  ),
-                  onPressed: () => _edit(context, null),
-                ),
-            ],
-          ),
+        generateAnimatedSection(
+          title: l.rcxMatchCustom,
+          footer: footer,
+          items: [
+            for (final head in custom)
+              _entryRow(context, l, head, match.indexOf(head)),
+            FormRow(
+              key: const ValueKey('add'),
+              title: l.rcxMatchAdd,
+              leading: EntryButton.add(onPressed: () => _edit(context, null)),
+              onPressed: () => _edit(context, null),
+            ),
+          ],
+        ),
       ],
     );
   }

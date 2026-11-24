@@ -118,14 +118,35 @@ RcxGroupStatus? rcxGroup(Ref ref, String groupName) {
   return ref.watch(rcxStatusStateProvider.select((s) => s?.group(groupName)));
 }
 
+/// Whether the running Core takes selection strategies and some profile is
+/// active, so a group can be scripted.
+final canScriptGroupsProvider = Provider<bool>((ref) {
+  return ref.watch(
+        rcxStatusStateProvider.select(
+          (status) => status?.strategySupport == true,
+        ),
+      ) &&
+      ref.watch(currentProfileProvider.select((profile) => profile != null));
+});
+
 /// The layer the Core runs: the current profile's choices plus the user's
 /// own profiles and the hosts its subscription came from.
 @riverpod
 RcxUserLayer currentRoutingLayer(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final library = ref.watch(rcxProfilesProvider);
+  return routingLayerFor(
+    ref.watch(currentProfileProvider),
+    ref.watch(rcxProfilesProvider),
+  );
+}
+
+RcxUserLayer routingLayerFor(
+  Profile? profile,
+  Map<String, RcxUserProfile> library,
+) {
   final layer = profile?.overrides.routing ?? const RcxUserLayer();
   return layer.copyWith(
+    profileScope: profile?.id.toString() ?? '-',
+    scenarioOff: layer.scenarioOff || (layer.scenario?.trim().isEmpty ?? true),
     profiles: {
       for (final MapEntry(:key, :value) in library.entries)
         if (value.kind != 'scenario') key: value.text,
@@ -182,6 +203,127 @@ class RcxRoutingAction extends _$RcxRoutingAction {
     });
   }
 
+  Future<bool> setStrategy(String name, String? source) async {
+    final profile = ref.read(currentProfileProvider);
+    if (profile == null ||
+        ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return false;
+    }
+    final previous = profile.overrides.routing.strategies[name];
+    RcxUserLayer write(RcxUserLayer routing, String? value) {
+      final strategies = Map<String, String>.of(routing.strategies);
+      if (value == null) {
+        strategies.remove(name);
+      } else {
+        strategies[name] = value;
+      }
+      return routing.copyWith(strategies: strategies);
+    }
+
+    await _updateLayer((layer) => write(layer, source), push: false);
+    if (!ref.mounted || ref.read(currentProfileProvider)?.id != profile.id) {
+      return false;
+    }
+    final pending = _push();
+    final revision = _policyRevision;
+    final status = await pending;
+    if (!ref.mounted ||
+        revision != _policyRevision ||
+        ref.read(currentProfileProvider)?.id != profile.id) {
+      return false;
+    }
+    final report = status?.strategies[name];
+    final accepted =
+        status?.strategySupport == true &&
+        (source == null ||
+            (source.isEmpty
+                ? (report?.source.isEmpty ?? true)
+                : report?.source == 'user'));
+    final latest = ref.read(currentProfileProvider)?.overrides.routing;
+    if (!accepted && latest?.strategies[name] == source) {
+      await _updateLayer((layer) => write(layer, previous), push: false);
+    }
+    return accepted;
+  }
+
+  Future<bool> setLocalStrategyGroup(
+    String name,
+    RcxLocalStrategyGroup? group,
+    String? source,
+  ) async {
+    final profile = ref.read(currentProfileProvider);
+    if (profile == null) return false;
+    final current = profile.overrides.routing;
+    final groups = Map<String, RcxLocalStrategyGroup>.of(current.localGroups);
+    final strategies = Map<String, String>.of(current.strategies);
+    if (group == null || source == null) {
+      groups.remove(name);
+      strategies.remove(name);
+    } else {
+      groups[name] = group;
+      strategies[name] = source;
+    }
+    if (group != null && group == current.localGroups[name]) {
+      return setStrategy(name, source);
+    }
+    await _updateLayer(
+      (layer) => layer.copyWith(localGroups: groups, strategies: strategies),
+      push: false,
+    );
+    final setup = ref.read(setupActionProvider.notifier);
+    final applied = await setup.applyProfile(force: true);
+    if (!ref.mounted || ref.read(currentProfileProvider)?.id != profile.id) {
+      return false;
+    }
+    final accepted = applied && await _strategyGroupApplied(name, group);
+    if (!accepted &&
+        ref.mounted &&
+        ref.read(currentProfileProvider)?.id == profile.id) {
+      final latest = ref.read(currentProfileProvider)?.overrides.routing;
+      if (latest?.localGroups[name] == group &&
+          latest?.strategies[name] == source) {
+        final restoredGroups = Map<String, RcxLocalStrategyGroup>.of(
+          latest!.localGroups,
+        )..remove(name);
+        final restoredStrategies = Map<String, String>.of(latest.strategies)
+          ..remove(name);
+        if (current.localGroups[name] case final original?) {
+          restoredGroups[name] = original;
+        }
+        if (current.strategies[name] case final original?) {
+          restoredStrategies[name] = original;
+        }
+        await _updateLayer(
+          (layer) => layer.copyWith(
+            localGroups: restoredGroups,
+            strategies: restoredStrategies,
+          ),
+          push: false,
+        );
+        await setup.applyProfile(force: true);
+      }
+    }
+    return accepted;
+  }
+
+  Future<bool> _strategyGroupApplied(
+    String name,
+    RcxLocalStrategyGroup? group,
+  ) async {
+    try {
+      final status = await ref.read(coreHandlerProvider).rcxStatus();
+      final report = status.strategies[name];
+      if (group == null) return report == null;
+      return report?.source == 'user' && report?.issue.isEmpty == true;
+    } catch (error) {
+      commonPrint.log(
+        'checking strategy group failed: $error',
+        logLevel: LogLevel.warning,
+      );
+      return false;
+    }
+  }
+
   /// Picks the auto control scenario [id] for the current subscription, or
   /// turns auto control off with null. A new pick takes the mode back.
   Future<void> setScenario(String? id) {
@@ -214,8 +356,9 @@ class RcxRoutingAction extends _$RcxRoutingAction {
   }
 
   Future<void> _updateLayer(
-    RcxUserLayer Function(RcxUserLayer routing) update,
-  ) async {
+    RcxUserLayer Function(RcxUserLayer routing) update, {
+    bool push = true,
+  }) async {
     final profile = ref.read(currentProfileProvider);
     if (profile == null) return;
     final layer = update(profile.overrides.routing);
@@ -226,7 +369,7 @@ class RcxRoutingAction extends _$RcxRoutingAction {
             overrides: profile.overrides.copyWith(routing: layer),
           ),
         );
-    await _push();
+    if (push) await _push();
   }
 
   /// Saves the user's profile [name], keeping the replaced text in its
@@ -251,18 +394,24 @@ class RcxRoutingAction extends _$RcxRoutingAction {
     await _push();
   }
 
-  Future<void> _push() async {
-    if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
+  int _policyRevision = 0;
+
+  Future<RcxStatus?> _push() async {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) return null;
+    final revision = ++_policyRevision;
+    final layer = ref.read(currentRoutingLayerProvider);
     try {
-      ref
-          .read(rcxStatusStateProvider.notifier)
-          .apply(
-            await ref
-                .read(coreHandlerProvider)
-                .rcxSetPolicy(ref.read(currentRoutingLayerProvider)),
-          );
+      final status = await ref.read(coreHandlerProvider).rcxSetPolicy(layer);
+      if (ref.mounted &&
+          revision == _policyRevision &&
+          layer.profileScope ==
+              ref.read(currentRoutingLayerProvider).profileScope) {
+        ref.read(rcxStatusStateProvider.notifier).apply(status);
+      }
+      return status;
     } catch (error) {
       commonPrint.log('rcxSetPolicy failed: $error', logLevel: LogLevel.error);
+      return null;
     }
   }
 

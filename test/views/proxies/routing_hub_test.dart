@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
@@ -7,6 +6,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/routing.dart';
 import 'package:reclash/views/proxies/routing_route.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
@@ -53,8 +53,12 @@ const _library = [
 ];
 
 class _FixedStatus extends RcxStatusState {
+  _FixedStatus(this.status);
+
+  final RcxStatus? status;
+
   @override
-  RcxStatus? build() => _status;
+  RcxStatus? build() => status;
 }
 
 class _FakeAction extends RcxRoutingAction {
@@ -121,6 +125,9 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(412, 915),
     List<RcxProfileInfo> library = _library,
+    RcxStatus? status = _status,
+    Profile profile = const Profile(id: 1, autoUpdateDuration: Duration.zero),
+    Widget view = const RoutingScenariosView(),
     Widget Function(Widget child)? wrap,
   }) async {
     tester.view.physicalSize = size;
@@ -132,19 +139,13 @@ void main() {
       TestApp(
         overrides: [
           coreStatusProvider.overrideWithValue(CoreStatus.connected),
-          profilesProvider.overrideWith(
-            () => TestProfiles(const [
-              Profile(id: 1, autoUpdateDuration: Duration.zero),
-            ]),
-          ),
+          profilesProvider.overrideWith(() => TestProfiles([profile])),
           currentProfileIdProvider.overrideWithBuild((_, _) => 1),
-          rcxStatusStateProvider.overrideWith(_FixedStatus.new),
+          rcxStatusStateProvider.overrideWith(() => _FixedStatus(status)),
           rcxLibraryProvider.overrideWith((_) async => library),
           rcxRoutingActionProvider.overrideWith(() => action),
         ],
-        child:
-            wrap?.call(const RoutingSettingsView()) ??
-            const RoutingSettingsView(),
+        child: wrap?.call(view) ?? view,
       ),
     );
     await _pumpFrames(tester);
@@ -166,13 +167,14 @@ void main() {
     await tester.pump();
   }
 
-  Future<void> openLibrary(WidgetTester tester) async {
-    await reveal(tester, find.text(l.rcxHubLibrary));
-    await tester.tap(find.text(l.rcxHubLibrary));
+  Future<void> openLibrary(WidgetTester tester, {bool scenarios = true}) async {
+    final row = find.text(scenarios ? l.rcxHubLibrary : l.rcxGroupProfiles);
+    if (scenarios) await reveal(tester, row);
+    await tester.tap(row);
     await _pumpFrames(tester);
   }
 
-  testWidgets('one page shows the scenario, its routes and the groups', (
+  testWidgets('the scenarios page shows routes and their live selections', (
     tester,
   ) async {
     await pumpHub(tester);
@@ -182,9 +184,25 @@ void main() {
     expect(_text('Video'), findsOneWidget);
     expect(find.textContaining('DE-1', findRichText: true), findsOneWidget);
     expect(_text('Bank'), findsOneWidget);
-    await reveal(tester, find.textContaining('NL-2', findRichText: true));
-    expect(find.textContaining('NL-2', findRichText: true), findsOneWidget);
+    expect(find.textContaining('NL-2', findRichText: true), findsNothing);
+    await reveal(tester, find.text(l.rcxHubLibrary));
     expect(find.text(l.rcxHubLibrary), findsOneWidget);
+  });
+
+  testWidgets('scripted groups have their own page', (tester) async {
+    await pumpHub(tester, view: const ScriptedGroupsView());
+
+    expect(_text('Proxy'), findsOneWidget);
+    expect(find.textContaining('NL-2', findRichText: true), findsOneWidget);
+    expect(_text('Video'), findsNothing);
+    expect(_text(l.rcxHubAuto), findsNothing);
+  });
+
+  testWidgets('scripted groups name the missing core', (tester) async {
+    await pumpHub(tester, view: const ScriptedGroupsView(), status: null);
+
+    expect(find.text(l.rcxHubNeedsCore), findsOneWidget);
+    expect(find.text(l.rcxGroupProfiles), findsNothing);
   });
 
   for (final scenario in [true, false]) {
@@ -195,27 +213,25 @@ void main() {
           tester,
           size: const Size(320, 740),
           library: const [],
+          view: scenario
+              ? const RoutingScenariosView()
+              : const ScriptedGroupsView(),
         );
         expect(find.byTooltip(l.more), findsNothing);
 
-        await openLibrary(tester);
+        await openLibrary(tester, scenarios: scenario);
 
-        expect(find.text(l.rcxNewScenario).hitTestable(), findsOneWidget);
-        expect(find.text(l.rcxNewProfile).hitTestable(), findsOneWidget);
-        expect(find.text(l.import).hitTestable(), findsOneWidget);
-        final importRow = find.ancestor(
-          of: find.text(l.import),
-          matching: find.byType(ListItem),
-        );
+        final create = find.text(scenario ? l.rcxNewScenario : l.rcxNewProfile);
+        expect(create.hitTestable(), findsOneWidget);
         expect(
-          tester.getTopLeft(find.byType(SegmentedControl<bool>)).dy,
-          greaterThan(tester.getBottomLeft(importRow).dy),
+          find.text(scenario ? l.rcxNewProfile : l.rcxNewScenario),
+          findsNothing,
         );
+        expect(find.text(l.import).hitTestable(), findsOneWidget);
+        expect(find.byType(SegmentedControl<bool>), findsNothing);
         expect(tester.takeException(), isNull);
 
-        await tester.tap(
-          find.text(scenario ? l.rcxNewScenario : l.rcxNewProfile),
-        );
+        await tester.tap(create);
         await _pumpFrames(tester);
 
         expect(
@@ -254,9 +270,6 @@ void main() {
     await _pumpFrames(tester);
     expect(opened, [isA<ScenarioEditor>()]);
 
-    await tester.tap(find.text(l.rcxNewProfile).hitTestable());
-    await _pumpFrames(tester);
-    expect(opened, [isA<ScenarioEditor>(), isA<RoutingStudio>()]);
     expect(tester.takeException(), isNull);
   });
 
@@ -273,9 +286,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a library tap runs a scenario and the pencil edits it', (
-    tester,
-  ) async {
+  testWidgets('a library tap opens a scenario for editing', (tester) async {
     final action = await pumpHub(
       tester,
       library: [
@@ -289,35 +300,53 @@ void main() {
       ],
     );
     await openLibrary(tester);
+    expect(_text('Fastest'), findsNothing);
 
     await tester.tap(_text('Whitelists').hitTestable());
     await _pumpFrames(tester);
-    expect(action.scenarios, ['builtin/whitelist']);
-    expect(find.byType(ScenarioEditor), findsNothing);
-
-    await tester.tap(_text('Every group').hitTestable());
-    await _pumpFrames(tester);
-    expect(action.scenarios, ['builtin/whitelist']);
-
-    await tester.tap(find.byTooltip(l.rcxDuplicate).first);
-    await _pumpFrames(tester);
+    expect(action.scenarios, isEmpty);
     expect(find.byType(ScenarioEditor), findsOneWidget);
   });
 
-  testWidgets('the advanced settings toggle in the hub turns advanced on', (
+  testWidgets('advanced settings open both RCX pages', (tester) async {
+    await pumpHub(tester, view: const AdvancedConfigView());
+
+    expect(find.text(l.rcxScenarios), findsOneWidget);
+    expect(find.text(l.rcxSmartGroups), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('turning scenarios back on resumes the last choice', (
     tester,
   ) async {
-    await pumpHub(tester);
+    final action = await pumpHub(
+      tester,
+      status: const RcxStatus(),
+      profile: Profile.normal().copyWith(
+        id: 1,
+        overrides: const ProfileOverrides(
+          routing: RcxUserLayer(scenario: _scenarioId),
+        ),
+      ),
+    );
 
-    await reveal(tester, find.text(l.rcxAdvancedMode));
-    await tester.tap(find.text(l.rcxAdvancedMode));
+    await tester.tap(find.byKey(const ValueKey('master')).last);
     await _pumpFrames(tester);
 
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(RoutingSettingsView)),
-    );
-    expect(container.read(appSettingProvider).routingAdvanced, isTrue);
-    expect(tester.takeException(), isNull);
+    expect(action.scenarios, [_scenarioId]);
+  });
+
+  testWidgets('enabling scenarios requires a choice', (tester) async {
+    final action = await pumpHub(tester, status: const RcxStatus());
+
+    await tester.tap(find.text(l.rcxHubAuto));
+    await _pumpFrames(tester);
+    expect(find.text(l.rcxHubChange), findsOneWidget);
+    expect(action.scenarios, isEmpty);
+
+    await tester.tap(_text('Every group').hitTestable());
+    await _pumpFrames(tester);
+    expect(action.scenarios, [_scenarioId]);
   });
 
   testWidgets('rarer scenario settings open on their own pages', (

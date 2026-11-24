@@ -105,7 +105,11 @@ func (rcxRuntime) Select(group string, via []string, node string) error {
 	for i := len(chain) - 2; i >= 0; i-- {
 		selector, err := selectableGroup(chain[i])
 		if err == nil {
-			err = selector.Set(chain[i+1])
+			if wrapped, ok := selector.(*scriptedSelector); ok && wrapped.state.Load() != nil {
+				err = errors.New("group is using a connection strategy")
+			} else {
+				err = selector.Set(chain[i+1])
+			}
 		}
 		if err != nil {
 			requestRcxTopologyRefresh()
@@ -214,7 +218,7 @@ func (p *nodeProbes) owns(node string) bool {
 type rcxHost struct{}
 
 func (rcxHost) Publish(status rcx.Status) {
-	sendMessage(RcxStatusMessage, status)
+	sendMessage(RcxStatusMessage, withStrategyReports(status))
 }
 
 type rcxFileStore struct{ name string }
@@ -315,6 +319,7 @@ func rcxRefreshTopology() {
 	}
 	topology, flat := rcxTopologyOf(proxies, names, smart, rcxReferences(proxies, names, rules))
 	topology.Subscription, topology.Main = subscription, main
+	topology.Strategies = strategyGroupList(proxies)
 	topology.Leaves, topology.Routes, topology.User = rcxLeaves(proxies), routes, user
 	geo := rcxGeo()
 	for i := range topology.Groups {
@@ -547,10 +552,11 @@ func rcxBundlePath(path string) string {
 func rcxReadBundle(path string) rcx.SubscriptionLayer {
 	var manifest struct {
 		Routing struct {
-			Profiles  map[string]any         `yaml:"profiles"`
-			Bindings  map[string]rcx.Binding `yaml:"bindings"`
-			Scenarios map[string]any         `yaml:"scenarios"`
-			Scenario  string                 `yaml:"scenario"`
+			Strategies yaml.Node              `yaml:"strategies"`
+			Profiles   map[string]any         `yaml:"profiles"`
+			Bindings   map[string]rcx.Binding `yaml:"bindings"`
+			Scenarios  map[string]any         `yaml:"scenarios"`
+			Scenario   string                 `yaml:"scenario"`
 		} `yaml:"routing"`
 	}
 	layer := rcx.SubscriptionLayer{Groups: map[string]rcx.Binding{}, Profiles: map[string]any{}, Scenarios: map[string]any{}}
@@ -563,6 +569,26 @@ func rcxReadBundle(path string) rcx.SubscriptionLayer {
 	maps.Copy(layer.Profiles, routing.Profiles)
 	maps.Copy(layer.Scenarios, routing.Scenarios)
 	layer.Scenario = routing.Scenario
+	layer.Strategies = make(map[string]string)
+	if routing.Strategies.Kind == 0 {
+		return layer
+	}
+	var strategies map[string]yaml.Node
+	if err := routing.Strategies.Decode(&strategies); err != nil {
+		layer.StrategyIssues = map[string]rcx.StrategyReport{"routing.strategies": {Issue: err.Error()}}
+		return layer
+	}
+	for _, name := range slices.Sorted(maps.Keys(strategies)) {
+		if len(layer.Strategies) >= rcx.MaxStrategies {
+			layer.StrategyIssues = map[string]rcx.StrategyReport{"routing.strategies": {Issue: "too many strategies"}}
+			break
+		}
+		text, err := rcx.StrategySource(strategies[name])
+		if err != nil {
+			text = "invalid"
+		}
+		layer.Strategies[name] = text
+	}
 	return layer
 }
 
@@ -593,7 +619,54 @@ func rcxSaveUser(layer rcx.UserLayer) {
 	}
 }
 
-func rcxSetUser(layer rcx.UserLayer) {
+var latestRCXPolicyCall uint64
+
+func withLatestRoutingPolicy(params *SetupParams) *SetupParams {
+	if params.callSequence == 0 || params.callSequence >= latestRCXPolicyCall ||
+		params.Rcx == nil || params.Rcx.ProfileScope == "" || params.Rcx.ProfileScope != appliedRCXProfileScope {
+		return params
+	}
+	user := rcxCurrentUser()
+	strategies := maps.Clone(user.Strategies)
+	if strategies == nil {
+		strategies = make(map[string]string)
+	}
+	for name := range user.LocalGroups {
+		if _, kept := params.Rcx.LocalGroups[name]; !kept {
+			delete(strategies, name)
+		}
+	}
+	for name, group := range params.Rcx.LocalGroups {
+		if current, exists := user.LocalGroups[name]; !exists || !sameLocalGroup(group, current) {
+			if source, exists := params.Rcx.Strategies[name]; exists {
+				strategies[name] = source
+			} else {
+				delete(strategies, name)
+			}
+		}
+	}
+	user.LocalGroups, user.Strategies = params.Rcx.LocalGroups, strategies
+	merged := *params
+	merged.Rcx = &user
+	return &merged
+}
+
+func rcxSetUser(layer rcx.UserLayer, sequence uint64) error {
+	configMu.Lock()
+	defer configMu.Unlock()
+	if sequence != 0 && sequence < latestRCXPolicyCall {
+		return nil
+	}
+	if currentConfig != nil && layer.ProfileScope != "" && appliedRCXProfileScope != "" && layer.ProfileScope != appliedRCXProfileScope {
+		return &MethodError{Code: "rcx_scope_changed", Message: "the routing profile changed"}
+	}
+	if err := validateChangedStrategies(rcxCurrentUser(), layer); err != nil {
+		return &MethodError{Code: "rcx_strategy_rejected", Message: err.Error()}
+	}
+	if sequence != 0 {
+		latestRCXPolicyCall = sequence
+	}
+	updateLiveGroupStrategies(layer)
 	rcxMu.Lock()
 	rcxUser = layer
 	rcxMu.Unlock()
@@ -603,4 +676,5 @@ func rcxSetUser(layer rcx.UserLayer) {
 	}
 	// Which nested selectors flatten depends on which groups are smart.
 	requestRcxTopologyRefresh()
+	return nil
 }

@@ -1,14 +1,21 @@
 # Auto routing
 
-RCX is the ReClash server-selection engine: smart groups pick their own server by profile, and a scenario steers the whole connection.
+RCX is the ReClash server-selection engine: scripted groups pick their own server by profile, and a scenario steers the whole connection.
+
+## In the app
+
+Open **Tools → Advanced configuration → Auto routing** and choose **Scenarios** or **Scripted groups**.
+
+- **Scenarios** starts off for each subscription. Turn on **Use a scenario** and choose one to control its routes, proxy groups and tunnel mode. Use **Scenario library** to create, edit or import scenarios.
+- **Scripted groups** lists active strategies and the existing behaviour library. Open **Behaviour** on a selector in **Proxies** for **Auto-select server**. To add your own group, choose **Add group** under **Scripted groups** or in the **Proxies** menu. In the group editor, the **Filter** row opens optional name and country rules. **Edit YAML** is in the overflow menu.
 
 ## Model
 
-RCX works on the select groups of the running config. Selection never changes a group's members: the engine picks one as a manual tap would, and records why. Only scenario routes add groups and rules, at config apply.
+A group strategy chooses an eligible member for each new connection or UDP session and owns the group's selection; an RCX binding for the same group stays stored but does not apply while the strategy runs. Rules and scenarios can target a scripted group by name.
 
 | Object | What it is | Where it comes from |
 | --- | --- | --- |
-| Smart group | A select group whose member the engine chooses. | A binding from the subscription, the user or the running scenario. |
+| Scripted group | A proxy group with a selection strategy. | The subscription or the current profile. |
 | Profile | How one group chooses (the app calls it a behaviour): pool, tiers, ranking, switching, checks, network kinds. | Built in, provider, or user. |
 | Scenario | Whole-connection behavior: group programs, routes, tunnel mode per network kind. | Same three sources; one per subscription. |
 | Route | Rules placed before the config's rules; matched traffic goes to its own group, an existing target, or `DIRECT`. | The running scenario, at config apply. |
@@ -62,7 +69,7 @@ Profiles and scenarios have separate namespaces, keyed as `<source>/<name>`.
 | `builtin/bypass-ru` | advanced | Tiers: passes `open` (`https://api.telegram.org/`) with a non-RU exit; any non-RU exit; any working server last. Kinds `portal` (paused) and `open`; direct split on `home fail and foreign ok`. |
 | `builtin/bypass-ir`, `builtin/bypass-cn` | advanced | Same tiers for IR and CN, checked on `youtube.com` and `google.com` `generate_204`; kind `portal` only. |
 | `builtin/whitelist-ru` | advanced | Extends `bypass-ru`; adds tag `bypass` and kind `whitelist` (`home ok and foreign fail`); `bypass` servers first. |
-| `builtin/every-group` (scenario) | — | `groups: {'*': {}}`: every select group except `GLOBAL` becomes smart with its binding's profile. The app runs it when auto routing is turned on and no scenario was chosen. |
+| `builtin/every-group` (scenario) | — | `groups: {'*': {}}`: every select group except `GLOBAL` uses scripted selection with its binding’s profile. |
 | `builtin/whitelist-ru` (scenario) | — | `$main` runs `bypass-ru` without `bypass` servers; on kind `whitelist` the mode becomes global and `GLOBAL` runs `simple` over `bypass` servers. |
 
 ## Glossary
@@ -80,7 +87,7 @@ Profiles and scenarios have separate namespaces, keyed as `<source>/<name>`.
 | Diagnostic | Direct device probe, outside the tunnel, that recognizes network kinds. |
 | Check | Request through a server to see whether it opens something (`passes(id)`). |
 | Exit country | Country a server's traffic leaves from, agreed by independent sources. |
-| Direct split | Routing `DIRECT`-matched connections through a smart group while direct access is broken. |
+| Direct split | Routing `DIRECT`-matched connections through a scripted group while direct access is broken. |
 | Control | Auto, pinned or manual, per group. |
 | Journal | The last 200 engine events: switches, failures, control, network, mode and direct-split changes. |
 

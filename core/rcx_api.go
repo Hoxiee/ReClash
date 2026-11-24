@@ -15,12 +15,18 @@ type RcxJournalParams struct {
 var errRcxNotReady = &MethodError{Code: "rcx_not_ready", Message: "routing engine is not initialized"}
 
 func init() {
-	registerMethod(rcxSetPolicyMethod, withFallible(func(layer rcx.UserLayer) (rcx.Status, error) {
-		rcxSetUser(layer)
-		return rcxCall(func(e *rcx.Engine) (rcx.Status, error) { return e.Status(), nil })
-	}))
+	registerMethod(rcxSetPolicyMethod, func(call *MethodCall) (any, error) {
+		layer, err := decodeArguments[rcx.UserLayer](call)
+		if err != nil {
+			return nil, err
+		}
+		if err := rcxSetUser(layer, call.seq); err != nil {
+			return rcx.Status{}, err
+		}
+		return rcxCall(func(e *rcx.Engine) (rcx.Status, error) { return withStrategyReports(e.Status()), nil })
+	})
 	registerMethod(rcxStatusMethod, func(*MethodCall) (any, error) {
-		return rcxCall(func(e *rcx.Engine) (rcx.Status, error) { return e.Status(), nil })
+		return rcxCall(func(e *rcx.Engine) (rcx.Status, error) { return withStrategyReports(e.Status()), nil })
 	})
 	registerMethod(rcxExplainMethod, withFallible(func(group string) (rcx.Explanation, error) {
 		return rcxCall(func(e *rcx.Engine) (rcx.Explanation, error) { return e.Explain(group) })
@@ -50,6 +56,9 @@ func init() {
 		return rcxCall(func(e *rcx.Engine) ([]rcx.ProfileInfo, error) { return e.Profiles(), nil })
 	})
 	registerMethod(rcxStudioMethod, withFallible(func(req rcx.StudioRequest) (rcx.StudioResult, error) {
+		if req.Kind == "strategy" {
+			return strategyStudio(req), nil
+		}
 		return rcxCall(func(e *rcx.Engine) (rcx.StudioResult, error) { return e.Studio(req) })
 	}))
 }

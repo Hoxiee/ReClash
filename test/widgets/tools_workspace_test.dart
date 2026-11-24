@@ -1711,20 +1711,35 @@ void main() {
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
-  testWidgets('auto routing opens inside the Tools workspace', (tester) async {
-    final container = await pumpTools(tester, size: const Size(1800, 1000));
-    await tester.tap(find.text(currentAppLocalizations.rcxTitle).first);
-    await tester.pumpAndSettle();
+  for (final (page, view) in [
+    (ToolPage.routing, RoutingScenariosView),
+    (ToolPage.scriptedGroups, ScriptedGroupsView),
+  ]) {
+    testWidgets('${page.name} opens under Advanced inside Tools', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: const Size(1800, 1000));
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.advanced));
+      await tester.pumpAndSettle();
+      final l = currentAppLocalizations;
+      await tester.tap(
+        find.text(page == ToolPage.routing ? l.rcxScenarios : l.rcxSmartGroups),
+      );
+      await tester.pumpAndSettle();
 
-    expect(container.read(toolsSessionProvider).path, [
-      const ToolRoute(ToolPage.routing),
-    ]);
-    expect(
-      ModalRoute.of(tester.element(find.byType(RoutingSettingsView)))!.settings,
-      isA<Page<void>>(),
-    );
-    expect(tester.takeException(), isNull);
-  });
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.advanced),
+        ToolRoute(page),
+      ]);
+      expect(
+        ModalRoute.of(tester.element(find.byType(view)))!.settings,
+        isA<Page<void>>(),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('a scenario opens on the auto routing path inside Tools', (
     tester,
@@ -1735,7 +1750,7 @@ void main() {
         .open(const ToolRoute(ToolPage.routing));
     await tester.pumpAndSettle();
     unawaited(
-      openScenarioEditor(tester.element(find.byType(RoutingSettingsView))),
+      openScenarioEditor(tester.element(find.byType(RoutingScenariosView))),
     );
     // Without a Core the scenario never lints, so its bar keeps loading.
     await tester.pump();
@@ -1751,7 +1766,8 @@ void main() {
     final title = tester.widget<NavigationTitle>(
       find.descendant(of: editor, matching: find.byType(NavigationTitle)),
     );
-    final routing = currentAppLocalizations.rcxTitle;
+    final l = currentAppLocalizations;
+    final routing = '${l.advancedConfig} › ${l.rcxScenarios}';
     expect(title.previous, routing);
     expect(title.title, startsWith('$routing › '));
     final pane = tester.getRect(
@@ -1775,7 +1791,7 @@ void main() {
       await tester.pumpAndSettle();
       unawaited(
         BaseNavigator.push<void>(
-          tester.element(find.byType(RoutingSettingsView)),
+          tester.element(find.byType(RoutingScenariosView)),
           const CommonScaffold(title: 'Group', body: Text('group body')),
         ),
       );
@@ -1788,7 +1804,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final routing = currentAppLocalizations.rcxTitle;
+      final l = currentAppLocalizations;
+      final routing = '${l.advancedConfig} › ${l.rcxScenarios}';
       final host = tester.state<ToolsViewState>(find.byType(ToolsView));
       if (size.width < 960) {
         expect(find.byType(NavigationTitle), findsNothing);
@@ -1802,16 +1819,17 @@ void main() {
         );
         expect(title.previous, '$routing › Group');
         expect(title.title, '$routing › Group › Profile');
-        title.onSelect!(1);
+        title.onSelect!(2);
         await tester.pumpAndSettle();
         expect(find.text('profile body'), findsNothing);
         expect(find.text('group body'), findsOneWidget);
         tester
             .widget<NavigationTitle>(find.byType(NavigationTitle).last)
-            .onSelect!(0);
+            .onSelect!(1);
         await tester.pumpAndSettle();
         expect(find.text('group body'), findsNothing);
         expect(container.read(toolsSessionProvider).path, [
+          const ToolRoute(ToolPage.advanced),
           const ToolRoute(ToolPage.routing),
         ]);
       }

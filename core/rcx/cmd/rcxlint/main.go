@@ -53,8 +53,11 @@ func lintFile(file string) bool {
 	if routing := child(root, "routing"); routing != nil {
 		return lintRouting(file, data, routing)
 	}
-	if child(root, "profiles") != nil || child(root, "scenarios") != nil {
+	if child(root, "profiles") != nil || child(root, "scenarios") != nil || child(root, "strategies") != nil {
 		return lintRouting(file, data, root)
+	}
+	if child(root, "version") != nil && child(root, "levels") != nil {
+		return lintStrategy(file, "", string(data))
 	}
 	name := strings.TrimSuffix(strings.TrimSuffix(filepath.Base(file), ".yaml"), ".rcx")
 	// Only a scenario names groups, routes or a tunnel mode.
@@ -70,10 +73,11 @@ func lintFile(file string) bool {
 // top level of a document that only carries profiles and scenarios.
 func lintRouting(file string, data []byte, root *yaml.Node) bool {
 	var bundle struct {
-		Profiles  map[string]any         `yaml:"profiles"`
-		Bindings  map[string]rcx.Binding `yaml:"bindings"`
-		Scenarios map[string]any         `yaml:"scenarios"`
-		Scenario  string                 `yaml:"scenario"`
+		Strategies map[string]yaml.Node   `yaml:"strategies"`
+		Profiles   map[string]any         `yaml:"profiles"`
+		Bindings   map[string]rcx.Binding `yaml:"bindings"`
+		Scenarios  map[string]any         `yaml:"scenarios"`
+		Scenario   string                 `yaml:"scenario"`
 	}
 	if err := root.Decode(&bundle); err != nil {
 		fmt.Printf("%s: error: %v\n", file, err)
@@ -85,6 +89,19 @@ func lintRouting(file string, data []byte, root *yaml.Node) bool {
 	}
 	layer := rcx.SubscriptionLayer{Groups: bundle.Bindings, Profiles: bundle.Profiles, Scenarios: bundle.Scenarios}
 	ok := true
+	if len(bundle.Strategies) > rcx.MaxStrategies {
+		fmt.Printf("%s: error: too many strategies\n", file)
+		ok = false
+	}
+	for _, name := range slices.Sorted(maps.Keys(bundle.Strategies)) {
+		text, err := rcx.StrategySource(bundle.Strategies[name])
+		if err != nil {
+			fmt.Printf("%s: error: strategy %s: %v\n", file, name, err)
+			ok = false
+		} else if !lintStrategy(file, name, text) {
+			ok = false
+		}
+	}
 	for _, name := range slices.Sorted(maps.Keys(bundle.Profiles)) {
 		text, err := yaml.Marshal(bundle.Profiles[name])
 		if err != nil {
@@ -197,4 +214,12 @@ func locate(node *yaml.Node, path string) int {
 		line, node = next.Line, next
 	}
 	return line
+}
+
+func lintStrategy(file, name, text string) bool {
+	if _, err := rcx.ParseStrategy(text); err != nil {
+		fmt.Printf("%s: error: strategy %s: %v\n", file, name, err)
+		return false
+	}
+	return true
 }

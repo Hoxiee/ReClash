@@ -145,7 +145,12 @@ ProviderConfigResult parseProviderConfig(String source, String locale) {
           );
         case 'routing':
           routing = _routing(value);
-          if (routing == null) warnings.add('Invalid routing section');
+          if (routing == null) {
+            warnings.add('Invalid routing section');
+          } else if (routing.containsKey('strategies') &&
+              routing['strategies'] is! Map<String, Object?>) {
+            warnings.add('Invalid routing.strategies section');
+          }
         case 'updates':
           preferUpdateMirror = _preferUpdateMirror(value, warnings);
         case 'chains':
@@ -583,7 +588,13 @@ Object? _convert(SubscriptionField field, Object raw, List<String> tags) {
   }
 }
 
-const _routingKeys = {'profiles', 'scenarios', 'scenario', 'bindings'};
+const _routingKeys = {
+  'profiles',
+  'scenarios',
+  'scenario',
+  'bindings',
+  'strategies',
+};
 
 Map<String, Object?>? _routing(Object? value) {
   if (value is! Map<String, Object?> ||

@@ -21,11 +21,12 @@ void main() {
     await mockPreferences();
   });
 
-  ProviderContainer make({RcxStatus? status, Mode? own}) {
+  ProviderContainer make({RcxStatus? status, Mode? own, Profile? profile}) {
     final c = ProviderContainer(
       overrides: [
         coreStatusProvider.overrideWithValue(CoreStatus.disconnected),
-        profilesProvider.overrideWith(() => TestProfiles(const [])),
+        profilesProvider.overrideWith(() => TestProfiles([?profile])),
+        currentProfileIdProvider.overrideWithBuild((_, _) => profile?.id),
         rcxStatusStateProvider.overrideWith(() => _FixedStatus(status)),
       ],
     );
@@ -42,6 +43,29 @@ void main() {
   }
 
   group('currentRoutingLayer', () {
+    test('scenarios require an explicit choice for this profile', () async {
+      const binding = RcxBinding(profile: rcxDefaultProfile);
+      final profile = Profile.normal().copyWith(
+        overrides: const ProfileOverrides(
+          routing: RcxUserLayer(groups: {'Proxy': binding}),
+        ),
+      );
+      final c = make(profile: profile);
+      final action = c.read(rcxRoutingActionProvider.notifier);
+
+      expect(c.read(currentRoutingLayerProvider).scenarioOff, isTrue);
+      expect(c.read(currentRoutingLayerProvider).groups, {'Proxy': binding});
+
+      await action.setScenario('provider/work');
+      expect(c.read(currentRoutingLayerProvider).scenario, 'provider/work');
+      expect(c.read(currentRoutingLayerProvider).scenarioOff, isFalse);
+
+      await action.setScenario(null);
+      expect(c.read(currentRoutingLayerProvider).scenario, 'provider/work');
+      expect(c.read(currentRoutingLayerProvider).scenarioOff, isTrue);
+      expect(c.read(currentRoutingLayerProvider).groups, {'Proxy': binding});
+    });
+
     test('splits scenarios from profiles by kind', () {
       final c = make();
       c.read(rcxProfilesProvider.notifier).value = {

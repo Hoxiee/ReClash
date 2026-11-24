@@ -678,7 +678,7 @@ power-labels:
 | --- | --- |
 | `profiles` | 配置名称到配置的映射。 |
 | `scenarios` | 场景名称到场景的映射。 |
-| `scenario` | 默认场景的名称。 |
+| `scenario` | 提供商声明的默认场景名称。ReClash 在用户选择后启动场景。 |
 | `bindings` | 代理组名称到下文绑定的映射。 |
 
 配置以 `provider/<name>` 寻址。`extends` 可以指定 `builtin/<name>` 或另一个提供商配置。
@@ -727,6 +727,31 @@ dart run tool/rcx.dart lint reclash.yaml
 ```
 
 该 linter 接受配置、场景、含有 `profiles` 或 `scenarios` 的文档，或含有 `routing` 的清单。在应用中，Core 会在组或场景状态中报告无效或缺失的提供商配置。
+
+### 脚本组
+
+`routing.strategies` 将现有代理组名称映射到选择策略。订阅正文应保留同名的标准代理组。ReClash 自动应用有效的提供商策略。用户可以使用自己的策略或恢复标准行为。不支持策略的客户端仍可使用订阅正文中的代理组。每个策略最多 64 KiB，每份清单最多 128 个策略。
+
+```yaml
+version: 1
+routing:
+  strategies:
+    Main:
+      version: 1
+      levels:
+        - match: {members: [Seoul-1, Seoul-2, Seoul-3]}
+          pick: sticky
+          weights: {Seoul-1: 2, Seoul-2: 1, Seoul-3: 1}
+          return-after: 2m
+        - match: {members: [Tokyo-1]}
+          pick: first
+```
+
+策略先应用 `exclude`，再按顺序检查 `levels`。每个层级可通过 `match` 指定成员名称 `members`、字面名称片段 `name-contains` 或从节点名称推断的两字母国家代码 `countries`。同一个条件中的各字段须同时匹配。省略 `match` 时允许所有剩余成员。`return-after` 指定高优先级层级恢复后，替换仍可用的后备层级前需要等待多久。
+
+`manual` 使用手动选择的成员，`first` 使用组内第一个可用成员，`hold` 保留当前可用节点，`latency` 优先选择延迟较低的节点。负载均衡支持 `round-robin`、`weighted`、按目标固定的 `sticky` 以及按源 IP 和目标固定的 `sticky-session`。默认权重为 1。选择作用于新的 TCP 连接或 UDP 会话。没有合格成员时，策略会报告问题并令连接失败。如需使用 `DIRECT` 作为后备，请将它加入组并在相应层级中按名称指定。
+
+使用 `dart run tool/rcx.dart lint` 检查格式。订阅检查器和组行为页面会显示被拒绝的策略，标准代理组仍可用。
 
 ### Chains
 

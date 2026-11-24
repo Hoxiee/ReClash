@@ -128,7 +128,7 @@ A pin still wins over `to`. When the config has no `Balancer`, the group reports
 
 ## Provider routing
 
-A provider ships a profile and a default scenario in the `routing` section of its manifest.
+A provider ships a profile and a scenario in the `routing` section of its manifest. Choose **Work** under **Scenarios** to run it.
 
 ```yaml title="reclash.yaml"
 routing:

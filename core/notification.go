@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/constant"
 )
 
@@ -16,7 +15,14 @@ func activeNotificationServer(name string, proxies map[string]constant.Proxy) st
 		if proxy == nil {
 			return ""
 		}
-		group, ok := adapterAs[outboundgroup.ProxyGroup](proxy)
+		if scripted := scriptedGroupOf(proxy); scripted != nil && scripted.state.Load() != nil {
+			if selected := scripted.Now(); selected != "" {
+				name = selected
+				continue
+			}
+			return name
+		}
+		group, ok := proxyGroupOf(proxy)
 		if !ok {
 			return name
 		}

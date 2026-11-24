@@ -14,6 +14,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
+class _ScriptedStatus extends RcxStatusState {
+  @override
+  RcxStatus? build() => const RcxStatus(
+    groups: [RcxGroupStatus(name: 'Selector', profile: 'builtin/simple')],
+  );
+}
+
 void main() {
   Future<ProviderContainer> pumpListLayout(
     WidgetTester tester, {
@@ -50,6 +57,7 @@ void main() {
           GroupsState(value: [group]),
         ),
         groupsProvider.overrideWithValue([group]),
+        rcxStatusStateProvider.overrideWith(_ScriptedStatus.new),
       ],
     );
     addTearDown(container.dispose);

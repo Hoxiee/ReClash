@@ -1,15 +1,15 @@
 {
   "rcxTitle": "Auto routing",
-  "rcxMakeSmart": "Turn on auto routing",
-  "rcxMakeSmartHint": "ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.",
-  "rcxTurnOff": "Turn off auto routing for this group",
+  "rcxMakeSmart": "Use scripted selection",
+  "rcxMakeSmartHint": "The selected behaviour determines how this group picks a server.",
+  "rcxTurnOff": "Remove scripted selection",
   "rcxChangeServer": "Change server",
   "rcxBackToAuto": "Back to auto",
   "rcxControl": "Control",
   "rcxModeAuto": "Auto",
   "rcxModeAutoHint": "Picks the best working server in the server order and switches when it fails.",
   "rcxModeManual": "Manual",
-  "rcxModeManualHint": "You pick the server in the proxies list; auto routing never switches it.",
+  "rcxModeManualHint": "The group stays on the server you pick in Proxies.",
   "rcxPinned": "Pinned: {node}",
   "@rcxPinned": {
     "placeholders": {
@@ -805,7 +805,7 @@
       }
     }
   },
-  "rcxManageHint": "Behaviours and scenarios are made and edited in Tools → Auto routing.",
+  "rcxManageHint": "Manage behaviours in Tools → Advanced configuration → Scripted groups.",
   "rcxModeBackToAuto": "Give the mode back to the scenario",
   "rcxModeByScenario": "The scenario sets the mode on this network",
   "rcxModeIs": "Mode: {mode}",
@@ -868,17 +868,17 @@
   "rcxScenarioKindsHint": "Recognize networks by direct diagnostics, then change the mode and groups on each.",
   "rcxScenarioMode": "Connection mode",
   "rcxScenarios": "Scenarios",
-  "rcxScenariosHint": "A scenario drives the whole connection. Tap one to run it; the pencil edits yours, or a copy of any other.",
-  "rcxSmartGroups": "Groups",
+  "rcxScenariosHint": "Tap a scenario to edit it. Built-in and provider scenarios open as copies.",
+  "rcxSmartGroups": "Scripted groups",
   "rcxHubRoutes": "Routes",
-  "rcxHubLibrary": "Library",
-  "rcxHubAuto": "Auto routing",
-  "rcxHubOffHint": "Turn on to let a scenario pick servers for your groups and routes.",
-  "rcxHubChange": "Change",
+  "rcxHubLibrary": "Scenario library",
+  "rcxHubAuto": "Use a scenario",
+  "rcxHubOffHint": "A scenario can control routes, proxy groups and the tunnel mode for this subscription.",
+  "rcxHubChange": "Choose a scenario",
   "rcxHubNoProfile": "No subscription",
   "rcxHubNoProfileHint": "Add a subscription first; auto routing works with its groups.",
   "rcxHubNeedsCore": "Start the connection to see auto routing",
-  "rcxHubGroupsEmpty": "No group is driven by auto routing yet.",
+  "rcxHubGroupsEmpty": "This subscription has no active scripted groups.",
   "rcxHubCopyTitle": "Edit a copy?",
   "rcxHubCopyMessage": "“{title}” is not yours to change. Your edits go to a copy, and the copy becomes the running scenario.",
   "@rcxHubCopyMessage": {
@@ -1042,7 +1042,7 @@
       }
     }
   },
-  "rcxWouldDo": "With auto routing on",
+  "rcxWouldDo": "Default behaviour",
   "rcxWouldServers": "{count, plural, one{It chooses from the {count} server of this group.} other{It chooses among the {count} servers of this group.}}",
   "@rcxWouldServers": {
     "placeholders": {
@@ -1051,7 +1051,6 @@
       }
     }
   },
-  "rcxSettingsLink": "Auto routing settings",
   "rcxRouteGroup": "Made by a route",
   "rcxRouteGroupHint": "A route in the scenario «{scenario}» created this group. Edit or remove it there.",
   "@rcxRouteGroupHint": {
@@ -1150,12 +1149,6 @@
   "@rcxModeScenario": {
     "description": "Label of the tunnel-mode choice where the running scenario sets the mode (dashboard mode card and mode bar). Short, 1–2 words."
   },
-  "rcxHubLibraryHint": "Scenarios, behaviours and import",
-  "@rcxHubLibraryHint": {
-    "description": "Subtitle of the Library row at the bottom of the auto-routing screen."
-  },
-  "rcxAdvancedMode": "Advanced settings",
-  "rcxAdvancedModeHint": "Step-by-step server order conditions, YAML, networks, tags and versions",
   "rcxFromScenario": "From scenario «{scenario}»",
   "@rcxFromScenario": {
     "placeholders": {
@@ -1165,5 +1158,17 @@
     }
   },
   "rcxFromYours": "Yours for this group",
-  "rcxDetails": "Details"
+  "rcxDetails": "Details",
+  "rcxActiveScriptedGroups": "Active scripted groups",
+  "rcxStrategyAuto": "Auto-select server",
+  "rcxStrategyEdit": "Edit strategy",
+  "rcxStrategyCoreUnavailable": "Strategy unavailable. The group can use its standard behaviour.",
+  "rcxStrategyProfileChanged": "The active profile changed. Reopen the editor to save.",
+  "rcxStrategyLines": "Enter one existing server, group or provider name per line in its field.",
+  "rcxStrategyAllServers": "Use all servers in the profile",
+  "rcxStrategyLowestLatency": "Prefer lower measured latency",
+  "rcxStrategyPreferNames": "Prefer names containing",
+  "rcxStrategyHold": "Keep the working server",
+  "rcxStrategyYaml": "Edit YAML",
+  "rcxStrategyNotApplied": "Could not apply the strategy"
 }

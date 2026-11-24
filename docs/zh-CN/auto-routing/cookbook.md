@@ -127,7 +127,7 @@ groups:
 
 ## 服务商路由
 
-服务商在其清单的 `routing` 部分提供一个配置和一个默认场景。
+服务商在其清单的 `routing` 部分提供一个配置和一个场景。在 **场景** 中选择 **Work** 即可运行。
 
 ```yaml title="reclash.yaml"
 routing:

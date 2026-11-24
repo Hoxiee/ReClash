@@ -678,7 +678,7 @@ power-labels:
 | --- | --- |
 | `profiles` | Map of profile name to profile. |
 | `scenarios` | Map of scenario name to scenario. |
-| `scenario` | Name of the default scenario. |
+| `scenario` | Provider’s default scenario identifier. ReClash starts a scenario after the user chooses it. |
 | `bindings` | Map of proxy-group name to binding, below. |
 
 A profile is addressed as `provider/<name>`. `extends` may name `builtin/<name>` or another provider profile.
@@ -727,6 +727,31 @@ dart run tool/rcx.dart lint reclash.yaml
 ```
 
 The linter accepts a profile, a scenario, a document with `profiles` or `scenarios`, or a manifest with `routing`. In the app, the Core reports an invalid or missing provider profile in the group or scenario status.
+
+### Scripted groups
+
+`routing.strategies` maps existing proxy-group names to selection strategies. Keep a normal group with the same name in the subscription body. ReClash automatically applies a valid provider strategy. The user can choose their own strategy or return to the normal group behaviour. Unsupported clients can still use the group declared in the subscription. Each strategy is at most 64 KiB, and a manifest may contain up to 128 strategies.
+
+```yaml
+version: 1
+routing:
+  strategies:
+    Main:
+      version: 1
+      levels:
+        - match: {members: [Seoul-1, Seoul-2, Seoul-3]}
+          pick: sticky
+          weights: {Seoul-1: 2, Seoul-2: 1, Seoul-3: 1}
+          return-after: 2m
+        - match: {members: [Tokyo-1]}
+          pick: first
+```
+
+A strategy first removes candidates matching `exclude`, then walks its ordered `levels`. Each level has an optional `match` with `members`, literal `name-contains`, or two-letter `countries` inferred from node labels. Fields of one match are combined with AND. Omit `match` to allow every remaining member. `return-after` is the time a higher-priority level must be available before taking over from a working reserve.
+
+Use `manual` for the selected member, `first` for the first available member in group order, `hold` to keep a working member, or `latency` to favour the lowest measured latency. Balancing options are `round-robin`, `weighted`, `sticky` by destination and `sticky-session` by source IP and destination. Named weights default to 1. A decision applies to a new TCP connection or UDP session. A strategy with no eligible candidate reports the problem and fails the connection. To use `DIRECT` as a reserve, explicitly name it in a level and include it in the group.
+
+Use `dart run tool/rcx.dart lint` to check the format. The subscription inspector and the group behaviour page show rejected strategies. They leave the regular proxy group available.
 
 ### Chains
 

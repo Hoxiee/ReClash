@@ -46,7 +46,30 @@ func adapterAs[T any](proxy constant.Proxy) (group T, ok bool) {
 		return group, false
 	}
 	group, ok = outbound.ProxyAdapter.(T)
+	if !ok {
+		if wrapper, wrapped := outbound.ProxyAdapter.(interface{ runtimeGroup() *scriptedGroup }); wrapped {
+			base := wrapper.runtimeGroup()
+			if base.state.Load() == nil {
+				group, ok = base.ProxyGroup.(T)
+			}
+		}
+	}
 	return group, ok
+}
+
+// proxyGroupOf unwraps a group for checks that must see its members, strategy or not.
+func proxyGroupOf(proxy constant.Proxy) (outboundgroup.ProxyGroup, bool) {
+	outbound, ok := proxy.(*adapter.Proxy)
+	if !ok {
+		return nil, false
+	}
+	if group, ok := outbound.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+		return group, true
+	}
+	if wrapper, ok := outbound.ProxyAdapter.(interface{ runtimeGroup() *scriptedGroup }); ok && wrapper.runtimeGroup() != nil {
+		return wrapper.runtimeGroup().ProxyGroup, true
+	}
+	return nil, false
 }
 
 func isProxyGroupType(adapterType constant.AdapterType) bool {
@@ -129,6 +152,10 @@ func proxyView(proxy constant.Proxy) any {
 		return node
 	}
 	view["name"] = node.Name
+	if group := scriptedGroupOf(proxy); group != nil && group.state.Load() != nil {
+		view["now"] = group.Now()
+		delete(view, "fixed")
+	}
 	if isBuiltInGlobal(proxy) {
 		view["hidden"] = true
 	}
@@ -170,9 +197,15 @@ func selectableGroup(groupName string) (pickableGroup, error) {
 // selectMu is released, since it takes that lock itself when it selects.
 func handleChangeProxy(params *ChangeProxyParams) *ChangeProxyResult {
 	result := changeProxy(params)
-	if result.Message == "" && params.ProxyName != "" {
+	if result.Message == "" {
 		if e := rcxIfReady(); e != nil {
-			e.NoteManualPick(rcxPickOf(params.GroupName, params.ProxyName))
+			if params.ProxyName != "" {
+				e.NoteManualPick(rcxPickOf(params.GroupName, params.ProxyName))
+			}
+			// The engine never notices a strategy group's pick, so publish it here.
+			if group := scriptedGroupOf(lookupProxy(params.GroupName)); group != nil && group.state.Load() != nil {
+				rcxHost{}.Publish(e.Status())
+			}
 		}
 	}
 	return result
@@ -206,10 +239,23 @@ func patchSelectGroup(mapping map[string]string) {
 	defer selectMu.Unlock()
 	proxies := tunnel.AllProxies()
 	for name, selected := range mapping {
-		if selector, ok := adapterAs[outboundgroup.SelectAble](proxies[name]); ok {
-			selector.ForceSet(selected)
+		if forceSetGroup(proxies[name], selected) {
+			continue
 		}
 	}
+}
+
+func forceSetGroup(proxy constant.Proxy, name string) bool {
+	outbound, ok := proxy.(*adapter.Proxy)
+	if !ok {
+		return false
+	}
+	selector, ok := outbound.ProxyAdapter.(interface{ ForceSet(string) })
+	if !ok {
+		return false
+	}
+	selector.ForceSet(name)
+	return true
 }
 
 // Tailscale and EasyTier register a DNS client under the proxy name when built

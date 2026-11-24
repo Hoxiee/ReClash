@@ -266,7 +266,6 @@ abstract class AppSettingProps with _$AppSettingProps {
       readValue: _readDashboardStyle,
     )
     DashboardStyle dashboardStyle,
-    @Default(false) bool routingAdvanced,
     @Default(false) bool simplestDashboardPinned,
     @Default(false) bool slotMachineUnlocked,
     @Default(false) bool slotMachinePower,

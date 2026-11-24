@@ -24,33 +24,36 @@ import (
 //
 // Kind "scenario" makes lint, format and source work on a scenario.
 type StudioRequest struct {
-	Op       string    `json:"op"`
-	Kind     string    `json:"kind,omitempty"`
-	Scenario *Scenario `json:"scenario,omitempty"`
-	Text     string    `json:"text,omitempty"`
-	ID       string    `json:"id,omitempty"`
-	Group    string    `json:"group,omitempty"`
-	Profile  *Profile  `json:"profile,omitempty"`
-	Network  bool      `json:"network,omitempty"`
-	Form     *CondForm `json:"form,omitempty"`
-	Base     string    `json:"base,omitempty"`
-	Theirs   string    `json:"theirs,omitempty"`
+	Create     bool                `json:"create,omitempty"`
+	LocalGroup *LocalStrategyGroup `json:"localGroup,omitempty"`
+	Op         string              `json:"op"`
+	Kind       string              `json:"kind,omitempty"`
+	Scenario   *Scenario           `json:"scenario,omitempty"`
+	Text       string              `json:"text,omitempty"`
+	ID         string              `json:"id,omitempty"`
+	Group      string              `json:"group,omitempty"`
+	Profile    *Profile            `json:"profile,omitempty"`
+	Network    bool                `json:"network,omitempty"`
+	Form       *CondForm           `json:"form,omitempty"`
+	Base       string              `json:"base,omitempty"`
+	Theirs     string              `json:"theirs,omitempty"`
 	// Taken names the user's profiles and scenarios an unpack must not
 	// replace.
 	Taken []string `json:"taken,omitempty"`
 }
 
 type StudioResult struct {
-	Text      string       `json:"text,omitempty"`
-	Profile   *Profile     `json:"profile,omitempty"`
-	Scenario  *Scenario    `json:"scenario,omitempty"`
-	Info      *ProfileInfo `json:"info,omitempty"`
-	Errors    []Issue      `json:"errors,omitempty"`
-	Warnings  []Issue      `json:"warnings,omitempty"`
-	Endpoints []Endpoint   `json:"endpoints,omitempty"`
-	Form      *CondForm    `json:"form,omitempty"`
-	Fields    []FieldInfo  `json:"fields,omitempty"`
-	Conflicts []string     `json:"conflicts,omitempty"`
+	StrategyLevels [][]string   `json:"strategyLevels,omitempty"`
+	Text           string       `json:"text,omitempty"`
+	Profile        *Profile     `json:"profile,omitempty"`
+	Scenario       *Scenario    `json:"scenario,omitempty"`
+	Info           *ProfileInfo `json:"info,omitempty"`
+	Errors         []Issue      `json:"errors,omitempty"`
+	Warnings       []Issue      `json:"warnings,omitempty"`
+	Endpoints      []Endpoint   `json:"endpoints,omitempty"`
+	Form           *CondForm    `json:"form,omitempty"`
+	Fields         []FieldInfo  `json:"fields,omitempty"`
+	Conflicts      []string     `json:"conflicts,omitempty"`
 	// Current and Candidate are the group's decision under its policy and
 	// under the draft, from the same evidence.
 	Current   *Decision      `json:"current,omitempty"`

@@ -20,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'card.dart';
 import 'common.dart';
 import 'routing.dart';
+import 'routing_strategy.dart';
 
 const _headerInset = 10.0;
 const _headerButtonInset = 4.0;
@@ -817,12 +818,16 @@ class ListHeader extends ConsumerWidget {
     final isDelayTesting = ref.watch(
       delayTestingGroupsProvider.select((state) => state.contains(groupName)),
     );
-    final profile = ref.watch(
+    final (scripted, profile) = ref.watch(
       rcxGroupProvider(groupName).select(
-        (state) =>
-            state == null || state.control.isManual ? null : state.profile,
+        (state) => switch (state) {
+          null => (false, null),
+          final group => (true, group.control.isManual ? null : group.profile),
+        },
       ),
     );
+    final behaviour = watchGroupBehaviour(ref, group);
+    final showRouting = behaviour || scripted;
     final colorScheme = context.colorScheme;
     final level = floating > 0
         ? SurfaceLevel.floatingOf(colorScheme)
@@ -853,12 +858,19 @@ class ListHeader extends ConsumerWidget {
             ),
             _GroupActions(
               isExpand: isExpand,
+              routingTooltip: behaviour
+                  ? context.appLocalizations.rcxBehaviour
+                  : null,
               isDelayTesting: isDelayTesting,
               groupType: profile == null
                   ? group.type.name
                   : rcxProfileTitle(context, ref, profile),
-              onRouting: group.type == GroupType.Selector
-                  ? () => unawaited(showRoutingSheet(context, groupName))
+              onRouting: showRouting
+                  ? () => unawaited(
+                      behaviour
+                          ? showGroupBehaviour(context, groupName)
+                          : showRoutingSheet(context, groupName),
+                    )
                   : null,
               onScrollToSelected: () {
                 onScrollToSelected(groupName);
@@ -1051,6 +1063,7 @@ class _GroupActions extends StatelessWidget {
     required this.onDelayTest,
     required this.onToggle,
     this.onRouting,
+    this.routingTooltip,
   });
 
   final bool isExpand;
@@ -1060,6 +1073,7 @@ class _GroupActions extends StatelessWidget {
   final VoidCallback onDelayTest;
   final VoidCallback onToggle;
   final VoidCallback? onRouting;
+  final String? routingTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -1086,7 +1100,8 @@ class _GroupActions extends StatelessWidget {
                 ),
                 if (onRouting != null)
                   IconButton(
-                    tooltip: context.appLocalizations.rcxTitle,
+                    tooltip:
+                        routingTooltip ?? context.appLocalizations.rcxTitle,
                     onPressed: onRouting,
                     icon: const GlyphIcon(AppGlyphs.shuffle),
                   ),

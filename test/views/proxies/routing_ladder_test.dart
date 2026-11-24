@@ -1,19 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/proxies/routing_ladder.dart';
 
 import '../../helpers/preferences.dart';
 import '../../helpers/test_app.dart';
-
-Override _advanced(bool on) => appSettingProvider.overrideWithBuild(
-  (_, _) => AppSettingProps(routingAdvanced: on),
-);
 
 void main() {
   late AppLocalizations l;
@@ -28,9 +21,9 @@ void main() {
       'adding a condition from the ${fromButton ? 'button' : 'row'} keeps the menu anchored to the button',
       (tester) async {
         await tester.pumpWidget(
-          TestApp(
-            overrides: [_advanced(true)],
-            child: const RoutingStepEditor(
+          const TestApp(
+            wrapInProviderScope: true,
+            child: RoutingStepEditor(
               step: null,
               number: 1,
               scope: {},
@@ -73,39 +66,33 @@ void main() {
     );
   }
 
-  for (final advanced in [false, true]) {
-    testWidgets('step editor shows power-user rows only when advanced is '
-        '$advanced', (tester) async {
-      await tester.pumpWidget(
-        TestApp(
-          overrides: [_advanced(advanced)],
-          child: const RoutingStepEditor(
-            step: null,
-            number: 1,
-            scope: {},
-            scenario: false,
-            groupName: null,
-          ),
+  testWidgets('step editor shows every power-user row', (tester) async {
+    await tester.pumpWidget(
+      const TestApp(
+        wrapInProviderScope: true,
+        child: RoutingStepEditor(
+          step: null,
+          number: 1,
+          scope: {},
+          scenario: false,
+          groupName: null,
         ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text(l.rcxLadderNameContains), findsOneWidget);
-      expect(find.text(l.rcxTierLabel), findsOneWidget);
-      expect(find.text(l.rcxCondAdd), advanced ? findsOneWidget : findsNothing);
-      expect(
-        find.text(l.rcxLastResort),
-        advanced ? findsOneWidget : findsNothing,
-      );
-    });
-  }
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(l.rcxLadderNameContains), findsOneWidget);
+    expect(find.text(l.rcxTierLabel), findsOneWidget);
+    expect(find.text(l.rcxCondAdd), findsOneWidget);
+    expect(find.text(l.rcxLastResort), findsOneWidget);
+  });
 
   testWidgets('step editor keeps a condition the step already uses', (
     tester,
   ) async {
     await tester.pumpWidget(
-      TestApp(
-        overrides: [_advanced(false)],
-        child: const RoutingStepEditor(
+      const TestApp(
+        wrapInProviderScope: true,
+        child: RoutingStepEditor(
           step: {'when': 'udp and latency < 200'},
           number: 1,
           scope: {},
@@ -116,7 +103,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(l.rcxFieldUdp), findsOneWidget);
-    expect(find.text(l.rcxCondAdd), findsNothing);
+    expect(find.text(l.rcxCondAdd), findsOneWidget);
   });
 
   group('RcxStepQuery', () {

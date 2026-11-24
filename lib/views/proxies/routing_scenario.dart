@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'routing.dart';
-import 'routing_advanced.dart';
 import 'routing_condition.dart';
 import 'routing_import.dart' show exportRoutingDocument;
 import 'routing_match.dart';
@@ -24,7 +23,6 @@ import 'routing_studio.dart';
 
 const _textDelay = Duration(milliseconds: 500);
 const _modes = ['', 'rule', 'global', 'direct'];
-const _defaultScenario = 'builtin/every-group';
 
 /// A new scenario lets every select group pick its own best server; the
 /// first edit is the user's own.
@@ -44,13 +42,6 @@ Future<void> openScenarioEditor(
     context,
     ScenarioEditor(name: name, text: text, from: from),
   );
-}
-
-/// The scenario this subscription runs when auto routing is turned on
-/// without a pick.
-String rcxScenarioToTurnOn(WidgetRef ref) {
-  final picked = ref.read(currentRoutingLayerProvider).scenario;
-  return picked == null || picked.isEmpty ? _defaultScenario : picked;
 }
 
 /// The lint issues of one scenario by where they belong: a route, a group's
@@ -282,7 +273,6 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final advanced = watchRoutingAdvanced(ref);
     final lint = this.lint;
     final errors = lint?.errors ?? const <RcxIssue>[];
     final placed = ScenarioSections.placed(errors);
@@ -290,27 +280,25 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
       title: _titleOf(context),
       isLoading: lint == null,
       menuItems: [
-        if (advanced) ...[
-          CommonPopupMenuItem(
-            glyph: AppGlyphs.code,
-            label: l.rcxYaml,
-            onPressed: _editYaml,
-          ),
-          CommonPopupMenuItem(
-            glyph: AppGlyphs.export,
-            label: l.rcxExport,
-            onPressed: () => unawaited(
-              exportRoutingDocument(
-                context,
-                ref,
-                id: widget.name != null && !_dirty ? lintId : null,
-                kind: 'scenario',
-                text: text,
-                title: _titleOf(context),
-              ),
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.code,
+          label: l.rcxYaml,
+          onPressed: _editYaml,
+        ),
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.export,
+          label: l.rcxExport,
+          onPressed: () => unawaited(
+            exportRoutingDocument(
+              context,
+              ref,
+              id: widget.name != null && !_dirty ? lintId : null,
+              kind: 'scenario',
+              text: text,
+              title: _titleOf(context),
             ),
           ),
-        ],
+        ),
         if (widget.name != null)
           CommonPopupMenuItem(
             glyph: AppGlyphs.delete,
@@ -351,20 +339,19 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
                     onChanged: (_) => _onTextChanged(),
                   ),
                 ),
-                if (advanced || _description.text.isNotEmpty)
-                  DecorationListItem(
-                    title: TextField(
-                      controller: _description,
-                      minLines: 2,
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      onChanged: (_) => _onTextChanged(),
-                      decoration: InputDecoration.collapsed(
-                        border: const NoInputBorder(),
-                        hintText: l.rcxHubDescriptionHint,
-                      ),
+                DecorationListItem(
+                  title: TextField(
+                    controller: _description,
+                    minLines: 2,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (_) => _onTextChanged(),
+                    decoration: InputDecoration.collapsed(
+                      border: const NoInputBorder(),
+                      hintText: l.rcxHubDescriptionHint,
                     ),
                   ),
+                ),
               ],
             ),
             ScenarioSections(
@@ -375,18 +362,14 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor>
               validate: validate,
             ),
           ],
-          if (lint != null) ..._lintSections(l, lint, advanced),
+          if (lint != null) ..._lintSections(l, lint),
         ],
       ),
     );
   }
 }
 
-List<Widget> _lintSections(
-  AppLocalizations l,
-  RcxStudioResult lint,
-  bool advanced,
-) => [
+List<Widget> _lintSections(AppLocalizations l, RcxStudioResult lint) => [
   if (ScenarioSections.placed(lint.warnings) case final warnings
       when warnings.isNotEmpty)
     generateSection(
@@ -398,7 +381,7 @@ List<Widget> _lintSections(
           ),
       ],
     ),
-  if (advanced && lint.endpoints.isNotEmpty)
+  if (lint.endpoints.isNotEmpty)
     generateSection(
       title: l.rcxContacts,
       footer: l.rcxContactsHint,
@@ -628,8 +611,7 @@ class _RunningScenarioListState extends ConsumerState<RunningScenarioList>
             tunnelMode: status.tunnelMode,
             routeLine: widget.routeLine,
           ),
-        if (_id != null && lint != null)
-          ..._lintSections(l, lint, watchRoutingAdvanced(ref)),
+        if (_id != null && lint != null) ..._lintSections(l, lint),
         ...widget.trailing,
       ],
     );
@@ -850,7 +832,6 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
   }
 
   Widget _moreSection(AppLocalizations l) {
-    final advanced = watchRoutingAdvanced(ref);
     final programs = rcxMap(_s['groups'])..remove(r'$main');
     final kinds = [
       for (final kind in rcxList(rcxMap(_s['network'])['kinds']))
@@ -877,37 +858,31 @@ class _ScenarioSectionsState extends ConsumerState<ScenarioSections> {
 
     final mode = _s['mode'] as String? ?? '';
     final items = [
-      if (advanced || mode.isNotEmpty)
-        _modeRow(l, mode, (mode) => widget.onEdit((s) => s['mode'] = mode)),
-      if (advanced || programs.isNotEmpty)
-        link(
-          l.rcxHubOtherGroups,
-          programs.isEmpty
-              ? l.rcxHubOtherGroupsHint
-              : programs.keys.map((key) => rcxProgramLabel(l, key)).join(', '),
-          (l) => [_programsSection(l)],
-          invalid: programs.keys.any(
-            (key) =>
-                widget.errors.hits('groups.$key') ||
-                widget.warnings.hits('groups.$key'),
-          ),
+      _modeRow(l, mode, (mode) => widget.onEdit((s) => s['mode'] = mode)),
+      link(
+        l.rcxHubOtherGroups,
+        programs.isEmpty
+            ? l.rcxHubOtherGroupsHint
+            : programs.keys.map((key) => rcxProgramLabel(l, key)).join(', '),
+        (l) => [_programsSection(l)],
+        invalid: programs.keys.any(
+          (key) =>
+              widget.errors.hits('groups.$key') ||
+              widget.warnings.hits('groups.$key'),
         ),
-      if (advanced || kinds.isNotEmpty)
-        link(
-          l.rcxHubNetworks,
-          kinds.isEmpty ? l.rcxScenarioKindsHint : kinds.join(', '),
-          _networkSections,
-        ),
-      if (advanced || tags.isNotEmpty)
-        link(
-          l.rcxTags,
-          tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
-          (l) => [_tagsSection(l, rcxMap(_s['tags']))],
-        ),
+      ),
+      link(
+        l.rcxHubNetworks,
+        kinds.isEmpty ? l.rcxScenarioKindsHint : kinds.join(', '),
+        _networkSections,
+      ),
+      link(
+        l.rcxTags,
+        tags.isEmpty ? l.rcxTagsHint : tags.keys.join(', '),
+        (l) => [_tagsSection(l, rcxMap(_s['tags']))],
+      ),
     ];
-    return items.isEmpty
-        ? const SizedBox.shrink()
-        : generateSection(title: l.more, items: items);
+    return generateSection(title: l.more, items: items);
   }
 
   Widget _programsSection(AppLocalizations l) => _ProgramsSection(

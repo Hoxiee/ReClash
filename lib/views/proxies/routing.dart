@@ -23,28 +23,35 @@ const _historyRows = 20;
 const _maxFlagChips = 8;
 
 /// The sheet holds its own pages, so the profile chooser opens inside it.
-/// Opened from the auto-routing settings, its link back only closes it.
 Future<void> showRoutingSheet(BuildContext context, String groupName) {
-  final fromHub =
-      context.findAncestorWidgetOfExactType<RoutingSettingsView>() != null;
   return showSheet<void>(
     context: context,
     props: nestedPagedSheetProps,
     builder: (sheetContext) => NestedPagedSheet(
       builder: (_) => RoutingSheet(
         groupName: groupName,
-        onOpenSettings: () {
+        onOpenSettings: (scenario) {
           Navigator.of(sheetContext).pop();
-          if (!fromHub && context.mounted) {
-            unawaited(
-              BaseNavigator.push<void>(context, const RoutingSettingsView()),
-            );
-          }
+          if (!context.mounted) return;
+          final alreadyOpen = scenario
+              ? context.findAncestorWidgetOfExactType<RoutingScenariosView>() !=
+                    null
+              : context.findAncestorWidgetOfExactType<ScriptedGroupsView>() !=
+                    null;
+          if (alreadyOpen) return;
+          unawaited(
+            BaseNavigator.push<void>(
+              context,
+              scenario
+                  ? const RoutingScenariosView()
+                  : const ScriptedGroupsView(),
+            ),
+          );
         },
         onOpenRoute: () {
           Navigator.of(sheetContext).pop();
           if (context.mounted) {
-            RoutingSettingsView.showRoute(context, groupName);
+            RoutingScenariosView.showRoute(context, groupName);
           }
         },
       ),
@@ -52,7 +59,7 @@ Future<void> showRoutingSheet(BuildContext context, String groupName) {
   );
 }
 
-/// One smart group: what it holds and why, how it is controlled, where it
+/// One scripted group: what it holds and why, how it is controlled, where it
 /// may change to, how it picks, and its own settings.
 class RoutingSheet extends ConsumerStatefulWidget {
   const RoutingSheet({
@@ -63,7 +70,7 @@ class RoutingSheet extends ConsumerStatefulWidget {
   });
 
   final String groupName;
-  final VoidCallback? onOpenSettings;
+  final ValueChanged<bool>? onOpenSettings;
   final VoidCallback? onOpenRoute;
 
   @override
@@ -275,16 +282,23 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
         ).copyWith(top: context.contentTopPadding, bottom: 20),
         children: [
           AnimatedEntries(
-            children: group == null
-                ? [
-                    _Intro(
-                      key: const ValueKey('intro'),
-                      groupName: widget.groupName,
-                      busy: _busy,
-                      onEnable: _enable,
-                    ),
-                  ]
-                : _sections(l, group, problems, saved, names),
+            children: switch (group) {
+              final group? => _sections(l, group, problems, saved, names),
+              null when ref.watch(rcxStatusStateProvider) != null => [
+                _Intro(
+                  key: const ValueKey('intro'),
+                  groupName: widget.groupName,
+                  busy: _busy,
+                  onEnable: _enable,
+                ),
+              ],
+              null => [
+                ListFooter(
+                  key: const ValueKey('unavailable'),
+                  text: l.rcxHubNeedsCore,
+                ),
+              ],
+            },
           ),
         ],
       ),
@@ -427,9 +441,9 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet>
     return [
       if (onOpenSettings != null)
         CommonPopupMenuItem(
-          label: l.rcxSettingsLink,
+          label: group?.route == true ? l.rcxScenarios : l.rcxSmartGroups,
           glyph: AppGlyphs.shuffle,
-          onPressed: onOpenSettings,
+          onPressed: () => onOpenSettings(group?.route == true),
         ),
       if (group != null && !group.route && group.source == 'user')
         CommonPopupMenuItem(

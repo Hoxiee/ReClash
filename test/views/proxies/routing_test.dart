@@ -48,6 +48,11 @@ void main() {
 
   test('the user layer encodes as the engine reads it', () {
     const layer = RcxUserLayer(
+      profileScope: '7',
+      strategies: {'G': 'version: 1\nlevels:\n  - pick: hold\n'},
+      localGroups: {
+        'L': RcxLocalStrategyGroup(members: ['a'], providers: ['p']),
+      },
       groups: {
         'G': RcxBinding(
           profile: 'builtin/from-list',
@@ -61,7 +66,30 @@ void main() {
     expect(group['profile'], 'builtin/from-list');
     expect(group['pool'], {'include': 'name ~ /DE/i'});
     expect(group.containsKey('default'), isFalse);
+    expect(json['profileScope'], '7');
+    expect((json['strategies']! as Map)['G'], contains('pick: hold'));
+    expect(((json['localGroups']! as Map)['L'] as Map)['members'], ['a']);
     expect(RcxUserLayer.safeFromJson('garbage'), const RcxUserLayer());
+  });
+
+  test('a strategy report reads the keys the engine writes', () {
+    final status = RcxStatus.fromJson({
+      'running': true,
+      'mode': 'rule',
+      'strategySupport': true,
+      'strategies': {
+        'G': {
+          'source': 'user',
+          'selected': 'DE-1',
+          'offered': true,
+          'empty': false,
+        },
+      },
+    });
+    expect(status.strategySupport, isTrue);
+    expect(status.strategies['G']?.source, 'user');
+    expect(status.strategies['G']?.selected, 'DE-1');
+    expect(status.strategies['G']?.offered, isTrue);
   });
 
   test('every reason code the engine emits has a sentence', () {

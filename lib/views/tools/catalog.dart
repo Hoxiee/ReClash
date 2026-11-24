@@ -243,10 +243,25 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
   );
   page(
     ToolPage.routing,
-    l.rcxTitle,
+    l.rcxScenarios,
     ToolCategory.configuration,
     AppGlyphs.shuffle,
-    keywords: [l.rcxScenarios, l.rcxGroupProfiles, l.rcxHubRoutes],
+    root: false,
+    keywords: [l.rcxTitle, l.rcxHubRoutes],
+  );
+  page(
+    ToolPage.scriptedGroups,
+    l.rcxSmartGroups,
+    ToolCategory.configuration,
+    AppGlyphs.layers,
+    root: false,
+    keywords: [
+      l.rcxTitle,
+      l.rcxGroupProfiles,
+      'scripted groups',
+      'smart groups',
+      'умные группы',
+    ],
   );
   page(
     ToolPage.network,

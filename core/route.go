@@ -272,7 +272,7 @@ func resolveExit(host string, proxyName string) string {
 
 func exitThrough(proxy constant.Proxy, metadata *constant.Metadata) string {
 	for proxy != nil {
-		if proxy.Type() == constant.LoadBalance {
+		if isBalancingExit(proxy) {
 			return exitName(proxy)
 		}
 		next := proxy.Unwrap(metadata, false)
@@ -292,7 +292,7 @@ func exitOfChains(chains []string) string {
 	}
 	proxies := tunnel.AllProxies()
 	for _, name := range slices.Backward(chains[1:]) {
-		if proxy := proxies[name]; proxy != nil && proxy.Type() == constant.LoadBalance {
+		if proxy := proxies[name]; proxy != nil && isBalancingExit(proxy) {
 			return exitName(proxy)
 		}
 	}
@@ -306,4 +306,19 @@ func exitOfChains(chains []string) string {
 // exit; the server counts since a provider can swap the node behind a name.
 func exitName(proxy constant.Proxy) string {
 	return fmt.Sprintf("%q %s %s", proxy.Name(), proxy.Type(), proxy.Addr())
+}
+
+func isBalancingExit(proxy constant.Proxy) bool {
+	if group := scriptedGroupOf(proxy); group != nil {
+		if runtime := group.state.Load(); runtime != nil {
+			if snapshot := runtime.snapshot.Load(); snapshot != nil {
+				switch snapshot.tcp.kind {
+				case "round-robin", "weighted", "sticky", "sticky-session":
+					return true
+				}
+			}
+			return false
+		}
+	}
+	return proxy.Type() == constant.LoadBalance
 }

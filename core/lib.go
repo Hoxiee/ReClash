@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/tunnel"
 	"net"
 	"strings"
@@ -407,7 +406,7 @@ func GetNotificationServer(name string) string {
 	selectMu.Lock()
 	defer selectMu.Unlock()
 	proxies := tunnel.AllProxies()
-	if _, ok := adapterAs[outboundgroup.ProxyGroup](proxies[name]); !ok {
+	if _, ok := proxyGroupOf(proxies[name]); !ok {
 		return ""
 	}
 	return activeNotificationServer(name, proxies)

@@ -154,9 +154,11 @@ func runningConfigPath() string {
 
 // setupLoad is a config ready to apply with the routing it was built for.
 type setupLoad struct {
-	cfg          *config.Config
-	subscription rcx.SubscriptionLayer
-	routes       rcx.AppliedRoutes
+	cfg                *config.Config
+	subscription       rcx.SubscriptionLayer
+	routes             rcx.AppliedRoutes
+	strategyIssues     map[string]rcx.StrategyReport
+	disableStrategyUDP map[string]bool
 }
 
 // loadSetupConfig builds the scenario's routes into the config, from the
@@ -195,7 +197,21 @@ func loadSetupConfig(params *SetupParams) (setupLoad, error) {
 		user = *params.Rcx
 	}
 	routes, key := rcx.ScenarioRoutes(load.subscription, user)
-	load.cfg, load.routes, err = parseRouted(raw, routes, key)
+	withGroups, issues := injectStrategyGroups(raw, user)
+	load.cfg, load.routes, err = parseRouted(withGroups, routes, key)
+	if err != nil && withGroups != raw {
+		// A local group that breaks the parse must not take the subscription down.
+		load.cfg, load.routes, err = parseRouted(raw, routes, key)
+	}
+	load.strategyIssues = issues
+	load.disableStrategyUDP = make(map[string]bool)
+	for _, entry := range raw.ProxyGroup {
+		if disabled, _ := entry["disable-udp"].(bool); disabled {
+			if name, _ := entry["name"].(string); name != "" {
+				load.disableStrategyUDP[name] = true
+			}
+		}
+	}
 	if err != nil {
 		// Applying again would fail the same way, so the wanted routes count
 		// as applied.
@@ -209,6 +225,7 @@ func applyConfig(params *SetupParams) error {
 	configMu.Lock()
 	defer configMu.Unlock()
 
+	params = withLatestRoutingPolicy(params)
 	applySetupSiteLocks(params.SiteLocks)
 	policy, err := loadProviderPolicy(params)
 	if err != nil {
@@ -241,6 +258,13 @@ func applyConfig(params *SetupParams) error {
 	if policyErr := installProviderPolicy(policy); policyErr != nil {
 		return blockProviderPolicy(policyErr)
 	}
+	user := rcxCurrentUser()
+	if params.Rcx != nil {
+		user = *params.Rcx
+	}
+	appliedRCXProfileScope = user.ProfileScope
+	attachScriptedGroups(cfg, load.disableStrategyUDP)
+	useGroupStrategies(cfg.Proxies, cfg.Providers[provider.ReservedName], load.subscription, user, load.strategyIssues)
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
 	siteLockSniffing = false
@@ -249,6 +273,9 @@ func applyConfig(params *SetupParams) error {
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()
 	rcxApplyConfig(params.Rcx, load.subscription, load.routes)
+	if params.Rcx != nil && err == nil {
+		latestRCXPolicyCall = max(latestRCXPolicyCall, params.callSequence)
+	}
 	extensionManager.Applied()
 	updateListeners(cfg)
 	reconcileGeoUpdater()

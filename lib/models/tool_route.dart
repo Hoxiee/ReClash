@@ -37,6 +37,7 @@ enum ToolPage {
   rules,
   scripts,
   routing,
+  scriptedGroups,
   coreDetails,
   coreRuntimeConfig,
 }
@@ -48,6 +49,8 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.telegram ||
     ToolPage.siteLock ||
     ToolPage.rules ||
+    ToolPage.routing ||
+    ToolPage.scriptedGroups ||
     ToolPage.scripts => ToolPage.advanced,
     ToolPage.userAgents || ToolPage.webDashboard => ToolPage.general,
     ToolPage.onDemand ||

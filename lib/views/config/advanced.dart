@@ -6,6 +6,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
+import 'package:reclash/views/config/routing.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/site_lock.dart';
 import 'package:reclash/views/telegram_proxy.dart';
@@ -65,6 +66,21 @@ class AdvancedConfigView extends StatelessWidget {
           child: Column(
             children: [
               generateSection(items: items),
+              generateSection(
+                title: appLocalizations.rcxTitle,
+                items: [
+                  ListItem.open(
+                    title: Text(appLocalizations.rcxScenarios),
+                    leading: const GlyphIcon(AppGlyphs.shuffle),
+                    widget: const RoutingScenariosView(),
+                  ),
+                  ListItem.open(
+                    title: Text(appLocalizations.rcxSmartGroups),
+                    leading: const GlyphIcon(AppGlyphs.layers),
+                    widget: const ScriptedGroupsView(),
+                  ),
+                ],
+              ),
               generateSection(
                 title: appLocalizations.extra,
                 items: [

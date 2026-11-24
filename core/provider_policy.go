@@ -406,7 +406,7 @@ func providerPolicyCandidate(policy *providerPolicy, proxy C.Proxy, lookup func(
 		}
 		seen[proxy.Name()] = true
 		defer delete(seen, proxy.Name())
-		if group, ok := adapterAs[interface{ Proxies() []C.Proxy }](proxy); ok {
+		if group, ok := proxyGroupOf(proxy); ok {
 			members := group.Proxies()
 			if len(members) == 0 {
 				return false

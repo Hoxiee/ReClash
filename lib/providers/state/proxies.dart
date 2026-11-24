@@ -294,6 +294,12 @@ String? proxyName(Ref ref, String groupName) {
 
 @riverpod
 String? selectedProxyName(Ref ref, String groupName) {
+  final strategy = ref.watch(
+    rcxStatusStateProvider.select((status) => status?.strategies[groupName]),
+  );
+  if (strategy != null && strategy.source.isNotEmpty) {
+    return strategy.selected.isEmpty ? null : strategy.selected;
+  }
   final proxyName = ref.watch(proxyNameProvider(groupName));
   final group = ref.watch(
     groupsProvider.select((state) => state.getGroup(groupName)),

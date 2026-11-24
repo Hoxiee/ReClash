@@ -102,6 +102,20 @@ func TestEngineReportsInvalidProfiles(t *testing.T) {
 	e.Close()
 }
 
+func TestEngineLeavesStrategyGroupsToTheirStrategy(t *testing.T) {
+	e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
+	topo := engineTopology()
+	topo.Strategies = []string{"G"}
+	e.SetTopology(topo)
+	if groups := e.Status().Groups; len(groups) != 0 {
+		t.Fatalf("a bound group with a strategy still reported: %+v", groups)
+	}
+	if problems := e.Status().Problems; len(problems) != 0 {
+		t.Fatalf("a strategy group became a problem: %+v", problems)
+	}
+	e.Close()
+}
+
 func TestChangeServerSpendsNoCheck(t *testing.T) {
 	e := NewEngine(&lockedRuntime{}, fixedProber{}, nil, nil)
 	e.SetRunning(true)

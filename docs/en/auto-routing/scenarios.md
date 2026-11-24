@@ -4,8 +4,9 @@ Reference for the RCX scenario format: programs for groups, routes, network kind
 
 ## Document
 
-A scenario is one YAML mapping of at most 64 KiB; unknown keys are rejected. One scenario runs per subscription: the
-user's choice, else the manifest's [`routing.scenario`](../providers/manifest.md#routing). Turning auto routing off keeps the choice but stops the scenario.
+A scenario is one YAML mapping of at most 64 KiB; unknown keys are rejected. The user chooses one active scenario per
+subscription under **Scenarios**. Turning **Use a scenario** off keeps the selection for the next time. Providers can
+offer scenarios through their [manifest](../providers/manifest.md#routing).
 
 ```yaml title="split.rcx.yaml"
 rcx: 1

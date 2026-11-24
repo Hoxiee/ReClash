@@ -195,9 +195,20 @@ void main() {
     ]);
   });
 
-  testWidgets('turns auto routing off for the user own binding', (
+  testWidgets('a plain selector can be given a scripted binding', (
     tester,
   ) async {
+    final action = await pumpSheet(tester, 'Plain');
+    expect(_text(l.rcxMakeSmart), findsOneWidget);
+
+    await tester.tap(_text(l.rcxMakeSmart));
+    await _pumpFrames(tester);
+    expect(action.bindings, [
+      ('Plain', const RcxBinding(profile: rcxDefaultProfile)),
+    ]);
+  });
+
+  testWidgets('removes scripted selection for a user binding', (tester) async {
     final action = await pumpSheet(tester, 'Proxy');
     expect(_text(l.rcxTurnOff), findsNothing);
     await tester.tap(find.byGlyph(AppGlyphs.more));
@@ -242,7 +253,7 @@ void main() {
     expect(_text(l.rcxRouteGroupHint('Every group')), findsOneWidget);
     await tester.tap(find.byGlyph(AppGlyphs.more));
     await _pumpFrames(tester);
-    expect(_text(l.rcxSettingsLink), findsOneWidget);
+    expect(_text(l.rcxScenarios), findsOneWidget);
     expect(_text(l.rcxTurnOff), findsNothing);
   });
 

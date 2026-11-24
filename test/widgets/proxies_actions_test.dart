@@ -14,6 +14,15 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
+class _TestRoutingStatus extends RcxStatusState {
+  @override
+  RcxStatus? build() => const RcxStatus();
+
+  void support() {
+    state = const RcxStatus(strategySupport: true);
+  }
+}
+
 Group _group(String name, [int count = 4]) => Group(
   type: GroupType.Selector,
   name: name,
@@ -54,6 +63,7 @@ void main() {
         currentGroupsStateProvider.overrideWithValue(
           GroupsState(value: groups),
         ),
+        rcxStatusStateProvider.overrideWith(_TestRoutingStatus.new),
       ],
     );
     addTearDown(container.dispose);
@@ -112,10 +122,59 @@ void main() {
       );
       expect(
         find.descendant(of: menu, matching: find.byGlyph(AppGlyphs.shuffle)),
-        findsOneWidget,
+        findsNothing,
       );
       expect(tester.takeException(), isNull);
     });
+  }
+
+  for (final type in ProxiesType.values) {
+    testWidgets(
+      'the ${type.name} actions script a selector once the core supports it',
+      (tester) async {
+        await pumpView(tester, type: type);
+
+        Future<Finder> routingAction() async {
+          if (type == ProxiesType.list) {
+            return find.byTooltip('Behaviour');
+          }
+          await tester.tap(_inBar(find.byTooltip('More')));
+          await tester.pumpAndSettle();
+          return find.descendant(
+            of: find.byType(CommonPopupMenu),
+            matching: find.text('Behaviour'),
+          );
+        }
+
+        Future<void> closeMenu() async {
+          if (type == ProxiesType.list) return;
+          final menu = find.byType(CommonPopupMenu);
+          Navigator.of(tester.element(menu)).pop();
+          await tester.pumpAndSettle();
+        }
+
+        expect(await routingAction(), findsNothing);
+        await closeMenu();
+
+        final status =
+            container.read(rcxStatusStateProvider.notifier)
+                as _TestRoutingStatus;
+        status.support();
+        await tester.pumpAndSettle();
+        expect(await routingAction(), findsOneWidget);
+        await closeMenu();
+
+        await tester.tap(_inBar(find.byTooltip('More')));
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byType(CommonPopupMenu),
+            matching: find.text('Add group'),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   }
 
   testWidgets(

@@ -123,13 +123,31 @@ void main() {
       [
         'page.general',
         'page.advanced',
-        'page.routing',
         'page.resources',
         'page.backup',
         'page.customResources',
       ],
     );
   });
+
+  test(
+    'scenarios and scripted groups are separate advanced settings',
+    () async {
+      final l = await AppLocalizations.load(const Locale('en'));
+      final catalog = buildToolCatalog(l, _environment());
+      for (final (page, title) in [
+        (ToolPage.routing, l.rcxScenarios),
+        (ToolPage.scriptedGroups, l.rcxSmartGroups),
+      ]) {
+        final entry = catalog.singleWhere(
+          (entry) => entry.route == ToolRoute(page),
+        );
+        expect(entry.title, title);
+        expect(page.parent, ToolPage.advanced);
+        expect(entry.showInCatalog, isFalse);
+      }
+    },
+  );
 
   test('web dashboard stays nested beside the external controller', () async {
     final l = await AppLocalizations.load(const Locale('en'));

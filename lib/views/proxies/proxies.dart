@@ -12,6 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'routing.dart';
+import 'routing_strategy.dart';
 import 'tab.dart';
 
 class ProxiesView extends ConsumerStatefulWidget {
@@ -54,6 +55,11 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   ) {
     final appLocalizations = context.appLocalizations;
     return [
+      if (ref.watch(canScriptGroupsProvider))
+        CommonPopupMenuItem(
+          label: appLocalizations.rcxAddGroup,
+          onPressed: () => unawaited(showNewStrategyGroup(context)),
+        ),
       _optionsMenuItem(
         glyph: AppGlyphs.appsList,
         label: appLocalizations.style,
@@ -167,17 +173,23 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         (state) => state.currentGroupName,
       ),
     );
-    final isSelector = ref.watch(
-      groupsProvider.select(
-        (groups) =>
-            groups.getGroup(groupName ?? '')?.type == GroupType.Selector,
-      ),
+    final group = ref.watch(
+      groupsProvider.select((groups) => groups.getGroup(groupName ?? '')),
     );
-    if (groupName == null || !isSelector) return null;
+    if (group == null) return null;
+    final legacy = ref.watch(rcxGroupProvider(group.name)) != null;
+    final behaviour = watchGroupBehaviour(ref, group);
+    if (!legacy && !behaviour) return null;
     return IconButtonData(
       glyph: AppGlyphs.shuffle,
-      onPressed: () => unawaited(showRoutingSheet(context, groupName)),
-      tooltip: context.appLocalizations.rcxTitle,
+      onPressed: () => unawaited(
+        behaviour
+            ? showGroupBehaviour(context, group.name)
+            : showRoutingSheet(context, group.name),
+      ),
+      tooltip: behaviour
+          ? context.appLocalizations.rcxBehaviour
+          : context.appLocalizations.rcxTitle,
     );
   }
 

@@ -134,6 +134,7 @@ type DecryptConfigParams struct {
 }
 
 type SetupParams struct {
+	callSequence   uint64
 	PolicyPath     *string           `json:"policy-path,omitempty"`
 	NoGlobal       *bool             `json:"no-global,omitempty"`
 	LockGlobal     *bool             `json:"lock-global,omitempty"`

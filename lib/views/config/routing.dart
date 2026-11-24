@@ -6,42 +6,40 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/proxies/routing.dart';
-import 'package:reclash/views/proxies/routing_advanced.dart';
 import 'package:reclash/views/proxies/routing_import.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/proxies/routing_studio.dart';
+import 'package:reclash/views/proxies/routing_strategy.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Auto routing as a whole on one page: the running scenario and its routes,
-/// the groups auto routing drives, and the way into the library.
-class RoutingSettingsView extends ConsumerStatefulWidget {
-  const RoutingSettingsView({super.key, this.route});
+/// The running scenario, its routes, and the switch that turns it on.
+class RoutingScenariosView extends ConsumerStatefulWidget {
+  const RoutingScenariosView({super.key, this.route});
 
   /// A route of the running scenario to open in its editor.
   final String? route;
 
   /// Opens [route] in the hub [context] is in, else in a new one.
   static void showRoute(BuildContext context, String route) {
-    final hub = context.findAncestorStateOfType<_RoutingSettingsViewState>();
+    final hub = context.findAncestorStateOfType<_RoutingScenariosViewState>();
     if (hub != null) {
       hub._showRoute(route);
     } else {
       unawaited(
-        BaseNavigator.push<void>(context, RoutingSettingsView(route: route)),
+        BaseNavigator.push<void>(context, RoutingScenariosView(route: route)),
       );
     }
   }
 
   @override
-  ConsumerState<RoutingSettingsView> createState() =>
-      _RoutingSettingsViewState();
+  ConsumerState<RoutingScenariosView> createState() =>
+      _RoutingScenariosViewState();
 }
 
-class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView> {
+class _RoutingScenariosViewState extends ConsumerState<RoutingScenariosView> {
   late String? _route = widget.route;
 
   void _showRoute(String route) => setState(() => _route = route);
@@ -54,7 +52,7 @@ class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView> {
     );
     final status = ref.watch(rcxStatusStateProvider);
     return CommonScaffold(
-      title: l.rcxTitle,
+      title: l.rcxScenarios,
       body: switch (status) {
         _ when !hasProfile => NullStatus(
           label: l.rcxHubNoProfile,
@@ -66,11 +64,23 @@ class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView> {
           illustration: NullStatusIllustration.proxies,
         ),
         final status => RunningScenarioList(
-          leading: const [_HubHeader()],
-          trailing: const [
-            _HubGroups(),
-            _LibraryEntry(),
-            RoutingAdvancedToggle(),
+          leading: const [_ScenarioControls()],
+          trailing: [
+            generateSection(
+              items: [
+                ListItem(
+                  title: Text(l.rcxHubLibrary),
+                  leading: const GlyphIcon(AppGlyphs.layers),
+                  trailing: const DisclosureIndicator(),
+                  onTap: () => unawaited(
+                    BaseNavigator.push<void>(
+                      context,
+                      const RoutingLibraryView(scenarios: true),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
           route: _route,
           onRouteShown: () => setState(() => _route = null),
@@ -147,21 +157,21 @@ String _groupLine(AppLocalizations l, RcxGroupStatus group, String mode) {
   ].join(' · ');
 }
 
-/// The switch, the running scenario and the mode it holds.
-class _HubHeader extends ConsumerWidget {
-  const _HubHeader();
+class _ScenarioControls extends ConsumerWidget {
+  const _ScenarioControls();
 
   Future<void> _choose(
     BuildContext context,
     WidgetRef ref,
     List<RcxProfileInfo> library,
-    String current,
+    String? current,
   ) async {
     final l = context.appLocalizations;
     final locale = Localizations.localeOf(context).toString();
+    final profileId = ref.read(currentProfileIdProvider);
     final byId = {
       for (final p in library)
-        if (p.isScenario) p.id: p,
+        if (p.isScenario && p.error.isEmpty) p.id: p,
     };
     final picked = await showInSheet<String>(
       context,
@@ -185,7 +195,12 @@ class _HubHeader extends ConsumerWidget {
         onSelected: (id) => Navigator.of(sheetContext).pop(id),
       ),
     );
-    if (picked == null || picked == current) return;
+    if (picked == null ||
+        !context.mounted ||
+        ref.read(currentProfileIdProvider) != profileId ||
+        picked == ref.read(rcxStatusStateProvider)?.scenario?.id) {
+      return;
+    }
     await ref.read(rcxRoutingActionProvider.notifier).setScenario(picked);
   }
 
@@ -199,6 +214,13 @@ class _HubHeader extends ConsumerWidget {
     if (status == null) return const SizedBox.shrink();
     final scenario = status.scenario;
     final current = scenario?.id ?? '';
+    final saved = ref.watch(
+      currentRoutingLayerProvider.select((layer) => layer.scenario),
+    );
+    final canChoose = library.any((p) => p.isScenario && p.error.isEmpty);
+    final resumable = library.any(
+      (p) => p.isScenario && p.id == saved && p.error.isEmpty,
+    );
     final info = library
         .where((p) => p.isScenario && p.id == current)
         .firstOrNull;
@@ -229,9 +251,15 @@ class _HubHeader extends ConsumerWidget {
               key: const ValueKey('master'),
               title: Text(l.rcxHubAuto),
               value: scenario != null,
-              onChanged: (on) => unawaited(
-                action.setScenario(on ? rcxScenarioToTurnOn(ref) : null),
-              ),
+              onChanged: scenario == null && !canChoose
+                  ? null
+                  : (on) => unawaited(
+                      !on
+                          ? action.setScenario(null)
+                          : resumable
+                          ? action.setScenario(saved)
+                          : _choose(context, ref, library, saved),
+                    ),
             ),
             if (scenario != null)
               DecorationListItem(
@@ -241,14 +269,10 @@ class _HubHeader extends ConsumerWidget {
                       (scenario.title.isEmpty ? current : scenario.title),
                 ),
                 subtitle: description.isEmpty ? null : EmojiText(description),
-                onPressed: () =>
-                    unawaited(_choose(context, ref, library, current)),
-                trailing: Text(
-                  l.rcxHubChange,
-                  style: AppTextStyle.body
-                      .of(context)
-                      .copyWith(color: context.colorScheme.primary),
-                ),
+                onPressed: canChoose
+                    ? () => unawaited(_choose(context, ref, library, current))
+                    : null,
+                trailing: canChoose ? const DisclosureIndicator() : null,
               ),
             if (scenario != null && scenario.problem == null)
               DecorationListItem(
@@ -280,88 +304,128 @@ class _HubHeader extends ConsumerWidget {
   }
 }
 
-/// The smart groups auto routing drives outside the scenario's routes.
-class _HubGroups extends ConsumerWidget {
-  const _HubGroups();
+/// Every group the app selects for, and the way into the behaviour library.
+class ScriptedGroupsView extends ConsumerWidget {
+  const ScriptedGroupsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
     final status = ref.watch(rcxStatusStateProvider);
-    final layer = ref.watch(currentRoutingLayerProvider);
-    if (status == null) return const SizedBox.shrink();
+    return CommonScaffold(
+      title: l.rcxSmartGroups,
+      body: _HubList(
+        id: 'scripted-groups',
+        children: [
+          if (status == null)
+            ListFooter(text: l.rcxHubNeedsCore)
+          else ...[
+            generateSection(
+              items: [
+                if (ref.watch(canScriptGroupsProvider))
+                  ListItem(
+                    title: Text(l.rcxAddGroup),
+                    leading: const GlyphIcon(AppGlyphs.add),
+                    trailing: const DisclosureIndicator(),
+                    onTap: () => unawaited(showNewStrategyGroup(context)),
+                  ),
+                ListItem(
+                  title: Text(l.rcxGroupProfiles),
+                  leading: const GlyphIcon(AppGlyphs.layers),
+                  trailing: const DisclosureIndicator(),
+                  onTap: () => unawaited(
+                    BaseNavigator.push<void>(
+                      context,
+                      const RoutingLibraryView(scenarios: false),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            _active(context, status),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Every group the app selects for: a connected strategy or an engine
+  /// binding. One group can carry either, never both in this list.
+  Widget _active(BuildContext context, RcxStatus status) {
+    final l = context.appLocalizations;
     final routeNames = {
       for (final route in status.scenario?.routes ?? const <RcxRouteStatus>[])
         route.name,
     };
-    final groups = [
+    final groups = {
       for (final group in status.groups)
-        if (!group.route && !routeNames.contains(group.name)) group,
-    ];
-    if (groups.isEmpty && layer.scenarioOff) return const SizedBox.shrink();
+        if (!group.route && !routeNames.contains(group.name)) group.name: group,
+    };
+    final names = {...status.strategies.keys, ...groups.keys}.toList()..sort();
+    if (names.isEmpty) return ListFooter(text: l.rcxHubGroupsEmpty);
+    Widget row(String name) {
+      if (status.strategies[name] case final report?) {
+        final fault = report.issue.isNotEmpty
+            ? l.rcxProblemProfileInvalid(report.issue)
+            : report.empty
+            ? l.rcxProblemGroupEmpty
+            : null;
+        return DecorationListItem(
+          invalid: fault != null,
+          title: EmojiText(name),
+          subtitle: EmojiText(
+            fault ??
+                [
+                  rcxSourceLabel(l, report.source),
+                  if (report.selected.isNotEmpty) report.selected,
+                ].join(' · '),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          onPressed: () => unawaited(showGroupBehaviour(context, name)),
+          trailing: const DisclosureIndicator(),
+        );
+      }
+      final group = groups[name]!;
+      return DecorationListItem(
+        invalid: _isFault(group.problem),
+        title: EmojiText(name),
+        subtitle: EmojiText(
+          _groupLine(l, group, status.tunnelMode),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        onPressed: () => unawaited(showRoutingSheet(context, name)),
+        trailing: const DisclosureIndicator(),
+      );
+    }
+
     return generateSection(
-      title: l.rcxSmartGroups,
+      title: l.rcxActiveScriptedGroups,
       footer: status.energy.requests > 0
           ? l.rcxEnergyToday(
               status.energy.requests,
               status.energy.bytes.traffic.show,
               status.energy.capBytes.traffic.show,
             )
-          : groups.isEmpty
-          ? l.rcxHubGroupsEmpty
           : null,
-      items: [
-        for (final group in groups)
-          DecorationListItem(
-            invalid: _isFault(group.problem),
-            title: EmojiText(group.name),
-            subtitle: EmojiText(
-              _groupLine(l, group, status.tunnelMode),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onPressed: () => unawaited(showRoutingSheet(context, group.name)),
-            trailing: const DisclosureIndicator(),
-          ),
-      ],
+      items: [for (final name in names) row(name)],
     );
   }
 }
 
-class _LibraryEntry extends StatelessWidget {
-  const _LibraryEntry();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    return generateSection(
-      items: [
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.layers),
-          title: Text(l.rcxHubLibrary),
-          subtitle: Text(l.rcxHubLibraryHint),
-          onPressed: () => unawaited(
-            BaseNavigator.push<void>(context, const RoutingLibraryView()),
-          ),
-          trailing: const DisclosureIndicator(),
-        ),
-      ],
-    );
-  }
-}
-
-/// Scenarios and group profiles from every source; the user's own entries
-/// edit in place, the others open as a copy to edit.
+/// Scenarios or behaviours from every source; the user's own entries edit in
+/// place, the others open as a copy.
 class RoutingLibraryView extends ConsumerStatefulWidget {
-  const RoutingLibraryView({super.key});
+  const RoutingLibraryView({super.key, required this.scenarios});
+
+  final bool scenarios;
 
   @override
   ConsumerState<RoutingLibraryView> createState() => _RoutingLibraryViewState();
 }
 
 class _RoutingLibraryViewState extends ConsumerState<RoutingLibraryView> {
-  bool _scenarios = true;
-
   RcxRoutingAction get _action => ref.read(rcxRoutingActionProvider.notifier);
 
   Future<String?> _sourceOf(RcxProfileInfo info) async {
@@ -387,12 +451,6 @@ class _RoutingLibraryViewState extends ConsumerState<RoutingLibraryView> {
     return info.isScenario
         ? openScenarioEditor(context, text: text, from: from)
         : openRoutingStudio(context, text: text, from: from);
-  }
-
-  Future<void> _run(RcxProfileInfo info) async {
-    final running = ref.read(rcxStatusStateProvider)?.scenario?.id;
-    if (info.id == running) return;
-    await _action.setScenario(info.id);
   }
 
   Future<void> _export(RcxProfileInfo info) async {
@@ -425,31 +483,32 @@ class _RoutingLibraryViewState extends ConsumerState<RoutingLibraryView> {
     final l = context.appLocalizations;
     final locale = Localizations.localeOf(context).toString();
     final library = ref.watch(rcxLibraryProvider).value ?? const [];
-    final active = ref.watch(
-      rcxStatusStateProvider.select((status) => status?.scenario?.id),
-    );
+    final scenarios = widget.scenarios;
+    final active = scenarios
+        ? ref.watch(
+            rcxStatusStateProvider.select((status) => status?.scenario?.id),
+          )
+        : null;
     final profiles = [
       for (final p in library)
-        if (p.isScenario == _scenarios) p,
+        if (p.isScenario == scenarios) p,
     ];
     return CommonScaffold(
-      title: l.rcxHubLibrary,
+      title: scenarios ? l.rcxHubLibrary : l.rcxGroupProfiles,
       body: _HubList(
-        id: 'library',
+        id: scenarios ? 'scenarios' : 'behaviours',
         children: [
           generateSection(
             items: [
               ListItem(
                 leading: const GlyphIcon(AppGlyphs.add),
-                title: Text(l.rcxNewScenario),
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                onTap: () => unawaited(openScenarioEditor(context)),
-              ),
-              ListItem(
-                leading: const GlyphIcon(AppGlyphs.add),
-                title: Text(l.rcxNewProfile),
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                onTap: () => unawaited(openRoutingStudio(context)),
+                title: Text(scenarios ? l.rcxNewScenario : l.rcxNewProfile),
+                trailing: const DisclosureIndicator(),
+                onTap: () => unawaited(
+                  scenarios
+                      ? openScenarioEditor(context)
+                      : openRoutingStudio(context),
+                ),
               ),
               ListItem(
                 leading: const GlyphIcon(AppGlyphs.importFile),
@@ -458,26 +517,13 @@ class _RoutingLibraryViewState extends ConsumerState<RoutingLibraryView> {
               ),
             ],
           ),
-          const ListSectionGap(),
-          SegmentedControl<bool>(
-            segments: [(true, l.rcxScenarios), (false, l.rcxGroupProfiles)],
-            value: _scenarios,
-            onChanged: (value) => setState(() => _scenarios = value),
-          ),
-          const SizedBox(height: 8),
           generateAnimatedSection(
-            footer: _scenarios ? l.rcxScenariosHint : l.rcxGroupProfilesHint,
+            footer: scenarios ? l.rcxScenariosHint : l.rcxGroupProfilesHint,
             items: [
               for (final info in profiles)
                 ContextMenuRegion(
                   key: ValueKey(info.id),
                   menuItems: [
-                    if (info.source == 'user')
-                      CommonPopupMenuItem(
-                        glyph: AppGlyphs.edit,
-                        label: l.edit,
-                        onPressed: () => unawaited(_open(info, copy: false)),
-                      ),
                     CommonPopupMenuItem(
                       glyph: AppGlyphs.copy,
                       label: l.rcxDuplicate,
@@ -499,13 +545,8 @@ class _RoutingLibraryViewState extends ConsumerState<RoutingLibraryView> {
                   child: _LibraryCard(
                     info: info,
                     locale: locale,
-                    active: info.isScenario && info.id == active,
-                    onPressed: info.isScenario && info.error.isEmpty
-                        ? () => unawaited(_run(info))
-                        : () => unawaited(_open(info, copy: false)),
-                    onEdit: info.isScenario
-                        ? () => unawaited(_open(info, copy: false))
-                        : null,
+                    active: info.id == active,
+                    onPressed: () => unawaited(_open(info, copy: false)),
                   ),
                 ),
             ],
@@ -522,17 +563,12 @@ class _LibraryCard extends StatelessWidget {
     required this.locale,
     required this.active,
     required this.onPressed,
-    this.onEdit,
   });
 
   final RcxProfileInfo info;
   final String locale;
   final bool active;
   final VoidCallback onPressed;
-
-  /// Opens the entry to edit when a tap does something else, as running a
-  /// scenario does.
-  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -567,21 +603,7 @@ class _LibraryCard extends StatelessWidget {
         ],
       ),
       onPressed: onPressed,
-      trailing: switch (onEdit) {
-        final onEdit? => Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 4,
-          children: [
-            if (active) const SelectionCheck(),
-            IconButton(
-              tooltip: info.source == 'user' ? l.edit : l.rcxDuplicate,
-              onPressed: onEdit,
-              icon: const GlyphIcon(AppGlyphs.edit),
-            ).withAppTooltip(),
-          ],
-        ),
-        null => active ? const SelectionCheck() : null,
-      },
+      trailing: active ? const SelectionCheck() : const DisclosureIndicator(),
     );
   }
 }

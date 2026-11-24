@@ -455,8 +455,11 @@ func usableChips(chips []Chip, policy *Policy) []Chip {
 }
 
 type UserLayer struct {
-	Groups   map[string]Binding `json:"groups,omitempty"`
-	Profiles map[string]string  `json:"profiles,omitempty"`
+	ProfileScope string                        `json:"profileScope,omitempty"`
+	Strategies   map[string]string             `json:"strategies,omitempty"`
+	LocalGroups  map[string]LocalStrategyGroup `json:"localGroups,omitempty"`
+	Groups       map[string]Binding            `json:"groups,omitempty"`
+	Profiles     map[string]string             `json:"profiles,omitempty"`
 	// Scenario picks the auto control over the subscription's default;
 	// ScenarioOff turns auto control off altogether.
 	Scenario    string            `json:"scenario,omitempty"`
@@ -474,9 +477,11 @@ type UserLayer struct {
 }
 
 type SubscriptionLayer struct {
-	Groups    map[string]Binding
-	Profiles  map[string]any
-	Scenarios map[string]any
+	Strategies     map[string]string
+	StrategyIssues map[string]StrategyReport
+	Groups         map[string]Binding
+	Profiles       map[string]any
+	Scenarios      map[string]any
 	// Scenario is the provider's default auto control.
 	Scenario string
 }

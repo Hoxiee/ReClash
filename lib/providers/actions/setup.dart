@@ -1267,7 +1267,14 @@ class SetupAction extends _$SetupAction {
     final sourcePath = profile == null || profile.type == ProfileType.custom
         ? ''
         : await appPath.getProfilePath(profile.id.toString());
+    RcxUserLayer appliedRouting() => routingLayerFor(
+      profile == null
+          ? null
+          : ref.read(profilesProvider).getProfile(profile.id) ?? profile,
+      ref.read(rcxProfilesProvider),
+    );
     final setupParams = _setupParams.copyWith(
+      rcx: appliedRouting(),
       base: realProfile?.base,
       policyPath: sourcePath,
       chains: appliedParams.chains,
@@ -1278,7 +1285,7 @@ class SetupAction extends _$SetupAction {
         state,
         realPatchConfig,
         networkSetting,
-        appliedParams,
+        appliedParams.copyWith(rcx: setupParams.rcx),
       ),
       _ => null,
     };
@@ -1313,6 +1320,7 @@ class SetupAction extends _$SetupAction {
     (Object, StackTrace)? handoffFailure;
     var setupFailed = false;
     Future<void> pushProfile() async {
+      RcxUserLayer? pushedRouting;
       try {
         if (setupParams.base == null) {
           final configFilePath = await appPath.configFilePath;
@@ -1325,8 +1333,9 @@ class SetupAction extends _$SetupAction {
         final String message;
         pushWatch.start();
         try {
+          pushedRouting = appliedRouting();
           message = await _core.setupConfig(
-            params: setupParams,
+            params: setupParams.copyWith(rcx: pushedRouting),
             preloadInvoke: preloadInvoke,
           );
         } finally {
@@ -1358,7 +1367,15 @@ class SetupAction extends _$SetupAction {
       globalState.lastConfigCounts =
           realProfile?.counts ?? configCountsOf(const {});
       _appliedUseSystemHosts.value = realProfile?.useSystemHosts;
-      _appliedInputs = inputs;
+      _appliedInputs = switch (inputs) {
+        (final state, final patch, final network, final params) => (
+          state,
+          patch,
+          network,
+          params.copyWith(rcx: pushedRouting),
+        ),
+        null => null,
+      };
       if (system.isAndroid) {
         await preferences.saveAppliedConfigMd5(yamlMd5);
       }

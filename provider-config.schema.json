@@ -505,7 +505,7 @@
     "routing": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Profiles, scenarios and bindings as the Core reads them; the Core validates their content.",
+      "description": "Profiles, scenarios, bindings and group strategies as the Core reads them; the Core validates their content.",
       "properties": {
         "profiles": {
           "type": "object"
@@ -519,6 +519,17 @@
         "bindings": {
           "type": "object",
           "description": "Proxy-group name to binding."
+        },
+        "strategies": {
+          "type": "object",
+          "maxProperties": 128,
+          "description": "Proxy-group name to a versioned selection strategy.",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "object", "required": ["version", "levels"] },
+              { "type": "string", "minLength": 1, "maxLength": 65536 }
+            ]
+          }
         }
       }
     },

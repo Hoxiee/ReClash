@@ -8,9 +8,14 @@ import 'package:material_ui/material_ui.dart';
 /// What a dev subscription's last response and manifest set, in protocol
 /// terms, so a panel author can check them without a proxy log.
 class SubscriptionInspectorSheet extends StatelessWidget {
-  const SubscriptionInspectorSheet({super.key, required this.snapshot});
+  const SubscriptionInspectorSheet({
+    super.key,
+    required this.snapshot,
+    this.strategyIssues = const {},
+  });
 
   final SubscriptionSnapshot snapshot;
+  final Map<String, String> strategyIssues;
 
   static String _value(Object? value) => switch (value) {
     final List<Object?> list => list.join(', '),
@@ -66,6 +71,8 @@ class SubscriptionInspectorSheet extends StatelessWidget {
               items: [
                 for (final warning in snapshot.warnings)
                   DecorationListItem(title: Text(warning)),
+                for (final MapEntry(:key, :value) in strategyIssues.entries)
+                  _row(key, appLocalizations.rcxProblemProfileInvalid(value)),
               ],
             ),
             generateSection(

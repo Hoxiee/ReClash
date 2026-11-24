@@ -4,7 +4,7 @@ RCX 场景格式参考:面向组、路由、网络类型和隧道模式的程序
 
 ## 文档
 
-场景是一个不超过 64 KiB 的 YAML 映射;未知键会被拒绝。每个订阅运行一个场景:用户的选择,否则取清单的 [`routing.scenario`](../providers/manifest.md#routing)。关闭自动路由会保留该选择,但停止场景。
+场景是一个不超过 64 KiB 的 YAML 映射;未知键会被拒绝。用户可以在 **场景** 中为每个订阅选择一个运行中的场景。关闭 **使用场景** 会保留上次选择。提供商可以通过[清单](../providers/manifest.md#routing)提供场景。
 
 ```yaml title="split.rcx.yaml"
 rcx: 1

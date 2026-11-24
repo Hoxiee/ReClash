@@ -8,12 +8,14 @@ import (
 )
 
 type Status struct {
-	Running  bool          `json:"running"`
-	Mode     Mode          `json:"mode"`
-	Network  string        `json:"network"`
-	Groups   []GroupStatus `json:"groups"`
-	Energy   EnergyStatus  `json:"energy"`
-	Problems []Reason      `json:"problems,omitempty"`
+	StrategySupport bool                      `json:"strategySupport,omitempty"`
+	Strategies      map[string]StrategyReport `json:"strategies,omitempty"`
+	Running         bool                      `json:"running"`
+	Mode            Mode                      `json:"mode"`
+	Network         string                    `json:"network"`
+	Groups          []GroupStatus             `json:"groups"`
+	Energy          EnergyStatus              `json:"energy"`
+	Problems        []Reason                  `json:"problems,omitempty"`
 	// Split names the group DIRECT rules go through now, if any.
 	Split string `json:"split,omitempty"`
 	// Library changes whenever the profile library is rebuilt, so the UI

@@ -210,8 +210,9 @@ While active, connections that matched an explicit `DIRECT` rule go through the 
 | Check | One user-bucket probe of every routable member. The core accepts it; the app does not offer it. |
 
 Picking a server by hand in the proxies list pins it (`pin.manual` in the journal) unless the group is in Manual. While a
-group is smart and not manual or idle, the engine replaces the automatic health check of every provider that serves its
-members.
+group runs a behaviour and is neither manual nor idle, the engine replaces the automatic health check of every provider
+that serves its members. A group with its own selection strategy keeps the provider health checks, because the strategy
+reads their results.
 
 ## Explanations and journal
 
