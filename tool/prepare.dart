@@ -1,7 +1,7 @@
 import 'dart:io';
 
 const _usage = '''
-Prepares dependencies, localization, models, and providers.
+Prepares the patched Core, dependencies, localization, models, and providers.
 
 Usage: dart tool/prepare.dart [--no-pub] [-- <flutter command>]
 

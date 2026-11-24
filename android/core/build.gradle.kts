@@ -262,7 +262,15 @@ val bindCore =
         dependsOn(prepareMihomo)
         sources.from(
             fileTree(goModule) {
-                exclude("**/*_test.go", "**/testdata/**", "cmd/**", "mihomo/.github/**")
+                exclude(
+                    "**/*_test.go",
+                    "**/testdata/**",
+                    "cmd/**",
+                    "mihomo/.github/**",
+                    "**/.mihomo/.git/**",
+                    "**/.mihomo/.github/**",
+                    "**/mihomo-patches/.git/**",
+                )
             },
         )
         moduleDirectory.set(goModule)

@@ -121,7 +121,11 @@ void _apply() {
 }
 
 bool _isPrepared(String base, List<String> patches) {
-  if (!_target.existsSync() || !_stateFile.existsSync()) return false;
+  if (!_target.existsSync() ||
+      !_stateFile.existsSync() ||
+      !_isRepository(_target)) {
+    return false;
+  }
   if (_git(['rev-parse', 'HEAD'], cwd: _target.path).stdout.toString().trim() !=
       base) {
     return false;
