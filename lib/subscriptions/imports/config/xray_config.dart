@@ -1008,7 +1008,7 @@ Map<String, Object?>? _convertShadowsocks(
     credentialKey: 'password',
     extraKey: 'method',
   );
-  if (proxy != null && _asMap(outbound['streamSettings']) != null) {
+  if (proxy != null && _asMap(outbound['streamSettings'])?.isNotEmpty == true) {
     proxy['x-import-losses'] = true;
   }
   return proxy;
