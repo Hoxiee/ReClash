@@ -770,7 +770,7 @@ void main() {
       stream['xhttpSettings'] = {
         'path': '/x',
         'sessionIDTable': 'a',
-        'sessionIDLength': '0-2147483647',
+        'sessionIDLength': '2147483647',
       };
       final result = tryConvertXrayConfigValue({
         'outbounds': [raw],

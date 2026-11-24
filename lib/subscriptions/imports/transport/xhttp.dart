@@ -253,7 +253,7 @@ bool _sessionIdsSafe(Map<String, Object?> extra) {
   final parts = text.split('-');
   if (parts.length == 1) {
     final v = int.tryParse(parts[0]);
-    if (v == null || v < 0) return null;
+    if (v == null || v < 0 || v > 4096) return null;
     return (v, v);
   }
   if (parts.length != 2) return null;
