@@ -89,20 +89,14 @@ void main() {
     });
   });
 
-  test('names a locale with no base when a fragment removes a key', () {
-    writeUpstream('intl_en.arb', '{"hello":"Hello"}');
+  test('a fragment-only locale falls back to English and honors removals', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello","removed":"Old"}');
     writeArb('fragments/identity.branding/intl_zh_CN.arb', '{"removed":null}');
 
-    expect(
-      () => assembler.assemble(),
-      throwsA(
-        isA<FormatException>().having(
-          (e) => e.message,
-          'message',
-          allOf(contains('zh_CN'), contains('no base ARB')),
-        ),
-      ),
-    );
+    final output = assembler.assemble();
+    expect(jsonDecode(output['intl_zh_CN.arb']!) as Map<String, dynamic>, {
+      'hello': 'Hello',
+    });
   });
 
   test('rejects a key owned by more than one feature', () {
@@ -132,9 +126,31 @@ void main() {
     expect(() => assembler.assemble(), throwsA(isA<YamlException>()));
   });
 
-  test('rejects incomplete locale key sets', () {
+  test('fills missing locale messages from English', () {
     writeUpstream('intl_en.arb', '{"hello":"Hello","world":"World"}');
     writeUpstream('intl_es.arb', '{"hello":"Hola"}');
+
+    final output = assembler.assemble();
+    expect(jsonDecode(output['intl_es.arb']!) as Map<String, dynamic>, {
+      'hello': 'Hola',
+      'world': 'World',
+    });
+  });
+
+  test('a locale removal suppresses the English fallback', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello","bye":"Bye"}');
+    writeUpstream('intl_es.arb', '{"hello":"Hola"}');
+    writeArb('fragments/retired/intl_es.arb', '{"bye":null}');
+
+    final output = assembler.assemble();
+    expect(jsonDecode(output['intl_es.arb']!) as Map<String, dynamic>, {
+      'hello': 'Hola',
+    });
+  });
+
+  test('rejects locale keys that English does not have', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello"}');
+    writeUpstream('intl_es.arb', '{"hello":"Hola","extra":"Extra"}');
 
     expect(
       () => assembler.assemble(),
@@ -142,7 +158,7 @@ void main() {
         isA<FormatException>().having(
           (e) => e.message,
           'message',
-          contains('es key mismatch'),
+          contains('missing from English'),
         ),
       ),
     );

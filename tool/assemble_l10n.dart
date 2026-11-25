@@ -38,6 +38,7 @@ class LocalizationAssembler {
     }
 
     final assembled = <String, Map<String, Object?>>{};
+    final removedKeys = <String, Set<String>>{};
     for (final locale in localeFiles) {
       final source = bases[locale];
       final messages = source == null ? <String, Object?>{} : _read(source);
@@ -119,31 +120,31 @@ class LocalizationAssembler {
         }
       }
 
+      removedKeys[locale] = removals.keys.toSet();
       for (final entry in removals.entries) {
-        if (!messages.containsKey(entry.key)) {
-          final missingBase = source == null
-              ? ' (no base ARB; fragments only)'
-              : '';
-          throw FormatException(
-            '${entry.value} removes unknown key ${entry.key} '
-            'for $locale$missingBase',
-          );
-        }
         messages.remove(entry.key);
         messages.remove('@${entry.key}');
       }
       assembled[locale] = messages;
     }
 
-    final englishKeys = _messageKeys(assembled['en']!);
+    final english = assembled['en']!;
+    final englishKeys = _messageKeys(english);
     for (final entry in assembled.entries) {
-      final localeKeys = _messageKeys(entry.value);
-      if (!_setEquals(englishKeys, localeKeys)) {
-        final missing = englishKeys.difference(localeKeys).toList()..sort();
-        final extra = localeKeys.difference(englishKeys).toList()..sort();
+      final locale = entry.key;
+      final messages = entry.value;
+      final extra = _messageKeys(messages).difference(englishKeys).toList()
+        ..sort();
+      if (extra.isNotEmpty) {
         throw FormatException(
-          '${entry.key} key mismatch; missing=${missing.join(',')} extra=${extra.join(',')}',
+          '$locale has keys missing from English: ${extra.join(',')}',
         );
+      }
+      final removed = removedKeys[locale] ?? const <String>{};
+      for (final message in english.entries) {
+        final key = message.key;
+        if (key.startsWith('@') || removed.contains(key)) continue;
+        messages.putIfAbsent(key, () => message.value);
       }
     }
 
@@ -263,9 +264,6 @@ class LocalizationAssembler {
     for (final entry in values.entries)
       if (!entry.key.startsWith('@')) entry.key,
   };
-
-  bool _setEquals(Set<String> a, Set<String> b) =>
-      a.length == b.length && a.containsAll(b);
 }
 
 void main(List<String> args) {
