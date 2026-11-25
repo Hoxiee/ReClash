@@ -179,7 +179,10 @@ void main() {
 
     double heightOf(String title) => tester
         .getSize(
-          find.ancestor(of: find.text(title), matching: find.byType(ListTile)),
+          find.ancestor(
+            of: find.text(title),
+            matching: find.byType(DecorationListItem),
+          ),
         )
         .height;
     expect(config().ntp.dialerProxy, isEmpty);
@@ -240,7 +243,10 @@ void main() {
 
     await tester.tap(
       find.descendant(
-        of: find.ancestor(of: status, matching: find.byType(ListTile)),
+        of: find.ancestor(
+          of: status,
+          matching: find.byType(DecorationListItem),
+        ),
         matching: find.byTooltip(currentAppLocalizations.remove),
       ),
     );

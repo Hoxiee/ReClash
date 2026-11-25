@@ -470,8 +470,10 @@ void main() {
     ) async {
       await pumpCustom(tester);
       final l = currentAppLocalizations;
-      Finder row(String title) =>
-          find.ancestor(of: find.text(title), matching: find.byType(ListTile));
+      Finder row(String title) => find.ancestor(
+        of: find.text(title),
+        matching: find.byType(DecorationListItem),
+      );
       Finder state(String title, String text) =>
           find.descendant(of: row(title), matching: find.text(text));
 

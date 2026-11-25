@@ -1,3 +1,4 @@
+import 'package:prism_ui/metrics.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
@@ -10,6 +11,7 @@ import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
+import 'package:reclash/ui/list.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -418,11 +420,11 @@ void main() {
     );
     final request = find.ancestor(
       of: find.text(l10n.subscriptionClientRequestAs),
-      matching: find.byType(ListTile),
+      matching: find.byType(DecorationListItem),
     );
     final gap =
         tester.getTopLeft(request).dy - tester.getBottomLeft(identity).dy;
-    expect(gap, lessThanOrEqualTo(32));
+    expect(gap, lessThanOrEqualTo(listSectionGap));
     await tester.enterText(_field(l10n.link), 'https://example.com/sub');
     await tester.tap(find.text(l10n.subscriptionClientRequestAs));
     await tester.pumpAndSettle();

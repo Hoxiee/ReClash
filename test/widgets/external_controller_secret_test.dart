@@ -3,6 +3,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/list.dart';
 import 'package:reclash/ui/switch.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +47,7 @@ void main() {
   Future<void> tapControllerSwitch(WidgetTester tester) async {
     await tester.tap(
       find.descendant(
-        of: find.widgetWithText(ListTile, 'External controller'),
+        of: find.widgetWithText(DecorationListItem, 'External controller'),
         matching: find.byType(CommonSwitch),
       ),
     );

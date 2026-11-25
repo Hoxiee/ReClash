@@ -54,11 +54,9 @@ class TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        return PrismThemeBridge(
-          child: wrapAppScopes(
-            context,
-            withStatusManager ? StatusManager(child: child!) : child!,
-          ),
+        return wrapAppScopes(
+          context,
+          withStatusManager ? StatusManager(child: child!) : child!,
         );
       },
       home: homeBuilder(child),
@@ -69,15 +67,18 @@ class TestApp extends StatelessWidget {
   }
 }
 
-/// The scopes ThemeManager provides, for a test with its own MaterialApp.
+/// The app's own scopes, for a test with its own MaterialApp: the prism theme
+/// bridge outside ThemeManager's, as `Application` nests them.
 Widget wrapAppScopes(BuildContext context, Widget child) {
   final measure = Measure.of(context, 1);
   globalState.measure = measure;
   final hasProviders =
       context.findAncestorWidgetOfExactType<UncontrolledProviderScope>() !=
       null;
-  return MeasureScope(
-    measure: measure,
-    child: hasProviders ? AppViewScope(child: child) : child,
+  return PrismThemeBridge(
+    child: MeasureScope(
+      measure: measure,
+      child: hasProviders ? AppViewScope(child: child) : child,
+    ),
   );
 }

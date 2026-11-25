@@ -38,7 +38,13 @@ class UrlSchemeSupportedLinksRow extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: 4,
               children: [
-                Text(l.urlSchemeFormats),
+                Flexible(
+                  child: Text(
+                    l.urlSchemeFormats,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 const GlyphIcon(AppGlyphs.picker),
               ],
             ),
