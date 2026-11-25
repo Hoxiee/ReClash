@@ -29,9 +29,13 @@ class LocalizationAssembler {
       }
       bases[locale] = file;
     }
+    final fragmentLocales = {
+      for (final file in fragments)
+        file: _targetLocale(_locale(file), bases.keys.toSet()),
+    };
     final localeFiles = <String>{
       ...bases.keys,
-      ...fragments.map((file) => _locale(file)),
+      ...fragmentLocales.values,
     }.toList()..sort();
     if (!localeFiles.contains('en')) {
       throw const FormatException('English ARB source is missing');
@@ -46,10 +50,11 @@ class LocalizationAssembler {
       final removals = <String, String>{};
       final metadata = <String, String>{};
       final fragmentsForLocale =
-          fragments.where((file) => _locale(file) == locale).toList()
+          fragments.where((file) => fragmentLocales[file] == locale).toList()
             ..sort((a, b) => a.path.compareTo(b.path));
 
       for (final file in fragmentsForLocale) {
+        final sourceLocale = _locale(file);
         final feature = _feature(file);
         final fragment = _read(file);
         final localMetadata = <String, Object?>{};
@@ -60,9 +65,9 @@ class LocalizationAssembler {
                 '${file.path} uses unsupported global ARB metadata ${entry.key}',
               );
             }
-            if (entry.value != locale) {
+            if (entry.value != sourceLocale) {
               throw FormatException(
-                '${file.path} declares @@locale ${entry.value}, expected $locale',
+                '${file.path} declares @@locale ${entry.value}, expected $sourceLocale',
               );
             }
           } else if (entry.key.startsWith('@')) {
@@ -213,6 +218,17 @@ class LocalizationAssembler {
     }
     return feature;
   }
+
+  // 0.9.5 moved Chinese from zh_CN to zh.
+  String _targetLocale(String locale, Set<String> bases) {
+    if (bases.contains(locale)) {
+      return locale;
+    }
+    final target = _localeAliases[locale];
+    return target != null && bases.contains(target) ? target : locale;
+  }
+
+  static const _localeAliases = {'zh_CN': 'zh'};
 
   String _locale(File file) {
     final name = p.basenameWithoutExtension(file.path);

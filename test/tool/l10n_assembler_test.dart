@@ -99,6 +99,30 @@ void main() {
     });
   });
 
+  test('moves zh_CN fragments onto zh when upstream moves the base', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello"}');
+    writeUpstream('intl_zh.arb', '{"hello":"你好"}');
+    writeArb('fragments/product/intl_zh_CN.arb', '{"hello":"你好呀"}');
+
+    final output = assembler.assemble();
+    expect(output.containsKey('intl_zh_CN.arb'), isFalse);
+    expect(jsonDecode(output['intl_zh.arb']!) as Map<String, dynamic>, {
+      'hello': '你好呀',
+    });
+  });
+
+  test('keeps zh_CN fragments on zh_CN while upstream still carries it', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello"}');
+    writeUpstream('intl_zh_CN.arb', '{"hello":"你好"}');
+    writeArb('fragments/product/intl_zh_CN.arb', '{"hello":"你好呀"}');
+
+    final output = assembler.assemble();
+    expect(output.containsKey('intl_zh.arb'), isFalse);
+    expect(jsonDecode(output['intl_zh_CN.arb']!) as Map<String, dynamic>, {
+      'hello': '你好呀',
+    });
+  });
+
   test('rejects a key owned by more than one feature', () {
     writeUpstream('intl_en.arb', '{"hello":"Hello"}');
     writeArb('fragments/feature-a/intl_en.arb', '{"one":"One"}');
