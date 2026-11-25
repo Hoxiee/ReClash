@@ -249,10 +249,9 @@ class VendorSync {
     bool fresh = false,
   }) {
     identifier(id);
-    if (fresh &&
-        (bootstrap || recipeMigration || audit != null || after != null)) {
+    if (fresh && (bootstrap || recipeMigration || audit != null)) {
       reject(
-        '--fresh cannot be combined with bootstrap, recipe migration, audit or a predecessor',
+        '--fresh cannot be combined with bootstrap, recipe migration or audit',
       );
     }
     if (after != null && (bootstrap || recipeMigration || audit != null)) {

@@ -714,7 +714,7 @@ void main() {
     );
     f.service.verify('fresh', reviews: ['unclassified']);
   });
-  test('fresh assembly rejects bootstrap and predecessor combinations', () {
+  test('fresh assembly rejects bootstrap', () {
     expect(
       () => f.service.prepare(
         'fresh-bootstrap',
@@ -725,14 +725,35 @@ void main() {
       ),
       throwsA(isA<ForkException>()),
     );
+  });
+  test('fresh assembly can be a child of a recipe migration', () {
+    f.bootstrap();
+    f.branding['paths'] = {'absent': 'absent-mapped'};
+    f.metadata();
+    f.commit('chore: change the normalization recipe');
+    f.service.prepare(
+      'recipe',
+      source: f.raw,
+      recipeMigration: true,
+      audit: digest(f.service.inspect(f.raw)),
+    );
+    f.finish('recipe');
+    final next = f.rewritten(
+      code: "import 'package:fl_clash/a.dart';\nconst upstream = 11;\n",
+    );
+    final result = f.service.prepare(
+      'child',
+      source: next,
+      after: 'recipe',
+      fresh: true,
+    );
+    expect(result['status'], 'fresh-candidate');
+    final receipt = f.service.receipt('child');
+    expect(receipt['fresh'], isTrue);
+    expect((receipt['after'] as Map)['id'], 'recipe');
     expect(
-      () => f.service.prepare(
-        'fresh-after',
-        source: f.raw,
-        after: 'x',
-        fresh: true,
-      ),
-      throwsA(isA<ForkException>()),
+      f.git.oid('refs/reclash/predecessor/child'),
+      f.candidate('recipe').oid('HEAD'),
     );
   });
 }

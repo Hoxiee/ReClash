@@ -54,7 +54,8 @@ missing, unresolved or stale outcomes block acceptance. Full card schema and evi
    observation IDs.
 4. If normalization changed, prepare a standalone recipe migration on the accepted raw source with its reviewed audit.
    Finish that candidate first. Review the release with `review --source <raw> --after <recipe>`, then prepare the child with
-   `sync prepare --id <child> --after <recipe> --product-review <plan.json>`.
+   `sync prepare --id <child> --after <recipe> --product-review <plan.json>`; add `--fresh` when the child reassembles the
+   product instead of replaying history.
    The predecessor must be clean, committed, standalone and unaccepted, with matching policy, refs and verified bundle.
    Do not accept the recipe separately once a child captures it. Multi-hop chains are unsupported.
 5. Run focused checks per cluster; commit only with authority. A changed policy invalidates preparation: reconcile

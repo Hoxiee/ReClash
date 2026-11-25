@@ -256,7 +256,7 @@ prepared product base instead of the old development tip, the `.fork` policy dir
 `pubspec.yaml` version field are restored from the old line, and no rebase runs. Keep the previous line on a backup
 branch; the old `dev` commit still supplies ownership and policy checks. Verification is unchanged: a clean linear chain
 from the prepared base, the product review, and the checks the affected contracts name. `--fresh` cannot combine with
-bootstrap, a recipe migration, an audit or a predecessor.
+bootstrap, a recipe migration or an audit; it can be the child of a recipe migration through `--after`.
 
 ```bash
 dart run tool/fork.dart sync prepare --id <unique-id> --fresh --product-review <plan.json>
