@@ -92,6 +92,31 @@ void main() {
       }
       expect(list.list, [3, 4]);
     });
+
+    test('appendAll adds every item in a single generation', () {
+      final first = FixedList(4, list: [1]);
+      final before = first.list;
+      final second = first.appendAll([2, 3]);
+
+      expect(second.list, [1, 2, 3]);
+      expect(second.revision, first.revision + 1);
+      expect(before, [1]);
+    });
+
+    test('appendAll honours maxLength from the tail', () {
+      final first = FixedList(3, list: [1, 2]);
+      final second = first.appendAll([3, 4, 5]);
+
+      expect(second.list, [3, 4, 5]);
+    });
+
+    test('appendAll with nothing to add still bumps the revision', () {
+      final first = FixedList(3, list: [1, 2]);
+      final second = first.appendAll(const []);
+
+      expect(second.list, [1, 2]);
+      expect(second.revision, first.revision + 1);
+    });
   });
 
   group('retainTrimmedHead', () {
