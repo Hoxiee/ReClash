@@ -4,6 +4,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/card.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/proxies.dart';
 import 'package:material_ui/material_ui.dart';
@@ -93,7 +94,7 @@ void main() {
     final ctx = FocusManager.instance.primaryFocus?.context;
     if (ctx == null) return false;
     return ctx.findAncestorWidgetOfExactType<ListHeader>() != null &&
-        ctx.findAncestorWidgetOfExactType<FilledButton>() != null &&
+        ctx.findAncestorWidgetOfExactType<CommonCard>() != null &&
         ctx.findAncestorWidgetOfExactType<IconButton>() == null;
   }
 

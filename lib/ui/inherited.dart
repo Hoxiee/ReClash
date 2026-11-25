@@ -1,7 +1,9 @@
-import 'package:reclash/ui/item_position.dart';
 import 'package:reclash/ui/sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
+
+export 'package:prism_ui/inherited.dart'
+    show ItemPositionProvider, ProxyDecoratorProvider;
 
 class PageActivityScope extends InheritedWidget {
   final bool isActive;
@@ -152,44 +154,6 @@ class FloatingBarScope extends InheritedWidget {
   bool updateShouldNotify(FloatingBarScope oldWidget) {
     return inset != oldWidget.inset;
   }
-}
-
-class ItemPositionProvider extends InheritedWidget {
-  final ItemPosition position;
-
-  const ItemPositionProvider({
-    super.key,
-    required this.position,
-    required super.child,
-  });
-
-  static ItemPositionProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ItemPositionProvider>();
-  }
-
-  @override
-  bool updateShouldNotify(ItemPositionProvider oldWidget) =>
-      position != oldWidget.position;
-}
-
-class ProxyDecoratorProvider extends InheritedWidget {
-  final bool isProxyDecorator;
-  final double lift;
-
-  const ProxyDecoratorProvider({
-    super.key,
-    required this.isProxyDecorator,
-    required this.lift,
-    required super.child,
-  });
-
-  static ProxyDecoratorProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ProxyDecoratorProvider>();
-  }
-
-  @override
-  bool updateShouldNotify(ProxyDecoratorProvider oldWidget) =>
-      isProxyDecorator != oldWidget.isProxyDecorator || lift != oldWidget.lift;
 }
 
 class SheetProvider<T> extends InheritedWidget {

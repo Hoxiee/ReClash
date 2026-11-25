@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' as material;
 import 'package:prism_ui/measure.dart' as prism;
+import 'package:prism_ui/surface.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:reclash/ui/page_background.dart';
 
 /// The app's resolved font, which Material keeps private inside its text styles.
 class PrismFont extends material.ThemeExtension<PrismFont> {
@@ -101,7 +103,10 @@ class PrismThemeBridge extends StatelessWidget {
       ),
       child: prism.Theme(
         data: buildPrismTheme(material.Theme.of(context)),
-        child: child,
+        child: prism.CardFillScope(
+          transform: PageBackgroundScope.applyCardOpacity,
+          child: child,
+        ),
       ),
     );
   }

@@ -260,6 +260,7 @@ class ApplicationState extends ConsumerState<Application> {
           localizationsDelegates: [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
+            AppPrismUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
             ...fallbackMaterialLocalizationsDelegates,
           ],

@@ -21,12 +21,17 @@ class CommonCheckBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Checkbox(
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-      visualDensity: VisualDensity.standard,
-      shape: isCircle ? AppShape.circle : null,
-      value: value,
-      onChanged: onChanged,
+    // A row may paint its own surface without Material, as prism's card does;
+    // the box still needs one for its ink.
+    return Material(
+      type: MaterialType.transparency,
+      child: Checkbox(
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
+        shape: isCircle ? AppShape.circle : null,
+        value: value,
+        onChanged: onChanged,
+      ),
     );
   }
 }

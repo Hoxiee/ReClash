@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/divider.dart' as prism;
+import 'package:prism_ui/metrics.dart' as prism_metrics;
 
 import '../helpers/test_app.dart';
 
@@ -42,7 +44,7 @@ void main() {
   }
 
   PaintPattern separator(WidgetTester tester, Finder row, {Rect? rect}) {
-    final color = Theme.of(tester.element(row)).colorScheme.outlineVariant;
+    final color = prism.Divider.colorOf(tester.element(row));
     return paints..something(
       (method, arguments) =>
           method == #drawRect &&
@@ -112,6 +114,7 @@ void main() {
     final row = tester.getRect(rows[0]);
     final title = tester.getRect(find.text('row 0'));
     final thickness = 2 / tester.view.devicePixelRatio;
+    final endIndent = prism_metrics.ListInsets.forWidth(row.width).leading;
     expect(
       tester.renderObject(rows[0]),
       separator(
@@ -120,7 +123,7 @@ void main() {
         rect: Rect.fromLTRB(
           title.left - row.left,
           row.height - thickness,
-          row.width - 14,
+          row.width - endIndent,
           row.height,
         ),
       ),

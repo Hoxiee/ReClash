@@ -48,6 +48,7 @@ class TestApp extends StatelessWidget {
       localizationsDelegates: [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,
+        AppPrismUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
         ...fallbackMaterialLocalizationsDelegates,
       ],

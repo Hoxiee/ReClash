@@ -1,4 +1,5 @@
 import 'package:reclash/ui/switch.dart';
+import 'package:reclash/ui/list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -363,7 +364,7 @@ void main() {
     final capture = find.text('Logcat');
     final level = find.text('Log level');
     final captureSwitch = find.descendant(
-      of: find.widgetWithText(ListTile, 'Logcat'),
+      of: find.widgetWithText(DecorationListItem, 'Logcat'),
       matching: find.byType(CommonSwitch),
     );
     expect(capture, findsOneWidget);

@@ -6,6 +6,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/ui/prism_theme.dart';
 import 'package:reclash/views/profiles/edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -68,11 +69,12 @@ Future<FocusNode> pumpEditProfile(
         localizationsDelegates: const [
           AppLocalizations.delegate,
           AppUiLocalizations.delegate,
+          AppPrismUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) {
-          return wrapAppScopes(context, child!);
+          return PrismThemeBridge(child: wrapAppScopes(context, child!));
         },
         home: Scaffold(
           body: Column(

@@ -3,6 +3,8 @@ import 'package:reclash/ui/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/card_surface.dart';
+import 'package:reclash/ui/prism_theme.dart';
 
 final _theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
@@ -51,6 +53,15 @@ BorderSide _buttonSide(WidgetTester tester, Key key) {
     find.descendant(of: find.byKey(key), matching: find.byType(Material)).first,
   );
   return (material.shape! as OutlinedBorder).side;
+}
+
+BorderSide _cardSide(WidgetTester tester, Key key) {
+  final card = tester.widget<CardSurface>(
+    find
+        .descendant(of: find.byKey(key), matching: find.byType(CardSurface))
+        .first,
+  );
+  return card.side;
 }
 
 BorderSide _ringSide(WidgetTester tester, Key key) {
@@ -227,6 +238,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: _theme,
+        builder: (context, child) => PrismThemeBridge(child: child!),
         home: RemoteFocusAdapter(
           enabled: remote,
           child: Scaffold(
@@ -257,20 +269,20 @@ void main() {
 
     await tester.tap(find.byKey(const Key('field')));
     await tester.pumpAndSettle();
-    expect(_buttonSide(tester, row).style, BorderStyle.none);
+    expect(_cardSide(tester, row).style, BorderStyle.none);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(_buttonSide(tester, row).style, BorderStyle.none);
+    expect(_cardSide(tester, row).style, BorderStyle.none);
 
     await tester.tap(find.byKey(const Key('before')));
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(_buttonSide(tester, row), _ring(standsOff: false));
+    expect(_cardSide(tester, row), _ring(standsOff: false));
 
     await tester.tap(find.byKey(const Key('field')));
     await tester.pumpAndSettle();
-    expect(_buttonSide(tester, row).style, BorderStyle.none);
+    expect(_cardSide(tester, row).style, BorderStyle.none);
   });
 
   testWidgets('a row rings any focus while a remote drives it', (tester) async {
@@ -278,6 +290,6 @@ void main() {
 
     await tester.showKeyboard(find.byKey(const Key('field')));
     await tester.pumpAndSettle();
-    expect(_buttonSide(tester, const Key('row')), _ring(standsOff: false));
+    expect(_cardSide(tester, const Key('row')), _ring(standsOff: false));
   });
 }

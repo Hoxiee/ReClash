@@ -24,6 +24,7 @@ import 'package:reclash/views/profiles/custom/rules.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/divider.dart' as prism_divider;
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -389,9 +390,7 @@ void main() {
 
     final rows = find.byType(DecorationListItem);
     expect(rows, findsNWidgets(3));
-    final color = Theme.of(
-      tester.element(rows.first),
-    ).colorScheme.outlineVariant;
+    final color = prism_divider.Divider.colorOf(tester.element(rows.first));
     final separator = paints
       ..something(
         (method, arguments) =>

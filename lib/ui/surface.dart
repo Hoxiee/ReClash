@@ -1,6 +1,7 @@
 import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/surface.dart' as prism;
 
 /// `.agents/surfaces.md` explains the levels and why dark mode never steps
 /// back down.
@@ -43,7 +44,10 @@ class SurfaceScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SurfaceLevelScope(level: level, child: child);
+    return prism.SurfaceScope(
+      level: prism.SurfaceLevel.values[level.index],
+      child: _SurfaceLevelScope(level: level, child: child),
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:reclash/ui/scaffold.dart';
 import 'package:reclash/ui/typography.dart';
 import 'package:reclash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/metrics.dart' as prism;
 
 extension BuildContextExtension on BuildContext {
   CommonScaffoldState? get commonScaffoldState {
@@ -41,7 +42,7 @@ extension BuildContextExtension on BuildContext {
   /// For a page that opens on a section: the section's own gap above it then
   /// lands it where [contentTopPadding] puts any other page's content.
   double get sectionsTopPadding =>
-      math.max(0, contentTopPadding - listHeaderPaddingOf(this).top);
+      math.max(0, contentTopPadding - prism.listHeaderPaddingOf(this).top);
 
   /// What the end of a body scrolls clear of: the system bar the body runs
   /// under and what floats over its foot. A docked search only counts below
