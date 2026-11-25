@@ -187,6 +187,8 @@ Future<ProviderConfigDelivery> fetchProviderConfig({
       },
       timeout: budget,
       cancellation: cancellation,
+      trust: SubscriptionUrlTrust.content,
+      trustSource: subscription,
     );
     if (response.uri.scheme != 'https') {
       throw const SubscriptionException(SubscriptionFailure.redirect);

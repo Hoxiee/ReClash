@@ -806,6 +806,8 @@ class _FakeTransport implements SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => _answer(source);
 
   @override
@@ -815,6 +817,8 @@ class _FakeTransport implements SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => _answer(source);
 
   SubscriptionResponse _answer(Uri source) {

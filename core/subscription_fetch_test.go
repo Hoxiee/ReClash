@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -379,5 +380,84 @@ func TestDownloadRuleSetPassesSourceHeadersToHTTPVehicle(t *testing.T) {
 	}
 	if _, err := downloadRuleSet(server.URL, filepath.Join(t.TempDir(), "rules"), map[string]string{"X-HWID": "device-id"}); err == nil {
 		t.Fatal("accepted device identity on resource request")
+	}
+}
+
+func TestSubscriptionRedirectsRejectLocalTargets(t *testing.T) {
+	ctx := context.Background()
+	current, err := url.Parse("https://provider.example/sub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range []string{
+		"http://127.0.0.1:8080/",
+		"http://[::1]/",
+		"http://169.254.169.254/latest/meta-data",
+		"http://100.100.100.200/",
+		"http://168.63.129.16/",
+		"http://metadata.google.internal/",
+		"http://localhost/",
+		"http://0.0.0.0/",
+		"http://[fe80::1]/",
+	} {
+		next, err := url.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := validateSubscriptionRedirectTarget(ctx, current, next); err == nil {
+			t.Errorf("accepted local redirect target %s", raw)
+		}
+	}
+	for _, raw := range []string{
+		"http://192.168.1.10:8080/sub",
+		"http://10.0.0.2/",
+		"http://172.16.0.1/",
+		"http://[fd00::1]/",
+		"https://example.com/",
+	} {
+		next, err := url.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := validateSubscriptionRedirectTarget(ctx, current, next); err != nil {
+			t.Errorf("rejected LAN redirect target %s: %v", raw, err)
+		}
+	}
+	local, err := url.Parse("http://127.0.0.1:1/sub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	next, err := url.Parse("http://127.0.0.1:2/sub")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := validateSubscriptionRedirectTarget(ctx, local, next); err != nil {
+		t.Fatalf("rejected same-host local redirect: %v", err)
+	}
+}
+
+func TestBlockedSubscriptionIP(t *testing.T) {
+	for _, raw := range []string{
+		"127.0.0.1",
+		"169.254.169.254",
+		"100.100.100.200",
+		"168.63.129.16",
+		"::1",
+		"fd00:ec2::254",
+	} {
+		if !blockedSubscriptionIP(net.ParseIP(raw)) {
+			t.Errorf("accepted blocked address %s", raw)
+		}
+	}
+	for _, raw := range []string{
+		"192.168.1.1",
+		"10.0.0.1",
+		"172.16.0.1",
+		"8.8.8.8",
+		"fd00::1",
+	} {
+		if blockedSubscriptionIP(net.ParseIP(raw)) {
+			t.Errorf("blocked LAN address %s", raw)
+		}
 	}
 }

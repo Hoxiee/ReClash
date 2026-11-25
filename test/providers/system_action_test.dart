@@ -31,11 +31,22 @@ class TestSystemAction extends SystemAction {
   final List<String> calls = [];
   final List<bool> cleanupNeedSave = [];
   Completer<void>? closeCoreGate;
+  Completer<void>? updateGate;
   Object? cleanupError;
   Duration watchdog = const Duration(hours: 1);
+  int updateApplies = 0;
 
   @override
   Duration get exitWatchdogDuration => watchdog;
+
+  @override
+  Future<void> applyReadyUpdateOnExit() async {
+    updateApplies++;
+    final gate = updateGate;
+    if (gate != null) {
+      await gate.future;
+    }
+  }
 
   @override
   Future<void> cleanupExitResources(bool needSave) async {
@@ -463,6 +474,7 @@ void main() {
       await notifier().handleExit(false);
 
       expect(action.cleanupNeedSave, [false]);
+      expect(action.updateApplies, 0);
     });
 
     test('concurrent exit requests share one shutdown', () async {
@@ -509,6 +521,22 @@ void main() {
         );
       },
     );
+
+    test('a slow update apply runs before the exit watchdog', () async {
+      action.watchdog = const Duration(milliseconds: 1);
+      action.updateGate = Completer<void>();
+
+      final operation = notifier().handleExit();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(action.updateApplies, 1);
+      expect(action.calls, isEmpty);
+
+      action.updateGate!.complete();
+      await operation;
+
+      expect(action.calls, ['cleanup', 'window', 'core', 'exit']);
+    });
 
     test('a cleanup failure still closes the window, Core and app', () async {
       action.cleanupError = StateError('cleanup failed');

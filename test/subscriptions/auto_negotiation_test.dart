@@ -34,6 +34,8 @@ class _NegotiationTransport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async {
     final response = responses[requests.length];
     requests.add(Map<String, String>.unmodifiable(headers));

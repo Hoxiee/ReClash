@@ -229,6 +229,66 @@ void main() {
     },
   );
 
+  test(
+    'makeRealProfileTask drops remote providers aimed at local targets',
+    () async {
+      final rawConfig = <String, dynamic>{
+        'proxy-providers': {
+          'safe': {'type': 'http', 'url': 'https://example.com/proxy.yaml'},
+          'loopback': {'type': 'http', 'url': 'http://127.1/proxy.yaml'},
+          'metadata': {
+            'type': 'http',
+            'url': 'http://169.254.169.254/latest/meta-data',
+          },
+        },
+        'rule-providers': {
+          'safeRules': {
+            'type': 'http',
+            'url': 'https://example.com/rules.yaml',
+          },
+          'localRules': {'type': 'http', 'url': 'http://[::1]/rules.yaml'},
+        },
+        'proxy-groups': [
+          {
+            'name': 'Mixed',
+            'type': 'select',
+            'use': ['safe', 'loopback'],
+          },
+          {
+            'name': 'OnlyLocal',
+            'type': 'select',
+            'use': ['loopback'],
+          },
+        ],
+        'rules': [
+          'RULE-SET,safeRules,DIRECT',
+          'RULE-SET,localRules,DIRECT',
+          'MATCH,Mixed',
+        ],
+      };
+      final result = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 8,
+          rawConfig: rawConfig,
+          realPatchConfig: const PatchClashConfig(),
+          appendSystemDns: false,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules: const [],
+          defaultUA: 'ReClash-Test',
+        ),
+      );
+      final config = loadYaml(result.yaml) as YamlMap;
+      expect(config['proxy-providers'].keys, ['safe']);
+      expect(config['rule-providers'].keys, ['safeRules']);
+      expect(config['proxy-groups'][0]['use'], ['safe']);
+      expect(config['proxy-groups'][1]['use'], isEmpty);
+      expect(config['proxy-groups'][1]['proxies'], ['DIRECT']);
+      expect(config['rules'], ['RULE-SET,safeRules,DIRECT', 'MATCH,Mixed']);
+    },
+  );
+
   test('lastMatchTarget reads the last MATCH rule that names a target', () {
     expect(
       lastMatchTarget(['MATCH,A', 'DOMAIN,x.test,B', 'match,C', 'MATCH,']),

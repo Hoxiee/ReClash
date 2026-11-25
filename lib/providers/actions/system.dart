@@ -60,9 +60,12 @@ class SystemAction extends _$SystemAction {
     return handleExit();
   }
 
-  Future<void> handleExit([bool needSave = true]) {
+  Future<void> handleExit([bool needSave = true]) async {
     ref.read(webDashboardActionProvider.notifier).cancel();
     ref.read(webDashboardAccessProvider.notifier).end();
+    if (needSave && !_unattendedExit) {
+      await applyReadyUpdateOnExit();
+    }
     final coordinator = _exitCoordinator ??= SystemExitCoordinator(
       watchdogDuration: exitWatchdogDuration,
       closeWindow: closeWindow,
@@ -118,14 +121,30 @@ class SystemAction extends _$SystemAction {
   @protected
   Duration get exitWatchdogDuration => const Duration(seconds: 3);
 
+  /// Runs before the watchdog: hashing the installer can outlast its budget.
+  @protected
+  Future<void> applyReadyUpdateOnExit() async {
+    try {
+      await ref
+          .read(appUpdateActionProvider.notifier)
+          .applyOnExit()
+          .timeout(const Duration(seconds: 30));
+    } on TimeoutException {
+      commonPrint.log(
+        'Update apply on exit timed out',
+        logLevel: LogLevel.warning,
+      );
+    } on Object catch (error) {
+      commonPrint.log(
+        'Update apply on exit failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   @protected
   Future<void> cleanupExitResources(bool needSave) async {
-    // The watchdog is already armed: start the authoritative save before a
-    // ready update's hash can hold it past the budget.
     final saveOperation = needSave ? _savePreferencesSafely() : null;
-    if (needSave && !_unattendedExit) {
-      await ref.read(appUpdateActionProvider.notifier).applyOnExit();
-    }
     final tray = trayPort;
     if (tray != null) {
       await tray.shutdown().onError<Object>((error, stackTrace) {

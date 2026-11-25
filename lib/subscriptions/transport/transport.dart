@@ -4,11 +4,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show compute;
+import 'package:reclash/common/remote_url.dart';
 
 import '../metadata/metadata.dart';
 import '../protocol/codec.dart';
 import '../protocol/registry.dart';
 import 'header_policy.dart';
+
+enum SubscriptionUrlTrust { user, content }
 
 enum SubscriptionFailure {
   cancelled,
@@ -90,12 +93,16 @@ class SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) => _request(
     source,
     limit: subscriptionWireLimit,
     headers: headers,
     timeout: timeout,
     cancellation: cancellation,
+    trust: trust,
+    trustSource: trustSource,
   );
 
   /// [fetch] with a smaller [limit] on both wire and decompressed bytes.
@@ -105,12 +112,16 @@ class SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) => _request(
     source,
     limit: limit,
     headers: headers,
     timeout: timeout,
     cancellation: cancellation,
+    trust: trust,
+    trustSource: trustSource,
   );
 
   Future<SubscriptionResponse> _request(
@@ -119,6 +130,8 @@ class SubscriptionTransport {
     required Map<String, String> headers,
     required Duration timeout,
     required SubscriptionCancellation? cancellation,
+    required SubscriptionUrlTrust trust,
+    Uri? trustSource,
   }) async {
     final client = _createClient();
     client.autoUncompress = false;
@@ -146,6 +159,8 @@ class SubscriptionTransport {
           headers,
           localCancellation,
           limit: limit,
+          trust: trust,
+          trustSource: trustSource,
           onResponse: () => receivedResponse = true,
         );
         return await pending.timeout(
@@ -266,6 +281,8 @@ class SubscriptionTransport {
     Map<String, String> fields,
     SubscriptionCancellation cancellation, {
     required int limit,
+    required SubscriptionUrlTrust trust,
+    Uri? trustSource,
     required void Function() onResponse,
   }) async {
     var uri = source;
@@ -293,6 +310,9 @@ class SubscriptionTransport {
           !seen.add(uri.toString())) {
         throw const SubscriptionException(SubscriptionFailure.redirect);
       }
+      if (!await _allowedTarget(uri, source, trust, hop, trustSource)) {
+        throw const SubscriptionException(SubscriptionFailure.redirect);
+      }
       final request = await client.getUrl(uri);
       request.followRedirects = false;
       request.maxRedirects = 0;
@@ -302,6 +322,13 @@ class SubscriptionTransport {
       }
       final response = await request.close();
       onResponse();
+      final remote = response.connectionInfo?.remoteAddress;
+      if (remote != null &&
+          !remote.isLoopback &&
+          !_trustsTarget(uri, source, trust, hop, trustSource) &&
+          isBlockedRemoteAddress(remote)) {
+        throw const SubscriptionException(SubscriptionFailure.redirect);
+      }
       final responseHeaders = <String, List<String>>{};
       var size = 0;
       response.headers.forEach((name, values) {
@@ -358,6 +385,35 @@ class SubscriptionTransport {
     }
     throw const SubscriptionException(SubscriptionFailure.redirect);
   }
+}
+
+bool _trustsTarget(
+  Uri uri,
+  Uri source,
+  SubscriptionUrlTrust trust,
+  int hop,
+  Uri? trustSource,
+) {
+  if (trust == SubscriptionUrlTrust.user && hop == 0) return true;
+  if (trustSource != null &&
+      uri.host.toLowerCase() == trustSource.host.toLowerCase()) {
+    return true;
+  }
+  // A local panel may redirect within itself; other local targets are refused.
+  return trust == SubscriptionUrlTrust.user &&
+      uri.host.toLowerCase() == source.host.toLowerCase() &&
+      isBlockedRemoteHost(source.host);
+}
+
+Future<bool> _allowedTarget(
+  Uri uri,
+  Uri source,
+  SubscriptionUrlTrust trust,
+  int hop,
+  Uri? trustSource,
+) async {
+  if (_trustsTarget(uri, source, trust, hop, trustSource)) return true;
+  return !await resolvesToBlockedRemoteAddress(uri);
 }
 
 void _validateResponseStatus(int status, Map<String, List<String>> headers) {

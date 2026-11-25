@@ -200,6 +200,9 @@ func fetchSubscription(params SubscriptionFetchParams, connector subscriptionCon
 		if err != nil || validateSubscriptionRedirect(target, next) != nil {
 			return nil, errors.New("invalid redirect")
 		}
+		if err := validateSubscriptionRedirectTarget(ctx, target, next); err != nil {
+			return nil, errors.New("invalid redirect")
+		}
 		if !sameSubscriptionOrigin(target, next) {
 			headers = retainedSubscriptionHeaders(headers)
 		}
@@ -227,6 +230,57 @@ func validateSubscriptionRedirect(current, next *url.URL) error {
 		return errors.New("HTTPS downgrade refused")
 	}
 	return nil
+}
+
+var localSubscriptionHosts = map[string]struct{}{
+	"metadata":                   {},
+	"metadata.google.internal":   {},
+	"instance-data":              {},
+	"instance-data.ec2.internal": {},
+	"metadata.tencentyun.com":    {},
+}
+
+func validateSubscriptionRedirectTarget(ctx context.Context, current, next *url.URL) error {
+	if strings.EqualFold(current.Hostname(), next.Hostname()) {
+		return nil
+	}
+	host := strings.ToLower(strings.TrimSuffix(next.Hostname(), "."))
+	if host == "" || host == "localhost" || strings.HasSuffix(host, ".localhost") {
+		return errors.New("local redirect")
+	}
+	if _, blocked := localSubscriptionHosts[host]; blocked {
+		return errors.New("local redirect")
+	}
+	if ip := net.ParseIP(strings.SplitN(host, "%", 2)[0]); ip != nil {
+		if blockedSubscriptionIP(ip) {
+			return errors.New("local redirect")
+		}
+		return nil
+	}
+	addresses, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+	if err != nil {
+		return nil
+	}
+	for _, address := range addresses {
+		if blockedSubscriptionIP(address.IP) {
+			return errors.New("local redirect")
+		}
+	}
+	return nil
+}
+
+func blockedSubscriptionIP(ip net.IP) bool {
+	if ip == nil || ip.IsUnspecified() || ip.IsLoopback() ||
+		ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsMulticast() {
+		return true
+	}
+	if v4 := ip.To4(); v4 != nil {
+		if v4[0] == 100 && v4[1] >= 64 && v4[1] <= 127 {
+			return true
+		}
+		return v4.Equal(net.IPv4(168, 63, 129, 16))
+	}
+	return ip.Equal(net.ParseIP("fd00:ec2::254"))
 }
 
 func validateSubscriptionURL(u *url.URL) error {

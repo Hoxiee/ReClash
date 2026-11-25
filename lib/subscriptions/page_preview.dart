@@ -72,6 +72,8 @@ Future<SubscriptionPagePreview> previewSubscriptionPage(
           headers: {..._browserHeaders, 'Cookie': cookie},
           timeout: const Duration(seconds: 8),
           cancellation: cancellation,
+          trust: SubscriptionUrlTrust.content,
+          trustSource: response.uri,
         );
         if (config.uri.origin == response.uri.origin) {
           final branding = await Isolate.run(
@@ -94,6 +96,8 @@ Future<SubscriptionPagePreview> previewSubscriptionPage(
         headers: {..._browserHeaders, 'Accept': 'application/json'},
         timeout: const Duration(seconds: 8),
         cancellation: cancellation,
+        trust: SubscriptionUrlTrust.content,
+        trustSource: response.uri,
       );
       if (api.uri.origin == response.uri.origin &&
           api.bytes.length <= 64 * 1024 &&
@@ -122,6 +126,8 @@ Future<SubscriptionPagePreview> previewSubscriptionPage(
         headers: {..._browserHeaders, 'Accept': 'image/*'},
         timeout: const Duration(seconds: 8),
         cancellation: cancellation,
+        trust: SubscriptionUrlTrust.content,
+        trustSource: response.uri,
       );
       final type = image.headers['content-type']?.firstOrNull
           ?.split(';')

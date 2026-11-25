@@ -43,6 +43,8 @@ class _Transport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async {
     calls++;
     return SubscriptionResponse(

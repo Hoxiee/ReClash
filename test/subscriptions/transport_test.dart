@@ -232,6 +232,29 @@ void main() {
     },
   );
 
+  test('content fetches refuse loopback before connecting', () async {
+    final uri = await serve((request) => respond(request, utf8.encode('ok')));
+    await expectLater(
+      SubscriptionTransport().fetch(uri, trust: SubscriptionUrlTrust.content),
+      throwsA(_failure(SubscriptionFailure.redirect)),
+    );
+  });
+
+  test('redirects cannot reach a metadata address', () async {
+    final uri = await serve((request) {
+      request.response.statusCode = 302;
+      request.response.headers.set(
+        'location',
+        'http://169.254.169.254/latest/meta-data',
+      );
+      return request.response.close();
+    });
+    await expectLater(
+      SubscriptionTransport().fetch(uri),
+      throwsA(_failure(SubscriptionFailure.redirect)),
+    );
+  });
+
   test('retains a verified provider support URL on device limits', () async {
     final uri = await serve((request) async {
       request.response.headers

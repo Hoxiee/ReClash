@@ -37,14 +37,17 @@ const _pageHeaders = {
 class ProviderBrandResolver {
   ProviderBrandResolver({
     required this.transport,
+    Uri? trustSource,
     LogoColorReader? readColor,
     ImageSizeReader? readSize,
     DateTime Function()? clock,
-  }) : _readColor = readColor ?? dominantLogoColor,
+  }) : _trustSource = trustSource,
+       _readColor = readColor ?? dominantLogoColor,
        _readSize = readSize ?? encodedImageSize,
        _clock = clock ?? DateTime.now;
 
   final SubscriptionTransport transport;
+  final Uri? _trustSource;
   final LogoColorReader _readColor;
   final ImageSizeReader _readSize;
   final DateTime Function() _clock;
@@ -266,6 +269,8 @@ class ProviderBrandResolver {
         headers: headers,
         timeout: _fetchTimeout,
         cancellation: cancellation,
+        trust: SubscriptionUrlTrust.content,
+        trustSource: _trustSource,
       );
     } on Object {
       _checkCancelled(cancellation);

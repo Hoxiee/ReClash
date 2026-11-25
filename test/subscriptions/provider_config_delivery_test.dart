@@ -46,6 +46,8 @@ class _Transport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => SubscriptionResponse(
     bytes: Uint8List.fromList(utf8.encode(_nodeBody)),
     headers: {
@@ -62,6 +64,8 @@ class _Transport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) {
     configRequests++;
     configHeaders = headers;

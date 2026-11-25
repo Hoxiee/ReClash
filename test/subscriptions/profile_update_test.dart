@@ -35,6 +35,8 @@ class _SubscriptionTransport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => SubscriptionResponse(
     bytes: Uint8List.fromList(utf8.encode(manifest!)),
     headers: const {},
@@ -48,6 +50,8 @@ class _SubscriptionTransport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async {
     requests++;
     requestHeaders = headers;
@@ -70,6 +74,8 @@ class _FailingManifestTransport extends _SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => throw const SubscriptionException(SubscriptionFailure.transport);
 }
 
@@ -87,6 +93,8 @@ class _HostTransport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async => SubscriptionResponse(
     bytes: Uint8List.fromList(utf8.encode(manifest!)),
     headers: const {},
@@ -100,6 +108,8 @@ class _HostTransport extends SubscriptionTransport {
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 30),
     SubscriptionCancellation? cancellation,
+    SubscriptionUrlTrust trust = SubscriptionUrlTrust.user,
+    Uri? trustSource,
   }) async {
     fetched.add(source);
     final responseHeaders = hosts[source.authority];

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/remote_url.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/enum/enum.dart';
@@ -279,6 +280,73 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
     };
   }
 
+  void dropUnsafeProviders(String section) {
+    final providers = rawConfig[section];
+    if (providers is! Map) {
+      return;
+    }
+    final removed = <String>{};
+    for (final entry in providers.entries.toList()) {
+      final provider = entry.value;
+      if (provider is! Map) {
+        continue;
+      }
+      final url = provider['url'];
+      if (url is! String || url.isEmpty || !isBlockedRemoteUrl(url)) {
+        continue;
+      }
+      removed.add(entry.key.toString());
+      providers.remove(entry.key);
+    }
+    if (removed.isEmpty) {
+      return;
+    }
+    if (section == 'proxy-providers') {
+      final groups = rawConfig['proxy-groups'];
+      if (groups is List) {
+        for (final group in groups) {
+          if (group is! Map) {
+            continue;
+          }
+          final use = group['use'];
+          if (use is List) {
+            group['use'] = use
+                .where((name) => !removed.contains(name?.toString()))
+                .toList();
+          }
+          if (group['include-all'] == true ||
+              group['include-all-providers'] == true) {
+            continue;
+          }
+          final proxies = group['proxies'];
+          final remainingUse = group['use'];
+          if ((proxies is! List || proxies.isEmpty) &&
+              (remainingUse is! List || remainingUse.isEmpty)) {
+            group['proxies'] = ['DIRECT'];
+          }
+        }
+      }
+      return;
+    }
+    final rules = rawConfig['rules'];
+    if (rules is! List) {
+      return;
+    }
+    rawConfig['rules'] = rules.where((rule) {
+      if (rule is! String) {
+        return true;
+      }
+      for (final name in removed) {
+        if (rule == 'RULE-SET,$name' || rule.startsWith('RULE-SET,$name,')) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
+  dropUnsafeProviders('proxy-providers');
+  dropUnsafeProviders('rule-providers');
   confineProviders('proxy-providers', proxiesProviderDirectoryName);
   confineProviders('rule-providers', rulesProviderDirectoryName);
   injectUnconfinedProviders('proxy-providers', data.injectedProxyProviders);

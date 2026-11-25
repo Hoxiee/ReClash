@@ -55,7 +55,10 @@ class ProfileBrandAction extends _$ProfileBrandAction {
         profile.subscriptionSnapshot?.metadata ?? const SubscriptionMetadata();
     try {
       final stored = await readProfileBrand(profile.id);
-      final resolver = ProviderBrandResolver(transport: transport);
+      final resolver = ProviderBrandResolver(
+        transport: transport,
+        trustSource: Uri.tryParse(profile.url),
+      );
       final ProviderBrand? brand;
       if (stored == null) {
         brand = await resolver.resolve(
