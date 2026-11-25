@@ -3,6 +3,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/manager/theme_manager.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/prism_theme.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,9 +53,11 @@ class TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        return wrapAppScopes(
-          context,
-          withStatusManager ? StatusManager(child: child!) : child!,
+        return PrismThemeBridge(
+          child: wrapAppScopes(
+            context,
+            withStatusManager ? StatusManager(child: child!) : child!,
+          ),
         );
       },
       home: homeBuilder(child),

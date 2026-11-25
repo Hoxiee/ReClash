@@ -2260,17 +2260,25 @@ class AppBarActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final style = IconButton.styleFrom(
+      fixedSize: Size.square(TonalButtonSize.bar.button),
+      minimumSize: Size.square(TonalButtonSize.bar.button),
+      padding: EdgeInsets.zero,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
     return IconButton(
       tooltip: data.tooltip,
       isSelected: data.isSelected,
       style: data.isSelected == true
-          ? IconButton.styleFrom(
-              backgroundColor: TonalButtonTheme.glassOf(context)
-                  ? null
-                  : colorScheme.primary,
-              foregroundColor: colorScheme.onPrimary,
+          ? style.merge(
+              IconButton.styleFrom(
+                backgroundColor: TonalButtonTheme.glassOf(context)
+                    ? null
+                    : colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
             )
-          : null,
+          : style,
       onPressed: data.isLoading ? null : data.onPressed,
       icon: data.isLoading
           ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
