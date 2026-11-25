@@ -4,10 +4,11 @@ ReClash is a multi-platform proxy client based on ClashMeta (mihomo), built with
 
 ## Version Notes
 
-- Flutter stays on the 3.47.x line. Release CI pins 3.47.6 and is the source
-  of truth for release builds; `.fvmrc` and local SDKs may sit on another 3.47
-  patch. The editor in `plugins/code_forge` came from `code_forge` 10.14.0, which
-  needs Dart 3.13.2, so the CI pin cannot go below Flutter 3.47.2.
+- Flutter stays on the 3.50.x line. Release CI pins 3.50.1 and is the source
+  of truth for release builds; local SDKs may sit on another 3.50 patch. The
+  editor in `plugins/code_forge` came from `code_forge` 10.14.0, which needs
+  Dart 3.13.2; Flutter 3.50.1 ships Dart 3.14. The pinned Nixpkgs has no
+  Flutter 3.50 yet, so the Nix devshell stays on 3.47.4 until that pin moves.
 - Before moving the pin, walk `flutter-upgrade.md`: it lists the workarounds tied to
   the current SDK, such as Impeller disabled on the Intel macOS release build.
 - The Dart SDK lower bound in `pubspec.yaml` sets the package language
@@ -72,8 +73,6 @@ latest releases. Two are held back:
 
 - `freezed` 4.0.2 needs `analyzer` 14, while `intl_utils` 2.8.16 still requires
   `analyzer` ^13. It moves once `intl_utils` accepts analyzer 14.
-- `test` 1.32.0 needs `test_api` 0.7.14, and `flutter_test` on Flutter 3.47 pins
-  0.7.12. It moves with the SDK.
 
 When an upgrade fails version solving, record the blocker here with
 what has to change upstream before the pin can move, so the next

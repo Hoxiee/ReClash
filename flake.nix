@@ -18,6 +18,7 @@
         let
           pkgs = import nixpkgs { inherit system; };
           lib = pkgs.lib;
+          # The pinned Nixpkgs has no Flutter 3.50 package yet; release CI is 3.50.1.
           flutter = pkgs.flutter347.override {
             supportedTargetFlutterPlatforms = [
               "universal"

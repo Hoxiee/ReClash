@@ -44,7 +44,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.6'
+          flutter-version: '3.50.1'
           channel: stable
           cache: true
       - run: git config --global user.name 'Fork maintenance tests'

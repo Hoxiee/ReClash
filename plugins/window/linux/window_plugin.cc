@@ -528,9 +528,25 @@ static void on_window_hide(GtkWidget*, gpointer data) {
   window_plugin_emit_event(WINDOW_PLUGIN(data), "hide");
 }
 
+// GTK destroys a toplevel's Wayland surface when the window is hidden and
+// makes a new one when it is shown, but the engine's view subsurface only
+// follows the new surface when the view is allocated again. Queue the whole
+// view tree so a re-shown window redraws at an unchanged size (3.50.0).
+static void queue_resize_tree(GtkWidget* widget, gpointer) {
+  gtk_widget_queue_resize(widget);
+  if (GTK_IS_CONTAINER(widget)) {
+    gtk_container_forall(GTK_CONTAINER(widget), queue_resize_tree, nullptr);
+  }
+}
+
 static gboolean on_window_map_event(GtkWidget*, GdkEvent*,
                                     gpointer data) {
-  window_geometry_on_map_event(WINDOW_PLUGIN(data));
+  WindowPlugin* self = WINDOW_PLUGIN(data);
+  window_geometry_on_map_event(self);
+  FlView* view = fl_plugin_registrar_get_view(self->registrar);
+  if (view != nullptr) {
+    queue_resize_tree(GTK_WIDGET(view), nullptr);
+  }
   return FALSE;
 }
 

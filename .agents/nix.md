@@ -40,10 +40,10 @@ Dart is not stored in Git.
 - The Nixpkgs input is pinned to an exact revision, not a floating branch. Generate
   `flake.lock` with real Nix before committing it; no hand-written lock or guessed
   content hash is supplied. CI generates its own lock in a disposable checkout.
-- Nixpkgs supplies Flutter 3.47.4 / Dart 3.13.3, including only universal and Linux
-  artifacts. This meets the editor's Dart 3.13.2 minimum, but is not release CI's
-  Flutter 3.47.6. Use the release CI SDK for release parity; do not silently
-  substitute an older Flutter or assume an arbitrary newer major is compatible.
+- The pinned Nixpkgs supplies Flutter 3.47.4 / Dart 3.13.3, including only universal
+  and Linux artifacts. It has no Flutter 3.50 package yet, so the devshell stays on
+  3.47.4 while release CI uses 3.50.1. Use the release CI SDK for 3.50 work and
+  release parity; do not substitute an older Flutter for it.
 - Go comes from `go_1_27` (1.27.3 at the pinned revision), satisfying `core/go.mod`.
   `GOTOOLCHAIN=local` prevents Go from silently downloading a different compiler.
 - Rust comes through Nixpkgs' Linux-patched `rustup`, not an unrelated Nixpkgs
