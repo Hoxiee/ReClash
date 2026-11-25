@@ -1,7 +1,5 @@
-import 'package:reclash/ui/button.dart';
-import 'package:reclash/ui/card.dart';
+import 'package:prism_ui/chip.dart' as prism;
 import 'package:reclash/ui/context.dart';
-import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/measure.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
@@ -9,49 +7,7 @@ import 'package:reclash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 
-class CommonChip extends StatelessWidget {
-  final String label;
-  final VoidCallback? onDeleted;
-
-  const CommonChip({super.key, required this.label, this.onDeleted});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final deletable = onDeleted != null;
-    return SizedBox(
-      height: TonalButtonSize.section.button,
-      child: CommonCard(
-        shape: AppShape.full,
-        inert: !deletable,
-        padding: EdgeInsets.only(left: 16, right: deletable ? 12 : 16),
-        onPressed: onDeleted,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 6,
-          children: [
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyle.subheadline
-                    .of(context, emphasized: true)
-                    .copyWith(color: colorScheme.onSurface),
-              ),
-            ),
-            if (deletable)
-              GlyphIcon(
-                AppGlyphs.close,
-                size: 16,
-                color: colorScheme.onSurfaceVariant,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+typedef CommonChip = prism.Chip;
 
 class TonalChip extends StatelessWidget {
   final String label;

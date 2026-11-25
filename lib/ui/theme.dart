@@ -1,3 +1,4 @@
+import 'package:prism_ui/theme.dart' as prism;
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/typography.dart';
@@ -10,15 +11,17 @@ class CommonMinFilledButtonTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButtonTheme(
-      data: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-        ).merge(FilledButtonTheme.of(context).style),
+    return prism.MinFilledButtonTheme(
+      child: FilledButtonTheme(
+        data: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ).merge(FilledButtonTheme.of(context).style),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
@@ -30,16 +33,18 @@ class CommonMinIconButtonTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButtonTheme(
-      data: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          visualDensity: VisualDensity.compact,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          iconSize: 20.ap(context),
-        ).merge(IconButtonTheme.of(context).style),
+    return prism.MinIconButtonTheme(
+      child: IconButtonTheme(
+        data: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            iconSize: 20.ap(context),
+          ).merge(IconButtonTheme.of(context).style),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
