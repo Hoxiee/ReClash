@@ -1,10 +1,29 @@
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' as material;
+import 'package:prism_ui/measure.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
+
+/// The app's resolved font, which Material keeps private inside its text styles.
+class PrismFont extends material.ThemeExtension<PrismFont> {
+  const PrismFont({this.family, this.fallback = const []});
+
+  final String? family;
+  final List<String> fallback;
+
+  @override
+  PrismFont copyWith({String? family, List<String>? fallback}) => PrismFont(
+    family: family ?? this.family,
+    fallback: fallback ?? this.fallback,
+  );
+
+  @override
+  PrismFont lerp(PrismFont? other, double t) => other ?? this;
+}
 
 /// Mirrors the resolved Material scheme, so both widget systems share a palette.
 prism.ThemeData buildPrismTheme(material.ThemeData theme) {
   final scheme = theme.colorScheme;
+  final font = theme.extension<PrismFont>();
   return prism.ThemeData(
     brightness: theme.brightness,
     platform: theme.platform,
@@ -57,8 +76,8 @@ prism.ThemeData buildPrismTheme(material.ThemeData theme) {
       inversePrimary: scheme.inversePrimary,
       surfaceTint: scheme.surfaceTint,
     ),
-    fontFamily: theme.textTheme.bodyMedium?.fontFamily,
-    fontFamilyFallback: theme.textTheme.bodyMedium?.fontFamilyFallback,
+    fontFamily: font?.family,
+    fontFamilyFallback: font?.fallback,
     visualDensity: prism.VisualDensity(
       horizontal: theme.visualDensity.horizontal,
       vertical: theme.visualDensity.vertical,
@@ -75,9 +94,15 @@ class PrismThemeBridge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return prism.Theme(
-      data: buildPrismTheme(material.Theme.of(context)),
-      child: child,
+    return prism.MeasureScope(
+      measure: prism.Measure.of(
+        context,
+        MediaQuery.textScalerOf(context).scale(1),
+      ),
+      child: prism.Theme(
+        data: buildPrismTheme(material.Theme.of(context)),
+        child: child,
+      ),
     );
   }
 }

@@ -4,6 +4,8 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/liquid_glass.dart' as prism;
+import 'package:prism_ui/navigation_dock.dart' as prism;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -193,7 +195,7 @@ void main() {
       findsNWidgets(2),
     );
     expect(
-      find.descendant(of: group, matching: find.byType(ElasticPress)),
+      find.descendant(of: group, matching: find.byType(prism.ElasticPress)),
       findsOneWidget,
     );
     expect(tester.getSize(group).height, leading.height);
@@ -220,15 +222,20 @@ void main() {
       ),
     );
 
-    for (final button in [
-      find.byType(TonalButtonGroup),
-      find.byType(BackButton),
-    ]) {
-      expect(
-        find.descendant(of: button, matching: find.byType(LiquidGlass)),
-        findsOneWidget,
-      );
-    }
+    expect(
+      find.descendant(
+        of: find.byType(TonalButtonGroup),
+        matching: find.byType(prism.LiquidGlass),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.ancestor(
+        of: find.byType(BackButton),
+        matching: find.byType(prism.LiquidGlass),
+      ),
+      findsOneWidget,
+    );
 
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(BackButton)),

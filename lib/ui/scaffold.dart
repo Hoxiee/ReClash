@@ -20,6 +20,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:prism_ui/liquid_glass.dart' as prism_ui;
+import 'package:prism_ui/theme_data.dart' as prism_ui;
 
 import 'builder.dart';
 import 'button.dart';
@@ -507,6 +509,18 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
   }
 
+  Widget _glassPane(Widget child) {
+    if (!LiquidGlassScope.of(context)) {
+      return child;
+    }
+    return prism_ui.LiquidGlass(
+      style: prism_ui.LiquidGlassStyle.regular(
+        prism_ui.Theme.of(context).colorScheme,
+      ),
+      child: child,
+    );
+  }
+
   Widget? _buildLeading(VoidCallback? backAction, {required _SheetPop? pop}) {
     final button = _buildLeadingButton(backAction, pop: pop);
     if (button == null) {
@@ -523,7 +537,7 @@ class CommonScaffoldState extends State<CommonScaffold>
             child: AnimatedOpacity(
               opacity: hidden ? 0 : 1,
               duration: context.motionDuration(kThemeAnimationDuration),
-              child: ElasticPress(child: button),
+              child: ElasticPress(child: _glassPane(button)),
             ),
           ),
         ),
@@ -670,7 +684,7 @@ class CommonScaffoldState extends State<CommonScaffold>
               : null,
         ),
       ...selection.build(),
-      for (final action in widgets) ElasticPress(child: action),
+      for (final action in widgets) ElasticPress(child: _glassPane(action)),
       if (fold.overflow.isNotEmpty)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
       if (widget.trailing case final trailing?)
@@ -1080,7 +1094,14 @@ class CommonScaffoldState extends State<CommonScaffold>
         },
       ),
     );
-    final appBar = _buildAppBar(backAction, form);
+    final bar = _buildAppBar(backAction, form);
+    final appBar = PreferredSize(
+      preferredSize: bar.preferredSize,
+      child: FilledButtonTheme(
+        data: _barFilledButtonTheme,
+        child: IconButtonTheme(data: _barIconButtonTheme, child: bar),
+      ),
+    );
     final header = !isCompact && PageViewport.contains(context)
         ? ViewportAppBar(appBar: appBar)
         : _PageAppBar(appBar: appBar);
@@ -2375,6 +2396,23 @@ const double appBarActionSpace = 4;
 const double _barButtonGap = 8;
 const double _headerOverhang = 16;
 const double _iconButtonTapPadding = 4;
+
+final _barIconButtonTheme = IconButtonThemeData(
+  style: IconButton.styleFrom(
+    fixedSize: Size.square(TonalButtonSize.bar.button),
+    minimumSize: Size.square(TonalButtonSize.bar.button),
+    padding: EdgeInsets.zero,
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  ),
+);
+
+final _barFilledButtonTheme = FilledButtonThemeData(
+  style: FilledButton.styleFrom(
+    minimumSize: Size.square(TonalButtonSize.bar.button),
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  ),
+);
 
 /// Where a filled button sits from the app bar edge, leading included: the
 /// layout margin iOS gives a compact and a regular width.
