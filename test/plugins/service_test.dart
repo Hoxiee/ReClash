@@ -60,6 +60,35 @@ class _MutatingListener with ServiceListener {
   }
 }
 
+Map<String, Object?> _connectionsResult(String id) => {
+  'connections': [
+    {
+      'id': id,
+      'metadata': {'network': 'tcp'},
+      'start': '2026-01-01',
+      'chains': ['DIRECT'],
+      'rule': 'MATCH',
+      'rulePayload': '',
+    },
+  ],
+};
+
+/// A valid envelope padded with an ignored key up to an exact byte length.
+Uint8List _sizedEnvelope({
+  required String id,
+  required Object? result,
+  required int length,
+}) {
+  int encoded(String pad) =>
+      utf8.encode(jsonEncode({'id': id, 'result': result, 'pad': pad})).length;
+  final padding = length - encoded('');
+  final envelope = Uint8List.fromList(
+    utf8.encode(jsonEncode({'id': id, 'result': result, 'pad': 'a' * padding})),
+  );
+  expect(envelope.length, length);
+  return envelope;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -341,6 +370,52 @@ void main() {
       expect(response!.id, '7');
       expect(response.result, {'up': 1});
       expect(response.error, isNull);
+    });
+
+    test('decodes a modelled result on both sides of the threshold', () async {
+      for (final length in [
+        coreIsolateDecodeBytes - 1,
+        coreIsolateDecodeBytes,
+      ]) {
+        mockCoreChannel(
+          (_) async => _sizedEnvelope(
+            id: '5',
+            result: _connectionsResult('c1'),
+            length: length,
+          ),
+        );
+
+        final response = await Service().invokeMethod(
+          const CoreMethodCall(id: '5', method: CoreMethod.getConnections),
+        );
+
+        expect(response!.result, isA<List<TrackerInfo>>());
+        expect((response.result as List<TrackerInfo>).single.id, 'c1');
+      }
+    });
+
+    test('runs the method model on a spilled answer', () async {
+      final home = Directory.systemTemp.createTempSync('service_model');
+      addTearDown(() => home.deleteSync(recursive: true));
+      await useAppPaths(home);
+      final file = File(join(home.path, coreSpillDirectoryName, '1.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          json.encode({'id': '6', 'result': _connectionsResult('c2')}),
+        );
+      mockCoreChannel(
+        (_) async => utf8.encode(
+          json.encode(CoreMethodResponse(id: '6', file: file.path).toJson()),
+        ),
+      );
+
+      final response = await Service().invokeMethod(
+        const CoreMethodCall(id: '6', method: CoreMethod.getConnections),
+      );
+
+      expect(response!.result, isA<List<TrackerInfo>>());
+      expect((response.result as List<TrackerInfo>).single.id, 'c2');
+      expect(file.existsSync(), isFalse);
     });
 
     test('decodes a large UTF-8 envelope off the calling isolate', () async {

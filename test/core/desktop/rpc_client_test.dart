@@ -7,6 +7,7 @@ import 'package:reclash/core/desktop/rpc_client.dart';
 import 'package:reclash/core/event.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/core/spill.dart';
+import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 
@@ -18,6 +19,35 @@ Future<Map<String, Object?>> _sentRequest(
 ) async {
   await pumpEventQueue();
   return jsonDecode(transport.sentMessages.single) as Map<String, Object?>;
+}
+
+Map<String, Object?> _connectionsResult(String id) => {
+  'connections': [
+    {
+      'id': id,
+      'metadata': {'network': 'tcp'},
+      'start': '2026-01-01',
+      'chains': ['DIRECT'],
+      'rule': 'MATCH',
+      'rulePayload': '',
+    },
+  ],
+};
+
+/// A valid envelope padded with an ignored key up to an exact byte length.
+Uint8List _sizedFrame({
+  required String id,
+  required Object? result,
+  required int length,
+}) {
+  int encoded(String pad) =>
+      utf8.encode(jsonEncode({'id': id, 'result': result, 'pad': pad})).length;
+  final padding = length - encoded('');
+  final frame = Uint8List.fromList(
+    utf8.encode(jsonEncode({'id': id, 'result': result, 'pad': 'a' * padding})),
+  );
+  expect(frame.length, length);
+  return frame;
 }
 
 void main() {
@@ -47,6 +77,115 @@ void main() {
     await client.close();
     await transport.close();
   });
+
+  test('a small frame decodes through its method model', () async {
+    final transport = FakeDesktopCoreTransport.connected();
+    final client = CoreRpcClient(transport);
+    final invocation = client.invoke<Object>(method: CoreMethod.getConnections);
+    final request = await _sentRequest(transport);
+
+    transport.addJson({
+      'id': request['id'],
+      'result': _connectionsResult('c1'),
+    });
+
+    final result = await invocation as List<TrackerInfo>;
+    expect(result.single.id, 'c1');
+    await client.close();
+    await transport.close();
+  });
+
+  test(
+    'a frame just under the isolate threshold decodes the same way',
+    () async {
+      final transport = FakeDesktopCoreTransport.connected();
+      final client = CoreRpcClient(transport);
+      final invocation = client.invoke<Object>(
+        method: CoreMethod.getConnections,
+      );
+      final request = await _sentRequest(transport);
+
+      transport.addFrame(
+        _sizedFrame(
+          id: request['id'] as String,
+          result: _connectionsResult('under'),
+          length: coreIsolateDecodeBytes - 1,
+        ),
+      );
+
+      final result = await invocation as List<TrackerInfo>;
+      expect(result.single.id, 'under');
+      await client.close();
+      await transport.close();
+    },
+  );
+
+  test('a frame at the isolate threshold decodes the same way', () async {
+    final transport = FakeDesktopCoreTransport.connected();
+    final client = CoreRpcClient(transport);
+    final invocation = client.invoke<Object>(method: CoreMethod.getConnections);
+    final request = await _sentRequest(transport);
+
+    transport.addFrame(
+      _sizedFrame(
+        id: request['id'] as String,
+        result: _connectionsResult('at'),
+        length: coreIsolateDecodeBytes,
+      ),
+    );
+
+    final result = await invocation as List<TrackerInfo>;
+    expect(result.single.id, 'at');
+    await client.close();
+    await transport.close();
+  });
+
+  test('a spilled answer for a modelled method arrives parsed', () async {
+    final home = Directory.systemTemp.createTempSync('rpc_model_spill');
+    addTearDown(() => home.deleteSync(recursive: true));
+    await useAppPaths(home);
+    final transport = FakeDesktopCoreTransport.connected();
+    final client = CoreRpcClient(transport);
+    final invocation = client.invoke<Object>(method: CoreMethod.getConnections);
+    final request = await _sentRequest(transport);
+    final file = File(join(home.path, coreSpillDirectoryName, '1.json'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        jsonEncode({'id': request['id'], 'result': _connectionsResult('c2')}),
+      );
+
+    transport.addJson({'id': request['id'], 'result': null, 'file': file.path});
+
+    final result = await invocation as List<TrackerInfo>;
+    expect(result.single.id, 'c2');
+    expect(file.existsSync(), isFalse);
+    await client.close();
+    await transport.close();
+  });
+
+  test(
+    'an isolate-decoded frame completes before a later disconnect',
+    () async {
+      final transport = FakeDesktopCoreTransport.connected();
+      final client = CoreRpcClient(transport);
+      final invocation = client.invoke<Object>(method: CoreMethod.getIsInit);
+      final request = await _sentRequest(transport);
+
+      transport.addFrame(
+        _sizedFrame(
+          id: request['id'] as String,
+          result: true,
+          length: coreIsolateDecodeBytes,
+        ),
+      );
+      transport.disconnect(1);
+
+      expect(await invocation, isTrue);
+      expect(client.pendingCount, 0);
+      await client.close();
+      await transport.close();
+    },
+  );
 
   test('correlates a response and ignores a late duplicate', () async {
     final transport = FakeDesktopCoreTransport.connected();
