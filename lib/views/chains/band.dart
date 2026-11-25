@@ -75,7 +75,7 @@ class ProxyBandLabel extends StatelessWidget {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: SizedBox(
         height: proxyBandLabelExtent - 4,
         child: Row(

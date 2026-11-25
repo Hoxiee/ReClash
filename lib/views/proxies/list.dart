@@ -627,6 +627,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     } else {
       _rows = null;
     }
+    final backing = context.raisedSurfaceLevel.colorOf(context.colorScheme);
     Widget buildHeader({double floating = 0, double lift = 0}) => SizedBox(
       height: listHeaderHeight,
       child: Stack(
@@ -637,10 +638,8 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
               top: listHeaderHeight / 2,
               left: 0,
               right: 0,
-              bottom: 0,
-              child: ColoredBox(
-                color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
-              ),
+              bottom: -1,
+              child: ColoredBox(color: backing),
             ),
           ListHeader(
             enterAnimated: false,

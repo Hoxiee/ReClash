@@ -7,6 +7,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/chains/band.dart';
 import 'package:reclash/views/proxies/card.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/widgets/widgets.dart' hide ListHeader;
@@ -58,6 +59,7 @@ void main() {
     ViewMode viewMode = ViewMode.mobile,
     List<Group>? groups,
     Set<String> unfoldSet = const {'G0', 'G1', 'G2'},
+    Set<String> favoriteSet = const {},
     ValueListenable<Brightness>? brightness,
     Color? backgroundColor,
     GlobalKey? repaintKey,
@@ -70,6 +72,7 @@ void main() {
     final profile = Profile.normal().copyWith(
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
+      favoriteSet: favoriteSet,
     );
     _RecordingProxiesAction.tested.clear();
     container = ProviderContainer(
@@ -274,6 +277,64 @@ void main() {
     expect(surfaceOf(tester, 'G0').shadows, isNull);
   });
 
+  testWidgets('the pinned header meets its backing without a seam', (
+    tester,
+  ) async {
+    const wallpaper = Color(0xFFBE6493);
+    final repaintKey = GlobalKey();
+    await pumpList(tester, backgroundColor: wallpaper, repaintKey: repaintKey);
+    final header = tester.getRect(headerOf('G0'));
+    final boundary =
+        repaintKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    await tester.runAsync(() async {
+      final image = await boundary.toImage();
+      try {
+        final data = (await image.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        ))!;
+        Color colorAt(Offset point) {
+          final index = (point.dy.floor() * image.width + point.dx.floor()) * 4;
+          return Color.fromARGB(
+            data.getUint8(index + 3),
+            data.getUint8(index),
+            data.getUint8(index + 1),
+            data.getUint8(index + 2),
+          );
+        }
+
+        final fill = colorAt(header.center.translate(0, -4));
+        for (var dy = -1.0; dy <= 1.0; dy += 0.5) {
+          final seam = colorAt(header.bottomCenter.translate(0, dy));
+          for (final (actual, expected) in [
+            (seam.r, fill.r),
+            (seam.g, fill.g),
+            (seam.b, fill.b),
+          ]) {
+            expect(
+              (actual - expected).abs() * 255,
+              lessThanOrEqualTo(2),
+              reason: 'Header fill continues ${header.bottom + dy}',
+            );
+          }
+        }
+      } finally {
+        image.dispose();
+      }
+    });
+  });
+
+  testWidgets('the favorites action keeps clear of the header', (tester) async {
+    await pumpList(tester, favoriteSet: {'G0-0'});
+    final label = find.byType(ProxyBandLabel).first;
+    final button = find
+        .descendant(of: label, matching: find.byType(TextButton))
+        .first;
+    final labelRect = tester.getRect(label);
+    final buttonRect = tester.getRect(button);
+    expect(buttonRect.top - labelRect.top, 2);
+    expect(labelRect.bottom - buttonRect.bottom, 2);
+  });
+
   testWidgets('pinned headers leave the wallpaper clear and the hidden '
       'cards untappable across themes and folding', (tester) async {
     const wallpaper = Color(0xFFBE6493);
@@ -324,6 +385,7 @@ void main() {
           if (hasRows) {
             expect(backing, isNot(wallpaper));
           }
+          // The rounded corners sit on the same fill as the rows below.
           for (final point in [
             header.bottomLeft + const Offset(1, -2),
             header.bottomRight + const Offset(-2, -2),
