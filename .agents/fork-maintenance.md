@@ -256,8 +256,9 @@ prepared product base instead of the old development tip, the `.fork` policy dir
 `pubspec.yaml` version field are restored from the old line, and no rebase runs. Keep the previous line on a backup
 branch; the old `dev` commit still supplies ownership and policy checks. Verification is unchanged: a clean linear chain
 from the prepared base, the product review, and the checks the affected contracts name. `--fresh` cannot combine with
-bootstrap, a recipe migration or an audit; it can be the child of a recipe migration through `--after`, even after
-development has moved past the predecessor's captured commit.
+bootstrap or with an audit outside a recipe migration; a recipe migration may use it with its required `--audit` to
+record the normalization without replaying the product. It can be the child of a recipe migration through `--after`,
+even after development has moved past the predecessor's captured commit.
 
 `--scaffold <manifest.json>` copies the listed repository-relative paths (files or directories) from the old
 development line into the candidate and commits them as one `chore(rebuild): apply the fork scaffold` commit. Put the
@@ -274,6 +275,10 @@ block checkout; standard git-lfs filters are allowed with smudge downloads disab
 
 Normalization preserves modes, binaries, symlinks and upstream gitlink semantics. It may rename `core/Clash.Meta` to
 `core/mihomo`, but never substitutes our engine base commit or patch profile. Core source changes require review even on clean merges.
+The recipe may list `drop` globs; a matching normalized path (after path mappings) is removed from the snapshot. Use
+drops for upstream-only overlays the product replaces — agent docs, CI, upstream packaging/tooling, the static site,
+generated sources and lockfiles — and keep the vendor observation upstream-equivalent otherwise. The review inventory
+shows dropped paths as vendor deletions, so `normalization-policy` review covers them.
 Ownership policy restores our `CHANGELOG.md` and only the `pubspec.yaml` version field, not dependencies.
 Do not blanket-keep upstream manifests/workflows or invent branding replacements to hide behavioral changes.
 
@@ -284,6 +289,8 @@ dart run tool/fork.dart sync prepare --id <id> --source <accepted-raw-oid> --rec
 ```
 
 This creates a separate vendor observation with the same raw source. It cannot mix a new source and recipe migration.
+Add `--fresh` when the product will be reassembled: the predecessor then anchors the recipe on the normalized base plus
+the fork policy, without replaying the product, and a fresh child normally follows it.
 Review label `normalization-policy` is additionally required. Reproduce old normalization using the archived downstream
 implementation/config revision, not today's script.
 

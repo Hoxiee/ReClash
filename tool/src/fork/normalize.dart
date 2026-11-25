@@ -61,9 +61,12 @@ class NormalizedTree {
 class Normalizer {
   Normalizer(this.git, String source)
     : recipe = yamlObject(source, 'branding') {
-    keys(recipe, 'v preserve paths rules', 'branding');
+    keys(recipe, 'v preserve paths rules drop', 'branding');
     if (recipe['v'] != 1) reject('Unsupported normalization version');
     strings(recipe['preserve'], 'preserve');
+    for (final pattern in strings(recipe['drop'], 'drop', optional: true)) {
+      safePath(pattern, glob: true);
+    }
     for (final entry in object(recipe['paths'], 'paths').entries) {
       safePath(entry.key);
       safePath(text(entry.value, 'paths'));
@@ -139,6 +142,7 @@ class Normalizer {
     final targets = <String>{};
     final paths = object(recipe['paths'], 'paths');
     final preserved = strings(recipe['preserve'], 'preserve');
+    final dropped = strings(recipe['drop'], 'drop', optional: true);
     for (final entry in git.entries(source)) {
       var path = entry.path;
       for (final mapping in paths.entries) {
@@ -148,6 +152,7 @@ class Normalizer {
         }
       }
       safePath(path);
+      if (dropped.any((pattern) => matches(pattern, path))) continue;
       if (!targets.add(path)) reject('Normalization path collision: $path');
       var oid = entry.oid;
       final rules = (recipe['rules'] as List)

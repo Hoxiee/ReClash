@@ -12,6 +12,38 @@ paths:
   android/app/src/main/kotlin/com/follow/clash: android/app/src/main/kotlin/com/reclash
   android/core/src/main/java/com/follow/clash: android/core/src/main/java/com/reclash
   plugins/wifi_ssid/android/src/main/kotlin/com/follow/clash: plugins/wifi_ssid/android/src/main/kotlin/com/reclash
+drop:
+  - '.claude/**'
+  - '.codex/**'
+  - '.gemini/**'
+  - '.codegraph/**'
+  - '.zed/**'
+  - '.run/**'
+  - '.mcp.json'
+  - 'opencode.jsonc'
+  - '.agents/**'
+  - 'AGENTS.md'
+  - '.github/**'
+  - 'site/**'
+  - 'Makefile'
+  - 'setup.dart'
+  - '.pre-commit-config.yaml'
+  - 'analysis_options.yaml'
+  - 'lint_options.yaml'
+  - 'l10n.yaml'
+  - 'distribute_options.yaml'
+  - 'release_telegram.py'
+  - 'changelog.json'
+  - 'tool/**'
+  - 'README.md'
+  - 'README_zh_CN.md'
+  - 'pubspec.lock'
+  - 'upstream_l10n/**'
+  - '.gitignore'
+  - '.gitattributes'
+  - '.metadata'
+  - '**/*.freezed.dart'
+  - '**/*.g.dart'
 rules:
   - paths: ['**/*.dart']
     replace:

@@ -798,6 +798,39 @@ void main() {
       throwsA(isA<ForkException>()),
     );
   });
+  test('fresh recipe migration anchors the policy without a replay', () {
+    f.bootstrap();
+    f.branding['drop'] = ['lib/code.dart'];
+    f.metadata();
+    f.commit('chore: change the normalization recipe');
+    f.service.prepare(
+      'recipe-fresh',
+      source: f.raw,
+      recipeMigration: true,
+      fresh: true,
+      audit: digest(f.service.inspect(f.raw)),
+    );
+    final receipt = f.service.receipt('recipe-fresh');
+    expect(receipt['fresh'], isTrue);
+    expect(receipt['recipeMigration'], isTrue);
+    final candidate = f.candidate('recipe-fresh');
+    expect(candidate.dirty, isEmpty);
+    expect(candidate.run(['ls-files', '--', 'lib/code.dart']).trim(), isEmpty);
+    expect(
+      File(p.join(candidate.root, '.fork', 'config.yaml')).existsSync(),
+      isTrue,
+    );
+    final next = f.rewritten(
+      code: "import 'package:fl_clash/a.dart';\nconst upstream = 15;\n",
+    );
+    final child = f.service.prepare(
+      'child-of-fresh',
+      source: next,
+      after: 'recipe-fresh',
+      fresh: true,
+    );
+    expect(child['status'], 'fresh-candidate');
+  });
   test('fresh assembly can be a child of a recipe migration', () {
     f.bootstrap();
     f.branding['paths'] = {'absent': 'absent-mapped'};

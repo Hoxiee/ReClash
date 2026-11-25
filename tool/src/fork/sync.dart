@@ -253,10 +253,14 @@ class VendorSync {
     String? scaffold,
   }) {
     identifier(id);
-    if (fresh && (bootstrap || recipeMigration || audit != null)) {
-      reject(
-        '--fresh cannot be combined with bootstrap, recipe migration or audit',
-      );
+    if (fresh && bootstrap) {
+      reject('--fresh cannot be combined with bootstrap');
+    }
+    if (fresh && audit != null && !recipeMigration) {
+      reject('--fresh cannot be combined with --audit');
+    }
+    if (fresh && recipeMigration && scaffold != null) {
+      reject('--scaffold cannot be combined with a recipe migration');
     }
     if (scaffold != null && !fresh) {
       reject('--scaffold requires --fresh');
@@ -562,6 +566,14 @@ class VendorSync {
           r['scaffoldCommit'] = target.oid('HEAD');
           save(id, r);
         }
+      }
+      if (recipeMigration && target.dirty.isNotEmpty) {
+        const message =
+            'chore(sync): anchor the recipe migration to the fork policy\n\n'
+            'Changelog: skip';
+        target.run(['commit', '-q', '--no-verify', '-m', message]);
+        r['recipeCommit'] = target.oid('HEAD');
+        save(id, r);
       }
     } else {
       final rebased = target.result(['rebase', '--onto', preparedBase, base]);

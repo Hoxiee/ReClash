@@ -28,34 +28,32 @@ void main() {
       );
       f.write('site/index.html', 'https://chen08209.github.io/FlClash\n');
       const upstreamArb = '{"example":"FlClash source text"}\n';
-      const upstreamGenerated = 'class AppLocalizations {}\n';
       f.write('arb/intl_en.arb', upstreamArb);
-      f.write('lib/l10n/l10n.dart', upstreamGenerated);
-      f.write('lib/l10n/intl/messages_en.dart', upstreamGenerated);
+      f.write('lib/l10n/l10n.dart', 'class AppLocalizations {}\n');
+      f.write('lib/l10n/intl/messages_en.dart', 'class AppLocalizations {}\n');
       f.commit('test: actual branding boundary');
       final n = Normalizer(f.git, recipe);
       final tree = n.apply('HEAD').write();
       expect(n.apply(tree).write(), tree);
       expect(f.git.read(tree, 'plugins/window/LICENSE'), license);
       expect(f.git.read(tree, 'plugins/window/README.md'), readme);
-      expect(
-        f.git.read(tree, 'site/index.html'),
-        'https://chen08209.github.io/FlClash\n',
-      );
       expect(f.git.read(tree, 'arb_upstream/intl_en.arb'), upstreamArb);
-      expect(f.git.read(tree, 'upstream_l10n/l10n.dart'), upstreamGenerated);
-      expect(
-        f.git.read(tree, 'upstream_l10n/intl/messages_en.dart'),
-        upstreamGenerated,
-      );
       expect(
         f.git.entries(tree).any((entry) => entry.path == 'arb/intl_en.arb'),
         isFalse,
       );
-      expect(
-        f.git.entries(tree).any((entry) => entry.path == 'lib/l10n/l10n.dart'),
-        isFalse,
-      );
+      for (final path in [
+        'site/index.html',
+        'lib/l10n/l10n.dart',
+        'upstream_l10n/l10n.dart',
+        'upstream_l10n/intl/messages_en.dart',
+      ]) {
+        expect(
+          f.git.entries(tree).any((entry) => entry.path == path),
+          isFalse,
+          reason: path,
+        );
+      }
       expect(
         f.git.read(
           tree,
@@ -65,6 +63,28 @@ void main() {
       );
     },
   );
+  test('drop rules remove matching paths before collisions', () {
+    f.branding['drop'] = ['site/**', '**/*.g.dart'];
+    f.write('site/index.html', 'drop me\n');
+    f.write('lib/a.g.dart', 'drop me\n');
+    f.write('lib/a.dart', 'keep me\n');
+    f.commit('test: droppable files');
+    final tree = Normalizer(
+      f.git,
+      jsonEncode(f.branding),
+    ).apply('HEAD').write();
+    final paths = f.git.entries(tree).map((entry) => entry.path).toSet();
+    expect(paths, isNot(contains('site/index.html')));
+    expect(paths, isNot(contains('lib/a.g.dart')));
+    expect(paths, contains('lib/a.dart'));
+  });
+  test('drop globs must stay inside the tree', () {
+    f.branding['drop'] = ['../outside'];
+    expect(
+      () => Normalizer(f.git, jsonEncode(f.branding)),
+      throwsA(isA<ForkException>()),
+    );
+  });
   test('chained recipes are rejected before they can break idempotence', () {
     f.branding['paths'] = {'lib': 'middle', 'middle': 'final'};
     expect(

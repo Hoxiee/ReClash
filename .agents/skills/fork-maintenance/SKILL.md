@@ -53,6 +53,8 @@ missing, unresolved or stale outcomes block acceptance. Full card schema and evi
    the fork-owned layers as one heavy first commit. Resolve the candidate according to the recorded decisions; do not
    change accepted development/vendor/product-base refs. Do not reuse observation IDs.
 4. If normalization changed, prepare a standalone recipe migration on the accepted raw source with its reviewed audit.
+   Use `--fresh` for it when the product will be reassembled, so the predecessor records the recipe on the normalized base
+   without a product replay.
    Finish that candidate first. Review the release with `review --source <raw> --after <recipe>`, then prepare the child with
    `sync prepare --id <child> --after <recipe> --product-review <plan.json>`; add `--fresh` when the child reassembles the
    product instead of replaying history.
