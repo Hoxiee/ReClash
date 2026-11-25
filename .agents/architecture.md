@@ -573,9 +573,13 @@ automatic retry is off because a retry after an HTTP 429 spends the same per-out
 QR and code labels. The generic kit (buttons, cards, switches, chips, dialogs, sheets, navigation) comes from the
 `plugins/prism_ui` submodule, the `Hoxiee/prism_ui` fork of upstream's package. `PrismThemeBridge` in
 `lib/ui/prism_theme.dart` mirrors the resolved Material theme into prism's and installs prism's `MeasureScope`; the
-application and `TestApp` both install it. New work imports `package:prism_ui/...` directly; the `Common*` aliases in
-`lib/ui` exist only for call sites the migration has not reached yet. `lib/widgets/` holds the components built from
-them that do know the app: settings rows, subscription and profile pieces, anything that reads a provider or a model.
+application and `TestApp` both install it. It runs again under `ElevatedSurfaceTheme`, because a sheet lifts the
+Material theme where it is built and prism has to follow it there or its rows and buttons draw the page's tone over
+the lifted sheet; a nested bridge reuses the outer `MeasureScope`. The bridge also maps the app's tooltip theme, so a
+prism `Tooltip` draws the same box as `AppTooltip` and the Material tooltips. New work imports
+`package:prism_ui/...` directly; the `Common*` aliases in `lib/ui` exist only for call sites the migration has not
+reached yet. `lib/widgets/` holds the components built from them that do know the app: settings rows, subscription
+and profile pieces, anything that reads a provider or a model.
 `widgets/widgets.dart` re-exports `ui/ui.dart`, so app code imports either barrel.
 
 `test/lint/ui_layering_test.dart` walks the imports of every file under `lib/ui`. Nothing they reach may leave

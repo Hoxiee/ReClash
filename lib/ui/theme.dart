@@ -1,6 +1,9 @@
+import 'package:prism_ui/surface.dart' show SurfaceContext;
+import 'package:prism_ui/theme_data.dart' as prism_data;
 import 'package:prism_ui/theme.dart' as prism;
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/ui/metrics.dart';
+import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -33,6 +36,7 @@ class CommonMinIconButtonTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = prism_data.Theme.of(context).colorScheme;
     return prism.MinIconButtonTheme(
       child: IconButtonTheme(
         data: IconButtonThemeData(
@@ -41,6 +45,11 @@ class CommonMinIconButtonTheme extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             iconSize: 20.ap(context),
+            backgroundColor: context.raisedSurfaceLevel.colorOf(colors),
+            disabledBackgroundColor: context.raisedSurfaceLevel.colorOf(colors),
+            foregroundColor: colors.onSurface,
+            disabledForegroundColor: colors.onSurface.withValues(alpha: 0.38),
+            shape: AppShape.full,
           ).merge(IconButtonTheme.of(context).style),
         ),
         child: child,

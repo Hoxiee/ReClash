@@ -551,6 +551,19 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
   }
 
+  /// Fills the Material back and close buttons beside prism's.
+  ButtonStyle _leadingButtonStyle() {
+    final colors = context.colorScheme;
+    final fill = context.raisedSurfaceLevel.colorOf(colors);
+    return IconButton.styleFrom(
+      backgroundColor: fill,
+      disabledBackgroundColor: fill,
+      foregroundColor: colors.onSurface,
+      disabledForegroundColor: colors.onSurface.withValues(alpha: 0.38),
+      shape: AppShape.full,
+    );
+  }
+
   Widget? _buildLeadingButton(
     VoidCallback? backAction, {
     required _SheetPop? pop,
@@ -560,8 +573,10 @@ class CommonScaffoldState extends State<CommonScaffold>
           ? null
           : _buildSheetPopButton(backAction, useCloseIcon: pop.useCloseIcon);
     }
+    final style = _leadingButtonStyle();
     if (backAction != null) {
       return BackButton(
+        style: style,
         onPressed: () {
           if (!mounted) {
             return;
@@ -575,8 +590,8 @@ class CommonScaffoldState extends State<CommonScaffold>
       return null;
     }
     return route is PageRoute && route.fullscreenDialog
-        ? const CloseButton()
-        : const BackButton();
+        ? CloseButton(style: style)
+        : BackButton(style: style);
   }
 
   Widget _buildTitle({required bool compact}) {

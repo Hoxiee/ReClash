@@ -85,6 +85,20 @@ Future<Rect> _pumpBar(
 }
 
 void main() {
+  testWidgets('a bar back button carries the tonal fill', (tester) async {
+    await _pumpBar(
+      tester,
+      view: _mobile,
+      platform: TargetPlatform.android,
+      child: const CommonScaffold(title: 'Title', body: SizedBox()),
+    );
+
+    final back = tester.widget<BackButton>(find.byType(BackButton));
+    final fill = back.style?.backgroundColor?.resolve(const <WidgetState>{});
+    expect(fill, isNotNull);
+    expect(fill, isNot(Colors.transparent));
+  });
+
   for (final view in _views.entries) {
     final inset = appBarActionInset(view.value == _mobile);
 

@@ -4,6 +4,8 @@ import 'package:prism_ui/measure.dart' as prism;
 import 'package:prism_ui/page_background.dart';
 import 'package:prism_ui/surface.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:reclash/ui/surface.dart' show ElevatedColorScheme;
+import 'package:reclash/ui/tooltip.dart' show appTooltipTheme;
 
 /// The app's resolved font, which Material keeps private inside its text styles.
 class PrismFont extends material.ThemeExtension<PrismFont> {
@@ -22,14 +24,8 @@ class PrismFont extends material.ThemeExtension<PrismFont> {
   PrismFont lerp(PrismFont? other, double t) => other ?? this;
 }
 
-/// Mirrors the resolved Material scheme, so both widget systems share a palette.
-prism.ThemeData buildPrismTheme(material.ThemeData theme) {
-  final scheme = theme.colorScheme;
-  final font = theme.extension<PrismFont>();
-  return prism.ThemeData(
-    brightness: theme.brightness,
-    platform: theme.platform,
-    colorScheme: prism.ColorScheme(
+prism.ColorScheme _prismScheme(material.ColorScheme scheme) =>
+    prism.ColorScheme(
       brightness: scheme.brightness,
       primary: scheme.primary,
       onPrimary: scheme.onPrimary,
@@ -77,7 +73,30 @@ prism.ThemeData buildPrismTheme(material.ThemeData theme) {
       onInverseSurface: scheme.onInverseSurface,
       inversePrimary: scheme.inversePrimary,
       surfaceTint: scheme.surfaceTint,
-    ),
+    );
+
+prism.TooltipThemeData _prismTooltipTheme(material.ThemeData theme) {
+  final tooltip = appTooltipTheme(theme);
+  return prism.TooltipThemeData(
+    constraints: tooltip.constraints,
+    padding: tooltip.padding,
+    margin: tooltip.margin,
+    textStyle: tooltip.textStyle,
+    decoration: tooltip.decoration,
+  );
+}
+
+prism.ThemeData buildPrismTheme(material.ThemeData theme) {
+  final scheme = theme.colorScheme;
+  final font = theme.extension<PrismFont>();
+  return prism.ThemeData(
+    brightness: theme.brightness,
+    platform: theme.platform,
+    colorScheme: _prismScheme(scheme),
+    elevatedColorScheme: switch (theme.extension<ElevatedColorScheme>()) {
+      final elevated? => _prismScheme(elevated.colorScheme),
+      _ => null,
+    },
     fontFamily: font?.family,
     fontFamilyFallback: font?.fallback,
     visualDensity: prism.VisualDensity(
@@ -85,7 +104,8 @@ prism.ThemeData buildPrismTheme(material.ThemeData theme) {
       vertical: theme.visualDensity.vertical,
     ),
     tapTargetSize: prism.TapTargetSize.shrinkWrap,
-    scaffoldBackgroundColor: scheme.surface,
+    scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
+    tooltipTheme: _prismTooltipTheme(theme),
   );
 }
 
@@ -96,18 +116,21 @@ class PrismThemeBridge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themed = prism.Theme(
+      data: buildPrismTheme(material.Theme.of(context)),
+      child: prism.CardFillScope(
+        transform: PageBackgroundScope.applyCardOpacity,
+        child: child,
+      ),
+    );
+    // A nested bridge reuses the outer measure.
+    if (prism.MeasureScope.maybeOf(context) != null) return themed;
     return prism.MeasureScope(
       measure: prism.Measure.of(
         context,
         MediaQuery.textScalerOf(context).scale(1),
       ),
-      child: prism.Theme(
-        data: buildPrismTheme(material.Theme.of(context)),
-        child: prism.CardFillScope(
-          transform: PageBackgroundScope.applyCardOpacity,
-          child: child,
-        ),
-      ),
+      child: themed,
     );
   }
 }

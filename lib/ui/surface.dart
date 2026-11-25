@@ -1,5 +1,6 @@
 import 'package:prism_ui/page_background.dart';
 import 'package:reclash/ui/color.dart';
+import 'package:reclash/ui/prism_theme.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/surface.dart' as prism;
 
@@ -127,7 +128,10 @@ class ElevatedSurfaceTheme extends StatelessWidget {
     return _ElevatedSurfaceScope(
       child: PageBackgroundScope(
         cardOpacity: 1,
-        child: Theme(data: Theme.of(context).elevated, child: child),
+        child: Theme(
+          data: Theme.of(context).elevated,
+          child: PrismThemeBridge(child: child),
+        ),
       ),
     );
   }
