@@ -259,8 +259,14 @@ from the prepared base, the product review, and the checks the affected contract
 bootstrap, a recipe migration or an audit; it can be the child of a recipe migration through `--after`, even after
 development has moved past the predecessor's captured commit.
 
+`--scaffold <manifest.json>` copies the listed repository-relative paths (files or directories) from the old
+development line into the candidate and commits them as one `chore(rebuild): apply the fork scaffold` commit. Put the
+fork-owned, upstream-conflicting layers there — contracts, agent docs, build/release tooling, localization fragments,
+owned assets — so the heavy work sits at the start of the new history and the feature commits stay small. The manifest
+is a JSON array; paths that do not exist in the old line are rejected.
+
 ```bash
-dart run tool/fork.dart sync prepare --id <unique-id> --fresh --product-review <plan.json>
+dart run tool/fork.dart sync prepare --id <unique-id> --fresh --scaffold <paths.json> --product-review <plan.json>
 ```
 
 Global Git settings are not modified; per-command rerere autoupdate is disabled. Unknown executable merge/filter drivers

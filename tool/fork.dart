@@ -50,6 +50,7 @@ void main(List<String> arguments) {
     ..addOption('source')
     ..addFlag('recipe-migration', negatable: false)
     ..addFlag('fresh', negatable: false)
+    ..addOption('scaffold')
     ..addOption('audit')
     ..addOption('after')
     ..addOption('product-review');
@@ -235,6 +236,7 @@ void main(List<String> arguments) {
             after: action.option('after'),
             productReview: action.option('product-review'),
             fresh: action.flag('fresh'),
+            scaffold: action.option('scaffold'),
           ),
           'status' => MaintenanceReport(registry).status(id),
           'verify' => service.verify(

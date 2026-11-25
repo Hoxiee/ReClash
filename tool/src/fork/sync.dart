@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -249,6 +250,7 @@ class VendorSync {
     String? after,
     String? productReview,
     bool fresh = false,
+    String? scaffold,
   }) {
     identifier(id);
     if (fresh && (bootstrap || recipeMigration || audit != null)) {
@@ -256,6 +258,12 @@ class VendorSync {
         '--fresh cannot be combined with bootstrap, recipe migration or audit',
       );
     }
+    if (scaffold != null && !fresh) {
+      reject('--scaffold requires --fresh');
+    }
+    final scaffoldPaths = scaffold == null
+        ? <String>[]
+        : readScaffoldPaths(scaffold);
     if (after != null && (bootstrap || recipeMigration || audit != null)) {
       reject(
         '--after cannot be combined with bootstrap, recipe migration or audit',
@@ -295,6 +303,16 @@ class VendorSync {
       reject('Observation ID exists; inspect it or choose another ID');
     }
     final dev = git.oid(devRef);
+    if (scaffoldPaths.isNotEmpty) {
+      final entries = git.entries(dev).map((e) => e.path).toList();
+      for (final path in scaffoldPaths) {
+        if (!entries.any(
+          (entry) => entry == path || entry.startsWith('$path/'),
+        )) {
+          reject('Scaffold path is not in the old development tree: $path');
+        }
+      }
+    }
     final oldVendor = git.exists(vendorRef) ? git.oid(vendorRef) : null;
     final oldProductBase = git.exists(productBaseRef)
         ? git.oid(productBaseRef)
@@ -471,6 +489,7 @@ class VendorSync {
           .toList(),
       'bootstrap': bootstrap,
       'fresh': fresh,
+      'scaffold': scaffoldPaths,
       'recipeMigration': recipeMigration,
       'productReview': ?productPlan,
       if (productPlan != null)
@@ -523,6 +542,27 @@ class VendorSync {
         ]);
       }
       preserveOwned(target, dev);
+      if (scaffoldPaths.isNotEmpty) {
+        target.run([
+          'restore',
+          '--source=$dev',
+          '--staged',
+          '--worktree',
+          '--',
+          ...scaffoldPaths,
+        ]);
+        target.run(['add', '--all']);
+        if (target.dirty.isNotEmpty) {
+          const message =
+              'chore(rebuild): apply the fork scaffold\n\n'
+              'Copied the fork-owned paths from the previous development '
+              'line.\n\n'
+              'Changelog: skip';
+          target.run(['commit', '-q', '--no-verify', '-m', message]);
+          r['scaffoldCommit'] = target.oid('HEAD');
+          save(id, r);
+        }
+      }
     } else {
       final rebased = target.result(['rebase', '--onto', preparedBase, base]);
       r['rebaseExit'] = rebased.exitCode;
@@ -1345,4 +1385,14 @@ class VendorSync {
         .where((line) => line.isNotEmpty)
         .toList();
   }
+}
+
+List<String> readScaffoldPaths(String path) {
+  final file = File(path);
+  if (!file.existsSync()) reject('Scaffold manifest is missing: $path');
+  final paths = strings(jsonDecode(file.readAsStringSync()), 'scaffold paths');
+  for (final entry in paths) {
+    safePath(entry);
+  }
+  return paths;
 }

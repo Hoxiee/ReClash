@@ -715,6 +715,77 @@ void main() {
     );
     f.service.verify('fresh', reviews: ['unclassified']);
   });
+  test('fresh assembly applies a scaffold as one commit', () {
+    f.bootstrap();
+    final manifest = Directory.systemTemp.createTempSync('reclash-scaffold-');
+    addTearDown(() => manifest.deleteSync(recursive: true));
+    final file = File(p.join(manifest.path, 'scaffold.json'))
+      ..writeAsStringSync('["lib/code.dart","CHANGELOG.md"]');
+    final next = f.rewritten(
+      code: "import 'package:fl_clash/a.dart';\nconst upstream = 13;\n",
+    );
+    final result = f.service.prepare(
+      'scaffold',
+      source: next,
+      fresh: true,
+      scaffold: file.path,
+    );
+    expect(result['status'], 'fresh-candidate');
+    final receipt = f.service.receipt('scaffold');
+    expect(receipt['scaffold'], ['lib/code.dart', 'CHANGELOG.md']);
+    final candidate = f.candidate('scaffold');
+    expect(candidate.dirty, isEmpty);
+    expect(
+      candidate.run(['log', '-1', '--format=%s']).trim(),
+      'chore(rebuild): apply the fork scaffold',
+    );
+    expect(
+      candidate.run([
+        'rev-list',
+        '--count',
+        '${receipt['preparedBase']}..HEAD',
+      ]).trim(),
+      '1',
+    );
+    expect(
+      candidate.read('HEAD', 'lib/code.dart'),
+      contains('downstream = true'),
+    );
+    expect(candidate.read('HEAD', 'CHANGELOG.md'), '# ReClash\n');
+    f.service.verify('scaffold', reviews: ['unclassified']);
+  });
+  test('scaffold requires a fresh assembly and known paths', () {
+    final manifest = Directory.systemTemp.createTempSync('reclash-scaffold-');
+    addTearDown(() => manifest.deleteSync(recursive: true));
+    final file = File(p.join(manifest.path, 'scaffold.json'))
+      ..writeAsStringSync('["missing"]');
+    expect(
+      () => f.service.prepare(
+        'scaffold-replay',
+        source: f.raw,
+        scaffold: file.path,
+      ),
+      throwsA(isA<ForkException>()),
+    );
+    expect(
+      () => f.service.prepare(
+        'scaffold-unknown',
+        source: f.raw,
+        fresh: true,
+        scaffold: file.path,
+      ),
+      throwsA(isA<ForkException>()),
+    );
+    expect(
+      () => f.service.prepare(
+        'scaffold-missing',
+        source: f.raw,
+        fresh: true,
+        scaffold: p.join(manifest.path, 'absent.json'),
+      ),
+      throwsA(isA<ForkException>()),
+    );
+  });
   test('fresh assembly rejects bootstrap', () {
     expect(
       () => f.service.prepare(
