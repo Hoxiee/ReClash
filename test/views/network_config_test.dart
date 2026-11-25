@@ -144,6 +144,7 @@ void main() {
       tester,
     ) async {
       region('RU');
+      final before = container.read(patchClashConfigProvider);
       await pumpItem(tester, tunItems(isMipsStack: false).first);
       expect(find.text('1500'), findsOneWidget);
       await tester.tap(find.text('MTU'));
@@ -153,8 +154,8 @@ void main() {
       await tester.pumpAndSettle();
       final patch = container.read(patchClashConfigProvider);
       expect(patch.tun.mtu, 1420);
-      expect(patch.tunOverride.mtu, 1420);
-      expect(patch.tunOverrideKeys, {TunOverrideKey.mtu});
+      expect(patch.tunOverride.mtu, before.tunOverride.mtu);
+      expect(patch.tunOverrideKeys, before.tunOverrideKeys);
       for (final code in ['CN', 'IR', null]) {
         region(code);
         await tester.pumpAndSettle();

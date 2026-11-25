@@ -249,6 +249,7 @@ Map<String, Object?> _summary({
   required String? profile,
 }) {
   final failed = path?.failed;
+  final stoppedStep = failed?.cause == null ? null : failed;
   final verdict = pathVerdict(path);
   final critical = findings.any((f) => f.severity == CheckSeverity.critical);
   final healed = [
@@ -264,10 +265,10 @@ Map<String, Object?> _summary({
   final trimmedNote = note?.trim();
   return {
     'verdict': verdict != 'fail' && critical ? 'fail' : verdict,
-    if (failed != null) ...{
-      'failedStep': failed.step.name,
-      'cause': ?failed.cause?.id,
-      'detail': ?failed.detail,
+    if (stoppedStep != null) ...{
+      'failedStep': stoppedStep.step.name,
+      'cause': ?stoppedStep.cause?.id,
+      'detail': ?stoppedStep.detail,
     },
     'findings': {
       for (final severity in CheckSeverity.values)

@@ -252,6 +252,21 @@ void main() {
       expect(setupAction.calls, [(running: false, initialize: false)]);
     });
 
+    test('explicit start resumes an on-demand pause', () async {
+      final container = buildContainer(
+        overrides: [
+          setupActionProvider.overrideWith(() => _SetupRunRecorder()),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          isStartProvider.overrideWithValue(true),
+          suspendProvider.overrideWithValue(true),
+        ],
+      );
+
+      await container.read(commonActionProvider.notifier).setRunning(true);
+
+      expect(container.read(onDemandOverrideProvider).paused, isFalse);
+    });
+
     test('explicit stop supersedes an in-flight external start', () async {
       final coreAction = _CoreStartRecorder()..pendingStart = Completer<bool>();
       final setupAction = _SetupRunRecorder();

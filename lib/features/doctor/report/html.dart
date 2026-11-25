@@ -186,7 +186,7 @@ app.append($("header",{},
   const fail=S.verdict==="fail",pass=S.verdict==="pass";
   const counts=S.servers?Object.entries(S.servers).filter(([k])=>!["total","ok","skipped","unknown"].includes(k)):[];
   app.append($("section",{class:"card verdict "+(fail?"bad":pass?"good":"")},
-    $("div",{class:"v-title"},fail?"Fails at "+(S.failedStep||"an unknown step"):pass?"Connection works":"Not checked"),
+    $("div",{class:"v-title"},fail?(S.failedStep?"Fails at "+S.failedStep:"Findings need attention"):pass?"Connection works":"Not checked"),
     fail&&(S.cause||S.detail)?$("div",{class:"v-detail"},join(S.cause,S.detail)):null,
     (S.healed||[]).length?$("div",{class:"v-detail"},"Auto-repair: "+S.healed.map(h=>h.remedy+" → "+h.outcome).join(", ")):null,
     S.note?$("blockquote",{},S.note):null,

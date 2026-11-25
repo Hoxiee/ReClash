@@ -112,11 +112,9 @@ final class SiteLockHostPolicy {
     if (_lifted) return;
     try {
       switch (await _readiness()) {
-        case HelperReadiness.notReady:
+        case HelperReadiness.notReady || HelperReadiness.manifestMissing:
           if (!_locksEnabled) _emit(SiteLockHostStatus.helperUnavailable);
           return;
-        case HelperReadiness.manifestMissing:
-          break;
         case HelperReadiness.ready:
           if (_disposed || _locksEnabled) return;
           await _delete();

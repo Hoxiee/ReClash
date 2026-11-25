@@ -432,11 +432,7 @@ class _MtuItem extends ConsumerWidget {
         ref
             .read(patchClashConfigProvider.notifier)
             .update(
-              (state) => state.copyWith(
-                tun: state.tun.copyWith(mtu: mtu),
-                tunOverride: state.tunOverride.copyWith(mtu: mtu),
-                tunOverrideKeys: {...state.tunOverrideKeys, TunOverrideKey.mtu},
-              ),
+              (state) => state.copyWith(tun: state.tun.copyWith(mtu: mtu)),
             );
       },
     );

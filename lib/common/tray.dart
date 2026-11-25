@@ -1,6 +1,7 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:tray/tray.dart';
 
@@ -157,70 +158,75 @@ class AppTray implements TrayPort {
       },
     );
 
+    final setupActive = read(setupSessionProvider).active;
     return [
       showItem,
-      TrayMenuCheckbox(
-        label: trayState.isStart
-            ? appLocalizations.stop
-            : appLocalizations.start,
-        checked: false,
-        detail: shortcut(HotAction.start),
-        onSelected: commonAction.toggleRunning,
-      ),
-      if (isMacOS) ...[
+      // The wizard owns the first connection decision; a tray Start or mode
+      // switch would bypass it while its window can also be hidden to here.
+      if (!setupActive) ...[
         TrayMenuCheckbox(
-          label: appLocalizations.speedStatistics,
-          checked: trayState.showTrayTitle,
-          onSelected: commonAction.updateSpeedStatistics,
+          label: trayState.isStart
+              ? appLocalizations.stop
+              : appLocalizations.start,
+          checked: false,
+          detail: shortcut(HotAction.start),
+          onSelected: commonAction.toggleRunning,
         ),
+        if (isMacOS) ...[
+          TrayMenuCheckbox(
+            label: appLocalizations.speedStatistics,
+            checked: trayState.showTrayTitle,
+            onSelected: commonAction.updateSpeedStatistics,
+          ),
+          TrayMenuCheckbox(
+            label: appLocalizations.monochromeIcon,
+            checked: trayState.monochromeTrayIcon,
+            onSelected: commonAction.updateMonochromeTrayIcon,
+          ),
+        ],
+        const TrayMenuSeparator(),
+        for (final mode in trayState.modes)
+          TrayMenuCheckbox(
+            label: mode.label,
+            checked: mode == trayState.mode,
+            detail: shortcut(switch (mode) {
+              Mode.rule => HotAction.ruleMode,
+              Mode.global => HotAction.globalMode,
+              Mode.direct => HotAction.directMode,
+            }),
+            onSelected: () {
+              setupAction.changeMode(mode);
+            },
+          ),
+        const TrayMenuSeparator(),
+        if (isMacOS) ..._buildGroupMenu(trayState: trayState, read: read),
+        if (trayState.isStart) ...[
+          TrayMenuCheckbox(
+            label: appLocalizations.tun,
+            checked: trayState.tunEnable,
+            detail: shortcut(HotAction.tun),
+            onSelected: systemAction.updateTun,
+          ),
+          TrayMenuCheckbox(
+            label: appLocalizations.systemProxy,
+            checked: trayState.systemProxy,
+            detail: shortcut(HotAction.proxy),
+            onSelected: systemAction.updateSystemProxy,
+          ),
+          const TrayMenuSeparator(),
+        ],
         TrayMenuCheckbox(
-          label: appLocalizations.monochromeIcon,
-          checked: trayState.monochromeTrayIcon,
-          onSelected: commonAction.updateMonochromeTrayIcon,
+          label: appLocalizations.autoLaunch,
+          checked: trayState.autoLaunch,
+          onSelected: systemAction.updateAutoLaunch,
         ),
-      ],
-      const TrayMenuSeparator(),
-      for (final mode in trayState.modes)
-        TrayMenuCheckbox(
-          label: mode.label,
-          checked: mode == trayState.mode,
-          detail: shortcut(switch (mode) {
-            Mode.rule => HotAction.ruleMode,
-            Mode.global => HotAction.globalMode,
-            Mode.direct => HotAction.directMode,
-          }),
-          onSelected: () {
-            setupAction.changeMode(mode);
-          },
-        ),
-      const TrayMenuSeparator(),
-      if (isMacOS) ..._buildGroupMenu(trayState: trayState, read: read),
-      if (trayState.isStart) ...[
-        TrayMenuCheckbox(
-          label: appLocalizations.tun,
-          checked: trayState.tunEnable,
-          detail: shortcut(HotAction.tun),
-          onSelected: systemAction.updateTun,
-        ),
-        TrayMenuCheckbox(
-          label: appLocalizations.systemProxy,
-          checked: trayState.systemProxy,
-          detail: shortcut(HotAction.proxy),
-          onSelected: systemAction.updateSystemProxy,
+        TrayMenuAction(
+          label: appLocalizations.copyEnvVar,
+          detail: shortcut(HotAction.copyEnv),
+          onSelected: systemAction.copyProxyEnv,
         ),
         const TrayMenuSeparator(),
       ],
-      TrayMenuCheckbox(
-        label: appLocalizations.autoLaunch,
-        checked: trayState.autoLaunch,
-        onSelected: systemAction.updateAutoLaunch,
-      ),
-      TrayMenuAction(
-        label: appLocalizations.copyEnvVar,
-        detail: shortcut(HotAction.copyEnv),
-        onSelected: systemAction.copyProxyEnv,
-      ),
-      const TrayMenuSeparator(),
       exitItem,
     ];
   }

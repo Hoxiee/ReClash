@@ -219,7 +219,10 @@ extension LogsStateExt on LogsState {
     }
     return logs
         .where(
-          (log) => keywords.every((keyword) => keyword == log.logLevel.name),
+          // Level chips are one dimension: two picked levels mean either.
+          (log) =>
+              keywords.isEmpty ||
+              keywords.any((keyword) => keyword == log.logLevel.name),
         )
         .whereMatches(
           searchQuery,

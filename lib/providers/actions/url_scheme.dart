@@ -82,6 +82,9 @@ class UrlSchemeAction extends _$UrlSchemeAction {
   bool _holdLink(String input) {
     final session = ref.read(setupSessionProvider.notifier);
     if (!session.holdsLinks) return false;
+    // Routing, doctor and fix links have their own dispatch; the wizard's
+    // field only knows how to import profiles, so holding one there loses it.
+    if (!isProfileLinkInput(input)) return false;
     session.offerLink(input);
     return true;
   }

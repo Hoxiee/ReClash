@@ -147,7 +147,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     if (!mounted) return;
     final state = ref.read(setupSessionProvider);
     final link = state.pendingLink;
-    if (link == null || state.step.index < SetupStep.profile.index) return;
+    // Only the profile step shows the field; a link that arrives later must
+    // stay pending for the post-setup dispatch instead of being dropped here.
+    if (link == null || state.step != SetupStep.profile) return;
     _linkController.text = link;
     _session.consumeLink();
   }
@@ -397,7 +399,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
               label: confirmed!.choice.label,
               ageSecretKey: key,
               select: false,
-              clientSettings: clientSettings,
+              clientSettings: confirmed!.source.preset == null
+                  ? clientSettings
+                  : confirmed!.choice.clientSettings,
               reviewContext: context,
               cancellation: cancellation,
             );

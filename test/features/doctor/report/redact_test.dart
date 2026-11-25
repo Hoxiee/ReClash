@@ -73,6 +73,26 @@ void main() {
       expect(text, endsWith('next'));
     });
 
+    test('masks provider authorization headers in both YAML forms', () {
+      const yaml =
+          'proxy-providers:\n'
+          '  panel:\n'
+          '    header:\n'
+          '      Authorization:\n'
+          '        - "Bearer providerToken123"\n'
+          '      Proxy-Authorization: Bearer otherToken456\n'
+          '      Accept: ["application/json"]\n';
+      final secrets = fieldSecrets(yaml);
+      expect(secrets, containsAll(['providerToken123', 'otherToken456']));
+
+      final text = _provider(secrets).text(yaml);
+      expect(text, isNot(contains('providerToken123')));
+      expect(text, isNot(contains('otherToken456')));
+      expect(text, contains('Authorization:'));
+      expect(text, contains('Proxy-Authorization: ***'));
+      expect(text, contains('Accept: ["application/json"]'));
+    });
+
     test('masks the literal secrets it was given wherever they appear', () {
       final secrets = urlSecrets(_subscription);
       final text = _provider(secrets).text('cached as f3a9c1e07b2d4e58.yaml');

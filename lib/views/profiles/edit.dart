@@ -854,7 +854,10 @@ Future<void> renameProfile(
   if (label == null || label == profile.label) {
     return;
   }
-  profilesAction.putProfile(profile.copyWith(label: label));
+  // The dialog can sit open across an auto-update; writing the row the sheet
+  // was built from would revert its fresh subscription fields.
+  final latest = ref.read(profilesProvider).getProfile(profile.id) ?? profile;
+  profilesAction.putProfile(latest.copyWith(label: label));
 }
 
 class _ProfileNameField extends StatelessWidget {

@@ -1635,6 +1635,25 @@ void main() {
     );
 
     test(
+      'a Core that leaves connected invalidates the applied inputs',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        when(() => core.setupConfig(any())).thenAnswer((_) async => '');
+        final scoped = trackedSetupContainer(core);
+        final setup = scoped.read(setupActionProvider.notifier);
+
+        expect(await setup.applyProfile(force: true), isTrue);
+        expect(await setup.inputsApplied(), isTrue);
+
+        scoped.read(coreStatusProvider.notifier).value =
+            CoreStatus.disconnected;
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+
+        expect(await setup.inputsApplied(), isFalse);
+      },
+    );
+
+    test(
       'a failed apply releases pending state before a subsequent apply',
       () async {
         final core = _MockCoreHandlerInterface();

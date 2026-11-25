@@ -209,6 +209,19 @@ class Request {
       installedVersion: installed,
     );
     _gitHubChecks[channel] = (at: now, result: result);
+    // A failed fallback must be retried by the next check, not replayed from
+    // the cache for an hour.
+    unawaited(
+      result.then<void>(
+        (_) {},
+        onError: (Object error, StackTrace stackTrace) {
+          final cached = _gitHubChecks[channel];
+          if (cached != null && identical(cached.result, result)) {
+            _gitHubChecks.remove(channel);
+          }
+        },
+      ),
+    );
     return result;
   }
 

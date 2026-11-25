@@ -25,6 +25,13 @@ Object? plainJson(Object? value) => switch (value) {
     'used': value.used,
     'total': value.total,
   },
+  ProfileUpdateFact() => {
+    'profileId': value.profileId,
+    'at': plainJson(value.at),
+    'status': value.status,
+    'error': value.error,
+    'servers': value.servers,
+  },
   HostsFact() => {
     'path': value.path,
     'lineCount': value.lineCount,
@@ -158,7 +165,11 @@ List<Map<String, Object?>> findingsJson(
 
 String pathVerdict(PathResult? path) {
   if (path == null || path.cancelled || !path.complete) return 'unknown';
-  return path.failed == null ? 'pass' : 'fail';
+  final failed = path.failed;
+  // A step that never ran (the tunnel is stopped) fails without a cause; it
+  // is not evidence that the path is broken.
+  if (failed == null) return 'pass';
+  return failed.cause == null ? 'unknown' : 'fail';
 }
 
 Map<String, Object?> pathJson(PathResult path, {required bool fresh}) => {

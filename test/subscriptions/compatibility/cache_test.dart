@@ -133,6 +133,7 @@ void main() {
   test('local negotiation state is not part of backup entries', () {
     expect(BackupEntries.of(profileIds: [42], scriptIds: [], providers: []), [
       'profiles/42.yaml',
+      'profiles/42.provider-config.json',
     ]);
   });
 }

@@ -266,6 +266,16 @@ void main() {
       },
     );
 
+    test('an adopted native run still hears its stop report', () async {
+      await Service().start();
+      await Service().stop();
+      Service().adoptRunning();
+
+      await reportStopped(lastRevision());
+
+      expect(listener.stops, 1);
+    });
+
     test('a throwing listener does not starve the next one', () async {
       final throwing = _ThrowingListener();
       Service().removeListener(listener);

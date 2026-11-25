@@ -24,8 +24,9 @@ final class ReportLeak implements Exception {
 
 const _fieldNames =
     'password|passwd|uuid|private-key|private_key|privatekey|pre-shared-key|'
-    'psk|auth-str|auth_str|auth|token|access-token|access_token|secret|'
-    'obfs-password|short-id|api-key|apikey|age-secret-key|agesecretkey';
+    'psk|auth-str|auth_str|authorization|proxy-authorization|auth|token|'
+    'access-token|access_token|secret|obfs-password|short-id|api-key|apikey|'
+    'age-secret-key|agesecretkey';
 
 final _field = RegExp(
   '(?<!\\w)($_fieldNames)(["\']?[ \\t]*[:=][ \\t]*)'
@@ -34,6 +35,15 @@ final _field = RegExp(
 );
 
 final _secretKey = RegExp('^(?:$_fieldNames)\$', caseSensitive: false);
+
+/// Provider headers keep their credentials in a scalar or a YAML list; the
+/// generic field regex only reaches the scalar.
+final _authorization = RegExp(
+  r'^([ \t]*(?:proxy-)?authorization[ \t]*:)[ \t]*(.*)'
+  r'((?:\n[ \t]+-[^\n]*)*)',
+  caseSensitive: false,
+  multiLine: true,
+);
 
 final _secretQueryKey = RegExp(
   'token|key|auth|sign|secret|pass|uuid|sid|session|code|ticket',
@@ -138,7 +148,28 @@ Set<String> fieldSecrets(String text) => {
     if (_unquote(match[3]!) case final value
         when value.length >= minSecretLength && value != redactionMask)
       value,
+  for (final match in _authorization.allMatches(text))
+    for (final value in _authorizationValues(match[2]!, match[3]!))
+      if (value.length >= minSecretLength && value != redactionMask) value,
 };
+
+Iterable<String> _authorizationValues(String inline, String block) sync* {
+  Iterable<String> values(String source) sync* {
+    for (final part in source.replaceAll(RegExp(r'[\[\]{}]'), '').split(',')) {
+      final value = _unquote(part.trim());
+      if (value.isEmpty) continue;
+      yield value;
+      final space = value.lastIndexOf(' ');
+      if (space > 0) yield value.substring(space + 1);
+    }
+  }
+
+  yield* values(inline);
+  for (final line in block.split('\n')) {
+    final dash = line.indexOf('-');
+    if (dash >= 0) yield* values(line.substring(dash + 1));
+  }
+}
 
 /// A subscription URL and the parts of it that would let someone else fetch
 /// the subscription.
@@ -286,6 +317,7 @@ final class Redactor {
     var out = matcher.mask(input);
     out = out.replaceAll(_privateKey, redactionMask);
     out = out.replaceAllMapped(_url, _redactUrl);
+    out = out.replaceAllMapped(_authorization, _redactAuthorization);
     out = out.replaceAllMapped(
       _field,
       (m) => '${m[1]}${m[2]}${_maskQuoted(m[3]!)}',
@@ -325,6 +357,23 @@ final class Redactor {
     "'" => "'$redactionMask'",
     _ => redactionMask,
   };
+
+  String _redactAuthorization(Match match) {
+    final head = match[1]!;
+    final block = match[3]!;
+    final buffer = StringBuffer('$head $redactionMask');
+    for (final line in block.split('\n')) {
+      if (line.trim().isEmpty) continue;
+      final dash = line.indexOf('-');
+      if (dash < 0) continue;
+      buffer
+        ..write('\n')
+        ..write(line.substring(0, dash + 1))
+        ..write(' ')
+        ..write(redactionMask);
+    }
+    return buffer.toString();
+  }
 
   String _redactUrl(Match match) {
     var rest = match[2]!;

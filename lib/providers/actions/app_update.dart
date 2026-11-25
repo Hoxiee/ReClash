@@ -161,9 +161,13 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
             _updateRetryDelays.length - 1,
           )]
         : _runtime.checkInterval;
-    if (attemptedAt == null ||
+    final elapsed = attemptedAt == null
+        ? null
+        : _runtime.now().difference(attemptedAt);
+    if (elapsed == null ||
+        elapsed.isNegative ||
         failed && retryNow ||
-        _runtime.now().difference(attemptedAt) >= cooldown) {
+        elapsed >= cooldown) {
       await check(automatic: true);
     }
   }
@@ -218,16 +222,15 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
 
   bool _current(int revision) => ref.mounted && revision == _revision;
 
-  /// A tray app can wait weeks for its moment to apply, and a failed package
-  /// would otherwise pin it to that version: a newer release takes the place.
-  bool get _supersedable =>
-      _runtime.desktop &&
-      const {
-        UpdatePhase.ready,
-        UpdatePhase.installFailed,
-        UpdatePhase.verifyFailed,
-        UpdatePhase.downloadFailed,
-      }.contains(state.phase);
+  /// A failed package would otherwise pin the app to that version: a newer
+  /// release takes its place on every platform, not only where the app
+  /// replaces itself.
+  bool get _supersedable => const {
+    UpdatePhase.ready,
+    UpdatePhase.installFailed,
+    UpdatePhase.verifyFailed,
+    UpdatePhase.downloadFailed,
+  }.contains(state.phase);
 
   Future<bool> savePreferences({
     required bool check,

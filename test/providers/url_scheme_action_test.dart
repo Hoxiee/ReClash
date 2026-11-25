@@ -516,7 +516,7 @@ void main() {
       expect(profiles.sources, isEmpty);
     });
 
-    test('doctor and routing links are held during setup', () async {
+    test('doctor and routing links dispatch during setup', () async {
       session.setActive(true);
       var opened = 0;
       for (final input in ['reclash://doctor', encodeRcxLink('rcx: 1\n')]) {
@@ -525,9 +525,9 @@ void main() {
           openDoctor: (_) async => opened++,
           openRouting: (_, _) async => opened++,
         );
-        expect(container.read(setupSessionProvider).pendingLink, input);
+        expect(container.read(setupSessionProvider).pendingLink, isNull);
       }
-      expect(opened, 0);
+      expect(opened, 2);
     });
 
     test('the latest held link wins and dropped commands leave it', () async {

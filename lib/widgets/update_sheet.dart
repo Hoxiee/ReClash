@@ -31,11 +31,17 @@ class UpdateSheet extends ConsumerWidget {
         () => showFormSheet<void>(
           context: context,
           builder: (context) => _preferences.track(
-            UpdatePreferences(
-              isAndroid: ProviderScope.containerOf(
-                context,
-                listen: false,
-              ).read(appUpdateActionProvider.notifier).isSupported,
+            Builder(
+              builder: (context) {
+                final action = ProviderScope.containerOf(
+                  context,
+                  listen: false,
+                ).read(appUpdateActionProvider.notifier);
+                return UpdatePreferences(
+                  isAndroid: action.isSupported && !action.isDesktop,
+                  selfUpdating: action.isDesktop,
+                );
+              },
             ),
           ),
         ),

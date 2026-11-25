@@ -173,6 +173,19 @@ class BackupAction extends _$BackupAction {
         }
       }
     }
+    // A profiles-only restore leaves the patch settings untouched, so no
+    // listener above notices that the config the Core runs is now stale.
+    if (ref.read(coreStatusProvider) == CoreStatus.connected) {
+      final applied = await ref
+          .read(setupActionProvider.notifier)
+          .applyProfile(force: true, silence: true, suppressErrors: true);
+      if (!applied) {
+        commonPrint.log(
+          'Restored profile could not be applied to the running Core',
+          logLevel: LogLevel.warning,
+        );
+      }
+    }
   }
 
   Future<void> _validateWallpapers(

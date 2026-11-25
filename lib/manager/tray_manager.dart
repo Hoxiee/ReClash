@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +50,12 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
       if (prev != null && prev != next) {
         _requestUpdate();
       }
+    });
+    ref.listenManual(setupSessionProvider.select((state) => state.active), (
+      prev,
+      next,
+    ) {
+      if (prev != next) _requestUpdate();
     });
     if (system.isMacOS) {
       // A health check lands result by result; one menu rebuild covers a run.

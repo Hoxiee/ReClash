@@ -10,6 +10,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter/foundation.dart';
@@ -116,6 +117,9 @@ void main() {
     calls = [];
     tray = AppTray.forPlatform(isMacOS: true, isWindows: false);
     container = ProviderContainer();
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(setupCompleted: true));
     Tray.instance.resetForTesting();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, (call) async {
@@ -174,6 +178,19 @@ void main() {
     expect(labels, contains(l10n.exit));
     expect(labels, isNot(contains(l10n.tun)));
     expect(labels, isNot(contains(l10n.systemProxy)));
+  });
+
+  test('a first-run wizard offers only show and exit', () async {
+    final setup = ProviderContainer();
+    addTearDown(setup.dispose);
+    await tray.update(
+      trayState: _trayState(isStart: true),
+      traffic: const Traffic(),
+      read: setup.read,
+    );
+
+    final l10n = currentAppLocalizations;
+    expect(_labels(showCall()), [l10n.show, l10n.exit]);
   });
 
   test('adds TUN and system proxy toggles once the core is running', () async {
@@ -339,6 +356,9 @@ void main() {
           }),
         ],
       );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(setupCompleted: true));
       const group = Group(
         name: 'Proxy',
         type: GroupType.Selector,

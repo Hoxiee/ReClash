@@ -64,7 +64,10 @@ bool isPrivilegedLaunchFailure(Object error) {
     return false;
   }
   return switch (error.cause) {
-    DesktopPrivilegeException(code: 'launch_cancelled') => false,
+    DesktopPrivilegeException(
+      code: 'launch_cancelled' || 'linux_cancelled' || 'windows_cancelled',
+    ) =>
+      false,
     WindowsLaunchException(:final cancelled) => !cancelled,
     DesktopPrivilegeException() ||
     HelperException() ||

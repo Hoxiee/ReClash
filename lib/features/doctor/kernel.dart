@@ -187,6 +187,9 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
   Future<List<DiagnosticEvent>> history() => _journal.history();
 
   bool _isSnoozed(Finding finding, DateTime now) {
+    // A warning the user snoozed can escalate to critical under the same id;
+    // critical findings are not snoozeable, so the old entry must not hide it.
+    if (finding.severity == CheckSeverity.critical) return false;
     if (!_snoozes.containsKey(finding.id)) return false;
     final until = _snoozes[finding.id];
     return until == null || now.isBefore(until);
@@ -363,7 +366,12 @@ class DoctorKernel implements DiagnosticKernel, FactSink {
     }
     final remaining = await _verify(targets, remedy.settle);
     if (before != null) {
-      _undo[remedyId] = _Undo(before, _config.read());
+      final after = _config.read();
+      // A repeated or no-op apply must not replace the snapshot that still
+      // restores the setting the user first changed.
+      if (before != after) {
+        _undo.putIfAbsent(remedyId, () => _Undo(before, after));
+      }
     }
     return _recordOutcome(
       RemedyOutcome(

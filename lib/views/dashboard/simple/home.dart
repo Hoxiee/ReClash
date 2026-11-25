@@ -218,9 +218,7 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
       case PowerAction.updateProfile:
         final profile = ref.read(currentProfileProvider);
         if (profile == null) return;
-        await ref
-            .read(profilesActionProvider.notifier)
-            .updateProfile(profile, showLoading: true);
+        await syncProfile(context, ref, profile);
       case PowerAction.grantVpn:
         await _remedy('device.requestVpnPermission', face);
       case PowerAction.openVpnSettings:

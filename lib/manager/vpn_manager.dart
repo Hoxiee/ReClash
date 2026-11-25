@@ -26,17 +26,33 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
     ref.listenManual(
       vpnOptionsProvider.select((state) => state.value?.effective),
       (prev, next) {
-        final running = ref.read(runningVpnOptionsProvider)?.effective;
-        if (next != null &&
-            prev != next &&
-            running != null &&
-            running != next &&
-            !ref.read(setupSessionProvider).active) {
-          commonPrint.log('VPN restart tip: ${_changedFields(running, next)}');
-          _showRestartTip();
-        }
+        if (next != null && prev != next) _showRestartIfNeeded();
       },
     );
+    // A paused run keeps its start options; compare again on resume.
+    ref.listenManual(suspendProvider, (prev, next) {
+      if (prev == true && !next) _showRestartIfNeeded();
+    });
+    ref.listenManual(setupSessionProvider.select((state) => state.active), (
+      prev,
+      next,
+    ) {
+      if (prev == true && !next) _showRestartIfNeeded();
+    });
+  }
+
+  void _showRestartIfNeeded() {
+    final running = ref.read(runningVpnOptionsProvider)?.effective;
+    final next = ref.read(vpnOptionsProvider).value?.effective;
+    if (next == null ||
+        running == null ||
+        running == next ||
+        ref.read(setupSessionProvider).active ||
+        ref.read(suspendProvider)) {
+      return;
+    }
+    commonPrint.log('VPN restart tip: ${_changedFields(running, next)}');
+    _showRestartTip();
   }
 
   String _changedFields(VpnOptions running, VpnOptions next) {

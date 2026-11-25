@@ -644,11 +644,10 @@ void main() {
       expect(data.clashProviders.single.label, 'Local rules');
       expect(data.configMap?['version'], 1);
       expect(
-        BackupEntries.ofData(data).map(
-          (entry) => File(
-            BackupEntries.resolve(staging.path, entry),
-          ).readAsStringSync(),
-        ),
+        BackupEntries.ofData(data)
+            .map((entry) => File(BackupEntries.resolve(staging.path, entry)))
+            .where((file) => file.existsSync())
+            .map((file) => file.readAsStringSync()),
         ['proxies: []', 'body', 'payload: []'],
       );
     });

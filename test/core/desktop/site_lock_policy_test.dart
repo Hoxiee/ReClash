@@ -194,14 +194,19 @@ void main() {
     });
   });
 
-  test('a missing helper holds no policy and is not retried', () {
+  test('a missing manifest keeps the lift pending', () {
     _run((async, host) {
       host.readiness = HelperReadiness.manifestMissing;
       host.policy.update(locksEnabled: false, coreConnected: false);
       async.elapse(_tick * 3);
 
       expect(host.calls, isEmpty);
-      expect(host.statuses, [SiteLockHostStatus.inactive]);
+      expect(host.statuses.last, SiteLockHostStatus.helperUnavailable);
+
+      host.readiness = HelperReadiness.ready;
+      async.elapse(_tick * 2);
+      expect(host.calls, ['delete']);
+      expect(host.statuses.last, SiteLockHostStatus.inactive);
     });
   });
 

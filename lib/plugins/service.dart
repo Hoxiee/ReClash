@@ -141,6 +141,12 @@ class Service {
         false;
   }
 
+  /// An engine that attaches to a run it did not start still has to hear the
+  /// native stop report for it.
+  void adoptRunning() {
+    _startRequested = true;
+  }
+
   Future<void> setTelegramProxy(String? params, {required bool autostart}) =>
       methodChannel.invokeMethod<void>('setTelegramProxy', {
         'params': params,

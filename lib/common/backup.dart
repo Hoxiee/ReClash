@@ -27,6 +27,10 @@ final class BackupException implements Exception {
 abstract final class BackupEntries {
   static String profile(Object id) => '$profilesDirectoryName/$id.yaml';
 
+  /// Provider chains and routing the subscription delivered with the profile.
+  static String profileProviderConfig(Object id) =>
+      '$profilesDirectoryName/$id.provider-config.json';
+
   static String script(Object id) => 'scripts/$id.js';
 
   static String wallpaper(String fileName) {
@@ -47,7 +51,7 @@ abstract final class BackupEntries {
     Iterable<String> wallpaperLibrary = const [],
   }) {
     return [
-      ...profileIds.map(profile),
+      ...profileIds.expand((id) => [profile(id), profileProviderConfig(id)]),
       ...scriptIds.map(script),
       ...providers.where((item) => !item.isRemote).map(provider),
       ...sanitizeWallpaperLibrary(wallpaperLibrary).map(wallpaper),

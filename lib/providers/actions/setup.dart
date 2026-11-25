@@ -87,6 +87,14 @@ class SetupAction extends _$SetupAction {
       appSettingProvider.select((state) => state.showTrayTitle),
       (_, _) => _syncRuntimeTicker(),
     );
+    // A new Core process starts empty: the snapshot from the previous one
+    // must not let a listener start claim the profile is already applied.
+    ref.listen(coreStatusProvider, (prev, next) {
+      if (prev == CoreStatus.connected && next != CoreStatus.connected) {
+        _appliedInputs = null;
+        globalState.lastConfigMd5 = null;
+      }
+    });
   }
 
   bool get _isTrafficShown =>
@@ -201,6 +209,10 @@ class SetupAction extends _$SetupAction {
       return;
     }
 
+    if (_startTime == null) {
+      // The one-minute repeat-crash guard belongs to a run, not the process.
+      _lastCoreCrash = null;
+    }
     _startTime ??= DateTime.now();
     _updateRunTime();
     _syncRuntimeTicker();
@@ -318,7 +330,7 @@ class SetupAction extends _$SetupAction {
     );
   }
 
-  Future<void> initStatus() async {
+  Future<void> initStatus({bool autoRun = true}) async {
     if (!globalState.needInitStatus) {
       return;
     }
@@ -331,7 +343,7 @@ class SetupAction extends _$SetupAction {
       if (!ref.mounted || revision != _runIntentRevision) return;
       globalState.lastConfigMd5 = md5;
       await _run(true, initialize: true, resume: true);
-    } else if (ref.read(appSettingProvider).autoRun) {
+    } else if (autoRun && ref.read(appSettingProvider).autoRun) {
       await setRunning(true, initialize: true);
     } else {
       await globalState.safeRun(() => applyProfile(force: true));
@@ -492,6 +504,7 @@ class SetupAction extends _$SetupAction {
         if (ref.mounted && _isCurrent(request)) {
           ref.read(runningVpnOptionsProvider.notifier).value = options;
         }
+        if (system.isAndroid) service?.adoptRunning();
         return true;
       }
       return _setListening(request);

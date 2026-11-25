@@ -82,7 +82,7 @@ object ServiceController {
 
         if (binding?.component != nextIntent.component) {
             if (binding != null) {
-                tearDownServices()
+                tearDownServices(recordUserStop = false)
             }
             lateinit var nextBinding: ManagedServiceBinding
             nextBinding = ManagedServiceBinding(nextIntent) { message ->
@@ -134,20 +134,20 @@ object ServiceController {
         release()
     }
 
-    private suspend fun tearDownServices() {
+    private suspend fun tearDownServices(recordUserStop: Boolean = true) {
         binding?.useService { service -> service.stop() }
             ?.onFailure { error ->
                 GlobalState.log("Unable to stop background service: $error")
             }
         clearBinding()
-        stopServices()
+        stopServices(recordUserStop)
     }
 
     // A service the system started itself — always-on VPN, or the sticky restart
     // after the process was killed — outlives every binding this process holds, so
     // unbinding alone leaves the tunnel up while the app reports it stopped.
-    private fun stopServices() {
-        VpnUserStop.record()
+    private fun stopServices(recordUserStop: Boolean = true) {
+        if (recordUserStop) VpnUserStop.record()
         listOf(VpnService::class.intent, ProxyService::class.intent).forEach { intent ->
             runCatching { GlobalState.application.stopService(intent) }
                 .onFailure { error ->

@@ -373,6 +373,23 @@ void main() {
       expect(_group(doc, 'PROXY')['proxies'], ['Chained', 'DIRECT']);
     });
 
+    test('drops a node whose hop cannot be converted', () {
+      final result = tryConvertXrayConfigValue({
+        'remarks': 'Broken',
+        'outbounds': [
+          _vless('exit', 0, sockopt: {'dialerProxy': 'missing'}),
+          _direct,
+        ],
+      });
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('de1.example')));
+      expect(result.config, isNot(contains('dialer-proxy')));
+      expect(
+        (result as LossyConversion).skipped.map((node) => node.kind),
+        contains('dialer-proxy'),
+      );
+    });
+
     test('maps a freedom fragment dialer to fragment-opts', () {
       final result = tryConvertXrayConfigValue({
         'remarks': 'Fragmented',
@@ -443,6 +460,19 @@ void main() {
         'DST-PORT,53,other',
         'MATCH,PROXY',
       ]);
+    });
+
+    test('maps a bare domain as a suffix, like domain:', () {
+      final doc = _convert(
+        withRules([
+          {
+            'type': 'field',
+            'domain': ['bank.example'],
+            'outboundTag': 'proxy',
+          },
+        ]),
+      );
+      expect(doc['rules'], ['DOMAIN-SUFFIX,bank.example,PROXY', 'MATCH,PROXY']);
     });
 
     test('keeps IP rules resolvable for non-AsIs domain strategies', () {

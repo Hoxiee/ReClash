@@ -519,6 +519,19 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
           ),
         );
       }
+      // The disconnect can arrive while the lease/managed launch is still
+      // settling; publishing Running would hide it from the reconciler.
+      if (_transport.state != DesktopTransportState.connected) {
+        await releaseLease();
+        throw _failure(
+          code: 'connection_lost',
+          phase: DesktopCorePhase.starting,
+          revision: revision,
+          lease: acquiredLease,
+          connectionGeneration: connected.generation,
+          cause: StateError('Core disconnected before the session was adopted'),
+        );
+      }
       final session = DesktopCoreSession(
         sessionId: sessionId,
         lease: acquiredLease,

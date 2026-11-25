@@ -24,6 +24,12 @@ class CommonAction extends _$CommonAction {
   }
 
   Future<void> setRunning(bool running) async {
+    // A paused run is still a native run: an explicit start has to clear the
+    // pause first, or the platform considers the run already up.
+    if (running && ref.read(isStartProvider) && ref.read(suspendProvider)) {
+      await ref.read(onDemandOverrideProvider.notifier).setPaused(false);
+      if (!ref.mounted) return;
+    }
     _pendingToggleRunning = running;
     final requestRevision = ++_toggleRequestRevision;
     if (!running &&

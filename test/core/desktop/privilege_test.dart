@@ -338,7 +338,13 @@ void main() {
       isPrivilegedLaunchFailure(
         failed(const DesktopPrivilegeException('linux_cancelled')),
       ),
-      isTrue,
+      isFalse,
+    );
+    expect(
+      isPrivilegedLaunchFailure(
+        failed(const DesktopPrivilegeException('windows_cancelled')),
+      ),
+      isFalse,
     );
     expect(
       isPrivilegedLaunchFailure(

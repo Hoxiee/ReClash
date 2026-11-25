@@ -114,6 +114,16 @@ class Bootstrap {
     globalState.packageInfo = await PackageInfo.fromPlatform();
     final installed = await preferences.getConfigMap() != null;
     var config = await migration.run();
+    if (system.isDesktop &&
+        Platform.environment['FLCLASH_ACCEPT_DISCLAIMER'] == '1' &&
+        config.appSettingProps.acceptedDisclaimerVersion < disclaimerVersion) {
+      config = config.copyWith(
+        appSettingProps: config.appSettingProps.copyWith(
+          acceptedDisclaimerVersion: disclaimerVersion,
+        ),
+      );
+      await preferences.saveConfig(config);
+    }
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,
     );
@@ -179,6 +189,7 @@ class Bootstrap {
       return;
     }
     if (_container.read(setupSessionProvider).active) {
+      unawaited(_container.read(systemActionProvider.notifier).updateTray());
       unawaited(window?.show());
       await bootGuard.markRunning();
       await _handleFailedPreference();
@@ -197,6 +208,21 @@ class Bootstrap {
     await bootGuard.markRunning();
     unawaited(_container.read(systemActionProvider.notifier).updateTray());
     await _syncAutoLaunch();
+    // Auto-run applies to the next launch; only Connect now starts a tunnel.
+    if (_container.read(profilesProvider).isNotEmpty &&
+        _container.read(coreStatusProvider) != CoreStatus.connecting) {
+      final coreAction = _container.read(coreActionProvider.notifier);
+      if (!await coreAction.startCore() && system.isAndroid) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        await coreAction.startCore();
+      }
+      if (!_bootDecision.isDegraded) {
+        await _container
+            .read(setupActionProvider.notifier)
+            .initStatus(autoRun: false);
+      }
+      _container.read(initProvider.notifier).value = true;
+    }
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
     );

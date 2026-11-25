@@ -9,6 +9,7 @@ import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart' show Locale;
@@ -29,6 +30,21 @@ Profile _profile(int id, String label) => Profile(
   autoUpdateDuration: Duration.zero,
   extendType: ExtendType.standard,
 );
+
+class _RecordingSetupAction extends SetupAction {
+  int applies = 0;
+
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool suppressErrors = false,
+    bool force = false,
+    Future<void> Function()? preloadInvoke,
+  }) async {
+    applies++;
+    return true;
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -334,6 +350,29 @@ void main() {
       final stored = await testDatabase.profilesDao.query().get();
       expect(stored.map((item) => item.label), ['From backup']);
     });
+
+    test(
+      're-applies the restored profiles while the core is connected',
+      () async {
+        final setupAction = _RecordingSetupAction();
+        final container = ProviderContainer(
+          overrides: [
+            setupActionProvider.overrideWith(() => setupAction),
+            coreStatusProvider.overrideWithBuild(
+              (_, _) => CoreStatus.connected,
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await actionOf(container).applyRestore(
+          MigrationData(profiles: [_profile(1, 'From backup')]),
+          RestoreOption.onlyProfiles,
+        );
+
+        expect(setupAction.applies, 1);
+      },
+    );
 
     test('an override restore drops profiles the backup omits', () async {
       final container = buildContainer();

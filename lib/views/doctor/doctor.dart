@@ -227,7 +227,8 @@ class _PathRow extends StatelessWidget {
       leading: GlyphIcon(
         switch (path) {
           PathResult(passed: true) => AppGlyphs.checkCircle,
-          PathResult(complete: true) when failed != null => AppGlyphs.error,
+          PathResult(complete: true) when failed?.cause != null =>
+            AppGlyphs.error,
           _ => AppGlyphs.status,
         },
         color: switch (path) {
@@ -244,6 +245,8 @@ class _PathRow extends StatelessWidget {
         ),
         PathResult(cancelled: true) => l.doctorPathCancelled,
         PathResult(complete: false) => l.doctorPathChecking,
+        PathResult(complete: true) when failed?.cause == null =>
+          l.doctorPathIdle,
         _ => l.doctorPathFailedAt(failed?.step.label(l) ?? ''),
       }),
       subtitle: path != null && path.complete && failed != null

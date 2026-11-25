@@ -74,9 +74,17 @@ class SystemAction extends _$SystemAction {
 
   Future<void> resetAllDataAndExit() async {
     if (!_resetPrepared) {
-      final stopped = await _core.stop();
-      if (stopped.outcome == CoreLifecycleOutcome.superseded) {
-        throw StateError('Core stop was superseded');
+      if (system.isAndroid) {
+        // CoreLib.stop() only detaches this engine; the VPN keeps the files.
+        await ref
+            .read(setupActionProvider.notifier)
+            .setRunning(false, silence: true);
+        await _waitForAndroidServiceStop();
+      } else {
+        final stopped = await _core.stop();
+        if (stopped.outcome == CoreLifecycleOutcome.superseded) {
+          throw StateError('Core stop was superseded');
+        }
       }
       await cleanupExitResources(false);
       await closeCore();
@@ -85,6 +93,18 @@ class SystemAction extends _$SystemAction {
     await disableAutoLaunch();
     await deleteAllData();
     await handleExit(false);
+  }
+
+  @protected
+  Future<void> _waitForAndroidServiceStop() async {
+    final handle = service;
+    if (handle == null) return;
+    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    while (DateTime.now().isBefore(deadline)) {
+      if (await handle.getRunTime() == null) return;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    throw StateError('Android VPN service did not stop');
   }
 
   @protected

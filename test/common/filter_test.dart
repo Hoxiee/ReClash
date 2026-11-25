@@ -121,6 +121,21 @@ void main() {
       expect(state.list[0].logLevel, LogLevel.error);
     });
 
+    test('two level keywords match either level', () {
+      final state = LogsState(
+        logs: [
+          log(LogLevel.info, 'info msg'),
+          log(LogLevel.warning, 'warning msg'),
+          log(LogLevel.error, 'error msg'),
+        ],
+        keywords: ['warning', 'error'],
+      );
+      expect(state.list.map((item) => item.logLevel), [
+        LogLevel.warning,
+        LogLevel.error,
+      ]);
+    });
+
     test('filters by query matching payload', () {
       final state = LogsState(
         logs: [

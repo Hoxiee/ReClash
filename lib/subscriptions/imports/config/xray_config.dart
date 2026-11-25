@@ -75,6 +75,7 @@ class _Draft {
   final String dialerTag;
   String? key;
   String? hopKey;
+  bool chainLost = false;
 }
 
 class _Balancer {
@@ -286,6 +287,18 @@ class _XrayConversion {
       _keyOf(plan, draft, {});
     }
     for (final draft in plan.drafts) {
+      if (draft.chainLost) {
+        _skip(
+          SkippedNode(
+            name: draft.generic || draft.tag.isEmpty
+                ? draft.proxy['server']?.toString() ?? ''
+                : draft.tag,
+            kind: 'dialer-proxy',
+            reason: SkippedNodeReason.protocol,
+          ),
+        );
+        continue;
+      }
       final node = _nodes.putIfAbsent(
         draft.key!,
         () => _Node(draft.proxy, draft.hopKey),
@@ -301,7 +314,7 @@ class _XrayConversion {
     _chooseMain(plan);
     final main = plan.mainDraft;
     if (main != null && plan.remarks.isNotEmpty) {
-      _nodes[main.key]!.candidates.add((
+      _nodes[main.key]?.candidates.add((
         name: plan.remarks,
         rank: _remarksRank,
       ));
@@ -377,13 +390,23 @@ class _XrayConversion {
     var key = _fingerprint(draft.proxy);
     final hop = plan.draftsByTag[draft.dialerTag];
     if (hop != null) {
-      if (!identical(hop, draft) && chain.add(draft)) {
+      if (identical(hop, draft) || !chain.add(draft)) {
+        draft.chainLost = true;
+      } else {
         draft.hopKey = _keyOf(plan, hop, chain);
         chain.remove(draft);
+        if (hop.chainLost) draft.chainLost = true;
         key = '$key>${draft.hopKey}';
       }
-    } else if (plan.services[draft.dialerTag] == 'DIRECT') {
-      _otherLosses = true;
+    } else if (draft.dialerTag.isNotEmpty) {
+      if (plan.services[draft.dialerTag] == 'DIRECT') {
+        _otherLosses = true;
+      } else {
+        // An unresolvable hop must not leave the node dialing from the
+        // user's own address; the node is skipped below and reported.
+        draft.chainLost = true;
+        _securityLosses = true;
+      }
     }
     return draft.key = key;
   }
@@ -409,7 +432,11 @@ class _XrayConversion {
       final members = <String>[];
       for (final prefix in ranked.prefixes) {
         for (final draft in plan.drafts) {
-          if (draft.tag.isEmpty || !draft.tag.startsWith(prefix)) continue;
+          if (draft.chainLost ||
+              draft.tag.isEmpty ||
+              !draft.tag.startsWith(prefix)) {
+            continue;
+          }
           if (!members.contains(draft.key)) members.add(draft.key!);
         }
       }
@@ -417,7 +444,9 @@ class _XrayConversion {
       final fallback = const {'direct', 'block'}.contains(fallbackTag)
           ? null
           : plan.draftsByTag[fallbackTag];
-      if (fallback != null && !members.contains(fallback.key)) {
+      if (fallback != null &&
+          !fallback.chainLost &&
+          !members.contains(fallback.key)) {
         members.add(fallback.key!);
       }
       if (members.isEmpty) continue;
@@ -448,11 +477,19 @@ class _XrayConversion {
       }
       break;
     }
-    if (plan.mainBalancer != null || plan.mainDraft != null) return;
-    plan.mainDraft = plan.firstDraft;
-    if (plan.mainDraft != null) return;
-    plan.mainBalancer = plan.balancers.firstOrNull;
-    if (plan.mainBalancer == null) plan.mainDraft = plan.drafts.firstOrNull;
+    if (plan.mainDraft?.chainLost ?? false) plan.mainDraft = null;
+    if (plan.mainBalancer == null && plan.mainDraft == null) {
+      plan.mainDraft = plan.firstDraft;
+      if (plan.mainDraft?.chainLost ?? false) plan.mainDraft = null;
+    }
+    if (plan.mainBalancer == null && plan.mainDraft == null) {
+      plan.mainBalancer = plan.balancers.firstOrNull;
+    }
+    if (plan.mainBalancer == null && plan.mainDraft == null) {
+      plan.mainDraft = plan.drafts
+          .where((draft) => !draft.chainLost)
+          .firstOrNull;
+    }
   }
 
   Map<String, Object?> _group(_Plan plan, _Balancer balancer, String name) {
@@ -462,7 +499,7 @@ class _XrayConversion {
     final group = <String, Object?>{
       'name': name,
       'type': 'url-test',
-      'proxies': [for (final key in balancer.memberKeys) _names[key]],
+      'proxies': [for (final key in balancer.memberKeys) ?_names[key]],
       ..._healthCheck(plan.source),
     };
     if (balancer.tiered) {
@@ -662,7 +699,7 @@ _Predicate? _domainPredicate(String value) {
       'DOMAIN-KEYWORD,${value.substring(8)}',
     _ when value.startsWith('regexp:') => 'DOMAIN-REGEX,${value.substring(7)}',
     _ when value.contains(':') => null,
-    _ => 'DOMAIN-KEYWORD,$value',
+    _ => 'DOMAIN-SUFFIX,$value',
   };
   return text == null || text.endsWith(',') ? null : _Predicate(text);
 }

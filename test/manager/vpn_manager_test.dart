@@ -8,6 +8,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/on_demand.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
@@ -144,6 +145,30 @@ void main() {
 
     setupSession.state = setupSession.state.copyWith(active: false);
     updateVpn((state) => state.copyWith(allowBypass: !state.allowBypass));
+    await settle(tester);
+    expect(tip(), findsOneWidget);
+    await drainTimers(tester);
+  });
+
+  testWidgets('a change made while the tunnel is paused waits for resume', (
+    tester,
+  ) async {
+    await pumpVpnManager(tester);
+    startService();
+    container.read(onDemandOverrideProvider.notifier).state = (
+      paused: true,
+      anchor: const <String>[],
+    );
+    await settle(tester);
+
+    updateVpn((state) => state.copyWith(ipv6: !state.ipv6));
+    await settle(tester);
+    expect(tip(), findsNothing);
+
+    container.read(onDemandOverrideProvider.notifier).state = (
+      paused: false,
+      anchor: const <String>[],
+    );
     await settle(tester);
     expect(tip(), findsOneWidget);
     await drainTimers(tester);
