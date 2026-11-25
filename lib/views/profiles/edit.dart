@@ -21,6 +21,7 @@ import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/metrics.dart' show ListInsets;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum _ProfileField { label, url, autoUpdateInterval, client }
@@ -809,7 +810,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             ),
             body: Builder(
               builder: (context) => ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                padding: ListInsets.of(context).page().copyWith(
                   top: context.sectionsTopPadding,
                   bottom: context.bottomInset + 16,
                 ),

@@ -4,13 +4,15 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/proxies/card.dart';
+import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/proxies.dart';
-import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/widgets.dart' hide ListHeader;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/common_button.dart' as prism;
 
+import '../helpers/context_menu.dart';
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -137,9 +139,10 @@ void main() {
 
         Future<Finder> routingAction() async {
           if (type == ProxiesType.list) {
-            return find.byTooltip('Behaviour');
+            await rightClick(tester, find.byType(ListHeader).first);
+          } else {
+            await tester.tap(_inBar(find.byTooltip('More')));
           }
-          await tester.tap(_inBar(find.byTooltip('More')));
           await tester.pumpAndSettle();
           return find.descendant(
             of: find.byType(CommonPopupMenu),
@@ -148,8 +151,8 @@ void main() {
         }
 
         Future<void> closeMenu() async {
-          if (type == ProxiesType.list) return;
           final menu = find.byType(CommonPopupMenu);
+          if (menu.evaluate().isEmpty) return;
           Navigator.of(tester.element(menu)).pop();
           await tester.pumpAndSettle();
         }

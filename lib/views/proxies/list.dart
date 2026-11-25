@@ -12,6 +12,7 @@ import 'package:reclash/views/chains/marks.dart';
 import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/collapsible_section.dart' show UnfoldMotion;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -649,6 +650,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
             key: ValueKey(groupName),
             isExpand: isExpand,
             unfolded: unfolded,
+            unfold: _controller,
             group: widget.group,
             onChange: widget.onChange,
           ),
@@ -799,6 +801,9 @@ class ListHeader extends ConsumerWidget {
   /// The shadow that lifts the header off the rows under it.
   final double lift;
 
+  /// Drives the group's rows unfolding, and the turn of the expand chevron.
+  final Animation<double> unfold;
+
   const ListHeader({
     super.key,
     this.enterAnimated = true,
@@ -809,6 +814,7 @@ class ListHeader extends ConsumerWidget {
     required this.onScrollToSelected,
     required this.isExpand,
     required this.unfolded,
+    required this.unfold,
   });
 
   @override
@@ -827,69 +833,75 @@ class ListHeader extends ConsumerWidget {
     );
     final behaviour = watchGroupBehaviour(ref, group);
     final showRouting = behaviour || scripted;
+    final onRouting = showRouting
+        ? () => unawaited(
+            behaviour
+                ? showGroupBehaviour(context, groupName)
+                : showRoutingSheet(context, groupName),
+          )
+        : null;
     final colorScheme = context.colorScheme;
     final level = floating > 0
         ? SurfaceLevel.floatingOf(colorScheme)
         : context.raisedSurfaceLevel;
     final radius = AppCorner.xl.ap(context);
-    final card = CommonCard(
+    Widget card = CommonCard(
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
-      shape: AppShape.vertical(
-        top: radius - _headerButtonInset,
-        bottom: unfolded
-            ? max(radius * floating - _headerButtonInset, 0)
-            : radius - _headerButtonInset,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(_headerInset - _headerButtonInset),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Row(
-                children: [
-                  _GroupIcon(src: group.icon, name: groupName),
-                  Flexible(child: _GroupSummary(groupName: groupName)),
-                ],
-              ),
+      radius: radius - _headerButtonInset,
+      fill: const Color(0x00000000),
+      padding: const EdgeInsets.all(_headerInset - _headerButtonInset),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Row(
+              children: [
+                _GroupIcon(src: group.icon, name: groupName),
+                Flexible(child: _GroupSummary(groupName: groupName)),
+              ],
             ),
-            _GroupActions(
-              isExpand: isExpand,
-              routingTooltip: behaviour
-                  ? context.appLocalizations.rcxBehaviour
-                  : null,
-              isDelayTesting: isDelayTesting,
-              groupType: profile == null
-                  ? group.type.name
-                  : rcxProfileTitle(context, ref, profile),
-              onRouting: showRouting
-                  ? () => unawaited(
-                      behaviour
-                          ? showGroupBehaviour(context, groupName)
-                          : showRoutingSheet(context, groupName),
-                    )
-                  : null,
-              onScrollToSelected: () {
-                onScrollToSelected(groupName);
-              },
-              onDelayTest: () {
-                ref
-                    .read(proxiesActionProvider.notifier)
-                    .delayTestPageGroup(groupName);
-              },
-              onToggle: () {
-                onChange(groupName);
-              },
-            ),
-          ],
-        ),
+          ),
+          _GroupActions(
+            isExpand: isExpand,
+            unfold: unfold,
+            isDelayTesting: isDelayTesting,
+            groupType: profile == null
+                ? group.type.name
+                : rcxProfileTitle(context, ref, profile),
+            onScrollToSelected: () {
+              onScrollToSelected(groupName);
+            },
+            onDelayTest: () {
+              ref
+                  .read(proxiesActionProvider.notifier)
+                  .delayTestPageGroup(groupName);
+            },
+            onToggle: () {
+              onChange(groupName);
+            },
+          ),
+        ],
       ),
       onPressed: () {
         onChange(groupName);
       },
     );
+    if (onRouting != null) {
+      card = ContextMenuRegion(
+        menuItems: [
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.shuffle,
+            label: behaviour
+                ? context.appLocalizations.rcxBehaviour
+                : context.appLocalizations.rcxTitle,
+            onPressed: onRouting,
+          ),
+        ],
+        child: card,
+      );
+    }
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: level.colorOf(colorScheme),
@@ -1056,23 +1068,21 @@ class _SelectedProxyName extends ConsumerWidget {
 class _GroupActions extends StatelessWidget {
   const _GroupActions({
     required this.isExpand,
+    required this.unfold,
     required this.isDelayTesting,
     required this.groupType,
     required this.onScrollToSelected,
     required this.onDelayTest,
     required this.onToggle,
-    this.onRouting,
-    this.routingTooltip,
   });
 
   final bool isExpand;
+  final Animation<double> unfold;
   final bool isDelayTesting;
   final String groupType;
   final VoidCallback onScrollToSelected;
   final VoidCallback onDelayTest;
   final VoidCallback onToggle;
-  final VoidCallback? onRouting;
-  final String? routingTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -1097,13 +1107,6 @@ class _GroupActions extends StatelessWidget {
                       ? CommonCircleLoading(size: TonalButtonSize.compact.icon)
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
-                if (onRouting != null)
-                  IconButton(
-                    tooltip:
-                        routingTooltip ?? context.appLocalizations.rcxTitle,
-                    onPressed: onRouting,
-                    icon: const GlyphIcon(AppGlyphs.shuffle),
-                  ),
               ],
             )
           else
@@ -1120,7 +1123,10 @@ class _GroupActions extends StatelessWidget {
                   ? context.appLocalizations.showLess
                   : context.appLocalizations.showMore,
               onPressed: onToggle,
-              icon: CommonExpandIcon(expand: isExpand),
+              icon: RotationTransition(
+                turns: unfold.drive(UnfoldMotion.chevronTurns),
+                child: const GlyphIcon(AppGlyphs.caretDown, fill: 1),
+              ),
             ),
           ),
         ],
