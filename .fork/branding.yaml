@@ -21,6 +21,10 @@ rules:
     replace:
       'name: fl_clash': 'name: reclash'
       core/Clash.Meta: core/mihomo
+  - paths: ['.gitmodules']
+    replace:
+      "url = git@github.com:chen08209/prism_ui.git\n\tbranch = main": "url = https://github.com/Hoxiee/prism_ui.git\n\tbranch = dev"
+      'git@github.com:chen08209/prism_ui.git': 'https://github.com/Hoxiee/prism_ui.git'
   - paths: ['core/**', Makefile, '.gitmodules', '.github/**', '.agents/**', 'android/**', 'plugins/**']
     replace:
       core/Clash.Meta: core/mihomo
