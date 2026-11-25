@@ -1,9 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:prism_ui/page_background.dart';
 import 'package:reclash/features/seasonal/layer.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/wallpaper.dart';
-import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/widgets/wallpaper_backdrop.dart';
 
 export 'package:reclash/widgets/wallpaper_backdrop.dart';
