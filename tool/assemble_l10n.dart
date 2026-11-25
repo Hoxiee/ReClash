@@ -121,8 +121,12 @@ class LocalizationAssembler {
 
       for (final entry in removals.entries) {
         if (!messages.containsKey(entry.key)) {
+          final missingBase = source == null
+              ? ' (no base ARB; fragments only)'
+              : '';
           throw FormatException(
-            '${entry.value} removes unknown key ${entry.key} for $locale',
+            '${entry.value} removes unknown key ${entry.key} '
+            'for $locale$missingBase',
           );
         }
         messages.remove(entry.key);

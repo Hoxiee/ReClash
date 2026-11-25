@@ -684,4 +684,55 @@ void main() {
       f.service.normalizer.fingerprint,
     );
   });
+  test('fresh assembly starts at the prepared base and keeps owned files', () {
+    f.bootstrap();
+    final next = f.rewritten(
+      code: "import 'package:fl_clash/a.dart';\nconst upstream = 9;\n",
+    );
+    final result = f.service.prepare('fresh', source: next, fresh: true);
+    expect(result['status'], 'fresh-candidate');
+    final receipt = f.service.receipt('fresh');
+    expect(receipt['fresh'], isTrue);
+    final candidate = f.candidate('fresh');
+    expect(candidate.rebaseInProgress, isFalse);
+    expect(candidate.oid('HEAD'), receipt['preparedBase']);
+    expect(candidate.dirty, isNotEmpty);
+    expect(
+      File(p.join(candidate.root, '.fork', 'config.yaml')).existsSync(),
+      isTrue,
+    );
+    f.finish('fresh');
+    expect(candidate.read('HEAD', 'CHANGELOG.md'), '# ReClash\n');
+    expect(candidate.read('HEAD', 'pubspec.yaml'), contains('version: 2.0.0'));
+    expect(
+      candidate.run([
+        'rev-list',
+        '--merges',
+        '${receipt['preparedBase']}..HEAD',
+      ]).trim(),
+      isEmpty,
+    );
+    f.service.verify('fresh', reviews: ['unclassified']);
+  });
+  test('fresh assembly rejects bootstrap and predecessor combinations', () {
+    expect(
+      () => f.service.prepare(
+        'fresh-bootstrap',
+        source: f.raw,
+        bootstrap: true,
+        audit: digest(f.service.inspect(f.raw)),
+        fresh: true,
+      ),
+      throwsA(isA<ForkException>()),
+    );
+    expect(
+      () => f.service.prepare(
+        'fresh-after',
+        source: f.raw,
+        after: 'x',
+        fresh: true,
+      ),
+      throwsA(isA<ForkException>()),
+    );
+  });
 }

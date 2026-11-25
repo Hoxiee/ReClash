@@ -48,8 +48,10 @@ missing, unresolved or stale outcomes block acceptance. Full card schema and evi
 2. Inspect `--json report` and contract dependencies; separate identity/storage/privacy/lifecycle/Core/policy decisions
    for authorized review. Preserve downstream release metadata and engine-source ownership.
 3. Prepare once with a unique descriptive ID, for example `flclash-v0.9.2-20261024`, and the completed product-review file
-   for an ordinary release. Resolve replay according to the recorded decisions in the assigned candidate; do not change
-   accepted development/vendor/product-base refs. Do not reuse observation IDs.
+   for an ordinary release. Replay history when the product commits still describe the target; use `--fresh` when the
+   release is reassembled at the prepared base, keeping the previous line on a backup branch. Resolve the candidate
+   according to the recorded decisions; do not change accepted development/vendor/product-base refs. Do not reuse
+   observation IDs.
 4. If normalization changed, prepare a standalone recipe migration on the accepted raw source with its reviewed audit.
    Finish that candidate first. Review the release with `review --source <raw> --after <recipe>`, then prepare the child with
    `sync prepare --id <child> --after <recipe> --product-review <plan.json>`.

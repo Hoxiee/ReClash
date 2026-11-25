@@ -89,6 +89,22 @@ void main() {
     });
   });
 
+  test('names a locale with no base when a fragment removes a key', () {
+    writeUpstream('intl_en.arb', '{"hello":"Hello"}');
+    writeArb('fragments/identity.branding/intl_zh_CN.arb', '{"removed":null}');
+
+    expect(
+      () => assembler.assemble(),
+      throwsA(
+        isA<FormatException>().having(
+          (e) => e.message,
+          'message',
+          allOf(contains('zh_CN'), contains('no base ARB')),
+        ),
+      ),
+    );
+  });
+
   test('rejects a key owned by more than one feature', () {
     writeUpstream('intl_en.arb', '{"hello":"Hello"}');
     writeArb('fragments/feature-a/intl_en.arb', '{"one":"One"}');

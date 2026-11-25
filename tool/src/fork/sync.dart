@@ -246,8 +246,15 @@ class VendorSync {
     bool recipeMigration = false,
     String? after,
     String? productReview,
+    bool fresh = false,
   }) {
     identifier(id);
+    if (fresh &&
+        (bootstrap || recipeMigration || audit != null || after != null)) {
+      reject(
+        '--fresh cannot be combined with bootstrap, recipe migration, audit or a predecessor',
+      );
+    }
     if (after != null && (bootstrap || recipeMigration || audit != null)) {
       reject(
         '--after cannot be combined with bootstrap, recipe migration or audit',
@@ -460,6 +467,7 @@ class VendorSync {
           .where((commit) => commit.isNotEmpty)
           .toList(),
       'bootstrap': bootstrap,
+      'fresh': fresh,
       'recipeMigration': recipeMigration,
       'productReview': ?productPlan,
       if (productPlan != null)
@@ -481,7 +489,15 @@ class VendorSync {
       git.createRef(chainObservationRef(id), replayTip);
     }
     save(id, r);
-    git.run(['worktree', 'add', '-b', 'sync/$id', '--', checkout, replayTip]);
+    git.run([
+      'worktree',
+      'add',
+      '-b',
+      'sync/$id',
+      '--',
+      checkout,
+      fresh ? preparedBase : replayTip,
+    ]);
     git.run([
       'worktree',
       'lock',
@@ -490,25 +506,45 @@ class VendorSync {
       checkout,
     ]);
     final target = ForkGit(checkout);
-    final rebased = target.result(['rebase', '--onto', preparedBase, base]);
-    r['rebaseExit'] = rebased.exitCode;
-    r['rebaseLog'] = '${rebased.stdout}\n${rebased.stderr}';
-    save(id, r);
-    if (rebased.exitCode != 0 && target.run(['ls-files', '-u']).isEmpty) {
-      reject(
-        'Rebase failed without index conflicts; inspect candidate: $checkout',
-      );
-    }
-    if (rebased.exitCode == 0) {
-      if (bootstrap && target.tree('HEAD') != git.tree(dev)) {
-        reject('Bootstrap replay changed the downstream tree');
+    if (fresh) {
+      if (git
+          .entries(dev)
+          .any((e) => e.path == '.fork' || e.path.startsWith('.fork/'))) {
+        target.run([
+          'restore',
+          '--source=$dev',
+          '--staged',
+          '--worktree',
+          '--',
+          '.fork',
+        ]);
       }
-      preserveOwned(target, replayTip);
+      preserveOwned(target, dev);
+    } else {
+      final rebased = target.result(['rebase', '--onto', preparedBase, base]);
+      r['rebaseExit'] = rebased.exitCode;
+      r['rebaseLog'] = '${rebased.stdout}\n${rebased.stderr}';
+      save(id, r);
+      if (rebased.exitCode != 0 && target.run(['ls-files', '-u']).isEmpty) {
+        reject(
+          'Rebase failed without index conflicts; inspect candidate: $checkout',
+        );
+      }
+      if (rebased.exitCode == 0) {
+        if (bootstrap && target.tree('HEAD') != git.tree(dev)) {
+          reject('Bootstrap replay changed the downstream tree');
+        }
+        preserveOwned(target, replayTip);
+      }
     }
     bundle(id, r);
     return {
       'id': id,
-      'status': bootstrap ? 'bootstrap-candidate' : 'rebase-candidate',
+      'status': bootstrap
+          ? 'bootstrap-candidate'
+          : fresh
+          ? 'fresh-candidate'
+          : 'rebase-candidate',
       'worktree': checkout,
       'productBase': preparedBase,
       'impact': r['impact'],

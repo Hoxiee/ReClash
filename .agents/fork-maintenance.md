@@ -248,6 +248,20 @@ inventory and resulting tree. Resolve rebase conflicts in the locked candidate, 
 ownership or policy adaptations before verification. Changes use endpoint trees and typed path reports; rename recognition
 is deliberately disabled, so both sides appear as delete/add. Run focused tests per compilable cluster, then finish the
 candidate only within granted authority. Deferred tests must run after assembly.
+
+### Fresh Assembly
+
+When the product layer is reassembled rather than replayed, add `--fresh` to preparation. The candidate starts at the
+prepared product base instead of the old development tip, the `.fork` policy directory, owned files and the
+`pubspec.yaml` version field are restored from the old line, and no rebase runs. Keep the previous line on a backup
+branch; the old `dev` commit still supplies ownership and policy checks. Verification is unchanged: a clean linear chain
+from the prepared base, the product review, and the checks the affected contracts name. `--fresh` cannot combine with
+bootstrap, a recipe migration, an audit or a predecessor.
+
+```bash
+dart run tool/fork.dart sync prepare --id <unique-id> --fresh --product-review <plan.json>
+```
+
 Global Git settings are not modified; per-command rerere autoupdate is disabled. Unknown executable merge/filter drivers
 block checkout; standard git-lfs filters are allowed with smudge downloads disabled.
 
@@ -354,6 +368,9 @@ carried behavior in `core/mihomo-patches`; an upstream bump updates `base.env`, 
 submodule gitlink. After any engine change, check that `base.env` matches the `core/mihomo` commit, that the
 profile applies to a clean checkout, and that both the desktop and Android Cores compile. Core-source review is
 separate from FlClash replay: a clean vendor merge never authorizes replacing the engine profile.
+
+Run maintenance commands in a candidate whose Core does not compile yet with `RECLASH_SKIP_BUILD=1`; the setup and
+rust_api hooks then skip their native builds. Every build or test that claims evidence must run without it.
 
 ## Operator Quick Start
 

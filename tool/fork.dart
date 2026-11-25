@@ -49,6 +49,7 @@ void main(List<String> arguments) {
     ..addOption('id', mandatory: true)
     ..addOption('source')
     ..addFlag('recipe-migration', negatable: false)
+    ..addFlag('fresh', negatable: false)
     ..addOption('audit')
     ..addOption('after')
     ..addOption('product-review');
@@ -233,6 +234,7 @@ void main(List<String> arguments) {
             audit: action.option('audit'),
             after: action.option('after'),
             productReview: action.option('product-review'),
+            fresh: action.flag('fresh'),
           ),
           'status' => MaintenanceReport(registry).status(id),
           'verify' => service.verify(

@@ -245,6 +245,34 @@ void main() {
       expect(log, contains('skipped: user-define build_assets=false'));
     });
 
+    test('skips the build when the tooling environment asks for it', () async {
+      var built = false;
+      final builder = CoreBuilder(
+        build: (_) async {
+          built = true;
+          throw StateError('unreachable');
+        },
+        environment: const {'RECLASH_SKIP_BUILD': '1'},
+      );
+      final output = BuildOutputBuilder();
+
+      await builder.run(
+        input: buildInput(
+          os: OS.linux,
+          architecture: Architecture.x64,
+          userDefines: {'build_assets': true},
+        ),
+        output: output,
+      );
+
+      expect(built, isFalse);
+      expect(BuildOutput(output.json).dependencies, isEmpty);
+      final log = File(
+        p.join(repository.path, '.dart_tool', 'setup_build_cache', 'hook.log'),
+      ).readAsStringSync();
+      expect(log, contains('skipped: RECLASH_SKIP_BUILD=1'));
+    });
+
     test('builds when the user-define holds any other value', () {
       const builder = CoreBuilder();
 

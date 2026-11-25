@@ -15,18 +15,30 @@ typedef CoreBuildFunction = Future<BuildReport> Function(BuildRequest request);
 final _log = Logger('setup_hooks');
 
 /// CI sets `build_assets: false` for `flutter test`; no test loads the Core.
-bool buildsAssets(BuildInput input) =>
-    input.userDefines['build_assets'] != false;
-
+/// Tooling that runs before a candidate Core compiles sets
+/// `RECLASH_SKIP_BUILD=1`.
 final class CoreBuilder implements Builder {
   const CoreBuilder({
     CoreBuildFunction build = buildPlatform,
     Architecture? hostArchitecture,
+    Map<String, String>? environment,
   }) : _build = build,
-       _hostArchitecture = hostArchitecture;
+       _hostArchitecture = hostArchitecture,
+       _environment = environment;
 
   final CoreBuildFunction _build;
   final Architecture? _hostArchitecture;
+  final Map<String, String>? _environment;
+
+  String? _skipReason(BuildInput input) {
+    if (input.userDefines['build_assets'] == false) {
+      return 'user-define build_assets=false';
+    }
+    if ((_environment ?? Platform.environment)['RECLASH_SKIP_BUILD'] == '1') {
+      return 'RECLASH_SKIP_BUILD=1';
+    }
+    return null;
+  }
 
   @override
   Future<void> run({
@@ -47,11 +59,12 @@ final class CoreBuilder implements Builder {
   }) async {
     final BuildReport report;
     try {
-      if (!buildsAssets(input)) {
+      final skipReason = _skipReason(input);
+      if (skipReason != null) {
         initLogging(logFile: hookLogPath(repositoryRoot(input)));
         _log.info(
           '=== ${DateTime.now().toIso8601String()} skipped: '
-          'user-define build_assets=false pid $pid',
+          '$skipReason pid $pid',
         );
         return;
       }
