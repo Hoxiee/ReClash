@@ -256,7 +256,8 @@ prepared product base instead of the old development tip, the `.fork` policy dir
 `pubspec.yaml` version field are restored from the old line, and no rebase runs. Keep the previous line on a backup
 branch; the old `dev` commit still supplies ownership and policy checks. Verification is unchanged: a clean linear chain
 from the prepared base, the product review, and the checks the affected contracts name. `--fresh` cannot combine with
-bootstrap, a recipe migration or an audit; it can be the child of a recipe migration through `--after`.
+bootstrap, a recipe migration or an audit; it can be the child of a recipe migration through `--after`, even after
+development has moved past the predecessor's captured commit.
 
 ```bash
 dart run tool/fork.dart sync prepare --id <unique-id> --fresh --product-review <plan.json>
@@ -439,7 +440,8 @@ dart run tool/fork.dart --markdown status --id <next-id>
 
 The predecessor must be an unaccepted standalone recipe migration with matching policy, protected refs and recovery
 bundle. Its receipt digest and exact candidate are captured and checked again; a create-only predecessor ref is included
-in the child bundle. Accepted development/vendor/product-base refs are not moved. `--after` cannot combine with
+in the child bundle. A fresh child may use that predecessor after development has moved, because it starts at its own
+prepared base; a replay child still rejects a moved development branch. Accepted development/vendor/product-base refs are not moved. `--after` cannot combine with
 bootstrap, audit or recipe migration. Final chain verification validates the captured predecessor again, unions predecessor and final candidate impact, and
 requires `normalization-policy` plus all affected critical/Core review labels. It binds predecessor metadata into the
 verification receipt and checks it again after tests. Accept revalidates the exact predecessor before any development

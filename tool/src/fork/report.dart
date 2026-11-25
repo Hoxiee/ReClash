@@ -299,9 +299,15 @@ class MaintenanceReport {
     final r = sync.receipt(id);
     final blockers = <String>[];
     try {
-      sync.assertInputs(r);
+      sync.assertInputs(r, allowDevMoved: r['recipeMigration'] == true);
     } on ForkException catch (error) {
       blockers.add(error.message);
+    }
+    if (r['recipeMigration'] == true && git.oid('dev') != r['dev']) {
+      blockers.add(
+        'Development branch moved; the recipe migration is usable only as '
+        'the predecessor of a fresh child',
+      );
     }
     final targetPath = text(r['worktree'], 'worktree');
     if (!Directory(targetPath).existsSync()) {

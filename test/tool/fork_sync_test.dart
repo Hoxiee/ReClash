@@ -7,6 +7,7 @@ import '../../tool/src/changelog/git.dart';
 import '../../tool/src/changelog/parser.dart';
 import '../../tool/src/fork/git.dart';
 import '../../tool/src/fork/model.dart';
+import '../../tool/src/fork/report.dart';
 import '../../tool/src/fork/registry.dart';
 import '../../tool/src/fork/sync.dart';
 import 'fork_fixture.dart';
@@ -738,8 +739,20 @@ void main() {
       audit: digest(f.service.inspect(f.raw)),
     );
     f.finish('recipe');
+    f.write('lib/later.dart', 'const later = 1;\n');
+    f.commit('feat: later development');
+    expect(
+      (MaintenanceReport(f.registry).status('recipe')['blockers'] as List).join(
+        '\n',
+      ),
+      contains('predecessor of a fresh child'),
+    );
     final next = f.rewritten(
       code: "import 'package:fl_clash/a.dart';\nconst upstream = 11;\n",
+    );
+    expect(
+      () => f.service.prepare('child-replay', source: next, after: 'recipe'),
+      throwsA(isA<ForkException>()),
     );
     final result = f.service.prepare(
       'child',

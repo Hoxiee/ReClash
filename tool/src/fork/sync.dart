@@ -91,7 +91,9 @@ class VendorSync {
   Map<String, dynamic> reviewSource(String source, {String? after}) {
     if (!productReviews.enabled) reject('Declare .fork/product.yaml first');
     sourceIdentity();
-    final predecessor = after == null ? null : chainPredecessor(after);
+    final predecessor = after == null
+        ? null
+        : chainPredecessor(after, allowDevMoved: true);
     final vendor = git.oid(vendorRef);
     final productBase = git.oid(productBaseRef);
     assertProductBase(productBase, vendor);
@@ -259,7 +261,9 @@ class VendorSync {
         '--after cannot be combined with bootstrap, recipe migration or audit',
       );
     }
-    final predecessor = after == null ? null : chainPredecessor(after);
+    final predecessor = after == null
+        ? null
+        : chainPredecessor(after, allowDevMoved: fresh);
     final productPlan = productReview == null
         ? null
         : readProductReview(productReview);
@@ -484,7 +488,7 @@ class VendorSync {
       ),
     };
     if (predecessor != null) {
-      assertPredecessor(predecessor);
+      assertPredecessor(predecessor, allowDevMoved: fresh);
       git.createRef(chainObservationRef(id), replayTip);
     }
     save(id, r);
@@ -556,10 +560,12 @@ class VendorSync {
   void assertPredecessor(
     Map<String, dynamic> captured, {
     bool recovering = false,
+    bool allowDevMoved = false,
   }) {
     final current = chainPredecessor(
       text(captured['id'], 'predecessor id'),
       validateAccepted: !recovering,
+      allowDevMoved: allowDevMoved,
     );
     if (digest(current) != digest(captured)) {
       reject('Predecessor inputs moved after preparation');
@@ -569,6 +575,7 @@ class VendorSync {
   Map<String, dynamic> chainPredecessor(
     String id, {
     bool validateAccepted = true,
+    bool allowDevMoved = false,
   }) {
     final r = receipt(id);
     if (r['recipeMigration'] != true ||
@@ -577,7 +584,11 @@ class VendorSync {
         r.containsKey('accepted')) {
       reject('Predecessor must be a standalone unaccepted recipe migration');
     }
-    assertInputs(r, validateAccepted: validateAccepted);
+    assertInputs(
+      r,
+      validateAccepted: validateAccepted,
+      allowDevMoved: allowDevMoved,
+    );
     final target = ForkGit(text(r['worktree'], 'predecessor worktree'));
     target.assertClean();
     final operation =
@@ -1041,12 +1052,16 @@ class VendorSync {
     Map<String, dynamic> r, {
     bool recovering = false,
     bool validateAccepted = true,
+    bool allowDevMoved = false,
   }) {
     if (r['registry'] != registry.fingerprint ||
         r['normalizer'] != normalizer.fingerprint) {
       reject('Policy/normalizer changed after preparation');
     }
-    if (validateAccepted && !recovering && git.oid(devRef) != r['dev']) {
+    if (validateAccepted &&
+        !recovering &&
+        !allowDevMoved &&
+        git.oid(devRef) != r['dev']) {
       reject('Development branch moved; reconcile a new candidate');
     }
     final vendor = git.exists(vendorRef) ? git.oid(vendorRef) : null;
@@ -1083,7 +1098,11 @@ class VendorSync {
     assertProductBase(preparedBase, prepared);
     final after = r['after'] == null ? null : object(r['after'], 'after');
     if (after != null) {
-      assertPredecessor(after, recovering: recovering);
+      assertPredecessor(
+        after,
+        recovering: recovering,
+        allowDevMoved: r['fresh'] == true,
+      );
       if (git.oid(chainObservationRef(r['id'] as String)) !=
           after['candidate']) {
         reject('Protected predecessor observation changed');
