@@ -569,9 +569,13 @@ automatic retry is off because a retry after an HTTP 429 spends the same per-out
 
 ## UI Layer
 
-`lib/ui/` holds the components and design tokens that know nothing of the app: shapes, surfaces, motion, colors, the
-scaffold, sheets, popups, lists and the glyphs under `lib/ui/icons/`. `lib/widgets/` holds the components built from
-them that do: settings rows, subscription and profile pieces, anything that reads a provider or a model.
+`lib/ui/` keeps the app-specific adapters and design tokens: the scaffold, list rows, null status, glyphs, wallpaper,
+QR and code labels. The generic kit (buttons, cards, switches, chips, dialogs, sheets, navigation) comes from the
+`plugins/prism_ui` submodule, the `Hoxiee/prism_ui` fork of upstream's package. `PrismThemeBridge` in
+`lib/ui/prism_theme.dart` mirrors the resolved Material theme into prism's and installs prism's `MeasureScope`; the
+application and `TestApp` both install it. New work imports `package:prism_ui/...` directly; the `Common*` aliases in
+`lib/ui` exist only for call sites the migration has not reached yet. `lib/widgets/` holds the components built from
+them that do know the app: settings rows, subscription and profile pieces, anything that reads a provider or a model.
 `widgets/widgets.dart` re-exports `ui/ui.dart`, so app code imports either barrel.
 
 `test/lint/ui_layering_test.dart` walks the imports of every file under `lib/ui`. Nothing they reach may leave
