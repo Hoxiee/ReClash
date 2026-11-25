@@ -3,7 +3,6 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/metrics.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -66,7 +65,7 @@ void main() {
     final list = tester.getRect(find.byTooltip('Select all'));
     final context = tester.element(find.byType(ListHeader));
 
-    expect(_width - list.right, prism.listHeaderPaddingOf(context).right);
+    expect(_width - list.right, listHeaderPaddingOf(context).right);
   });
 
   testWidgets('a header spaces its actions like an app bar', (tester) async {

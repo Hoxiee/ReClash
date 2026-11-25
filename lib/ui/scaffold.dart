@@ -2266,7 +2266,7 @@ class _OverflowMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CommonPopupBox(
-      targetBuilder: (open) => IconButton(
+      targetBuilder: (open) => prism_ui.IconButton(
         tooltip: UiLocalizations.of(context).more,
         onPressed: open,
         icon: const GlyphIcon(AppGlyphs.more),

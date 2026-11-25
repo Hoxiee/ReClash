@@ -9,14 +9,13 @@ import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/models.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/list.dart' as prism;
+import 'package:prism_ui/metrics.dart' as prism_metrics;
 import 'package:prism_ui/models.dart' as prism_models;
 
 import 'open_container.dart';
 import 'popup.dart';
 import 'sheet.dart';
 import 'switch.dart';
-
-export 'package:prism_ui/list.dart' show ListFooter, ListSectionGap;
 
 part 'list_selected.dart';
 
@@ -513,6 +512,32 @@ class _OptionsValueButton extends StatelessWidget {
   }
 }
 
+class ListSectionGap extends StatelessWidget {
+  const ListSectionGap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(height: listHeaderPaddingOf(context).top);
+  }
+}
+
+/// A section's footnote, set on the leading inset of the rows above it.
+class ListFooter extends StatelessWidget {
+  final String text;
+
+  const ListFooter({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final leading = prism_metrics.ListInsets.of(context).leading;
+    return Container(
+      alignment: AlignmentDirectional.centerStart,
+      padding: listFooterPaddingOf(context, leading: leading),
+      child: Text(text, style: context.listCaptionStyle),
+    );
+  }
+}
+
 /// A section's title, as tall as its action buttons with or without them.
 class ListHeader extends StatelessWidget {
   final String title;
@@ -548,7 +573,7 @@ class ListHeader extends StatelessWidget {
     return prism.ListHeader(
       title: title,
       caption: caption,
-      padding: padding,
+      padding: padding ?? listHeaderPaddingOf(context),
       trailing: trailing,
       atTop: atTop,
       actions: [for (final data in actions) _action(data)],
@@ -565,7 +590,6 @@ Widget generateSection({
   List<IconButtonData> actions = const [],
   String? footer,
   bool atTop = false,
-  bool last = false,
 }) {
   return Column(
     children: [
@@ -573,10 +597,9 @@ Widget generateSection({
         if (title != null)
           ListHeader(title: title, actions: actions, atTop: atTop)
         else if (!atTop)
-          const prism.ListSectionGap(),
+          const ListSectionGap(),
       generateGroup(items),
-      if (items.isNotEmpty && footer != null)
-        prism.ListFooter(text: footer, last: last),
+      if (items.isNotEmpty && footer != null) ListFooter(text: footer),
     ],
   );
 }

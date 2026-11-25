@@ -544,6 +544,20 @@ class _Battery extends BatteryOptimizationIgnored {
   Stream<bool?> build() => Stream.value(true);
 }
 
+/// The routing engine holding the main group on a manual pick, so its header
+/// carries the routing action beside locate and delay as a live Core does.
+class _MockRcxStatus extends RcxStatusState {
+  @override
+  RcxStatus build() => RcxStatus(
+    groups: [
+      RcxGroupStatus(
+        name: _mainGroup,
+        control: const RcxControl(mode: 'manual'),
+      ),
+    ],
+  );
+}
+
 /// What a subscription's provider config leaves in the app settings, applied
 /// by the same code that applies a real one.
 Config _config(DashboardStyle dashboard, ProviderHints? hints) {
@@ -563,7 +577,10 @@ Config _config(DashboardStyle dashboard, ProviderHints? hints) {
         );
 }
 
-List<Override> overrides({DashboardStyle dashboard = DashboardStyle.detailed}) {
+List<Override> overrides({
+  DashboardStyle dashboard = DashboardStyle.detailed,
+  bool routing = false,
+}) {
   final hints = switch (_brand) {
     'ember' => _emberHints(),
     'halo' => _haloHints(),
@@ -573,6 +590,7 @@ List<Override> overrides({DashboardStyle dashboard = DashboardStyle.detailed}) {
   return [
     initProvider.overrideWithBuild((_, _) => true),
     ...buildConfigOverrides(config),
+    if (routing) rcxStatusStateProvider.overrideWith(_MockRcxStatus.new),
     if (hints != null) ...[
       providerHintsProvider.overrideWithValue(hints),
       effectiveWallpaperImageProvider.overrideWithValue(

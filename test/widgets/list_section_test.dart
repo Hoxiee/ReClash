@@ -1,7 +1,6 @@
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/metrics.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -35,7 +34,7 @@ void main() {
     );
 
     final context = tester.element(find.byType(ListView));
-    final gap = prism.listHeaderPaddingOf(context).top;
+    final gap = listHeaderPaddingOf(context).top;
     expect(rowRect(tester, 'first').top, gap);
     expect(
       rowRect(tester, 'second').top,

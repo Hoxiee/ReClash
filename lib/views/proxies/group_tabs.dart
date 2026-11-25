@@ -6,6 +6,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 const _stripInset = 16.0;
 const _tabSpacing = 8.0;
@@ -139,7 +140,7 @@ class _GroupTabsState extends State<GroupTabs> {
       size: TonalButtonSize.section,
       child: ElasticPress(
         child: CommonPopupBox(
-          targetBuilder: (open) => IconButton(
+          targetBuilder: (open) => prism.IconButton(
             tooltip: context.appLocalizations.proxyGroup,
             onPressed: open,
             icon: const GlyphIcon(AppGlyphs.chevronDown),

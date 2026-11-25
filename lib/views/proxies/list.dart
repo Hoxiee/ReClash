@@ -12,7 +12,7 @@ import 'package:reclash/views/chains/marks.dart';
 import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/collapsible_section.dart' show UnfoldMotion;
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -30,6 +30,9 @@ const _liftDistance = 16.0;
 const _groupMinWidth = 360.0;
 const _groupMaxColumns = 3;
 const _lastRowGrowth = _headerInset - proxyGridSpacing;
+
+/// Turns the group's expand caret from pointing down, folded away, to up.
+final _expandTurns = Tween<double>(begin: 0, end: 0.5);
 
 class ProxiesListView extends ConsumerStatefulWidget {
   const ProxiesListView({super.key});
@@ -845,7 +848,7 @@ class ListHeader extends ConsumerWidget {
         ? SurfaceLevel.floatingOf(colorScheme)
         : context.raisedSurfaceLevel;
     final radius = AppCorner.xl.ap(context);
-    Widget card = CommonCard(
+    final card = CommonCard(
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
@@ -870,6 +873,10 @@ class ListHeader extends ConsumerWidget {
             groupType: profile == null
                 ? group.type.name
                 : rcxProfileTitle(context, ref, profile),
+            onRouting: onRouting,
+            routingTooltip: behaviour
+                ? context.appLocalizations.rcxBehaviour
+                : null,
             onScrollToSelected: () {
               onScrollToSelected(groupName);
             },
@@ -888,20 +895,6 @@ class ListHeader extends ConsumerWidget {
         onChange(groupName);
       },
     );
-    if (onRouting != null) {
-      card = ContextMenuRegion(
-        menuItems: [
-          CommonPopupMenuItem(
-            glyph: AppGlyphs.shuffle,
-            label: behaviour
-                ? context.appLocalizations.rcxBehaviour
-                : context.appLocalizations.rcxTitle,
-            onPressed: onRouting,
-          ),
-        ],
-        child: card,
-      );
-    }
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: level.colorOf(colorScheme),
@@ -1074,6 +1067,8 @@ class _GroupActions extends StatelessWidget {
     required this.onScrollToSelected,
     required this.onDelayTest,
     required this.onToggle,
+    this.onRouting,
+    this.routingTooltip,
   });
 
   final bool isExpand;
@@ -1083,6 +1078,8 @@ class _GroupActions extends StatelessWidget {
   final VoidCallback onScrollToSelected;
   final VoidCallback onDelayTest;
   final VoidCallback onToggle;
+  final VoidCallback? onRouting;
+  final String? routingTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -1094,19 +1091,26 @@ class _GroupActions extends StatelessWidget {
             TonalButtonGroup(
               size: TonalButtonSize.compact,
               children: [
-                IconButton(
+                prism.IconButton(
                   tooltip: context.appLocalizations.scrollToSelected,
                   onPressed: onScrollToSelected,
                   iconSize: 19,
                   icon: const GlyphIcon(AppGlyphs.locate),
                 ),
-                IconButton(
+                prism.IconButton(
                   tooltip: context.appLocalizations.delayTest,
                   onPressed: isDelayTesting ? null : onDelayTest,
                   icon: isDelayTesting
                       ? CommonCircleLoading(size: TonalButtonSize.compact.icon)
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
+                if (onRouting != null)
+                  prism.IconButton(
+                    tooltip:
+                        routingTooltip ?? context.appLocalizations.rcxTitle,
+                    onPressed: onRouting,
+                    icon: const GlyphIcon(AppGlyphs.shuffle),
+                  ),
               ],
             )
           else
@@ -1118,13 +1122,13 @@ class _GroupActions extends StatelessWidget {
             ),
           const SizedBox(width: 6),
           ElasticPress(
-            child: IconButton(
+            child: prism.IconButton(
               tooltip: isExpand
                   ? context.appLocalizations.showLess
                   : context.appLocalizations.showMore,
               onPressed: onToggle,
               icon: RotationTransition(
-                turns: unfold.drive(UnfoldMotion.chevronTurns),
+                turns: unfold.drive(_expandTurns),
                 child: const GlyphIcon(AppGlyphs.caretDown, fill: 1),
               ),
             ),

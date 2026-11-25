@@ -8,6 +8,7 @@ import 'package:reclash/ui/card.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/proxies.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,27 +96,27 @@ void main() {
     if (ctx == null) return false;
     return ctx.findAncestorWidgetOfExactType<ListHeader>() != null &&
         ctx.findAncestorWidgetOfExactType<CommonCard>() != null &&
-        ctx.findAncestorWidgetOfExactType<IconButton>() == null;
+        ctx.findAncestorWidgetOfExactType<prism.IconButton>() == null;
   }
 
   bool focusInHeaderAction() {
     final ctx = FocusManager.instance.primaryFocus?.context;
     if (ctx == null) return false;
     return ctx.findAncestorWidgetOfExactType<ListHeader>() != null &&
-        ctx.findAncestorWidgetOfExactType<IconButton>() != null;
+        ctx.findAncestorWidgetOfExactType<prism.IconButton>() != null;
   }
 
   int? focusedHeaderActionIndex() {
     final context = FocusManager.instance.primaryFocus?.context;
     final header = context?.findAncestorWidgetOfExactType<ListHeader>();
-    final button = context?.findAncestorWidgetOfExactType<IconButton>();
+    final button = context?.findAncestorWidgetOfExactType<prism.IconButton>();
     if (header == null || button == null) {
       return null;
     }
     final buttons = find
         .descendant(
           of: find.byWidget(header),
-          matching: find.byType(IconButton),
+          matching: find.byType(prism.IconButton),
         )
         .evaluate()
         .map((element) => element.widget)
@@ -170,6 +171,10 @@ void main() {
     await tester.pump();
     expect(focusedHeaderActionIndex(), 2);
 
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(focusedHeaderActionIndex(), 3);
+
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
@@ -190,7 +195,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
-    expect(focusedHeaderActionIndex(), 2);
+    expect(focusedHeaderActionIndex(), 3);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
