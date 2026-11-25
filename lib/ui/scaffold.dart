@@ -20,7 +20,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:prism_ui/common_button.dart' as prism_ui;
 import 'package:prism_ui/liquid_glass.dart' as prism_ui;
+import 'package:prism_ui/navigation_dock.dart' as prism_ui;
 import 'package:prism_ui/theme_data.dart' as prism_ui;
 
 import 'builder.dart';
@@ -386,7 +388,7 @@ class CommonScaffoldState extends State<CommonScaffold>
     final glass = LiquidGlassScope.of(context);
     const height = BottomInsetScope.dockedSearchHeight;
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final field = ElasticPress(
+    final field = prism_ui.ElasticPress(
       child: GooPane(
         child: SearchField(
           height: height,
@@ -420,7 +422,11 @@ class CommonScaffoldState extends State<CommonScaffold>
         top: false,
         right: false,
         child: GooSurface(
-          glass: glass ? LiquidGlassStyle.pill(colorScheme) : null,
+          glass: glass
+              ? prism_ui.LiquidGlassStyle.pill(
+                  prism_ui.Theme.of(context).colorScheme,
+                )
+              : null,
           color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
           shadows: glass ? const [] : dockShadows(colorScheme),
           child: ListenableBuilder(
@@ -742,7 +748,9 @@ class CommonScaffoldState extends State<CommonScaffold>
             )
           : null,
       glass: LiquidGlassScope.of(context)
-          ? LiquidGlassStyle.regular(colorScheme)
+          ? prism_ui.LiquidGlassStyle.regular(
+              prism_ui.Theme.of(context).colorScheme,
+            )
           : null,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       // The field's own buttons stay off the bar's button fills and glass.
@@ -1825,7 +1833,7 @@ class _BarSearch extends StatelessWidget {
   final List<Widget> actions;
   final double actionsWidth;
   final Widget? cancel;
-  final LiquidGlassStyle? glass;
+  final prism_ui.LiquidGlassStyle? glass;
   final Color color;
   final Widget field;
 
@@ -1955,7 +1963,7 @@ class _BarSearch extends StatelessWidget {
                     children: [
                       Positioned.fromRect(
                         rect: fieldRect,
-                        child: ElasticPress(
+                        child: prism_ui.ElasticPress(
                           key: fieldKey,
                           child: GooPane(
                             child: ClipRSuperellipse(
@@ -2281,25 +2289,18 @@ class AppBarActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final style = IconButton.styleFrom(
-      fixedSize: Size.square(TonalButtonSize.bar.button),
-      minimumSize: Size.square(TonalButtonSize.bar.button),
-      padding: EdgeInsets.zero,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-    return IconButton(
+    final selected = data.isSelected == true;
+    return prism_ui.IconButton(
       tooltip: data.tooltip,
-      isSelected: data.isSelected,
-      style: data.isSelected == true
-          ? style.merge(
-              IconButton.styleFrom(
-                backgroundColor: TonalButtonTheme.glassOf(context)
-                    ? null
-                    : colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-              ),
+      isSelected: selected,
+      style: selected
+          ? prism_ui.ButtonStyle.from(
+              backgroundColor: TonalButtonTheme.glassOf(context)
+                  ? null
+                  : colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
             )
-          : style,
+          : null,
       onPressed: data.isLoading ? null : data.onPressed,
       icon: data.isLoading
           ? CommonCircleLoading(size: TonalButtonSize.bar.icon)

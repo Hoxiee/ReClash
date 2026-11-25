@@ -1,6 +1,7 @@
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -50,18 +51,25 @@ Future<List<String>> _pumpBar(
 Finder _inBar(Finder finder) =>
     find.descendant(of: find.byType(AppBar), matching: finder);
 
+/// A bar action, whether the scaffold's own prism button or a raw Material one.
+final _anyAction = find.byWidgetPredicate(
+  (widget) => widget is prism.IconButton || widget is IconButton,
+);
+
+String? _tooltipOf(Widget widget) => switch (widget) {
+  prism.IconButton(:final tooltip) => tooltip,
+  IconButton(:final tooltip) => tooltip,
+  _ => null,
+};
+
 List<String> _barButtons(WidgetTester tester) => [
-  for (final button in tester.widgetList<IconButton>(
-    _inBar(find.byType(IconButton)),
-  ))
-    button.tooltip ?? '',
+  for (final element in _inBar(_anyAction).evaluate())
+    _tooltipOf(element.widget) ?? '',
 ];
 
 List<String> _shownButtons(WidgetTester tester) => [
-  for (final button in tester.widgetList<IconButton>(
-    find.byType(IconButton).hitTestable(),
-  ))
-    button.tooltip ?? '',
+  for (final element in _anyAction.hitTestable().evaluate())
+    _tooltipOf(element.widget) ?? '',
 ];
 
 Future<void> _openMenu(WidgetTester tester) async {

@@ -11,6 +11,7 @@ import 'package:reclash/ui/switch.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/tun.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -211,10 +212,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      IconButton restore() => tester.widget<IconButton>(
+      prism.IconButton restore() => tester.widget<prism.IconButton>(
         find.ancestor(
           of: find.byTooltip(l.restoreDefaults),
-          matching: find.byType(IconButton),
+          matching: find.byType(prism.IconButton),
         ),
       );
       expect(restore().onPressed, isNull);

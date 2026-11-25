@@ -4,6 +4,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -60,8 +61,8 @@ void _expectSorting(WidgetTester tester) {
   expect(find.byType(BackButton).hitTestable(), findsNothing);
   expect(find.byType(SearchField), findsNothing);
   expect(_inBar(find.text('Add')), findsNothing);
-  final toggle = _inBar(find.widgetWithGlyph(IconButton, AppGlyphs.sort));
-  expect(tester.widget<IconButton>(toggle).isSelected, isTrue);
+  final toggle = _inBar(find.widgetWithGlyph(prism.IconButton, AppGlyphs.sort));
+  expect(tester.widget<prism.IconButton>(toggle).isSelected, isTrue);
 }
 
 void main() {

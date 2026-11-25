@@ -28,6 +28,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/glyph_finders.dart';
@@ -850,7 +851,7 @@ void main() {
 
   Finder checkAllButton() => find.ancestor(
     of: find.byTooltip('Check all'),
-    matching: find.byType(IconButton),
+    matching: find.byType(prism.IconButton),
   );
 
   testWidgets('the sheet checks every service, each on its own', (
@@ -880,13 +881,16 @@ void main() {
     expect(asked.skip(ServiceTarget.values.length), [
       for (final target in ServiceTarget.values) [target.id],
     ]);
-    expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNull);
+    expect(tester.widget<prism.IconButton>(checkAllButton()).onPressed, isNull);
 
     sweep.complete();
     await settleChecks(tester);
     expect(asked, hasLength(ServiceTarget.values.length * 2));
     expect(find.text('Not checked'), findsNothing);
-    expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNotNull);
+    expect(
+      tester.widget<prism.IconButton>(checkAllButton()).onPressed,
+      isNotNull,
+    );
   });
 
   testWidgets('tapping a sheet row checks its service again', (tester) async {
@@ -1031,7 +1035,10 @@ void main() {
     );
     expect(rows, isNotEmpty);
     expect(rows.every((row) => row.onPressed != null), isTrue);
-    expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNotNull);
+    expect(
+      tester.widget<prism.IconButton>(checkAllButton()).onPressed,
+      isNotNull,
+    );
   });
 
   AppSettingProps settingsOf(WidgetTester tester) => ProviderScope.containerOf(
@@ -1078,7 +1085,10 @@ void main() {
       await tester.tap(find.byType(ServiceStatusCard));
       await settleChecks(tester);
       expect(find.text('Service checks are off'), findsNWidgets(2));
-      expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNull);
+      expect(
+        tester.widget<prism.IconButton>(checkAllButton()).onPressed,
+        isNull,
+      );
       await tester.tap(find.byTooltip('Manage services'));
       await settleChecks(tester);
       await tester.tap(switchOf(ServiceTarget.google));

@@ -4,6 +4,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -286,8 +287,8 @@ void main() {
       _EditorHarness(items: items, searchable: true, onDelete: (_) {}),
     );
     await tester.pump();
-    IconButton deleteButton() => tester.widget<IconButton>(
-      find.widgetWithGlyph(IconButton, AppGlyphs.delete),
+    prism.IconButton deleteButton() => tester.widget<prism.IconButton>(
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.delete),
     );
 
     await _search(tester, 'a');

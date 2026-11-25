@@ -12,6 +12,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/region.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -95,7 +96,7 @@ void main() {
 
   Finder applyButton() => find.ancestor(
     of: find.byTooltip('Apply region'),
-    matching: find.byType(IconButton),
+    matching: find.byType(prism.IconButton),
   );
 
   testWidgets('a device suggestion is only marked until a country is applied', (
@@ -104,7 +105,7 @@ void main() {
     await pumpRegionView(tester);
     expect(find.text('Recommended for this device'), findsOneWidget);
     expect(find.text('What changes'), findsNothing);
-    expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
+    expect(tester.widget<prism.IconButton>(applyButton()).onPressed, isNull);
     await choose(tester, 'China');
     expect(find.text('What changes'), findsOneWidget);
     expect(container.read(appSettingProvider).regionCode, isNull);
@@ -181,7 +182,7 @@ void main() {
   testWidgets('unchanged saved region disables apply', (tester) async {
     container.read(systemActionProvider.notifier).applyRegion('RU');
     await pumpRegionView(tester);
-    expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
+    expect(tester.widget<prism.IconButton>(applyButton()).onPressed, isNull);
     expect(find.text('What changes'), findsNothing);
   });
 
@@ -207,7 +208,7 @@ void main() {
     await pumpRegionView(tester);
     expect(find.text('Recommended for this device'), findsNothing);
     await choose(tester, 'Egypt');
-    expect(tester.widget<IconButton>(applyButton()).onPressed, isNotNull);
+    expect(tester.widget<prism.IconButton>(applyButton()).onPressed, isNotNull);
   });
 
   testWidgets('detection arriving later never replaces the manual draft', (

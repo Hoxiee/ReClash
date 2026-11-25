@@ -15,6 +15,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/navigation_dock.dart' as prism;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';
@@ -900,8 +902,8 @@ void main() {
       TestApp(
         child: Center(
           child: TonalButtonTheme(
-            child: ElasticPress(
-              child: IconButton(
+            child: prism.ElasticPress(
+              child: prism.IconButton(
                 tooltip: _addLabel,
                 onPressed: () {},
                 icon: const GlyphIcon(AppGlyphs.add),
@@ -911,23 +913,19 @@ void main() {
         ),
       ),
     );
-    final press = find.byType(ElasticPress);
+    final press = find.byType(prism.ElasticPress);
     final resting = tester.getRect(press);
     double width() =>
         _painted(tester, tester.renderObject(press), resting).width;
-    final ink = tester.widget<InkWell>(
+    // The button's press look is the swell alone: no Material ink answers a
+    // pointer, so no state layer stands on it in any state.
+    expect(
       find.descendant(
-        of: find.byType(IconButton),
+        of: find.byType(prism.IconButton),
         matching: find.byType(InkWell),
       ),
+      findsNothing,
     );
-    for (final state in [
-      WidgetState.hovered,
-      WidgetState.focused,
-      WidgetState.pressed,
-    ]) {
-      expect(ink.overlayColor!.resolve({state}), Colors.transparent);
-    }
 
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);

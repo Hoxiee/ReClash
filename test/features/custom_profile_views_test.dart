@@ -23,6 +23,7 @@ import 'package:reclash/views/profiles/custom/groups.dart';
 import 'package:reclash/views/profiles/custom/rules.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -373,7 +374,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(TonalButtonGroup),
-        matching: find.byType(IconButton),
+        matching: find.byType(prism.IconButton),
       ),
       findsNWidgets(2),
     );
@@ -1275,7 +1276,7 @@ void main() {
     final l = currentAppLocalizations;
 
     expect(find.text(l.nullTip(l.proxies)), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, l.add), findsOneWidget);
+    expect(find.widgetWithText(TonalButton, l.add), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

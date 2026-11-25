@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/proxy_chains/proxy_chains.dart';
 import 'package:reclash/models/models.dart';
@@ -356,10 +357,10 @@ void main() {
       tester,
     ) async {
       await pump(tester, const ChainEditor(), chains: const []);
-      IconButton save() => tester.widget<IconButton>(
+      prism.IconButton save() => tester.widget<prism.IconButton>(
         find.ancestor(
           of: find.byTooltip('Save'),
-          matching: find.byType(IconButton),
+          matching: find.byType(prism.IconButton),
         ),
       );
       expect(save().onPressed, isNull);

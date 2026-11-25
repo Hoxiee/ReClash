@@ -11,6 +11,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -96,11 +97,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  IconButton barButton(WidgetTester tester, String tooltip) =>
-      tester.widget<IconButton>(
+  prism.IconButton barButton(WidgetTester tester, String tooltip) =>
+      tester.widget<prism.IconButton>(
         find.ancestor(
           of: find.byTooltip(tooltip),
-          matching: find.byType(IconButton),
+          matching: find.byType(prism.IconButton),
         ),
       );
 

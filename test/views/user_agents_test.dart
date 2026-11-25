@@ -6,6 +6,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -93,8 +94,8 @@ void main() {
     expect(selected(), isNull);
     expect(find.byType(CommonPopupMenu), findsNothing);
 
-    final sortButton = find.widgetWithGlyph(IconButton, AppGlyphs.sort);
-    expect(tester.widget<IconButton>(sortButton).isSelected, isTrue);
+    final sortButton = find.widgetWithGlyph(prism.IconButton, AppGlyphs.sort);
+    expect(tester.widget<prism.IconButton>(sortButton).isSelected, isTrue);
     await tester.tap(sortButton);
     await tester.pumpAndSettle();
     expect(find.byType(SortHandle), findsNothing);

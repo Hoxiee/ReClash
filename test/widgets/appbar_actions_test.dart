@@ -4,6 +4,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:prism_ui/liquid_glass.dart' as prism;
 import 'package:prism_ui/navigation_dock.dart' as prism;
 
@@ -139,7 +140,7 @@ void main() {
           );
           final leading = tester.getRect(_container(find.byType(BackButton)));
           final action = tester.getRect(
-            _container(find.widgetWithGlyph(IconButton, AppGlyphs.sync)),
+            find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync),
           );
 
           expect(leading.left, inset);
@@ -191,7 +192,7 @@ void main() {
 
     expect(group, findsOneWidget);
     expect(
-      find.descendant(of: group, matching: find.byType(IconButton)),
+      find.descendant(of: group, matching: find.byType(prism.IconButton)),
       findsNWidgets(2),
     );
     expect(
@@ -262,10 +263,10 @@ void main() {
       ),
     );
     final first = tester.getRect(
-      find.widgetWithGlyph(IconButton, AppGlyphs.sync),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync),
     );
     final second = tester.getRect(
-      find.widgetWithGlyph(IconButton, AppGlyphs.sort),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.sort),
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(mouse.removePointer);
@@ -316,7 +317,7 @@ void main() {
     await tester.tap(find.byTooltip('Cancel'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    final sync = find.widgetWithGlyph(IconButton, AppGlyphs.sync);
+    final sync = find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync);
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(mouse.removePointer);
     await mouse.addPointer(location: tester.getCenter(sync));
@@ -486,7 +487,7 @@ void main() {
           child: SheetProvider(type: type, child: scaffold),
         );
         final close = tester.getRect(
-          _container(find.widgetWithGlyph(IconButton, AppGlyphs.close)),
+          find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
         );
         final title = tester.getRect(
           find.descendant(
@@ -615,14 +616,14 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final search = find.widgetWithGlyph(IconButton, AppGlyphs.search);
-    final button = tester.getRect(_container(search));
+    final search = find.widgetWithGlyph(prism.IconButton, AppGlyphs.search);
+    final button = tester.getRect(search);
 
     await tester.tap(search);
     await tester.pumpAndSettle();
     final field = tester.getRect(find.byType(SearchField));
     final cancel = tester.getRect(
-      _container(find.widgetWithGlyph(IconButton, AppGlyphs.close)),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
     );
 
     expect(find.text('Title'), findsNothing);
@@ -647,15 +648,18 @@ void main() {
         body: const SizedBox(),
       ),
     );
-    final search = find.widgetWithGlyph(IconButton, AppGlyphs.search);
-    final button = tester.getRect(_container(search));
+    final search = find.widgetWithGlyph(prism.IconButton, AppGlyphs.search);
+    final button = tester.getRect(search);
 
     await tester.tap(search);
     await tester.pumpAndSettle();
     final field = tester.getRect(find.byType(SearchField));
 
     expect(find.text('Title'), findsOneWidget);
-    expect(find.widgetWithGlyph(IconButton, AppGlyphs.close), findsNothing);
+    expect(
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
+      findsNothing,
+    );
     expect(field.size, Size(280, TonalButtonSize.bar.button));
     expect(field.right, button.right);
     expect(field.center.dy, button.center.dy);
