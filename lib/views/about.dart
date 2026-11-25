@@ -80,10 +80,10 @@ class AboutView extends ConsumerWidget {
       ),
       _Credit(
         avatar: 'assets/images/avatar/legiz-ru.jpg',
-        project: 'Prizrak-Box',
+        project: 'Prizrak-Core',
         name: 'legiz-ru',
-        role: appLocalizations.creditPrizrakBox,
-        link: 'https://github.com/legiz-ru/Prizrak-Box',
+        role: appLocalizations.creditPrizrakCore,
+        link: 'https://github.com/legiz-ru/Prizrak-Core',
       ),
       _Credit(
         avatar: 'assets/images/avatar/coolcoala.jpg',
@@ -93,11 +93,18 @@ class AboutView extends ConsumerWidget {
         link: 'https://github.com/coolcoala/koala-clash',
       ),
       _Credit(
-        avatar: 'assets/images/avatar/hufrea.jpg',
-        project: 'ByeDPI',
-        name: 'hufrea',
-        role: appLocalizations.creditByeDpi,
-        link: 'https://github.com/hufrea/byedpi',
+        avatar: 'assets/images/avatar/nemu-x.jpg',
+        project: 'ClashFest',
+        name: 'Nemu-x',
+        role: appLocalizations.creditClashFest,
+        link: 'https://github.com/Nemu-x/ClashFest',
+      ),
+      _Credit(
+        avatar: 'assets/images/avatar/remnawave.jpg',
+        project: 'Remnawave',
+        name: 'remnawave',
+        role: appLocalizations.creditRemnawave,
+        link: 'https://github.com/remnawave/panel',
       ),
     ];
     return CommonScaffold(

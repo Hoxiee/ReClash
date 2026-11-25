@@ -1,5 +1,4 @@
 {
-  "creditByeDpi": "DPI chetlab oʻtish",
   "creditFlClash": "Ilova asosi",
   "creditFlClashX": "ReClash boshlangan mijoz",
   "creditMihomo": "Proksi yadrosi",
@@ -9,6 +8,8 @@
   "licenses": "Litsenziyalar",
   "licensesDesc": "Ilova tarkibidagi paketlar",
   "maintainer": "Meynteyner",
-  "creditPrizrakBox": "Yadro uchun ilhom",
-  "creditKoalaClash": "Meni mihomo bilan tanishtirgan mijoz"
+  "creditKoalaClash": "Meni mihomo bilan tanishtirgan mijoz",
+  "creditClashFest": "Xray moslik yamalari",
+  "creditRemnawave": "Obuna paneli",
+  "creditPrizrakCore": "Yadroning Xray qismlari"
 }

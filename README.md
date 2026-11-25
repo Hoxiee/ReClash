@@ -210,13 +210,24 @@ feature requests go to [GitHub Issues](https://github.com/Hoxiee/ReClash/issues)
 
 ## Acknowledgements
 
-ReClash exists because of the work of these projects and maintainers:
+ReClash exists because of the work of these projects and their maintainers.
+
+**Application**
 
 - [FlClash](https://github.com/chen08209/FlClash) by [chen08209](https://github.com/chen08209), the application ReClash is based on.
 - [FlClashX](https://github.com/pluralplay/FlClashX) by [pluralplay](https://github.com/pluralplay), the client ReClash started from.
 - [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application. ReClash runs a patched build from [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core).
-- [Prizrak-Box](https://github.com/legiz-ru/Prizrak-Box) by [legiz-ru](https://github.com/legiz-ru), for inspiring the core work.
 - [Koala Clash](https://github.com/coolcoala/koala-clash) by [coolcoala](https://github.com/coolcoala), the client that introduced me to mihomo.
+
+**Core**
+
+- [ClashFest](https://github.com/Nemu-x/ClashFest) by [Nemu-x](https://github.com/Nemu-x): its patches were ported into the core as Xray compatibility and diagnostics, with the original patch numbers kept.
+- [Prizrak-Core](https://github.com/legiz-ru/Prizrak-Core) by [legiz-ru](https://github.com/legiz-ru): finalmask, Firefox fingerprints, XDRIVE, REALITY and the Xray share-link converter came from it.
+- [veles](https://github.com/Rerowros/veles), [Citrus](https://github.com/getmikan/Citrus), [SlothClash](https://github.com/Nemu-x/SlothClash) and [Xray-core](https://github.com/XTLS/Xray-core) as the sources of individual patches; see [CREDITS.md](https://github.com/Hoxiee/mihomo-patch-core/blob/main/CREDITS.md) for the breakdown.
+
+**Remnawave** is the best subscription panel, and we recommend it. ReClash is tightly integrated with it: it understands Remnawave's subscription headers, HWID with `x-hwid` and the subscription page, and ships a [ready-made response rule](docs/en/providers/rollout.md#remnawave). There is no Remnawave code in ReClash, the subscription body stays plain mihomo, and other panels work the same way.
+
+ReClash reads other clients' headers as aliases instead of porting their code: the headers of Happ, INCY, v2RayTun and [Karing](https://github.com/KaringX/karing), and the subscription pages of [3x-ui](https://github.com/MHSanaei/3x-ui) and [Marzban](https://github.com/Gozargah/Marzban).
 
 ReClash is maintained independently. References to other projects describe technical lineage, compatibility, and dependencies; they do not imply endorsement.
 

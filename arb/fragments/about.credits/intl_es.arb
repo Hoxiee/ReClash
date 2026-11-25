@@ -5,10 +5,11 @@
   "creditFlClash": "Base del cliente",
   "creditFlClashX": "El cliente del que nació ReClash",
   "creditMihomo": "Núcleo proxy",
-  "creditByeDpi": "Evasión de DPI",
   "license": "Licencia",
   "licenses": "Licencias",
   "licensesDesc": "Paquetes incluidos en la aplicación",
-  "creditPrizrakBox": "Inspiración para el núcleo",
-  "creditKoalaClash": "El cliente que me presentó a mihomo"
+  "creditKoalaClash": "El cliente que me presentó a mihomo",
+  "creditClashFest": "Parches de compatibilidad Xray",
+  "creditRemnawave": "Panel de suscripciones",
+  "creditPrizrakCore": "Partes Xray del núcleo"
 }

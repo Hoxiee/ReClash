@@ -1,5 +1,4 @@
 {
-  "creditByeDpi": "DPI айналып өту",
   "creditFlClash": "Қолданбаның негізі",
   "creditFlClashX": "ReClash басталған клиент",
   "creditMihomo": "Прокси ядросы",
@@ -9,6 +8,8 @@
   "licenses": "Лицензиялар",
   "licensesDesc": "Қолданбаға кіретін дестелер",
   "maintainer": "Мейнтейнер",
-  "creditPrizrakBox": "Ядроға шабыт",
-  "creditKoalaClash": "Мені mihomo-ны таныстырған клиент"
+  "creditKoalaClash": "Мені mihomo-ны таныстырған клиент",
+  "creditClashFest": "Xray үйлесімділік патчтары",
+  "creditRemnawave": "Жазылым панелі",
+  "creditPrizrakCore": "Ядроның Xray бөліктері"
 }

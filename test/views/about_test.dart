@@ -93,9 +93,10 @@ void main() {
       'FlClash': 'chen08209',
       'FlClashX': 'pluralplay',
       'mihomo': 'MetaCubeX',
-      'Prizrak-Box': 'legiz-ru',
+      'Prizrak-Core': 'legiz-ru',
       'Koala Clash': 'coolcoala',
-      'ByeDPI': 'hufrea',
+      'ClashFest': 'Nemu-x',
+      'Remnawave': 'remnawave',
     };
     for (final credit in credits.entries) {
       expect(find.text(credit.key).hitTestable(), findsOneWidget);
@@ -111,7 +112,8 @@ void main() {
         'assets/images/avatar/metacubex.jpg',
         'assets/images/avatar/legiz-ru.jpg',
         'assets/images/avatar/coolcoala.jpg',
-        'assets/images/avatar/hufrea.jpg',
+        'assets/images/avatar/nemu-x.jpg',
+        'assets/images/avatar/remnawave.jpg',
       ]),
     );
     expect(find.byTooltip('chen08209: ${l10n.creditFlClash}'), findsOneWidget);
@@ -138,13 +140,13 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await tester.scrollUntilVisible(
-      find.text('ByeDPI'),
+      find.text('Remnawave'),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
     expect(find.text('Благодарности'), findsOneWidget);
-    expect(find.text('hufrea').hitTestable(), findsOneWidget);
+    expect(find.text('remnawave').hitTestable(), findsOneWidget);
     expect(find.text('Другие участники'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -159,9 +161,10 @@ void main() {
         'FlClash': 'https://github.com/chen08209/FlClash',
         'FlClashX': 'https://github.com/pluralplay/FlClashX',
         'mihomo': 'https://github.com/MetaCubeX/mihomo',
-        'Prizrak-Box': 'https://github.com/legiz-ru/Prizrak-Box',
+        'Prizrak-Core': 'https://github.com/legiz-ru/Prizrak-Core',
         'Koala Clash': 'https://github.com/coolcoala/koala-clash',
-        'ByeDPI': 'https://github.com/hufrea/byedpi',
+        'ClashFest': 'https://github.com/Nemu-x/ClashFest',
+        'Remnawave': 'https://github.com/remnawave/panel',
       };
 
       for (final entry in destinations.entries) {

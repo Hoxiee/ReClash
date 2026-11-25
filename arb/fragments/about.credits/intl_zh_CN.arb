@@ -5,10 +5,11 @@
   "creditFlClash": "应用基础",
   "creditFlClashX": "ReClash 的起点",
   "creditMihomo": "代理内核",
-  "creditByeDpi": "DPI 绕过",
   "license": "许可证",
   "licenses": "开源许可",
   "licensesDesc": "应用内置的软件包",
-  "creditPrizrakBox": "内核的灵感",
-  "creditKoalaClash": "让我认识 mihomo 的客户端"
+  "creditKoalaClash": "让我认识 mihomo 的客户端",
+  "creditClashFest": "Xray 兼容补丁",
+  "creditRemnawave": "订阅面板",
+  "creditPrizrakCore": "内核的 Xray 部分"
 }

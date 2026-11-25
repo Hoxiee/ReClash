@@ -5,10 +5,11 @@
   "creditFlClash": "Основа приложения",
   "creditFlClashX": "Клиент, с которого начался ReClash",
   "creditMihomo": "Прокси-ядро",
-  "creditByeDpi": "Обход DPI",
   "license": "Лицензия",
   "licenses": "Лицензии",
   "licensesDesc": "Пакеты, входящие в приложение",
-  "creditPrizrakBox": "Вдохновение для ядра",
-  "creditKoalaClash": "Клиент, который познакомил меня с mihomo"
+  "creditKoalaClash": "Клиент, который познакомил меня с mihomo",
+  "creditClashFest": "Патчи Xray-совместимости",
+  "creditRemnawave": "Панель подписок",
+  "creditPrizrakCore": "Xray-части ядра"
 }

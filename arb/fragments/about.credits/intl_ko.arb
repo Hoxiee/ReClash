@@ -5,10 +5,11 @@
   "creditFlClash": "앱의 기반",
   "creditFlClashX": "ReClash가 시작된 클라이언트",
   "creditMihomo": "프록시 코어",
-  "creditByeDpi": "DPI 우회",
   "license": "라이선스",
   "licenses": "라이선스",
   "licensesDesc": "앱에 포함된 패키지",
-  "creditPrizrakBox": "코어 작업의 영감",
-  "creditKoalaClash": "나에게 mihomo를 소개한 클라이언트"
+  "creditKoalaClash": "나에게 mihomo를 소개한 클라이언트",
+  "creditClashFest": "Xray 호환 패치",
+  "creditRemnawave": "구독 패널",
+  "creditPrizrakCore": "코어의 Xray 부분"
 }

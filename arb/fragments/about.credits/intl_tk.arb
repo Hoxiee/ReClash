@@ -1,5 +1,4 @@
 {
-  "creditByeDpi": "DPI böwüsme",
   "creditFlClash": "Programmanyň binýady",
   "creditFlClashX": "ReClash-nyň başlangyjy",
   "creditMihomo": "Proksi çekirdegi",
@@ -9,6 +8,8 @@
   "licenses": "Ygtyýarnamalar",
   "licensesDesc": "Programmä goşulan paketler",
   "maintainer": "Meýnteýner",
-  "creditPrizrakBox": "Ýadro üçin ylham",
-  "creditKoalaClash": "Meni mihomo bilen tanyşdyran müşderi"
+  "creditKoalaClash": "Meni mihomo bilen tanyşdyran müşderi",
+  "creditClashFest": "Xray laýyklyk ýamalary",
+  "creditRemnawave": "Abuna paneli",
+  "creditPrizrakCore": "Ýadronyň Xray bölekleri"
 }

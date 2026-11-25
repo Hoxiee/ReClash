@@ -5,10 +5,11 @@
   "creditFlClash": "Client foundation",
   "creditFlClashX": "The client ReClash started from",
   "creditMihomo": "Proxy core",
-  "creditByeDpi": "DPI bypass",
   "license": "License",
   "licenses": "Licenses",
   "licensesDesc": "Packages bundled into the app",
-  "creditPrizrakBox": "Inspiration for the core",
-  "creditKoalaClash": "The client that introduced me to mihomo"
+  "creditKoalaClash": "The client that introduced me to mihomo",
+  "creditClashFest": "Xray compatibility patches",
+  "creditRemnawave": "Subscription panel",
+  "creditPrizrakCore": "Xray parts of the core"
 }

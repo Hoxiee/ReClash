@@ -5,10 +5,11 @@
   "creditFlClash": "Client de base",
   "creditFlClashX": "Le client dont ReClash est parti",
   "creditMihomo": "Cœur du proxy",
-  "creditByeDpi": "Contournement DPI",
   "license": "Licence",
   "licenses": "Licences",
   "licensesDesc": "Paquets inclus dans l'application",
-  "creditPrizrakBox": "Inspiration pour le cœur",
-  "creditKoalaClash": "Le client qui m'a fait découvrir mihomo"
+  "creditKoalaClash": "Le client qui m'a fait découvrir mihomo",
+  "creditClashFest": "Patchs de compatibilité Xray",
+  "creditRemnawave": "Panneau d'abonnements",
+  "creditPrizrakCore": "Parties Xray du cœur"
 }

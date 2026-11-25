@@ -5,10 +5,11 @@
   "creditFlClash": "アプリの基盤",
   "creditFlClashX": "ReClash の出発点",
   "creditMihomo": "プロキシコア",
-  "creditByeDpi": "DPI 回避",
   "license": "ライセンス",
   "licenses": "ライセンス一覧",
   "licensesDesc": "アプリに同棑されているパッケージ",
-  "creditPrizrakBox": "コアへのインスピレーション",
-  "creditKoalaClash": "mihomo を教えてくれたクライアント"
+  "creditKoalaClash": "mihomo を教えてくれたクライアント",
+  "creditClashFest": "Xray 互換パッチ",
+  "creditRemnawave": "サブスクリプションパネル",
+  "creditPrizrakCore": "コアの Xray 部分"
 }
