@@ -1,5 +1,7 @@
 library;
 
+import 'dart:convert';
+
 import 'xray_fingerprint.dart';
 
 /// Copies the client-side TLS and REALITY fields of an Xray [streamSettings]
@@ -114,6 +116,64 @@ bool _serverOnlyRealityFields(Map<String, Object?>? reality) {
     if (_present(reality[key])) return true;
   }
   return false;
+}
+
+bool xrayRealityValid(Map<String, Object?>? reality) {
+  final password = _text(reality?['password']);
+  final publicKey = password ?? _text(reality?['publicKey']);
+  if (publicKey == null || !isValidRealityPublicKey(publicKey)) return false;
+  final shortId = _text(reality?['shortId']);
+  if (shortId != null && !isValidRealityShortId(shortId)) return false;
+  final mldsa = _text(reality?['mldsa65Verify']);
+  if (mldsa != null && !isValidRealityMldsa65Verify(mldsa)) return false;
+  return true;
+}
+
+bool isValidRealityPublicKey(String value) =>
+    _decodeRawBase64Url(value)?.length == _realityPublicKeyLength;
+
+bool isValidRealityShortId(String value) {
+  if (value.isEmpty) return true;
+  if (value.length > _realityShortIdMaxHexLength || value.length.isOdd) {
+    return false;
+  }
+  return _hexPattern.hasMatch(value);
+}
+
+bool isValidRealityMldsa65Verify(String value) =>
+    _decodeRawBase64Url(value)?.length == _mldsa65PublicKeyLength;
+
+bool xrayEchConfigValid(Object? value) {
+  final raw = _text(value);
+  if (raw == null) return true;
+  final plus = raw.indexOf('+');
+  if (plus > 0 && _isEchResolver(raw.substring(plus + 1))) return true;
+  if (_isEchResolver(raw)) return true;
+  if (raw.contains('-----BEGIN')) {
+    return raw.contains('-----BEGIN ECH CONFIGS-----') &&
+        raw.contains('-----END ECH CONFIGS-----');
+  }
+  final compact = raw.replaceAll(RegExp(r'\s'), '');
+  if (compact.isEmpty || compact.length % 4 != 0) return false;
+  try {
+    return base64.decode(compact).isNotEmpty;
+  } on FormatException {
+    return false;
+  }
+}
+
+const _realityPublicKeyLength = 32;
+const _mldsa65PublicKeyLength = 1952;
+const _realityShortIdMaxHexLength = 16;
+final _hexPattern = RegExp(r'^[0-9a-fA-F]+$');
+
+List<int>? _decodeRawBase64Url(String value) {
+  if (value.isEmpty || value.contains('=')) return null;
+  try {
+    return base64Url.decode(base64Url.normalize(value));
+  } on FormatException {
+    return null;
+  }
 }
 
 /// Xray's ECHConfig sources: a fixed config, a DNS URL, or a forced

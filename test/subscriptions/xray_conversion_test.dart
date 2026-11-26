@@ -1,7 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/imports/config/xray_config.dart';
 import 'package:reclash/subscriptions/imports/subscription/subscription_links.dart';
 import 'package:yaml/yaml.dart';
+
+final _realityKeys = [
+  for (var fill = 1; fill <= 3; fill++)
+    base64Url.encode(List.filled(32, fill)).replaceAll('=', ''),
+];
+final _mldsaKey = base64Url.encode(List.filled(1952, 7)).replaceAll('=', '');
 
 const _servers = [
   ('de1.example', '11111111-1111-4111-8111-111111111111'),
@@ -37,7 +45,7 @@ Map<String, Object?> _vless(
     'security': 'reality',
     'realitySettings': {
       'serverName': 'cdn.example',
-      'publicKey': 'pbk$server',
+      'publicKey': _realityKeys[server],
       'shortId': 'ab',
       'fingerprint': ?fingerprint,
     },
@@ -378,11 +386,13 @@ void main() {
         'remarks': 'Broken',
         'outbounds': [
           _vless('exit', 0, sockopt: {'dialerProxy': 'missing'}),
+          _vless('good', 1),
           _direct,
         ],
       });
       expect(result, isNotNull);
       expect(result!.config, isNot(contains('de1.example')));
+      expect(result.config, contains('nl1.example'));
       expect(result.config, isNot(contains('dialer-proxy')));
       expect(
         (result as LossyConversion).skipped.map((node) => node.kind),
@@ -527,6 +537,25 @@ void main() {
       expect(_convert(config)['rules'], ['MATCH,PROXY']);
     });
 
+    test('reports a partially unsupported predicate list', () {
+      final result = tryConvertXrayConfigValue(
+        withRules([
+          {
+            'type': 'field',
+            'domain': ['geosite:google', 'ext:x:y'],
+            'outboundTag': 'proxy',
+          },
+        ]),
+      );
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final doc = loadYaml(result.config) as YamlMap;
+      expect((doc['rules'] as YamlList).cast<String>(), [
+        'GEOSITE,google,PROXY',
+        'MATCH,PROXY',
+      ]);
+    });
+
     test('ignores rules shadowed by a catch-all', () {
       final doc = _convert(
         withRules([
@@ -665,8 +694,8 @@ void main() {
               as Map<String, Object?>;
       reality
         ..remove('publicKey')
-        ..['password'] = 'new-public-key'
-        ..['mldsa65Verify'] = 'mldsa-key';
+        ..['password'] = _realityKeys[1]
+        ..['mldsa65Verify'] = _mldsaKey;
       final proxy = _proxy(
         _convert({
           'outbounds': [raw],
@@ -674,8 +703,8 @@ void main() {
         'edge-a',
       );
       final options = proxy['reality-opts'] as YamlMap;
-      expect(options['public-key'], 'new-public-key');
-      expect(options['mldsa65-verify'], 'mldsa-key');
+      expect(options['public-key'], _realityKeys[1]);
+      expect(options['mldsa65-verify'], _mldsaKey);
     });
 
     test('maps sockopt and WS headers, and reports keepalive loss', () {
@@ -813,6 +842,45 @@ void main() {
       expect(opts.containsKey('session-length'), isFalse);
     });
 
+    test('drops a session range starting at zero and records the loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'sessionIDTable': '01',
+        'sessionIDLength': '0-31',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final opts = proxy['xhttp-opts'] as YamlMap;
+      expect(opts.containsKey('session-table'), isFalse);
+      expect(opts.containsKey('session-length'), isFalse);
+    });
+
+    test('drops an oversized session table and records the loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'sessionIDTable': 'a' * 4097,
+        'sessionIDLength': '16-32',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final opts = proxy['xhttp-opts'] as YamlMap;
+      expect(opts.containsKey('session-table'), isFalse);
+    });
+
     test('reports an invalid VLESS flow instead of emitting it', () {
       final raw = _vless('edge-flow', 0);
       final users = _vlessUsers(raw);
@@ -826,20 +894,98 @@ void main() {
       expect(proxy.containsKey('flow'), isFalse);
     });
 
-    test('reports an invalid VLESS encryption instead of dropping it', () {
-      final raw = _vless('edge-encryption', 1);
-      final users = _vlessUsers(raw);
-      users['encryption'] = 'not-a-known-scheme';
+    test(
+      'skips an invalid VLESS encryption instead of emitting a broken node',
+      () {
+        final raw = _vless('edge-encryption', 1);
+        final users = _vlessUsers(raw);
+        users['encryption'] = 'not-a-known-scheme';
+        final result = tryConvertXrayConfigValue({
+          'outbounds': [raw, _vless('edge-good', 0)],
+        });
+        expect(result, isNotNull);
+        expect(
+          result!.skipped.map((node) => node.kind),
+          contains('encryption'),
+        );
+        expect(result.config, isNot(contains('edge-encryption')));
+        expect(result.config, contains('edge-good'));
+      },
+    );
+
+    test('skips REALITY with an unusable key as a security loss', () {
+      final raw = _vless('bad-reality', 0);
+      final reality =
+          (raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>;
+      reality['publicKey'] = 'not-a-key';
       final result = tryConvertXrayConfigValue({
-        'outbounds': [raw],
+        'outbounds': [raw, _vless('edge-good', 1)],
       });
       expect(result, isNotNull);
-      expect((result! as LossyConversion).hasOtherLosses, isTrue);
-      final proxy = _proxy(
-        loadYaml(result.config) as YamlMap,
-        'edge-encryption',
-      );
-      expect(proxy.containsKey('encryption'), isFalse);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('reality'));
+      expect(result.config, isNot(contains('bad-reality')));
+      expect(result.config, contains('edge-good'));
+    });
+
+    test('skips REALITY with an unusable short id', () {
+      final raw = _vless('bad-short-id', 0);
+      final reality =
+          (raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>;
+      reality['shortId'] = 'zz';
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('reality'));
+    });
+
+    test('skips an unusable ECH config as a security loss', () {
+      final raw = _vless('bad-ech', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'echConfigList': 'not-base64'};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('ech'));
+    });
+
+    test('skips a Shadowsocks node with a stream the Core cannot express', () {
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [
+          {
+            'tag': 'ss-ws',
+            'protocol': 'shadowsocks',
+            'settings': {
+              'servers': [
+                {
+                  'address': 'ss.example',
+                  'port': 8388,
+                  'method': 'aes-128-gcm',
+                  'password': 'pw',
+                },
+              ],
+            },
+            'streamSettings': {
+              'network': 'ws',
+              'security': 'tls',
+              'wsSettings': {'path': '/ws'},
+            },
+          },
+          _vless('edge-good', 1),
+        ],
+      });
+      expect(result, isNotNull);
+      expect(result!.skipped.map((node) => node.kind), contains('shadowsocks'));
+      expect(result.config, isNot(contains('ss-ws')));
     });
 
     test('maps stream finalmask on VLESS and Trojan only', () {
@@ -1036,20 +1182,37 @@ void main() {
       );
     });
 
+    test('drops a mux.cool block the Core would ignore', () {
+      final raw = _vless('bad-mux', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 'many',
+        'xudpProxyUDP443': 'sometimes',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'bad-mux');
+      expect(proxy.containsKey('mux.cool'), isFalse);
+    });
+
     test('prefers the REALITY password over a stale public key', () {
       final raw = _vless('edge-a', 0);
       final reality =
           ((raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
                 as Map<String, Object?>)
-            ..['password'] = 'new-key';
-      reality['publicKey'] = 'old-key';
+            ..['password'] = _realityKeys[1];
+      reality['publicKey'] = _realityKeys[0];
       final proxy = _proxy(
         _convert({
           'outbounds': [raw],
         }),
         'edge-a',
       );
-      expect((proxy['reality-opts'] as YamlMap)['public-key'], 'new-key');
+      expect((proxy['reality-opts'] as YamlMap)['public-key'], _realityKeys[1]);
     });
 
     test('lets an xhttp extra headers block win over sibling headers', () {

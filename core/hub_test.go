@@ -308,6 +308,28 @@ func TestHandleValidateConfigAcceptsAValidFile(t *testing.T) {
 	}
 }
 
+func TestHandleValidateConfigRejectsAnUnbuildableProxy(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := `proxies:
+  - {name: bad, type: vless, server: 127.0.0.1, port: 443, uuid: 11111111-1111-4111-8111-111111111111, encryption: "mlkem768x25519plus.native.0rtt."}
+proxy-groups:
+  - {name: PROXY, type: select, proxies: [bad, DIRECT]}
+rules:
+  - MATCH,PROXY
+`
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+
+	err := handleValidateConfig(path)
+	if err == nil {
+		t.Fatal("handleValidateConfig accepted a proxy the Core cannot build")
+	}
+	if !strings.Contains(err.Error(), "proxy 0") {
+		t.Errorf("handleValidateConfig = %v, want the proxy index", err)
+	}
+}
+
 func TestHandleDecryptConfigReadsAnAgeEncryptedFile(t *testing.T) {
 	secretKey, publicKey, err := age.GenX25519KeyPair()
 	if err != nil {

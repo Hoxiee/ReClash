@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../routing/skipped_node.dart';
 import '../subscription/subscription_links.dart';
+import 'xray_security.dart';
 
 const _serviceTypes = {'selector', 'urltest', 'direct', 'block', 'dns'};
 const _groupTypes = {'selector', 'urltest'};
@@ -27,14 +28,26 @@ bool _hasSingboxOutbounds(Map<String, Object?> config) {
       );
 }
 
-class _SingboxConfigResult implements ConvertedSubscription {
-  const _SingboxConfigResult({required this.config, this.skipped = const []});
+class _SingboxConfigResult
+    implements ConvertedSubscription, LossyConversion, SecurityLossyConversion {
+  const _SingboxConfigResult({
+    required this.config,
+    this.skipped = const [],
+    this.hasOtherLosses = false,
+    this.hasSecurityLoss = false,
+  });
 
   @override
   final String config;
 
   @override
   final List<SkippedNode> skipped;
+
+  @override
+  final bool hasOtherLosses;
+
+  @override
+  final bool hasSecurityLoss;
 }
 
 ConvertedSubscription? tryConvertSingboxConfig(String body) =>
@@ -52,6 +65,11 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
   final seen = {...reservedProxyNames};
   final targets = <String, String>{};
   final groupDefs = <String, Map<String, Object?>>{};
+  final proxyByTag = <String, Map<String, Object?>>{};
+  final nameByTag = <String, String>{};
+  final detourTags = <String, String>{};
+  var hasOtherLosses = false;
+  var hasSecurityLoss = false;
   for (final outbound in outbounds) {
     if (outbound is! Map<String, Object?>) continue;
     final type = outbound['type'];
@@ -66,10 +84,21 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
     try {
       proxy = _convertOutbound(outbound);
     } on _UnsupportedOutbound catch (error) {
+      if (error.security) hasSecurityLoss = true;
       skipped.add(error.node);
       continue;
     }
-    if (proxy == null) continue;
+    if (proxy == null) {
+      final kind = type?.toString() ?? 'outbound';
+      skipped.add(
+        SkippedNode(
+          name: tag.isEmpty ? kind : tag,
+          kind: kind,
+          reason: SkippedNodeReason.protocol,
+        ),
+      );
+      continue;
+    }
     var name = proxy['name']! as String;
     if (reservedProxyNames.contains(name)) name = '$name node';
     final base = name;
@@ -79,11 +108,62 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
       suffix++;
     }
     proxy['name'] = name;
+    if (proxy.remove('x-security-loss') == true) hasSecurityLoss = true;
+    if (proxy.remove('x-import-losses') == true) hasOtherLosses = true;
     proxies.add(proxy);
-    if (tag.isNotEmpty) targets[tag] = name;
+    if (tag.isNotEmpty) {
+      targets[tag] = name;
+      proxyByTag[tag] = proxy;
+      nameByTag[tag] = name;
+      final detour = outbound['detour']?.toString().trim() ?? '';
+      if (detour.isNotEmpty) detourTags[tag] = detour;
+    }
   }
 
-  if (proxies.isEmpty && skipped.isEmpty) return null;
+  final failed = <String>{};
+  String? resolveDetour(String tag, Set<String> stack) {
+    if (failed.contains(tag) || !proxyByTag.containsKey(tag)) return null;
+    final detour = detourTags[tag];
+    if (detour == null) return nameByTag[tag];
+    if (detour == tag || stack.contains(tag)) return null;
+    stack.add(tag);
+    try {
+      if (proxyByTag.containsKey(detour)) {
+        final hop = resolveDetour(detour, stack);
+        if (hop == null) return null;
+        proxyByTag[tag]!['dialer-proxy'] = hop;
+        return nameByTag[tag];
+      }
+      if (targets[detour] == 'DIRECT') {
+        // A direct detour still drops the chain the source asked for.
+        hasOtherLosses = true;
+        return nameByTag[tag];
+      }
+      if (targets.containsKey(detour)) return null;
+      return null;
+    } finally {
+      stack.remove(tag);
+    }
+  }
+
+  for (final tag in detourTags.keys.toList()) {
+    if (resolveDetour(tag, <String>{}) == null) failed.add(tag);
+  }
+  for (final tag in failed) {
+    final proxy = proxyByTag[tag]!;
+    proxies.remove(proxy);
+    targets.remove(tag);
+    hasSecurityLoss = true;
+    skipped.add(
+      SkippedNode(
+        name: nameByTag[tag]!,
+        kind: 'dialer-proxy',
+        reason: SkippedNodeReason.protocol,
+      ),
+    );
+  }
+
+  if (proxies.isEmpty) return null;
   seen.add('PROXY');
   final route = _asMap(decoded['route']);
   final plan = _planGroups(
@@ -93,14 +173,18 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
     seen,
     route?['final']?.toString() ?? '',
   );
+  final ruleResult = _convertRules(route, plan, targets);
+  hasOtherLosses = hasOtherLosses || ruleResult.hasLosses;
   return _SingboxConfigResult(
     config: emitProxiesConfig(
       proxies,
       groups: plan?.groups ?? const [],
-      rules: _convertRules(route, plan, targets),
+      rules: ruleResult.rules,
       entries: plan?.entries,
     ),
     skipped: skipped,
+    hasOtherLosses: hasOtherLosses,
+    hasSecurityLoss: hasSecurityLoss,
   );
 }
 
@@ -247,20 +331,25 @@ int _urlTestInterval(Object? value) {
 
 typedef _Predicate = ({String text, bool ip});
 
-List<String> _convertRules(
+({List<String> rules, bool hasLosses}) _convertRules(
   Map<String, Object?>? route,
   _GroupPlan? plan,
   Map<String, String> targets,
 ) {
-  if (route == null) return const [];
+  if (route == null) return (rules: const [], hasLosses: false);
   String? target(String tag) {
     if (tag == plan?.mainTag) return 'PROXY';
     return plan?.groupNames[tag] ?? targets[tag];
   }
 
   final rules = <String>{};
+  var hasLosses = false;
+  var hasCatchAll = false;
   for (final rule in _listOf(route['rules'])) {
-    if (rule is! Map<String, Object?>) continue;
+    if (rule is! Map<String, Object?>) {
+      hasLosses = true;
+      continue;
+    }
     final action = rule['action']?.toString() ?? 'route';
     final String? ruleTarget;
     if (action == 'reject') {
@@ -270,18 +359,33 @@ List<String> _convertRules(
     } else {
       ruleTarget = null;
     }
-    if (ruleTarget == null) continue;
+    if (ruleTarget == null) {
+      hasLosses = true;
+      continue;
+    }
     final predicates = _rulePredicates(rule);
-    if (predicates == null || predicates.isEmpty) continue;
+    if (predicates == null) {
+      hasLosses = true;
+      continue;
+    }
+    if (predicates.isEmpty) {
+      rules.add('MATCH,$ruleTarget');
+      hasCatchAll = true;
+      break;
+    }
     rules.addAll(_combineRulePredicates(predicates, ruleTarget));
   }
 
   final finalTag = route['final']?.toString() ?? '';
-  if (finalTag.isNotEmpty && finalTag != plan?.mainTag) {
+  if (!hasCatchAll && finalTag.isNotEmpty && finalTag != plan?.mainTag) {
     final finalTarget = plan?.groupNames[finalTag] ?? targets[finalTag];
-    if (finalTarget != null) rules.add('MATCH,$finalTarget');
+    if (finalTarget != null) {
+      rules.add('MATCH,$finalTarget');
+    } else {
+      hasLosses = true;
+    }
   }
-  return rules.toList();
+  return (rules: rules.toList(), hasLosses: hasLosses);
 }
 
 const _ruleMetadataKeys = {'type', 'outbound', 'action', 'method', 'no_drop'};
@@ -334,6 +438,8 @@ List<_Predicate>? _fieldPredicates(String key, List<String> values) {
         ip: false,
       ),
       'port_range' => _portRange(value),
+      'process_name' => (text: 'PROCESS-NAME,$value', ip: false),
+      'process_path' => (text: 'PROCESS-PATH,$value', ip: false),
       'network' when value == 'tcp' || value == 'udp' => (
         text: 'NETWORK,$value',
         ip: false,
@@ -387,9 +493,10 @@ Object? _tryJson(String body) {
 }
 
 class _UnsupportedOutbound implements Exception {
-  const _UnsupportedOutbound(this.node);
+  const _UnsupportedOutbound(this.node, {this.security = false});
 
   final SkippedNode node;
+  final bool security;
 }
 
 const _requiredFields = {
@@ -403,7 +510,7 @@ const _requiredFields = {
   'anytls': ['password'],
   'http': [],
   'socks5': [],
-  'wireguard': ['private-key', 'public-key'],
+  'wireguard': ['private-key'],
 };
 
 Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
@@ -427,8 +534,22 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
       proxy['type'] = 'vless';
       proxy['udp'] = true;
       _set(proxy, 'uuid', outbound['uuid']);
-      final flow = sanitizeVlessFlow(outbound['flow']?.toString() ?? '');
-      if (flow != null) proxy['flow'] = flow;
+      final rawFlow = outbound['flow']?.toString() ?? '';
+      final flow = sanitizeVlessFlow(rawFlow);
+      if (flow != null) {
+        proxy['flow'] = flow;
+        if (rawFlow != flow) proxy['x-import-losses'] = true;
+      } else if (rawFlow.isNotEmpty) {
+        proxy['x-import-losses'] = true;
+      }
+      final encryption = outbound['encryption']?.toString() ?? '';
+      if (encryption.isNotEmpty && encryption != 'none') {
+        if (isValidVlessEncryption(encryption)) {
+          proxy['encryption'] = encryption;
+        } else {
+          proxy['x-import-losses'] = true;
+        }
+      }
       final packetEncoding = outbound['packet_encoding']?.toString() ?? '';
       if (packetEncoding == 'packetaddr' || packetEncoding == 'packet') {
         proxy['packet-encoding'] = 'packetaddr';
@@ -525,7 +646,24 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
   }
 
   _applyTls(proxy, outbound['tls'], fallbackSni: server);
+  if (proxy.remove('x-invalid-reality') == true) {
+    throw _UnsupportedOutbound(
+      SkippedNode(
+        name: name,
+        kind: 'reality',
+        reason: SkippedNodeReason.protocol,
+      ),
+      security: true,
+    );
+  }
+  if (proxy.remove('x-invalid-ech') == true) {
+    throw _UnsupportedOutbound(
+      SkippedNode(name: name, kind: 'ech', reason: SkippedNodeReason.protocol),
+      security: true,
+    );
+  }
   _applyTransport(proxy, outbound['transport']);
+  _applyMultiplex(proxy, outbound['multiplex'], type);
   if (proxy['type'] == 'tuic' && proxy['tls'] != true) {
     proxy['tls'] = true;
     proxy['sni'] = server;
@@ -558,10 +696,11 @@ Map<String, Object?>? _convertWireguard(
   }
 
   final mtu = _toInt(outbound['mtu']);
+  final peerServer = first['server']?.toString() ?? '';
   return <String, Object?>{
     'name': name,
     'type': 'wireguard',
-    'server': first['server']?.toString() ?? server,
+    'server': peerServer.isEmpty ? server : peerServer,
     'port': first['port'] ?? port,
     'private-key': privateKey,
     'ip': ip ?? '',
@@ -619,12 +758,22 @@ void _applyTls(
   required String fallbackSni,
 }) {
   if (tlsValue is! Map<String, Object?>) return;
-  if (tlsValue['enabled'] != true) return;
+  final reality = _asMap(tlsValue['reality']);
+  final realityEnabled = reality?['enabled'] == true;
+  if (tlsValue['enabled'] != true) {
+    if (realityEnabled) proxy['x-invalid-reality'] = true;
+    return;
+  }
 
   proxy['tls'] = true;
   final disableSni = tlsValue['disable_sni'] == true;
   final type = proxy['type']?.toString() ?? '';
-  if (disableSni && type == 'tuic') proxy['disable-sni'] = true;
+  if (disableSni && type == 'tuic') {
+    proxy['disable-sni'] = true;
+  } else if (disableSni) {
+    // Only TUIC has a disable-sni switch; the Core would send the host anyway.
+    proxy['x-security-loss'] = true;
+  }
   final sni = disableSni
       ? ''
       : tlsValue['server_name']?.toString() ?? fallbackSni;
@@ -640,16 +789,59 @@ void _applyTls(
   final fingerprint = utls?['fingerprint']?.toString() ?? '';
   if (utls?['enabled'] == true && fingerprint.isNotEmpty) {
     proxy['client-fingerprint'] = fingerprint;
+  } else if (utls?['enabled'] == true) {
+    proxy['x-security-loss'] = true;
   }
 
-  final reality = _asMap(tlsValue['reality']);
-  final publicKey = reality?['public_key']?.toString() ?? '';
-  if (reality?['enabled'] == true && publicKey.isNotEmpty) {
-    proxy['reality-opts'] = {
-      'public-key': publicKey,
-      if ((reality?['short_id'] ?? '').toString().isNotEmpty)
-        'short-id': reality?['short_id'].toString(),
-    };
+  final ech = _asMap(tlsValue['ech']);
+  if (ech?['enabled'] == true) {
+    final config = ech?['config']?.toString() ?? '';
+    if (config.isNotEmpty && !xrayEchConfigValid(config)) {
+      proxy['x-invalid-ech'] = true;
+    } else {
+      proxy['ech-opts'] = {
+        'enable': true,
+        if (config.isNotEmpty) 'config': config,
+      };
+    }
+  }
+
+  if (realityEnabled) {
+    final publicKey = reality?['public_key']?.toString() ?? '';
+    final shortId = reality?['short_id']?.toString() ?? '';
+    final mldsa = reality?['mldsa65_verify']?.toString() ?? '';
+    if (!isValidRealityPublicKey(publicKey) ||
+        !isValidRealityShortId(shortId) ||
+        (mldsa.isNotEmpty && !isValidRealityMldsa65Verify(mldsa))) {
+      proxy['x-invalid-reality'] = true;
+    } else {
+      proxy['reality-opts'] = {
+        'public-key': publicKey,
+        if (shortId.isNotEmpty) 'short-id': shortId,
+        if (mldsa.isNotEmpty) 'mldsa65-verify': mldsa,
+      };
+      if (_present(reality?['spider_x'])) proxy['x-security-loss'] = true;
+    }
+  }
+
+  for (final key in const [
+    'min_version',
+    'max_version',
+    'cipher_suites',
+    'curve_preferences',
+    'certificate',
+    'client_certificate',
+    'client_key',
+  ]) {
+    if (_present(tlsValue[key])) proxy['x-security-loss'] = true;
+  }
+  for (final key in const [
+    'fragment',
+    'record_fragment',
+    'kernel_tx',
+    'kernel_rx',
+  ]) {
+    if (_present(tlsValue[key])) proxy['x-import-losses'] = true;
   }
 }
 
@@ -657,21 +849,31 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
   if (transportValue is! Map<String, Object?>) return;
   final type = transportValue['type']?.toString() ?? '';
   final path = transportValue['path']?.toString() ?? '';
-  final headers = _asMap(transportValue['headers']);
+  final headers = _transportHeaders(
+    transportValue['headers'],
+    () => proxy['x-import-losses'] = true,
+  );
   final hostValue = transportValue['host'];
-  final host =
-      (hostValue is List && hostValue.isNotEmpty
-          ? hostValue.first.toString()
-          : hostValue?.toString()) ??
-      headers?['Host']?.toString() ??
-      '';
+  final hostList = switch (hostValue) {
+    final List<Object?> values => [
+      for (final value in values)
+        if (value.toString().isNotEmpty) value.toString(),
+    ],
+    final value? when value.toString().isNotEmpty => [value.toString()],
+    _ => const <String>[],
+  };
+  final host = hostList.firstOrNull ?? _header(headers, 'Host') ?? '';
   switch (type) {
     case 'ws':
       proxy['network'] = 'ws';
       final earlyData = _toInt(transportValue['max_early_data']);
+      final wsHeaders = {...headers};
+      if (host.isNotEmpty && _header(wsHeaders, 'Host') == null) {
+        wsHeaders['Host'] = host;
+      }
       final wsOpts = <String, Object?>{
         if (path.isNotEmpty) 'path': path,
-        if (host.isNotEmpty) 'headers': {'Host': host},
+        if (wsHeaders.isNotEmpty) 'headers': wsHeaders,
         if (earlyData != null && earlyData > 0) 'max-early-data': earlyData,
       };
       proxy['ws-opts'] = wsOpts;
@@ -687,18 +889,39 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
       if (serviceName.isNotEmpty) {
         proxy['grpc-opts'] = {'grpc-service-name': serviceName};
       }
+      for (final key in const [
+        'permit_without_stream',
+        'idle_timeout',
+        'ping_timeout',
+        'keepalive_period',
+        'max_concurrent_streams',
+      ]) {
+        if (_present(transportValue[key])) proxy['x-import-losses'] = true;
+      }
+      if (headers.isNotEmpty) proxy['x-import-losses'] = true;
     case 'http':
+      final httpHosts = hostList.isNotEmpty
+          ? hostList
+          : (host.isNotEmpty ? [host] : const <String>[]);
       proxy['network'] = 'h2';
       proxy['h2-opts'] = {
         if (path.isNotEmpty) 'path': path,
-        if (host.isNotEmpty) 'host': [host],
+        if (httpHosts.isNotEmpty) 'host': httpHosts,
       };
+      if (_present(transportValue['method']) ||
+          headers.keys.any((key) => key.toLowerCase() != 'host')) {
+        proxy['x-import-losses'] = true;
+      }
     case 'httpupgrade':
       proxy['network'] = 'ws';
+      final upgradeHeaders = {...headers};
+      if (host.isNotEmpty && _header(upgradeHeaders, 'Host') == null) {
+        upgradeHeaders['Host'] = host;
+      }
       proxy['ws-opts'] = {
         'v2ray-http-upgrade': true,
         if (path.isNotEmpty) 'path': path,
-        if (host.isNotEmpty) 'headers': {'Host': host},
+        if (upgradeHeaders.isNotEmpty) 'headers': upgradeHeaders,
       };
     default:
       throw _UnsupportedOutbound(
@@ -710,6 +933,76 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
       );
   }
 }
+
+void _applyMultiplex(Map<String, Object?> proxy, Object? value, String type) {
+  final mux = _asMap(value);
+  if (mux == null || mux['enabled'] != true) return;
+  if (!const {
+    'vless',
+    'vmess',
+    'trojan',
+    'shadowsocks',
+    'http',
+    'socks',
+    'anytls',
+  }.contains(type)) {
+    proxy['x-import-losses'] = true;
+    return;
+  }
+  final protocol = mux['protocol']?.toString() ?? '';
+  if (protocol.isNotEmpty &&
+      !const {'smux', 'yamux', 'h2mux'}.contains(protocol)) {
+    proxy['x-import-losses'] = true;
+    return;
+  }
+  final maxConnections = _toInt(mux['max_connections']);
+  final minStreams = _toInt(mux['min_streams']);
+  final maxStreams = _toInt(mux['max_streams']);
+  final padding = mux['padding'];
+  proxy['smux'] = <String, Object?>{
+    'enabled': true,
+    if (protocol.isNotEmpty) 'protocol': protocol,
+    if (maxConnections != null && maxConnections > 0)
+      'max-connections': maxConnections,
+    if (minStreams != null && minStreams > 0) 'min-streams': minStreams,
+    if (maxStreams != null && maxStreams > 0) 'max-streams': maxStreams,
+    if (padding is bool) 'padding': padding,
+  };
+  if (mux['brutal'] != null) proxy['x-import-losses'] = true;
+}
+
+Map<String, String> _transportHeaders(Object? value, void Function() onLoss) {
+  final source = _asMap(value);
+  if (source == null) return {};
+  final result = <String, String>{};
+  for (final entry in source.entries) {
+    final header = entry.value;
+    if (header is String) {
+      result[entry.key] = header;
+    } else if (header is List &&
+        header.isNotEmpty &&
+        header.every((item) => item is String)) {
+      result[entry.key] = header.first.toString();
+    } else {
+      onLoss();
+    }
+  }
+  return result;
+}
+
+String? _header(Map<String, String> headers, String name) {
+  for (final entry in headers.entries) {
+    if (entry.key.toLowerCase() == name.toLowerCase()) return entry.value;
+  }
+  return null;
+}
+
+bool _present(Object? value) => switch (value) {
+  null || '' || false => false,
+  List() => value.isNotEmpty,
+  Map() => value.isNotEmpty,
+  _ => true,
+};
 
 void _set(Map<String, Object?> proxy, String key, Object? value) {
   if (value == null) return;

@@ -5,6 +5,8 @@ import 'package:reclash/subscriptions/imports/subscription/subscription_links.da
 import 'package:yaml/yaml.dart';
 
 const _uuid = '11111111-1111-4111-8111-111111111111';
+final _realityKey = base64Url.encode(List.filled(32, 1)).replaceAll('=', '');
+final _mldsaKey = base64Url.encode(List.filled(1952, 7)).replaceAll('=', '');
 
 String _description(String text) => base64.encode(utf8.encode(text));
 
@@ -79,7 +81,7 @@ void main() {
       );
       final result = tryConvertShareLinks(
         'vless://$_uuid@edge.example:443?security=reality'
-        '&pbk=key&sid=ab&pqv=mldsa&pcs=AA%3ABB'
+        '&pbk=$_realityKey&sid=ab&pqv=$_mldsaKey&pcs=AA%3ABB'
         '&vcn=front.example&ech=${Uri.encodeComponent('udp://1.1.1.1')}'
         '&fragmentPackets=tlshello&fragmentLength=10-20'
         '&fragmentInterval=5-10&fm=$fm&spx=%2F#Edge',
@@ -100,25 +102,25 @@ void main() {
         'delay': '5-10',
       });
       final reality = node['reality-opts'] as YamlMap;
-      expect(reality['public-key'], 'key');
+      expect(reality['public-key'], _realityKey);
       expect(reality['short-id'], 'ab');
-      expect(reality['mldsa65-verify'], 'mldsa');
+      expect(reality['mldsa65-verify'], _mldsaKey);
       expect(node['finalmask'], isA<YamlMap>());
     });
 
     test('maps Trojan REALITY and certificate verification', () {
       final proxy = _one(
-        'trojan://pw@edge.example:443?security=reality&pbk=key&sid=ab'
-        '&pqv=mldsa&sni=front.example&vcn=front.example&pcs=AA%3ABB#T',
+        'trojan://pw@edge.example:443?security=reality&pbk=$_realityKey&sid=ab'
+        '&pqv=$_mldsaKey&sni=front.example&vcn=front.example&pcs=AA%3ABB#T',
       );
       expect(proxy['tls'], isTrue);
       expect(proxy['sni'], 'front.example');
       expect(proxy['fingerprint'], 'AA:BB');
       expect(proxy['name-cert-verify'], 'front.example');
       final reality = proxy['reality-opts'] as YamlMap;
-      expect(reality['public-key'], 'key');
+      expect(reality['public-key'], _realityKey);
       expect(reality['short-id'], 'ab');
-      expect(reality['mldsa65-verify'], 'mldsa');
+      expect(reality['mldsa65-verify'], _mldsaKey);
     });
 
     test('maps XHTTP session parameters into extra', () {
@@ -166,22 +168,132 @@ void main() {
 
     test('adds the hybrid key share to chrome REALITY links', () {
       final proxy = _one(
-        'vless://$_uuid@edge.example:443?security=reality&pbk=key&sid=ab'
+        'vless://$_uuid@edge.example:443?security=reality&pbk=$_realityKey&sid=ab'
         '&sni=a.example&flow=xtls-rprx-vision#a',
       );
       expect(proxy['client-fingerprint'], 'chrome');
       final reality = proxy['reality-opts'] as YamlMap;
-      expect(reality['public-key'], 'key');
+      expect(reality['public-key'], _realityKey);
       expect(reality['support-x25519mlkem768'], isTrue);
     });
 
     test('honors an explicit MLKEM opt-out', () {
       final proxy = _one(
-        'vless://$_uuid@edge.example:443?security=reality&pbk=key'
+        'vless://$_uuid@edge.example:443?security=reality&pbk=$_realityKey'
         '&support-x25519mlkem768=false#a',
       );
       final reality = proxy['reality-opts'] as YamlMap;
       expect(reality['support-x25519mlkem768'], isFalse);
+    });
+
+    test('skips REALITY links with an unusable key', () {
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@bad.example:443?security=reality&pbk=not-a-key#bad\n'
+        'vless://$_uuid@good.example:443?security=tls#good',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasSecurityLoss, isTrue);
+      expect(result.skipped.single.kind, 'reality');
+      expect(result.config, isNot(contains('bad.example')));
+      expect(result.config, contains('good.example'));
+    });
+
+    test('skips REALITY links without a public key', () {
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@bad.example:443?security=reality&sid=ab#bad\n'
+        'vless://$_uuid@good.example:443?security=tls#good',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasSecurityLoss, isTrue);
+      expect(result.skipped.single.kind, 'reality');
+      expect(result.config, isNot(contains('"public-key": ""')));
+    });
+
+    test('skips REALITY links with an unusable short id', () {
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@bad.example:443?security=reality'
+        '&pbk=$_realityKey&sid=zz#bad\n'
+        'vless://$_uuid@good.example:443?security=tls#good',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasSecurityLoss, isTrue);
+      expect(result.skipped.single.kind, 'reality');
+    });
+
+    test('skips a malformed ECH config as a security loss', () {
+      final result = tryConvertShareLinks(
+        'vless://$_uuid@bad.example:443?security=tls&ech=not-base64#bad\n'
+        'vless://$_uuid@good.example:443?security=tls#good',
+      );
+      expect(result, isNotNull);
+      expect(result!.hasSecurityLoss, isTrue);
+      expect(result.skipped.single.kind, 'ech');
+    });
+
+    test('accepts the legacy VMess TLS flag instead of dropping the node', () {
+      final vmess = base64.encode(
+        utf8.encode(
+          jsonEncode({
+            'v': '2',
+            'ps': 'vm',
+            'add': 'vm.example',
+            'port': '443',
+            'id': _uuid,
+            'net': 'ws',
+            'path': '/x',
+            'tls': '1',
+            'sni': 'cdn.example',
+          }),
+        ),
+      );
+      final proxy = _one('vmess://$vmess');
+      expect(proxy['tls'], isTrue);
+      expect(proxy['servername'], 'cdn.example');
+    });
+
+    test('keeps VMess KCP options', () {
+      final vmess = base64.encode(
+        utf8.encode(
+          jsonEncode({
+            'v': '2',
+            'ps': 'kcp',
+            'add': 'kcp.example',
+            'port': '443',
+            'id': _uuid,
+            'net': 'kcp',
+            'mtu': '1350',
+            'tti': '20',
+            'uplinkCapacity': '5',
+            'downlinkCapacity': '20',
+            'congestion': true,
+            'readBufferSize': '1',
+            'writeBufferSize': '2',
+            'seed': 'seed',
+            'type': 'srtp',
+          }),
+        ),
+      );
+      final proxy = _one('vmess://$vmess');
+      expect(proxy['mkcp-opts'], {
+        'mtu': 1350,
+        'tti': 20,
+        'uplink-capacity': 5,
+        'downlink-capacity': 20,
+        'congestion': true,
+        'read-buffer': 1,
+        'write-buffer': 2,
+        'seed': 'seed',
+        'header': 'srtp',
+      });
+    });
+
+    test('keeps v2ray-plugin tls=false as no TLS', () {
+      final credential = base64.encode(utf8.encode('aes-128-gcm:pw'));
+      final plugin = Uri.encodeComponent(
+        'v2ray-plugin;tls=false;host=cdn.example',
+      );
+      final proxy = _one('ss://$credential@ss.example:8388?plugin=$plugin#ss');
+      expect((proxy['plugin-opts'] as YamlMap).containsKey('tls'), isFalse);
     });
 
     test('drops finalmask UDP masks that Core cannot use on TCP', () {
@@ -211,7 +323,7 @@ void main() {
 
     test('keeps other known fingerprints without the key share', () {
       final proxy = _one(
-        'vless://$_uuid@edge.example:443?security=reality&pbk=key&fp=safari#a',
+        'vless://$_uuid@edge.example:443?security=reality&pbk=$_realityKey&fp=safari#a',
       );
       expect(proxy['client-fingerprint'], 'safari');
       expect(
@@ -280,7 +392,7 @@ void main() {
             'id': _uuid,
             'net': 'tcp',
             'tls': 'reality',
-            'pbk': 'key',
+            'pbk': _realityKey,
           }),
         ),
       );

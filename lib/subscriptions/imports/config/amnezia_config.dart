@@ -331,7 +331,14 @@ String? awgConfFromLinkParams({
       continue;
     }
     final proxy = _convertAmneziaContainer(share, protocolConfig);
-    if (proxy != null) proxies.add(proxy);
+    if (proxy != null) {
+      proxies.add(proxy);
+    } else {
+      final kind = containerName ?? 'amnezia';
+      skipped.add(
+        SkippedNode(name: kind, kind: kind, reason: SkippedNodeReason.protocol),
+      );
+    }
   }
   return (proxies, skipped);
 }
