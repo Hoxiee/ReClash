@@ -218,14 +218,14 @@ ReClash существует благодаря работе этих проек
 
 - [FlClash](https://github.com/chen08209/FlClash) от [chen08209](https://github.com/chen08209) — приложение, на котором основан ReClash.
 - [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — клиент, с которого начался ReClash.
-- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения. ReClash использует сборку с патчами из [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core).
+- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро, на котором построено приложение. ReClash поставляется с [rain-core](https://github.com/Hoxiee/rain-core) — своим официальным ядром mihomo с патчами.
 - [Koala Clash](https://github.com/coolcoala/koala-clash) от [coolcoala](https://github.com/coolcoala) — клиент, который познакомил меня с mihomo.
 
 **Ядро**
 
 - [ClashFest](https://github.com/Nemu-x/ClashFest) от [Nemu-x](https://github.com/Nemu-x) — из его патчей в ядро перенесены Xray-совместимость и диагностика; номера патчей сохранены.
 - [Prizrak-Core](https://github.com/legiz-ru/Prizrak-Core) от [legiz-ru](https://github.com/legiz-ru) — оттуда пришли finalmask, отпечатки Firefox, XDRIVE, REALITY и конвертер Xray-ссылок.
-- [veles](https://github.com/Rerowros/veles), [Citrus](https://github.com/getmikan/Citrus), [SlothClash](https://github.com/Nemu-x/SlothClash) и [Xray-core](https://github.com/XTLS/Xray-core) — источники отдельных патчей; разбор — в [CREDITS.md](https://github.com/Hoxiee/mihomo-patch-core/blob/main/CREDITS.md).
+- [veles](https://github.com/Rerowros/veles), [Citrus](https://github.com/getmikan/Citrus), [SlothClash](https://github.com/Nemu-x/SlothClash) и [Xray-core](https://github.com/XTLS/Xray-core) — источники отдельных патчей; разбор — в [CREDITS.md](https://github.com/Hoxiee/rain-core/blob/main/CREDITS.md).
 
 **Remnawave** — лучшая панель для подписок, и мы её рекомендуем. ReClash плотно с ней интегрирован: понимает её заголовки подписки, HWID с `x-hwid` и страницу подписки, а для её правил ответа есть [готовое правило](docs/ru/providers/rollout.md#remnawave). При этом кода Remnawave в нём нет, тело подписки остаётся обычным mihomo, и с другими панелями всё работает так же.
 

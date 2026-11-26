@@ -206,14 +206,14 @@ ReClash 的开发离不开以下项目及其维护者。
 
 - [FlClash](https://github.com/chen08209/FlClash)，由 [chen08209](https://github.com/chen08209) 维护，是 ReClash 的项目基础。
 - [FlClashX](https://github.com/pluralplay/FlClashX)，由 [pluralplay](https://github.com/pluralplay) 维护，是 ReClash 的起点。
-- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用使用的代理核心。ReClash 使用来自 [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core) 的修补版本。
+- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用的代理核心。ReClash 随附 [rain-core](https://github.com/Hoxiee/rain-core)，它是 ReClash 的官方 mihomo 内核。
 - [Koala Clash](https://github.com/coolcoala/koala-clash)，由 [coolcoala](https://github.com/coolcoala) 维护，是让我认识 mihomo 的客户端。
 
 **内核**
 
 - [ClashFest](https://github.com/Nemu-x/ClashFest)，由 [Nemu-x](https://github.com/Nemu-x) 维护：其中的补丁被移植到内核，带来 Xray 兼容与诊断能力，并保留原补丁编号。
 - [Prizrak-Core](https://github.com/legiz-ru/Prizrak-Core)，由 [legiz-ru](https://github.com/legiz-ru) 维护：finalmask、Firefox 指纹、XDRIVE、REALITY 和 Xray 分享链接转换来自这里。
-- [veles](https://github.com/Rerowros/veles)、[Citrus](https://github.com/getmikan/Citrus)、[SlothClash](https://github.com/Nemu-x/SlothClash) 和 [Xray-core](https://github.com/XTLS/Xray-core) 是部分补丁的来源；详见 [CREDITS.md](https://github.com/Hoxiee/mihomo-patch-core/blob/main/CREDITS.md)。
+- [veles](https://github.com/Rerowros/veles)、[Citrus](https://github.com/getmikan/Citrus)、[SlothClash](https://github.com/Nemu-x/SlothClash) 和 [Xray-core](https://github.com/XTLS/Xray-core) 是部分补丁的来源；详见 [CREDITS.md](https://github.com/Hoxiee/rain-core/blob/main/CREDITS.md)。
 
 **Remnawave** 是最好的订阅面板，我们也推荐使用。ReClash 与它紧密集成：能读取它的订阅响应头、`x-hwid` 设备标识和订阅页面，并为它的响应规则提供了[现成规则](docs/zh-CN/providers/rollout.md#remnawave)。ReClash 不含 Remnawave 的代码，订阅正文仍是普通 mihomo，其他面板也同样可用。
 
