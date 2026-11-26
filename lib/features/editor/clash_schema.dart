@@ -355,7 +355,11 @@ const _proxyTypes = [
   'rematch',
 ];
 
-const _proxyCommon = {'name': _str, 'type': YamlSchema.scalar(_proxyTypes)};
+const _proxyCommon = {
+  'name': _str,
+  'type': YamlSchema.scalar(_proxyTypes),
+  'fragment-opts': _fragmentOpts,
+};
 
 const _server = {'server': _str, 'port': _str};
 
@@ -408,7 +412,64 @@ const _reality = {
     'public-key': _str,
     'short-id': _str,
     'support-x25519mlkem768': _bool,
+    'client-version': _str,
+    'mlkem-client-fingerprint': _str,
+    'mldsa65-verify': _str,
   }),
+};
+
+const _fragmentOpts = YamlSchema.map({
+  'packets': _str,
+  'length': _str,
+  'delay': _str,
+  'lengths': _strList,
+  'delays': _strList,
+  'max-split': _str,
+});
+
+/// The `mux.cool` block of a vless proxy, Xray's own outbound mux.
+const _muxCool = YamlSchema.map({
+  'enabled': _bool,
+  'max-concurrency': _str,
+  'max-connections': _str,
+  'max-carriers': _str,
+  'xudp-concurrency': _str,
+  'xudp-proxy-udp443': _str,
+});
+
+/// The `xdrive-opts` block of a vless proxy with `network: xdrive`.
+const _xdriveOpts = YamlSchema.map({
+  'fronting': _str,
+  'remote-folder': _str,
+  'service': YamlSchema.scalar(['local']),
+  'secrets': _strList,
+  'segment-bytes': _str,
+  'flush-interval-ms': _str,
+  'poll-interval-ms': _str,
+  'max-poll-interval-ms': _str,
+  'session-ttl-seconds': _str,
+  'concurrency': _str,
+  'eager-window-ms': _str,
+  'hole-timeout-ms': _str,
+  'template': YamlSchema.dict(_str),
+});
+
+const _finalMask = YamlSchema.map({
+  'tcp': YamlSchema.list(YamlSchema.map(_finalMaskEntry)),
+  'udp': YamlSchema.list(YamlSchema.map(_finalMaskEntry)),
+});
+
+const _finalMaskEntry = {
+  'type': _str,
+  'packets': _str,
+  'length': _str,
+  'delay': _str,
+  'lengths': _strList,
+  'delays': _strList,
+  'max-split': _str,
+  'interval': _str,
+  'reset': _str,
+  'settings': YamlSchema.dict(_str),
 };
 
 const _wsOpts = YamlSchema.map({
@@ -489,7 +550,15 @@ const _vmessTransport = {
 };
 
 const _vlessTransport = {
-  'network': YamlSchema.scalar(['tcp', 'ws', 'http', 'h2', 'grpc', 'xhttp']),
+  'network': YamlSchema.scalar([
+    'tcp',
+    'ws',
+    'http',
+    'h2',
+    'grpc',
+    'xhttp',
+    'xdrive',
+  ]),
   'ws-opts': _wsOpts,
   'http-opts': _httpOpts,
   'h2-opts': _h2Opts,
@@ -798,6 +867,9 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'flow': YamlSchema.scalar(['xtls-rprx-vision']),
     'encryption': _str,
     'packet-encoding': YamlSchema.scalar(['packetaddr', 'xudp']),
+    'mux.cool': _muxCool,
+    'xdrive-opts': _xdriveOpts,
+    'finalmask': _finalMask,
     ..._optionalTls,
     ..._tlsLayers,
     ..._reality,
@@ -814,6 +886,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
       'password': _str,
     }),
     'client-fingerprint': _clientFingerprint,
+    'finalmask': _finalMask,
     ..._sniTls,
     ..._tlsLayers,
     ..._reality,
@@ -845,6 +918,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'obfs-min-packet-size': _str,
     'obfs-max-packet-size': _str,
     'hop-interval': _str,
+    'disable-mtu-discovery': _bool,
     'bbr-profile': _bbrProfile,
     'cwnd': _str,
     'udp-mtu': _str,
@@ -1160,6 +1234,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'sni': _str,
     'skip-cert-verify': _bool,
     'network': YamlSchema.scalar(['h2', 'h3-l4proxy']),
+    'disable-mtu-discovery': _bool,
     'congestion-controller': _congestionController,
     'bbr-profile': _bbrProfile,
     'cwnd': _str,
@@ -1407,6 +1482,9 @@ const _dns = YamlSchema.map({
   'nameserver': _nameserver,
   'fallback': _nameserver,
   'fallback-lazy-query': _bool,
+  'serve-expired': _bool,
+  'serve-expired-ttl': _str,
+  'serve-expired-client-timeout': _str,
   'proxy-server-nameserver': _nameserver,
   'direct-nameserver': _nameserver,
   'direct-nameserver-follow-policy': _bool,
@@ -1494,6 +1572,7 @@ const _sniffer = YamlSchema.map({
   'enable': _bool,
   'force-dns-mapping': _bool,
   'parse-pure-ip': _bool,
+  'skip-threshold': _str,
   'override-destination': _bool,
   'sniff': YamlSchema.map({
     'HTTP': _sniffPorts,
@@ -1921,6 +2000,7 @@ const clashConfigSchema = YamlSchema.map({
   'ipv6': _bool,
   'unified-delay': _bool,
   'tcp-concurrent': _bool,
+  'tcp-connect-timeout': _str,
   'find-process-mode': YamlSchema.scalar(['strict', 'always', 'off']),
   'global-ua': _str,
   'keep-alive-interval': _str,
