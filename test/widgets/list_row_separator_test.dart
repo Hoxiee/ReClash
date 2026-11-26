@@ -61,13 +61,13 @@ void main() {
     expect(tester.renderObject(rows[2]), isNot(separator(tester, rows[2])));
   });
 
-  testWidgets('an invalid row drops the separators on both its edges', (
+  testWidgets('an invalid row keeps the separators on both its edges', (
     tester,
   ) async {
     final rows = await pumpRows(tester, invalid: 1);
 
-    expect(tester.renderObject(rows[0]), isNot(separator(tester, rows[0])));
-    expect(tester.renderObject(rows[1]), isNot(separator(tester, rows[1])));
+    expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
+    expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
   testWidgets('a selected row keeps the separators on both its edges', (
@@ -79,18 +79,19 @@ void main() {
     expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
-  testWidgets('pressing a row hides the separator above it until release', (
+  testWidgets('pressing a row keeps the separators on both its edges', (
     tester,
   ) async {
     final rows = await pumpRows(tester);
 
-    final gesture = await tester.startGesture(tester.getCenter(rows[2]));
+    final gesture = await tester.startGesture(tester.getCenter(rows[1]));
     await tester.pump();
-    expect(tester.renderObject(rows[1]), isNot(separator(tester, rows[1])));
     expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
+    expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
 
     await gesture.up();
     await tester.pumpAndSettle();
+    expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
     expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
