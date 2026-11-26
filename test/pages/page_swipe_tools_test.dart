@@ -17,6 +17,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -107,6 +108,9 @@ void main() {
     container
         .read(profilesProvider.notifier)
         .put(const Profile(id: 1, autoUpdateDuration: Duration.zero));
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(pageSwipe: true));
     container.read(viewSizeProvider.notifier).value = _size;
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -147,6 +151,36 @@ void main() {
     await fling(tester, 200);
     expect(shown(), PageLabel.proxies);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a swipe back follows the finger on a Tools page', (
+    tester,
+  ) async {
+    final container = await pumpHome(tester);
+
+    await tester.tap(find.widgetWithText(ListItem<dynamic>, 'General').first);
+    await tester.pumpAndSettle();
+    final route = ModalRoute.of(
+      tester.element(find.byType(SettingsRevealScope)),
+    )!;
+
+    final gesture = await tester.startGesture(const Offset(120, 420));
+    for (var step = 0; step < 10; step++) {
+      await gesture.moveBy(const Offset(10, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    for (var frame = 0; frame < 10; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(route.animation!.value, lessThan(0.95));
+    expect(container.read(toolsSessionProvider).path, isNotEmpty);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(container.read(toolsSessionProvider).path, isNotEmpty);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
   });
 
   testWidgets('a swipe back on a Tools page still sliding in goes back', (

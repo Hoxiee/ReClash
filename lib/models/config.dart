@@ -289,7 +289,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool coreErrorNotices,
     @Default(true) bool closeConnections,
     @Default(defaultDelayTestTimeout) int delayTestTimeout,
-    @Default(true) bool pageSwipe,
+    @Default(false) bool pageSwipe,
     @Default(true) bool floatingNavigationBar,
     @Default(NavigationLayout.auto)
     @JsonKey(unknownEnumValue: NavigationLayout.auto)
