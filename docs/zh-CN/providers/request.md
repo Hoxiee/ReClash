@@ -52,7 +52,7 @@ ReClash 在本地检测正文格式。原生 Clash YAML 保持原样；分享链
 
 分享链接列表接受纯文本、Base64 和 Base64url。支持的协议方案包括 `mierus`、`tt`（TrustTunnel）、`socks5h`、`hysteria2+realm` 和 `hy2+realm`；Mieru 链接可以定义多组端口/协议。设置了 anti-DPI、客户端随机前缀或多个地址的 TrustTunnel 链接导入时会带有丢失警告，因为 Core 无法表达这些字段。在可识别的列表中，无法识别或格式错误的节点链接会被报告为已跳过。
 
-VLESS XHTTP 转换会保留受支持的 `extra` 选项，包括请求头、填充、连接复用和独立的下载连接。不受支持或格式错误的 extra 选项会被报告为转换损失。外来的 DNS、入站及其他未转换的配置部分同样会被报告，Xray 数组中的每个配置也是如此。存在损失时需要批准，或该来源已接受导入策略；未经批准的更新会让已保存的配置保持不变。
+VLESS XHTTP 转换会保留受支持的 `extra` 选项，包括请求头、填充、连接复用和独立的下载连接。不受支持或格式错误的 extra 选项会被报告为转换损失。外来的 DNS、入站及其他未转换的配置部分同样会被报告，Xray 数组中的每个配置也是如此。在 VLESS 上，Xray `mux` 会转换为 `mux.cool`。Xray 会把小于 128 的 TCP `concurrency` 提高到 128，导入器保留这一生效值；负值会禁用 mux。Vision 节点仅在关闭 TCP 多路复用（`concurrency: 0` 或缺失）并启用 XUDP（`xudpConcurrency > 0`）时保留 mux：导入器写入 Core 的 `concurrency: 0`（不建立 TCP 池），因此 TCP 保持普通 Vision，只有 UDP 被多路复用；其他 Vision mux 记为转换损失，非 VLESS mux 同样记为转换损失。既没有 TCP 池也没有 XUDP 的块会被丢弃。存在损失时需要批准，或该来源已接受导入策略；未经批准的更新会让已保存的配置保持不变。
 
 ## 响应状态
 

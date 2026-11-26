@@ -767,7 +767,7 @@ void main() {
       );
       expect(proxy['mux.cool'], {
         'enabled': true,
-        'max-concurrency': 8,
+        'max-concurrency': 128,
         'xudp-concurrency': 16,
         'xudp-proxy-udp443': 'allow',
       });
@@ -780,6 +780,186 @@ void main() {
       expect(result, isNotNull);
       expect((result! as LossyConversion).hasOtherLosses, isTrue);
       expect(result.config, isNot(contains('mux.cool')));
+    });
+
+    test('raises Xray zero concurrency to the 128-worker floor', () {
+      final raw = _vless('mux-xudp', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 0,
+        'xudpConcurrency': 8,
+        'xudpProxyUDP443': 'reject',
+      };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'mux-xudp',
+      );
+      expect(proxy['mux.cool'], {
+        'enabled': true,
+        'max-concurrency': 128,
+        'xudp-concurrency': 8,
+        'xudp-proxy-udp443': 'reject',
+      });
+    });
+
+    test('keeps TCP mux for a zero concurrency without an XUDP pool', () {
+      for (final mux in [
+        {'enabled': true, 'concurrency': 0},
+        {'enabled': true, 'concurrency': 0, 'xudpConcurrency': 0},
+      ]) {
+        final raw = _vless('mux-none', 0);
+        _vlessUsers(raw).remove('flow');
+        raw['mux'] = mux;
+        final result = tryConvertXrayConfigValue({
+          'outbounds': [raw],
+        });
+        expect(result, isNotNull);
+        expect((result! as LossyConversion).hasOtherLosses, isFalse);
+        final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-none');
+        expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
+      }
+    });
+
+    test('defaults absent Xray concurrency to the 128-worker floor', () {
+      final raw = _vless('mux-default', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {'enabled': true};
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'mux-default',
+      );
+      expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
+    });
+
+    test('keeps Xray concurrency above the floor and omits zero XUDP', () {
+      final raised = _vless('mux-floor', 0);
+      _vlessUsers(raised).remove('flow');
+      raised['mux'] = {'enabled': true, 'concurrency': 8};
+      final raisedProxy = _proxy(
+        _convert({
+          'outbounds': [raised],
+        }),
+        'mux-floor',
+      );
+      expect(raisedProxy['mux.cool'], {
+        'enabled': true,
+        'max-concurrency': 128,
+      });
+
+      final above = _vless('mux-above', 1);
+      _vlessUsers(above).remove('flow');
+      above['mux'] = {
+        'enabled': true,
+        'concurrency': 256,
+        'xudpConcurrency': 0,
+      };
+      final aboveProxy = _proxy(
+        _convert({
+          'outbounds': [above],
+        }),
+        'mux-above',
+      );
+      expect(aboveProxy['mux.cool'], {'enabled': true, 'max-concurrency': 256});
+    });
+
+    test('keeps Vision with a pure-XUDP mux.cool block', () {
+      final raw = _vless('vision-xudp', 0);
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 0,
+        'xudpConcurrency': 8,
+        'xudpProxyUDP443': 'allow',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'vision-xudp');
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy['mux.cool'], {
+        'concurrency': 0,
+        'xudp-concurrency': 8,
+        'xudp-proxy-udp443': 'allow',
+      });
+    });
+
+    test('keeps Vision with a pure-XUDP block for absent concurrency', () {
+      final raw = _vless('vision-default', 0);
+      raw['mux'] = {'enabled': true, 'xudpConcurrency': 8};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(
+        loadYaml(result.config) as YamlMap,
+        'vision-default',
+      );
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy['mux.cool'], {'concurrency': 0, 'xudp-concurrency': 8});
+    });
+
+    test('drops Vision mux without an XUDP pool', () {
+      final raw = _vless('vision-plain', 0);
+      raw['mux'] = {'enabled': true, 'concurrency': 0};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'vision-plain');
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy.containsKey('mux.cool'), isFalse);
+    });
+
+    test('reports mux on a non-VLESS outbound as a loss', () {
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [
+          {
+            'tag': 'ss-mux',
+            'protocol': 'shadowsocks',
+            'settings': {
+              'servers': [
+                {
+                  'address': 'ss.example',
+                  'port': 8388,
+                  'method': 'aes-128-gcm',
+                  'password': 'pw',
+                },
+              ],
+            },
+            'mux': {'enabled': true, 'concurrency': 8},
+          },
+          _vless('edge-good', 1),
+        ],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'ss-mux');
+      expect(proxy.containsKey('mux.cool'), isFalse);
+    });
+
+    test('reports an invalid Xray UDP 443 policy as a loss', () {
+      final raw = _vless('mux-443', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 8,
+        'xudpProxyUDP443': 'sometimes',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-443');
+      expect(proxy.containsKey('mux.cool'), isFalse);
     });
 
     test('maps raw to tcp and http to h2', () {
@@ -1176,10 +1356,7 @@ void main() {
       expect(result, isNotNull);
       expect((result! as LossyConversion).hasOtherLosses, isTrue);
       final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-udp-off');
-      expect(
-        (proxy['mux.cool'] as YamlMap).containsKey('xudp-concurrency'),
-        isFalse,
-      );
+      expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
     });
 
     test('drops a mux.cool block the Core would ignore', () {

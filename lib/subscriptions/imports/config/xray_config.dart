@@ -246,6 +246,9 @@ class _XrayConversion {
         final invalidUdp443 =
             udp443.isNotEmpty &&
             !const {'reject', 'allow', 'skip'}.contains(udp443);
+        final vision =
+            proxy['type'] == 'vless' &&
+            (proxy['flow']?.toString().startsWith('xtls-rprx-vision') ?? false);
         if ((mux['concurrency'] != null && mux['concurrency'] is! num) ||
             (mux['xudpConcurrency'] != null &&
                 mux['xudpConcurrency'] is! num)) {
@@ -255,20 +258,39 @@ class _XrayConversion {
           // Xray disables Mux entirely for a negative TCP concurrency.
         } else if (invalidUdp443) {
           proxy['x-import-losses'] = true;
-        } else if (proxy['type'] == 'vless' &&
-            !(proxy['flow']?.toString().startsWith('xtls-rprx-vision') ??
-                false)) {
-          if (xudp != null && xudp < 0) {
-            proxy['x-import-losses'] = true;
-          }
-          proxy['mux.cool'] = <String, Object?>{
-            'enabled': true,
-            'max-concurrency': ?concurrency,
-            if (xudp != null && xudp >= 0) 'xudp-concurrency': xudp,
-            if (udp443.isNotEmpty) 'xudp-proxy-udp443': udp443,
-          };
-        } else {
+        } else if (proxy['type'] != 'vless') {
           proxy['x-import-losses'] = true;
+        } else {
+          // Xray 26 raises 0..128 to 128; absent is zero before that.
+          final udpPlain = xudp != null && xudp < 0;
+          if (vision) {
+            if (concurrency == null || concurrency == 0) {
+              if (xudp != null && xudp > 0) {
+                proxy['mux.cool'] = <String, Object?>{
+                  'concurrency': 0,
+                  'xudp-concurrency': xudp,
+                  if (udp443.isNotEmpty) 'xudp-proxy-udp443': udp443,
+                };
+              } else if (udpPlain) {
+                proxy['x-import-losses'] = true;
+              }
+            } else {
+              proxy['x-import-losses'] = true;
+            }
+          } else {
+            if (udpPlain) {
+              proxy['x-import-losses'] = true;
+            }
+            final maxConcurrency = concurrency == null || concurrency <= 128
+                ? 128
+                : concurrency;
+            proxy['mux.cool'] = <String, Object?>{
+              'enabled': true,
+              'max-concurrency': maxConcurrency,
+              if (xudp != null && xudp > 0) 'xudp-concurrency': xudp,
+              if (udp443.isNotEmpty && !udpPlain) 'xudp-proxy-udp443': udp443,
+            };
+          }
         }
       }
       if (_present(outbound['targetStrategy']) ||
