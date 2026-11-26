@@ -16,6 +16,7 @@ typedef BuiltProfile = ({
   bool useSystemHosts,
   SetupBase? base,
   String webDashboardDirectory,
+  List<String> dropped,
 });
 
 class _RunRequest {
@@ -869,6 +870,7 @@ class SetupAction extends _$SetupAction {
         useSystemHosts: true,
         base: null,
         webDashboardDirectory: '',
+        dropped: const <String>[],
       );
     }
     final defaultUA = globalState.packageInfo.ua;
@@ -960,6 +962,7 @@ class SetupAction extends _$SetupAction {
         useSystemHosts: res.useSystemHosts,
         base: null,
         webDashboardDirectory: webDashboardDirectory,
+        dropped: res.dropped,
       );
     }
     final (:base, :path) = profileBase;
@@ -974,6 +977,7 @@ class SetupAction extends _$SetupAction {
       useSystemHosts: res.useSystemHosts,
       base: SetupBase(path: path, overlay: res.yaml),
       webDashboardDirectory: webDashboardDirectory,
+      dropped: res.dropped,
     );
   }
 
@@ -1276,6 +1280,13 @@ class SetupAction extends _$SetupAction {
     final realProfile = suppressErrors
         ? await buildProfile()
         : await globalState.safeRun(buildProfile, title: 'build profile');
+    if (realProfile != null && realProfile.dropped.isNotEmpty) {
+      commonPrint.log(
+        'providers the Core cannot fetch were dropped: '
+        '${realProfile.dropped.join(', ')}',
+        logLevel: LogLevel.warning,
+      );
+    }
     final profileFailed = realProfile == null;
     final sourcePath = profile == null || profile.type == ProfileType.custom
         ? ''

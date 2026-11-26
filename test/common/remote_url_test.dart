@@ -47,6 +47,22 @@ void main() {
     }
   });
 
+  test('a provider URL keeps its credentials but not a local target', () {
+    expect(
+      isBlockedProviderUrl('https://user:pass@example.com/provider.yaml'),
+      isFalse,
+    );
+    for (final url in [
+      'http://127.0.0.1/provider.yaml',
+      'http://[::1]/provider.yaml',
+      'http://169.254.169.254/provider.yaml',
+      'ftp://example.com/provider.yaml',
+      'file:///etc/hosts',
+    ]) {
+      expect(isBlockedProviderUrl(url), isTrue, reason: url);
+    }
+  });
+
   test('a content URL never resolves a blocked literal', () async {
     expect(
       await resolvesToBlockedRemoteAddress(Uri.parse('http://127.1/')),
