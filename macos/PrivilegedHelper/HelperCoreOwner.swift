@@ -23,6 +23,8 @@ final class ManagedCore {
 
 final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
     let identity: HelperIdentity
+    private let manifest: HelperManifest?
+    private let manifestFailure: HelperFailure?
     private var child: ManagedCore?
     private let queue: DispatchQueue
     private var orphanReaper: DispatchSourceTimer?
@@ -30,16 +32,37 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
     init(identity: HelperIdentity, queue: DispatchQueue) {
         self.identity = identity
         self.queue = queue
+        if identity.trustMode.isDeveloperID {
+            manifest = nil
+            manifestFailure = nil
+        } else {
+            do {
+                manifest = try HelperManifest.load(identity: identity)
+                manifestFailure = nil
+            } catch let failure as HelperFailure {
+                manifest = nil
+                manifestFailure = failure
+            } catch {
+                manifest = nil
+                manifestFailure = HelperFailure(code: "helperOutdated", detail: error.localizedDescription)
+            }
+        }
     }
 
     func handleRequest(_ request: Data, from peer: RCHelperPeer,
                        reply: @escaping (Data) -> Void) {
         do {
-            try CodeTrust.validate(peer.code, requirement: identity.appRequirement)
-            guard peer.uid != 0, peer.pid > 1,
+            if let failure = manifestFailure {
+                reply(encode(failure.payload))
+                return
+            }
+            try CodeTrust.validateClient(peer.code, identity: identity, manifest: manifest)
+            let ownerMatches = identity.trustMode.isDeveloperID ||
+                (manifest.map { peer.uid == $0.ownerUid } ?? false)
+            guard peer.uid != 0, peer.pid > 1, ownerMatches,
                   let value = try JSONSerialization.jsonObject(with: request) as? [String: Any],
                   let command = value["method"] as? String else {
-                throw HelperFailure(code: "clientRejected", detail: "Only a signed, unelevated ReClash GUI may use the Helper.")
+                throw HelperFailure(code: "clientRejected", detail: "Only the owning ReClash GUI may use the Helper.")
             }
             let result: [String: Any]
             switch command {
@@ -47,7 +70,7 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
                 try keys(value, exactly: ["method", "appPath", "coreSha256", "helperSha256"])
                 let bundle = try clientBundle(value, peer: peer)
                 try validateRunningHelper(bundle)
-                result = ["status": "enabled", "protocolVersion": 1]
+                result = ["status": "enabled", "protocolVersion": 1, "trustMode": identity.trustMode.name]
             case "start":
                 try keys(value, exactly: ["method", "sessionId", "address", "homeDir", "coreSha256", "helperSha256", "appPath"])
                 result = try start(value, peer: peer)
@@ -80,11 +103,17 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
     func connectionInvalidated(_ connectionID: String) {
         guard let child, child.connectionId == connectionID else { return }
         if !release(child, timeout: 8000), orphanReaper == nil {
+            let orphan = child
             let timer = DispatchSource.makeTimerSource(queue: queue)
             timer.schedule(deadline: .now() + 1, repeating: 1)
             timer.setEventHandler { [weak self] in
-                guard let self, let owned = self.child else { return }
-                if self.release(owned, timeout: 2000) {
+                guard let self else { return }
+                guard self.child === orphan else {
+                    self.orphanReaper?.cancel()
+                    self.orphanReaper = nil
+                    return
+                }
+                if self.release(orphan, timeout: 2000) {
                     self.orphanReaper?.cancel()
                     self.orphanReaper = nil
                 }
@@ -120,7 +149,7 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
               Bundle(url: app)?.executableURL?.path == executable.path else {
             throw HelperFailure(code: "clientRejected", detail: "The XPC client is not the executable of the requested signed bundle.")
         }
-        let bundle = try HelperBundle.validate(at: app, identity: identity)
+        let bundle = try HelperBundle.validate(at: app, identity: identity, manifest: manifest)
         guard value["coreSha256"] as? String == bundle.coreHash,
               value["helperSha256"] as? String == bundle.helperHash else {
             throw HelperFailure(code: "bundleInvalid", detail: "The launch hashes do not match the signed bundle.")
@@ -129,9 +158,19 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
     }
 
     private func validateRunningHelper(_ bundle: HelperBundle) throws {
-        let executable = URL(fileURLWithPath: CommandLine.arguments[0])
-        guard try CodeTrust.hash(executable) == bundle.helperHash else {
-            throw HelperFailure(code: "helperOutdated", detail: "The registered Helper differs from this app. Register this signed app's Helper again.")
+        guard !identity.trustMode.isDeveloperID else {
+            let hash = try CodeTrust.hash(URL(fileURLWithPath: CommandLine.arguments[0]))
+            guard hash == bundle.helperHash else {
+                throw HelperFailure(code: "helperOutdated", detail: "The registered Helper differs from this app. Register this app's Helper again.")
+            }
+            return
+        }
+        let hash = try CodeTrust.hash(URL(fileURLWithPath: CommandLine.arguments[0]))
+        if let manifest, manifest.helperSha256 != hash {
+            throw HelperFailure(code: "helperOutdated", detail: "The running Helper differs from the installed manifest. Reinstall the Helper.")
+        }
+        guard hash == bundle.helperHash else {
+            throw HelperFailure(code: "helperOutdated", detail: "The registered Helper differs from this app. Register this app's Helper again.")
         }
     }
 
@@ -143,8 +182,11 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
             throw HelperFailure(code: "requestInvalid", detail: "A valid Core session, address and home are required.")
         }
         if let owned = child {
-            if rc_poll_child(owned.pid) == 1 { child = nil }
-            else {
+            if rc_poll_child(owned.pid) == 1 {
+                child = nil
+                orphanReaper?.cancel()
+                orphanReaper = nil
+            } else {
                 throw HelperFailure(code: "coreStopFailed", detail: "The Helper still owns a Core; stop its session and confirm exit before another launch.")
             }
         }
@@ -154,7 +196,7 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
                                         appIdentifier: identity.appIdentifier)
         try SecurePaths.socket(address, uid: peer.uid)
         let account = try SecurePaths.accountHome(uid: peer.uid)
-        let core = try ManagedCoreStore.stage(bundle, identity: identity)
+        let core = try ManagedCoreStore.stage(bundle, identity: identity, manifest: manifest)
         var descriptors: [Int32] = [-1, -1]
         guard socketpair(AF_UNIX, SOCK_STREAM, 0, &descriptors) == 0 else {
             throw HelperFailure(code: "processLaunchFailed", detail: "The managed Core bootstrap socket could not be created.")
@@ -215,7 +257,7 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
               let timeout = value["timeoutMillis"] as? Int, timeout >= 0 else {
             throw HelperFailure(code: "requestInvalid", detail: "A valid session and stop timeout are required.")
         }
-        guard let child else { return ["stopped": false, "exitConfirmed": true] }
+        guard let child else { return ["stopped": false, "exitConfirmed": false] }
         guard child.sessionId == session, child.connectionId == peer.connectionID,
               child.uid == peer.uid, child.clientPid == peer.pid else {
             throw HelperFailure(code: "sessionMismatch", detail: "This request does not own the managed Core session.")
@@ -228,7 +270,11 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
 
     private func release(_ owned: ManagedCore, timeout: Int) -> Bool {
         guard rc_stop_child(owned.pid, Int32(timeout)) == 1 else { return false }
-        if child === owned { child = nil }
+        if child === owned {
+            child = nil
+            orphanReaper?.cancel()
+            orphanReaper = nil
+        }
         return true
     }
 }
@@ -238,14 +284,18 @@ enum ManagedCoreStore {
         URL(fileURLWithPath: "/Library/Application Support/ReClash/ManagedCore/\(identity.appIdentifier)/\(hash)")
     }
 
-    static func stage(_ bundle: HelperBundle, identity: HelperIdentity) throws -> URL {
+    static func stage(
+        _ bundle: HelperBundle,
+        identity: HelperIdentity,
+        manifest: HelperManifest?
+    ) throws -> URL {
         let directory = root(identity: identity, hash: bundle.coreHash)
         let directoryFD = try openRootDirectory(directory.path)
         defer { close(directoryFD) }
         let target = directory.appendingPathComponent("ReClashCore")
         var existing = stat()
         if fstatat(directoryFD, "ReClashCore", &existing, AT_SYMLINK_NOFOLLOW) == 0 {
-            try verify(target, identity: identity, hash: bundle.coreHash)
+            try verify(target, identity: identity, manifest: manifest, hash: bundle.coreHash)
             return target
         }
         let source = open(bundle.core.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
@@ -282,23 +332,47 @@ enum ManagedCoreStore {
         guard fchmod(output, 0o700) == 0, fchown(output, 0, 0) == 0, fsync(output) == 0 else {
             throw HelperFailure(code: "processLaunchFailed", detail: "Managed Core permissions could not be secured.")
         }
-        try verify(directory.appendingPathComponent(name), identity: identity, hash: bundle.coreHash)
+        try verify(directory.appendingPathComponent(name), identity: identity, manifest: manifest, hash: bundle.coreHash)
         guard renameat(directoryFD, name, directoryFD, "ReClashCore") == 0, fsync(directoryFD) == 0 else {
             throw HelperFailure(code: "processLaunchFailed", detail: "The verified Core could not be published atomically.")
         }
         return target
     }
 
-    static func verify(_ core: URL, identity: HelperIdentity, hash: String) throws {
+    static func verify(
+        _ core: URL,
+        identity: HelperIdentity,
+        manifest: HelperManifest?,
+        hash: String
+    ) throws {
         try SecurePaths.noSymlinks(core.path)
         var info = stat()
         guard lstat(core.path, &info) == 0, info.st_uid == 0, info.st_mode & 0o022 == 0,
               core.deletingLastPathComponent() == root(identity: identity, hash: hash) else {
             throw HelperFailure(code: "bundleInvalid", detail: "The managed Core is outside its immutable root-owned hash directory.")
         }
-        try CodeTrust.staticCode(at: core, requirement: identity.coreRequirement)
-        guard try CodeTrust.hash(core) == hash else {
-            throw HelperFailure(code: "bundleInvalid", detail: "The managed Core hash does not match the final signed manifest.")
+        switch identity.trustMode {
+        case .developerID:
+            guard let requirement = identity.coreRequirement else {
+                throw HelperFailure(code: "bundleInvalid", detail: "The Developer ID requirement is missing.")
+            }
+            try CodeTrust.staticCode(at: core, requirement: requirement)
+        case .certificate(let sha256):
+            try CodeTrust.validateCertificate(at: core, identifier: "\(identity.appIdentifier).core", sha256: sha256)
+        case .adHoc:
+            let info = try CodeTrust.signingInformation(at: core)
+            guard CodeTrust.isAdHoc(info),
+                  info[kSecCodeInfoIdentifier as String] as? String == "\(identity.appIdentifier).core" else {
+                throw HelperFailure(code: "bundleInvalid", detail: "The managed Core is not ad-hoc signed as ReClash.")
+            }
+            try CodeTrust.validateIntegrity(at: core)
+        }
+        let actual = try CodeTrust.hash(core)
+        guard actual == hash else {
+            throw HelperFailure(code: "bundleInvalid", detail: "The managed Core hash does not match the final manifest.")
+        }
+        if !identity.trustMode.isDeveloperID, let manifest, actual != manifest.coreSha256 {
+            throw HelperFailure(code: "helperOutdated", detail: "The managed Core differs from the installed Helper pin. Reinstall the Helper.")
         }
     }
 

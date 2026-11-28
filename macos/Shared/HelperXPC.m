@@ -73,6 +73,10 @@ static NSData *RCPayload(xpc_object_t message) {
         RCHelperListener *owner = weakSelf;
         if (!owner || xpc_get_type(event) != XPC_TYPE_CONNECTION) return;
         xpc_connection_t connection = (xpc_connection_t)event;
+        if (owner->_connections.count >= 64) {
+            xpc_connection_cancel(connection);
+            return;
+        }
         NSString *connectionID = NSUUID.UUID.UUIDString;
         owner->_connections[connectionID] = connection;
         xpc_connection_set_target_queue(connection, owner->_queue);

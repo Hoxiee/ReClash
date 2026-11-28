@@ -38,6 +38,7 @@
 		F9A000000000000000000019 = {isa = PBXBuildFile; fileRef = F9A000000000000000000004; };
 		F9A00000000000000000001A = {isa = PBXBuildFile; fileRef = F9A000000000000000000005; };
 		F9A00000000000000000001B = {isa = PBXBuildFile; fileRef = F9A000000000000000000006; };
+		F9A00000000000000000001D = {isa = PBXBuildFile; fileRef = F9A00000000000000000001C; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +116,7 @@
 		F9A000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelper/HelperMain.swift; sourceTree = SOURCE_ROOT; };
 		F9A000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelper/HelperCoreOwner.swift; sourceTree = SOURCE_ROOT; };
 		F9A000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PrivilegedHelper/CoreSpawn.c; sourceTree = SOURCE_ROOT; };
+		F9A00000000000000000001C = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runner/HelperInstaller.swift; sourceTree = SOURCE_ROOT; };
 		F9A000000000000000000007 = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.reclash.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -225,6 +227,7 @@
 				F9A000000000000000000004,
 				F9A000000000000000000005,
 				F9A000000000000000000006,
+				F9A00000000000000000001C,
 			);
 			name = "Privileged Helper";
 			sourceTree = "<group>";
@@ -469,6 +472,7 @@
 				F9A000000000000000000014,
 				F9A000000000000000000015,
 				F9A000000000000000000016,
+				F9A00000000000000000001D,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 			);

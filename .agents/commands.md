@@ -32,6 +32,26 @@ Omit `-AllowInstall` for payload/signature inspection alone; add `-RequireSigned
 The installation check refuses an existing installation or user data and seeds its own settings with TUN, proxy and
 autostart disabled. It exercises the shipped GUI and Core; UAC, TUN and clean-OS dependencies still need native acceptance.
 
+### macOS Helper signing
+
+A Developer ID certificate and Team ID keep the `SMAppService`/`SMJobBless` path. Set `RECLASH_MACOS_TEAM_ID` and
+`RECLASH_MACOS_SIGNING_IDENTITY` for `setup.dart`, or the matching `FLUTTER_XCODE_*` settings for a direct Xcode build.
+
+Without a Developer ID, create a Code Signing identity in Keychain Access (Certificate Assistant → Create a Certificate →
+Self Signed Root → Code Signing), open the certificate's Trust settings and choose **Always Trust** for Code Signing, then
+pass its name as `RECLASH_MACOS_SIGNING_IDENTITY`, leaving `RECLASH_MACOS_TEAM_ID` unset. The app is self-signed at build
+time, and the first TUN enable installs the Helper as a root launchd daemon after one administrator prompt. Move ReClash
+to `/Applications` first; the installer refuses App Translocation. The Helper pins the app certificate SHA-256 and the
+Helper/Core SHA-256, so a rebuild that changes either bundled binary asks for the administrator password again to
+refresh the launchd Helper; a rebuild with identical Helper and Core binaries reuses it.
+
+With no signing identity at all, Xcode leaves the app ad-hoc. That build also installs the launchd Helper, but the Helper
+pins the running app executable SHA-256 plus the Helper/Core SHA-256, so every app update needs one administrator prompt
+to refresh the Helper.
+Gatekeeper still blocks a downloaded unsigned or self-signed DMG until the user chooses Open Anyway; notarization needs
+Developer ID. The self-signed and ad-hoc launchd Helper never shares an installation between macOS accounts: a second
+account is refused until the first account removes it. Developer ID `SMAppService` mode remains system-wide.
+
 The desktop Go core and the Rust helper build automatically: Flutter runs
 `plugins/setup/hook/build.dart` on every `flutter build` and `flutter test`,
 and the hook drives `CoreBuilder` from the `setup_hooks` package in

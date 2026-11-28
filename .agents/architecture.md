@@ -208,14 +208,20 @@ for a current version, preserving the existing staging and rollback guarantees.
 ### Local Trust Boundary
 
 The Windows Helper answers only a connection whose client process runs under the owner SID it was installed for;
-the Linux Helper only the owner uid. A setuid Core is executable by `root:admin` (macOS) or the installing user's primary
-group, so its boundary also includes every member of that group, not just the installing account. Profiles cannot choose
-a controller address, a secret or alternate controllers. Another account outside those permissions, a subscription,
-or a remote party reaching the privileged Core's control or filesystem APIs is a vulnerability.
+the Linux Helper only the owner uid. The macOS Helper is installed in one of two modes: Developer ID through
+`SMAppService`/`SMJobBless`, or a self-signed/ad-hoc launchd daemon installed with one administrator prompt. The launchd
+mode pins the app certificate SHA-256 (or the running app executable SHA-256 for ad-hoc), the Helper and Core SHA-256,
+and the installing uid in a root-owned manifest, and stages only a Core whose signature and hash match that manifest. The installer passes its script to `osascript`
+inline, not through a user-writable file, and verifies the copied Helper hash and signature before launchd starts it.
+After installation the root-owned Helper and manifest are the boundary. A setuid Core is not used on macOS; on Linux
+its boundary is the installing user's primary group, so it also includes every member of that group, not just the
+installing account. Profiles cannot choose a controller address, a secret or alternate controllers. Another account
+outside those permissions, a subscription, or a remote party reaching the privileged Core's control or filesystem APIs
+is a vulnerability.
 
 A process running as the same account is not stopped. It can ask the Helper to start the Core
-against a socket or pipe it owns, or run a setuid Core against a port it listens on, and so become the host that drives
-a privileged Core: `initClash` chooses the home directory every path check anchors on, and `getConfig`,
+against a socket or pipe it owns, or on Linux run a setuid Core against a port it listens on, and so become the host that
+drives a privileged Core: `initClash` chooses the home directory every path check anchors on, and `getConfig`,
 `getProfileBase`, `getProfileOutbounds` and a `setupConfig` or `buildProfile` base read any path.
 The Core connects to whatever address it is given and cannot tell that host from ReClash. An account check cannot
 distinguish it from a same-account process that can already read ReClash's memory and files. This remains a user-to-root
@@ -2106,11 +2112,14 @@ macOS preserves deployment target 12: signed Helper registration uses `SMAppServ
 12. Public low-level XPC identity validation binds the caller and fixed signed Core. Registration requiring Settings
 approval is not readiness. A root managed Core is the current backend; it receives a socketpair bootstrap and retains
 the authenticated owner's real UID/GID for generated-file ownership. Its sandbox denies execution/fork outside the
-fixed launch and confines data reads/writes, with only required system resources admitted. There is no setuid or
-osascript fallback; unsigned/ad-hoc builds fail closed for this backend.
-Runner keeps `ENABLE_HARDENED_RUNTIME = NO` because CI signs ad-hoc: hardened runtime enables library validation,
-which rejects the Team-ID-less Flutter frameworks and kills the app in dyld at launch. A signed pipeline turns it on
-together with a real `DEVELOPMENT_TEAM`.
+fixed launch and confines data reads/writes, with only required system resources admitted. The Core intentionally keeps
+effective UID 0 for `utun`; its Seatbelt profile is a deny-list around file and process access, not a whole-process jail,
+so a Core compromise is root and needs upstream sandbox hardening. Self-signed and ad-hoc builds
+use the launchd Helper after one administrator prompt; there is no setuid fallback, and unsigned or mismatched bundles
+fail closed.
+Runner keeps `ENABLE_HARDENED_RUNTIME = NO` for ad-hoc/self-signed builds because CI signs without a Team ID: hardened
+runtime enables library validation, which rejects the Team-ID-less Flutter frameworks and kills the app in dyld at
+launch. A Developer ID build sets `ENABLE_HARDENED_RUNTIME = YES` together with its real `DEVELOPMENT_TEAM`.
 
 Every desktop manifest records the final Core hash; Linux also records final Helper hash and string protocol `9`.
 macOS recomputes the manifest after signing. Hashes attest consistency, not publisher provenance. Managed privileged

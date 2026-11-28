@@ -63,6 +63,9 @@ jobs:
           fetch-depth: 0
           submodules: true
 
+      - name: Check macOS Helper contracts
+        run: python3 -I tool/check_macos_helper.py
+
       - name: Test Telegram release publishing
         run: python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py
 
@@ -235,6 +238,17 @@ jobs:
       # tagged release matrix built before; the bundle itself is discarded.
       - name: Build debug bundle
         run: flutter build ${{ matrix.platform }} --debug
+
+      - name: Verify macOS Helper bundle
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          app="$(find build/macos/Build/Products -maxdepth 2 -path '*/Debug/ReClash.app' -type d | head -1)"
+          if [[ -z "$app" ]]; then
+            echo '::error::ReClash.app was not produced'
+            exit 1
+          fi
+          bash macos/packaging/helper/verify_bundle.sh "$app"
 
   go:
     name: Go core
@@ -604,8 +618,6 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
           xcodebuild -version
 
-      # A tag signs with a Developer ID when the repository holds the
-      # certificate; until then packaging stays ad-hoc, with no TUN on macOS.
       - name: Import macOS signing certificate
         if: matrix.platform == 'macos' && startsWith(github.ref, 'refs/tags/v')
         env:
@@ -615,7 +627,7 @@ jobs:
           SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
         run: |
           if [[ -z "$CERTIFICATE" || -z "$CERTIFICATE_PASSWORD" || -z "$TEAM_ID" || -z "$SIGNING_IDENTITY" ]]; then
-            echo '::warning::MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, MACOS_TEAM_ID and MACOS_SIGNING_IDENTITY are not set; packaging an ad-hoc DMG without TUN.'
+            echo '::warning::MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, MACOS_TEAM_ID and MACOS_SIGNING_IDENTITY are not set; packaging an ad-hoc DMG that installs the launchd Helper after one administrator prompt.'
             exit 0
           fi
           keychain="$RUNNER_TEMP/reclash-signing.keychain-db"
@@ -676,10 +688,21 @@ jobs:
       - name: Setup
         env:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
-          RECLASH_MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
-          RECLASH_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          RECLASH_MACOS_TEAM_ID: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.MACOS_TEAM_ID || '' }}
+          RECLASH_MACOS_SIGNING_IDENTITY: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.MACOS_SIGNING_IDENTITY || '' }}
           UPDATE_MIRROR_URLS: ${{ vars.UPDATE_MIRROR_URLS }}
         run: dart setup.dart ${{ matrix.platform }} --no-prepare ${{ matrix.platform == 'macos' && format('--arch {0}', matrix.arch) || '' }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
+
+      - name: Verify macOS Helper bundle
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          app="$(find build/macos/Build/Products -maxdepth 2 -path '*/Release/ReClash.app' -type d | head -1)"
+          if [[ -z "$app" ]]; then
+            echo '::error::ReClash.app was not produced'
+            exit 1
+          fi
+          bash macos/packaging/helper/verify_bundle.sh "$app"
 
       - name: Upload
         uses: actions/upload-artifact@v4

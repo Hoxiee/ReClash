@@ -7,7 +7,13 @@ import 'core_manifest.dart';
 import 'launcher.dart';
 import 'model.dart';
 
-enum MacOSHelperStatus { enabled, notRegistered, notFound, requiresApproval }
+enum MacOSHelperStatus {
+  enabled,
+  updateRequired,
+  notRegistered,
+  notFound,
+  requiresApproval,
+}
 
 final class MacOSHelperReadiness {
   final MacOSHelperStatus status;
@@ -100,6 +106,7 @@ final class NativeMacOSHelperPort implements MacOSHelperPort {
     final value = await _invoke(method);
     final status = switch (value['status']) {
       'enabled' => MacOSHelperStatus.enabled,
+      'updateRequired' => MacOSHelperStatus.updateRequired,
       'notRegistered' => MacOSHelperStatus.notRegistered,
       'notFound' => MacOSHelperStatus.notFound,
       'requiresApproval' => MacOSHelperStatus.requiresApproval,

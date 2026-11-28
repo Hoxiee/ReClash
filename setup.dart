@@ -413,13 +413,13 @@ Map<String, String> createPackageProcessEnvironment({
     // flutter_tools passes FLUTTER_XCODE_* to xcodebuild as build settings.
     if (macosArch != null)
       'FLUTTER_XCODE_ARCHS': macosArch == 'amd64' ? 'x86_64' : 'arm64',
-    if (team != null &&
-        team.isNotEmpty &&
-        identity != null &&
-        identity.isNotEmpty) ...{
-      'FLUTTER_XCODE_DEVELOPMENT_TEAM': team,
+    if (identity != null && identity.isNotEmpty) ...{
       'FLUTTER_XCODE_CODE_SIGN_IDENTITY': identity,
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+      if (team != null && team.isNotEmpty) ...{
+        'FLUTTER_XCODE_DEVELOPMENT_TEAM': team,
+        'FLUTTER_XCODE_ENABLE_HARDENED_RUNTIME': 'YES',
+      },
     },
     'PATH': path,
   };

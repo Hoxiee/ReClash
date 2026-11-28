@@ -199,6 +199,20 @@ hooks:
         'Developer ID Application',
       );
       expect(env['FLUTTER_XCODE_CODE_SIGN_STYLE'], 'Manual');
+      expect(env['FLUTTER_XCODE_ENABLE_HARDENED_RUNTIME'], 'YES');
+    });
+
+    test('macOS packaging signs a self-signed identity without a Team ID', () {
+      final env = setup.createPackageProcessEnvironment(
+        rootDir: '/repo',
+        platform: 'macos',
+        macosSigningIdentity: 'ReClash Self-Signed',
+      );
+
+      expect(env['FLUTTER_XCODE_CODE_SIGN_IDENTITY'], 'ReClash Self-Signed');
+      expect(env['FLUTTER_XCODE_CODE_SIGN_STYLE'], 'Manual');
+      expect(env, isNot(contains('FLUTTER_XCODE_DEVELOPMENT_TEAM')));
+      expect(env, isNot(contains('FLUTTER_XCODE_ENABLE_HARDENED_RUNTIME')));
     });
 
     test('macOS packaging stays ad-hoc without an identity', () {

@@ -28,13 +28,19 @@ cp -f "$helper" "$launch_services/$helper_id"
 chmod 755 "$launch_services/$helper_id" "$core"
 team="${DEVELOPMENT_TEAM:-}"
 signing="${EXPANDED_CODE_SIGN_IDENTITY:-}"
-if [[ "${CODE_SIGNING_ALLOWED:-YES}" == YES && -n "$signing" && "$signing" != - && -n "$team" ]]; then
-    /usr/bin/codesign --force --timestamp --options runtime --identifier "$app_id.core" --sign "$signing" "$core"
-    /usr/bin/codesign --force --timestamp --options runtime --identifier "$helper_id" --sign "$signing" "$launch_services/$helper_id"
+if [[ "${CODE_SIGNING_ALLOWED:-YES}" == YES ]]; then
+    [[ -n "$signing" ]] || signing="-"
+    if [[ -n "$team" && "$signing" != "-" ]]; then
+        /usr/bin/codesign --force --timestamp --options runtime --identifier "$app_id.core" --sign "$signing" "$core"
+        /usr/bin/codesign --force --timestamp --options runtime --identifier "$helper_id" --sign "$signing" "$launch_services/$helper_id"
+    else
+        /usr/bin/codesign --force --timestamp=none --options runtime --identifier "$app_id.core" --sign "$signing" "$core"
+        /usr/bin/codesign --force --timestamp=none --options runtime --identifier "$helper_id" --sign "$signing" "$launch_services/$helper_id"
+    fi
     /usr/bin/codesign --verify --strict --all-architectures "$core"
     /usr/bin/codesign --verify --strict --all-architectures "$launch_services/$helper_id"
 else
-    echo "warning: Privileged TUN is unavailable in ad-hoc/unsigned bundles; the bridge fails closed with bundleInvalid"
+    echo "warning: code signing is disabled; TUN will fail closed until the app, Core and Helper are signed"
 fi
 
 cat > "$launch_daemons/$helper_id.plist" <<PLIST
@@ -50,7 +56,10 @@ cat > "$launch_daemons/$helper_id.plist" <<PLIST
 <key>ExitTimeOut</key><integer>10</integer>
 </dict></plist>
 PLIST
-requirement="anchor apple generic and identifier \"$helper_id\" and certificate leaf[subject.OU] = \"$team\""
+requirement="identifier \"$helper_id\""
+if [[ -n "$team" ]]; then
+    requirement="anchor apple generic and identifier \"$helper_id\" and certificate leaf[subject.OU] = \"$team\""
+fi
 /usr/libexec/PlistBuddy -c 'Delete :SMPrivilegedExecutables' "$info" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c 'Add :SMPrivilegedExecutables dict' "$info"
 /usr/libexec/PlistBuddy -c "Add :SMPrivilegedExecutables:$helper_id string $requirement" "$info"

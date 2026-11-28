@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/desktop/linux_helper.dart';
+import 'package:reclash/core/desktop/macos_helper.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -181,9 +182,23 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
     if (!mounted || confirmed != true) return;
     setState(() => _removing = true);
     try {
-      if (ref.read(coreHandlerProvider).processOwner ==
-          CoreProcessOwner.helper) {
+      final owner = ref.read(coreHandlerProvider).processOwner;
+      if (owner == CoreProcessOwner.helper ||
+          owner == CoreProcessOwner.macosHelper) {
         await ref.read(setupActionProvider.notifier).setTunEnabled(false);
+      }
+      if (system.isMacOS) {
+        final result = await const NativeMacOSHelperPort().unregister();
+        if (!mounted) return;
+        if (result.status == MacOSHelperStatus.notRegistered) {
+          context.showNotifier(l10n.removeHelperDone);
+        } else {
+          context.showNotifier(
+            result.detail ?? l10n.removeHelperFailed,
+            level: MessageLevel.error,
+          );
+        }
+        return;
       }
       final result = await _helperInstaller.uninstall();
       await ref.read(killSwitchHostStateProvider.notifier).refresh();
@@ -380,7 +395,8 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                 ),
               ],
             ),
-            if (system.isLinux && _helperInstaller.systemdAvailable)
+            if ((system.isLinux && _helperInstaller.systemdAvailable) ||
+                system.isMacOS)
               generateSection(
                 items: [
                   ListItem(

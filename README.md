@@ -119,7 +119,7 @@ Get the latest build from [GitHub Releases](https://github.com/Hoxiee/ReClash/re
 | --- | --- | --- |
 | Android 7 and later | APK for `arm64-v8a`, `armeabi-v7a` and `x86_64` | Most phones use `arm64-v8a`. |
 | Windows 10 and later | Installer (`-setup.exe`) or portable `.zip`, for x64 and ARM64 | Pick ARM64 on Snapdragon and other ARM laptops. Builds are not code-signed, so SmartScreen or Smart App Control may warn or block: in SmartScreen choose More info → Run anyway. |
-| macOS 12 and later | DMG for Apple Silicon (`arm64`) and Intel (`amd64`) | Not from the App Store. DMGs are Developer ID signed and not notarized once the signing certificate is configured; until then the build is ad-hoc and has no TUN. On macOS 15 and later the context-menu Open no longer bypasses Gatekeeper: try to open the app once, then go to System Settings → Privacy & Security → Open Anyway. |
+| macOS 12 and later | DMG for Apple Silicon (`arm64`) and Intel (`amd64`) | Not from the App Store. Move ReClash to `/Applications` before enabling TUN; the installer refuses App Translocation. DMGs can be Developer ID signed; without that certificate the build is self-signed or ad-hoc. The first TUN toggle, and any update that changes the bundled Helper or Core (or the app executable in an ad-hoc build), asks for an administrator password once to install or refresh the local launchd Helper, so TUN does not need notarization. A downloaded build is still blocked by Gatekeeper until Open Anyway. On macOS 15 and later the context-menu Open no longer bypasses Gatekeeper: try to open the app once, then go to System Settings → Privacy & Security → Open Anyway. |
 | Linux | `.deb`, `.rpm` and Arch `.pkg.tar.xz` for x64 and ARM64; AppImage for x64 | See the tray note below. |
 
 <p>
@@ -196,7 +196,7 @@ build. Packages land in `dist/`.
 | --- | --- |
 | Android | Android SDK with the NDK. Add `--arch arm64` to build a single ABI. |
 | Windows | GCC (MinGW-w64) for the core and [Inno Setup](https://jrsoftware.org/isinfo.php) 6 for the installer. |
-| macOS | Xcode and Node.js. The script installs `appdmg` through npm. TUN needs a Developer ID signature and Team ID; an ad-hoc source build has no privileged Helper and fails closed. |
+| macOS | Xcode and Node.js. The script installs `appdmg` through npm. TUN uses the bundled Helper; without a Developer ID and Team ID the app is self-signed or ad-hoc and installs the Helper with one administrator prompt. |
 | Linux | Debian or Ubuntu. The script installs the build packages with apt and downloads `appimagetool`. |
 
 Run `dart setup.dart --help` for the remaining options, such as `--targets` to build only some package formats.
