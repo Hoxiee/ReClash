@@ -1,5 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -16,7 +17,9 @@ const coreManifestName = 'manifest.json';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const packageName = 'com.reclash';
-final unixSocketPath = '/tmp/ReClashSocket_${Random().nextInt(10000)}.sock';
+final unixSocketPath = Platform.isMacOS
+    ? '/tmp/ReClashSocket_${_randomPipeId()}.sock'
+    : '/tmp/ReClashSocket_${Random().nextInt(10000)}.sock';
 final windowsPipeName = '\\\\.\\pipe\\ReClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperPortKey =

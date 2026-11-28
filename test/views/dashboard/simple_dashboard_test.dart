@@ -700,6 +700,9 @@ void main() {
           ],
         );
         chooseSimple();
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(pageSwipe: true));
         tester.view.physicalSize = _phone;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);

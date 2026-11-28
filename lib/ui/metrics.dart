@@ -18,6 +18,12 @@ EdgeInsets listHeaderPaddingOf(BuildContext context) =>
     const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8) *
     1.mAp(context);
 
+/// Pads a section's footnote on the leading inset of the rows above it.
+EdgeInsetsGeometry listFooterPaddingOf(
+  BuildContext context, {
+  required double leading,
+}) => EdgeInsetsDirectional.fromSTEB(leading, 8, leading, 0) * 1.mAp(context);
+
 const listRowMinHeight = 56.0;
 const listRowVerticalPadding = 10.0;
 const pageToolbarHeight = 72.0;

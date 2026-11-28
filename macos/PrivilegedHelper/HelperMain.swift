@@ -7,6 +7,12 @@ private func runCoreExec() throws -> Never {
         throw HelperFailure(code: "bootstrapInvalid", detail: "Only the signed root Helper may execute the Core bootstrap.")
     }
     let identity = try HelperIdentity.current(isHelper: true)
+    let manifest: HelperManifest?
+    if identity.trustMode.isDeveloperID {
+        manifest = nil
+    } else {
+        manifest = try HelperManifest.load(identity: identity)
+    }
     var parentUid: uid_t = 0
     var parentPid: pid_t = 0
     guard RCSocketPeer(3, &parentUid, &parentPid), parentUid == 0,
@@ -14,7 +20,12 @@ private func runCoreExec() throws -> Never {
           let parentCode = RCCopySocketPeerCode(3) else {
         throw HelperFailure(code: "bootstrapInvalid", detail: "The managed bootstrap parent could not be authenticated.")
     }
-    try CodeTrust.validate(parentCode, requirement: identity.helperRequirement)
+    try CodeTrust.validateParent(
+        parentCode,
+        identity: identity,
+        manifest: manifest,
+        helperExecutable: CommandLine.arguments[0]
+    )
     var buffer = [CChar](repeating: 0, count: 4097)
     let count = rc_read_line(3, &buffer, buffer.count, 5000)
     guard count > 0,
@@ -46,7 +57,7 @@ private func runCoreExec() throws -> Never {
     guard core.lastPathComponent == "ReClashCore" else {
         throw HelperFailure(code: "bootstrapInvalid", detail: "The fixed managed Core executable is required.")
     }
-    try ManagedCoreStore.verify(core, identity: identity, hash: hash)
+    try ManagedCoreStore.verify(core, identity: identity, manifest: manifest, hash: hash)
     var ready = try JSONSerialization.data(withJSONObject:
         ["execReady": true, "version": 1, "sessionId": session, "pid": getpid()])
     ready.append(10)

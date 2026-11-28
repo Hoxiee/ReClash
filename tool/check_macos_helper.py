@@ -19,16 +19,25 @@ def run(root):
     identifiers = re.findall(r'^\t\t([A-F0-9]{24})(?: /\*.*?\*/)? = \{', project, re.M)
     require(len(identifiers) == len(set(identifiers)), 'Duplicate Xcode object identifiers')
     for source in ['HelperMain.swift', 'HelperCoreOwner.swift', 'CoreSpawn.c',
-                   'HelperXPC.m', 'HelperPolicy.swift', 'PrivilegedHelperBridge.swift']:
+                   'HelperXPC.m', 'HelperPolicy.swift', 'PrivilegedHelperBridge.swift',
+                   'HelperInstaller.swift']:
         require(source in project, f'{source} is not in the native target')
     runner = project.split('33CC10EC2044A3C60003C045 /* Runner */ = {', 1)[1].split('\n\t\t};', 1)[0]
     require(runner.index('Copy Core') < runner.index('Embed Signed Helper'),
             'Final signing/hash phase must run after CodeSignOnCopy')
     require('F9A00000000000000000000E' in runner, 'Helper is not a Runner dependency')
+    runner_sources = project.split('33CC10E92044A3C60003C045 /* Sources */ = {', 1)[1].split('\n\t\t};', 1)[0]
+    require('F9A00000000000000000001D' in runner_sources, 'Helper installer is not in Runner sources')
     require('com.apple.product-type.tool' in project, 'Missing executable Helper target')
     require(all(value == '12.0' for value in re.findall(r'MACOSX_DEPLOYMENT_TARGET = ([^;]+);', project)),
             'macOS 12 support was changed')
     require('__info_plist' in project and '__launchd_plist' in project, 'SMJobBless sections are missing')
+    app_info = read(root, 'macos/Runner/Configs/AppInfo.xcconfig')
+    require('PRODUCT_BUNDLE_IDENTIFIER = com.reclash' in app_info,
+            'AppInfo must keep the com.reclash identifier')
+    for identifier in ['com.reclash', 'com.reclash.debug']:
+        require(f'RECLASH_APP_IDENTIFIER = {identifier}' in project,
+                f'Helper target must keep RECLASH_APP_IDENTIFIER = {identifier}')
 
     xpc = read(root, 'macos/Shared/HelperXPC.m')
     require('SecCodeCreateWithXPCMessage' in xpc, 'XPC messages must use their kernel audit token')
@@ -40,18 +49,36 @@ def run(root):
 
     policy = read(root, 'macos/Shared/HelperPolicy.swift')
     for token in ['kSecCodeInfoTeamIdentifier', 'anchor apple generic', 'bundleInvalid',
-                  'O_NOFOLLOW', 'helperProtocolVersion', 'S_IFLNK', 'info.st_uid == uid']:
+                  'O_NOFOLLOW', 'helperProtocolVersion', 'S_IFLNK', 'info.st_uid == uid',
+                  'HelperTrustMode', 'HelperManifest', 'certificateSHA256',
+                  'appExecutableSha256', 'coreSha256', 'isAdHoc', 'ownerUid',
+                  'helperHash == manifest.helperSha256',
+                  'coreHash == manifest.coreSha256']:
         require(token in policy, f'Missing signing/path guard: {token}')
+    require('identifier == "com.reclash"' in policy and
+            'identifier == "com.reclash.debug"' in policy,
+            'HelperPolicy must agree with the two supported app identifiers')
     bridge = read(root, 'macos/Runner/PrivilegedHelperBridge.swift')
     for token in ['reclash/privileged_helper', '#available(macOS 13.0', 'SMAppService.daemon',
                   'SMJobBless', 'SMJobRemove', 'kSMRightModifySystemDaemons',
-                  'case .requiresApproval', 'prepareUnregister']:
+                  'case .requiresApproval', 'prepareUnregister', 'HelperInstaller',
+                  'updateRequired', 'manifest.coreSha256 == bundle.coreHash']:
         require(token in bridge, f'Missing native registration contract: {token}')
+    installer = read(root, 'macos/Runner/HelperInstaller.swift')
+    for token in ['osascript', 'launchctl', 'bootstrap', 'bootout', 'base64',
+                  'HelperManifest', 'installedHelper', 'runAsRoot', 'administrator privileges',
+                  'EXPECTED_APP_SHA', 'check_exec', 'HELPER_DEST']:
+        require(token in installer, f'Missing unsigned Helper installer contract: {token}')
+    require('NSTemporaryDirectory' not in installer,
+            'The installer must not execute a user-writable script')
+    require('check_cdhash' not in installer,
+            'The ad-hoc pin must be an app-executable hash, not an ambiguous CDHash')
     require('LaunchAtLogin' not in bridge, 'GUI autostart must stay separate from privileged registration')
     owner = read(root, 'macos/PrivilegedHelper/HelperCoreOwner.swift')
     for token in ['child.connectionId == peer.connectionID', 'coreStopFailed',
                   'child.sessionId == session', 'connectionInvalidated', 'rc_stop_child',
-                  'O_EXCL', 'fsync(output)', 'renameat', 'helperOutdated']:
+                  'O_EXCL', 'fsync(output)', 'renameat', 'helperOutdated',
+                  'actual != manifest.coreSha256']:
         require(token in owner, f'Missing scoped process ownership: {token}')
 
     spawn = read(root, 'macos/PrivilegedHelper/CoreSpawn.c')
@@ -62,11 +89,13 @@ def run(root):
     require('(deny process-fork)' in profile and '(deny process-exec' in profile,
             'Privileged Core must not launch arbitrary subprocesses')
     allowed_subpaths = set(re.findall(r'\(subpath "([^"]+)"\)', profile))
-    require(allowed_subpaths == {'%s', '/System', '/usr/lib', '/usr/share'},
+    require(allowed_subpaths == {'%s', '/System', '/usr/lib', '/usr/share',
+                                '/var/db/timezone', '/private/var/db/timezone'},
             f'Unexpected root-readable subtree: {allowed_subpaths}')
     allowed_files = set(re.findall(r'\(literal "([^"]+)"\)', profile))
     require(allowed_files == {'%s', '/etc/hosts', '/private/etc/hosts', '/etc/resolv.conf',
-                             '/private/etc/resolv.conf', '/etc/localtime', '/private/etc/localtime',
+                             '/private/etc/resolv.conf', '/private/var/run/resolv.conf',
+                             '/etc/localtime', '/private/etc/localtime',
                              '/dev/null', '/dev/random', '/dev/urandom'},
             f'Unexpected privileged read exception: {allowed_files}')
     require('setreuid(uid, 0)' in spawn and 'setregid(gid, gid)' in spawn,
@@ -96,8 +125,15 @@ def run(root):
             ET.fromstring(plist)
     native = '\n'.join(read(root, str(path.relative_to(root))) for path in
                        (root / 'macos').rglob('*') if path.suffix in {'.swift', '.m', '.c', '.sh'})
-    for forbidden in ['osascript', 'chmod 475', 'StadiumBorder']:
+    for forbidden in ['chmod 475', 'StadiumBorder']:
         require(forbidden not in native, f'Forbidden privileged fallback: {forbidden}')
+    for path in (root / 'macos').rglob('*'):
+        if path.suffix not in {'.swift', '.m', '.c', '.sh'}:
+            continue
+        relative = str(path.relative_to(root))
+        if 'osascript' in read(root, relative):
+            require(relative == 'macos/Runner/HelperInstaller.swift',
+                    f'{relative} must not launch the installer shell')
     print('macOS Helper source, Xcode target, registration and sandbox contracts passed')
 
 

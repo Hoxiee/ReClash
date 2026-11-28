@@ -120,7 +120,7 @@
 | --- | --- | --- |
 | Android 7 и новее | APK для `arm64-v8a`, `armeabi-v7a` и `x86_64` | Большинству телефонов нужен `arm64-v8a`. |
 | Windows 10 и новее | Установщик (`-setup.exe`) или портативный `.zip`, для x64 и ARM64 | На Snapdragon и других ARM-ноутбуках берите ARM64. Сборки не подписаны, поэтому SmartScreen или Smart App Control могут предупредить или заблокировать запуск: в SmartScreen нажмите «Подробнее» → «Выполнить в любом случае». |
-| macOS 12 и новее | DMG для Apple Silicon (`arm64`) и Intel (`amd64`) | Сборка не из App Store: На macOS 15 и новее «Открыть» в контекстном меню больше не обходит Gatekeeper: попробуйте открыть приложение один раз, затем зайдите в Системные настройки → Конфиденциальность и безопасность → «Всё равно открыть». |
+| macOS 12 и новее | DMG для Apple Silicon (`arm64`) и Intel (`amd64`) | Сборка не из App Store. Перед включением TUN переместите ReClash в `/Applications`: установщик отказывается от App Translocation. DMG может быть подписан Developer ID; без этого сертификата сборка подписывается self-signed или ad-hoc. При первом включении TUN — а также после обновления, меняющего встроенные Helper или Core (или исполняемый файл ad-hoc-сборки), — macOS один раз запросит пароль администратора для установки или обновления локального launchd Helper, поэтому нотаризация для TUN не нужна. Скачанная сборка всё равно блокируется Gatekeeper до «Всё равно открыть». На macOS 15 и новее «Открыть» в контекстном меню больше не обходит Gatekeeper: попробуйте открыть приложение один раз, затем зайдите в Системные настройки → Конфиденциальность и безопасность → «Всё равно открыть». |
 | Linux | `.deb`, `.rpm` и `.pkg.tar.xz` для Arch, для x64 и ARM64; AppImage для x64 | См. примечание про трей ниже. |
 
 <p>
@@ -198,7 +198,7 @@ dart setup.dart android   # или windows, macos, linux
 | --- | --- |
 | Android | Android SDK с NDK. Добавьте `--arch arm64`, чтобы собрать один ABI. |
 | Windows | GCC (MinGW-w64) для ядра и [Inno Setup](https://jrsoftware.org/isinfo.php) 6 для установщика. |
-| macOS | Xcode и Node.js. Скрипт ставит `appdmg` через npm. |
+| macOS | Xcode и Node.js. Скрипт ставит `appdmg` через npm. TUN использует встроенный Helper; без Developer ID и Team ID приложение подписывается self-signed или ad-hoc и ставит Helper с одним запросом пароля администратора. |
 | Linux | Debian или Ubuntu. Скрипт ставит пакеты для сборки через apt и скачивает `appimagetool`. |
 
 Остальные параметры, например `--targets` для сборки только части форматов, — в `dart setup.dart --help`.
@@ -218,14 +218,14 @@ ReClash существует благодаря работе этих проек
 
 - [FlClash](https://github.com/chen08209/FlClash) от [chen08209](https://github.com/chen08209) — приложение, на котором основан ReClash.
 - [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — клиент, с которого начался ReClash.
-- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения. ReClash использует сборку с патчами из [Hoxiee/mihomo-patch-core](https://github.com/Hoxiee/mihomo-patch-core).
+- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро, на котором построено приложение. ReClash поставляется с [rain-core](https://github.com/Hoxiee/rain-core) — своим официальным ядром mihomo с патчами.
 - [Koala Clash](https://github.com/coolcoala/koala-clash) от [coolcoala](https://github.com/coolcoala) — клиент, который познакомил меня с mihomo.
 
 **Ядро**
 
 - [ClashFest](https://github.com/Nemu-x/ClashFest) от [Nemu-x](https://github.com/Nemu-x) — из его патчей в ядро перенесены Xray-совместимость и диагностика; номера патчей сохранены.
 - [Prizrak-Core](https://github.com/legiz-ru/Prizrak-Core) от [legiz-ru](https://github.com/legiz-ru) — оттуда пришли finalmask, отпечатки Firefox, XDRIVE, REALITY и конвертер Xray-ссылок.
-- [veles](https://github.com/Rerowros/veles), [Citrus](https://github.com/getmikan/Citrus), [SlothClash](https://github.com/Nemu-x/SlothClash) и [Xray-core](https://github.com/XTLS/Xray-core) — источники отдельных патчей; разбор — в [CREDITS.md](https://github.com/Hoxiee/mihomo-patch-core/blob/main/CREDITS.md).
+- [veles](https://github.com/Rerowros/veles), [Citrus](https://github.com/getmikan/Citrus), [SlothClash](https://github.com/Nemu-x/SlothClash) и [Xray-core](https://github.com/XTLS/Xray-core) — источники отдельных патчей; разбор — в [CREDITS.md](https://github.com/Hoxiee/rain-core/blob/main/CREDITS.md).
 
 **Remnawave** — лучшая панель для подписок, и мы её рекомендуем. ReClash плотно с ней интегрирован: понимает её заголовки подписки, HWID с `x-hwid` и страницу подписки, а для её правил ответа есть [готовое правило](docs/ru/providers/rollout.md#remnawave). При этом кода Remnawave в нём нет, тело подписки остаётся обычным mihomo, и с другими панелями всё работает так же.
 

@@ -63,7 +63,12 @@ Widget _shell() => switch (_platform) {
 };
 
 List<Override> previewOverrides() => [
-  ...mock.overrides(dashboard: _dashboard),
+  ...mock.overrides(
+    dashboard: _dashboard,
+    // The proxies page shows a group's routing action only while the Core
+    // reports the group scripted.
+    routing: _page == PageLabel.proxies,
+  ),
   currentPageLabelProvider.overrideWithBuild((_, _) => _page),
 ];
 

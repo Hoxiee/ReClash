@@ -128,7 +128,7 @@ class _XrayConversion {
     for (var index = 0; index < configs.length; index++) {
       _plans.add(_read(index, configs[index]));
     }
-    if (_nodes.isEmpty && _skipped.isEmpty) return null;
+    if (_nodes.isEmpty) return null;
 
     final taken = {...reservedProxyNames};
     for (final entry in _nodes.entries) {
@@ -219,10 +219,21 @@ class _XrayConversion {
       try {
         proxy = _convertOutbound(outbound);
       } on _UnsupportedOutbound catch (error) {
+        if (error.security) _securityLosses = true;
         _skip(error.node);
         continue;
       }
-      if (proxy == null) continue;
+      if (proxy == null) {
+        final protocol = outbound['protocol']?.toString() ?? 'outbound';
+        _skip(
+          SkippedNode(
+            name: tag.isEmpty ? protocol : tag,
+            kind: protocol,
+            reason: SkippedNodeReason.protocol,
+          ),
+        );
+        continue;
+      }
       final mux = _asMap(outbound['mux']);
       if (mux != null && mux['enabled'] == true) {
         final concurrency = mux['concurrency'] is num
@@ -231,23 +242,55 @@ class _XrayConversion {
         final xudp = mux['xudpConcurrency'] is num
             ? (mux['xudpConcurrency'] as num).toInt()
             : null;
-        if (concurrency != null && concurrency < 0) {
-          // Xray disables Mux entirely for a negative TCP concurrency.
-        } else if (proxy['type'] == 'vless' &&
-            !(proxy['flow']?.toString().startsWith('xtls-rprx-vision') ??
-                false)) {
-          if (xudp != null && xudp < 0) {
-            proxy['x-import-losses'] = true;
-          }
-          proxy['mux.cool'] = <String, Object?>{
-            'enabled': true,
-            'max-concurrency': ?concurrency,
-            if (xudp != null && xudp >= 0) 'xudp-concurrency': xudp,
-            if ((mux['xudpProxyUDP443'] ?? '').toString().isNotEmpty)
-              'xudp-proxy-udp443': mux['xudpProxyUDP443'].toString(),
-          };
-        } else {
+        final udp443 = mux['xudpProxyUDP443']?.toString() ?? '';
+        final invalidUdp443 =
+            udp443.isNotEmpty &&
+            !const {'reject', 'allow', 'skip'}.contains(udp443);
+        final vision =
+            proxy['type'] == 'vless' &&
+            (proxy['flow']?.toString().startsWith('xtls-rprx-vision') ?? false);
+        if ((mux['concurrency'] != null && mux['concurrency'] is! num) ||
+            (mux['xudpConcurrency'] != null &&
+                mux['xudpConcurrency'] is! num)) {
+          // Core would ignore the whole mux.cool block on a non-numeric value.
           proxy['x-import-losses'] = true;
+        } else if (concurrency != null && concurrency < 0) {
+          // Xray disables Mux entirely for a negative TCP concurrency.
+        } else if (invalidUdp443) {
+          proxy['x-import-losses'] = true;
+        } else if (proxy['type'] != 'vless') {
+          proxy['x-import-losses'] = true;
+        } else {
+          // Xray 26 raises 0..128 to 128; absent is zero before that.
+          final udpPlain = xudp != null && xudp < 0;
+          if (vision) {
+            if (concurrency == null || concurrency == 0) {
+              if (xudp != null && xudp > 0) {
+                proxy['mux.cool'] = <String, Object?>{
+                  'concurrency': 0,
+                  'xudp-concurrency': xudp,
+                  if (udp443.isNotEmpty) 'xudp-proxy-udp443': udp443,
+                };
+              } else if (udpPlain) {
+                proxy['x-import-losses'] = true;
+              }
+            } else {
+              proxy['x-import-losses'] = true;
+            }
+          } else {
+            if (udpPlain) {
+              proxy['x-import-losses'] = true;
+            }
+            final maxConcurrency = concurrency == null || concurrency <= 128
+                ? 128
+                : concurrency;
+            proxy['mux.cool'] = <String, Object?>{
+              'enabled': true,
+              'max-concurrency': maxConcurrency,
+              if (xudp != null && xudp > 0) 'xudp-concurrency': xudp,
+              if (udp443.isNotEmpty && !udpPlain) 'xudp-proxy-udp443': udp443,
+            };
+          }
         }
       }
       if (_present(outbound['targetStrategy']) ||
@@ -556,7 +599,7 @@ class _XrayConversion {
       for (final rule in plan.rules) {
         if (_isCatchAll(rule)) break;
         final target = _ruleTarget(plan, rule);
-        final fields = _rulePredicates(rule);
+        final fields = _rulePredicates(rule, onLoss: () => _otherLosses = true);
         if (target == null || fields == null) {
           _otherLosses = true;
           continue;
@@ -631,7 +674,10 @@ class _Predicate {
   final bool ip;
 }
 
-List<List<_Predicate>>? _rulePredicates(Map<String, Object?> rule) {
+List<List<_Predicate>>? _rulePredicates(
+  Map<String, Object?> rule, {
+  void Function()? onLoss,
+}) {
   if (rule.keys.any(
     (key) => !_ruleConditions.contains(key) && !_ruleMetadata.contains(key),
   )) {
@@ -651,10 +697,18 @@ List<List<_Predicate>>? _rulePredicates(Map<String, Object?> rule) {
     if (entry.$1 == 'network' && _coversBothNetworks(value)) continue;
     final predicates = entry.$2(value);
     if (predicates.isEmpty) return null;
+    if (predicates.length < _ruleValueCount(value)) onLoss?.call();
     fields.add(predicates);
   }
   return fields.isEmpty ? null : fields;
 }
+
+int _ruleValueCount(Object? value) => switch (value) {
+  String() => value.split(',').where((entry) => entry.trim().isNotEmpty).length,
+  List() => value.where((entry) => entry.toString().isNotEmpty).length,
+  num() => 1,
+  _ => 0,
+};
 
 List<String> _ruleLines(
   List<List<_Predicate>> fields,
@@ -865,9 +919,10 @@ String _uniqueName(String base, Set<String> taken) {
 }
 
 class _UnsupportedOutbound implements Exception {
-  const _UnsupportedOutbound(this.node);
+  const _UnsupportedOutbound(this.node, {this.security = false});
 
   final SkippedNode node;
+  final bool security;
 }
 
 final _genericTagPattern = RegExp(
@@ -984,6 +1039,9 @@ Map<String, Object?>? _convertVless(
   if (vnext == null) return null;
   final users = _firstOf(vnext['users']);
   if (users == null) return null;
+  final multipleEndpoints =
+      settings['vnext'] is List && (settings['vnext'] as List).length > 1 ||
+      vnext['users'] is List && (vnext['users'] as List).length > 1;
 
   final server = vnext['address']?.toString();
   final port = _toInt(vnext['port']);
@@ -999,11 +1057,13 @@ Map<String, Object?>? _convertVless(
     'port': port,
     'uuid': uuid,
     'udp': true,
+    if (multipleEndpoints) 'x-import-losses': true,
   };
   final rawFlow = users['flow']?.toString() ?? '';
   final flow = sanitizeVlessFlow(rawFlow);
   if (flow != null) {
     proxy['flow'] = flow;
+    if (rawFlow != flow) proxy['x-import-losses'] = true;
   } else if (rawFlow.isNotEmpty) {
     proxy['x-import-losses'] = true;
   }
@@ -1012,7 +1072,13 @@ Map<String, Object?>? _convertVless(
     if (isValidVlessEncryption(encryption)) {
       proxy['encryption'] = encryption;
     } else {
-      proxy['x-import-losses'] = true;
+      throw _UnsupportedOutbound(
+        SkippedNode(
+          name: name,
+          kind: 'encryption',
+          reason: SkippedNodeReason.protocol,
+        ),
+      );
     }
   }
 
@@ -1035,6 +1101,9 @@ Map<String, Object?>? _convertVmess(
   if (vnext == null) return null;
   final users = _firstOf(vnext['users']);
   if (users == null) return null;
+  final multipleEndpoints =
+      settings['vnext'] is List && (settings['vnext'] as List).length > 1 ||
+      vnext['users'] is List && (vnext['users'] as List).length > 1;
 
   final server = vnext['address']?.toString();
   final port = _toInt(vnext['port']);
@@ -1052,6 +1121,7 @@ Map<String, Object?>? _convertVmess(
     'alterId': _toInt(users['alterId']) ?? 0,
     'cipher': sanitizeVmessCipher(users['security']?.toString() ?? 'auto'),
     'udp': true,
+    if (multipleEndpoints) 'x-import-losses': true,
   };
 
   if (users['globalPadding'] == true) proxy['global-padding'] = true;
@@ -1107,10 +1177,17 @@ Map<String, Object?>? _convertShadowsocks(
           value != null && !const {'tcp', 'raw', ''}.contains(value.toString()),
         'security' =>
           value != null && !const {'none', ''}.contains(value.toString()),
+        'sockopt' => false,
         _ => _present(value),
       };
     });
-    if (unsupported) proxy['x-import-losses'] = true;
+    if (unsupported) {
+      // mihomo's ss outbound has no streamSettings; emitting it without the
+      // transport would produce a node that cannot connect.
+      proxy['x-unsupported-transport'] = 'shadowsocks';
+    } else if (applyXraySockopt(proxy, stream['sockopt'])) {
+      proxy['x-import-losses'] = true;
+    }
   }
   return proxy;
 }
@@ -1158,12 +1235,15 @@ Map<String, Object?>? _fromServersList(
   final port = _toInt(servers['port']);
   if (server == null || server.isEmpty || port == null) return null;
 
+  final multipleServers =
+      settings['servers'] is List && (settings['servers'] as List).length > 1;
   final proxy = <String, Object?>{
     'name': name.isEmpty ? server : name,
     'type': type,
     'server': server,
     'port': port,
     'udp': true,
+    if (multipleServers) 'x-import-losses': true,
   };
   if (credentialKey != null) {
     final credential = servers[credentialKey]?.toString();
@@ -1207,6 +1287,8 @@ Map<String, Object?>? _convertWireguardOutbound(
   final secretKey = secretKeyOf(settings)!;
 
   final peers = _firstOf(settings['peers']);
+  final multiplePeers =
+      settings['peers'] is List && (settings['peers'] as List).length > 1;
   final publicKey = (peers?['publicKey'] ?? settings['publicKey'])?.toString();
   final endpoint =
       (peers?['endpoint'] ?? settings['endpoint'])?.toString() ?? '';
@@ -1245,6 +1327,7 @@ Map<String, Object?>? _convertWireguardOutbound(
       'workers': workers,
     'peers': [peer],
     'udp': true,
+    if (multiplePeers) 'x-import-losses': true,
   };
 }
 
@@ -1258,6 +1341,31 @@ void _applyStreamSettings(
   required String fallbackSni,
 }) {
   if (streamSettings is! Map<String, Object?>) return;
+
+  final security = (streamSettings['security']?.toString() ?? 'none')
+      .toLowerCase();
+  final reality = _asMap(streamSettings['realitySettings']);
+  if (security == 'reality' && !xrayRealityValid(reality)) {
+    throw _UnsupportedOutbound(
+      SkippedNode(
+        name: proxy['name']?.toString() ?? '',
+        kind: 'reality',
+        reason: SkippedNodeReason.protocol,
+      ),
+      security: true,
+    );
+  }
+  final ech = _asMap(streamSettings['tlsSettings'])?['echConfigList'];
+  if (!xrayEchConfigValid(ech)) {
+    throw _UnsupportedOutbound(
+      SkippedNode(
+        name: proxy['name']?.toString() ?? '',
+        kind: 'ech',
+        reason: SkippedNodeReason.protocol,
+      ),
+      security: true,
+    );
+  }
 
   final network = streamSettings['network']?.toString() ?? 'tcp';
   if (applyXraySecurity(proxy, streamSettings, type: type)) {

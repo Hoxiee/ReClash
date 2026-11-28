@@ -10,6 +10,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/config/ntp.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -178,7 +179,10 @@ void main() {
 
     double heightOf(String title) => tester
         .getSize(
-          find.ancestor(of: find.text(title), matching: find.byType(ListTile)),
+          find.ancestor(
+            of: find.text(title),
+            matching: find.byType(DecorationListItem),
+          ),
         )
         .height;
     expect(config().ntp.dialerProxy, isEmpty);
@@ -239,7 +243,10 @@ void main() {
 
     await tester.tap(
       find.descendant(
-        of: find.ancestor(of: status, matching: find.byType(ListTile)),
+        of: find.ancestor(
+          of: status,
+          matching: find.byType(DecorationListItem),
+        ),
         matching: find.byTooltip(currentAppLocalizations.remove),
       ),
     );
@@ -307,10 +314,10 @@ void main() {
     setKeys(NtpOverrideKey.values.toSet());
     await tester.pump();
 
-    final add = tester.widget<IconButton>(
+    final add = tester.widget<prism.IconButton>(
       find.ancestor(
         of: find.byTooltip(currentAppLocalizations.addSettingEntry),
-        matching: find.byType(IconButton),
+        matching: find.byType(prism.IconButton),
       ),
     );
     expect(add.onPressed, isNull);

@@ -48,7 +48,8 @@ void main() {
     final sizes = tester
         .widgetList<CommonCircleLoading>(find.byType(CommonCircleLoading))
         .map((loading) => tester.getSize(find.byWidget(loading)));
-    expect(sizes, [const Size.square(16), const Size.square(48)]);
+    // A page's indicator stands in for the empty-page illustration.
+    expect(sizes, [const Size.square(16), const Size.square(128)]);
   });
 
   testWidgets('CommonCircleLoading fills a tight slot', (tester) async {

@@ -15,7 +15,7 @@ const macOSBootstrapLimit = 4096
 
 var macOSSessionPattern = regexp.MustCompile(`^[0-9a-f]{32}$`)
 var macOSHashPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
-var macOSSocketPattern = regexp.MustCompile(`^/tmp/ReClashSocket_[0-9]+\.sock$`)
+var macOSSocketPattern = regexp.MustCompile(`^/tmp/ReClashSocket_[0-9a-f]{32}\.sock$`)
 
 type macOSBootstrap struct {
 	Version       int    `json:"version"`

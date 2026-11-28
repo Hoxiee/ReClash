@@ -2,6 +2,7 @@ import 'package:reclash/pages/editor.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,7 +39,9 @@ void main() {
     for (final glyph in [AppGlyphs.search, AppGlyphs.check]) {
       expect(
         tester
-            .widget<IconButton>(find.widgetWithGlyph(IconButton, glyph))
+            .widget<prism.IconButton>(
+              find.widgetWithGlyph(prism.IconButton, glyph),
+            )
             .onPressed,
         isNull,
       );
@@ -77,7 +80,9 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
+          .widget<prism.IconButton>(
+            find.widgetWithGlyph(prism.IconButton, AppGlyphs.check),
+          )
           .onPressed,
       isNotNull,
     );

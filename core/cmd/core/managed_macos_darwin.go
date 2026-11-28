@@ -79,22 +79,25 @@ func prepareDesktopStartup(args []string) (string, func(), error) {
 	}); err != nil {
 		return "", nil, err
 	}
-	if err := connection.SetDeadline(time.Now().Add(5 * time.Second)); err != nil {
-		return "", nil, err
-	}
-	if err := json.NewEncoder(connection).Encode(map[string]any{
-		"version": 1, "ready": true, "sessionId": bootstrap.SessionID, "pid": os.Getpid(),
-	}); err != nil {
-		return "", nil, err
-	}
-	if err := connection.SetDeadline(time.Time{}); err != nil {
-		return "", nil, err
-	}
+	core.SetStartupReady(func() error {
+		if err := connection.SetDeadline(time.Now().Add(5 * time.Second)); err != nil {
+			return err
+		}
+		if err := json.NewEncoder(connection).Encode(map[string]any{
+			"version": 1, "ready": true, "sessionId": bootstrap.SessionID, "pid": os.Getpid(),
+		}); err != nil {
+			return err
+		}
+		if err := connection.SetDeadline(time.Time{}); err != nil {
+			return err
+		}
+		go func() {
+			_, _ = io.Copy(io.Discard, reader)
+			_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
+		}()
+		return nil
+	})
 	failed = false
-	go func() {
-		_, _ = io.Copy(io.Discard, reader)
-		_ = syscall.Kill(os.Getpid(), syscall.SIGTERM)
-	}()
 	return bootstrap.Address, cleanup, nil
 }
 

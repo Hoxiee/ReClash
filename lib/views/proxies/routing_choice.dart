@@ -576,14 +576,16 @@ class _LinkValue extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 160),
-          child: EmojiText(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.listTitleStyle.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 160),
+            child: EmojiText(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.listTitleStyle.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),

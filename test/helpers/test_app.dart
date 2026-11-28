@@ -3,6 +3,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/manager/theme_manager.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/prism_theme.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,6 +48,7 @@ class TestApp extends StatelessWidget {
       localizationsDelegates: [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,
+        AppPrismUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
         ...fallbackMaterialLocalizationsDelegates,
       ],
@@ -65,15 +67,18 @@ class TestApp extends StatelessWidget {
   }
 }
 
-/// The scopes ThemeManager provides, for a test with its own MaterialApp.
+/// The app's own scopes, for a test with its own MaterialApp: the prism theme
+/// bridge outside ThemeManager's, as `Application` nests them.
 Widget wrapAppScopes(BuildContext context, Widget child) {
   final measure = Measure.of(context, 1);
   globalState.measure = measure;
   final hasProviders =
       context.findAncestorWidgetOfExactType<UncontrolledProviderScope>() !=
       null;
-  return MeasureScope(
-    measure: measure,
-    child: hasProviders ? AppViewScope(child: child) : child,
+  return PrismThemeBridge(
+    child: MeasureScope(
+      measure: measure,
+      child: hasProviders ? AppViewScope(child: child) : child,
+    ),
   );
 }

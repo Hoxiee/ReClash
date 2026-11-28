@@ -16,6 +16,8 @@ dependencies:
   flutter:
     sdk: flutter
   material_ui: ^1.5.0
+  prism_ui:
+    path: plugins/prism_ui
   intl: any
   path_provider: ^2.1.6
   path: ^1.9.1

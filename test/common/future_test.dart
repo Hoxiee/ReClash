@@ -3,6 +3,15 @@ import 'dart:async';
 import 'package:reclash/common/future.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+int _identity(int value) => value;
+
+int _failOnNegative(int value) {
+  if (value < 0) {
+    throw ArgumentError.value(value, 'value', 'must not be negative');
+  }
+  return value;
+}
+
 void main() {
   group('FutureExt.withTimeout', () {
     test('returns the value when it completes before the timeout', () async {
@@ -88,6 +97,78 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 450));
 
       expect(lastCalls, 0);
+    });
+  });
+
+  group('LatestCompute', () {
+    test('coalesces queued runs and reports only the latest input', () async {
+      final results = <int>[];
+      final reported = Completer<void>();
+      final queue = LatestCompute<int, int>(_identity, (result) {
+        results.add(result);
+        if (result == 3) {
+          reported.complete();
+        }
+      });
+
+      queue.run(1);
+      queue.run(2);
+      queue.run(3);
+
+      await reported.future.timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(results, [3]);
+    });
+
+    test('drops the result of a run cancelled while in flight', () async {
+      final results = <int>[];
+      final queue = LatestCompute<int, int>(_identity, results.add);
+
+      queue.run(1);
+      queue.cancel();
+
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      expect(results, isEmpty);
+    });
+
+    test('reports every result when runs do not overlap', () async {
+      final results = <int>[];
+      final first = Completer<void>();
+      final second = Completer<void>();
+      final queue = LatestCompute<int, int>(_identity, (result) {
+        results.add(result);
+        if (result == 1) {
+          first.complete();
+        } else if (result == 2) {
+          second.complete();
+        }
+      });
+
+      queue.run(1);
+      await first.future.timeout(const Duration(seconds: 10));
+      queue.run(2);
+      await second.future.timeout(const Duration(seconds: 10));
+
+      expect(results, [1, 2]);
+    });
+
+    test('keeps draining after a task throws', () async {
+      final results = <int>[];
+      final reported = Completer<void>();
+      final queue = LatestCompute<int, int>(_failOnNegative, (result) {
+        results.add(result);
+        reported.complete();
+      });
+
+      queue.run(-1);
+      queue.run(2);
+
+      await reported.future.timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(results, [2]);
     });
   });
 

@@ -235,6 +235,10 @@ void main() {
       final rawConfig = <String, dynamic>{
         'proxy-providers': {
           'safe': {'type': 'http', 'url': 'https://example.com/proxy.yaml'},
+          'private': {
+            'type': 'http',
+            'url': 'https://user:pass@example.com/private.yaml',
+          },
           'loopback': {'type': 'http', 'url': 'http://127.1/proxy.yaml'},
           'metadata': {
             'type': 'http',
@@ -280,12 +284,21 @@ void main() {
         ),
       );
       final config = loadYaml(result.yaml) as YamlMap;
-      expect(config['proxy-providers'].keys, ['safe']);
+      expect(config['proxy-providers'].keys, ['safe', 'private']);
+      expect(
+        config['proxy-providers']['private']['url'],
+        'https://user:pass@example.com/private.yaml',
+      );
       expect(config['rule-providers'].keys, ['safeRules']);
       expect(config['proxy-groups'][0]['use'], ['safe']);
       expect(config['proxy-groups'][1]['use'], isEmpty);
       expect(config['proxy-groups'][1]['proxies'], ['DIRECT']);
       expect(config['rules'], ['RULE-SET,safeRules,DIRECT', 'MATCH,Mixed']);
+      expect(result.dropped, [
+        'proxy-providers/loopback',
+        'proxy-providers/metadata',
+        'rule-providers/localRules',
+      ]);
     },
   );
 

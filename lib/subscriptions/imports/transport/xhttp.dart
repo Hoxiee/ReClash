@@ -180,6 +180,15 @@ class _XhttpConversion {
     }
     final security = source['security'] ?? 'none';
     final downloadTls = map(source['tlsSettings']);
+    if (security == 'reality' &&
+        !xrayRealityValid(map(source['realitySettings']))) {
+      hasLosses = true;
+      return const {};
+    }
+    if (!xrayEchConfigValid(downloadTls?['echConfigList'])) {
+      hasLosses = true;
+      return const {};
+    }
     if (security == 'tls' || security == 'reality') {
       result['tls'] = true;
       if (applyXraySecurity(result, source, type: 'vless')) hasLosses = true;
@@ -232,10 +241,12 @@ bool xhttpSessionIdsSafe(Object? table, Object? length) =>
 bool _sessionIdsSafe(Map<String, Object?> extra) {
   final table = extra['sessionIDTable']?.toString();
   if (table == null || table.isEmpty || table == 'uuid') return true;
+  if (table.length > 4096) return false;
   if (!table.codeUnits.every((unit) => unit < 0x80)) return false;
   final range = _parseSessionRange(extra['sessionIDLength']?.toString());
   if (range == null) return false;
   final (min, max) = range;
+  if (min <= 0) return false;
   final base = table.length;
   if (base >= 2 && max >= 31) return true;
   if (base <= 1) return max - min + 1 >= 2147483648;

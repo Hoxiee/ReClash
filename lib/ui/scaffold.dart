@@ -8,18 +8,22 @@ import 'package:reclash/ui/keyboard.dart';
 import 'package:reclash/ui/l10n.dart';
 import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/models.dart';
-import 'package:reclash/ui/page_background.dart';
-import 'package:reclash/ui/page_viewport.dart';
 import 'package:reclash/ui/pop_scope.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
 import 'package:reclash/ui/typography.dart';
-import 'package:reclash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:prism_ui/common_button.dart' as prism_ui;
+import 'package:prism_ui/liquid_glass.dart' as prism_ui;
+import 'package:prism_ui/navigation_dock.dart' as prism_ui;
+import 'package:prism_ui/page_background.dart';
+import 'package:prism_ui/page_viewport.dart';
+import 'package:prism_ui/theme_data.dart' as prism_ui;
+import 'package:prism_ui/view_scope.dart';
 
 import 'builder.dart';
 import 'button.dart';
@@ -384,7 +388,7 @@ class CommonScaffoldState extends State<CommonScaffold>
     final glass = LiquidGlassScope.of(context);
     const height = BottomInsetScope.dockedSearchHeight;
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final field = ElasticPress(
+    final field = prism_ui.ElasticPress(
       child: GooPane(
         child: SearchField(
           height: height,
@@ -418,7 +422,11 @@ class CommonScaffoldState extends State<CommonScaffold>
         top: false,
         right: false,
         child: GooSurface(
-          glass: glass ? LiquidGlassStyle.pill(colorScheme) : null,
+          glass: glass
+              ? prism_ui.LiquidGlassStyle.pill(
+                  prism_ui.Theme.of(context).colorScheme,
+                )
+              : null,
           color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
           shadows: glass ? const [] : dockShadows(colorScheme),
           child: ListenableBuilder(
@@ -507,6 +515,18 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
   }
 
+  Widget _glassPane(Widget child) {
+    if (!LiquidGlassScope.of(context)) {
+      return child;
+    }
+    return prism_ui.LiquidGlass(
+      style: prism_ui.LiquidGlassStyle.regular(
+        prism_ui.Theme.of(context).colorScheme,
+      ),
+      child: child,
+    );
+  }
+
   Widget? _buildLeading(VoidCallback? backAction, {required _SheetPop? pop}) {
     final button = _buildLeadingButton(backAction, pop: pop);
     if (button == null) {
@@ -523,11 +543,24 @@ class CommonScaffoldState extends State<CommonScaffold>
             child: AnimatedOpacity(
               opacity: hidden ? 0 : 1,
               duration: context.motionDuration(kThemeAnimationDuration),
-              child: ElasticPress(child: button),
+              child: ElasticPress(child: _glassPane(button)),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Fills the Material back and close buttons beside prism's.
+  ButtonStyle _leadingButtonStyle() {
+    final colors = context.colorScheme;
+    final fill = context.raisedSurfaceLevel.colorOf(colors);
+    return IconButton.styleFrom(
+      backgroundColor: fill,
+      disabledBackgroundColor: fill,
+      foregroundColor: colors.onSurface,
+      disabledForegroundColor: colors.onSurface.withValues(alpha: 0.38),
+      shape: AppShape.full,
     );
   }
 
@@ -540,8 +573,10 @@ class CommonScaffoldState extends State<CommonScaffold>
           ? null
           : _buildSheetPopButton(backAction, useCloseIcon: pop.useCloseIcon);
     }
+    final style = _leadingButtonStyle();
     if (backAction != null) {
       return BackButton(
+        style: style,
         onPressed: () {
           if (!mounted) {
             return;
@@ -555,8 +590,8 @@ class CommonScaffoldState extends State<CommonScaffold>
       return null;
     }
     return route is PageRoute && route.fullscreenDialog
-        ? const CloseButton()
-        : const BackButton();
+        ? CloseButton(style: style)
+        : BackButton(style: style);
   }
 
   Widget _buildTitle({required bool compact}) {
@@ -670,7 +705,7 @@ class CommonScaffoldState extends State<CommonScaffold>
               : null,
         ),
       ...selection.build(),
-      for (final action in widgets) ElasticPress(child: action),
+      for (final action in widgets) ElasticPress(child: _glassPane(action)),
       if (fold.overflow.isNotEmpty)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
       if (widget.trailing case final trailing?)
@@ -728,7 +763,9 @@ class CommonScaffoldState extends State<CommonScaffold>
             )
           : null,
       glass: LiquidGlassScope.of(context)
-          ? LiquidGlassStyle.regular(colorScheme)
+          ? prism_ui.LiquidGlassStyle.regular(
+              prism_ui.Theme.of(context).colorScheme,
+            )
           : null,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       // The field's own buttons stay off the bar's button fills and glass.
@@ -1080,7 +1117,14 @@ class CommonScaffoldState extends State<CommonScaffold>
         },
       ),
     );
-    final appBar = _buildAppBar(backAction, form);
+    final bar = _buildAppBar(backAction, form);
+    final appBar = PreferredSize(
+      preferredSize: bar.preferredSize,
+      child: FilledButtonTheme(
+        data: _barFilledButtonTheme,
+        child: IconButtonTheme(data: _barIconButtonTheme, child: bar),
+      ),
+    );
     final header = !isCompact && PageViewport.contains(context)
         ? ViewportAppBar(appBar: appBar)
         : _PageAppBar(appBar: appBar);
@@ -1804,7 +1848,7 @@ class _BarSearch extends StatelessWidget {
   final List<Widget> actions;
   final double actionsWidth;
   final Widget? cancel;
-  final LiquidGlassStyle? glass;
+  final prism_ui.LiquidGlassStyle? glass;
   final Color color;
   final Widget field;
 
@@ -1934,7 +1978,7 @@ class _BarSearch extends StatelessWidget {
                     children: [
                       Positioned.fromRect(
                         rect: fieldRect,
-                        child: ElasticPress(
+                        child: prism_ui.ElasticPress(
                           key: fieldKey,
                           child: GooPane(
                             child: ClipRSuperellipse(
@@ -2237,7 +2281,7 @@ class _OverflowMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CommonPopupBox(
-      targetBuilder: (open) => IconButton(
+      targetBuilder: (open) => prism_ui.IconButton(
         tooltip: UiLocalizations.of(context).more,
         onPressed: open,
         icon: const GlyphIcon(AppGlyphs.more),
@@ -2260,11 +2304,12 @@ class AppBarActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return IconButton(
+    final selected = data.isSelected == true;
+    return prism_ui.IconButton(
       tooltip: data.tooltip,
-      isSelected: data.isSelected,
-      style: data.isSelected == true
-          ? IconButton.styleFrom(
+      isSelected: selected,
+      style: selected
+          ? prism_ui.ButtonStyle.from(
               backgroundColor: TonalButtonTheme.glassOf(context)
                   ? null
                   : colorScheme.primary,
@@ -2367,6 +2412,23 @@ const double appBarActionSpace = 4;
 const double _barButtonGap = 8;
 const double _headerOverhang = 16;
 const double _iconButtonTapPadding = 4;
+
+final _barIconButtonTheme = IconButtonThemeData(
+  style: IconButton.styleFrom(
+    fixedSize: Size.square(TonalButtonSize.bar.button),
+    minimumSize: Size.square(TonalButtonSize.bar.button),
+    padding: EdgeInsets.zero,
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  ),
+);
+
+final _barFilledButtonTheme = FilledButtonThemeData(
+  style: FilledButton.styleFrom(
+    minimumSize: Size.square(TonalButtonSize.bar.button),
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  ),
+);
 
 /// Where a filled button sits from the app bar edge, leading included: the
 /// layout margin iOS gives a compact and a regular width.

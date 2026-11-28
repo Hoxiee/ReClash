@@ -10,6 +10,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/navigation_dock.dart' as prism_ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';
@@ -1209,7 +1210,7 @@ class _FindField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElasticPress(
+    return prism_ui.ElasticPress(
       child: GooPane(
         child: SearchField(
           height: _findButtonSize.button,

@@ -9,6 +9,9 @@ import 'package:path/path.dart';
 
 import '../helpers/app_paths.dart';
 
+/// A model an isolate can be sent, so a spilled answer can prove it ran there.
+Object? _tagged(Object? result) => {'tagged': result};
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -69,10 +72,76 @@ void main() {
 
     final response = await resolveSpilledResponse(
       CoreMethodResponse(id: '4', file: file.path),
-      method: CoreMethod.getConnections,
+      model: coreResultModelOf(CoreMethod.getConnections),
     );
 
     expect(response.unwrap<List<TrackerInfo>>()?.single.id, 'c1');
+  });
+
+  test('a model decodes a result its transport read inline', () {
+    final response = withResultModel(
+      coreResultModelOf(CoreMethod.getConnections),
+      {
+        'id': '9',
+        'result': {
+          'connections': [
+            {
+              'id': 'c9',
+              'metadata': {'network': 'tcp'},
+              'start': '2026-01-01',
+              'chains': ['DIRECT'],
+              'rule': 'MATCH',
+              'rulePayload': '',
+            },
+          ],
+        },
+      },
+    );
+
+    expect(response['result'], isA<List<TrackerInfo>>());
+    expect((response['result'] as List<TrackerInfo>).single.id, 'c9');
+  });
+
+  test('a model leaves an error or a spilled envelope untouched', () {
+    final model = coreResultModelOf(CoreMethod.getConnections);
+    const failed = <String, Object?>{
+      'error': {'code': 'unavailable', 'message': 'core down'},
+      'result': 'inline',
+    };
+    const spilled = <String, Object?>{'file': '1.json', 'result': null};
+
+    final plain = <String, Object?>{
+      'result': {'mode': 'rule'},
+    };
+
+    expect(withResultModel(model, failed), same(failed));
+    expect(withResultModel(model, spilled), same(spilled));
+    expect(withResultModel(null, plain), same(plain));
+  });
+
+  test('only a method with a model has one', () {
+    expect(coreResultModelOf(CoreMethod.getConnections), isNotNull);
+    expect(coreResultModelOf(CoreMethod.getConfig), isNull);
+  });
+
+  test('the isolate threshold is 50 KiB', () {
+    expect(coreIsolateDecodeBytes, 50 * 1024);
+  });
+
+  test('a spilled answer runs the model it was handed', () async {
+    final file = spill(spillDirectory, {
+      'id': '10',
+      'result': {'mode': 'rule'},
+    });
+
+    final response = await resolveSpilledResponse(
+      CoreMethodResponse(id: '10', file: file.path),
+      model: _tagged,
+    );
+
+    expect(response.unwrap<Map<String, dynamic>>(), {
+      'tagged': {'mode': 'rule'},
+    });
   });
 
   test('refuses a file outside the spill directory', () async {

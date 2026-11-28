@@ -4,6 +4,7 @@ import 'package:reclash/common/app_localizations.dart';
 import 'package:reclash/pages/scan.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/ui/activate_box.dart';
+import 'package:reclash/ui/button.dart' show TonalButton;
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/null_status.dart';
 import 'package:reclash/ui/surface.dart';
@@ -765,7 +766,7 @@ void main() {
       final settings = tester.getRect(
         find.ancestor(
           of: find.text(currentAppLocalizations.settings),
-          matching: find.bySubtype<FilledButton>(),
+          matching: find.bySubtype<TonalButton>(),
         ),
       );
       final close = tester.getRect(

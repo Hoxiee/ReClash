@@ -57,11 +57,12 @@ abstract interface class SecurityLossyConversion {
   bool get hasSecurityLoss;
 }
 
-class ShareLinksResult implements LossyConversion {
+class ShareLinksResult implements LossyConversion, SecurityLossyConversion {
   const ShareLinksResult({
     required this.config,
     this.skipped = const [],
     this.hasOtherLosses = false,
+    this.hasSecurityLoss = false,
   });
 
   @override
@@ -72,6 +73,9 @@ class ShareLinksResult implements LossyConversion {
 
   @override
   final bool hasOtherLosses;
+
+  @override
+  final bool hasSecurityLoss;
 }
 
 bool _isLinkLine(String line) {
@@ -111,21 +115,24 @@ bool isShareLinkInput(String input) {
 }
 
 ShareLinksResult? tryConvertShareLinks(String raw) {
-  final (proxies, skipped, hasOtherLosses) = _scanShareLinks(raw);
+  final (proxies, skipped, hasOtherLosses, hasSecurityLoss) = _scanShareLinks(
+    raw,
+  );
   if (proxies.isEmpty) return null;
   return ShareLinksResult(
     config: emitProxiesConfig(proxies),
     skipped: skipped,
     hasOtherLosses: hasOtherLosses,
+    hasSecurityLoss: hasSecurityLoss,
   );
 }
 
 List<SkippedNode> probeUnsupportedShareLinks(String raw) {
-  final (proxies, skipped, _) = _scanShareLinks(raw);
+  final (proxies, skipped, _, _) = _scanShareLinks(raw);
   return proxies.isEmpty ? skipped : const [];
 }
 
-(List<Map<String, Object?>>, List<SkippedNode>, bool) _scanShareLinks(
+(List<Map<String, Object?>>, List<SkippedNode>, bool, bool) _scanShareLinks(
   String raw,
 ) {
   final proxies = <Map<String, Object?>>[];
@@ -134,6 +141,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   final nextSuffix = <String, int>{};
   final extensionCounts = <String, int>{};
   var hasOtherLosses = false;
+  var hasSecurityLoss = false;
   var atNodeLimit = false;
 
   void addProxy(Map<String, Object?> proxy) {
@@ -203,7 +211,11 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
         }
         final parsed = scheme == 'amneziawg' || scheme == 'awg'
             ? [?_parseAmneziaWgLink(normalized)]
-            : _parseUri(normalized, onLoss: () => hasOtherLosses = true);
+            : _parseUri(
+                normalized,
+                onLoss: () => hasOtherLosses = true,
+                onSecurityLoss: () => hasSecurityLoss = true,
+              );
         final extension = parsed.isEmpty ? extensionForScheme(scheme) : null;
         if (extension != null) {
           final count = extensionCounts.update(
@@ -219,6 +231,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           if (scheme == 'amneziawg' || scheme == 'awg') hasOtherLosses = true;
         }
       } on _UnsupportedLink catch (error) {
+        if (error.security) hasSecurityLoss = true;
         addSkipped(error.node);
       } catch (_) {
         skip(normalized, scheme);
@@ -239,13 +252,14 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
     }
   }
 
-  return (proxies, skipped, hasOtherLosses);
+  return (proxies, skipped, hasOtherLosses, hasSecurityLoss);
 }
 
 class _UnsupportedLink implements Exception {
-  const _UnsupportedLink(this.node);
+  const _UnsupportedLink(this.node, {this.security = false});
 
   final SkippedNode node;
+  final bool security;
 }
 
 String? _tryDecodeFragment(String fragment) {
@@ -283,15 +297,20 @@ String _stripLinkExtras(String name) {
 List<Map<String, Object?>> _parseUri(
   String uri, {
   required void Function() onLoss,
+  required void Function() onSecurityLoss,
 }) {
   if (uri.startsWith('mierus://')) return _parseMieru(uri, onLoss: onLoss);
   if (uri.startsWith('tt://')) return [?_parseTrustTunnel(uri, onLoss: onLoss)];
   final proxy = switch (_nodeScheme(uri)) {
-    'vmess' => _parseVmess(uri, onLoss: onLoss),
-    'vless' => _parseVless(uri, onLoss: onLoss),
+    'vmess' => _parseVmess(uri, onLoss: onLoss, onSecurityLoss: onSecurityLoss),
+    'vless' => _parseVless(uri, onLoss: onLoss, onSecurityLoss: onSecurityLoss),
     'ssr' => _parseShadowsocksR(uri),
     'ss' => _parseShadowsocks(uri),
-    'trojan' => _parseTrojan(uri, onLoss: onLoss),
+    'trojan' => _parseTrojan(
+      uri,
+      onLoss: onLoss,
+      onSecurityLoss: onSecurityLoss,
+    ),
     'hysteria2' ||
     'hy2' ||
     'hysteria2+realm' ||
@@ -511,6 +530,7 @@ Map<String, Object?>? _parseAmneziaWgLink(String uri) {
 Map<String, Object?>? _parseVmess(
   String uri, {
   required void Function() onLoss,
+  required void Function() onSecurityLoss,
 }) {
   final decoded = tryBase64Decode(uri.substring('vmess://'.length));
   if (decoded == null) return null;
@@ -580,12 +600,41 @@ Map<String, Object?>? _parseVmess(
       path: path,
       serviceName: path,
     );
+    if (rawNet == 'kcp') {
+      final opts = <String, Object?>{
+        if (int.tryParse(j['mtu']?.toString() ?? '') case final mtu?
+            when mtu > 0)
+          'mtu': mtu,
+        if (int.tryParse(j['tti']?.toString() ?? '') case final tti?
+            when tti > 0)
+          'tti': tti,
+        if (int.tryParse(j['uplinkCapacity']?.toString() ?? '') case final up?
+            when up > 0)
+          'uplink-capacity': up,
+        if (int.tryParse(j['downlinkCapacity']?.toString() ?? '')
+            case final down? when down > 0)
+          'downlink-capacity': down,
+        if (j['congestion'] is bool) 'congestion': j['congestion'],
+        if (int.tryParse(j['readBufferSize']?.toString() ?? '') case final read?
+            when read > 0)
+          'read-buffer': read,
+        if (int.tryParse(j['writeBufferSize']?.toString() ?? '')
+            case final write? when write > 0)
+          'write-buffer': write,
+        if ((j['seed'] ?? '').toString().isNotEmpty) 'seed': j['seed'],
+        if (headerType.isNotEmpty) 'header': headerType,
+      };
+      if (opts.isNotEmpty) proxy['mkcp-opts'] = opts;
+    }
   }
 
-  final tls = j['tls']?.toString() ?? '';
-  if (tls == 'reality' ||
-      (tls.isEmpty && (j['pbk']?.toString().isNotEmpty ?? false)) ||
-      (tls.isNotEmpty && tls != 'tls' && tls != 'reality')) {
+  final rawTls = j['tls'];
+  final tls = rawTls is bool
+      ? (rawTls ? 'tls' : '')
+      : rawTls?.toString().trim().toLowerCase() ?? '';
+  final tlsOn = tls == 'tls' || tls == '1' || tls == 'true';
+  final hasRealityKey = (j['pbk']?.toString().isNotEmpty ?? false);
+  if (tls == 'reality' || (!tlsOn && hasRealityKey)) {
     throw _UnsupportedLink(
       SkippedNode(
         name: name.isEmpty ? server : name,
@@ -594,7 +643,16 @@ Map<String, Object?>? _parseVmess(
       ),
     );
   }
-  if (tls == 'tls') {
+  if (tls.isNotEmpty && !tlsOn && tls != 'none') {
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name.isEmpty ? server : name,
+        kind: 'tls',
+        reason: SkippedNodeReason.protocol,
+      ),
+    );
+  }
+  if (tlsOn) {
     proxy['tls'] = true;
     final sni = j['sni']?.toString();
     if (sni != null && sni.isNotEmpty) proxy['servername'] = sni;
@@ -603,9 +661,21 @@ Map<String, Object?>? _parseVmess(
     proxy,
     fingerprint: j['fp']?.toString() ?? '',
     alpn: j['alpn']?.toString() ?? '',
-    allowInsecure: false,
+    allowInsecure: j['allowInsecure'] == true || j['verify_cert'] == false,
     emulateXray: true,
   );
+  final ech = j['ech']?.toString() ?? '';
+  if (ech.isNotEmpty && !xrayEchConfigValid(ech)) {
+    onSecurityLoss();
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name.isEmpty ? server : name,
+        kind: 'ech',
+        reason: SkippedNodeReason.protocol,
+      ),
+      security: true,
+    );
+  }
   final params = <String, String>{
     for (final key in const [
       'pcs',
@@ -623,9 +693,18 @@ Map<String, Object?>? _parseVmess(
   return proxy;
 }
 
+String _linkSecurity(Map<String, String> params, {required String fallback}) {
+  final explicit = params['security']?.trim().toLowerCase();
+  if (explicit != null && explicit.isNotEmpty) return explicit;
+  final tls = params['tls']?.trim().toLowerCase();
+  if (tls == '1' || tls == 'true' || tls == 'tls') return 'tls';
+  return fallback;
+}
+
 Map<String, Object?>? _parseVless(
   String uri, {
   required void Function() onLoss,
+  required void Function() onSecurityLoss,
 }) {
   final parts = _splitUserinfoUri(uri);
   if (parts == null) return null;
@@ -640,30 +719,55 @@ Map<String, Object?>? _parseVless(
     'udp': true,
   };
 
-  final security = params['security'] ?? 'none';
+  final security = _linkSecurity(params, fallback: 'none');
   final sni = params['sni'] ?? params['peer'] ?? server;
   if (security == 'reality') {
+    final publicKey = params['pbk'] ?? params['password'] ?? '';
+    final shortId = params['sid'] ?? '';
+    final mldsa = params['pqv'] ?? '';
+    if (!isValidRealityPublicKey(publicKey) ||
+        !isValidRealityShortId(shortId) ||
+        (mldsa.isNotEmpty && !isValidRealityMldsa65Verify(mldsa))) {
+      onSecurityLoss();
+      throw _UnsupportedLink(
+        SkippedNode(
+          name: name,
+          kind: 'reality',
+          reason: SkippedNodeReason.protocol,
+        ),
+        security: true,
+      );
+    }
     proxy['tls'] = true;
     proxy['servername'] = sni;
     proxy['reality-opts'] = <String, Object?>{
-      'public-key': params['pbk'] ?? params['password'] ?? '',
-      if ((params['sid'] ?? '').isNotEmpty) 'short-id': params['sid'],
-      if ((params['pqv'] ?? '').isNotEmpty) 'mldsa65-verify': params['pqv'],
+      'public-key': publicKey,
+      if (shortId.isNotEmpty) 'short-id': shortId,
+      if (mldsa.isNotEmpty) 'mldsa65-verify': mldsa,
       if (const {'1', 'true'}.contains(params['support-x25519mlkem768']))
         'support-x25519mlkem768': true,
     };
     if ((params['spx'] ?? '').isNotEmpty) onLoss();
-    if ((params['pbk'] ?? params['password'] ?? '').isEmpty) onLoss();
-  } else if (security == 'tls') {
+  } else if (security == 'tls' || security == 'xtls') {
     proxy['tls'] = true;
     proxy['servername'] = sni;
+    if (security == 'xtls') onLoss();
   } else if (security.isNotEmpty && security != 'none') {
     onLoss();
+  }
+  final ech = params['ech'] ?? '';
+  if (ech.isNotEmpty && !xrayEchConfigValid(ech)) {
+    onSecurityLoss();
+    throw _UnsupportedLink(
+      SkippedNode(name: name, kind: 'ech', reason: SkippedNodeReason.protocol),
+      security: true,
+    );
   }
   final rawFlow = params['flow'] ?? '';
   final flow = sanitizeVlessFlow(rawFlow);
   if (flow != null) {
     proxy['flow'] = flow;
+    if (rawFlow != flow) onLoss();
   } else if (rawFlow.isNotEmpty) {
     onLoss();
   }
@@ -672,7 +776,15 @@ Map<String, Object?>? _parseVless(
     if (isValidVlessEncryption(encryption)) {
       proxy['encryption'] = encryption;
     } else {
-      onLoss();
+      onSecurityLoss();
+      throw _UnsupportedLink(
+        SkippedNode(
+          name: name,
+          kind: 'encryption',
+          reason: SkippedNodeReason.protocol,
+        ),
+        security: true,
+      );
     }
   }
   _applyTlsExtras(
@@ -834,6 +946,7 @@ Map<String, Object?>? _parseShadowsocksR(String uri) {
 Map<String, Object?>? _parseTrojan(
   String uri, {
   required void Function() onLoss,
+  required void Function() onSecurityLoss,
 }) {
   final parts = _splitUserinfoUri(uri);
   if (parts == null) return null;
@@ -847,26 +960,50 @@ Map<String, Object?>? _parseTrojan(
     'password': password,
     'udp': true,
   };
-  final security = params['security'] ?? 'tls';
+  final security = _linkSecurity(params, fallback: 'tls');
   final sni = params['sni'] ?? params['peer'] ?? server;
   if (sni.isNotEmpty) proxy['sni'] = sni;
   if (security == 'reality') {
+    final publicKey = params['pbk'] ?? params['password'] ?? '';
+    final shortId = params['sid'] ?? '';
+    final mldsa = params['pqv'] ?? '';
+    if (!isValidRealityPublicKey(publicKey) ||
+        !isValidRealityShortId(shortId) ||
+        (mldsa.isNotEmpty && !isValidRealityMldsa65Verify(mldsa))) {
+      onSecurityLoss();
+      throw _UnsupportedLink(
+        SkippedNode(
+          name: name,
+          kind: 'reality',
+          reason: SkippedNodeReason.protocol,
+        ),
+        security: true,
+      );
+    }
     proxy['tls'] = true;
     proxy['reality-opts'] = <String, Object?>{
-      'public-key': params['pbk'] ?? params['password'] ?? '',
-      if ((params['sid'] ?? '').isNotEmpty) 'short-id': params['sid'],
-      if ((params['pqv'] ?? '').isNotEmpty) 'mldsa65-verify': params['pqv'],
+      'public-key': publicKey,
+      if (shortId.isNotEmpty) 'short-id': shortId,
+      if (mldsa.isNotEmpty) 'mldsa65-verify': mldsa,
       if (const {'1', 'true'}.contains(params['support-x25519mlkem768']))
         'support-x25519mlkem768': true,
     };
     if ((params['spx'] ?? '').isNotEmpty) onLoss();
-    if ((params['pbk'] ?? params['password'] ?? '').isEmpty) onLoss();
-  } else if (security == 'tls') {
+  } else if (security == 'tls' || security == 'xtls') {
     proxy['tls'] = true;
+    if (security == 'xtls') onLoss();
   } else if (security == 'none') {
     onLoss();
   } else if (security.isNotEmpty && security != 'tls') {
     onLoss();
+  }
+  final ech = params['ech'] ?? '';
+  if (ech.isNotEmpty && !xrayEchConfigValid(ech)) {
+    onSecurityLoss();
+    throw _UnsupportedLink(
+      SkippedNode(name: name, kind: 'ech', reason: SkippedNodeReason.protocol),
+      security: true,
+    );
   }
   _applyTlsExtras(
     proxy,
@@ -1367,13 +1504,40 @@ String sanitizeVmessCipher(String cipher) {
 
 String? sanitizeVlessFlow(String flow) {
   if (flow.isEmpty) return null;
-  if (flow.length < 16 || !flow.startsWith(_vlessVisionFlow)) return null;
-  return flow;
+  if (flow == _vlessVisionFlow) return flow;
+  // Xray appends -udp443 to the Vision flow; the Core reads only the first 16
+  // characters, so keep Vision and let the caller report the dropped suffix.
+  if (flow.startsWith('$_vlessVisionFlow-')) return _vlessVisionFlow;
+  return null;
 }
 
+/// Mirrors Core's encryption.NewClient: scheme, key mode, RTT mode, at least
+/// one raw-base64url key of 32 (X25519) or 1184 (ML-KEM-768) bytes, and the
+/// remaining short segments treated as padding.
 bool isValidVlessEncryption(String encryption) {
   final parts = encryption.split('.');
-  return parts.length >= 4 && parts.first == 'mlkem768x25519plus';
+  if (parts.length < 4 || parts.first != 'mlkem768x25519plus') return false;
+  if (!const {'native', 'xorpub', 'random'}.contains(parts[1])) return false;
+  if (!const {'1rtt', '0rtt'}.contains(parts[2])) return false;
+  var keys = 0;
+  for (final part in parts.skip(3)) {
+    if (part.length < 20) continue;
+    final bytes = _decodeRawBase64Url(part);
+    if (bytes == null || (bytes.length != 32 && bytes.length != 1184)) {
+      return false;
+    }
+    keys++;
+  }
+  return keys > 0;
+}
+
+List<int>? _decodeRawBase64Url(String value) {
+  if (value.isEmpty || value.contains('=')) return null;
+  try {
+    return base64Url.decode(base64Url.normalize(value));
+  } on FormatException {
+    return null;
+  }
 }
 
 bool isValidPortHopping(String ports) => _portHopPattern.hasMatch(ports);
@@ -1579,6 +1743,17 @@ void _applyTlsExtras(
   if (allowInsecure) proxy['skip-cert-verify'] = true;
 }
 
+bool? _pluginBool(String? value) {
+  switch (value?.trim().toLowerCase()) {
+    case null || '' || '0' || 'false' || 'no' || 'off':
+      return false;
+    case '1' || 'true' || 'yes' || 'on':
+      return true;
+    default:
+      return null;
+  }
+}
+
 bool _applyPlugin(Map<String, Object?> proxy, String pluginParam) {
   if (pluginParam.isEmpty) return true;
   final segments = pluginParam.split(';');
@@ -1597,10 +1772,12 @@ bool _applyPlugin(Map<String, Object?> proxy, String pluginParam) {
         if ((opts['obfs-host'] ?? '').isNotEmpty) 'host': opts['obfs-host'],
       };
     case 'v2ray-plugin':
+      final tls = _pluginBool(opts['tls']);
+      if (tls == null) return false;
       proxy['plugin'] = 'v2ray-plugin';
       proxy['plugin-opts'] = {
         'mode': opts['mode'] ?? 'websocket',
-        if (opts.containsKey('tls')) 'tls': true,
+        if (tls) 'tls': true,
         if ((opts['host'] ?? '').isNotEmpty) 'host': opts['host'],
         if ((opts['path'] ?? '').isNotEmpty) 'path': opts['path'],
       };

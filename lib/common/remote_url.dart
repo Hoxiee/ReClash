@@ -14,11 +14,26 @@ const _blockedIpv6 = ['fd00:ec2::254'];
 ///
 /// Loopback, link-local, carrier-grade NAT and cloud metadata are refused;
 /// RFC 1918 and ULA addresses stay reachable for LAN-hosted subscriptions.
+/// Credentials in the URL are refused too: a fetch never needs them, and a
+/// redirect should not carry them.
 bool isBlockedRemoteUrl(String value) {
+  final uri = Uri.tryParse(value.trim());
+  if (uri == null || uri.userInfo.isNotEmpty) {
+    return true;
+  }
+  return isBlockedProviderUrl(value);
+}
+
+/// Whether a provider URL from subscription content must not be handed to the
+/// Core to fetch.
+///
+/// Unlike [isBlockedRemoteUrl] userinfo stays: it is the provider's own
+/// credentials, which the Core sends as Basic auth. Loopback, metadata and
+/// non-http URLs are refused here for the same reason as above.
+bool isBlockedProviderUrl(String value) {
   final uri = Uri.tryParse(value.trim());
   if (uri == null ||
       uri.host.isEmpty ||
-      uri.userInfo.isNotEmpty ||
       (uri.scheme != 'http' && uri.scheme != 'https')) {
     return true;
   }

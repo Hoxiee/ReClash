@@ -3,5 +3,9 @@
 	url = https://github.com/MetaCubeX/mihomo.git
 [submodule "core/mihomo-patches"]
 	path = core/mihomo-patches
-	url = https://github.com/Hoxiee/mihomo-patch-core.git
+	url = https://github.com/Hoxiee/rain-core.git
 	branch = main
+[submodule "plugins/prism_ui"]
+	path = plugins/prism_ui
+	url = https://github.com/Hoxiee/prism_ui.git
+	branch = dev

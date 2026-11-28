@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:prism_ui/page_background.dart';
 import 'package:reclash/models/wallpaper.dart';
-import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/ui/wallpaper_image.dart';
 
 class WallpaperLayer extends StatelessWidget {

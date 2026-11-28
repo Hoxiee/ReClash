@@ -154,6 +154,9 @@ String? desktopPrivilegeErrorMessage(Object error, AppLocalizations l10n) {
       code.contains('manifest')) {
     return l10n.desktopBundleInvalid;
   }
+  if (code == 'helperownedbyanotheruser') {
+    return l10n.desktopHelperUnavailable;
+  }
   if (code.contains('agentunavailable') || code.contains('pkexecunavailable')) {
     return l10n.desktopAuthorizationAgentUnavailable;
   }

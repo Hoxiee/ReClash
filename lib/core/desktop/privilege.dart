@@ -123,7 +123,8 @@ final class DesktopPrivilegeCoordinator implements DesktopCoreLauncherResolver {
 
   static HelperException? _noFailure() => null;
 
-  bool get _installs => platform == 'linux' || platform == 'windows';
+  bool get _installs =>
+      platform == 'linux' || platform == 'windows' || platform == 'macos';
 
   void configure({required bool tunEnabled, bool allowPrompt = false}) {
     _tunEnabled = tunEnabled && !safeMode;
@@ -179,7 +180,15 @@ final class DesktopPrivilegeCoordinator implements DesktopCoreLauncherResolver {
         _setMacOSReadiness(readiness);
         if (readiness.isReady) return DesktopPrivilegeSetup.ready;
         return switch (readiness.status) {
+          MacOSHelperStatus.enabled
+              when readiness.code == 'helperOutdated' ||
+                  readiness.code == 'helperUnavailable' =>
+            DesktopPrivilegeSetup.update,
           MacOSHelperStatus.requiresApproval => DesktopPrivilegeSetup.approval,
+          MacOSHelperStatus.updateRequired
+              when readiness.code == 'helperOwnedByAnotherUser' =>
+            DesktopPrivilegeSetup.unavailable,
+          MacOSHelperStatus.updateRequired => DesktopPrivilegeSetup.update,
           MacOSHelperStatus.notRegistered => DesktopPrivilegeSetup.install,
           _ => DesktopPrivilegeSetup.unavailable,
         };
@@ -261,7 +270,8 @@ final class DesktopPrivilegeCoordinator implements DesktopCoreLauncherResolver {
         DesktopPrivilegeStatus.ready,
       MacOSHelperStatus.requiresApproval =>
         DesktopPrivilegeStatus.requiresApproval,
-      MacOSHelperStatus.notRegistered => DesktopPrivilegeStatus.notRegistered,
+      MacOSHelperStatus.notRegistered ||
+      MacOSHelperStatus.updateRequired => DesktopPrivilegeStatus.notRegistered,
       _ => DesktopPrivilegeStatus.failed,
     };
     code =
@@ -330,7 +340,7 @@ final class DesktopPrivilegeCoordinator implements DesktopCoreLauncherResolver {
           return linux;
         case 'macos':
           var readiness = await macos.port.readiness();
-          if (!readiness.isReady && allowPrompt) {
+          if (!readiness.isReady && (allowPrompt || allowInstall)) {
             if (isCancelled()) {
               throw const DesktopPrivilegeException('launch_cancelled');
             }

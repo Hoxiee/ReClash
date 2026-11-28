@@ -26,7 +26,15 @@ void main() {
 
       expect(dateTime.show, '2026-05-27');
       expect(dateTime.showFull, '2026-05-27 14:03:09');
-      expect(dateTime.showTime, ' 14:03:09');
+      expect(dateTime.showTime, '14:03:09');
+    });
+
+    test('showTime never carries the date separator space', () {
+      final dateTime = DateTime(2026, 5, 27, 0, 5, 7);
+
+      expect(dateTime.showTime, hasLength(8));
+      expect(dateTime.showTime.startsWith(' '), isFalse);
+      expect(dateTime.showTime, '00:05:07');
     });
 
     test('formats offset timestamps in the system time zone', () {

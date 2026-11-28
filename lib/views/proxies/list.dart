@@ -12,6 +12,7 @@ import 'package:reclash/views/chains/marks.dart';
 import 'package:reclash/views/chains/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -29,6 +30,9 @@ const _liftDistance = 16.0;
 const _groupMinWidth = 360.0;
 const _groupMaxColumns = 3;
 const _lastRowGrowth = _headerInset - proxyGridSpacing;
+
+/// Turns the group's expand caret from pointing down, folded away, to up.
+final _expandTurns = Tween<double>(begin: 0, end: 0.5);
 
 class ProxiesListView extends ConsumerStatefulWidget {
   const ProxiesListView({super.key});
@@ -649,6 +653,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
             key: ValueKey(groupName),
             isExpand: isExpand,
             unfolded: unfolded,
+            unfold: _controller,
             group: widget.group,
             onChange: widget.onChange,
           ),
@@ -799,6 +804,9 @@ class ListHeader extends ConsumerWidget {
   /// The shadow that lifts the header off the rows under it.
   final double lift;
 
+  /// Drives the group's rows unfolding, and the turn of the expand chevron.
+  final Animation<double> unfold;
+
   const ListHeader({
     super.key,
     this.enterAnimated = true,
@@ -809,6 +817,7 @@ class ListHeader extends ConsumerWidget {
     required this.onScrollToSelected,
     required this.isExpand,
     required this.unfolded,
+    required this.unfold,
   });
 
   @override
@@ -827,6 +836,13 @@ class ListHeader extends ConsumerWidget {
     );
     final behaviour = watchGroupBehaviour(ref, group);
     final showRouting = behaviour || scripted;
+    final onRouting = showRouting
+        ? () => unawaited(
+            behaviour
+                ? showGroupBehaviour(context, groupName)
+                : showRoutingSheet(context, groupName),
+          )
+        : null;
     final colorScheme = context.colorScheme;
     final level = floating > 0
         ? SurfaceLevel.floatingOf(colorScheme)
@@ -836,55 +852,44 @@ class ListHeader extends ConsumerWidget {
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
-      shape: AppShape.vertical(
-        top: radius - _headerButtonInset,
-        bottom: unfolded
-            ? max(radius * floating - _headerButtonInset, 0)
-            : radius - _headerButtonInset,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(_headerInset - _headerButtonInset),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Row(
-                children: [
-                  _GroupIcon(src: group.icon, name: groupName),
-                  Flexible(child: _GroupSummary(groupName: groupName)),
-                ],
-              ),
+      radius: radius - _headerButtonInset,
+      fill: const Color(0x00000000),
+      padding: const EdgeInsets.all(_headerInset - _headerButtonInset),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Row(
+              children: [
+                _GroupIcon(src: group.icon, name: groupName),
+                Flexible(child: _GroupSummary(groupName: groupName)),
+              ],
             ),
-            _GroupActions(
-              isExpand: isExpand,
-              routingTooltip: behaviour
-                  ? context.appLocalizations.rcxBehaviour
-                  : null,
-              isDelayTesting: isDelayTesting,
-              groupType: profile == null
-                  ? group.type.name
-                  : rcxProfileTitle(context, ref, profile),
-              onRouting: showRouting
-                  ? () => unawaited(
-                      behaviour
-                          ? showGroupBehaviour(context, groupName)
-                          : showRoutingSheet(context, groupName),
-                    )
-                  : null,
-              onScrollToSelected: () {
-                onScrollToSelected(groupName);
-              },
-              onDelayTest: () {
-                ref
-                    .read(proxiesActionProvider.notifier)
-                    .delayTestPageGroup(groupName);
-              },
-              onToggle: () {
-                onChange(groupName);
-              },
-            ),
-          ],
-        ),
+          ),
+          _GroupActions(
+            isExpand: isExpand,
+            unfold: unfold,
+            isDelayTesting: isDelayTesting,
+            groupType: profile == null
+                ? group.type.name
+                : rcxProfileTitle(context, ref, profile),
+            onRouting: onRouting,
+            routingTooltip: behaviour
+                ? context.appLocalizations.rcxBehaviour
+                : null,
+            onScrollToSelected: () {
+              onScrollToSelected(groupName);
+            },
+            onDelayTest: () {
+              ref
+                  .read(proxiesActionProvider.notifier)
+                  .delayTestPageGroup(groupName);
+            },
+            onToggle: () {
+              onChange(groupName);
+            },
+          ),
+        ],
       ),
       onPressed: () {
         onChange(groupName);
@@ -1056,6 +1061,7 @@ class _SelectedProxyName extends ConsumerWidget {
 class _GroupActions extends StatelessWidget {
   const _GroupActions({
     required this.isExpand,
+    required this.unfold,
     required this.isDelayTesting,
     required this.groupType,
     required this.onScrollToSelected,
@@ -1066,6 +1072,7 @@ class _GroupActions extends StatelessWidget {
   });
 
   final bool isExpand;
+  final Animation<double> unfold;
   final bool isDelayTesting;
   final String groupType;
   final VoidCallback onScrollToSelected;
@@ -1084,13 +1091,13 @@ class _GroupActions extends StatelessWidget {
             TonalButtonGroup(
               size: TonalButtonSize.compact,
               children: [
-                IconButton(
+                prism.IconButton(
                   tooltip: context.appLocalizations.scrollToSelected,
                   onPressed: onScrollToSelected,
                   iconSize: 19,
                   icon: const GlyphIcon(AppGlyphs.locate),
                 ),
-                IconButton(
+                prism.IconButton(
                   tooltip: context.appLocalizations.delayTest,
                   onPressed: isDelayTesting ? null : onDelayTest,
                   icon: isDelayTesting
@@ -1098,7 +1105,7 @@ class _GroupActions extends StatelessWidget {
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
                 if (onRouting != null)
-                  IconButton(
+                  prism.IconButton(
                     tooltip:
                         routingTooltip ?? context.appLocalizations.rcxTitle,
                     onPressed: onRouting,
@@ -1115,12 +1122,15 @@ class _GroupActions extends StatelessWidget {
             ),
           const SizedBox(width: 6),
           ElasticPress(
-            child: IconButton(
+            child: prism.IconButton(
               tooltip: isExpand
                   ? context.appLocalizations.showLess
                   : context.appLocalizations.showMore,
               onPressed: onToggle,
-              icon: CommonExpandIcon(expand: isExpand),
+              icon: RotationTransition(
+                turns: unfold.drive(_expandTurns),
+                child: const GlyphIcon(AppGlyphs.caretDown, fill: 1),
+              ),
             ),
           ),
         ],

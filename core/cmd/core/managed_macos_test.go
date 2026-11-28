@@ -12,7 +12,7 @@ import (
 func validMacOSBootstrap() macOSBootstrap {
 	return macOSBootstrap{
 		Version: 1, SessionID: strings.Repeat("a", 32),
-		Address: "/tmp/ReClashSocket_42.sock", OwnerUID: 501, OwnerGID: 20, ClientPID: 123,
+		Address: "/tmp/ReClashSocket_0123456789abcdef0123456789abcdef.sock", OwnerUID: 501, OwnerGID: 20, ClientPID: 123,
 		HomeDir:    "/Users/test/Library/Application Support/com.reclash",
 		CoreSHA256: strings.Repeat("b", 64), AppIdentifier: "com.reclash", AccountHome: "/Users/test",
 		CorePath: "/Library/Application Support/ReClash/ManagedCore/com.reclash/" + strings.Repeat("b", 64) + "/ReClashCore",

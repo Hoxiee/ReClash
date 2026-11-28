@@ -168,9 +168,28 @@ func send(data []byte) {
 	_ = c.Close()
 }
 
+var startupReady func() error
+
+func SetStartupReady(ready func() error) {
+	startupReady = ready
+}
+
+func announceStartupReady() error {
+	ready := startupReady
+	startupReady = nil
+	if ready == nil {
+		return nil
+	}
+	return ready()
+}
+
 func StartServer(arg string) {
 	dialed, err := dial(arg)
 	if err != nil {
+		panic(err.Error())
+	}
+	if err := announceStartupReady(); err != nil {
+		_ = dialed.Close()
 		panic(err.Error())
 	}
 	serve(dialed)

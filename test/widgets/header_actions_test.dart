@@ -55,7 +55,7 @@ Future<void> _pumpHeader(WidgetTester tester, Widget header) async {
 }
 
 void main() {
-  testWidgets('both headers end their actions at the same inset', (
+  testWidgets('a list header ends its actions at its own inset', (
     tester,
   ) async {
     await _pumpHeader(
@@ -63,16 +63,9 @@ void main() {
       const ListHeader(title: 'Exclude SSIDs', actions: _data),
     );
     final list = tester.getRect(find.byTooltip('Select all'));
-    await _pumpHeader(
-      tester,
-      InfoHeader(
-        info: const Info(label: 'Added rules'),
-        actions: _actions(),
-      ),
-    );
-    final info = tester.getRect(find.byTooltip('Select all'));
+    final context = tester.element(find.byType(ListHeader));
 
-    expect(_width - list.right, _width - info.right);
+    expect(_width - list.right, listHeaderPaddingOf(context).right);
   });
 
   testWidgets('a header spaces its actions like an app bar', (tester) async {
@@ -89,18 +82,18 @@ void main() {
     expect(second.left - first.right, appBarActionSpace);
   });
 
-  testWidgets('a list header stands as tall with actions as without', (
+  testWidgets('a list header centers its title against its actions', (
     tester,
   ) async {
     await _pumpHeader(tester, const ListHeader(title: 'Rules'));
     final bare = tester.getRect(find.text('Rules'));
-    final bareHeader = tester.getSize(find.byType(ListHeader));
     await _pumpHeader(tester, const ListHeader(title: 'Rules', actions: _data));
     final withActions = tester.getRect(find.text('Rules'));
     final button = tester.getRect(find.byTooltip('Select all'));
 
-    expect(withActions.topLeft, bare.topLeft);
-    expect(tester.getSize(find.byType(ListHeader)).height, bareHeader.height);
+    // Prism trims the header's top by the actions' overhang, lifting the
+    // title so it centers against them.
+    expect(withActions.top, lessThan(bare.top));
     expect(button.height, TonalButtonSize.section.button);
     expect(button.center.dy, closeTo(withActions.center.dy, 1));
     expect(

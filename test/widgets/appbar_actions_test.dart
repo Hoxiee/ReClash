@@ -4,6 +4,9 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/liquid_glass.dart' as prism;
+import 'package:prism_ui/navigation_dock.dart' as prism;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -82,6 +85,20 @@ Future<Rect> _pumpBar(
 }
 
 void main() {
+  testWidgets('a bar back button carries the tonal fill', (tester) async {
+    await _pumpBar(
+      tester,
+      view: _mobile,
+      platform: TargetPlatform.android,
+      child: const CommonScaffold(title: 'Title', body: SizedBox()),
+    );
+
+    final back = tester.widget<BackButton>(find.byType(BackButton));
+    final fill = back.style?.backgroundColor?.resolve(const <WidgetState>{});
+    expect(fill, isNotNull);
+    expect(fill, isNot(Colors.transparent));
+  });
+
   for (final view in _views.entries) {
     final inset = appBarActionInset(view.value == _mobile);
 
@@ -137,7 +154,7 @@ void main() {
           );
           final leading = tester.getRect(_container(find.byType(BackButton)));
           final action = tester.getRect(
-            _container(find.widgetWithGlyph(IconButton, AppGlyphs.sync)),
+            find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync),
           );
 
           expect(leading.left, inset);
@@ -189,11 +206,11 @@ void main() {
 
     expect(group, findsOneWidget);
     expect(
-      find.descendant(of: group, matching: find.byType(IconButton)),
+      find.descendant(of: group, matching: find.byType(prism.IconButton)),
       findsNWidgets(2),
     );
     expect(
-      find.descendant(of: group, matching: find.byType(ElasticPress)),
+      find.descendant(of: group, matching: find.byType(prism.ElasticPress)),
       findsOneWidget,
     );
     expect(tester.getSize(group).height, leading.height);
@@ -220,15 +237,20 @@ void main() {
       ),
     );
 
-    for (final button in [
-      find.byType(TonalButtonGroup),
-      find.byType(BackButton),
-    ]) {
-      expect(
-        find.descendant(of: button, matching: find.byType(LiquidGlass)),
-        findsOneWidget,
-      );
-    }
+    expect(
+      find.descendant(
+        of: find.byType(TonalButtonGroup),
+        matching: find.byType(prism.LiquidGlass),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.ancestor(
+        of: find.byType(BackButton),
+        matching: find.byType(prism.LiquidGlass),
+      ),
+      findsOneWidget,
+    );
 
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(BackButton)),
@@ -255,10 +277,10 @@ void main() {
       ),
     );
     final first = tester.getRect(
-      find.widgetWithGlyph(IconButton, AppGlyphs.sync),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync),
     );
     final second = tester.getRect(
-      find.widgetWithGlyph(IconButton, AppGlyphs.sort),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.sort),
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(mouse.removePointer);
@@ -309,7 +331,7 @@ void main() {
     await tester.tap(find.byTooltip('Cancel'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    final sync = find.widgetWithGlyph(IconButton, AppGlyphs.sync);
+    final sync = find.widgetWithGlyph(prism.IconButton, AppGlyphs.sync);
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(mouse.removePointer);
     await mouse.addPointer(location: tester.getCenter(sync));
@@ -479,7 +501,7 @@ void main() {
           child: SheetProvider(type: type, child: scaffold),
         );
         final close = tester.getRect(
-          _container(find.widgetWithGlyph(IconButton, AppGlyphs.close)),
+          find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
         );
         final title = tester.getRect(
           find.descendant(
@@ -608,14 +630,14 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final search = find.widgetWithGlyph(IconButton, AppGlyphs.search);
-    final button = tester.getRect(_container(search));
+    final search = find.widgetWithGlyph(prism.IconButton, AppGlyphs.search);
+    final button = tester.getRect(search);
 
     await tester.tap(search);
     await tester.pumpAndSettle();
     final field = tester.getRect(find.byType(SearchField));
     final cancel = tester.getRect(
-      _container(find.widgetWithGlyph(IconButton, AppGlyphs.close)),
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
     );
 
     expect(find.text('Title'), findsNothing);
@@ -640,15 +662,18 @@ void main() {
         body: const SizedBox(),
       ),
     );
-    final search = find.widgetWithGlyph(IconButton, AppGlyphs.search);
-    final button = tester.getRect(_container(search));
+    final search = find.widgetWithGlyph(prism.IconButton, AppGlyphs.search);
+    final button = tester.getRect(search);
 
     await tester.tap(search);
     await tester.pumpAndSettle();
     final field = tester.getRect(find.byType(SearchField));
 
     expect(find.text('Title'), findsOneWidget);
-    expect(find.widgetWithGlyph(IconButton, AppGlyphs.close), findsNothing);
+    expect(
+      find.widgetWithGlyph(prism.IconButton, AppGlyphs.close),
+      findsNothing,
+    );
     expect(field.size, Size(280, TonalButtonSize.bar.button));
     expect(field.right, button.right);
     expect(field.center.dy, button.center.dy);

@@ -12,8 +12,13 @@ if [[ -n "$team" && ! "$team" =~ ^[A-Z0-9]{10}$ ]]; then
     echo "error: DEVELOPMENT_TEAM must be a valid signing Team ID"
     exit 1
 fi
-app_requirement="anchor apple generic and identifier \"$app_id\" and certificate leaf[subject.OU] = \"$team\""
-core_requirement="anchor apple generic and identifier \"$app_id.core\" and certificate leaf[subject.OU] = \"$team\""
+if [[ -n "$team" ]]; then
+    app_requirement="anchor apple generic and identifier \"$app_id\" and certificate leaf[subject.OU] = \"$team\""
+    core_requirement="anchor apple generic and identifier \"$app_id.core\" and certificate leaf[subject.OU] = \"$team\""
+else
+    app_requirement="identifier \"$app_id\""
+    core_requirement="identifier \"$app_id.core\""
+fi
 
 cat > "$output/info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

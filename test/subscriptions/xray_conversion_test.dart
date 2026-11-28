@@ -1,7 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/imports/config/xray_config.dart';
 import 'package:reclash/subscriptions/imports/subscription/subscription_links.dart';
 import 'package:yaml/yaml.dart';
+
+final _realityKeys = [
+  for (var fill = 1; fill <= 3; fill++)
+    base64Url.encode(List.filled(32, fill)).replaceAll('=', ''),
+];
+final _mldsaKey = base64Url.encode(List.filled(1952, 7)).replaceAll('=', '');
 
 const _servers = [
   ('de1.example', '11111111-1111-4111-8111-111111111111'),
@@ -37,7 +45,7 @@ Map<String, Object?> _vless(
     'security': 'reality',
     'realitySettings': {
       'serverName': 'cdn.example',
-      'publicKey': 'pbk$server',
+      'publicKey': _realityKeys[server],
       'shortId': 'ab',
       'fingerprint': ?fingerprint,
     },
@@ -378,11 +386,13 @@ void main() {
         'remarks': 'Broken',
         'outbounds': [
           _vless('exit', 0, sockopt: {'dialerProxy': 'missing'}),
+          _vless('good', 1),
           _direct,
         ],
       });
       expect(result, isNotNull);
       expect(result!.config, isNot(contains('de1.example')));
+      expect(result.config, contains('nl1.example'));
       expect(result.config, isNot(contains('dialer-proxy')));
       expect(
         (result as LossyConversion).skipped.map((node) => node.kind),
@@ -527,6 +537,25 @@ void main() {
       expect(_convert(config)['rules'], ['MATCH,PROXY']);
     });
 
+    test('reports a partially unsupported predicate list', () {
+      final result = tryConvertXrayConfigValue(
+        withRules([
+          {
+            'type': 'field',
+            'domain': ['geosite:google', 'ext:x:y'],
+            'outboundTag': 'proxy',
+          },
+        ]),
+      );
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final doc = loadYaml(result.config) as YamlMap;
+      expect((doc['rules'] as YamlList).cast<String>(), [
+        'GEOSITE,google,PROXY',
+        'MATCH,PROXY',
+      ]);
+    });
+
     test('ignores rules shadowed by a catch-all', () {
       final doc = _convert(
         withRules([
@@ -665,8 +694,8 @@ void main() {
               as Map<String, Object?>;
       reality
         ..remove('publicKey')
-        ..['password'] = 'new-public-key'
-        ..['mldsa65Verify'] = 'mldsa-key';
+        ..['password'] = _realityKeys[1]
+        ..['mldsa65Verify'] = _mldsaKey;
       final proxy = _proxy(
         _convert({
           'outbounds': [raw],
@@ -674,8 +703,8 @@ void main() {
         'edge-a',
       );
       final options = proxy['reality-opts'] as YamlMap;
-      expect(options['public-key'], 'new-public-key');
-      expect(options['mldsa65-verify'], 'mldsa-key');
+      expect(options['public-key'], _realityKeys[1]);
+      expect(options['mldsa65-verify'], _mldsaKey);
     });
 
     test('maps sockopt and WS headers, and reports keepalive loss', () {
@@ -738,7 +767,7 @@ void main() {
       );
       expect(proxy['mux.cool'], {
         'enabled': true,
-        'max-concurrency': 8,
+        'max-concurrency': 128,
         'xudp-concurrency': 16,
         'xudp-proxy-udp443': 'allow',
       });
@@ -751,6 +780,186 @@ void main() {
       expect(result, isNotNull);
       expect((result! as LossyConversion).hasOtherLosses, isTrue);
       expect(result.config, isNot(contains('mux.cool')));
+    });
+
+    test('raises Xray zero concurrency to the 128-worker floor', () {
+      final raw = _vless('mux-xudp', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 0,
+        'xudpConcurrency': 8,
+        'xudpProxyUDP443': 'reject',
+      };
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'mux-xudp',
+      );
+      expect(proxy['mux.cool'], {
+        'enabled': true,
+        'max-concurrency': 128,
+        'xudp-concurrency': 8,
+        'xudp-proxy-udp443': 'reject',
+      });
+    });
+
+    test('keeps TCP mux for a zero concurrency without an XUDP pool', () {
+      for (final mux in [
+        {'enabled': true, 'concurrency': 0},
+        {'enabled': true, 'concurrency': 0, 'xudpConcurrency': 0},
+      ]) {
+        final raw = _vless('mux-none', 0);
+        _vlessUsers(raw).remove('flow');
+        raw['mux'] = mux;
+        final result = tryConvertXrayConfigValue({
+          'outbounds': [raw],
+        });
+        expect(result, isNotNull);
+        expect((result! as LossyConversion).hasOtherLosses, isFalse);
+        final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-none');
+        expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
+      }
+    });
+
+    test('defaults absent Xray concurrency to the 128-worker floor', () {
+      final raw = _vless('mux-default', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {'enabled': true};
+      final proxy = _proxy(
+        _convert({
+          'outbounds': [raw],
+        }),
+        'mux-default',
+      );
+      expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
+    });
+
+    test('keeps Xray concurrency above the floor and omits zero XUDP', () {
+      final raised = _vless('mux-floor', 0);
+      _vlessUsers(raised).remove('flow');
+      raised['mux'] = {'enabled': true, 'concurrency': 8};
+      final raisedProxy = _proxy(
+        _convert({
+          'outbounds': [raised],
+        }),
+        'mux-floor',
+      );
+      expect(raisedProxy['mux.cool'], {
+        'enabled': true,
+        'max-concurrency': 128,
+      });
+
+      final above = _vless('mux-above', 1);
+      _vlessUsers(above).remove('flow');
+      above['mux'] = {
+        'enabled': true,
+        'concurrency': 256,
+        'xudpConcurrency': 0,
+      };
+      final aboveProxy = _proxy(
+        _convert({
+          'outbounds': [above],
+        }),
+        'mux-above',
+      );
+      expect(aboveProxy['mux.cool'], {'enabled': true, 'max-concurrency': 256});
+    });
+
+    test('keeps Vision with a pure-XUDP mux.cool block', () {
+      final raw = _vless('vision-xudp', 0);
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 0,
+        'xudpConcurrency': 8,
+        'xudpProxyUDP443': 'allow',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'vision-xudp');
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy['mux.cool'], {
+        'concurrency': 0,
+        'xudp-concurrency': 8,
+        'xudp-proxy-udp443': 'allow',
+      });
+    });
+
+    test('keeps Vision with a pure-XUDP block for absent concurrency', () {
+      final raw = _vless('vision-default', 0);
+      raw['mux'] = {'enabled': true, 'xudpConcurrency': 8};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(
+        loadYaml(result.config) as YamlMap,
+        'vision-default',
+      );
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy['mux.cool'], {'concurrency': 0, 'xudp-concurrency': 8});
+    });
+
+    test('drops Vision mux without an XUDP pool', () {
+      final raw = _vless('vision-plain', 0);
+      raw['mux'] = {'enabled': true, 'concurrency': 0};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isFalse);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'vision-plain');
+      expect(proxy['flow'], 'xtls-rprx-vision');
+      expect(proxy.containsKey('mux.cool'), isFalse);
+    });
+
+    test('reports mux on a non-VLESS outbound as a loss', () {
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [
+          {
+            'tag': 'ss-mux',
+            'protocol': 'shadowsocks',
+            'settings': {
+              'servers': [
+                {
+                  'address': 'ss.example',
+                  'port': 8388,
+                  'method': 'aes-128-gcm',
+                  'password': 'pw',
+                },
+              ],
+            },
+            'mux': {'enabled': true, 'concurrency': 8},
+          },
+          _vless('edge-good', 1),
+        ],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'ss-mux');
+      expect(proxy.containsKey('mux.cool'), isFalse);
+    });
+
+    test('reports an invalid Xray UDP 443 policy as a loss', () {
+      final raw = _vless('mux-443', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 8,
+        'xudpProxyUDP443': 'sometimes',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-443');
+      expect(proxy.containsKey('mux.cool'), isFalse);
     });
 
     test('maps raw to tcp and http to h2', () {
@@ -813,6 +1022,45 @@ void main() {
       expect(opts.containsKey('session-length'), isFalse);
     });
 
+    test('drops a session range starting at zero and records the loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'sessionIDTable': '01',
+        'sessionIDLength': '0-31',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final opts = proxy['xhttp-opts'] as YamlMap;
+      expect(opts.containsKey('session-table'), isFalse);
+      expect(opts.containsKey('session-length'), isFalse);
+    });
+
+    test('drops an oversized session table and records the loss', () {
+      final raw = _vless('edge-a', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream['network'] = 'xhttp';
+      stream['xhttpSettings'] = {
+        'path': '/x',
+        'sessionIDTable': 'a' * 4097,
+        'sessionIDLength': '16-32',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'edge-a');
+      final opts = proxy['xhttp-opts'] as YamlMap;
+      expect(opts.containsKey('session-table'), isFalse);
+    });
+
     test('reports an invalid VLESS flow instead of emitting it', () {
       final raw = _vless('edge-flow', 0);
       final users = _vlessUsers(raw);
@@ -826,20 +1074,98 @@ void main() {
       expect(proxy.containsKey('flow'), isFalse);
     });
 
-    test('reports an invalid VLESS encryption instead of dropping it', () {
-      final raw = _vless('edge-encryption', 1);
-      final users = _vlessUsers(raw);
-      users['encryption'] = 'not-a-known-scheme';
+    test(
+      'skips an invalid VLESS encryption instead of emitting a broken node',
+      () {
+        final raw = _vless('edge-encryption', 1);
+        final users = _vlessUsers(raw);
+        users['encryption'] = 'not-a-known-scheme';
+        final result = tryConvertXrayConfigValue({
+          'outbounds': [raw, _vless('edge-good', 0)],
+        });
+        expect(result, isNotNull);
+        expect(
+          result!.skipped.map((node) => node.kind),
+          contains('encryption'),
+        );
+        expect(result.config, isNot(contains('edge-encryption')));
+        expect(result.config, contains('edge-good'));
+      },
+    );
+
+    test('skips REALITY with an unusable key as a security loss', () {
+      final raw = _vless('bad-reality', 0);
+      final reality =
+          (raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>;
+      reality['publicKey'] = 'not-a-key';
       final result = tryConvertXrayConfigValue({
-        'outbounds': [raw],
+        'outbounds': [raw, _vless('edge-good', 1)],
       });
       expect(result, isNotNull);
-      expect((result! as LossyConversion).hasOtherLosses, isTrue);
-      final proxy = _proxy(
-        loadYaml(result.config) as YamlMap,
-        'edge-encryption',
-      );
-      expect(proxy.containsKey('encryption'), isFalse);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('reality'));
+      expect(result.config, isNot(contains('bad-reality')));
+      expect(result.config, contains('edge-good'));
+    });
+
+    test('skips REALITY with an unusable short id', () {
+      final raw = _vless('bad-short-id', 0);
+      final reality =
+          (raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
+              as Map<String, Object?>;
+      reality['shortId'] = 'zz';
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('reality'));
+    });
+
+    test('skips an unusable ECH config as a security loss', () {
+      final raw = _vless('bad-ech', 0);
+      final stream = raw['streamSettings']! as Map<String, Object?>;
+      stream
+        ..['security'] = 'tls'
+        ..remove('realitySettings')
+        ..['tlsSettings'] = {'echConfigList': 'not-base64'};
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.map((node) => node.kind), contains('ech'));
+    });
+
+    test('skips a Shadowsocks node with a stream the Core cannot express', () {
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [
+          {
+            'tag': 'ss-ws',
+            'protocol': 'shadowsocks',
+            'settings': {
+              'servers': [
+                {
+                  'address': 'ss.example',
+                  'port': 8388,
+                  'method': 'aes-128-gcm',
+                  'password': 'pw',
+                },
+              ],
+            },
+            'streamSettings': {
+              'network': 'ws',
+              'security': 'tls',
+              'wsSettings': {'path': '/ws'},
+            },
+          },
+          _vless('edge-good', 1),
+        ],
+      });
+      expect(result, isNotNull);
+      expect(result!.skipped.map((node) => node.kind), contains('shadowsocks'));
+      expect(result.config, isNot(contains('ss-ws')));
     });
 
     test('maps stream finalmask on VLESS and Trojan only', () {
@@ -1030,10 +1356,24 @@ void main() {
       expect(result, isNotNull);
       expect((result! as LossyConversion).hasOtherLosses, isTrue);
       final proxy = _proxy(loadYaml(result.config) as YamlMap, 'mux-udp-off');
-      expect(
-        (proxy['mux.cool'] as YamlMap).containsKey('xudp-concurrency'),
-        isFalse,
-      );
+      expect(proxy['mux.cool'], {'enabled': true, 'max-concurrency': 128});
+    });
+
+    test('drops a mux.cool block the Core would ignore', () {
+      final raw = _vless('bad-mux', 0);
+      _vlessUsers(raw).remove('flow');
+      raw['mux'] = {
+        'enabled': true,
+        'concurrency': 'many',
+        'xudpProxyUDP443': 'sometimes',
+      };
+      final result = tryConvertXrayConfigValue({
+        'outbounds': [raw, _vless('edge-good', 1)],
+      });
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+      final proxy = _proxy(loadYaml(result.config) as YamlMap, 'bad-mux');
+      expect(proxy.containsKey('mux.cool'), isFalse);
     });
 
     test('prefers the REALITY password over a stale public key', () {
@@ -1041,15 +1381,15 @@ void main() {
       final reality =
           ((raw['streamSettings']! as Map<String, Object?>)['realitySettings']!
                 as Map<String, Object?>)
-            ..['password'] = 'new-key';
-      reality['publicKey'] = 'old-key';
+            ..['password'] = _realityKeys[1];
+      reality['publicKey'] = _realityKeys[0];
       final proxy = _proxy(
         _convert({
           'outbounds': [raw],
         }),
         'edge-a',
       );
-      expect((proxy['reality-opts'] as YamlMap)['public-key'], 'new-key');
+      expect((proxy['reality-opts'] as YamlMap)['public-key'], _realityKeys[1]);
     });
 
     test('lets an xhttp extra headers block win over sibling headers', () {

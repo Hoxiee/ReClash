@@ -91,6 +91,10 @@ typedef RealProfile = ({
   String md5,
   ConfigCounts counts,
   bool useSystemHosts,
+
+  /// Providers removed because the Core must not fetch them, as
+  /// `<section>/<name>`, so the caller can say so instead of losing them.
+  List<String> dropped,
 });
 
 /// Counts what the Core was handed, not what the profile file declares.
@@ -129,6 +133,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
   final addedRules = data.addedRules;
   final appendSystemDns = data.appendSystemDns;
   final defaultUA = data.defaultUA;
+  final dropped = <String>[];
   String getProvidersFilePathInner(String type, String key) {
     return join(
       profilesPath,
@@ -292,10 +297,11 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
         continue;
       }
       final url = provider['url'];
-      if (url is! String || url.isEmpty || !isBlockedRemoteUrl(url)) {
+      if (url is! String || url.isEmpty || !isBlockedProviderUrl(url)) {
         continue;
       }
       removed.add(entry.key.toString());
+      dropped.add('$section/${entry.key}');
       providers.remove(entry.key);
     }
     if (removed.isEmpty) {
@@ -470,6 +476,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
     md5: yaml.toMd5(),
     counts: configCountsOf(rawConfig),
     useSystemHosts: useSystemHosts,
+    dropped: dropped,
   );
 }
 

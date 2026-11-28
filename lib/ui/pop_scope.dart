@@ -1,54 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
+import 'package:prism_ui/pop_scope.dart' as prism;
 
 import 'inherited.dart';
 
-class CommonPopScope extends StatelessWidget {
-  final Widget child;
+typedef CommonPopScope = prism.PopGuard;
 
-  /// Any handler vetoes the pop up front, which also turns off the drag back,
-  /// so pass one only while there is something to intercept.
-  final FutureOr<bool> Function(BuildContext context)? onPop;
-  final FutureOr<void> Function()? onPopSuccess;
-
-  const CommonPopScope({
-    super.key,
-    required this.child,
-    this.onPop,
-    this.onPopSuccess,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final route = ModalRoute.of(context);
-    final hasBackLayer = route?.willHandlePopInternally == true;
-    return _RouteExitRegistration(
-      onExit: onPop,
-      child: PopScope(
-        canPop: onPop == null || hasBackLayer,
-        onPopInvokedWithResult: (didPop, _) async {
-          if (didPop) {
-            await onPopSuccess?.call();
-            return;
-          }
-          if (onPop == null) return;
-          // BackLayerScope adds its entry a frame after this builds, which
-          // rebuilds nothing here on a route with another below it.
-          if (route?.willHandlePopInternally == true) {
-            Navigator.of(context).pop();
-            return;
-          }
-          final res = await onPop!(context);
-          if (!context.mounted || !res) return;
-          Navigator.of(context).pop();
-        },
-        child: child,
-      ),
-    );
-  }
-}
-
+/// Keeps a page's own back layer, in the app's [PageActivityScope], between the
+/// route and the pop scope that would otherwise pop the page.
 class BackLayerScope extends StatefulWidget {
   final Widget child;
   final VoidCallback onBack;
@@ -141,72 +99,4 @@ class _BackLayerScopeState extends State<BackLayerScope> {
   }
 }
 
-final _routeExitGuards = Expando<Set<Future<bool> Function()>>();
-
-Future<bool> canLeaveRoute(Route<dynamic> route) async {
-  final guards = _routeExitGuards[route]?.toList().reversed;
-  if (guards == null || guards.isEmpty) {
-    return route.popDisposition != RoutePopDisposition.doNotPop;
-  }
-  for (final guard in guards) {
-    final allowed = await guard();
-    if (!route.isActive) return true;
-    if (!allowed) return false;
-  }
-  return true;
-}
-
-class _RouteExitRegistration extends StatefulWidget {
-  const _RouteExitRegistration({required this.onExit, required this.child});
-
-  final FutureOr<bool> Function(BuildContext context)? onExit;
-  final Widget child;
-
-  @override
-  State<_RouteExitRegistration> createState() => _RouteExitRegistrationState();
-}
-
-class _RouteExitRegistrationState extends State<_RouteExitRegistration> {
-  ModalRoute<dynamic>? _route;
-
-  Future<bool> _check() async =>
-      !mounted || widget.onExit == null || await widget.onExit!(context);
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final route = ModalRoute.of(context);
-    if (identical(route, _route)) return;
-    _detach();
-    _route = route;
-    if (route != null && widget.onExit != null) {
-      (_routeExitGuards[route] ??= <Future<bool> Function()>{}).add(_check);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant _RouteExitRegistration oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final route = _route;
-    if (route == null) return;
-    if (widget.onExit == null) {
-      _detach();
-    } else {
-      (_routeExitGuards[route] ??= <Future<bool> Function()>{}).add(_check);
-    }
-  }
-
-  void _detach() {
-    final route = _route;
-    if (route != null) _routeExitGuards[route]?.remove(_check);
-  }
-
-  @override
-  void dispose() {
-    _detach();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
+Future<bool> canLeaveRoute(Route<dynamic> route) => prism.canLeaveRoute(route);

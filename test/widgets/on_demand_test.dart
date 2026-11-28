@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:prism_ui/metrics.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/on_demand.dart';
@@ -491,8 +492,11 @@ void main() {
           .first,
     );
 
+    final trailingInset = ListInsets.of(
+      tester.element(find.byType(OnDemandView)),
+    ).trailing;
     expect(button.center.dy, closeTo(row.center.dy, 1));
-    expect(button.right, closeTo(row.right - 16, 1));
+    expect(button.right, closeTo(row.right - trailingInset, 1));
     expect(tester.getTopLeft(desc).dy, greaterThanOrEqualTo(row.bottom));
   });
 

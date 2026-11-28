@@ -83,19 +83,20 @@ void main() {
   );
 
   test(
-    'unsigned bundle readiness remains actionable and fail closed',
+    'unsigned bundle readiness reports an update instead of a signed-only failure',
     () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (_) async {
             return {
-              'status': 'notFound',
-              'code': 'bundleInvalid',
-              'detail': 'Certificate signing is required.',
+              'status': 'updateRequired',
+              'code': 'helperOutdated',
+              'detail': 'Reinstall the launchd Helper.',
             };
           });
       final result = await const NativeMacOSHelperPort().readiness();
+      expect(result.status, MacOSHelperStatus.updateRequired);
       expect(result.isReady, isFalse);
-      expect(result.code, 'bundleInvalid');
+      expect(result.code, 'helperOutdated');
     },
   );
 

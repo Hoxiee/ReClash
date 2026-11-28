@@ -8,6 +8,7 @@ import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/profiles/extend/script.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/card.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,7 +113,7 @@ void main() {
         .getTopLeft(
           find.descendant(
             of: find.byType(MoreActionButton),
-            matching: find.byType(CommonCard),
+            matching: find.byType(prism.Card),
           ),
         )
         .dy;

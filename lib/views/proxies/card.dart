@@ -246,9 +246,9 @@ class ProxyCard extends ConsumerWidget {
             key: key,
             onPressed: () => _handleSelect(ref),
             isSelected: inUse,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Container(
               alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -48,6 +48,7 @@ class _MacPort implements MacOSHelperPort {
   @override
   Future<MacOSHelperReadiness> register() async {
     registrations++;
+    ready = const MacOSHelperReadiness(status: MacOSHelperStatus.enabled);
     return ready;
   }
 
@@ -70,6 +71,8 @@ class _MacPort implements MacOSHelperPort {
 }
 
 const _sessionId = '0123456789abcdef0123456789abcdef';
+const _coreHash =
+    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 void main() {
   late FakeLauncher direct;
@@ -100,6 +103,7 @@ void main() {
     String platform = 'linux',
     bool safeMode = false,
     HelperReadinessProbe? ready,
+    Future<String?> Function()? macosCoreSha256,
   }) {
     final probe = ready ?? () async => HelperReadiness.notReady;
     return DesktopPrivilegeCoordinator(
@@ -119,7 +123,12 @@ void main() {
           return elevatedExit;
         },
       ),
-      macos: MacOSHelperLauncher(port: macos),
+      macos: MacOSHelperLauncher(
+        port: macos,
+        readCoreSha256: macosCoreSha256,
+        homeDirectory: () async =>
+            '/Users/test/Library/Application Support/com.reclash',
+      ),
       linuxInstaller: LinuxHelperInstaller(
         isLinux: true,
         hasSystemd: () => true,
@@ -381,6 +390,60 @@ void main() {
     );
     expect(privileges.status, DesktopPrivilegeStatus.requiresApproval);
     expect(macos.registrations, 0);
+  });
+
+  test('macOS install is actionable after the prompt is confirmed', () async {
+    macos.ready = const MacOSHelperReadiness(
+      status: MacOSHelperStatus.notRegistered,
+    );
+    final privileges = coordinator(
+      platform: 'macos',
+      macosCoreSha256: () async => _coreHash,
+    )..configure(tunEnabled: true);
+    privileges.allowInstall();
+    expect(
+      await privileges.prepare(tunEnabled: true),
+      DesktopPrivilegeDecision.restartRequired,
+    );
+    expect(privileges.status, DesktopPrivilegeStatus.notRegistered);
+    final lease = await attempt(await privileges.resolve());
+    expect(lease.owner, CoreProcessOwner.macosHelper);
+    expect(macos.registrations, 1);
+  });
+
+  test('macOS update readiness maps to the update setup', () async {
+    macos.ready = const MacOSHelperReadiness(
+      status: MacOSHelperStatus.updateRequired,
+    );
+    final privileges = coordinator(platform: 'macos');
+    expect(
+      await privileges.inspect(tunEnabled: true),
+      DesktopPrivilegeSetup.update,
+    );
+  });
+
+  test('a Helper owned by another user is unavailable', () async {
+    macos.ready = const MacOSHelperReadiness(
+      status: MacOSHelperStatus.updateRequired,
+      code: 'helperOwnedByAnotherUser',
+    );
+    final privileges = coordinator(platform: 'macos');
+    expect(
+      await privileges.inspect(tunEnabled: true),
+      DesktopPrivilegeSetup.unavailable,
+    );
+  });
+
+  test('a signed Helper error is offered as an update', () async {
+    macos.ready = const MacOSHelperReadiness(
+      status: MacOSHelperStatus.enabled,
+      code: 'helperOutdated',
+    );
+    final privileges = coordinator(platform: 'macos');
+    expect(
+      await privileges.inspect(tunEnabled: true),
+      DesktopPrivilegeSetup.update,
+    );
   });
 
   test('cancel before readiness settles cannot start a Helper lease', () async {

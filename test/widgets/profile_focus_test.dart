@@ -108,7 +108,7 @@ void main() {
     await pumpProfiles(tester, profiles: profiles);
 
     final cards = find
-        .byType(FilledButton)
+        .byType(CommonCard)
         .evaluate()
         .map((element) => element.widget)
         .toList();
@@ -117,7 +117,7 @@ void main() {
       for (var tab = 0; tab < 50; tab++) {
         final context = FocusManager.instance.primaryFocus?.context;
         final focusedCard = context
-            ?.findAncestorWidgetOfExactType<FilledButton>();
+            ?.findAncestorWidgetOfExactType<CommonCard>();
         if (identical(focusedCard, cards[index])) {
           return;
         }

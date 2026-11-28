@@ -47,9 +47,11 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       TestApp(
-        child: SubscriptionCustomUserAgentRow(
-          controller: controller,
-          onChanged: (_) {},
+        child: Scaffold(
+          body: SubscriptionCustomUserAgentRow(
+            controller: controller,
+            onChanged: (_) {},
+          ),
         ),
       ),
     );

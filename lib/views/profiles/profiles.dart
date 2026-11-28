@@ -11,6 +11,7 @@ import 'package:reclash/views/profiles/custom/custom.dart';
 import 'package:reclash/views/profiles/extend/extend.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -117,7 +118,7 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
               ? null
               : [
                   AddProfileMenu(
-                    builder: (open) => IconButton(
+                    builder: (open) => prism.IconButton(
                       tooltip: appLocalizations.addProfile,
                       onPressed: open,
                       icon: const GlyphIcon(AppGlyphs.addCircle),

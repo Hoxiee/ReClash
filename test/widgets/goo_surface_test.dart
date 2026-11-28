@@ -3,6 +3,8 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/navigation_dock.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -43,18 +45,18 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ElasticPress(
-                    child: IconButton(
+                    child: prism.IconButton(
                       onPressed: _noop,
                       icon: GlyphIcon(AppGlyphs.close),
                     ),
                   ),
                   TonalButtonGroup(
                     children: [
-                      IconButton(
+                      prism.IconButton(
                         onPressed: _noop,
                         icon: GlyphIcon(AppGlyphs.chevronUp),
                       ),
-                      IconButton(
+                      prism.IconButton(
                         onPressed: _noop,
                         icon: GlyphIcon(AppGlyphs.chevronDown),
                       ),
@@ -82,7 +84,7 @@ void main() {
             color: Colors.white,
             child: Opacity(
               opacity: 1,
-              child: ElasticPress(
+              child: prism.ElasticPress(
                 child: GooPane(
                   child: ColoredBox(
                     color: Colors.blue,

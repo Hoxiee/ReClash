@@ -15,6 +15,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -264,7 +265,9 @@ void main() {
     await settle(tester, 12);
     expect(
       tester
-          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
+          .widget<prism.IconButton>(
+            find.widgetWithGlyph(prism.IconButton, AppGlyphs.check),
+          )
           .onPressed,
       isNull,
     );
@@ -338,8 +341,8 @@ void main() {
       controller.replaceRange(start, end, text);
       await settle(tester, 2);
       return tester
-              .widget<IconButton>(
-                find.widgetWithGlyph(IconButton, AppGlyphs.check),
+              .widget<prism.IconButton>(
+                find.widgetWithGlyph(prism.IconButton, AppGlyphs.check),
               )
               .onPressed !=
           null;
@@ -442,7 +445,9 @@ void main() {
   }
 
   VoidCallback? saveButton(WidgetTester tester) => tester
-      .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.check))
+      .widget<prism.IconButton>(
+        find.widgetWithGlyph(prism.IconButton, AppGlyphs.check),
+      )
       .onPressed;
 
   testWidgets('a held save shortcut saves once', (tester) async {
@@ -465,7 +470,7 @@ void main() {
     controller.replaceRange(10, 10, 's');
     await settle(tester, 2);
 
-    await tester.tap(find.widgetWithGlyph(IconButton, AppGlyphs.check));
+    await tester.tap(find.widgetWithGlyph(prism.IconButton, AppGlyphs.check));
     await tester.pump();
     expect(saveButton(tester), isNull);
     await pressSaveShortcut(tester);
@@ -539,7 +544,7 @@ void main() {
     ]);
     expect(controller.text, 'mode: ');
 
-    await tester.tap(find.widgetWithGlyph(IconButton, AppGlyphs.check));
+    await tester.tap(find.widgetWithGlyph(prism.IconButton, AppGlyphs.check));
     await settle(tester, 12);
 
     expect(saved, ['mode: rules']);

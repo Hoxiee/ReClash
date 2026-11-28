@@ -188,8 +188,8 @@ class AboutView extends ConsumerWidget {
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,
                 title: appLocalizations.core,
-                url: 'https://github.com/Hoxiee/mihomo-patch-core',
-                label: 'github.com/Hoxiee/mihomo-patch-core',
+                url: 'https://github.com/Hoxiee/rain-core',
+                label: 'github.com/Hoxiee/rain-core',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.send,

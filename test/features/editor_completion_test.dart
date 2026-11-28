@@ -251,7 +251,7 @@ void main() {
         _labels(
           _complete('name: a\ntype: vless\nfl|', schema: EditorSchema.proxy),
         ),
-        ['flow'],
+        ['flow', 'finalmask'],
       );
     });
 

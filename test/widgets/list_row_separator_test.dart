@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/divider.dart' as prism;
+import 'package:prism_ui/metrics.dart' as prism_metrics;
 
 import '../helpers/test_app.dart';
 
@@ -42,7 +44,7 @@ void main() {
   }
 
   PaintPattern separator(WidgetTester tester, Finder row, {Rect? rect}) {
-    final color = Theme.of(tester.element(row)).colorScheme.outlineVariant;
+    final color = prism.Divider.colorOf(tester.element(row));
     return paints..something(
       (method, arguments) =>
           method == #drawRect &&
@@ -59,13 +61,13 @@ void main() {
     expect(tester.renderObject(rows[2]), isNot(separator(tester, rows[2])));
   });
 
-  testWidgets('an invalid row drops the separators on both its edges', (
+  testWidgets('an invalid row keeps the separators on both its edges', (
     tester,
   ) async {
     final rows = await pumpRows(tester, invalid: 1);
 
-    expect(tester.renderObject(rows[0]), isNot(separator(tester, rows[0])));
-    expect(tester.renderObject(rows[1]), isNot(separator(tester, rows[1])));
+    expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
+    expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
   testWidgets('a selected row keeps the separators on both its edges', (
@@ -77,18 +79,19 @@ void main() {
     expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
-  testWidgets('pressing a row hides the separator above it until release', (
+  testWidgets('pressing a row keeps the separators on both its edges', (
     tester,
   ) async {
     final rows = await pumpRows(tester);
 
-    final gesture = await tester.startGesture(tester.getCenter(rows[2]));
+    final gesture = await tester.startGesture(tester.getCenter(rows[1]));
     await tester.pump();
-    expect(tester.renderObject(rows[1]), isNot(separator(tester, rows[1])));
     expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
+    expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
 
     await gesture.up();
     await tester.pumpAndSettle();
+    expect(tester.renderObject(rows[0]), separator(tester, rows[0]));
     expect(tester.renderObject(rows[1]), separator(tester, rows[1]));
   });
 
@@ -112,6 +115,7 @@ void main() {
     final row = tester.getRect(rows[0]);
     final title = tester.getRect(find.text('row 0'));
     final thickness = 2 / tester.view.devicePixelRatio;
+    final endIndent = prism_metrics.ListInsets.forWidth(row.width).leading;
     expect(
       tester.renderObject(rows[0]),
       separator(
@@ -120,7 +124,7 @@ void main() {
         rect: Rect.fromLTRB(
           title.left - row.left,
           row.height - thickness,
-          row.width - 14,
+          row.width - endIndent,
           row.height,
         ),
       ),

@@ -37,6 +37,7 @@ import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:prism_ui/split_workspace.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/region.dart';
@@ -606,7 +607,7 @@ void main() {
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pumpAndSettle();
     final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
-    final divider = find.byKey(const ValueKey('tools-pane-divider'));
+    final divider = find.byKey(SplitWorkspace.dividerKey);
     final initialRow = tester.getRect(row);
     final initialDivider = tester.getRect(divider);
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
@@ -640,7 +641,7 @@ void main() {
             .read(currentPageLabelProvider.notifier)
             .toPage(PageLabel.tools);
         await tester.pumpAndSettle();
-        final divider = find.byKey(const ValueKey('tools-pane-divider'));
+        final divider = find.byKey(SplitWorkspace.dividerKey);
         final rect = tester.getRect(divider);
         final boundary = find.byKey(const ValueKey('workspace-render'));
         final sample = Offset(rect.center.dx, rect.top + 150);
@@ -1084,7 +1085,7 @@ void main() {
       find.text('Choose a section or search for a setting'),
       findsOneWidget,
     );
-    final divider = find.byKey(const ValueKey('tools-pane-divider'));
+    final divider = find.byKey(SplitWorkspace.dividerKey);
     expect(tester.getSize(divider).width, 1);
     expect(tester.getCenter(divider).dx, 360.5);
     final catalogList = find.descendant(
@@ -2361,7 +2362,10 @@ void main() {
       await gesture.moveBy(const Offset(180, 0));
       await tester.pump();
       await gesture.moveBy(const Offset(50, 0));
+      // The page trails the finger on a spring: one frame starts it, the
+      // next lets it reach the finger.
       await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump(const Duration(milliseconds: 120));
       expect(tester.getRect(bar).left, greaterThan(before.left + 40));
       final trailing = tester.getRect(navigation);
       expect(trailing.left, greaterThan(dock.left - 420 * 0.25));

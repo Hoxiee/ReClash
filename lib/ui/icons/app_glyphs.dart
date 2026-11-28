@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:reclash/ui/icons/glyph.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/icons/glyph.dart';
 
 abstract final class AppGlyphs {
   static const dashboard = Glyph([

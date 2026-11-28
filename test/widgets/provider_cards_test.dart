@@ -13,7 +13,7 @@ import 'package:reclash/subscriptions/metadata/provider_cards.dart';
 import 'package:reclash/subscriptions/metadata/provider_config.dart';
 import 'package:reclash/ui/card.dart';
 import 'package:reclash/ui/icons/app_glyphs.dart';
-import 'package:reclash/ui/icons/glyph_icon.dart';
+import 'package:prism_ui/icons/glyph_icon.dart';
 import 'package:reclash/views/dashboard/simple/widget_list.dart';
 import 'package:reclash/widgets/icon.dart';
 import 'package:reclash/widgets/provider_cards.dart';

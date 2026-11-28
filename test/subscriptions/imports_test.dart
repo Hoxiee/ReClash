@@ -7,6 +7,8 @@ import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:yaml/yaml.dart';
 
 Uint8List _bytes(String value) => Uint8List.fromList(utf8.encode(value));
+final _realityKey = base64Url.encode(List.filled(32, 1)).replaceAll('=', '');
+final _mldsaKey = base64Url.encode(List.filled(1952, 7)).replaceAll('=', '');
 
 void main() {
   group('convertSubscriptionImport', () {
@@ -172,9 +174,9 @@ void main() {
               'security': 'reality',
               'realitySettings': {
                 'serverName': 'front.example',
-                'password': 'reality-key',
+                'password': _realityKey,
                 'shortId': 'ab',
-                'mldsa65Verify': 'mldsa-key',
+                'mldsa65Verify': _mldsaKey,
                 'fingerprint': 'chrome',
               },
             },
@@ -188,8 +190,8 @@ void main() {
       final doc = loadYaml(utf8.decode(result.bytes)) as YamlMap;
       final proxy = (doc['proxies'] as YamlList).single as YamlMap;
       final reality = proxy['reality-opts'] as YamlMap;
-      expect(reality['public-key'], 'reality-key');
-      expect(reality['mldsa65-verify'], 'mldsa-key');
+      expect(reality['public-key'], _realityKey);
+      expect(reality['mldsa65-verify'], _mldsaKey);
     });
 
     test('converts sing-box nodes and records discarded config sections', () {

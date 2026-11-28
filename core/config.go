@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -101,7 +102,15 @@ func handleValidateConfig(path string) error {
 	if err != nil {
 		return err
 	}
-	return checkGroupFilters(raw)
+	if err := checkGroupFilters(raw); err != nil {
+		return err
+	}
+	for index, message := range handleValidateProxies(raw.Proxy) {
+		if message != "" {
+			return fmt.Errorf("proxy %d: %s", index, message)
+		}
+	}
+	return nil
 }
 
 func handleDecryptConfig(params DecryptConfigParams) (string, error) {

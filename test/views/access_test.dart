@@ -977,7 +977,7 @@ void main() {
       await pumpAccessView(tester);
 
       expect(find.text('App list permission required'), findsOneWidget);
-      expect(find.widgetWithText(FilledButton, 'Authorize'), findsOneWidget);
+      expect(find.widgetWithText(TonalButton, 'Authorize'), findsOneWidget);
       expect(find.text('No data'), findsNothing);
       await openBarMenu(tester);
       expect(find.text('Select all'), findsNothing);
@@ -1008,7 +1008,7 @@ void main() {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Authorize'));
+      await tester.tap(find.widgetWithText(TonalButton, 'Authorize'));
       await tester.pumpAndSettle();
 
       expect(systemAction.requestCount, 1);
@@ -1028,7 +1028,7 @@ void main() {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Authorize'));
+      await tester.tap(find.widgetWithText(TonalButton, 'Authorize'));
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(TextButton, 'Settings'), findsOneWidget);

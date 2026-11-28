@@ -9,6 +9,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -137,8 +138,9 @@ void main() {
         Future<Finder> routingAction() async {
           if (type == ProxiesType.list) {
             return find.byTooltip('Behaviour');
+          } else {
+            await tester.tap(_inBar(find.byTooltip('More')));
           }
-          await tester.tap(_inBar(find.byTooltip('More')));
           await tester.pumpAndSettle();
           return find.descendant(
             of: find.byType(CommonPopupMenu),
@@ -149,6 +151,7 @@ void main() {
         Future<void> closeMenu() async {
           if (type == ProxiesType.list) return;
           final menu = find.byType(CommonPopupMenu);
+          if (menu.evaluate().isEmpty) return;
           Navigator.of(tester.element(menu)).pop();
           await tester.pumpAndSettle();
         }
@@ -231,10 +234,10 @@ void main() {
       container.read(queryProvider(QueryTag.proxies).notifier).value =
           'missing';
       await tester.pumpAndSettle();
-      final action = tester.widget<IconButton>(
+      final action = tester.widget<prism.IconButton>(
         find.ancestor(
           of: _inBar(find.byTooltip('Expand all groups')),
-          matching: find.byType(IconButton),
+          matching: find.byType(prism.IconButton),
         ),
       );
       expect(action.onPressed, isNull);
@@ -245,10 +248,10 @@ void main() {
 
   testWidgets('an empty list disables the group action', (tester) async {
     await pumpView(tester, groups: []);
-    final action = tester.widget<IconButton>(
+    final action = tester.widget<prism.IconButton>(
       find.ancestor(
         of: _inBar(find.byTooltip('Expand all groups')),
-        matching: find.byType(IconButton),
+        matching: find.byType(prism.IconButton),
       ),
     );
     expect(action.onPressed, isNull);

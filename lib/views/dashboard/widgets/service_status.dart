@@ -858,7 +858,6 @@ class ServiceManageView extends ConsumerWidget {
 }
 
 const _rowBadgeSize = 40.0;
-const _rowStatusShare = 0.5;
 const _rowBadgeInset = 12.0;
 // Concentric with the corners DecorationListItem gives the ends of a run.
 const _rowBadgeRadius = AppCorner.xl - _rowBadgeInset;
@@ -957,42 +956,34 @@ class _ServiceRowState extends ConsumerState<_ServiceRow>
         : null;
     final outboundIp = ipEntry?.value;
     final service = _ServiceView(target, entry, entry.phase);
-    return LayoutBuilder(
-      builder: (context, constraints) => DecorationListItem(
-        minVerticalPadding: _rowBadgeInset,
-        contentPadding: const EdgeInsets.only(left: _rowBadgeInset, right: 16),
-        onPressed: loading ? null : widget.onCheck,
-        leading: _ServiceBadge(
-          target: target,
-          size: _rowBadgeSize,
-          radius: _rowBadgeRadius,
-          variant: widget.variant,
-          dot: loading
-              ? context.colorScheme.onSurfaceVariant
-              : service.dotOf(context),
-        ),
-        title: Text(target.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-        // A one-line tile is shorter than a two-line one, so the line is always
-        // there and a check does not resize the row.
-        subtitle: loading
-            ? SkeletonText(width: 96, style: secondary)
-            : _OutboundIpLine(
-                ip: outboundIp,
-                region: check?.region,
-                pending:
-                    ipEntry != null &&
-                    ipEntry.phase != ProbePhase.failed &&
-                    outboundIp == null,
-                fallback: node,
-                style: secondary,
-              ),
-        trailing: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: constraints.maxWidth * _rowStatusShare,
-          ),
-          child: _ServiceRowStatus(service: service, loading: loading),
-        ),
+    return DecorationListItem(
+      minVerticalPadding: _rowBadgeInset,
+      contentPadding: const EdgeInsets.only(left: _rowBadgeInset, right: 16),
+      onPressed: loading ? null : widget.onCheck,
+      leading: _ServiceBadge(
+        target: target,
+        size: _rowBadgeSize,
+        radius: _rowBadgeRadius,
+        variant: widget.variant,
+        dot: loading
+            ? context.colorScheme.onSurfaceVariant
+            : service.dotOf(context),
       ),
+      title: Text(target.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      // Keep the subtitle so a check's skeleton does not resize a one-line row.
+      subtitle: loading
+          ? SkeletonText(width: 96, style: secondary)
+          : _OutboundIpLine(
+              ip: outboundIp,
+              region: check?.region,
+              pending:
+                  ipEntry != null &&
+                  ipEntry.phase != ProbePhase.failed &&
+                  outboundIp == null,
+              fallback: node,
+              style: secondary,
+            ),
+      trailing: _ServiceRowStatus(service: service, loading: loading),
     );
   }
 }
@@ -1013,14 +1004,12 @@ class _ServiceRowStatus extends StatelessWidget {
     if (loading) {
       return SkeletonText(width: 44, style: style);
     }
-    return TooltipText(
-      text: Text(
-        label,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.end,
-        style: style,
-      ),
+    return Text(
+      label,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.end,
+      style: style,
     );
   }
 }

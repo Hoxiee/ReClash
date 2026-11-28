@@ -11,6 +11,7 @@ import 'package:reclash/views/profiles/custom/members.dart';
 import 'package:reclash/views/profiles/custom/quick_edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef ReferencedProviders = ({List<String> proxy, List<String> rule});
@@ -165,7 +166,7 @@ class _ProxyProviderItem extends ConsumerWidget {
           : TonalButtonTheme(
               size: TonalButtonSize.compact,
               child: ElasticPress(
-                child: IconButton(
+                child: prism.IconButton(
                   tooltip: context.appLocalizations.edit,
                   onPressed: () => _handleEdit(context, ref),
                   icon: const GlyphIcon(AppGlyphs.edit),

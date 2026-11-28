@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/subscriptions/imports/config/singbox_config.dart';
+import 'package:reclash/subscriptions/imports/subscription/subscription_links.dart';
 import 'package:yaml/yaml.dart';
 
 Map<String, Object?> _vless(String tag, String server) => {
@@ -272,6 +273,144 @@ void main() {
     });
   });
 
+  group('sing-box transport fidelity', () {
+    test('maps detour to dialer-proxy and keeps every WS header', () {
+      final result = tryConvertSingboxConfigValue({
+        'outbounds': [
+          {
+            'type': 'vless',
+            'tag': 'exit',
+            'server': 'exit.example',
+            'server_port': 443,
+            'uuid': '11111111-1111-4111-8111-111111111111',
+            'detour': 'hop',
+            'transport': {
+              'type': 'ws',
+              'path': '/x',
+              'headers': {'Host': 'cdn.example', 'X-Auth': 'secret'},
+            },
+          },
+          {
+            'type': 'vless',
+            'tag': 'hop',
+            'server': 'hop.example',
+            'server_port': 443,
+            'uuid': '11111111-1111-4111-8111-111111111111',
+          },
+        ],
+        'route': {'final': 'exit'},
+      });
+      expect(result, isNotNull);
+      final doc = loadYaml(result!.config) as YamlMap;
+      final proxy = (doc['proxies'] as YamlList).cast<YamlMap>().firstWhere(
+        (node) => node['name'] == 'exit',
+      );
+      expect(proxy['dialer-proxy'], 'hop');
+      expect((proxy['ws-opts'] as YamlMap)['headers'], {
+        'Host': 'cdn.example',
+        'X-Auth': 'secret',
+      });
+    });
+
+    test('skips REALITY without a key and reports a security loss', () {
+      final result = tryConvertSingboxConfigValue({
+        'outbounds': [
+          {
+            'type': 'vless',
+            'tag': 'bad',
+            'server': 'bad.example',
+            'server_port': 443,
+            'uuid': '11111111-1111-4111-8111-111111111111',
+            'tls': {
+              'enabled': true,
+              'server_name': 'bad.example',
+              'reality': {'enabled': true, 'short_id': 'ab'},
+            },
+          },
+          {
+            'type': 'vless',
+            'tag': 'good',
+            'server': 'good.example',
+            'server_port': 443,
+            'uuid': '11111111-1111-4111-8111-111111111111',
+          },
+        ],
+        'route': {'final': 'good'},
+      });
+      expect(result, isNotNull);
+      expect((result! as SecurityLossyConversion).hasSecurityLoss, isTrue);
+      expect(result.skipped.single.kind, 'reality');
+      expect(result.config, isNot(contains('bad.example')));
+    });
+
+    test('maps ECH and multiplex instead of dropping them', () {
+      final result = tryConvertSingboxConfigValue({
+        'outbounds': [
+          {
+            'type': 'vless',
+            'tag': 'edge',
+            'server': 'edge.example',
+            'server_port': 443,
+            'uuid': '11111111-1111-4111-8111-111111111111',
+            'tls': {
+              'enabled': true,
+              'server_name': 'edge.example',
+              'ech': {'enabled': true, 'config': 'AAAA'},
+            },
+            'multiplex': {
+              'enabled': true,
+              'protocol': 'smux',
+              'max_streams': 8,
+            },
+          },
+        ],
+        'route': {'final': 'edge'},
+      });
+      expect(result, isNotNull);
+      final doc = loadYaml(result!.config) as YamlMap;
+      final proxy = (doc['proxies'] as YamlList).single as YamlMap;
+      expect(proxy['ech-opts'], {'enable': true, 'config': 'AAAA'});
+      expect(proxy['smux'], {
+        'enabled': true,
+        'protocol': 'smux',
+        'max-streams': 8,
+      });
+    });
+    test('keeps a multi-peer WireGuard outbound', () {
+      final result = tryConvertSingboxConfigValue({
+        'outbounds': [
+          {
+            'type': 'wireguard',
+            'tag': 'wg',
+            'server': 'wg.example',
+            'server_port': 51820,
+            'private_key': 'private',
+            'local_address': ['10.0.0.2/32'],
+            'peers': [
+              {
+                'server': 'a.example',
+                'server_port': 51820,
+                'public_key': 'public-a',
+                'allowed_ips': ['0.0.0.0/0'],
+              },
+              {
+                'server': 'b.example',
+                'server_port': 51820,
+                'public_key': 'public-b',
+                'allowed_ips': ['::/0'],
+              },
+            ],
+          },
+        ],
+        'route': {'final': 'wg'},
+      });
+      expect(result, isNotNull);
+      final doc = loadYaml(result!.config) as YamlMap;
+      final proxy = (doc['proxies'] as YamlList).single as YamlMap;
+      expect((proxy['peers'] as YamlList), hasLength(2));
+    });
+  });
+
   group('sing-box rules', () {
     Map<String, Object?> convertRules(
       List<Map<String, Object?>> rules, {
@@ -393,7 +532,45 @@ void main() {
         },
         {'outbound': 'direct'},
       ]);
-      expect(_rules(yaml), ['MATCH,PROXY']);
+      expect(_rules(yaml), ['PROCESS-NAME,curl,DIRECT', 'MATCH,DIRECT']);
+    });
+
+    test('reports a dropped rule as a loss', () {
+      final result = tryConvertSingboxConfigValue(
+        _config(
+          route: {
+            'rules': [
+              {
+                'rule_set': ['geoip-cn'],
+                'outbound': 'direct',
+              },
+              {'domain': 'x.example', 'invert': true, 'outbound': 'direct'},
+            ],
+            'final': 'select',
+          },
+        ),
+      );
+      expect(result, isNotNull);
+      expect((result! as LossyConversion).hasOtherLosses, isTrue);
+    });
+
+    test('maps a catch-all rule instead of dropping it', () {
+      expect(
+        _rules(
+          convertRules([
+            {'action': 'reject'},
+          ]),
+        ),
+        ['MATCH,REJECT'],
+      );
+      expect(
+        _rules(
+          convertRules([
+            {'outbound': 'direct'},
+          ]),
+        ),
+        ['MATCH,DIRECT'],
+      );
     });
 
     test('deduplicates identical rules and keeps first order', () {

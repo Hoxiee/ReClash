@@ -24,6 +24,7 @@ import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:reclash/widgets/url_scheme_labels.dart';
+import 'package:reclash/ui/prism_theme.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -259,19 +260,22 @@ class ApplicationState extends ConsumerState<Application> {
           localizationsDelegates: [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
+            AppPrismUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
             ...fallbackMaterialLocalizationsDelegates,
           ],
           builder: (context, child) {
-            return ThemeCrossFade(
-              child: buildManagerStack(
-                isDesktop: system.isDesktop,
-                onConnectivityChanged: _handleConnectivityChanged,
-                terminateSignals: _terminateSignals,
-                child: RemoteFocusAdapter(
-                  enabled: system.isTV,
-                  floatingKeyboard: app?.floatingKeyboard,
-                  child: child!,
+            return PrismThemeBridge(
+              child: ThemeCrossFade(
+                child: buildManagerStack(
+                  isDesktop: system.isDesktop,
+                  onConnectivityChanged: _handleConnectivityChanged,
+                  terminateSignals: _terminateSignals,
+                  child: RemoteFocusAdapter(
+                    enabled: system.isTV,
+                    floatingKeyboard: app?.floatingKeyboard,
+                    child: child!,
+                  ),
                 ),
               ),
             );
