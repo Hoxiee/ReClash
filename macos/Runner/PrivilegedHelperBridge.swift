@@ -472,6 +472,7 @@ final class PrivilegedHelperBridge {
                 bless(identity, bundle: bundle, result: result)
                 return
             }
+            }
             readiness(identity, bundle: bundle, result: result)
         } catch let failure as HelperFailure {
             fail(result, failure)
